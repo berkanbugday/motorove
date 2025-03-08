@@ -5,6 +5,8 @@ node_modules/
 yarn.lock
 package-lock.json
 pnpm-lock.yaml
+.yarn/
+.yarnrc.yml
 
 # Testing
 coverage/
@@ -67,22 +69,65 @@ out/
 .netlify/
 
 # API specific
-api/uploads/
-api/tmp/
-api/*.cert
-api/*.key
-api/*.pem
+apps/api/uploads/
+apps/api/tmp/
+apps/api/*.cert
+apps/api/*.key
+apps/api/*.pem
 
 # Mobile specific - Android
-mobile/android/app/build/
-mobile/android/build/
-mobile/android/captures/
-mobile/android/app/release/
-mobile/*.apk
-mobile/*.aab
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/captures/
+apps/mobile/android/app/release/
+apps/mobile/*.apk
+apps/mobile/*.aab
 
 # Mobile specific - iOS
-mobile/ios/Pods/
-mobile/ios/build/
-mobile/ios/Podfile.lock
-mobile/*.ipa 
+apps/mobile/ios/Pods/
+apps/mobile/ios/build/
+apps/mobile/ios/Podfile.lock
+apps/mobile/*.ipa
+apps/mobile/ios/DerivedData/
+apps/mobile/ios/xcuserdata/
+apps/mobile/ios/*.xcworkspace/
+apps/mobile/ios/*.xcodeproj/xcuserdata/
+apps/mobile/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Cache and temporary files
+.cache/
+.temp/
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Coverage and test reports
+coverage/
+.nyc_output/
+test-results/
+junit.xml
+reports/
+
+# Storybook
+storybook-static/
+.storybook-out/
+
+# PWA files
+**/public/sw.js
+**/public/workbox-*.js
+**/public/worker-*.js
+**/public/sw.js.map
+**/public/workbox-*.js.map
+**/public/worker-*.js.map
+
+# Misc
+.history/
+.env*.local
+*.local
+.env.backup
+*.backup
+.directory
+
+# Turborepo
+.turbo
