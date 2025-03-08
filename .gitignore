@@ -73,33 +73,16 @@ api/*.cert
 api/*.key
 api/*.pem
 
-# Mobile specific - Common
-mobile/.expo/
-mobile/.expo-shared/
-mobile/web-build/
-mobile/*.jsbundle
-
 # Mobile specific - Android
 mobile/android/app/build/
 mobile/android/build/
-mobile/android/gradle/
-mobile/android/local.properties
-mobile/android/.gradle/
 mobile/android/captures/
 mobile/android/app/release/
 mobile/*.apk
 mobile/*.aab
-mobile/*.keystore
 
 # Mobile specific - iOS
 mobile/ios/Pods/
 mobile/ios/build/
-mobile/ios/DerivedData/
-mobile/ios/*.xcworkspace/
-mobile/ios/*.xcodeproj/*
-!mobile/ios/*.xcodeproj/project.pbxproj
-!mobile/ios/*.xcodeproj/xcshareddata/
-!mobile/ios/*.xcworkspace/contents.xcworkspacedata
-mobile/ios/.xcode.env.local
 mobile/ios/Podfile.lock
 mobile/*.ipa 
