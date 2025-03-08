@@ -1,0 +1,61 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env"],
+  "globalEnv": [
+    "NODE_ENV",
+    "NEXT_PUBLIC_*",
+    "VERCEL_*",
+    "PORT",
+    "API_URL",
+    "DATABASE_URL",
+    "JWT_SECRET"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "build/**", "android/app/build/**", "ios/build/**"]
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+    },
+    "types": {
+      "dependsOn": [],
+      "outputs": ["dist/**/*.d.ts", "*.d.ts"]
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "android": {
+      "dependsOn": ["^build"],
+      "outputs": ["android/app/build/**"]
+    },
+    "ios": {
+      "dependsOn": ["^build"],
+      "outputs": ["ios/build/**"]
+    },
+    "pod-install": {
+      "cache": false
+    }
+  }
+} 
