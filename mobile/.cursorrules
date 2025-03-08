@@ -1,0 +1,166 @@
+You are an expert in TypeScript, React Native, and Mobile UI development.
+
+# Core Development Principles
+
+## Code Style and Architecture
+
+- Write clean, maintainable TypeScript code following SOLID principles
+- Use functional and declarative programming patterns; avoid classes
+- Implement feature-based architecture over layer-based architecture
+- Follow atomic design principles for component organization
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Structure files consistently: exports, subcomponents, hooks, helpers, types, static content
+
+## Naming and File Organization
+
+- Use lowercase with dashes for directories (e.g., features/auth-wizard)
+- Use PascalCase for components, interfaces, and types
+- Use camelCase for variables, functions, and instances
+- Favor named exports over default exports
+- Group related features in feature directories
+- Keep component files focused and under 250 lines
+- Extract complex logic into custom hooks
+
+## TypeScript Best Practices
+
+- Enable strict mode and noUncheckedIndexedAccess
+- Use interfaces for objects and types for unions/intersections
+- Leverage discriminated unions for complex state management
+- Use const assertions for literal types
+- Avoid type assertions (as) unless absolutely necessary
+- Define proper return types for all functions
+- Use generics for reusable components and utilities
+
+# Frontend Development
+
+## Component Architecture
+
+- Use functional components with proper TypeScript interfaces
+- Implement compound components pattern for complex UIs
+- Extract reusable logic into custom hooks
+- Use React.memo() strategically for performance optimization
+- Implement proper prop drilling prevention using Context
+- Follow single responsibility principle for components
+
+## State Management
+
+- Use React Query for server state management
+- Implement Zustand for client-side state management
+- Use Context API for theme, authentication, and app-wide settings
+- Implement proper loading and error states
+- Use optimistic updates for better UX
+- Implement proper cache invalidation strategies
+
+## UI and Styling
+
+- Use react-native-reanimated for performant animations
+- Implement proper dark mode support with useColorScheme
+- Use react-native-safe-area-context for safe area handling
+- Implement proper keyboard handling
+- Use react-native-gesture-handler for gestures
+- Follow platform-specific design guidelines
+- Implement proper accessibility features
+- Use responsive design patterns
+
+## Performance Optimization
+
+- Implement proper list virtualization
+- Use proper image optimization techniques
+- Implement code splitting and lazy loading
+- Use proper caching strategies
+- Monitor and optimize bundle size
+- Implement proper memory management
+- Use performance monitoring tools
+
+# Testing and Quality Assurance
+
+## Testing Strategy
+
+- Implement proper unit tests with Jest
+- Use React Native Testing Library for component testing
+- Implement E2E tests with Detox
+- Use proper mocking strategies
+- Implement proper test coverage
+- Follow TDD when applicable
+
+## Error Handling
+
+- Implement proper error boundaries
+- Use proper error logging with Sentry
+- Implement proper validation with Zod
+- Handle edge cases properly
+- Implement proper offline handling
+- Use proper error messages and user feedback
+
+# Security and Data Management
+
+## Security Best Practices
+
+- Implement proper authentication and authorization
+- Use proper encryption for sensitive data
+- Implement proper certificate pinning
+- Use proper secure storage
+- Follow security best practices
+- Implement proper input validation
+
+## Data Management
+
+- Use proper caching strategies
+- Implement proper offline support
+- Use proper data persistence
+- Implement proper data synchronization
+- Follow data privacy regulations
+
+# Development Workflow
+
+## Version Control
+
+- Use proper Git workflow
+- Write meaningful commit messages
+- Use proper branch naming
+- Implement proper code review process
+- Use proper versioning strategy
+
+## CI/CD
+
+- Implement proper CI/CD pipeline
+- Use proper deployment strategy
+- Implement proper app signing
+- Use proper environment management
+- Implement proper monitoring
+
+# Cross-Platform Development
+
+## Platform Specific
+
+- Handle platform differences properly
+- Use proper platform-specific APIs
+- Implement proper platform-specific UI
+- Handle platform-specific permissions
+- Use proper platform-specific navigation
+
+## Internationalization
+
+- Implement proper i18n support
+- Handle RTL languages properly
+- Use proper number and date formatting
+- Handle different time zones properly
+- Implement proper currency handling
+
+# Dependencies and Tools
+
+## Package Management
+
+- Use pnpm for package management
+- Keep dependencies up to date
+- Use proper peer dependencies
+- Implement proper dependency management
+- Monitor for security vulnerabilities
+
+## Development Tools
+
+- Use proper IDE configuration
+- Implement proper linting rules
+- Use proper formatting rules
+- Implement proper debugging tools
+- Use proper development environment

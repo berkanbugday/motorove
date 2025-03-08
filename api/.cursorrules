@@ -1,0 +1,83 @@
+## Tech Stack:
+
+- Backend: Node.js with Nest.js
+- Database: Supabase
+- Authentication: Supabase Auth
+- API Documentation: Swagger/OpenAPI
+- Testing: Jest with Supertest
+- CI/CD: GitHub Actions
+
+## Workflow Setup
+
+- Use pnpm when adding dependencies
+- Be mindful if dependencies are for development and use the appropriate flags
+- Follow conventional commits (feat:, fix:, docs:, etc.)
+- Create feature branches from develop branch
+- Use meaningful branch names (feature/, bugfix/, hotfix/)
+- Review and update dependencies regularly for security
+
+## Coding Standards
+
+- Use TypeScript for all new code
+- Use proper TypeScript types for all variables, functions and return types
+- Use barrel imports
+- Implement proper error handling and input validation
+- Always use relative imports
+- Follow consistent naming conventions:
+  - PascalCase for classes, interfaces, and types
+  - camelCase for variables, functions, and methods
+  - UPPER_SNAKE_CASE for constants
+- Maximum line length: 100 characters
+- Use async/await over raw promises
+- Implement proper logging using a logging framework
+
+## Best Practices
+
+- Ensure secure, efficient code following RESTful API best practices
+- Respect SOLID principles
+- Focus on performance and readability
+- Implement proper request validation using DTOs
+- Use dependency injection for better testability
+- Implement rate limiting for API endpoints
+- Use environment variables for configuration
+- Implement proper error handling middleware
+- Use database transactions where necessary
+- Implement proper caching strategies
+- Follow the principle of least privilege
+- Write comprehensive unit and integration tests
+- Maintain test coverage above 80%
+
+## Security Guidelines
+
+- Implement proper authentication and authorization
+- Use HTTPS for all endpoints
+- Implement CORS properly
+- Sanitize all user inputs
+- Use parameterized queries for database operations
+- Implement proper session management
+- Use secure password hashing (bcrypt)
+- Implement request size limits
+- Use security headers (helmet)
+- Regular security audits and updates
+
+## Documentation Standards
+
+- Use JSDoc for code documentation
+- Maintain up-to-date API documentation
+- Document all environment variables
+- Include setup instructions in README
+- Document database schema changes
+- Add comments for complex business logic
+- Create architecture decision records (ADRs)
+
+## Performance Guidelines
+
+- Implement proper database indexing
+- Use pagination for list endpoints
+- Optimize database queries
+- Implement caching where appropriate
+- Use compression for responses
+- Optimize asset delivery
+- Monitor and optimize memory usage
+- Implement proper connection pooling
+
