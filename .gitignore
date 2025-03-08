@@ -10,8 +10,7 @@ package-lock.json
 
 # Production
 /build
-/dist
-/dist/**/*
+dist
 /.next/
 /out/
 
