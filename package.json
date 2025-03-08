@@ -10,18 +10,19 @@
 		"format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
 		"types": "turbo types",
 		"start": "turbo start",
-		"prepare": "husky install",
+		"postinstall": "husky",
 		"ios": "pnpm --filter @motorove/mobile ios",
 		"android": "pnpm --filter @motorove/mobile android",
 		"pod-install": "pnpm --filter @motorove/mobile pod-install",
 		"mobile:dev": "pnpm --filter @motorove/mobile dev",
 		"api:dev": "pnpm --filter @motorove/api dev",
 		"api:db:generate": "pnpm --filter @motorove/api db:generate",
-		"api:db:migrate": "pnpm --filter @motorove/api db:migrate"
+		"api:db:migrate": "pnpm --filter @motorove/api db:migrate",
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"turbo": "2.4.4",
-		"prettier": "^3.2.5",
+		"prettier": "^2.8.8",
 		"husky": "^9.0.11",
 		"lint-staged": "^15.2.2",
 		"@commitlint/cli": "^19.0.3",
