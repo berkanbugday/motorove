@@ -1,43 +1,49 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {StyleSheet, TouchableOpacity} from 'react-native';
 import {View, Text} from 'react-native-ui-lib';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {TabBar} from '../components/TabBar';
+import {Header} from '../components/Header';
 
-const TAB_ITEMS = [
-  'My Groups',
-  'Discover',
-  'Popular',
-  'Trending',
-  'New',
-  'Sports',
-  'Gaming',
-  'Music',
-  'Tech',
-  'Art',
-];
+const TAB_ITEMS = ['Explore', 'Joined'];
 
 export function GroupsScreen() {
   const [selectedIndex, setSelectedIndex] = React.useState(0);
 
+  const handleFilterPress = () => {
+    // Handle filter press
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <TabBar
-        items={TAB_ITEMS}
-        selectedIndex={selectedIndex}
-        onTabPress={setSelectedIndex}
+    <View style={styles.container}>
+      <Header
+        title="Groups"
+        rightComponent={
+          <TouchableOpacity
+            onPress={handleFilterPress}
+            style={styles.iconButton}>
+            <Icon name="filter-variant" size={24} color="#000000" />
+          </TouchableOpacity>
+        }
       />
-      <View style={styles.content}>
-        {TAB_ITEMS.map(
-          (item, index) =>
-            selectedIndex === index && (
-              <View key={item}>
-                <Text style={styles.contentText}>{item} Content</Text>
-              </View>
-            ),
-        )}
+      <View flex>
+        <TabBar
+          items={TAB_ITEMS}
+          selectedIndex={selectedIndex}
+          onTabPress={setSelectedIndex}
+        />
+        <View style={styles.content}>
+          {TAB_ITEMS.map(
+            (item, index) =>
+              selectedIndex === index && (
+                <View key={item}>
+                  <Text style={styles.contentText}>{item} Content</Text>
+                </View>
+              ),
+          )}
+        </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -52,5 +58,8 @@ const styles = StyleSheet.create({
   },
   contentText: {
     fontSize: 16,
+  },
+  iconButton: {
+    padding: 8,
   },
 });

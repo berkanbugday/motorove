@@ -4,7 +4,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {TabNavigator} from './src/navigation/TabNavigator';
 
-function App(): React.JSX.Element {
+function App(): React.ReactElement {
   return (
     <GestureHandlerRootView>
       <SafeAreaProvider>
