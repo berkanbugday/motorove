@@ -1,18 +1,19 @@
 # Dependencies
 node_modules/
-/.pnp
+.pnp
 .pnp.js
 yarn.lock
 package-lock.json
+pnpm-lock.yaml
 
 # Testing
-/coverage
+coverage
 
 # Production
-/build
+build
 dist
-/.next/
-/out/
+.next/
+out/
 
 # Environment files
 .env
@@ -74,4 +75,49 @@ out/
 .vercel
 
 # Local Netlify folder
-.netlify 
+.netlify
+
+# React Native
+bundle/
+build
+# Android
+android/app/build/
+android/build/
+android/gradle/
+android/local.properties
+android/.gradle/
+android/captures/
+android/app/release/
+*.apk
+*.aab
+*.keystore
+
+# iOS
+ios/build/
+ios/Pods/
+ios/DerivedData/
+ios/*.xcworkspace
+ios/*.xcodeproj/*
+!ios/*.xcodeproj/project.pbxproj
+!ios/*.xcodeproj/xcshareddata/
+!ios/*.xcworkspace/contents.xcworkspacedata
+ios/.xcode.env.local
+ios/Podfile.lock
+
+# React Native specific
+*.jsbundle
+*.ipa
+.expo/
+.expo-shared/
+web-build/
+
+# TypeScript specific
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# API
+uploads
+tmp
+*.cert
+*.key
+*.pem 
