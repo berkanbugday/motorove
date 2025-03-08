@@ -18,6 +18,11 @@ export function GroupsScreen() {
     <View style={styles.container}>
       <Header
         title="Groups"
+        onSearch={text => {
+          // Handle search text changes here
+          console.log('Search text:', text);
+        }}
+        onSubmitSearch={text => console.log('Search submitted:', text)}
         rightComponent={
           <TouchableOpacity
             onPress={handleFilterPress}
