@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {HomeScreen} from '../screens/HomeScreen';
 import {SearchScreen} from '../screens/SearchScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
+import {GroupsScreen} from '../screens/GroupsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -30,6 +31,15 @@ export function TabNavigator() {
         }}
       />
       <Tab.Screen
+        name="Groups"
+        component={GroupsScreen}
+        options={{
+          tabBarIcon: ({color, size}) => (
+            <Icon name="account-group" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Search"
         component={SearchScreen}
         options={{
@@ -49,4 +59,4 @@ export function TabNavigator() {
       />
     </Tab.Navigator>
   );
-} 
+}
