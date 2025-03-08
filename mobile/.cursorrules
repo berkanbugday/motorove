@@ -1,166 +1,108 @@
 You are an expert in TypeScript, React Native, and Mobile UI development.
 
-# Core Development Principles
+Code Style and Structure
 
-## Code Style and Architecture
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported component, subcomponents, helpers, static content, types.
 
-- Write clean, maintainable TypeScript code following SOLID principles
-- Use functional and declarative programming patterns; avoid classes
-- Implement feature-based architecture over layer-based architecture
-- Follow atomic design principles for component organization
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
-- Structure files consistently: exports, subcomponents, hooks, helpers, types, static content
+Naming Conventions
 
-## Naming and File Organization
+- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Favor named exports for components.
 
-- Use lowercase with dashes for directories (e.g., features/auth-wizard)
-- Use PascalCase for components, interfaces, and types
-- Use camelCase for variables, functions, and instances
-- Favor named exports over default exports
-- Group related features in feature directories
-- Keep component files focused and under 250 lines
-- Extract complex logic into custom hooks
+Package Management
 
-## TypeScript Best Practices
+- Use pnpm for package management.
 
-- Enable strict mode and noUncheckedIndexedAccess
-- Use interfaces for objects and types for unions/intersections
-- Leverage discriminated unions for complex state management
-- Use const assertions for literal types
-- Avoid type assertions (as) unless absolutely necessary
-- Define proper return types for all functions
-- Use generics for reusable components and utilities
+TypeScript Usage
 
-# Frontend Development
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
+- Use strict mode in TypeScript for better type safety.
 
-## Component Architecture
+Syntax and Formatting
 
-- Use functional components with proper TypeScript interfaces
-- Implement compound components pattern for complex UIs
-- Extract reusable logic into custom hooks
-- Use React.memo() strategically for performance optimization
-- Implement proper prop drilling prevention using Context
-- Follow single responsibility principle for components
+- Use the "function" keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX.
+- Use Prettier for consistent code formatting.
 
-## State Management
+UI and Styling
 
-- Use React Query for server state management
-- Implement Zustand for client-side state management
-- Use Context API for theme, authentication, and app-wide settings
-- Implement proper loading and error states
-- Use optimistic updates for better UX
-- Implement proper cache invalidation strategies
+- Use built-in components for common UI patterns and layouts.
+- Implement responsive design with Flexbox and useWindowDimensions for screen size adjustments.
+- Use styled-components or Tailwind CSS for component styling.
+- Implement dark mode support using useColorScheme.
+- Ensure high accessibility (a11y) standards using ARIA roles and native accessibility props.
+- Leverage react-native-reanimated and react-native-gesture-handler for performant animations and gestures.
 
-## UI and Styling
+Safe Area Management
 
-- Use react-native-reanimated for performant animations
-- Implement proper dark mode support with useColorScheme
-- Use react-native-safe-area-context for safe area handling
-- Implement proper keyboard handling
-- Use react-native-gesture-handler for gestures
-- Follow platform-specific design guidelines
-- Implement proper accessibility features
-- Use responsive design patterns
+- Use SafeAreaProvider from react-native-safe-area-context to manage safe areas globally in your app.
+- Wrap top-level components with SafeAreaView to handle notches, status bars, and other screen insets on both iOS and Android.
+- Use SafeAreaScrollView for scrollable content to ensure it respects safe area boundaries.
+- Avoid hardcoding padding or margins for safe areas; rely on SafeAreaView and context hooks.
 
-## Performance Optimization
+Performance Optimization
 
-- Implement proper list virtualization
-- Use proper image optimization techniques
-- Implement code splitting and lazy loading
-- Use proper caching strategies
-- Monitor and optimize bundle size
-- Implement proper memory management
-- Use performance monitoring tools
+- Minimize the use of useState and useEffect; prefer context and reducers for state management.
+- Use AppLoading and SplashScreen for optimized app startup experience.
+- Optimize images: use WebP format where supported, include size data, implement lazy loading
+- Implement code splitting and lazy loading for non-critical components with React's Suspense and dynamic imports.
+- Profile and monitor performance using React Native's built-in tools and debugging features.
+- Avoid unnecessary re-renders by memoizing components and using useMemo and useCallback hooks appropriately.
 
-# Testing and Quality Assurance
+Navigation
 
-## Testing Strategy
+- Use react-navigation for routing and navigation; follow its best practices for stack, tab, and drawer navigators.
+- Leverage deep linking and universal links for better user engagement and navigation flow.
+- Use dynamic routes for better navigation handling.
 
-- Implement proper unit tests with Jest
-- Use React Native Testing Library for component testing
-- Implement E2E tests with Detox
-- Use proper mocking strategies
-- Implement proper test coverage
-- Follow TDD when applicable
+State Management
 
-## Error Handling
+- Use React Context and useReducer for managing global state.
+- Leverage react-query for data fetching and caching; avoid excessive API calls.
+- For complex state management, consider using Zustand
+- Handle URL search parameters using libraries
 
-- Implement proper error boundaries
-- Use proper error logging with Sentry
-- Implement proper validation with Zod
-- Handle edge cases properly
-- Implement proper offline handling
-- Use proper error messages and user feedback
+Error Handling and Validation
 
-# Security and Data Management
+- Use Zod for runtime validation and error handling.
+- Implement proper error logging using Sentry or a similar service.
+- Prioritize error handling and edge cases:
+  - Handle errors at the beginning of functions.
+  - Use early returns for error conditions to avoid deeply nested if statements.
+  - Avoid unnecessary else statements; use if-return pattern instead.
+  - Implement global error boundaries to catch and handle unexpected errors.
+- Use sentry for logging and reporting errors in production.
 
-## Security Best Practices
+Testing
 
-- Implement proper authentication and authorization
-- Use proper encryption for sensitive data
-- Implement proper certificate pinning
-- Use proper secure storage
-- Follow security best practices
-- Implement proper input validation
+- Write unit tests using Jest and React Native Testing Library.
+- Implement integration tests for critical user flows using Detox.
+- Use testing tools for running tests in different environments.
+- Consider snapshot testing for components to ensure UI consistency.
 
-## Data Management
+Security
 
-- Use proper caching strategies
-- Implement proper offline support
-- Use proper data persistence
-- Implement proper data synchronization
-- Follow data privacy regulations
+- Sanitize user inputs to prevent XSS attacks.
+- Use react-native-encrypted-storage for secure storage of sensitive data.
+- Ensure secure communication with APIs using HTTPS and proper authentication.
+- Use Security guidelines to protect your app
 
-# Development Workflow
+Internationalization (i18n)
 
-## Version Control
+- Use react-native-i18n for internationalization and localization.
+- Support multiple languages and RTL layouts.
+- Ensure text scaling and font adjustments for accessibility.
 
-- Use proper Git workflow
-- Write meaningful commit messages
-- Use proper branch naming
-- Implement proper code review process
-- Use proper versioning strategy
+Key Conventions
 
-## CI/CD
+1. Prioritize Mobile Web Vitals (Load Time, Jank, and Responsiveness).
+2. Follow best practices for app deployment and publishing
+3. Ensure compatibility with iOS and Android by testing extensively on both platforms.
 
-- Implement proper CI/CD pipeline
-- Use proper deployment strategy
-- Implement proper app signing
-- Use proper environment management
-- Implement proper monitoring
-
-# Cross-Platform Development
-
-## Platform Specific
-
-- Handle platform differences properly
-- Use proper platform-specific APIs
-- Implement proper platform-specific UI
-- Handle platform-specific permissions
-- Use proper platform-specific navigation
-
-## Internationalization
-
-- Implement proper i18n support
-- Handle RTL languages properly
-- Use proper number and date formatting
-- Handle different time zones properly
-- Implement proper currency handling
-
-# Dependencies and Tools
-
-## Package Management
-
-- Use pnpm for package management
-- Keep dependencies up to date
-- Use proper peer dependencies
-- Implement proper dependency management
-- Monitor for security vulnerabilities
-
-## Development Tools
-
-- Use proper IDE configuration
-- Implement proper linting rules
-- Use proper formatting rules
-- Implement proper debugging tools
-- Use proper development environment

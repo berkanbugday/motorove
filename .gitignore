@@ -7,11 +7,11 @@ package-lock.json
 pnpm-lock.yaml
 
 # Testing
-coverage
+coverage/
 
 # Production
-build
-dist
+build/
+dist/
 .next/
 out/
 
@@ -49,75 +49,57 @@ Thumbs.db
 *.seed
 *.pid.lock
 
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
+# Node.js specific
+.npm/
 .eslintcache
-
-# Optional REPL history
 .node_repl_history
-
-# Output of 'npm pack'
 *.tgz
-
-# Yarn Integrity file
 .yarn-integrity
 
 # TypeScript
 *.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # Next.js
 .next/
 out/
+.vercel/
+.netlify/
 
-# Vercel
-.vercel
+# API specific
+api/uploads/
+api/tmp/
+api/*.cert
+api/*.key
+api/*.pem
 
-# Local Netlify folder
-.netlify
+# Mobile specific - Common
+mobile/.expo/
+mobile/.expo-shared/
+mobile/web-build/
+mobile/*.jsbundle
 
-# React Native
-bundle/
-build
-# Android
-android/app/build/
-android/build/
-android/gradle/
-android/local.properties
-android/.gradle/
-android/captures/
-android/app/release/
-*.apk
-*.aab
-*.keystore
+# Mobile specific - Android
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/gradle/
+mobile/android/local.properties
+mobile/android/.gradle/
+mobile/android/captures/
+mobile/android/app/release/
+mobile/*.apk
+mobile/*.aab
+mobile/*.keystore
 
-# iOS
-ios/build/
-ios/Pods/
-ios/DerivedData/
-ios/*.xcworkspace
-ios/*.xcodeproj/*
-!ios/*.xcodeproj/project.pbxproj
-!ios/*.xcodeproj/xcshareddata/
-!ios/*.xcworkspace/contents.xcworkspacedata
-ios/.xcode.env.local
-ios/Podfile.lock
-
-# React Native specific
-*.jsbundle
-*.ipa
-.expo/
-.expo-shared/
-web-build/
-
-# TypeScript specific
-*.tsbuildinfo
-tsconfig.tsbuildinfo
-
-# API
-uploads
-tmp
-*.cert
-*.key
-*.pem 
+# Mobile specific - iOS
+mobile/ios/Pods/
+mobile/ios/build/
+mobile/ios/DerivedData/
+mobile/ios/*.xcworkspace/
+mobile/ios/*.xcodeproj/*
+!mobile/ios/*.xcodeproj/project.pbxproj
+!mobile/ios/*.xcodeproj/xcshareddata/
+!mobile/ios/*.xcworkspace/contents.xcworkspacedata
+mobile/ios/.xcode.env.local
+mobile/ios/Podfile.lock
+mobile/*.ipa 
