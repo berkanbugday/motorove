@@ -17,6 +17,14 @@ interface Tag {
   label: string;
 }
 
+interface BadgeProps {
+  content: string | React.ReactNode;
+  style?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+  size?: 'small' | 'medium' | 'large';
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  customStyle?: any;
+}
+
 interface StackedListItemProps {
   image: ImageSourcePropType;
   title: string;
@@ -24,7 +32,11 @@ interface StackedListItemProps {
   description?: string;
   smallTexts?: string[];
   tags?: Tag[];
+  badge?: BadgeProps;
   onPress?: () => void;
+  button?: Omit<ButtonProps, 'onPress'> & {
+    onPress?: () => void;
+  };
   rightActions?: {
     text: string;
     color: string;
@@ -38,9 +50,6 @@ interface StackedListProps {
   imageSize?: ImageSize;
   imageStyle?: ImageStyle;
   layout?: 'vertical' | 'horizontal';
-  button?: Omit<ButtonProps, 'onPress'> & {
-    onPress?: (index: number) => void;
-  };
 }
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
@@ -71,7 +80,6 @@ const StackedListItem: React.FC<
   StackedListItemProps & {
     imageSize?: ImageSize;
     imageStyle?: ImageStyle;
-    button?: ButtonProps;
   }
 > = ({
   image,
@@ -82,6 +90,7 @@ const StackedListItem: React.FC<
   description,
   smallTexts = [],
   tags = [],
+  badge,
   onPress,
   button,
   rightActions,
@@ -135,9 +144,102 @@ const StackedListItem: React.FC<
     return [styles.button, baseStyle, sizeStyle, shapeStyle];
   };
 
+  const getBadgeStyle = () => {
+    const baseStyle = {
+      position: 'absolute' as const,
+      zIndex: 1,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    };
+
+    const sizeStyle = {
+      small: {
+        minWidth: 16,
+        height: 16,
+        fontSize: 10,
+      },
+      medium: {
+        minWidth: 20,
+        height: 20,
+        fontSize: 12,
+      },
+      large: {
+        minWidth: 24,
+        height: 24,
+        fontSize: 14,
+      },
+    }[badge?.size || 'medium'];
+
+    const positionStyle = {
+      'top-right': {
+        top: -8,
+        right: -8,
+      },
+      'top-left': {
+        top: -8,
+        left: -8,
+      },
+      'bottom-right': {
+        bottom: -8,
+        right: -8,
+      },
+      'bottom-left': {
+        bottom: -8,
+        left: -8,
+      },
+    }[badge?.position || 'top-right'];
+
+    const colorStyle = {
+      primary: {
+        backgroundColor: '#007AFF',
+      },
+      secondary: {
+        backgroundColor: '#8E8E93',
+      },
+      success: {
+        backgroundColor: '#34C759',
+      },
+      warning: {
+        backgroundColor: '#FF9500',
+      },
+      error: {
+        backgroundColor: '#FF3B30',
+      },
+    }[badge?.style || 'primary'];
+
+    return [
+      baseStyle,
+      sizeStyle,
+      positionStyle,
+      colorStyle,
+      badge?.customStyle,
+    ];
+  };
+
+  const renderBadge = () => {
+    if (!badge) return null;
+
+    return (
+      <View style={getBadgeStyle()}>
+        {typeof badge.content === 'string' ? (
+          <Text
+            style={[styles.badgeText, {fontSize: getBadgeStyle()[2].fontSize}]}>
+            {badge.content}
+          </Text>
+        ) : (
+          badge.content
+        )}
+      </View>
+    );
+  };
+
   const renderContent = () => (
     <View style={styles.itemContainer}>
       <View style={styles.imageContainer}>
+        {renderBadge()}
         <Image
           source={image}
           style={[
@@ -220,7 +322,6 @@ export const StackedList: React.FC<StackedListProps> = ({
   imageSize = 'medium',
   imageStyle = 'square',
   layout = 'horizontal',
-  button,
 }) => {
   const ListComponent = layout === 'horizontal' ? ScrollView : View;
   const horizontalProps =
@@ -251,12 +352,6 @@ export const StackedList: React.FC<StackedListProps> = ({
             {...item}
             imageSize={imageSize}
             imageStyle={imageStyle}
-            button={
-              button && {
-                ...button,
-                onPress: () => button.onPress?.(index),
-              }
-            }
             onPress={() => onItemPress?.(index)}
           />
         </View>
@@ -378,5 +473,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

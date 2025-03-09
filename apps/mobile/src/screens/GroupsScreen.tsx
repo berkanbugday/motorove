@@ -4,26 +4,58 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  ImageSourcePropType,
+  ViewStyle,
 } from 'react-native';
 import {View, Text} from 'react-native-ui-lib';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {TabBar} from '../components/common/TabBar';
 import {Header} from '../components/common/Header';
-import {Card} from '../components/common/Card';
 import {StackedList} from '../components/common/StackedList';
+import {ButtonProps} from '../components/types/common';
 
-const TAB_ITEMS = ['Explore', 'Joined'];
+interface Tag {
+  id: string;
+  label: string;
+}
 
-// Enhanced group type with additional info
+interface BadgeProps {
+  content: string | React.ReactNode;
+  style?: 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+  size?: 'small' | 'medium' | 'large';
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  customStyle?: ViewStyle;
+}
+
+interface StackedListItemProps {
+  image: ImageSourcePropType;
+  title: string;
+  smallTexts?: string[];
+  tags?: Tag[];
+  badge?: BadgeProps;
+  button?: {
+    label: string;
+    size?: 'small' | 'medium' | 'large';
+    style?: 'square' | 'circle' | 'round';
+    onPress?: () => void;
+  };
+}
+
 type GroupInfo = {
   id: string;
-  image: {uri: string};
+  image: ImageSourcePropType;
   title: string;
   smallTexts: string[];
   tags: Array<{id: string; label: string}>;
-  isPrivate: boolean;
-  memberCount: number;
+  badge?: BadgeProps;
+  button?: {
+    label: string;
+    size?: 'small' | 'medium' | 'large';
+    style?: 'square' | 'circle' | 'round';
+  };
 };
+
+const TAB_ITEMS = ['Explore', 'Joined'];
 
 // Mock data for explore groups with enhanced info
 const EXPLORE_GROUPS: GroupInfo[] = [
@@ -31,37 +63,58 @@ const EXPLORE_GROUPS: GroupInfo[] = [
     id: '1',
     image: {uri: 'https://picsum.photos/200'},
     title: 'Motorcycle Enthusiasts',
-    smallTexts: ['Created Jan 2024', 'Active 2h ago'],
+    smallTexts: ['1250 members'],
     tags: [
       {id: '1', label: 'Motorcycles'},
       {id: '2', label: 'Adventure'},
     ],
-    isPrivate: true,
-    memberCount: 1250,
+    badge: {
+      content: <Icon name="lock" size={12} color="#FFFFFF" />,
+      style: 'error',
+      size: 'medium',
+      position: 'top-left',
+    },
+    button: {
+      label: 'Pending',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '2',
     image: {uri: 'https://picsum.photos/201'},
     title: 'Weekend Riders',
-    smallTexts: ['Created Mar 2024', 'Active 5m ago'],
+    smallTexts: ['500 members'],
     tags: [
       {id: '3', label: 'Rides'},
       {id: '4', label: 'Social'},
     ],
-    isPrivate: false,
-    memberCount: 500,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '3',
     image: {uri: 'https://picsum.photos/202'},
     title: 'Sport Bike Lovers',
-    smallTexts: ['Created Feb 2024', 'Active 1h ago'],
+    smallTexts: ['750 members'],
     tags: [
       {id: '5', label: 'Sport Bikes'},
       {id: '6', label: 'Racing'},
     ],
-    isPrivate: false,
-    memberCount: 750,
+    badge: {
+      content: <Icon name="lock" size={12} color="#FFFFFF" />,
+      style: 'error',
+      size: 'medium',
+      position: 'top-left',
+    },
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '4',
@@ -72,8 +125,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '7', label: 'Cruisers'},
       {id: '8', label: 'Touring'},
     ],
-    isPrivate: false,
-    memberCount: 600,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '5',
@@ -84,8 +140,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '9', label: 'ADV'},
       {id: '10', label: 'Off-road'},
     ],
-    isPrivate: false,
-    memberCount: 800,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '6',
@@ -96,8 +155,17 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '11', label: 'Cafe Racers'},
       {id: '12', label: 'Custom'},
     ],
-    isPrivate: false,
-    memberCount: 450,
+    badge: {
+      content: <Icon name="lock" size={12} color="#FFFFFF" />,
+      style: 'error',
+      size: 'small',
+      position: 'top-left',
+    },
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '7',
@@ -108,8 +176,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '13', label: 'Track'},
       {id: '14', label: 'Racing'},
     ],
-    isPrivate: false,
-    memberCount: 900,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '8',
@@ -120,8 +191,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '15', label: 'Vintage'},
       {id: '16', label: 'Classic'},
     ],
-    isPrivate: false,
-    memberCount: 700,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '9',
@@ -132,8 +206,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '17', label: 'City'},
       {id: '18', label: 'Commuting'},
     ],
-    isPrivate: false,
-    memberCount: 550,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '10',
@@ -144,8 +221,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '19', label: 'Touring'},
       {id: '20', label: 'Long Distance'},
     ],
-    isPrivate: false,
-    memberCount: 650,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '11',
@@ -156,8 +236,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '21', label: 'Dual Sport'},
       {id: '22', label: 'Adventure'},
     ],
-    isPrivate: false,
-    memberCount: 700,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '12',
@@ -168,8 +251,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '23', label: 'Night Rides'},
       {id: '24', label: 'Urban'},
     ],
-    isPrivate: false,
-    memberCount: 400,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '13',
@@ -180,8 +266,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '25', label: 'DIY'},
       {id: '26', label: 'Maintenance'},
     ],
-    isPrivate: false,
-    memberCount: 300,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '14',
@@ -192,8 +281,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '27', label: 'Women'},
       {id: '28', label: 'Community'},
     ],
-    isPrivate: false,
-    memberCount: 250,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '15',
@@ -204,8 +296,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '29', label: 'Beginners'},
       {id: '30', label: 'Learning'},
     ],
-    isPrivate: false,
-    memberCount: 150,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '16',
@@ -216,8 +311,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '31', label: 'Photography'},
       {id: '32', label: 'Art'},
     ],
-    isPrivate: false,
-    memberCount: 200,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '17',
@@ -228,8 +326,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '33', label: 'Camping'},
       {id: '34', label: 'Adventure'},
     ],
-    isPrivate: false,
-    memberCount: 350,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '18',
@@ -240,8 +341,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '35', label: 'Stunts'},
       {id: '36', label: 'Skills'},
     ],
-    isPrivate: false,
-    memberCount: 400,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '19',
@@ -252,8 +356,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '37', label: 'Vlogging'},
       {id: '38', label: 'Content'},
     ],
-    isPrivate: false,
-    memberCount: 300,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '20',
@@ -264,8 +371,11 @@ const EXPLORE_GROUPS: GroupInfo[] = [
       {id: '39', label: 'Electric'},
       {id: '40', label: 'Eco-friendly'},
     ],
-    isPrivate: false,
-    memberCount: 200,
+    button: {
+      label: 'Join',
+      size: 'medium',
+      style: 'round',
+    },
   },
 ];
 
@@ -275,25 +385,37 @@ const JOINED_GROUPS: GroupInfo[] = [
     id: '21',
     image: {uri: 'https://picsum.photos/220'},
     title: 'Local Riders Club',
-    smallTexts: ['Joined Feb 2024', 'Active 1h ago'],
+    smallTexts: ['85 members'],
     tags: [
       {id: '41', label: 'Local'},
       {id: '42', label: 'Community'},
     ],
-    isPrivate: true,
-    memberCount: 85,
+    badge: {
+      content: <Icon name="lock" size={12} color="#FFFFFF" />,
+      style: 'error',
+      size: 'medium',
+      position: 'top-left',
+    },
+    button: {
+      label: 'Joined',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '22',
     image: {uri: 'https://picsum.photos/221'},
     title: 'Mountain Roads',
-    smallTexts: ['Joined Mar 2024', 'Active 30m ago'],
+    smallTexts: ['1000 members'],
     tags: [
       {id: '43', label: 'Mountains'},
       {id: '44', label: 'Scenic'},
     ],
-    isPrivate: false,
-    memberCount: 1000,
+    button: {
+      label: 'Joined',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '23',
@@ -304,8 +426,11 @@ const JOINED_GROUPS: GroupInfo[] = [
       {id: '45', label: 'Commuting'},
       {id: '46', label: 'Urban'},
     ],
-    isPrivate: false,
-    memberCount: 700,
+    button: {
+      label: 'Joined',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '24',
@@ -316,8 +441,11 @@ const JOINED_GROUPS: GroupInfo[] = [
       {id: '47', label: 'Weekend'},
       {id: '48', label: 'Group Rides'},
     ],
-    isPrivate: false,
-    memberCount: 1200,
+    button: {
+      label: 'Joined',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '25',
@@ -328,8 +456,11 @@ const JOINED_GROUPS: GroupInfo[] = [
       {id: '49', label: 'Gear'},
       {id: '50', label: 'Reviews'},
     ],
-    isPrivate: false,
-    memberCount: 500,
+    button: {
+      label: 'Joined',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '26',
@@ -340,8 +471,11 @@ const JOINED_GROUPS: GroupInfo[] = [
       {id: '51', label: 'Track'},
       {id: '52', label: 'Performance'},
     ],
-    isPrivate: false,
-    memberCount: 800,
+    button: {
+      label: 'Joined',
+      size: 'medium',
+      style: 'round',
+    },
   },
   {
     id: '27',
@@ -352,169 +486,16 @@ const JOINED_GROUPS: GroupInfo[] = [
       {id: '53', label: 'Custom'},
       {id: '54', label: 'Building'},
     ],
-    isPrivate: false,
-    memberCount: 600,
-  },
-  {
-    id: '28',
-    image: {uri: 'https://picsum.photos/227'},
-    title: 'Vintage Lovers',
-    smallTexts: ['Joined Feb 2024', 'Active 2d ago'],
-    tags: [
-      {id: '55', label: 'Classic'},
-      {id: '56', label: 'Restoration'},
-    ],
-    isPrivate: false,
-    memberCount: 400,
-  },
-  {
-    id: '29',
-    image: {uri: 'https://picsum.photos/228'},
-    title: 'Safety First',
-    smallTexts: ['Joined Jan 2024', 'Active 6h ago'],
-    tags: [
-      {id: '57', label: 'Safety'},
-      {id: '58', label: 'Training'},
-    ],
-    isPrivate: false,
-    memberCount: 300,
-  },
-  {
-    id: '30',
-    image: {uri: 'https://picsum.photos/229'},
-    title: 'Moto Events',
-    smallTexts: ['Joined Mar 2024', 'Active 8h ago'],
-    tags: [
-      {id: '59', label: 'Events'},
-      {id: '60', label: 'Meetups'},
-    ],
-    isPrivate: false,
-    memberCount: 500,
-  },
-  {
-    id: '31',
-    image: {uri: 'https://picsum.photos/230'},
-    title: 'Tech Talk',
-    smallTexts: ['Joined Feb 2024', 'Active 1d ago'],
-    tags: [
-      {id: '61', label: 'Technical'},
-      {id: '62', label: 'Maintenance'},
-    ],
-    isPrivate: false,
-    memberCount: 250,
-  },
-  {
-    id: '32',
-    image: {uri: 'https://picsum.photos/231'},
-    title: 'Road Trip Planning',
-    smallTexts: ['Joined Jan 2024', 'Active 4h ago'],
-    tags: [
-      {id: '63', label: 'Travel'},
-      {id: '64', label: 'Planning'},
-    ],
-    isPrivate: false,
-    memberCount: 400,
-  },
-  {
-    id: '33',
-    image: {uri: 'https://picsum.photos/232'},
-    title: 'New Riders Support',
-    smallTexts: ['Joined Mar 2024', 'Active 2h ago'],
-    tags: [
-      {id: '65', label: 'New Riders'},
-      {id: '66', label: 'Support'},
-    ],
-    isPrivate: false,
-    memberCount: 200,
-  },
-  {
-    id: '34',
-    image: {uri: 'https://picsum.photos/233'},
-    title: 'Moto Photography',
-    smallTexts: ['Joined Feb 2024', 'Active 5h ago'],
-    tags: [
-      {id: '67', label: 'Photos'},
-      {id: '68', label: 'Art'},
-    ],
-    isPrivate: false,
-    memberCount: 300,
-  },
-  {
-    id: '35',
-    image: {uri: 'https://picsum.photos/234'},
-    title: 'Adventure Planning',
-    smallTexts: ['Joined Jan 2024', 'Active 7h ago'],
-    tags: [
-      {id: '69', label: 'Adventure'},
-      {id: '70', label: 'Planning'},
-    ],
-    isPrivate: false,
-    memberCount: 250,
-  },
-  {
-    id: '36',
-    image: {uri: 'https://picsum.photos/235'},
-    title: 'Race Fans',
-    smallTexts: ['Joined Mar 2024', 'Active 9h ago'],
-    tags: [
-      {id: '71', label: 'Racing'},
-      {id: '72', label: 'MotoGP'},
-    ],
-    isPrivate: false,
-    memberCount: 1000,
-  },
-  {
-    id: '37',
-    image: {uri: 'https://picsum.photos/236'},
-    title: 'Bike Maintenance',
-    smallTexts: ['Joined Feb 2024', 'Active 3d ago'],
-    tags: [
-      {id: '73', label: 'DIY'},
-      {id: '74', label: 'Repairs'},
-    ],
-    isPrivate: false,
-    memberCount: 200,
-  },
-  {
-    id: '38',
-    image: {uri: 'https://picsum.photos/237'},
-    title: 'Group Rides',
-    smallTexts: ['Joined Jan 2024', 'Active 10h ago'],
-    tags: [
-      {id: '75', label: 'Group'},
-      {id: '76', label: 'Social'},
-    ],
-    isPrivate: false,
-    memberCount: 700,
-  },
-  {
-    id: '39',
-    image: {uri: 'https://picsum.photos/238'},
-    title: 'Moto Stories',
-    smallTexts: ['Joined Mar 2024', 'Active 12h ago'],
-    tags: [
-      {id: '77', label: 'Stories'},
-      {id: '78', label: 'Experiences'},
-    ],
-    isPrivate: false,
-    memberCount: 300,
-  },
-  {
-    id: '40',
-    image: {uri: 'https://picsum.photos/239'},
-    title: 'Eco Riders',
-    smallTexts: ['Joined Feb 2024', 'Active 2d ago'],
-    tags: [
-      {id: '79', label: 'Electric'},
-      {id: '80', label: 'Sustainable'},
-    ],
-    isPrivate: false,
-    memberCount: 200,
+    button: {
+      label: 'Joined',
+      size: 'medium',
+      style: 'round',
+    },
   },
 ];
 
 // Add suggested groups data
-const SUGGESTED_GROUPS = EXPLORE_GROUPS.slice(0, 5);
+const SUGGESTED_GROUPS = EXPLORE_GROUPS.slice(0, 3);
 
 export function GroupsScreen() {
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -570,20 +551,18 @@ export function GroupsScreen() {
     setFilteredJoinedGroups(filteredJoined);
   };
 
-  const renderGroupInfo = (group: GroupInfo) => ({
-    ...group,
-    rightContent: (
-      <View style={styles.groupInfo}>
-        <Icon
-          name={group.isPrivate ? 'lock' : 'lock-open-variant'}
-          size={16}
-          color={group.isPrivate ? '#FF9500' : '#34C759'}
-        />
-        <Text style={styles.memberCount}>
-          {group.memberCount.toLocaleString()} members
-        </Text>
-      </View>
-    ),
+  const renderGroupInfo = (group: GroupInfo): StackedListItemProps => ({
+    image: group.image,
+    title: group.title,
+    smallTexts: group.smallTexts,
+    tags: group.tags,
+    badge: group.badge,
+    button: group.button
+      ? {
+          ...group.button,
+          onPress: () => console.log('Button pressed for group:', group.id),
+        }
+      : undefined,
   });
 
   return (
@@ -635,12 +614,6 @@ export function GroupsScreen() {
               </View>
               <StackedList
                 layout="vertical"
-                button={{
-                  label: 'Join',
-                  onPress: () => console.log('Join group'),
-                  size: 'medium',
-                  style: 'round',
-                }}
                 items={filteredSuggestedGroups.map(renderGroupInfo)}
                 onItemPress={index =>
                   console.log('Pressed suggested group:', index)
@@ -651,12 +624,6 @@ export function GroupsScreen() {
               </View>
               <StackedList
                 layout="vertical"
-                button={{
-                  label: 'Join',
-                  onPress: () => console.log('Join group'),
-                  size: 'medium',
-                  style: 'round',
-                }}
                 items={filteredExploreGroups.map(renderGroupInfo)}
                 onItemPress={index =>
                   console.log('Pressed explore group:', index)
@@ -666,12 +633,6 @@ export function GroupsScreen() {
           ) : (
             <StackedList
               layout="vertical"
-              button={{
-                label: 'View',
-                onPress: () => console.log('View group'),
-                size: 'medium',
-                style: 'round',
-              }}
               items={filteredJoinedGroups.map(renderGroupInfo)}
               onItemPress={index => console.log('Pressed joined group:', index)}
             />
