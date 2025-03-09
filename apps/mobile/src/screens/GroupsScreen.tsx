@@ -13,6 +13,7 @@ import {TabBar} from '../components/common/TabBar';
 import {Header} from '../components/common/Header';
 import {StackedList} from '../components/common/StackedList';
 import {ButtonProps} from '../components/types/common';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 interface Tag {
   id: string;
@@ -497,7 +498,11 @@ const JOINED_GROUPS: GroupInfo[] = [
 // Add suggested groups data
 const SUGGESTED_GROUPS = EXPLORE_GROUPS.slice(0, 3);
 
-export function GroupsScreen() {
+interface GroupsScreenProps {
+  navigation: NativeStackNavigationProp<any>;
+}
+
+export function GroupsScreen({navigation}: GroupsScreenProps) {
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [refreshing, setRefreshing] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -549,6 +554,14 @@ export function GroupsScreen() {
         group.tags.some(tag => tag.label.toLowerCase().includes(query)),
     );
     setFilteredJoinedGroups(filteredJoined);
+  };
+
+  const handleGroupPress = (group: GroupInfo) => {
+    navigation.navigate('GroupDetail', {
+      groupId: group.id,
+      groupName: group.title,
+      groupImage: group.image,
+    });
   };
 
   const renderGroupInfo = (group: GroupInfo): StackedListItemProps => ({
@@ -616,7 +629,7 @@ export function GroupsScreen() {
                 layout="vertical"
                 items={filteredSuggestedGroups.map(renderGroupInfo)}
                 onItemPress={index =>
-                  console.log('Pressed suggested group:', index)
+                  handleGroupPress(filteredSuggestedGroups[index])
                 }
               />
               <View style={styles.sectionHeader}>
@@ -626,7 +639,7 @@ export function GroupsScreen() {
                 layout="vertical"
                 items={filteredExploreGroups.map(renderGroupInfo)}
                 onItemPress={index =>
-                  console.log('Pressed explore group:', index)
+                  handleGroupPress(filteredExploreGroups[index])
                 }
               />
             </>
@@ -634,7 +647,9 @@ export function GroupsScreen() {
             <StackedList
               layout="vertical"
               items={filteredJoinedGroups.map(renderGroupInfo)}
-              onItemPress={index => console.log('Pressed joined group:', index)}
+              onItemPress={index =>
+                handleGroupPress(filteredJoinedGroups[index])
+              }
             />
           )}
         </ScrollView>

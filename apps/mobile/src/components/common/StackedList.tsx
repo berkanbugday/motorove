@@ -374,19 +374,18 @@ const styles = StyleSheet.create({
   verticalCardWrapper: {
     width: '100%',
     marginRight: 0,
-    marginBottom: 16,
   },
   itemContainer: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
     padding: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
+    // shadowColor: '#000',
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 1,
+    // },
+    // shadowOpacity: 0.08,
+    // shadowRadius: 2,
     elevation: 2,
   },
   imageContainer: {
