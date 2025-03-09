@@ -42,6 +42,8 @@ interface HeaderProps {
   showHeader?: boolean;
   onSearch?: (text: string) => void;
   onSubmitSearch?: (text: string) => void;
+  onClearSearch?: () => void;
+  onCloseSearch?: () => void;
 }
 
 export const Header = ({
@@ -60,6 +62,8 @@ export const Header = ({
   showHeader = true,
   onSearch,
   onSubmitSearch,
+  onClearSearch,
+  onCloseSearch,
 }: HeaderProps): React.ReactElement => {
   const [isSearchActive, setIsSearchActive] = React.useState(false);
   const [searchText, setSearchText] = React.useState('');
@@ -111,12 +115,14 @@ export const Header = ({
       LayoutAnimation.configureNext(CustomLayoutAnimation);
       setIsSearchActive(false);
       setSearchText('');
+      onCloseSearch?.();
     });
   };
 
   const handleClearSearch = () => {
     setSearchText('');
     searchInputRef.current?.focus();
+    onClearSearch?.();
   };
 
   const handleSubmitSearch = () => {
