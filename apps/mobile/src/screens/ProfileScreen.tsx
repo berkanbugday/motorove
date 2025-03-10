@@ -9,8 +9,18 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {ProfileStackParamList} from '../navigation/ProfileStack';
+
+type ProfileScreenNavigationProp = NativeStackNavigationProp<
+  ProfileStackParamList,
+  'Profile'
+>;
 
 export function ProfileScreen() {
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -49,25 +59,33 @@ export function ProfileScreen() {
 
         {/* Menu Items */}
         <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('EditProfile')}>
             <Icon name="account-edit" size={24} color="#333" />
             <Text style={styles.menuText}>Edit Profile</Text>
             <Icon name="chevron-right" size={24} color="#CCCCCC" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('Notifications')}>
             <Icon name="bell-outline" size={24} color="#333" />
             <Text style={styles.menuText}>Notifications</Text>
             <Icon name="chevron-right" size={24} color="#CCCCCC" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('PrivacySecurity')}>
             <Icon name="shield-check-outline" size={24} color="#333" />
             <Text style={styles.menuText}>Privacy & Security</Text>
             <Icon name="chevron-right" size={24} color="#CCCCCC" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('HelpSupport')}>
             <Icon name="help-circle-outline" size={24} color="#333" />
             <Text style={styles.menuText}>Help & Support</Text>
             <Icon name="chevron-right" size={24} color="#CCCCCC" />

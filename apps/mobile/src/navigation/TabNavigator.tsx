@@ -2,10 +2,10 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {HomeScreen} from '../screens/HomeScreen';
-import {SearchScreen} from '../screens/SearchScreen';
-import {ProfileScreen} from '../screens/ProfileScreen';
-import {LoginScreen} from '../screens/LoginScreen';
 import {GroupsNavigator} from './GroupsNavigator';
+import {MapScreen} from '../screens/Map/MapScreen';
+import {RecordScreen} from '../screens/Record';
+import {ProfileStack} from './ProfileStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -32,6 +32,24 @@ export function TabNavigator() {
         }}
       />
       <Tab.Screen
+        name="Maps"
+        component={MapScreen}
+        options={{
+          tabBarIcon: ({color, size}) => (
+            <Icon name="map-search" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Record"
+        component={RecordScreen}
+        options={{
+          tabBarIcon: ({color, size}) => (
+            <Icon name="radiobox-marked" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="Groups"
         component={GroupsNavigator}
         options={{
@@ -41,17 +59,8 @@ export function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{
-          tabBarIcon: ({color, size}) => (
-            <Icon name="magnify" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
           tabBarIcon: ({color, size}) => (
             <Icon name="account" color={color} size={size} />
