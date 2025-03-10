@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {HomeScreen} from '../screens/HomeScreen';
 import {SearchScreen} from '../screens/SearchScreen';
 import {ProfileScreen} from '../screens/ProfileScreen';
+import {LoginScreen} from '../screens/LoginScreen';
 import {GroupsNavigator} from './GroupsNavigator';
 
 const Tab = createBottomTabNavigator();
