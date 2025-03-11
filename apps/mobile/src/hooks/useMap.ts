@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback, useRef} from 'react';
 import Geolocation from '@react-native-community/geolocation';
 
 export interface Marker {
@@ -15,6 +15,7 @@ interface UseMapReturn {
   searchLocation: (query: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
+  refreshLocation: () => void;
 }
 
 export const useMap = (): UseMapReturn => {
@@ -24,70 +25,171 @@ export const useMap = (): UseMapReturn => {
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const markersGeneratedRef = useRef(false);
 
-  useEffect(() => {
-    getCurrentLocation();
-    fetchNearbyPlaces();
-  }, []);
+  const getCurrentLocation = useCallback(() => {
+    setIsLoading(true);
+    setError(null);
 
-  const getCurrentLocation = () => {
+    Geolocation.requestAuthorization();
+
     Geolocation.getCurrentPosition(
       position => {
         setUserLocation([position.coords.longitude, position.coords.latitude]);
+        setIsLoading(false);
       },
       error => {
-        setError('Error getting location: ' + error.message);
+        let errorMessage = 'Error getting location: ';
+        switch (error.code) {
+          case 1:
+            errorMessage +=
+              'Permission denied. Please enable location services.';
+            break;
+          case 2:
+            errorMessage += 'Position unavailable. Please try again.';
+            break;
+          case 3:
+            errorMessage += 'Location request timed out. Please try again.';
+            break;
+          default:
+            errorMessage += error.message;
+        }
+        setError(errorMessage);
+        setIsLoading(false);
       },
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 1000,
+      },
     );
-  };
+  }, []);
 
-  const fetchNearbyPlaces = async () => {
-    setIsLoading(true);
-    try {
-      // TODO: Replace with actual API call to your backend
-      const mockData: Marker[] = [
-        {
-          id: '1',
-          type: 'repair',
-          coordinates: [-73.9866, 40.7306],
-          title: 'NYC Moto Shop',
-          description: 'Expert motorcycle repairs and maintenance',
-        },
-        {
-          id: '2',
-          type: 'dealer',
-          coordinates: [-73.9877, 40.7297],
-          title: 'Motorcycle Dealership',
-          description: 'New and used motorcycles for sale',
-        },
-        {
-          id: '3',
-          type: 'parking',
-          coordinates: [-73.9855, 40.7315],
-          title: 'Secure Moto Parking',
-          description: '24/7 secure motorcycle parking',
-        },
+  const generateStableMarkers = useCallback(
+    (baseLocation: [number, number]) => {
+      if (markersGeneratedRef.current) return;
+
+      const types: ('repair' | 'dealer' | 'parking')[] = [
+        'repair',
+        'dealer',
+        'parking',
       ];
+      const titles = {
+        repair: [
+          'Quick Fix Moto',
+          'Pro Motorcycle Service',
+          'Bike Mechanics',
+          'MotoTech Repairs',
+          'Elite Motorcycle Shop',
+        ],
+        dealer: [
+          'Premium Motorcycles',
+          'City Moto Dealer',
+          'Luxury Bikes',
+          'Classic Motorcycles',
+          'Modern Moto Store',
+        ],
+        parking: [
+          'Secure Bike Parking',
+          '24/7 Moto Parking',
+          'Premium Parking',
+          'Safe Spot Parking',
+          'Covered Bike Storage',
+        ],
+      };
+
+      const descriptions = {
+        repair: [
+          'Expert repairs and maintenance',
+          'Professional motorcycle service',
+          'Quick and reliable repairs',
+          'Certified mechanics',
+          'Full-service workshop',
+        ],
+        dealer: [
+          'New and used motorcycles',
+          'Premium bike selection',
+          'Authorized dealer',
+          'Custom motorcycles',
+          'Best deals in town',
+        ],
+        parking: [
+          '24/7 secure parking',
+          'Camera surveillance',
+          'Covered parking spots',
+          'Monthly rates available',
+          'Easy access parking',
+        ],
+      };
+
+      // Use a seeded random number generator for stable positions
+      const seedRandom = (seed: number) => {
+        return () => {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        };
+      };
+
+      const random = seedRandom(12345); // Use a fixed seed for stable generation
+
+      const mockData: Marker[] = Array.from({length: 20}, (_, i) => {
+        // Use seeded random for stable offsets
+        const latOffset = (random() - 0.5) * 0.04;
+        const lngOffset = (random() - 0.5) * 0.04;
+
+        const typeIndex = Math.floor(random() * types.length);
+        const randomType = types[typeIndex];
+
+        const titleIndex = Math.floor(random() * 5);
+        const descriptionIndex = Math.floor(random() * 5);
+
+        return {
+          id: (i + 1).toString(),
+          type: randomType,
+          coordinates: [
+            baseLocation[0] + lngOffset,
+            baseLocation[1] + latOffset,
+          ],
+          title: titles[randomType][titleIndex],
+          description: descriptions[randomType][descriptionIndex],
+        };
+      });
+
       setMarkers(mockData);
+      markersGeneratedRef.current = true;
+    },
+    [],
+  );
+
+  const fetchNearbyPlaces = useCallback(async () => {
+    try {
+      if (!userLocation) {
+        return;
+      }
+      generateStableMarkers(userLocation);
     } catch (err) {
       setError('Error fetching nearby places');
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [userLocation, generateStableMarkers]);
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, [getCurrentLocation]);
+
+  useEffect(() => {
+    if (userLocation) {
+      fetchNearbyPlaces();
+    }
+  }, [userLocation, fetchNearbyPlaces]);
 
   const searchLocation = async (query: string) => {
     if (!query.trim()) return;
 
     setIsLoading(true);
+    setError(null);
     try {
       // TODO: Implement Mapbox Geocoding API call
-      // For now, just log the search query
       console.log('Searching for:', query);
-
-      // Mock search results
-      // In real implementation, update markers based on search results
       await fetchNearbyPlaces();
     } catch (err) {
       setError('Error searching location');
@@ -96,11 +198,17 @@ export const useMap = (): UseMapReturn => {
     }
   };
 
+  const refreshLocation = useCallback(() => {
+    markersGeneratedRef.current = false;
+    getCurrentLocation();
+  }, [getCurrentLocation]);
+
   return {
     userLocation,
     markers,
     searchLocation,
     isLoading,
     error,
+    refreshLocation,
   };
 };

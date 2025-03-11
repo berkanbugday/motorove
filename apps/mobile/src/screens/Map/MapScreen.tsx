@@ -29,6 +29,10 @@ export function MapScreen() {
     await searchLocation(searchQuery);
   };
 
+  const refreshLocation = async () => {
+    await searchLocation(searchQuery);
+  };
+
   const renderMarkers = () => {
     return markers.map(marker => (
       <Mapbox.PointAnnotation
@@ -73,13 +77,21 @@ export function MapScreen() {
             style={styles.loader}
           />
         )}
+        <TouchableOpacity
+          onPress={refreshLocation}
+          style={styles.refreshButton}>
+          <Icon name="refresh" size={24} color="#666" />
+        </TouchableOpacity>
       </View>
 
       {/* Error Message */}
       {error && (
-        <View style={styles.errorContainer}>
+        <TouchableOpacity
+          style={styles.errorContainer}
+          onPress={refreshLocation}>
           <Text style={styles.errorText}>{error}</Text>
-        </View>
+          <Text style={styles.retryText}>Tap to retry</Text>
+        </TouchableOpacity>
       )}
 
       {/* Map View */}
@@ -247,5 +259,15 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     color: '#FF4444',
+  },
+  refreshButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  retryText: {
+    color: '#FF4444',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 4,
   },
 });
