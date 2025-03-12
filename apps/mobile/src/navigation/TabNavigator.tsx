@@ -9,6 +9,26 @@ import {ProfileStack} from './ProfileStack';
 
 const Tab = createBottomTabNavigator();
 
+const HomeIcon = ({color, size}: {color: string; size: number}) => (
+  <Icon name="home" color={color} size={size} />
+);
+
+const MapIcon = ({color, size}: {color: string; size: number}) => (
+  <Icon name="map-search" color={color} size={size} />
+);
+
+const RecordIcon = ({color, size}: {color: string; size: number}) => (
+  <Icon name="radiobox-marked" color={color} size={size} />
+);
+
+const GroupsIcon = ({color, size}: {color: string; size: number}) => (
+  <Icon name="account-group" color={color} size={size} />
+);
+
+const ProfileIcon = ({color, size}: {color: string; size: number}) => (
+  <Icon name="account" color={color} size={size} />
+);
+
 export function TabNavigator() {
   return (
     <Tab.Navigator
@@ -26,45 +46,35 @@ export function TabNavigator() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({color, size}) => (
-            <Icon name="home" color={color} size={size} />
-          ),
+          tabBarIcon: HomeIcon,
         }}
       />
       <Tab.Screen
         name="Maps"
         component={MapScreen}
         options={{
-          tabBarIcon: ({color, size}) => (
-            <Icon name="map-search" color={color} size={size} />
-          ),
+          tabBarIcon: MapIcon,
         }}
       />
       <Tab.Screen
         name="Record"
         component={RecordScreen}
         options={{
-          tabBarIcon: ({color, size}) => (
-            <Icon name="radiobox-marked" color={color} size={size} />
-          ),
+          tabBarIcon: RecordIcon,
         }}
       />
       <Tab.Screen
         name="Groups"
         component={GroupsNavigator}
         options={{
-          tabBarIcon: ({color, size}) => (
-            <Icon name="account-group" color={color} size={size} />
-          ),
+          tabBarIcon: GroupsIcon,
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileStack}
         options={{
-          tabBarIcon: ({color, size}) => (
-            <Icon name="account" color={color} size={size} />
-          ),
+          tabBarIcon: ProfileIcon,
         }}
       />
     </Tab.Navigator>

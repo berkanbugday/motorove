@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -10,14 +10,6 @@ import {
   Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {ProfileStackParamList} from '../navigation/ProfileStack';
-
-type HelpSupportScreenNavigationProp = NativeStackNavigationProp<
-  ProfileStackParamList,
-  'HelpSupport'
->;
 
 type FAQItem = {
   question: string;
@@ -26,8 +18,7 @@ type FAQItem = {
 };
 
 export function HelpSupportScreen() {
-  const navigation = useNavigation<HelpSupportScreenNavigationProp>();
-  const [faqItems, setFaqItems] = useState<FAQItem[]>([
+  const [faqItems, setFaqItems] = React.useState<FAQItem[]>([
     {
       question: 'How do I book a ride?',
       answer:

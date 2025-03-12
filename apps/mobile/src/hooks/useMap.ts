@@ -38,9 +38,9 @@ export const useMap = (): UseMapReturn => {
         setUserLocation([position.coords.longitude, position.coords.latitude]);
         setIsLoading(false);
       },
-      error => {
+      locationError => {
         let errorMessage = 'Error getting location: ';
-        switch (error.code) {
+        switch (locationError.code) {
           case 1:
             errorMessage +=
               'Permission denied. Please enable location services.';
@@ -52,7 +52,7 @@ export const useMap = (): UseMapReturn => {
             errorMessage += 'Location request timed out. Please try again.';
             break;
           default:
-            errorMessage += error.message;
+            errorMessage += locationError.message;
         }
         setError(errorMessage);
         setIsLoading(false);

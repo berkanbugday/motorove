@@ -10,17 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {ProfileStackParamList} from '../navigation/ProfileStack';
-
-type PrivacySecurityScreenNavigationProp = NativeStackNavigationProp<
-  ProfileStackParamList,
-  'PrivacySecurity'
->;
 
 export function PrivacySecurityScreen() {
-  const navigation = useNavigation<PrivacySecurityScreenNavigationProp>();
   const [settings, setSettings] = useState({
     twoFactorAuth: true,
     biometricLogin: true,

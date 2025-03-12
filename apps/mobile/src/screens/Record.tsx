@@ -8,19 +8,19 @@ MapboxGL.setAccessToken(
   'pk.eyJ1IjoiYmVya2FuYnVnZGF5IiwiYSI6ImNtODNhaXByZjFmejYya3Nhdzhoa3NkaTMifQ.0o__L4YytBYoLPzcZBigDg',
 );
 
-const ANIMATION_DURATION = 10000;
+const ANIMATION_DURATION = 5000;
 const INITIAL_COORDINATES = [33.470359, 40.5781289]; // Çankırı Seydiköy coordinates
 const MIN_ZOOM = 11; // Wider view
 const MAX_ZOOM = 12; // Less close-up
 const BASE_TERRAIN = 3; // Fixed terrain exaggeration to prevent jumping
-const CAMERA_TRANSITION_DURATION = 300; // Smoother camera transitions
+const CAMERA_TRANSITION_DURATION = 1000; // Smoother camera transitions
 const BASE_HEADING = 50;
 const BASE_PITCH = 50;
 
 // Animation constants
-const HEADING_VARIATION = 70;
-const PITCH_VARIATION = 20;
-const FOLLOW_DISTANCE = 0.002;
+const HEADING_VARIATION = 40;
+const PITCH_VARIATION = 15;
+const FOLLOW_DISTANCE = 0.003;
 
 export const RecordScreen = () => {
   const mapRef = useRef<MapboxGL.MapView>(null);
@@ -29,10 +29,10 @@ export const RecordScreen = () => {
   const startTimeRef = useRef<number>();
   const lastCameraUpdate = useRef<number>(0);
 
-  const [elevation, setElevation] = useState<number>(0);
+  const [_currentElevation, setElevation] = useState<number>(0);
   const [markerCoordinates, setMarkerCoordinates] =
     useState(INITIAL_COORDINATES);
-  const [routeProgress, setRouteProgress] = useState(0);
+  const [_routeProgress, setRouteProgress] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [drawnCoordinates, setDrawnCoordinates] = useState([
     INITIAL_COORDINATES,
@@ -271,6 +271,32 @@ export const RecordScreen = () => {
     };
   }, []);
 
+  // Define Mapbox-specific styles outside of StyleSheet
+  const mapboxStyles = {
+    lineStyle: {
+      lineColor: 'red',
+      lineWidth: 5,
+      lineCap: 'round',
+      lineJoin: 'round',
+    },
+    textStyle: {
+      textField: [
+        'format',
+        ['get', 'title'],
+        {'font-scale': 1.2},
+        '\n',
+        {},
+        ['get', 'subtitle'],
+        {'font-scale': 0.7},
+      ],
+      textSize: 12,
+      textColor: '#FFFFFF',
+      textLetterSpacing: 0.1,
+      textAnchor: 'bottom',
+      textMaxWidth: 8,
+    },
+  };
+
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
@@ -315,15 +341,7 @@ export const RecordScreen = () => {
               coordinates: drawnCoordinates,
             },
           }}>
-          <MapboxGL.LineLayer
-            id="drawnLine"
-            style={{
-              lineColor: 'red',
-              lineWidth: 5,
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
-          />
+          <MapboxGL.LineLayer id="drawnLine" style={mapboxStyles.lineStyle} />
         </MapboxGL.ShapeSource>
 
         <MapboxGL.PointAnnotation
@@ -346,7 +364,7 @@ export const RecordScreen = () => {
                 },
                 geometry: {
                   type: 'Point',
-                  coordinates: [33.617, 40.6], // Çankırı Merkez coordinates
+                  coordinates: [33.617, 40.6],
                 },
               },
               {
@@ -357,30 +375,14 @@ export const RecordScreen = () => {
                 },
                 geometry: {
                   type: 'Point',
-                  coordinates: [33.470359, 40.5781289], // Seydiköy coordinates
+                  coordinates: [33.470359, 40.5781289],
                 },
               },
             ],
           }}>
           <MapboxGL.SymbolLayer
             id="cityLabels"
-            style={{
-              textField: [
-                'format',
-                ['get', 'title'],
-                {'font-scale': 1.2},
-                '\n',
-                {},
-                ['get', 'subtitle'],
-                {'font-scale': 0.8},
-              ],
-              textSize: 16,
-              textColor: '#FFFFFF',
-              textHaloColor: '#000000',
-              textHaloWidth: 2,
-              textAnchor: 'top',
-              textOffset: [0, 1],
-            }}
+            style={mapboxStyles.textStyle}
           />
         </MapboxGL.ShapeSource>
       </MapboxGL.MapView>
@@ -392,12 +394,6 @@ export const RecordScreen = () => {
           <Text style={styles.controlButtonText}>
             {isAnimating ? 'Stop' : 'Start'}
           </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.controlButton, styles.resetButton]}
-          onPress={resetCamera}>
-          <Text style={styles.controlButtonText}>Reset View</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -412,40 +408,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   markerContainer: {
-    width: 20,
-    height: 20,
-    backgroundColor: 'red',
-    borderRadius: 10,
+    width: 8,
+    height: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 4,
+    opacity: 0.9,
   },
   buttonContainer: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 40,
     left: 0,
     right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 20,
   },
   controlButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  resetButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 4,
+    minWidth: 100,
+    alignItems: 'center',
   },
   controlButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '400',
+    letterSpacing: 1,
   },
 });

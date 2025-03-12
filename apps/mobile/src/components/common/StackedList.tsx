@@ -304,7 +304,7 @@ const StackedListItem: React.FC<
         <ReanimatedSwipeable
           friction={2}
           rightThreshold={40}
-          renderRightActions={(progress, dragX) => (
+          renderRightActions={(_progress, _dragX) => (
             <RightActions actions={rightActions} />
           )}>
           {content}

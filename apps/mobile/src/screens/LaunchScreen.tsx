@@ -1,12 +1,5 @@
-import React, {useEffect, useCallback, useMemo} from 'react';
-import {
-  View,
-  StyleSheet,
-  Animated,
-  Dimensions,
-  Platform,
-  StatusBar,
-} from 'react-native';
+import React, {useEffect, useMemo} from 'react';
+import {View, StyleSheet, Animated, Dimensions, StatusBar} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 const {width} = Dimensions.get('window');

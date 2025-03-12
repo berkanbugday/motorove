@@ -22,7 +22,7 @@ export function MapScreen() {
   const {userLocation, markers, searchLocation, isLoading, error} = useMap();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMarker, setSelectedMarker] = useState<Marker | null>(null);
-  const [activeTab, setActiveTab] = useState('map');
+  const [_activeTab, _setActiveTab] = useState('map');
   const mapRef = useRef(null);
 
   const handleSearch = async () => {

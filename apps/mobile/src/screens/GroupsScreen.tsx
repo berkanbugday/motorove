@@ -1,19 +1,18 @@
 import React from 'react';
 import {
+  View,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  TouchableOpacity,
+  Text,
   RefreshControl,
-  ImageSourcePropType,
   ViewStyle,
 } from 'react-native';
-import {View, Text} from 'react-native-ui-lib';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {TabBar} from '../components/common/TabBar';
-import {Header} from '../components/common/Header';
-import {StackedList} from '../components/common/StackedList';
-import {ButtonProps} from '../components/types/common';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {Header} from '../components/common/Header';
+import {TabBar} from '../components/common/TabBar';
+import {StackedList} from '../components/common/StackedList';
 
 interface Tag {
   id: string;
@@ -29,7 +28,7 @@ interface BadgeProps {
 }
 
 interface StackedListItemProps {
-  image: ImageSourcePropType;
+  image: any;
   title: string;
   smallTexts?: string[];
   tags?: Tag[];
@@ -44,7 +43,7 @@ interface StackedListItemProps {
 
 type GroupInfo = {
   id: string;
-  image: ImageSourcePropType;
+  image: any;
   title: string;
   smallTexts: string[];
   tags: Array<{id: string; label: string}>;
