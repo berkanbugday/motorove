@@ -13,13 +13,13 @@ const INITIAL_COORDINATES = [33.470359, 40.5781289]; // Çankırı Seydiköy coo
 const MIN_ZOOM = 11; // Wider view
 const MAX_ZOOM = 12; // Less close-up
 const BASE_TERRAIN = 3; // Fixed terrain exaggeration to prevent jumping
-const CAMERA_TRANSITION_DURATION = 500; // Smoother camera transitions
-const BASE_HEADING = 150;
-const BASE_PITCH = 60;
+const CAMERA_TRANSITION_DURATION = 300; // Smoother camera transitions
+const BASE_HEADING = 50;
+const BASE_PITCH = 50;
 
 // Animation constants
-const HEADING_VARIATION = 30;
-const PITCH_VARIATION = 10;
+const HEADING_VARIATION = 70;
+const PITCH_VARIATION = 20;
 const FOLLOW_DISTANCE = 0.002;
 
 export const RecordScreen = () => {
@@ -37,8 +37,6 @@ export const RecordScreen = () => {
   const [drawnCoordinates, setDrawnCoordinates] = useState([
     INITIAL_COORDINATES,
   ]);
-  const [currentZoom, setCurrentZoom] = useState(MIN_ZOOM);
-  const [isForward, setIsForward] = useState(true);
 
   // Route data from Seydiköy to Çankırı Merkez
   const routeCoordinates = useMemo(
@@ -142,8 +140,6 @@ export const RecordScreen = () => {
   // Calculate the center and deltas for the region
   const centerLng = (minLng + maxLng) / 2;
   const centerLat = (minLat + maxLat) / 2;
-  const latDelta = (maxLat - minLat) * 1.5; // Add 50% padding
-  const lngDelta = (maxLng - minLng) * 1.5;
 
   const resetCamera = useCallback(() => {
     cameraRef.current?.setCamera({
@@ -171,13 +167,13 @@ export const RecordScreen = () => {
 
   const updateElevation = useCallback(async (coordinates: number[]) => {
     try {
-      if (mapRef.current) {
-        const elevation = await mapRef.current.queryTerrainElevation(
-          coordinates,
-        );
-        if (elevation !== null) {
-          setElevation(Math.floor(elevation));
-        }
+      if (!mapRef.current || !coordinates || coordinates.length !== 2) {
+        return;
+      }
+
+      const elevation = await mapRef.current.queryTerrainElevation(coordinates);
+      if (typeof elevation === 'number' && !isNaN(elevation)) {
+        setElevation(Math.floor(elevation));
       }
     } catch (error) {
       console.error('Error getting elevation:', error);
@@ -195,10 +191,9 @@ export const RecordScreen = () => {
       const offsetLng = -Math.sin(bearingRad) * FOLLOW_DISTANCE;
       const offsetLat = -Math.cos(bearingRad) * FOLLOW_DISTANCE;
 
-      // Calculate zoom based on direction
-      const zoomProgress = isForward ? progress : 1 - progress;
+      // Calculate zoom based on progress
       const dynamicZoom =
-        MIN_ZOOM + (MAX_ZOOM - MIN_ZOOM) * Math.sin(zoomProgress * Math.PI);
+        MIN_ZOOM + (MAX_ZOOM - MIN_ZOOM) * Math.sin(progress * Math.PI);
 
       return {
         centerCoordinate: [
@@ -210,7 +205,7 @@ export const RecordScreen = () => {
         zoomLevel: dynamicZoom,
       };
     },
-    [isForward],
+    [],
   );
 
   const animate = useCallback(
@@ -219,8 +214,6 @@ export const RecordScreen = () => {
       const progress = (timestamp - startTimeRef.current) / ANIMATION_DURATION;
 
       if (progress > 1) {
-        // Toggle direction when animation completes
-        setIsForward(!isForward);
         setIsAnimating(false);
         resetAnimation();
         return;
@@ -228,27 +221,28 @@ export const RecordScreen = () => {
 
       const path = lineString(routeCoordinates);
       const pathDistance = length(path, {units: 'kilometers'});
-      // Use forward or reverse progress based on direction
-      const currentPoint = along(
-        path,
-        isForward ? pathDistance * progress : pathDistance * (1 - progress),
-      );
+      const currentPoint = along(path, pathDistance * progress);
       const newCoordinates = currentPoint.geometry.coordinates;
 
-      setMarkerCoordinates(newCoordinates);
-      setDrawnCoordinates(prev => [...prev, newCoordinates]);
-      setRouteProgress(progress);
+      if (Array.isArray(newCoordinates) && newCoordinates.length === 2) {
+        setMarkerCoordinates(newCoordinates);
+        setDrawnCoordinates(prev => [...prev, newCoordinates]);
+        setRouteProgress(progress);
 
-      if (timestamp - lastCameraUpdate.current > 1000) {
-        updateElevation(newCoordinates);
-        lastCameraUpdate.current = timestamp;
+        // Only update elevation if enough time has passed and map is ready
+        if (timestamp - lastCameraUpdate.current > 1000 && mapRef.current) {
+          updateElevation(newCoordinates);
+          lastCameraUpdate.current = timestamp;
+        }
+
+        const cameraConfig = calculateCameraPosition(progress, newCoordinates);
+        if (cameraRef.current) {
+          cameraRef.current.setCamera({
+            ...cameraConfig,
+            animationDuration: CAMERA_TRANSITION_DURATION,
+          });
+        }
       }
-
-      const cameraConfig = calculateCameraPosition(progress, newCoordinates);
-      cameraRef.current?.setCamera({
-        ...cameraConfig,
-        animationDuration: CAMERA_TRANSITION_DURATION,
-      });
 
       animationRef.current = requestAnimationFrame(animate);
     },
@@ -257,7 +251,6 @@ export const RecordScreen = () => {
       updateElevation,
       calculateCameraPosition,
       resetAnimation,
-      isForward,
     ],
   );
 
@@ -283,7 +276,10 @@ export const RecordScreen = () => {
       <MapboxGL.MapView
         ref={mapRef}
         style={styles.map}
-        styleURL={MapboxGL.StyleURL.SatelliteStreet}
+        logoEnabled={false}
+        attributionEnabled={false}
+        scaleBarEnabled={false}
+        styleURL={MapboxGL.StyleURL.Satellite}
         pitchEnabled={true}
         rotateEnabled={true}>
         <MapboxGL.Camera
@@ -307,28 +303,6 @@ export const RecordScreen = () => {
           sourceID="mapbox-dem"
           style={{exaggeration: BASE_TERRAIN}}
         />
-
-        {/* Full route line */}
-        <MapboxGL.ShapeSource
-          id="routeSource"
-          shape={{
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: routeCoordinates,
-            },
-          }}>
-          <MapboxGL.LineLayer
-            id="routeLine"
-            style={{
-              lineColor: 'rgba(255, 0, 0, 0.3)',
-              lineWidth: 5,
-              lineCap: 'round',
-              lineJoin: 'round',
-            }}
-          />
-        </MapboxGL.ShapeSource>
 
         {/* Drawn path */}
         <MapboxGL.ShapeSource
@@ -357,13 +331,59 @@ export const RecordScreen = () => {
           coordinate={markerCoordinates}>
           <View style={styles.markerContainer} />
         </MapboxGL.PointAnnotation>
-      </MapboxGL.MapView>
 
-      <View style={styles.elevationContainer}>
-        <Text style={styles.elevationText}>
-          Altitude: {Math.floor(elevation)}m
-        </Text>
-      </View>
+        {/* City Labels */}
+        <MapboxGL.ShapeSource
+          id="cityLabelsSource"
+          shape={{
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: {
+                  title: 'Çankırı',
+                  subtitle: 'Merkez',
+                },
+                geometry: {
+                  type: 'Point',
+                  coordinates: [33.617, 40.6], // Çankırı Merkez coordinates
+                },
+              },
+              {
+                type: 'Feature',
+                properties: {
+                  title: 'Seydiköy',
+                  subtitle: 'Başlangıç',
+                },
+                geometry: {
+                  type: 'Point',
+                  coordinates: [33.470359, 40.5781289], // Seydiköy coordinates
+                },
+              },
+            ],
+          }}>
+          <MapboxGL.SymbolLayer
+            id="cityLabels"
+            style={{
+              textField: [
+                'format',
+                ['get', 'title'],
+                {'font-scale': 1.2},
+                '\n',
+                {},
+                ['get', 'subtitle'],
+                {'font-scale': 0.8},
+              ],
+              textSize: 16,
+              textColor: '#FFFFFF',
+              textHaloColor: '#000000',
+              textHaloWidth: 2,
+              textAnchor: 'top',
+              textOffset: [0, 1],
+            }}
+          />
+        </MapboxGL.ShapeSource>
+      </MapboxGL.MapView>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -390,18 +410,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-  },
-  elevationContainer: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    padding: 10,
-    borderRadius: 5,
-  },
-  elevationText: {
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   markerContainer: {
     width: 20,
