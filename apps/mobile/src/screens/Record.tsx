@@ -8,12 +8,12 @@ MapboxGL.setAccessToken(
   'pk.eyJ1IjoiYmVya2FuYnVnZGF5IiwiYSI6ImNtODNhaXByZjFmejYya3Nhdzhoa3NkaTMifQ.0o__L4YytBYoLPzcZBigDg',
 );
 
-const ANIMATION_DURATION = 5000;
+const ANIMATION_DURATION = 3000;
 const INITIAL_COORDINATES = [33.470359, 40.5781289]; // Çankırı Seydiköy coordinates
 const MIN_ZOOM = 11; // Wider view
 const MAX_ZOOM = 12; // Less close-up
 const BASE_TERRAIN = 3; // Fixed terrain exaggeration to prevent jumping
-const CAMERA_TRANSITION_DURATION = 1000; // Smoother camera transitions
+const CAMERA_TRANSITION_DURATION = ANIMATION_DURATION / 2; // Smoother camera transitions
 const BASE_HEADING = 50;
 const BASE_PITCH = 50;
 
