@@ -51,6 +51,7 @@
     "react-test-renderer": "18.2.0",
     "typescript": "~5.5.0"
   },
+  "packageManager": "pnpm@10.6.1",
   "engines": {
     "node": ">=18",
     "pnpm": ">=10"
