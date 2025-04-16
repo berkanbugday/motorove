@@ -11,6 +11,8 @@
 		"types": "turbo types",
 		"start": "turbo start",
 		"postinstall": "husky",
+		"build:ios": "pnpm --filter @motorove/mobile build:ios",
+		"build:android": "pnpm --filter @motorove/mobile build:android",
 		"ios": "pnpm --filter @motorove/mobile ios",
 		"android": "pnpm --filter @motorove/mobile android",
 		"pod-install": "pnpm --filter @motorove/mobile pod-install",
@@ -21,17 +23,17 @@
 		"prepare": "husky"
 	},
 	"devDependencies": {
-		"turbo": "2.4.4",
-		"prettier": "^2.8.8",
-		"husky": "^9.0.11",
-		"lint-staged": "^15.2.2",
-		"@commitlint/cli": "^19.0.3",
-		"@commitlint/config-conventional": "^19.0.3"
+		"@commitlint/cli": "^19.8.0",
+		"@commitlint/config-conventional": "^19.8.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.5.0",
+		"prettier": "^3.5.3",
+		"turbo": "2.5.0"
 	},
 	"packageManager": "pnpm@10.6.1",
 	"engines": {
-		"node": ">=18.0.0",
-		"pnpm": ">=10.0.0"
+		"node": ">=20",
+		"pnpm": ">=10"
 	},
 	"lint-staged": {
 		"*.{ts,tsx}": [

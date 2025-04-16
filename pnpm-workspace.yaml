@@ -2,9 +2,9 @@ packages:
   - packages/*
   - apps/*
 ignoredBuiltDependencies:
-  - '@nestjs/core'
-  - '@prisma/client'
-  - '@prisma/engines'
+  - "@nestjs/core"
+  - "@prisma/client"
+  - "@prisma/engines"
   - prisma
 onlyBuiltDependencies:
-  - '@prisma/client'
+  - "@prisma/client"
