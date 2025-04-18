@@ -1,11 +1,10 @@
+const baseConfig = require("./base");
+
 module.exports = {
-  moduleFileExtensions: ['js', 'json', 'ts'],
-  rootDir: 'src',
-  testRegex: '.*\\.spec\\.ts$',
+  ...baseConfig,
+  rootDir: "src",
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest'
+    "^.+\\.(t|j)s$": "ts-jest",
   },
-  collectCoverageFrom: ['**/*.(t|j)s'],
-  coverageDirectory: '../coverage',
-  testEnvironment: 'node'
-}; 
+  testEnvironment: "node",
+};

@@ -1,7 +1,7 @@
-import baseConfig from "./base.js";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
+const baseConfig = require("./base.js");
+const typescriptEslint = require("@typescript-eslint/eslint-plugin");
 
-export default [
+module.exports = [
   ...baseConfig,
   {
     plugins: {

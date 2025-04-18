@@ -1,11 +1,11 @@
-import baseConfig from "./base.js";
-import reactPlugin from "eslint-plugin-react";
-import reactNativePlugin from "eslint-plugin-react-native";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
+const baseConfig = require("./base.js");
+const reactPlugin = require("eslint-plugin-react");
+const reactNativePlugin = require("eslint-plugin-react-native");
+const typescriptEslint = require("@typescript-eslint/eslint-plugin");
 
 // React Native config doesn't appear to export correctly for ESLint 9
 // Recreate basic React Native rules without directly importing the config
-export default [
+module.exports = [
   ...baseConfig,
   {
     plugins: {

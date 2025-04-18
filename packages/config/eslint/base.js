@@ -1,11 +1,11 @@
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import typescriptEslintParser from "@typescript-eslint/parser";
-import prettierPlugin from "eslint-plugin-prettier";
-import prettierConfig from "eslint-config-prettier";
-import reactPlugin from "eslint-plugin-react";
-import reactNativePlugin from "eslint-plugin-react-native";
+const typescriptEslint = require("@typescript-eslint/eslint-plugin");
+const typescriptEslintParser = require("@typescript-eslint/parser");
+const prettierPlugin = require("eslint-plugin-prettier");
+const prettierConfig = require("eslint-config-prettier");
+const reactPlugin = require("eslint-plugin-react");
+const reactNativePlugin = require("eslint-plugin-react-native");
 
-export default [
+module.exports = [
   {
     plugins: {
       "@typescript-eslint": typescriptEslint,
