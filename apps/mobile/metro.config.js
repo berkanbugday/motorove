@@ -1,8 +1,5 @@
-import {getDefaultConfig, mergeConfig} from '@react-native/metro-config';
-import path from 'path';
-import {fileURLToPath} from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const path = require('path');
 
 /**
  * Metro configuration
@@ -22,4 +19,4 @@ const config = {
   },
 };
 
-export default mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);

@@ -1,3 +1,3 @@
-import mobileConfig from '@motorove/config/jest/mobile.js';
+const mobileConfig = require('@motorove/config/jest/mobile.js');
 
-export default mobileConfig;
+module.exports = mobileConfig;

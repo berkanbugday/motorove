@@ -1,8 +1,11 @@
-import mobileConfig from '@motorove/config/eslint/mobile.js';
+const mobileConfig = require('@motorove/config/eslint/mobile.js');
 
-export default [
+module.exports = [
   ...mobileConfig,
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-var-requires': 'off',
+    },
   },
 ];

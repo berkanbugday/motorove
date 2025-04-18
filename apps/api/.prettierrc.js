@@ -1,3 +1,3 @@
-import prettierConfig from '@motorove/config/prettier';
+const prettierConfig = require('@motorove/config/prettier');
 
-export default prettierConfig;
+module.exports = prettierConfig;
