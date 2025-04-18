@@ -55,8 +55,8 @@ export const Card: React.FC<CardProps> = ({
       imagePosition === 'leftTop'
         ? {alignSelf: 'flex-start' as const}
         : imagePosition === 'center'
-        ? {alignItems: 'center' as const}
-        : {};
+          ? {alignItems: 'center' as const}
+          : {};
 
     return [baseStyle, positionStyle];
   };
@@ -97,11 +97,11 @@ export const Card: React.FC<CardProps> = ({
             paddingVertical: 6,
           }
         : button?.size === 'large'
-        ? {
-            paddingHorizontal: 20,
-            paddingVertical: 10,
-          }
-        : {};
+          ? {
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+            }
+          : {};
 
     const shapeStyle =
       button?.style === 'circle'
@@ -112,10 +112,10 @@ export const Card: React.FC<CardProps> = ({
             alignItems: 'center' as const,
           }
         : button?.style === 'round'
-        ? {
-            borderRadius: 25,
-          }
-        : {};
+          ? {
+              borderRadius: 25,
+            }
+          : {};
 
     return [containerStyles.button, baseStyle, sizeStyle, shapeStyle];
   };

@@ -46,8 +46,8 @@ export function MapScreen() {
               marker.type === 'repair'
                 ? 'build'
                 : marker.type === 'dealer'
-                ? 'store'
-                : 'local-parking'
+                  ? 'store'
+                  : 'local-parking'
             }
             size={24}
             color="#FF4444"

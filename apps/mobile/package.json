@@ -2,10 +2,11 @@
   "name": "@motorove/mobile",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "lint": "eslint .",
+    "lint": "eslint . --fix",
     "dev": "react-native start",
     "test": "jest",
     "pod-install": "cd ios && pod install",

@@ -121,11 +121,11 @@ const StackedListItem: React.FC<
             paddingVertical: 6,
           }
         : button?.size === 'large'
-        ? {
-            paddingHorizontal: 20,
-            paddingVertical: 10,
-          }
-        : {};
+          ? {
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+            }
+          : {};
 
     const shapeStyle =
       button?.style === 'circle'
@@ -136,10 +136,10 @@ const StackedListItem: React.FC<
             alignItems: 'center' as const,
           }
         : button?.style === 'round'
-        ? {
-            borderRadius: 25,
-          }
-        : {};
+          ? {
+              borderRadius: 25,
+            }
+          : {};
 
     return [styles.button, baseStyle, sizeStyle, shapeStyle];
   };
