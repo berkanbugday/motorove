@@ -1,20 +1,31 @@
 import UIKit
 import React
-import React_RCTAppDelegate
 
-@main
-class AppDelegate: RCTAppDelegate {
-  override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    self.moduleName = "motorove"
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate, RCTBridgeDelegate {
+  var window: UIWindow?
+  
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+    let moduleName = "motorove"
+    let bridge = RCTBridge(delegate: self, launchOptions: launchOptions)
+    let rootView = RCTRootView(bridge: bridge!, moduleName: moduleName, initialProperties: nil)
+
+    if #available(iOS 13.0, *) {
+      rootView.backgroundColor = UIColor.systemBackground
+    } else {
+      rootView.backgroundColor = UIColor.white
+    }
+
+    window = UIWindow(frame: UIScreen.main.bounds)
+    let rootViewController = UIViewController()
+    rootViewController.view = rootView
+    window?.rootViewController = rootViewController
+    window?.makeKeyAndVisible()
     
-    // You can add your custom initial props in the dictionary below.
-    // They will be passed down to the ViewController used by React Native.
-    self.initialProps = [:]
-
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    return true
   }
-
-  override func sourceURL(for bridge: RCTBridge) -> URL? {
+  
+  func sourceURL(for bridge: RCTBridge!) -> URL! {
     #if DEBUG
     return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
     #else
