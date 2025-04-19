@@ -7,6 +7,14 @@ const path = require('path');
  *
  * @type {import('@react-native/metro-config').MetroConfig}
  */
+const defaultConfig = getDefaultConfig(__dirname);
+
+// Add svg to the asset extensions (handled by default by metro)
+const assetExts = defaultConfig.resolver.assetExts.filter(ext => ext !== 'svg');
+
+// Add svg to the source extensions that will be handled by react-native-svg-transformer
+const sourceExts = [...defaultConfig.resolver.sourceExts, 'svg'];
+
 const config = {
   watchFolders: [
     // Add the root of the project to allow importing from monorepo packages
@@ -21,7 +29,8 @@ const config = {
     // Ensure proper resolution of React Native modules
     disableHierarchicalLookup: true,
     // Ensure these file extensions are handled properly
-    sourceExts: ['js', 'jsx', 'ts', 'tsx', 'json', 'mjs', 'cjs'],
+    assetExts,
+    sourceExts,
   },
   transformer: {
     getTransformOptions: async () => ({
@@ -41,6 +50,7 @@ const config = {
         keep_fnames: true,
       },
     },
+    babelTransformerPath: require.resolve('react-native-svg-transformer'),
   },
   // Enable caching for better performance
   cacheVersion: '1.0',
