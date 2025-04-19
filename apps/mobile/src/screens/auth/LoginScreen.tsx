@@ -261,17 +261,17 @@ export function LoginScreen() {
                 <TouchableOpacity
                   style={styles.socialButton}
                   onPress={() => handleSocialLogin('google')}>
-                  <Text style={styles.socialButtonText}>G</Text>
+                  <Icon name="google" size={24} color="#121212" />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.socialButton}
                   onPress={() => handleSocialLogin('apple')}>
-                  <Text style={styles.socialButtonText}>🍎</Text>
+                  <Icon name="apple" size={24} color="#121212" />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.socialButton}
                   onPress={() => handleSocialLogin('facebook')}>
-                  <Text style={styles.socialButtonText}>f</Text>
+                  <Icon name="facebook" size={24} color="#121212" />
                 </TouchableOpacity>
               </View>
 

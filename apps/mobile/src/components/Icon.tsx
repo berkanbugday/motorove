@@ -4,9 +4,18 @@ import React from 'react';
 import Eye from '../assets/icons/eye.svg';
 import EyeSlash from '../assets/icons/eye-slash.svg';
 import Envelope from '../assets/icons/envelope.svg';
+import Google from '../assets/icons/google.svg';
+import Apple from '../assets/icons/apple.svg';
+import Facebook from '../assets/icons/facebook.svg';
 
 // Type for icons
-export type IconName = 'eye' | 'eye-slash' | 'envelope';
+export type IconName =
+  | 'eye'
+  | 'eye-slash'
+  | 'envelope'
+  | 'google'
+  | 'apple'
+  | 'facebook';
 
 interface IconProps {
   name: IconName;
@@ -32,6 +41,12 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <EyeSlash {...commonProps} />;
     case 'envelope':
       return <Envelope {...commonProps} />;
+    case 'google':
+      return <Google {...commonProps} />;
+    case 'apple':
+      return <Apple {...commonProps} />;
+    case 'facebook':
+      return <Facebook {...commonProps} />;
     default:
       return null;
   }
