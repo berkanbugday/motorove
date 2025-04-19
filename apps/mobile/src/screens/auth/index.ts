@@ -1,1 +1,2 @@
-export * from './LoginScreen';
+export {LoginScreen} from './LoginScreen';
+export {ForgotPasswordScreen} from './ForgotPasswordScreen';

@@ -14,6 +14,8 @@ import {
   TextStyle,
 } from 'react-native';
 import {useWindowDimensions} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '../../navigation';
 import {Icon} from '../../components';
 
@@ -125,6 +127,7 @@ export function LoginScreen() {
 
   const {login} = useAuth();
   const {height} = useWindowDimensions();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   function handleChange(key: keyof LoginCredentials, value: string) {
     setCredentials(prev => ({...prev, [key]: value}));
@@ -184,7 +187,7 @@ export function LoginScreen() {
   }
 
   function handleForgotPassword() {
-    // Navigate to forgot password screen
+    navigation.navigate('ForgotPassword');
   }
 
   function handleSocialLogin(provider: 'google' | 'apple' | 'facebook') {

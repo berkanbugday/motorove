@@ -3,7 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import {LoginScreen} from '../screens/auth';
+import {LoginScreen, ForgotPasswordScreen} from '../screens/auth';
 import {HomeScreen} from '../screens/home';
 import {WelcomeScreen} from '../screens/welcome';
 
@@ -11,6 +11,7 @@ import {WelcomeScreen} from '../screens/welcome';
 type AuthStackParamList = {
   Login: undefined;
   Welcome: undefined;
+  ForgotPassword: undefined;
 };
 
 type MainStackParamList = {
@@ -29,6 +30,10 @@ function AuthNavigator({isFirstTime}: {isFirstTime: boolean}) {
       initialRouteName={isFirstTime ? 'Welcome' : 'Login'}>
       <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
       <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+      />
     </AuthStack.Navigator>
   );
 }
