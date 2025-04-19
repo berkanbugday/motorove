@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "lint": "ESLINT_USE_FLAT_CONFIG=true eslint --config eslint.config.cjs .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "run-both": "concurrently \"pnpm android\" \"pnpm ios\""
   },
   "dependencies": {
     "react": "19.0.0",
@@ -28,6 +29,7 @@
     "@types/jest": "^29.5.13",
     "@types/react": "^19.0.0",
     "@types/react-test-renderer": "^19.0.0",
+    "concurrently": "^9.1.2",
     "eslint": "^9.25.0",
     "jest": "^29.6.3",
     "prettier": "2.8.8",
