@@ -20,6 +20,8 @@ const config = {
     ],
     // Ensure proper resolution of React Native modules
     disableHierarchicalLookup: true,
+    // Ensure these file extensions are handled properly
+    sourceExts: ['js', 'jsx', 'ts', 'tsx', 'json', 'mjs', 'cjs'],
   },
   transformer: {
     getTransformOptions: async () => ({
@@ -28,7 +30,21 @@ const config = {
         inlineRequires: true,
       },
     }),
+    // Enable hermes transform for better performance
+    hermesParser: true,
+    // Optimize polyfill processing
+    minifierConfig: {
+      keep_classnames: true,
+      keep_fnames: true,
+      mangle: {
+        keep_classnames: true,
+        keep_fnames: true,
+      },
+    },
   },
+  // Enable caching for better performance
+  cacheVersion: '1.0',
+  hasteImplModulePath: null,
 };
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);

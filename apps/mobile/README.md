@@ -66,7 +66,7 @@ This is one way to run your app — you can also build it directly from Android 
 
 Now that you have successfully run the app, let's make changes!
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
 
 When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
 
@@ -95,3 +95,93 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+# Motorove Mobile App
+
+## Fixing React Native Snap Carousel Issues
+
+The project uses `react-native-snap-carousel` which is not fully compatible with newer versions of React Native because it uses the deprecated `ViewPropTypes`. We've implemented a fix for this using `deprecated-react-native-prop-types`.
+
+### Automatic Fix
+
+The fix should be automatically applied when running `npm install` or `pnpm install` with the patch-package system. If you encounter any issues, you can manually apply the fix.
+
+### Manual Fix
+
+If you encounter the error: `TypeError: Cannot read property 'style' of undefined, js engine: hermes`, follow these steps:
+
+1. Make sure `deprecated-react-native-prop-types` is installed:
+
+   ```
+   pnpm add deprecated-react-native-prop-types
+   ```
+
+2. Modify the following files in the node_modules directory:
+
+#### `node_modules/react-native-snap-carousel/src/carousel/Carousel.js`
+
+- Change the import line:
+
+  ```js
+  // Replace this line
+  import {
+    Animated,
+    Easing,
+    FlatList,
+    I18nManager,
+    Platform,
+    ScrollView,
+    View,
+    ViewPropTypes,
+  } from 'react-native';
+
+  // With these lines
+  import {
+    Animated,
+    Easing,
+    FlatList,
+    I18nManager,
+    Platform,
+    ScrollView,
+    View,
+  } from 'react-native';
+  import {ViewPropTypes} from 'deprecated-react-native-prop-types';
+  ```
+
+- Replace style prop types:
+
+  ```js
+  // Replace all occurrences of
+  ViewPropTypes ? ViewPropTypes.style : View.propTypes.style;
+
+  // With
+  ViewPropTypes
+    ? ViewPropTypes.style
+    : PropTypes.oneOfType([PropTypes.object, PropTypes.array]);
+  ```
+
+#### `node_modules/react-native-snap-carousel/src/pagination/Pagination.js`
+
+- Change the import line:
+
+  ```js
+  import {I18nManager, Platform, View} from 'react-native';
+  import {ViewPropTypes} from 'deprecated-react-native-prop-types';
+  ```
+
+- Replace all style prop types similarly.
+
+#### `node_modules/react-native-snap-carousel/src/pagination/PaginationDot.js`
+
+- Update imports and replace style prop types.
+
+#### `node_modules/react-native-snap-carousel/src/parallaximage/ParallaxImage.js`
+
+- Update imports and replace style prop types.
+
+### Alternative Solutions
+
+If you continue to face issues, consider using a more modern carousel library like:
+
+- `react-native-reanimated-carousel`
+- `react-native-pager-view`
