@@ -1,5 +1,7 @@
 package com.motorove
 
+import android.os.Bundle
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -12,6 +14,14 @@ class MainActivity : ReactActivity() {
    * rendering of the component.
    */
   override fun getMainComponentName(): String = "motorove"
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    // Install the splash screen before calling super.onCreate
+    // This ensures the splash screen is displayed until React loads
+    installSplashScreen()
+    
+    super.onCreate(savedInstanceState)
+  }
 
   /**
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
