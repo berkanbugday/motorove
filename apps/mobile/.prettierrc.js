@@ -1,3 +1,7 @@
-const prettierConfig = require('@motorove/config/prettier');
-
-module.exports = prettierConfig;
+module.exports = {
+  arrowParens: 'avoid',
+  bracketSameLine: true,
+  bracketSpacing: false,
+  singleQuote: true,
+  trailingComma: 'all',
+};

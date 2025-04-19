@@ -1,9 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 ## Tech Stack:
 
 - Backend: Node.js with Nest.js
 - Database: Supabase
 - Authentication: Supabase Auth
-- API Documentation: Swagger/OpenAPI
+- API Documentation: OpenAPI
 - Testing: Jest with Supertest
 - CI/CD: GitHub Actions
 
@@ -80,4 +85,8 @@
 - Optimize asset delivery
 - Monitor and optimize memory usage
 - Implement proper connection pooling
+
+## Package Management
+
+- Use pnpm for package management.
 
