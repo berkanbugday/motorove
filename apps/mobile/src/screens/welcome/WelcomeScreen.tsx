@@ -10,8 +10,21 @@ import {
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 const {width: screenWidth} = Dimensions.get('window');
+
+// Define the navigation type
+type AuthStackParamList = {
+  Login: undefined;
+  Welcome: undefined;
+};
+
+type WelcomeScreenNavigationProp = NativeStackNavigationProp<
+  AuthStackParamList,
+  'Welcome'
+>;
 
 interface CarouselItem {
   id: number;
@@ -45,6 +58,7 @@ function WelcomeScreen(): React.JSX.Element {
   const [activeSlide, setActiveSlide] = useState(0);
   const carouselRef = useRef(null);
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<WelcomeScreenNavigationProp>();
 
   const renderCarouselItem = ({item}: {item: CarouselItem}) => {
     return (
@@ -58,16 +72,16 @@ function WelcomeScreen(): React.JSX.Element {
     );
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Mark as not first time user
-    AsyncStorage.setItem('isFirstTime', 'false');
-    console.log('Navigate to Login');
+    await AsyncStorage.setItem('isFirstTime', 'false');
+    navigation.replace('Login');
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     // Mark as not first time user
-    AsyncStorage.setItem('isFirstTime', 'false');
-    console.log('Navigate to Signup');
+    await AsyncStorage.setItem('isFirstTime', 'false');
+    navigation.replace('Login'); // Assuming Login screen has a way to switch to signup
   };
 
   return (

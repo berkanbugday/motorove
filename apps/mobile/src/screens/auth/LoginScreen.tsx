@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -9,6 +9,9 @@ import {
   Platform,
   ScrollView,
   SafeAreaView,
+  Image,
+  Animated,
+  TextStyle,
 } from 'react-native';
 import {useWindowDimensions} from 'react-native';
 import {useAuth} from '../../navigation';
@@ -17,6 +20,98 @@ import {Icon} from '../../components';
 interface LoginCredentials {
   email: string;
   password: string;
+}
+
+interface AnimatedInputProps {
+  label: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  secureTextEntry?: boolean;
+  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
+  icon: React.ReactNode;
+  error?: string;
+  onToggleSecureEntry?: () => void;
+  showPassword?: boolean;
+}
+
+function AnimatedInput({
+  label,
+  value,
+  onChangeText,
+  secureTextEntry = false,
+  keyboardType = 'default',
+  icon,
+  error,
+  onToggleSecureEntry,
+  showPassword,
+}: AnimatedInputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const animatedIsFocused = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const inputRef = useRef<TextInput>(null);
+
+  React.useEffect(() => {
+    Animated.timing(animatedIsFocused, {
+      toValue: isFocused || value ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [animatedIsFocused, isFocused, value]);
+
+  const labelStyle: Animated.AnimatedProps<TextStyle> = {
+    position: 'absolute',
+    left: 15,
+    top: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: [15, -10],
+    }),
+    fontSize: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: [16, 12],
+    }),
+    color: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['#888', '#121212'],
+    }),
+    backgroundColor: '#fff',
+    paddingHorizontal: 5,
+    zIndex: 5,
+  };
+
+  const handleLabelPress = () => {
+    inputRef.current?.focus();
+  };
+
+  return (
+    <View style={styles.inputContainer}>
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={handleLabelPress}
+        style={styles.labelContainer}>
+        <Animated.Text style={labelStyle}>{label}</Animated.Text>
+      </TouchableOpacity>
+      <TextInput
+        ref={inputRef}
+        style={[styles.input, error && styles.inputError]}
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        autoCapitalize="none"
+      />
+      <View style={styles.inputIcon}>
+        {onToggleSecureEntry ? (
+          <TouchableOpacity onPress={onToggleSecureEntry}>
+            <Icon name={showPassword ? 'eye' : 'eye-slash'} size={20} />
+          </TouchableOpacity>
+        ) : (
+          icon
+        )}
+      </View>
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+    </View>
+  );
 }
 
 export function LoginScreen() {
@@ -107,50 +202,39 @@ export function LoginScreen() {
           keyboardShouldPersistTaps="handled">
           <View style={[styles.content, {minHeight: height * 0.8}]}>
             <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>logo</Text>
+              <Image
+                source={require('../../assets/images/motorove_logo_dark.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
             </View>
 
             <Text style={styles.welcomeText}>
-              Welcome back! Please sign in to continue
+              Welcome back! Please login to continue
             </Text>
 
             <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email address"
-                  placeholderTextColor="#888"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={credentials.email}
-                  onChangeText={text => handleChange('email', text)}
-                />
-                <View style={styles.inputIcon}>
-                  <Icon name="envelope" size={24} />
-                </View>
-                {errors.email ? (
-                  <Text style={styles.errorText}>{errors.email}</Text>
-                ) : null}
-              </View>
+              <AnimatedInput
+                label="Email Address"
+                value={credentials.email}
+                onChangeText={text => handleChange('email', text)}
+                keyboardType="email-address"
+                icon={<Icon name="envelope" size={20} />}
+                error={errors.email}
+              />
 
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  placeholderTextColor="#888"
-                  secureTextEntry={!showPassword}
-                  value={credentials.password}
-                  onChangeText={text => handleChange('password', text)}
-                />
-                <TouchableOpacity
-                  style={styles.inputIcon}
-                  onPress={togglePasswordVisibility}>
+              <AnimatedInput
+                label="Password"
+                value={credentials.password}
+                onChangeText={text => handleChange('password', text)}
+                secureTextEntry={!showPassword}
+                icon={
                   <Icon name={showPassword ? 'eye' : 'eye-slash'} size={24} />
-                </TouchableOpacity>
-                {errors.password ? (
-                  <Text style={styles.errorText}>{errors.password}</Text>
-                ) : null}
-              </View>
+                }
+                error={errors.password}
+                onToggleSecureEntry={togglePasswordVisibility}
+                showPassword={showPassword}
+              />
 
               <TouchableOpacity
                 style={styles.forgotPasswordContainer}
@@ -163,7 +247,7 @@ export function LoginScreen() {
                 onPress={handleLogin}
                 disabled={isSubmitting}>
                 <Text style={styles.buttonText}>
-                  {isSubmitting ? 'Signing In...' : 'Sign In'}
+                  {isSubmitting ? 'Logging In...' : 'Login'}
                 </Text>
               </TouchableOpacity>
 
@@ -223,10 +307,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  logoText: {
-    fontSize: 32,
-    fontFamily: 'cursive',
-    fontWeight: 'bold',
+  logo: {
+    width: 100,
+    height: 100,
   },
   welcomeText: {
     fontSize: 16,
@@ -252,17 +335,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
   },
+  inputError: {
+    borderColor: '#FF3B30',
+  },
   inputIcon: {
     position: 'absolute',
     right: 15,
-    top: 12,
+    top: 16,
   },
   iconText: {
     fontSize: 20,
     color: '#888',
   },
   errorText: {
-    color: 'red',
+    color: '#FF3B30',
     fontSize: 14,
     marginTop: 5,
     marginLeft: 5,
@@ -338,5 +424,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 5,
     fontSize: 14,
+  },
+  labelContainer: {
+    position: 'absolute',
+    zIndex: 10,
+    width: '100%',
+    height: 50,
   },
 });

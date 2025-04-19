@@ -1,13 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {LoginScreen} from '../screens/auth';
 import {HomeScreen} from '../screens/home';
+import {WelcomeScreen} from '../screens/welcome';
 
 // Define our navigation types
 type AuthStackParamList = {
   Login: undefined;
+  Welcome: undefined;
 };
 
 type MainStackParamList = {
@@ -19,9 +22,12 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const MainStack = createNativeStackNavigator<MainStackParamList>();
 
 // Auth Stack Navigator - shown when user is NOT authenticated
-function AuthNavigator() {
+function AuthNavigator({isFirstTime}: {isFirstTime: boolean}) {
   return (
-    <AuthStack.Navigator screenOptions={{headerShown: false}}>
+    <AuthStack.Navigator
+      screenOptions={{headerShown: false}}
+      initialRouteName={isFirstTime ? 'Welcome' : 'Login'}>
+      <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
       <AuthStack.Screen name="Login" component={LoginScreen} />
     </AuthStack.Navigator>
   );
@@ -39,19 +45,47 @@ function MainNavigator() {
 // Root Navigator - determines which stack to show based on auth state
 export function RootNavigator() {
   // This would typically come from a context or auth provider
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, _setIsAuthenticated] = useState(false);
+  const [isFirstTime, setIsFirstTime] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // TODO: Replace with actual auth state check from Supabase
+  // Check first time user status and auth state
   useEffect(() => {
-    // Check if user is logged in
-    // Example: supabase.auth.getSession().then(({ data }) => {
-    //   setIsAuthenticated(!!data.session);
-    // });
+    const checkFirstTimeUser = async () => {
+      try {
+        const value = await AsyncStorage.getItem('isFirstTime');
+        setIsFirstTime(value === null); // If value is null, this is the first time
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error checking first time status:', error);
+        setIsFirstTime(true);
+        setIsLoading(false);
+      }
+    };
+
+    // TODO: Replace with actual auth state check from Supabase
+    // Example of how this would be implemented:
+    // const checkAuthState = async () => {
+    //   const { data } = await supabase.auth.getSession();
+    //   _setIsAuthenticated(!!data.session);
+    // };
+    // checkAuthState();
+
+    checkFirstTimeUser();
   }, []);
+
+  if (isLoading) {
+    // You could show a splash screen here
+    return null;
+  }
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? (
+        <MainNavigator />
+      ) : (
+        <AuthNavigator isFirstTime={isFirstTime} />
+      )}
     </NavigationContainer>
   );
 }
