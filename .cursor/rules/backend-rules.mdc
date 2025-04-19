@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Backend App Rules ***
+
 ## Tech Stack:
 
 - Backend: Node.js with Nest.js

@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile App Rules ***
+
 You are an expert in TypeScript, React Native, and Mobile UI development.
 
 ## Code Style and Structure
