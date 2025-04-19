@@ -5,11 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView,
   Platform,
 } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -44,6 +44,7 @@ const carouselItems: CarouselItem[] = [
 function WelcomeScreen(): React.JSX.Element {
   const [activeSlide, setActiveSlide] = useState(0);
   const carouselRef = useRef(null);
+  const insets = useSafeAreaInsets();
 
   const renderCarouselItem = ({item}: {item: CarouselItem}) => {
     return (
@@ -70,39 +71,53 @@ function WelcomeScreen(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.carouselContainer}>
-        <Carousel
-          ref={carouselRef}
-          data={carouselItems}
-          renderItem={renderCarouselItem}
-          sliderWidth={screenWidth}
-          itemWidth={screenWidth - 60}
-          onSnapToItem={index => setActiveSlide(index)}
-          useScrollView={true}
-          loop={false}
-        />
-        <Pagination
-          dotsLength={carouselItems.length}
-          activeDotIndex={activeSlide}
-          containerStyle={styles.paginationContainer}
-          dotStyle={styles.paginationDot}
-          inactiveDotStyle={styles.paginationInactiveDot}
-          inactiveDotOpacity={0.4}
-          inactiveDotScale={0.6}
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.signupButton]}
-          onPress={handleSignup}>
-          <Text style={styles.signupButtonText}>Sign Up</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.loginButton]}
-          onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top', 'bottom', 'left', 'right']}>
+      <View style={styles.contentContainer}>
+        <View style={styles.carouselContainer}>
+          <Carousel
+            ref={carouselRef}
+            data={carouselItems}
+            renderItem={renderCarouselItem}
+            sliderWidth={screenWidth}
+            itemWidth={screenWidth - 60}
+            onSnapToItem={(index: number) => setActiveSlide(index)}
+            useScrollView={true}
+            loop={false}
+          />
+          <Pagination
+            dotsLength={carouselItems.length}
+            activeDotIndex={activeSlide}
+            dotStyle={styles.paginationDot}
+            inactiveDotStyle={styles.paginationInactiveDot}
+            inactiveDotOpacity={0.5}
+            inactiveDotScale={0.7}
+            animatedFriction={3}
+            animatedTension={100}
+          />
+        </View>
+        <View
+          style={[
+            styles.buttonContainer,
+            {
+              paddingBottom: Math.max(
+                insets.bottom,
+                Platform.OS === 'ios' ? 20 : 16,
+              ),
+            },
+          ]}>
+          <TouchableOpacity
+            style={[styles.button, styles.signupButton]}
+            onPress={handleSignup}>
+            <Text style={styles.signupButtonText}>Sign Up</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.loginButton]}
+            onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -111,12 +126,17 @@ function WelcomeScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F9FAFB',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: 20,
   },
   carouselContainer: {
-    flex: 3,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 30,
   },
   slide: {
     alignItems: 'center',
@@ -148,23 +168,18 @@ const styles = StyleSheet.create({
     color: '#666666',
     textAlign: 'center',
   },
-  paginationContainer: {
-    paddingVertical: 10,
-  },
   paginationDot: {
-    width: 10,
+    width: 25,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#2E64E5',
+    backgroundColor: '#121212',
   },
   paginationInactiveDot: {
+    width: 10,
     backgroundColor: '#C4C4C4',
   },
   buttonContainer: {
-    flex: 1,
     paddingHorizontal: 30,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 20,
-    justifyContent: 'flex-end',
   },
   button: {
     paddingVertical: 14,
@@ -173,12 +188,12 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   signupButton: {
-    backgroundColor: '#2E64E5',
+    backgroundColor: '#FF3B30',
   },
   loginButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#2E64E5',
+    borderColor: '#121212',
   },
   signupButtonText: {
     color: '#FFFFFF',
@@ -186,7 +201,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   loginButtonText: {
-    color: '#2E64E5',
+    color: '#121212',
     fontSize: 16,
     fontWeight: '600',
   },

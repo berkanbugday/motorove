@@ -55,7 +55,7 @@ function App(): React.JSX.Element {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <NavigationContainer>
         <Stack.Navigator screenOptions={{headerShown: false}}>
-          {isFirstTime ? (
+          {1 == 1 ? (
             <Stack.Screen name="Welcome" component={WelcomeScreen} />
           ) : (
             <Stack.Screen name="Home" component={HomeScreen} />
