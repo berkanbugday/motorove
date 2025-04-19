@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@react-native/gradle-plugin':
-        specifier: ^0.79.1
-        version: 0.79.1
       react:
         specifier: 19.0.0
         version: 19.0.0

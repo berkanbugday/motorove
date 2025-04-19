@@ -11,7 +11,6 @@
     "run-both": "concurrently \"pnpm android\" \"pnpm ios\""
   },
   "dependencies": {
-    "@react-native/gradle-plugin": "^0.79.1",
     "react": "19.0.0",
     "react-native": "0.79.1"
   },
