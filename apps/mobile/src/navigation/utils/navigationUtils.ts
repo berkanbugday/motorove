@@ -59,6 +59,24 @@ export function useAuth() {
     });
   };
 
+  const signup = async (fullName: string, email: string, password: string) => {
+    // TODO: Implement actual signup with Supabase
+    // Example: const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+
+    // For demo purposes:
+    return new Promise<{success: boolean; error?: string}>(resolve => {
+      setTimeout(() => {
+        // Simulate successful signup
+        if (fullName && email && password) {
+          setIsAuthenticated(true);
+          resolve({success: true});
+        } else {
+          resolve({success: false, error: 'Registration failed'});
+        }
+      }, 1000);
+    });
+  };
+
   const logout = async () => {
     // TODO: Implement actual logout with Supabase
     // Example: await supabase.auth.signOut();
@@ -70,6 +88,7 @@ export function useAuth() {
   return {
     isAuthenticated,
     login,
+    signup,
     logout,
   };
 }

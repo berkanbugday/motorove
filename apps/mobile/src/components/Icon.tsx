@@ -8,7 +8,8 @@ import Google from '@assets/icons/google.svg';
 import Apple from '@assets/icons/apple.svg';
 import Facebook from '@assets/icons/facebook.svg';
 import ArrowLeft from '@assets/icons/arrow-left.svg';
-
+import User from '@assets/icons/user.svg';
+import Close from '@assets/icons/close.svg';
 // Type for icons
 export type IconName =
   | 'eye'
@@ -17,7 +18,9 @@ export type IconName =
   | 'google'
   | 'apple'
   | 'facebook'
-  | 'arrow-left';
+  | 'arrow-left'
+  | 'user'
+  | 'close';
 
 interface IconProps {
   name: IconName;
@@ -51,6 +54,10 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Facebook {...commonProps} />;
     case 'arrow-left':
       return <ArrowLeft {...commonProps} />;
+    case 'user':
+      return <User {...commonProps} />;
+    case 'close':
+      return <Close {...commonProps} />;
     default:
       return null;
   }

@@ -14,16 +14,26 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/index';
-import {Icon, AnimatedInput, Button} from '@components/index';
+import {
+  Icon,
+  AnimatedInput,
+  Button,
+  Checkbox,
+  ContentModal,
+} from '@components/index';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {loginSchema, LoginFormValues} from '@utils/validation';
+import {signupSchema, SignupFormValues} from '@utils/validation';
 import {colors, spacing, fontSizes, radius} from '@theme/index';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {termsOfService, privacyPolicy} from '@constants/legalContent';
 
-export function LoginScreen() {
+export function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
-  const {login} = useAuth();
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [termsModalVisible, setTermsModalVisible] = useState(false);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const {signup} = useAuth();
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
@@ -33,11 +43,14 @@ export function LoginScreen() {
     handleSubmit,
     formState: {errors, isSubmitting},
     setError,
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
+      fullName: '',
       email: '',
       password: '',
+      confirmPassword: '',
+      agreeToTerms: false,
     },
   });
 
@@ -45,12 +58,20 @@ export function LoginScreen() {
     setShowPassword(!showPassword);
   }
 
-  async function onSubmit(data: LoginFormValues) {
+  function toggleConfirmPasswordVisibility() {
+    setShowConfirmPassword(!showConfirmPassword);
+  }
+
+  async function onSubmit(data: SignupFormValues) {
     try {
-      const {success, error} = await login(data.email, data.password);
+      const {success, error} = await signup(
+        data.fullName,
+        data.email,
+        data.password,
+      );
 
       if (!success && error) {
-        setError('password', {
+        setError('confirmPassword', {
           type: 'manual',
           message: error,
         });
@@ -58,25 +79,29 @@ export function LoginScreen() {
       // If successful, the useAuth hook will update isAuthenticated
       // which will trigger the navigation to switch to MainNavigator
     } catch (error) {
-      setError('password', {
+      setError('confirmPassword', {
         type: 'manual',
         message: 'An unexpected error occurred. Please try again.',
       });
     }
   }
 
-  function handleSignUp() {
-    // Navigate to sign up screen
-    navigation.navigate('Signup');
+  function handleLogin() {
+    // Navigate to login screen
+    navigation.navigate('Login');
   }
 
-  function handleForgotPassword() {
-    navigation.navigate('ForgotPassword');
+  function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
+    // Handle social signup based on provider type
+    console.log(`Social signup with ${provider}`);
   }
 
-  function handleSocialLogin(provider: 'google' | 'apple' | 'facebook') {
-    // Handle social login based on provider type
-    console.log(`Social login with ${provider}`);
+  function handleTermsPress() {
+    setTermsModalVisible(true);
+  }
+
+  function handlePrivacyPress() {
+    setPrivacyModalVisible(true);
   }
 
   return (
@@ -98,10 +123,19 @@ export function LoginScreen() {
               </View>
 
               <Text style={styles.welcomeText}>
-                Welcome back! Please login to continue
+                Create an account to get started
               </Text>
 
               <View style={styles.form}>
+                <AnimatedInput
+                  control={control}
+                  name="fullName"
+                  label="Full Name"
+                  icon={<Icon name="user" size={20} />}
+                  error={errors.fullName}
+                  testID="signup-fullname"
+                />
+
                 <AnimatedInput
                   control={control}
                   name="email"
@@ -109,7 +143,7 @@ export function LoginScreen() {
                   keyboardType="email-address"
                   icon={<Icon name="envelope" size={20} />}
                   error={errors.email}
-                  testID="login-email"
+                  testID="signup-email"
                 />
 
                 <AnimatedInput
@@ -121,23 +155,56 @@ export function LoginScreen() {
                   error={errors.password}
                   onToggleSecureEntry={togglePasswordVisibility}
                   showPassword={showPassword}
-                  testID="login-password"
+                  testID="signup-password"
                 />
 
-                <Button
-                  title="Forgot password?"
-                  variant="text"
-                  onPress={handleForgotPassword}
-                  style={styles.forgotPasswordContainer}
+                <AnimatedInput
+                  control={control}
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  secureTextEntry={!showConfirmPassword}
+                  icon={<Icon name="eye-slash" size={20} />}
+                  error={errors.confirmPassword}
+                  onToggleSecureEntry={toggleConfirmPasswordVisibility}
+                  showPassword={showConfirmPassword}
+                  testID="signup-confirm-password"
                 />
 
+                <View style={styles.termsContainer}>
+                  <Checkbox
+                    control={control}
+                    name="agreeToTerms"
+                    error={errors.agreeToTerms}
+                    testID="terms-checkbox"
+                    variant="outline"
+                    size="medium"
+                    style={styles.termsCheckbox}
+                  />
+                  <View style={styles.termsTextContainer}>
+                    <Text style={styles.termsText}>I agree to the</Text>
+                    <Button
+                      title="Terms of Service"
+                      variant="text"
+                      onPress={handleTermsPress}
+                      textStyle={styles.termsLink}
+                    />
+                    <Text style={styles.termsText}>and</Text>
+                    <Button
+                      title="Privacy Policy"
+                      variant="text"
+                      onPress={handlePrivacyPress}
+                      textStyle={styles.termsLink}
+                    />
+                  </View>
+                </View>
+
                 <Button
-                  title="Login"
+                  title="Sign Up"
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
                   disabled={isSubmitting}
-                  testID="login-button"
+                  testID="signup-button"
                 />
 
                 <View style={styles.dividerContainer}>
@@ -149,7 +216,7 @@ export function LoginScreen() {
                 <View style={styles.socialButtonsContainer}>
                   <TouchableOpacity
                     style={styles.socialButton}
-                    onPress={() => handleSocialLogin('google')}>
+                    onPress={() => handleSocialSignup('google')}>
                     <Icon
                       name="google"
                       size={18}
@@ -159,13 +226,13 @@ export function LoginScreen() {
 
                   <TouchableOpacity
                     style={styles.socialButton}
-                    onPress={() => handleSocialLogin('apple')}>
+                    onPress={() => handleSocialSignup('apple')}>
                     <Icon name="apple" size={18} color={colors.social.apple} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.socialButton}
-                    onPress={() => handleSocialLogin('facebook')}>
+                    onPress={() => handleSocialSignup('facebook')}>
                     <Icon
                       name="facebook"
                       size={18}
@@ -174,10 +241,12 @@ export function LoginScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.signupContainer}>
-                  <Text style={styles.signupText}>Don't have an account? </Text>
-                  <TouchableOpacity onPress={handleSignUp}>
-                    <Text style={styles.signupLink}>Sign up</Text>
+                <View style={styles.loginContainer}>
+                  <Text style={styles.loginText}>
+                    Already have an account?{' '}
+                  </Text>
+                  <TouchableOpacity onPress={handleLogin}>
+                    <Text style={styles.loginLink}>Log in</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -185,6 +254,22 @@ export function LoginScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* Terms of Service Modal */}
+      <ContentModal
+        visible={termsModalVisible}
+        onClose={() => setTermsModalVisible(false)}
+        title="Terms of Service"
+        content={termsOfService}
+      />
+
+      {/* Privacy Policy Modal */}
+      <ContentModal
+        visible={privacyModalVisible}
+        onClose={() => setPrivacyModalVisible(false)}
+        title="Privacy Policy"
+        content={privacyPolicy}
+      />
     </View>
   );
 }
@@ -219,10 +304,6 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
   },
-  forgotPasswordContainer: {
-    alignSelf: 'flex-end',
-    marginBottom: spacing.lg,
-  },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,18 +333,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  signupContainer: {
+  loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing.md,
   },
-  signupText: {
+  loginText: {
     color: colors.neutral.grey,
     fontSize: fontSizes.sm,
   },
-  signupLink: {
+  loginLink: {
     color: colors.primary.main,
     fontSize: fontSizes.sm,
     fontWeight: '600',
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing.lg,
+    marginTop: spacing.sm,
+  },
+  termsCheckbox: {
+    marginTop: 0,
+    marginRight: 0,
+  },
+  termsTextContainer: {
+    flex: 1,
+    marginLeft: spacing.xs,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+  },
+  termsText: {
+    color: colors.neutral.grey,
+    fontSize: fontSizes.sm,
+    lineHeight: fontSizes.sm * 1.5,
+  },
+  termsLink: {
+    fontSize: fontSizes.sm,
+    lineHeight: fontSizes.sm,
+    textDecorationLine: 'underline',
   },
 });

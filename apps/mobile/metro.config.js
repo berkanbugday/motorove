@@ -22,6 +22,7 @@ const extraNodeModules = {
   '@types': path.resolve(srcPath, 'types'),
   '@assets': path.resolve(srcPath, 'assets'),
   '@theme': path.resolve(srcPath, 'theme'),
+  '@constants': path.resolve(srcPath, 'constants'),
   '@': srcPath,
 };
 

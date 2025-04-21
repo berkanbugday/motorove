@@ -11,7 +11,7 @@
       "@types/*": ["src/types/*"],
       "@assets/*": ["src/assets/*"],
       "@theme/*": ["src/theme/*"],
-      "@theme": ["src/theme"],
+      "@constants/*": ["src/constants/*"],
       "@/*": ["src/*"]
     }
   }

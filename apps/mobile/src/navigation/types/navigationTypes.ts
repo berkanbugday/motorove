@@ -3,9 +3,10 @@ import {RouteProp} from '@react-navigation/native';
 
 // AUTH STACK
 export type AuthStackParamList = {
-  Login: undefined;
+  Login: {mode?: 'login' | 'signup'};
   Welcome: undefined;
   ForgotPassword: undefined;
+  Signup: undefined;
 };
 
 export type AuthScreenNavigationProp<T extends keyof AuthStackParamList> =

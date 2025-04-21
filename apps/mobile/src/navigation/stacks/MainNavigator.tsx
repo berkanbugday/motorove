@@ -25,16 +25,16 @@ export function MainNavigator() {
       />
       {/* Add more screens here as your app grows */}
       {/* Example:
-      <Stack.Screen 
-        name="Profile" 
-        component={ProfileScreen} 
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{
           title: 'My Profile',
         }}
       />
-      <Stack.Screen 
-        name="Settings" 
-        component={SettingsScreen} 
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
         options={{
           title: 'Settings',
         }}
