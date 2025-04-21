@@ -3,12 +3,6 @@ description:
 globs: 
 alwaysApply: false
 ---
-*** Mobile Development ***
-
----
-description: This rule provides comprehensive best practices and coding standards for React Native development, covering code organization, performance, security, testing, and common pitfalls.
-globs: **/*.{js,jsx,ts,tsx}
----
 - Use TypeScript for type safety and improved code maintainability.
 - Prefer functional components with hooks over class components for simplicity and reusability.
 - Maintain a clear and consistent project structure for scalability and maintainability.
@@ -203,6 +197,7 @@ globs: **/*.{js,jsx,ts,tsx}
 - **Recommended Development Tools:**
     - **VS Code:** Use VS Code with the React Native Tools extension for debugging and code completion.
     - **React Native CLI:** Use the React Native CLI for creating and managing React Native projects.
+    - **Expo CLI:** Use the Expo CLI for developing and testing React Native applications without native code.
     - **Android Studio:** Use Android Studio for building and debugging Android applications.
     - **Xcode:** Use Xcode for building and debugging iOS applications.
 
