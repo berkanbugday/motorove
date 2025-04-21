@@ -3,15 +3,16 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
   Platform,
+  Image,
 } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {Button} from '@components/index';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -31,6 +32,7 @@ interface CarouselItem {
   title: string;
   text: string;
   color: string;
+  image?: any; // Optional image property
 }
 
 const carouselItems: CarouselItem[] = [
@@ -54,7 +56,7 @@ const carouselItems: CarouselItem[] = [
   },
 ];
 
-function WelcomeScreen(): React.JSX.Element {
+export function WelcomeScreen(): React.JSX.Element {
   const [activeSlide, setActiveSlide] = useState(0);
   const carouselRef = useRef(null);
   const insets = useSafeAreaInsets();
@@ -64,7 +66,15 @@ function WelcomeScreen(): React.JSX.Element {
     return (
       <View style={styles.slide}>
         <View style={[styles.imageContainer, {backgroundColor: item.color}]}>
-          <Text style={styles.imageText}>{item.title}</Text>
+          {item.image ? (
+            <Image
+              source={item.image}
+              style={styles.image}
+              resizeMode="contain"
+            />
+          ) : (
+            <Text style={styles.imageText}>{item.title}</Text>
+          )}
         </View>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.text}>{item.text}</Text>
@@ -121,16 +131,20 @@ function WelcomeScreen(): React.JSX.Element {
               ),
             },
           ]}>
-          <TouchableOpacity
-            style={[styles.button, styles.signupButton]}
-            onPress={handleSignup}>
-            <Text style={styles.signupButtonText}>Sign Up</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.loginButton]}
-            onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
+          <Button
+            title="Sign Up"
+            onPress={handleSignup}
+            variant="primary"
+            style={styles.button}
+            testID="welcome-signup-button"
+          />
+          <Button
+            title="Login"
+            onPress={handleLogin}
+            variant="outline"
+            style={styles.button}
+            testID="welcome-login-button"
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -165,6 +179,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  image: {
+    width: '80%',
+    height: '80%',
+  },
   imageText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -196,29 +214,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   button: {
-    paddingVertical: 14,
-    borderRadius: 30,
-    alignItems: 'center',
     marginVertical: 8,
   },
-  signupButton: {
-    backgroundColor: '#FF3B30',
-  },
-  loginButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#121212',
-  },
-  signupButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loginButtonText: {
-    color: '#121212',
-    fontSize: 16,
-    fontWeight: '600',
-  },
 });
-
-export default WelcomeScreen;

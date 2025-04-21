@@ -1,12 +1,12 @@
 import React from 'react';
 
 // SVG imports
-import Eye from '../assets/icons/eye.svg';
-import EyeSlash from '../assets/icons/eye-slash.svg';
-import Envelope from '../assets/icons/envelope.svg';
-import Google from '../assets/icons/google.svg';
-import Apple from '../assets/icons/apple.svg';
-import Facebook from '../assets/icons/facebook.svg';
+import Eye from '@assets/icons/eye.svg';
+import EyeSlash from '@assets/icons/eye-slash.svg';
+import Envelope from '@assets/icons/envelope.svg';
+import Google from '@assets/icons/google.svg';
+import Apple from '@assets/icons/apple.svg';
+import Facebook from '@assets/icons/facebook.svg';
 
 // Type for icons
 export type IconName =

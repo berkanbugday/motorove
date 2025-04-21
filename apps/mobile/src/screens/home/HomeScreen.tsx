@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {useAuth} from '../../navigation';
+import {View, Text, StyleSheet, SafeAreaView, Image} from 'react-native';
+import {useAuth} from '@navigation/index';
+import {Button} from '@components/index';
 
 export function HomeScreen() {
   const {logout} = useAuth();
@@ -12,43 +13,53 @@ export function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Motorove</Text>
-      <Text style={styles.subtitle}>You are logged in!</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Image
+          source={require('@assets/images/motorove_logo_dark.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.title}>Welcome to Motorove</Text>
+        <Text style={styles.subtitle}>You are logged in!</Text>
+
+        <Button
+          title="Logout"
+          onPress={handleLogout}
+          variant="primary"
+          testID="logout-button"
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
+  },
+  logo: {
+    width: 180,
+    height: 60,
+    marginBottom: 40,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#333',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 30,
     color: '#666',
-  },
-  button: {
-    backgroundColor: '#FF3B30',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

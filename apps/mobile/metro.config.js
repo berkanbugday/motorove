@@ -1,5 +1,7 @@
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 const path = require('path');
+const os = require('os');
+const {FileStore} = require('metro-cache');
 
 /**
  * Metro configuration
@@ -9,11 +11,31 @@ const path = require('path');
  */
 const defaultConfig = getDefaultConfig(__dirname);
 
-// Add svg to the asset extensions (handled by default by metro)
-const assetExts = defaultConfig.resolver.assetExts.filter(ext => ext !== 'svg');
+// Path aliases configuration for Metro
+const srcPath = path.resolve(__dirname, 'src');
+const extraNodeModules = {
+  '@components': path.resolve(srcPath, 'components'),
+  '@screens': path.resolve(srcPath, 'screens'),
+  '@navigation': path.resolve(srcPath, 'navigation'),
+  '@utils': path.resolve(srcPath, 'utils'),
+  '@hooks': path.resolve(srcPath, 'hooks'),
+  '@types': path.resolve(srcPath, 'types'),
+  '@assets': path.resolve(srcPath, 'assets'),
+  '@': srcPath,
+};
 
-// Add svg to the source extensions that will be handled by react-native-svg-transformer
-const sourceExts = [...defaultConfig.resolver.sourceExts, 'svg'];
+// Define a custom cache directory
+const cacheDir = path.join(os.tmpdir(), 'metro-cache');
+
+// Check if cache reset is requested either from environment or global flag
+const shouldResetCache = process.env.RESET_CACHE === 'true';
+
+// Log the cache status
+if (shouldResetCache) {
+  console.log('🧹 Metro cache reset requested. Clearing cache...');
+} else {
+  console.log(`📦 Using Metro cache at: ${cacheDir}`);
+}
 
 const config = {
   watchFolders: [
@@ -28,9 +50,12 @@ const config = {
     ],
     // Ensure proper resolution of React Native modules
     disableHierarchicalLookup: true,
-    // Ensure these file extensions are handled properly
-    assetExts,
-    sourceExts,
+    // Filter svg from asset extensions
+    assetExts: defaultConfig.resolver.assetExts.filter(ext => ext !== 'svg'),
+    // Add svg to source extensions for react-native-svg-transformer
+    sourceExts: [...defaultConfig.resolver.sourceExts, 'svg'],
+    // Add alias paths for imports
+    extraNodeModules,
   },
   transformer: {
     getTransformOptions: async () => ({
@@ -39,22 +64,17 @@ const config = {
         inlineRequires: true,
       },
     }),
-    // Enable hermes transform for better performance
-    hermesParser: true,
-    // Optimize polyfill processing
-    minifierConfig: {
-      keep_classnames: true,
-      keep_fnames: true,
-      mangle: {
-        keep_classnames: true,
-        keep_fnames: true,
-      },
-    },
     babelTransformerPath: require.resolve('react-native-svg-transformer'),
   },
-  // Enable caching for better performance
-  cacheVersion: '1.0',
-  hasteImplModulePath: null,
+  // Configure Metro caching
+  cacheStores: [
+    new FileStore({
+      root: cacheDir,
+    }),
+  ],
+  // Increase cache size limit (default is 50MB)
+  maxWorkers: Math.max(os.cpus().length - 1, 1),
+  resetCache: shouldResetCache,
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = mergeConfig(defaultConfig, config);

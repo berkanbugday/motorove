@@ -1,1 +1,1 @@
-export {default as WelcomeScreen} from './WelcomeScreen';
+export {WelcomeScreen} from './WelcomeScreen';
