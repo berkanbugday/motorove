@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Backend Development ***
+
 - **Code Organization and Structure:**
   - **Directory Structure:**
     - Adopt a modular structure that reflects the application's domain or features. A common approach includes organizing code into modules, services, controllers, DTOs, and entities, each in their own directory.

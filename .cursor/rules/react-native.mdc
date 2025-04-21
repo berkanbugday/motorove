@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development ***
+
 ---
 description: This rule provides comprehensive best practices and coding standards for React Native development, covering code organization, performance, security, testing, and common pitfalls.
 globs: **/*.{js,jsx,ts,tsx}

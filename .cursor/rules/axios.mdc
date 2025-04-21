@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development & Backend Development ***
+
 ---
 description: This rule provides comprehensive guidelines for using Axios effectively, covering best practices, security considerations, and performance optimization. It aims to improve code quality, maintainability, and overall application resilience when working with Axios.
 globs: **/*.{js,jsx,ts,tsx}

@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Backend Development ***
+
 # Stripe Integration Best Practices
 
 This document provides a comprehensive guide to best practices for integrating Stripe's payment processing services. It covers code organization, common patterns, performance considerations, security, testing, common pitfalls, and tooling.

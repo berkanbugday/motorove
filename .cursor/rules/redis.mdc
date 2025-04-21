@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Backend Development ***
+
 - **General Best Practices**
   - Follow official Redis documentation and community best practices.
   - Use the most recent stable version of the Redis client library for your language.

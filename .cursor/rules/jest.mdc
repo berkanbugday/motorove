@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development & Backend Development ***
+
 - **Organize tests by feature or module:**
   - Group tests into files or directories that correspond to the features or modules they are testing. This makes it easier to locate and maintain tests.
   - Create a `__tests__` directory alongside your source code files. This is a common convention that Jest recognizes.

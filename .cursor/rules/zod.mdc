@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development ***
+
 - **Organize Zod schemas logically for readability and maintainability.** Group related schemas together and structure your Zod code for improved clarity, especially in larger projects.
 - **Compose and reuse related schemas to avoid repetition.** Use Zod's composition features (e.g., `z.intersection`, `z.union`, `z.extend`) to create reusable schema components and reduce redundancy.
 - **Implement schema versioning for better management.** As your application evolves, version your schemas to handle data migrations and maintain compatibility with older data formats.

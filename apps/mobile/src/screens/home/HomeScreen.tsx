@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Text, StyleSheet, SafeAreaView, Image} from 'react-native';
 import {useAuth} from '@navigation/index';
 import {Button} from '@components/index';
+import {colors, spacing, typography, commonStyles} from '@theme';
 
 export function HomeScreen() {
   const {logout} = useAuth();
@@ -37,29 +38,27 @@ export function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
+    ...commonStyles.container,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: spacing.lg,
   },
   logo: {
     width: 180,
     height: 60,
-    marginBottom: 40,
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    ...typography.title,
+    marginBottom: spacing.xs,
+    color: colors.neutral.darkGrey,
   },
   subtitle: {
-    fontSize: 16,
-    marginBottom: 30,
-    color: '#666',
+    ...typography.body,
+    marginBottom: spacing.lg,
+    color: colors.neutral.grey,
   },
 });

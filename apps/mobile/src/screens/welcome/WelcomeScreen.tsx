@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -6,35 +6,28 @@ import {
   Dimensions,
   Platform,
   Image,
+  ImageSourcePropType,
 } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Button} from '@components/index';
+import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
+import {colors, spacing, radius, fontSizes} from '@theme';
 
 const {width: screenWidth} = Dimensions.get('window');
 
-// Define the navigation type
-type AuthStackParamList = {
-  Login: undefined;
-  Welcome: undefined;
-};
-
-type WelcomeScreenNavigationProp = NativeStackNavigationProp<
-  AuthStackParamList,
-  'Welcome'
->;
-
+// Define carousel item interface
 interface CarouselItem {
   id: number;
   title: string;
   text: string;
   color: string;
-  image?: any; // Optional image property
+  image?: ImageSourcePropType;
 }
 
+// Carousel data - moved outside component to avoid recreation on each render
 const carouselItems: CarouselItem[] = [
   {
     id: 1,
@@ -56,43 +49,87 @@ const carouselItems: CarouselItem[] = [
   },
 ];
 
+// Carousel Item Component
+const CarouselItemComponent = ({item}: {item: CarouselItem}) => (
+  <View style={styles.slide}>
+    <View style={[styles.imageContainer, {backgroundColor: item.color}]}>
+      {item.image ? (
+        <Image source={item.image} style={styles.image} resizeMode="contain" />
+      ) : (
+        <Text style={styles.imageText}>{item.title}</Text>
+      )}
+    </View>
+    <Text style={styles.title}>{item.title}</Text>
+    <Text style={styles.text}>{item.text}</Text>
+  </View>
+);
+
+// Button Section Component
+type ButtonSectionProps = {
+  onLoginPress: () => void;
+  onSignupPress: () => void;
+  bottomPadding: number;
+};
+
+const ButtonSection = ({
+  onLoginPress,
+  onSignupPress,
+  bottomPadding,
+}: ButtonSectionProps) => (
+  <View
+    style={[
+      styles.buttonContainer,
+      {
+        paddingBottom: bottomPadding,
+      },
+    ]}>
+    <Button
+      title="Sign Up"
+      onPress={onSignupPress}
+      variant="primary"
+      shape="round"
+      style={styles.button}
+      testID="welcome-signup-button"
+    />
+    <Button
+      title="Login"
+      onPress={onLoginPress}
+      variant="outline"
+      shape="round"
+      style={styles.button}
+      testID="welcome-login-button"
+    />
+  </View>
+);
+
 export function WelcomeScreen(): React.JSX.Element {
   const [activeSlide, setActiveSlide] = useState(0);
   const carouselRef = useRef(null);
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation<WelcomeScreenNavigationProp>();
+  const navigation = useNavigation<AuthScreenNavigationProp<'Welcome'>>();
+  const {markAsNotFirstTime} = useFirstTimeCheck();
 
-  const renderCarouselItem = ({item}: {item: CarouselItem}) => {
-    return (
-      <View style={styles.slide}>
-        <View style={[styles.imageContainer, {backgroundColor: item.color}]}>
-          {item.image ? (
-            <Image
-              source={item.image}
-              style={styles.image}
-              resizeMode="contain"
-            />
-          ) : (
-            <Text style={styles.imageText}>{item.title}</Text>
-          )}
-        </View>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.text}>{item.text}</Text>
-      </View>
-    );
-  };
-
-  const handleLogin = async () => {
-    // Mark as not first time user
-    await AsyncStorage.setItem('isFirstTime', 'false');
+  // Event Handlers - memoized with useCallback
+  const handleLogin = useCallback(async () => {
+    await markAsNotFirstTime();
     navigation.replace('Login');
-  };
+  }, [navigation, markAsNotFirstTime]);
 
-  const handleSignup = async () => {
-    // Mark as not first time user
-    await AsyncStorage.setItem('isFirstTime', 'false');
+  const handleSignup = useCallback(async () => {
+    await markAsNotFirstTime();
     navigation.replace('Login'); // Assuming Login screen has a way to switch to signup
-  };
+  }, [navigation, markAsNotFirstTime]);
+
+  // Handle carousel snap
+  const handleSnapToItem = useCallback((index: number) => {
+    setActiveSlide(index);
+  }, []);
+
+  // Calculate bottom padding for button container
+  const bottomPadding = Math.max(
+    insets.bottom,
+    Platform.OS === 'ios' ? 20 : 16,
+  );
 
   return (
     <SafeAreaView
@@ -103,10 +140,10 @@ export function WelcomeScreen(): React.JSX.Element {
           <Carousel
             ref={carouselRef}
             data={carouselItems}
-            renderItem={renderCarouselItem}
+            renderItem={({item}) => <CarouselItemComponent item={item} />}
             sliderWidth={screenWidth}
             itemWidth={screenWidth - 60}
-            onSnapToItem={(index: number) => setActiveSlide(index)}
+            onSnapToItem={handleSnapToItem}
             useScrollView={true}
             loop={false}
           />
@@ -121,31 +158,12 @@ export function WelcomeScreen(): React.JSX.Element {
             animatedTension={100}
           />
         </View>
-        <View
-          style={[
-            styles.buttonContainer,
-            {
-              paddingBottom: Math.max(
-                insets.bottom,
-                Platform.OS === 'ios' ? 20 : 16,
-              ),
-            },
-          ]}>
-          <Button
-            title="Sign Up"
-            onPress={handleSignup}
-            variant="primary"
-            style={styles.button}
-            testID="welcome-signup-button"
-          />
-          <Button
-            title="Login"
-            onPress={handleLogin}
-            variant="outline"
-            style={styles.button}
-            testID="welcome-login-button"
-          />
-        </View>
+
+        <ButtonSection
+          onLoginPress={handleLogin}
+          onSignupPress={handleSignup}
+          bottomPadding={bottomPadding}
+        />
       </View>
     </SafeAreaView>
   );
@@ -154,28 +172,28 @@ export function WelcomeScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.neutral.background,
   },
   contentContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingVertical: 20,
+    paddingVertical: spacing.screen.vertical,
   },
   carouselContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.lg,
   },
   slide: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: spacing.md,
   },
   imageContainer: {
     width: screenWidth - 80,
     height: screenWidth - 80,
-    borderRadius: 16,
-    marginBottom: 30,
+    borderRadius: radius.lg,
+    marginBottom: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -184,36 +202,36 @@ const styles = StyleSheet.create({
     height: '80%',
   },
   imageText: {
-    fontSize: 18,
+    fontSize: fontSizes.lg,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.neutral.white,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#333333',
+    fontSize: fontSizes.xl,
+    fontWeight: 'bold',
+    color: colors.neutral.darkGrey,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.xs,
   },
   text: {
-    fontSize: 16,
-    color: '#666666',
+    fontSize: fontSizes.md,
+    color: colors.neutral.grey,
     textAlign: 'center',
   },
   paginationDot: {
     width: 25,
     height: 10,
-    borderRadius: 5,
-    backgroundColor: '#121212',
+    borderRadius: radius.xs,
+    backgroundColor: colors.neutral.black,
   },
   paginationInactiveDot: {
     width: 10,
-    backgroundColor: '#C4C4C4',
+    backgroundColor: colors.neutral.lightGrey,
   },
   buttonContainer: {
-    paddingHorizontal: 30,
+    paddingHorizontal: spacing.screen.horizontal,
   },
   button: {
-    marginVertical: 8,
+    marginVertical: spacing.sm,
   },
 });

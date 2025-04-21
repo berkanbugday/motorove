@@ -1,76 +1,45 @@
-// Login form validation
-export interface LoginFormValues {
-  email: string;
-  password: string;
-}
+import {z} from 'zod';
 
-export function validateLoginForm(values: LoginFormValues) {
-  const errors: Partial<LoginFormValues> = {};
+// Login form schema
+export const loginSchema = z.object({
+  email: z
+    .string({required_error: 'Email is required'})
+    .email('Email is invalid'),
+  password: z
+    .string({required_error: 'Password is required'})
+    .min(6, 'Password must be at least 6 characters'),
+});
 
-  if (!values.email) {
-    errors.email = 'Email is required';
-  } else if (!/\S+@\S+\.\S+/.test(values.email)) {
-    errors.email = 'Email is invalid';
-  }
+export type LoginFormValues = z.infer<typeof loginSchema>;
 
-  if (!values.password) {
-    errors.password = 'Password is required';
-  } else if (values.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters';
-  }
+// Forgot password form schema
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string({required_error: 'Email is required'})
+    .email('Email is invalid'),
+});
 
-  return errors;
-}
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
-// Forgot password form validation
-export interface ForgotPasswordFormValues {
-  email: string;
-}
+// Registration form schema
+export const registrationSchema = z
+  .object({
+    name: z
+      .string({required_error: 'Name is required'})
+      .min(1, 'Name is required'),
+    email: z
+      .string({required_error: 'Email is required'})
+      .email('Email is invalid'),
+    password: z
+      .string({required_error: 'Password is required'})
+      .min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z
+      .string({required_error: 'Please confirm your password'})
+      .min(1, 'Please confirm your password'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
-export function validateForgotPasswordForm(values: ForgotPasswordFormValues) {
-  const errors: Partial<ForgotPasswordFormValues> = {};
-
-  if (!values.email) {
-    errors.email = 'Email is required';
-  } else if (!/\S+@\S+\.\S+/.test(values.email)) {
-    errors.email = 'Email is invalid';
-  }
-
-  return errors;
-}
-
-// Registration form validation
-export interface RegistrationFormValues {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-export function validateRegistrationForm(values: RegistrationFormValues) {
-  const errors: Partial<RegistrationFormValues> = {};
-
-  if (!values.name) {
-    errors.name = 'Name is required';
-  }
-
-  if (!values.email) {
-    errors.email = 'Email is required';
-  } else if (!/\S+@\S+\.\S+/.test(values.email)) {
-    errors.email = 'Email is invalid';
-  }
-
-  if (!values.password) {
-    errors.password = 'Password is required';
-  } else if (values.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters';
-  }
-
-  if (!values.confirmPassword) {
-    errors.confirmPassword = 'Please confirm your password';
-  } else if (values.password !== values.confirmPassword) {
-    errors.confirmPassword = 'Passwords do not match';
-  }
-
-  return errors;
-}
+export type RegistrationFormValues = z.infer<typeof registrationSchema>;

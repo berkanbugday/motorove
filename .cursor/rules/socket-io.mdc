@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development & Backend Development ***
+
 # Socket.IO Best Practices
 
 This document outlines best practices for developing robust, scalable, and secure real-time applications using Socket.IO. It covers various aspects, from code organization to security considerations.

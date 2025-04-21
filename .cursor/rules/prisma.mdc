@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Backend Development ***
+
 - **General Principles:**
   - **Never expose the raw Prisma client directly in APIs.** Instead, create abstraction layers (e.g., repositories or services) to handle data access logic. This protects you from accidentally exposing sensitive database details and allows you to easily change your data access implementation in the future.
   - **Always use input validation** before performing any database operations. Use a validation library like Zod or Yup to ensure that user input conforms to your expected schema and data types.  This helps prevent injection attacks and data corruption.

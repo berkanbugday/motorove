@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development ***
+
 # Zustand Best Practices
 
 This document outlines best practices for using Zustand in your React applications. Zustand is a simple and unopinionated state management library. Following these guidelines will help you write maintainable, performant, and scalable applications.

@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development & Backend Development ***
+
 - Ensure that your codebase is connected to Sentry, with source code management integrations (e.g., GitHub, GitLab, Bitbucket) and source maps properly configured. This enables Sentry to link errors to specific lines of code, dramatically improving debugging efficiency.
 - Implement custom alerts tailored to your needs, avoiding alert fatigue by prioritizing alerts based on severity or user impact. Set up different notification channels for varying alert priorities (e.g., Slack for low-priority, PagerDuty for high-priority).
 - Leverage Sentry's performance monitoring capabilities to track application performance metrics and identify slow transactions. Use distributed tracing to visualize request flows and pinpoint performance bottlenecks.

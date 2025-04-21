@@ -3,6 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
+*** Mobile Development & Backend Development ***
+
 ---
 description: This rule provides comprehensive guidelines for ESLint, covering code organization, common patterns, performance, security, testing, and tooling, ensuring high-quality, maintainable JavaScript/TypeScript code.
 globs: **/*.{js,jsx,ts,tsx,vue}

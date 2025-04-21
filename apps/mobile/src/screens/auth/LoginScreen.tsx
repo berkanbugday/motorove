@@ -15,8 +15,10 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/index';
 import {Icon, AnimatedInput, Button} from '@components/index';
-import {useForm} from '@hooks/index';
-import {LoginFormValues, validateLoginForm} from '@utils/validation';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {loginSchema, LoginFormValues} from '@utils/validation';
+import {colors, spacing, fontSizes, radius} from '@theme/index';
 
 export function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,44 +27,45 @@ export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const {
-    values: credentials,
-    errors,
-    isSubmitting,
-    handleChange,
+    control,
     handleSubmit,
-    setErrors,
-  } = useForm<LoginFormValues>(
-    {
+    formState: {errors, isSubmitting},
+    setError,
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
       email: '',
       password: '',
     },
-    validateLoginForm,
-  );
+  });
 
   function togglePasswordVisibility() {
     setShowPassword(!showPassword);
   }
 
-  async function handleLogin() {
-    handleSubmit(async values => {
-      try {
-        const {success, error} = await login(values.email, values.password);
+  async function onSubmit(data: LoginFormValues) {
+    try {
+      const {success, error} = await login(data.email, data.password);
 
-        if (!success && error) {
-          setErrors({password: error});
-        }
-        // If successful, the useAuth hook will update isAuthenticated
-        // which will trigger the navigation to switch to MainNavigator
-      } catch (error) {
-        setErrors({
-          password: 'An unexpected error occurred. Please try again.',
+      if (!success && error) {
+        setError('password', {
+          type: 'manual',
+          message: error,
         });
       }
-    });
+      // If successful, the useAuth hook will update isAuthenticated
+      // which will trigger the navigation to switch to MainNavigator
+    } catch (error) {
+      setError('password', {
+        type: 'manual',
+        message: 'An unexpected error occurred. Please try again.',
+      });
+    }
   }
 
   function handleSignUp() {
     // Navigate to sign up screen
+    navigation.replace('Login', {mode: 'signup'});
   }
 
   function handleForgotPassword() {
@@ -97,9 +100,9 @@ export function LoginScreen() {
 
             <View style={styles.form}>
               <AnimatedInput
+                control={control}
+                name="email"
                 label="Email Address"
-                value={credentials.email}
-                onChangeText={text => handleChange('email', text)}
                 keyboardType="email-address"
                 icon={<Icon name="envelope" size={20} />}
                 error={errors.email}
@@ -107,9 +110,9 @@ export function LoginScreen() {
               />
 
               <AnimatedInput
+                control={control}
+                name="password"
                 label="Password"
-                value={credentials.password}
-                onChangeText={text => handleChange('password', text)}
                 secureTextEntry={!showPassword}
                 icon={<Icon name="eye-slash" size={20} />}
                 error={errors.password}
@@ -126,7 +129,8 @@ export function LoginScreen() {
 
               <Button
                 title="Login"
-                onPress={handleLogin}
+                shape="round"
+                onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
                 disabled={isSubmitting}
                 testID="login-button"
@@ -134,7 +138,7 @@ export function LoginScreen() {
 
               <View style={styles.dividerContainer}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>OR</Text>
+                <Text style={styles.dividerText}>or continue with</Text>
                 <View style={styles.divider} />
               </View>
 
@@ -142,27 +146,22 @@ export function LoginScreen() {
                 <TouchableOpacity
                   style={styles.socialButton}
                   onPress={() => handleSocialLogin('google')}>
-                  <Image
-                    source={require('@assets/icons/google.svg')}
-                    style={styles.socialIcon}
-                  />
+                  <Icon name="google" size={18} color={colors.social.google} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.socialButton}
                   onPress={() => handleSocialLogin('apple')}>
-                  <Image
-                    source={require('@assets/icons/apple.svg')}
-                    style={styles.socialIcon}
-                  />
+                  <Icon name="apple" size={18} color={colors.social.apple} />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.socialButton}
                   onPress={() => handleSocialLogin('facebook')}>
-                  <Image
-                    source={require('@assets/icons/facebook.svg')}
-                    style={styles.socialIcon}
+                  <Icon
+                    name="facebook"
+                    size={18}
+                    color={colors.social.facebook}
                   />
                 </TouchableOpacity>
               </View>
@@ -184,86 +183,82 @@ export function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.neutral.white,
   },
   scrollContent: {
     flexGrow: 1,
   },
   content: {
     flex: 1,
-    padding: 24,
+    padding: spacing.screen.horizontal,
     justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
   logo: {
     width: 180,
     height: 60,
   },
   welcomeText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: fontSizes.md,
+    color: colors.neutral.grey,
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
   form: {
     width: '100%',
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   forgotPasswordText: {
-    color: '#FF3B30',
-    fontSize: 14,
+    color: colors.neutral.black,
+    fontSize: fontSizes.sm,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 24,
+    marginVertical: spacing.lg,
   },
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: colors.neutral.veryLightGrey,
   },
   dividerText: {
-    color: '#888',
-    paddingHorizontal: 16,
-    fontSize: 14,
+    color: colors.neutral.grey,
+    paddingHorizontal: spacing.md,
+    fontSize: fontSizes.sm,
   },
   socialButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: 24,
+    marginBottom: spacing.lg,
   },
   socialButton: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: '#F5F5F5',
+    borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.neutral.veryLightGrey,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  socialIcon: {
-    width: 24,
-    height: 24,
-    resizeMode: 'contain',
   },
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 16,
+    marginTop: spacing.md,
   },
   signupText: {
-    color: '#666',
-    fontSize: 14,
+    color: colors.neutral.grey,
+    fontSize: fontSizes.sm,
   },
   signupLink: {
-    color: '#FF3B30',
-    fontSize: 14,
+    color: colors.primary.main,
+    fontSize: fontSizes.sm,
     fontWeight: '600',
   },
 });

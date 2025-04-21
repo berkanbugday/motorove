@@ -24,6 +24,7 @@ module.exports = {
           '@hooks': './src/hooks',
           '@types': './src/types',
           '@assets': './src/assets',
+          '@theme': './src/theme',
           '@': './src',
         },
       },
