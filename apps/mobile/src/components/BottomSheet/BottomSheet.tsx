@@ -29,6 +29,8 @@ const SNAP_POINTS = {
   PARTIAL: SCREEN_HEIGHT * 0.5,
   FULL: SCREEN_HEIGHT * 0.8,
 };
+// Threshold below which the sheet will close when released
+const CLOSE_THRESHOLD = SNAP_POINTS.PARTIAL * 0.3;
 
 export interface BottomSheetProps {
   children: React.ReactNode;
@@ -177,6 +179,7 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
 
     // This gesture detects when a scroll view inside the bottom sheet is being scrolled
     const scrollGesture = Gesture.Native()
+      .shouldActivateOnStart(true) // Helps with gesture detection on both platforms
       .onBegin(() => {
         isScrolling.value = true;
       })
@@ -185,6 +188,10 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
       });
 
     const panGesture = Gesture.Pan()
+      .activeOffsetY([-20, 20]) // Use consistent active area for both platforms
+      .failOffsetX([-20, 20]) // Prevent horizontal gestures from interfering
+      .minPointers(1) // Ensure it works with a single finger
+      .maxPointers(1) // Restrict to single finger for consistent behavior
       .onStart(() => {
         contextY.value = translateY.value;
         active.value = true;
@@ -206,15 +213,21 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
         // Calculate new position based on gesture
         let newPosition = currentPosition - event.translationY;
 
-        // Constrain to valid range
-        if (newPosition < SNAP_POINTS.PARTIAL / 2) {
-          newPosition = SNAP_POINTS.PARTIAL / 2;
+        // Allow dragging below partial position to trigger closing
+        if (newPosition < 0) {
+          newPosition = 0;
         } else if (newPosition > SNAP_POINTS.FULL) {
           newPosition = SNAP_POINTS.FULL;
         }
 
         // Update translateY
         translateY.value = SCREEN_HEIGHT - newPosition;
+
+        // Adjust opacity based on position relative to close threshold
+        if (newPosition < SNAP_POINTS.PARTIAL) {
+          const progress = Math.max(0, newPosition / SNAP_POINTS.PARTIAL);
+          backdropOpacity.value = backDropOpacity * progress;
+        }
       })
       .onEnd(event => {
         if (!enableGestureControl) return;
@@ -235,8 +248,9 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
           return;
         }
 
-        // Snap to closest point
-        if (currentPosition < SNAP_POINTS.PARTIAL / 2) {
+        // Snap to closest point or close
+        // Close if dragged below 30% of PARTIAL height
+        if (currentPosition < CLOSE_THRESHOLD) {
           runOnJS(handleClose)();
         } else if (
           currentPosition <
