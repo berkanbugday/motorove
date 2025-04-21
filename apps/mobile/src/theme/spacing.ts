@@ -28,7 +28,7 @@ export const spacing = {
 
   // Screen padding
   screen: {
-    horizontal: 24,
+    horizontal: 20,
     vertical: 20,
   },
 

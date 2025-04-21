@@ -14,7 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Button} from '@components/index';
 import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
-import {colors, spacing, radius, fontSizes} from '@theme';
+import {colors, spacing, radius, fontSizes} from '@theme/index';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -112,12 +112,12 @@ export function WelcomeScreen(): React.JSX.Element {
   // Event Handlers - memoized with useCallback
   const handleLogin = useCallback(async () => {
     await markAsNotFirstTime();
-    navigation.replace('Login');
+    navigation.replace('Login', {mode: 'login'});
   }, [navigation, markAsNotFirstTime]);
 
   const handleSignup = useCallback(async () => {
     await markAsNotFirstTime();
-    navigation.replace('Login'); // Assuming Login screen has a way to switch to signup
+    navigation.replace('Signup');
   }, [navigation, markAsNotFirstTime]);
 
   // Handle carousel snap
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   paginationDot: {
     width: 25,
     height: 10,
-    borderRadius: radius.xs,
+    borderRadius: radius.round,
     backgroundColor: colors.neutral.black,
   },
   paginationInactiveDot: {

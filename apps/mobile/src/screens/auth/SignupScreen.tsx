@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -14,13 +14,8 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/index';
-import {
-  Icon,
-  AnimatedInput,
-  Button,
-  Checkbox,
-  ContentModal,
-} from '@components/index';
+import {Icon, AnimatedInput, Button, Checkbox, Header} from '@components/index';
+import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signupSchema, SignupFormValues} from '@utils/validation';
@@ -31,8 +26,8 @@ import {termsOfService, privacyPolicy} from '@constants/legalContent';
 export function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [termsModalVisible, setTermsModalVisible] = useState(false);
-  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const termsBottomSheetRef = useRef<BottomSheetRef>(null);
+  const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
   const {signup} = useAuth();
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -97,11 +92,19 @@ export function SignupScreen() {
   }
 
   function handleTermsPress() {
-    setTermsModalVisible(true);
+    termsBottomSheetRef.current?.open('full');
   }
 
   function handlePrivacyPress() {
-    setPrivacyModalVisible(true);
+    privacyBottomSheetRef.current?.open('full');
+  }
+
+  function closeTermsModal() {
+    termsBottomSheetRef.current?.close();
+  }
+
+  function closePrivacyModal() {
+    privacyBottomSheetRef.current?.close();
   }
 
   return (
@@ -255,21 +258,41 @@ export function SignupScreen() {
         </KeyboardAvoidingView>
       </SafeAreaView>
 
-      {/* Terms of Service Modal */}
-      <ContentModal
-        visible={termsModalVisible}
-        onClose={() => setTermsModalVisible(false)}
-        title="Terms of Service"
-        content={termsOfService}
-      />
+      {/* Terms of Service Bottom Sheet */}
+      <BottomSheet ref={termsBottomSheetRef} initialSnap="closed">
+        <View style={styles.bottomSheetContent}>
+          <Header
+            title="Terms of Service"
+            leftIconName="close"
+            onLeftIconPress={closeTermsModal}
+          />
+          <ScrollView
+            style={styles.legalScrollView}
+            contentContainerStyle={styles.legalContentContainer}
+            bounces={false}
+            showsVerticalScrollIndicator={false}>
+            <Text style={styles.legalText}>{termsOfService}</Text>
+          </ScrollView>
+        </View>
+      </BottomSheet>
 
-      {/* Privacy Policy Modal */}
-      <ContentModal
-        visible={privacyModalVisible}
-        onClose={() => setPrivacyModalVisible(false)}
-        title="Privacy Policy"
-        content={privacyPolicy}
-      />
+      {/* Privacy Policy Bottom Sheet */}
+      <BottomSheet ref={privacyBottomSheetRef} initialSnap="closed">
+        <View style={styles.bottomSheetContent}>
+          <Header
+            title="Privacy Policy"
+            leftIconName="close"
+            onLeftIconPress={closePrivacyModal}
+          />
+          <ScrollView
+            style={styles.legalScrollView}
+            contentContainerStyle={styles.legalContentContainer}
+            bounces={false}
+            showsVerticalScrollIndicator={false}>
+            <Text style={styles.legalText}>{privacyPolicy}</Text>
+          </ScrollView>
+        </View>
+      </BottomSheet>
     </View>
   );
 }
@@ -372,5 +395,21 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.sm,
     lineHeight: fontSizes.sm,
     textDecorationLine: 'underline',
+  },
+  legalText: {
+    color: colors.neutral.black,
+    fontSize: fontSizes.sm,
+    lineHeight: fontSizes.md * 1.2,
+    paddingBottom: spacing.md,
+  },
+  bottomSheetContent: {
+    flex: 1,
+  },
+  legalScrollView: {
+    flex: 1,
+    paddingHorizontal: spacing.md,
+  },
+  legalContentContainer: {
+    paddingVertical: spacing.sm,
   },
 });

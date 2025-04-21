@@ -1,4 +1,7 @@
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const {
+  wrapWithReanimatedMetroConfig,
+} = require('react-native-reanimated/metro-config');
 const path = require('path');
 const os = require('os');
 const {FileStore} = require('metro-cache');
@@ -79,4 +82,5 @@ const config = {
   resetCache: shouldResetCache,
 };
 
-module.exports = mergeConfig(defaultConfig, config);
+const mergedConfig = mergeConfig(defaultConfig, config);
+module.exports = wrapWithReanimatedMetroConfig(mergedConfig);

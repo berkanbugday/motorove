@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {colors, spacing, typography} from '@theme';
+import {colors, spacing, typography} from '@theme/index';
 import {Icon, IconName} from '../Icon';
 
 export interface HeaderProps {
@@ -33,6 +33,16 @@ export interface HeaderProps {
    * Function to call when the back button is pressed
    */
   onBackPress?: () => void;
+
+  /**
+   * Optional icon name for the left side
+   */
+  leftIconName?: IconName;
+
+  /**
+   * Function to call when the left icon is pressed
+   */
+  onLeftIconPress?: () => void;
 
   /**
    * Optional icon name for the right button
@@ -85,6 +95,8 @@ export function Header({
   subtitle,
   showBackButton = false,
   onBackPress,
+  leftIconName,
+  onLeftIconPress,
   rightIconName,
   rightButtonText,
   onRightButtonPress,
@@ -121,16 +133,23 @@ export function Header({
       />
 
       <View style={styles.contentContainer}>
-        {/* Left section (back button) */}
+        {/* Left section (back button or custom icon) */}
         <View style={styles.leftSection}>
-          {showBackButton && (
+          {showBackButton ? (
             <TouchableOpacity
               onPress={onBackPress}
               style={styles.backButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               <Icon name="arrow-left" size={24} color={textColor} />
             </TouchableOpacity>
-          )}
+          ) : leftIconName ? (
+            <TouchableOpacity
+              onPress={onLeftIconPress}
+              style={styles.backButton}
+              hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
+              <Icon name={leftIconName} size={24} color={textColor} />
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         {/* Middle section (title) */}
