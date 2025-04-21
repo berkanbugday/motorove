@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 - Use TypeScript for type safety and improved code maintainability.
 - Prefer functional components with hooks over class components for simplicity and reusability.
@@ -197,7 +197,6 @@ alwaysApply: false
 - **Recommended Development Tools:**
     - **VS Code:** Use VS Code with the React Native Tools extension for debugging and code completion.
     - **React Native CLI:** Use the React Native CLI for creating and managing React Native projects.
-    - **Expo CLI:** Use the Expo CLI for developing and testing React Native applications without native code.
     - **Android Studio:** Use Android Studio for building and debugging Android applications.
     - **Xcode:** Use Xcode for building and debugging iOS applications.
 

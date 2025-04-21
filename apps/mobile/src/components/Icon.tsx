@@ -7,6 +7,7 @@ import Envelope from '@assets/icons/envelope.svg';
 import Google from '@assets/icons/google.svg';
 import Apple from '@assets/icons/apple.svg';
 import Facebook from '@assets/icons/facebook.svg';
+import ArrowLeft from '@assets/icons/arrow-left.svg';
 
 // Type for icons
 export type IconName =
@@ -15,7 +16,8 @@ export type IconName =
   | 'envelope'
   | 'google'
   | 'apple'
-  | 'facebook';
+  | 'facebook'
+  | 'arrow-left';
 
 interface IconProps {
   name: IconName;
@@ -47,6 +49,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Apple {...commonProps} />;
     case 'facebook':
       return <Facebook {...commonProps} />;
+    case 'arrow-left':
+      return <ArrowLeft {...commonProps} />;
     default:
       return null;
   }

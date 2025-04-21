@@ -19,12 +19,14 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {loginSchema, LoginFormValues} from '@utils/validation';
 import {colors, spacing, fontSizes, radius} from '@theme/index';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const {login} = useAuth();
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const insets = useSafeAreaInsets();
 
   const {
     control,
@@ -78,105 +80,112 @@ export function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled">
-          <View style={[styles.content, {minHeight: height * 0.8}]}>
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('@assets/images/motorove_logo_dark.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
+    <View style={styles.container}>
+      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled">
+            <View style={[styles.content, {minHeight: height * 0.8}]}>
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('@assets/images/motorove_logo_dark.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+              </View>
+
+              <Text style={styles.welcomeText}>
+                Welcome back! Please login to continue
+              </Text>
+
+              <View style={styles.form}>
+                <AnimatedInput
+                  control={control}
+                  name="email"
+                  label="Email Address"
+                  keyboardType="email-address"
+                  icon={<Icon name="envelope" size={20} />}
+                  error={errors.email}
+                  testID="login-email"
+                />
+
+                <AnimatedInput
+                  control={control}
+                  name="password"
+                  label="Password"
+                  secureTextEntry={!showPassword}
+                  icon={<Icon name="eye-slash" size={20} />}
+                  error={errors.password}
+                  onToggleSecureEntry={togglePasswordVisibility}
+                  showPassword={showPassword}
+                  testID="login-password"
+                />
+
+                <Button
+                  title="Forgot password?"
+                  variant="text"
+                  onPress={handleForgotPassword}
+                  style={styles.forgotPasswordContainer}
+                />
+
+                <Button
+                  title="Login"
+                  shape="round"
+                  onPress={handleSubmit(onSubmit)}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  testID="login-button"
+                />
+
+                <View style={styles.dividerContainer}>
+                  <View style={styles.divider} />
+                  <Text style={styles.dividerText}>or continue with</Text>
+                  <View style={styles.divider} />
+                </View>
+
+                <View style={styles.socialButtonsContainer}>
+                  <TouchableOpacity
+                    style={styles.socialButton}
+                    onPress={() => handleSocialLogin('google')}>
+                    <Icon
+                      name="google"
+                      size={18}
+                      color={colors.social.google}
+                    />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.socialButton}
+                    onPress={() => handleSocialLogin('apple')}>
+                    <Icon name="apple" size={18} color={colors.social.apple} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.socialButton}
+                    onPress={() => handleSocialLogin('facebook')}>
+                    <Icon
+                      name="facebook"
+                      size={18}
+                      color={colors.social.facebook}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.signupContainer}>
+                  <Text style={styles.signupText}>Don't have an account? </Text>
+                  <TouchableOpacity onPress={handleSignUp}>
+                    <Text style={styles.signupLink}>Sign up</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-
-            <Text style={styles.welcomeText}>
-              Welcome back! Please login to continue
-            </Text>
-
-            <View style={styles.form}>
-              <AnimatedInput
-                control={control}
-                name="email"
-                label="Email Address"
-                keyboardType="email-address"
-                icon={<Icon name="envelope" size={20} />}
-                error={errors.email}
-                testID="login-email"
-              />
-
-              <AnimatedInput
-                control={control}
-                name="password"
-                label="Password"
-                secureTextEntry={!showPassword}
-                icon={<Icon name="eye-slash" size={20} />}
-                error={errors.password}
-                onToggleSecureEntry={togglePasswordVisibility}
-                showPassword={showPassword}
-                testID="login-password"
-              />
-
-              <TouchableOpacity
-                style={styles.forgotPasswordContainer}
-                onPress={handleForgotPassword}>
-                <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-              </TouchableOpacity>
-
-              <Button
-                title="Login"
-                shape="round"
-                onPress={handleSubmit(onSubmit)}
-                loading={isSubmitting}
-                disabled={isSubmitting}
-                testID="login-button"
-              />
-
-              <View style={styles.dividerContainer}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>or continue with</Text>
-                <View style={styles.divider} />
-              </View>
-
-              <View style={styles.socialButtonsContainer}>
-                <TouchableOpacity
-                  style={styles.socialButton}
-                  onPress={() => handleSocialLogin('google')}>
-                  <Icon name="google" size={18} color={colors.social.google} />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.socialButton}
-                  onPress={() => handleSocialLogin('apple')}>
-                  <Icon name="apple" size={18} color={colors.social.apple} />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.socialButton}
-                  onPress={() => handleSocialLogin('facebook')}>
-                  <Icon
-                    name="facebook"
-                    size={18}
-                    color={colors.social.facebook}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.signupContainer}>
-                <Text style={styles.signupText}>Don't have an account? </Text>
-                <TouchableOpacity onPress={handleSignUp}>
-                  <Text style={styles.signupLink}>Sign up</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -213,10 +222,6 @@ const styles = StyleSheet.create({
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
     marginBottom: spacing.lg,
-  },
-  forgotPasswordText: {
-    color: colors.neutral.black,
-    fontSize: fontSizes.sm,
   },
   dividerContainer: {
     flexDirection: 'row',

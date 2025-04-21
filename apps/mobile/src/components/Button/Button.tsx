@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     color: colors.neutral.black,
   },
   textButtonText: {
-    color: colors.primary.main,
+    color: colors.neutral.darkGrey,
   },
   disabledButtonText: {
     // No additional styles needed, opacity is applied to the button

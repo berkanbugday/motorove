@@ -8,82 +8,108 @@ import {
   ScrollView,
   SafeAreaView,
   Image,
-  TouchableOpacity,
   useWindowDimensions,
+  TextStyle,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Icon, AnimatedInput, Button} from '@components/index';
-import {useForm} from '@hooks/index';
+import {Icon, AnimatedInput, Button, Header} from '@components/index';
 import {
   ForgotPasswordFormValues,
-  validateForgotPasswordForm,
+  forgotPasswordSchema,
 } from '@utils/validation';
+import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {colors} from '@theme/colors';
+import {typography} from '@theme/typography';
+import {spacing} from '@theme/spacing';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export function ForgotPasswordScreen() {
   const [emailSent, setEmailSent] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {height} = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
-  const {values, errors, isSubmitting, handleChange, handleSubmit, setErrors} =
-    useForm<ForgotPasswordFormValues>(
-      {
-        email: '',
-      },
-      validateForgotPasswordForm,
-    );
+  const {
+    control,
+    handleSubmit,
+    formState: {errors, isSubmitting},
+    setError,
+  } = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
 
   function handleGoBack() {
     navigation.goBack();
   }
 
+  function handleLoginPress() {
+    navigation.navigate('Login');
+  }
+
+  function handleSupportPress() {
+    // Navigate to support or open support contact options
+    navigation.navigate('Support');
+  }
+
   async function handleResetPassword() {
-    handleSubmit(async _formValues => {
+    handleSubmit(async formValues => {
       try {
         // TODO: Implement actual password reset with Supabase
-        // Example: const { error } = await supabase.auth.resetPasswordForEmail(_formValues.email);
+        // Example: const { error } = await supabase.auth.resetPasswordForEmail(formValues.email);
 
         // For demo purposes, simulate success after a delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
+        // Store email for confirmation screen
+        setUserEmail(formValues.email);
+
         // Set email sent flag to show confirmation view
         setEmailSent(true);
       } catch (error) {
-        setErrors({
-          email: 'Failed to send reset email. Please try again.',
+        setError('email', {
+          type: 'manual',
+          message: 'Failed to send reset email. Please try again.',
         });
       }
-    });
+    })();
   }
 
   // View when email has been sent
   if (emailSent) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.safeArea, {paddingTop: insets.top}]}>
         <View style={styles.content}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('@assets/images/motorove_logo_dark.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-
+          <Text style={styles.title}>Check your email</Text>
           <View style={styles.successContainer}>
-            <Icon name="envelope" size={60} color="#4CAF50" />
-            <Text style={styles.successTitle}>Email Sent!</Text>
+            <Icon name="envelope" size={60} color={colors.status.success} />
+            <Text style={styles.successTitle}>We've sent a email to</Text>
+            <Text style={styles.emailText}>{userEmail}</Text>
             <Text style={styles.successText}>
-              We've sent password reset instructions to your email address.
-              Please check your inbox.
+              If you don't see the email, please check your spam folder
             </Text>
-            <Button
-              title="Back to Login"
-              onPress={handleGoBack}
-              variant="primary"
-              style={styles.backButton}
-              testID="back-to-login-button"
-            />
           </View>
+          <Button
+            title="Resend Reset Link"
+            variant="primary"
+            shape="round"
+            onPress={handleResetPassword}
+            style={{marginBottom: spacing.sm}}
+            testID="resend-reset-link-button"
+          />
+
+          <Button
+            title="Back to Login"
+            variant="outline"
+            shape="round"
+            onPress={handleLoginPress}
+            testID="back-to-login-button"
+          />
         </View>
       </SafeAreaView>
     );
@@ -91,132 +117,160 @@ export function ForgotPasswordScreen() {
 
   // Reset password form view
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled">
-          <View style={[styles.content, {minHeight: height * 0.8}]}>
-            <TouchableOpacity
-              style={styles.backButtonContainer}
-              onPress={handleGoBack}>
-              <Icon name="eye" size={20} />{' '}
-              {/* Using eye icon as a placeholder since we don't have a back arrow icon */}
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
+    <View style={styles.container}>
+      <Header
+        showBackButton
+        includeStatusBar={true}
+        onBackPress={handleGoBack}
+      />
+      <SafeAreaView style={[styles.safeArea, {paddingTop: insets.top}]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardView}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled">
+            <View style={[styles.content, {minHeight: height * 0.75}]}>
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('@assets/images/motorove_logo_dark.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+              </View>
 
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('@assets/images/motorove_logo_dark.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
+              <Text style={styles.title}>Reset your password</Text>
+              <Text style={styles.subtitle}>
+                Enter your email address and we'll send you instructions to
+                reset your password.
+              </Text>
+
+              <View style={styles.form}>
+                <AnimatedInput
+                  control={control}
+                  name="email"
+                  label="Email Address"
+                  keyboardType="email-address"
+                  icon={<Icon name="envelope" size={20} />}
+                  error={errors.email}
+                  testID="forgot-password-email"
+                />
+
+                <Button
+                  title="Send Reset Link"
+                  shape="round"
+                  onPress={handleResetPassword}
+                  loading={isSubmitting}
+                  disabled={isSubmitting}
+                  style={styles.resetButton}
+                  testID="send-reset-button"
+                />
+
+                <Button
+                  title="Remember your password? Login"
+                  variant="text"
+                  onPress={handleLoginPress}
+                  style={styles.linkContainer}
+                  testID="back-to-login-button"
+                />
+
+                <Button
+                  title="Need help? Contact Support"
+                  variant="text"
+                  onPress={handleSupportPress}
+                  style={styles.linkContainer}
+                  testID="contact-support-button"
+                />
+
+                <Text style={styles.securityNotice}>
+                  For your security, a password reset link will be sent to your
+                  registered email address. The link will expire in 24 hours.
+                </Text>
+              </View>
             </View>
-
-            <Text style={styles.title}>Forgot Password</Text>
-            <Text style={styles.subtitle}>
-              Enter your email address and we'll send you instructions to reset
-              your password.
-            </Text>
-
-            <View style={styles.form}>
-              <AnimatedInput
-                label="Email Address"
-                value={values.email}
-                onChangeText={text => handleChange('email', text)}
-                keyboardType="email-address"
-                icon={<Icon name="envelope" size={20} />}
-                error={errors.email}
-                testID="forgot-password-email"
-              />
-
-              <Button
-                title="Send Reset Link"
-                onPress={handleResetPassword}
-                loading={isSubmitting}
-                disabled={isSubmitting}
-                style={styles.resetButton}
-                testID="send-reset-button"
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.neutral.white,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
   },
   content: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  backButtonContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  backButtonText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#333',
+    padding: spacing.screen.horizontal,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
   },
   logo: {
     width: 180,
     height: 60,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    ...(typography.title as TextStyle),
+    color: colors.neutral.black,
+    marginBottom: spacing.md,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    ...(typography.body as TextStyle),
+    color: colors.neutral.grey,
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
   form: {
     width: '100%',
   },
   resetButton: {
-    marginTop: 16,
+    marginTop: spacing.md,
+    backgroundColor: colors.primary.main,
+  },
+  linkContainer: {
+    marginTop: spacing.md,
+  },
+  securityNotice: {
+    ...(typography.caption as TextStyle),
+    color: colors.neutral.grey,
+    marginTop: spacing.lg,
+    textAlign: 'center',
   },
   successContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
   },
   successTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 20,
-    marginBottom: 16,
+    ...(typography.body as TextStyle),
+    color: colors.neutral.black,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  emailText: {
+    ...(typography.body as TextStyle),
+    fontWeight: '700',
+    color: colors.neutral.black,
+    marginBottom: spacing.md,
+    textAlign: 'center',
   },
   successText: {
-    fontSize: 16,
-    color: '#666',
+    ...(typography.bodySmall as TextStyle),
+    color: colors.neutral.grey,
     textAlign: 'center',
-    marginBottom: 30,
-  },
-  backButton: {
-    marginTop: 20,
+    marginBottom: spacing.xl,
   },
 });
