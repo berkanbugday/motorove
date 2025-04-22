@@ -83,7 +83,7 @@ export function ForgotPasswordScreen() {
   // View when email has been sent
   if (emailSent) {
     return (
-      <SafeAreaView style={[styles.safeArea, {paddingTop: insets.top}]}>
+      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
         <View style={styles.content}>
           <Text style={styles.title}>Check your email</Text>
           <View style={styles.successContainer}>
@@ -99,7 +99,7 @@ export function ForgotPasswordScreen() {
             variant="primary"
             shape="round"
             onPress={handleResetPassword}
-            style={{marginBottom: spacing.sm}}
+            style={{marginBottom: spacing.lg}}
             testID="resend-reset-link-button"
           />
 
@@ -123,7 +123,7 @@ export function ForgotPasswordScreen() {
         includeStatusBar={true}
         onBackPress={handleGoBack}
       />
-      <SafeAreaView style={[styles.safeArea, {paddingTop: insets.top}]}>
+      <SafeAreaView style={[{flex: 1}, {paddingTop: insets.top}]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}>
@@ -199,9 +199,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.white,
-  },
-  safeArea: {
-    flex: 1,
   },
   keyboardView: {
     flex: 1,

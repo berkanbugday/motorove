@@ -26,6 +26,8 @@ import {termsOfService, privacyPolicy} from '@constants/legalContent';
 export function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const termsBottomSheetRef = useRef<BottomSheetRef>(null);
   const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
   const {signup} = useAuth();
@@ -70,6 +72,11 @@ export function SignupScreen() {
           type: 'manual',
           message: error,
         });
+      } else if (success) {
+        // Store email for confirmation screen
+        setUserEmail(data.email);
+        // Set signup success flag to show confirmation view
+        setSignupSuccess(true);
       }
       // If successful, the useAuth hook will update isAuthenticated
       // which will trigger the navigation to switch to MainNavigator
@@ -84,6 +91,16 @@ export function SignupScreen() {
   function handleLogin() {
     // Navigate to login screen
     navigation.navigate('Login');
+  }
+
+  function handleResendVerificationEmail() {
+    // TODO: Implement actual email verification
+  }
+
+  function handleBackToSignup() {
+    // Navigate to signup screen
+    setSignupSuccess(false);
+    navigation.navigate('Signup');
   }
 
   function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
@@ -105,6 +122,42 @@ export function SignupScreen() {
 
   function closePrivacyModal() {
     privacyBottomSheetRef.current?.close();
+  }
+
+  // View when signup is successful
+  if (signupSuccess) {
+    return (
+      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
+        <View style={styles.content}>
+          <Text style={styles.successTitle}>Verify your email</Text>
+          <View style={styles.successContainer}>
+            <Icon name="envelope" size={60} color={colors.status.success} />
+            <Text style={styles.successMessage}>
+              We've sent a verification email to
+            </Text>
+            <Text style={styles.emailText}>{userEmail}</Text>
+            <Text style={styles.successText}>
+              If you don't see the email, check your spam folder
+            </Text>
+          </View>
+          <Button
+            title="Resend Verification Email"
+            variant="primary"
+            shape="round"
+            onPress={handleResendVerificationEmail}
+            style={{marginBottom: spacing.lg}}
+            testID="resend-verification-email-button"
+          />
+          <Button
+            title="Back to Signup"
+            variant="outline"
+            shape="round"
+            onPress={handleBackToSignup}
+            testID="back-to-signup-button"
+          />
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -207,6 +260,7 @@ export function SignupScreen() {
                   loading={isSubmitting}
                   disabled={isSubmitting}
                   testID="signup-button"
+                  style={{marginTop: spacing.md}}
                 />
 
                 <View style={styles.dividerContainer}>
@@ -307,7 +361,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing.screen.horizontal,
-    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
@@ -344,7 +397,7 @@ const styles = StyleSheet.create({
   socialButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
   },
   socialButton: {
     width: 50,
@@ -404,5 +457,36 @@ const styles = StyleSheet.create({
   },
   legalContentContainer: {
     paddingVertical: spacing.sm,
+  },
+  successTitle: {
+    fontSize: fontSizes.lg,
+    fontWeight: '700',
+    color: colors.neutral.black,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  successContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  successMessage: {
+    fontSize: fontSizes.md,
+    color: colors.neutral.black,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  emailText: {
+    fontSize: fontSizes.md,
+    fontWeight: '700',
+    color: colors.neutral.black,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  successText: {
+    fontSize: fontSizes.sm,
+    color: colors.neutral.grey,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
   },
 });
