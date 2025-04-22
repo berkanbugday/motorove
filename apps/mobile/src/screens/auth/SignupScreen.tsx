@@ -2,7 +2,6 @@ import React, {useState, useRef} from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,7 +13,17 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/index';
-import {Icon, AnimatedInput, Button, Checkbox, Header} from '@components';
+import {
+  Icon,
+  AnimatedInput,
+  Button,
+  Checkbox,
+  Header,
+  Title,
+  Body,
+  BodySmall,
+  Subtitle,
+} from '@components';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -134,23 +143,25 @@ export function SignupScreen() {
     return (
       <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
         <View style={styles.content}>
-          <Text style={styles.successTitle}>Verify your email</Text>
+          <Title align="center" style={styles.successTitle}>
+            Verify your email
+          </Title>
           <View style={styles.successContainer}>
             <Icon name="envelope" size={60} color={colors.status.success} />
-            <Text style={styles.successMessage}>
-              We've sent a verification email to
-            </Text>
-            <Text style={styles.emailText}>{userEmail}</Text>
-            <Text style={styles.successText}>
+            <Body>We've sent a verification email to</Body>
+            <Body color={colors.neutral.black} weight="semiBold">
+              {userEmail}
+            </Body>
+            <BodySmall align="center" style={styles.successText}>
               If you don't see the email, check your spam folder
-            </Text>
+            </BodySmall>
           </View>
           <Button
             title="Resend Verification Email"
             variant="primary"
             shape="round"
             onPress={handleResendVerificationEmail}
-            style={{marginBottom: spacing.lg}}
+            style={{marginVertical: spacing.sm}}
             testID="resend-verification-email-button"
           />
           <Button
@@ -158,6 +169,7 @@ export function SignupScreen() {
             variant="outline"
             shape="round"
             onPress={handleBackToSignup}
+            style={{marginVertical: spacing.sm}}
             testID="back-to-signup-button"
           />
         </View>
@@ -183,9 +195,13 @@ export function SignupScreen() {
                 />
               </View>
 
-              <Text style={styles.welcomeText}>
+              <Subtitle
+                align="center"
+                weight="medium"
+                color={colors.neutral.grey}
+                style={styles.welcomeText}>
                 Create an account to get started
-              </Text>
+              </Subtitle>
 
               <View style={styles.form}>
                 <AnimatedInput
@@ -240,14 +256,16 @@ export function SignupScreen() {
                   size="medium"
                   label={
                     <View style={styles.termsTextContainer}>
-                      <Text style={styles.termsText}>I agree to the</Text>
+                      <BodySmall color={colors.neutral.grey}>
+                        I agree to the
+                      </BodySmall>
                       <Button
                         title="Terms of Service"
                         variant="text"
                         onPress={handleTermsPress}
                         textStyle={styles.termsLink}
                       />
-                      <Text style={styles.termsText}>and</Text>
+                      <BodySmall color={colors.neutral.grey}>and</BodySmall>
                       <Button
                         title="Privacy Policy"
                         variant="text"
@@ -270,7 +288,11 @@ export function SignupScreen() {
 
                 <View style={styles.dividerContainer}>
                   <View style={styles.divider} />
-                  <Text style={styles.dividerText}>or continue with</Text>
+                  <BodySmall
+                    color={colors.neutral.grey}
+                    style={styles.dividerText}>
+                    or continue with
+                  </BodySmall>
                   <View style={styles.divider} />
                 </View>
 
@@ -303,12 +325,17 @@ export function SignupScreen() {
                 </View>
 
                 <View style={styles.loginContainer}>
-                  <Text style={styles.loginText}>
+                  <Body color={colors.neutral.grey}>
                     Already have an account?{' '}
-                  </Text>
-                  <TouchableOpacity onPress={handleLogin}>
-                    <Text style={styles.loginLink}>Log in</Text>
-                  </TouchableOpacity>
+                  </Body>
+                  <Button
+                    title="Log in"
+                    variant="text"
+                    onPress={handleLogin}
+                    textStyle={styles.loginLink}
+                    testID="login-button">
+                    Log in
+                  </Button>
                 </View>
               </View>
             </View>
@@ -329,7 +356,7 @@ export function SignupScreen() {
             contentContainerStyle={styles.legalContentContainer}
             bounces={false}
             showsVerticalScrollIndicator={false}>
-            <Text style={styles.legalText}>{termsOfService}</Text>
+            <BodySmall>{termsOfService}</BodySmall>
           </ScrollView>
         </View>
       </BottomSheet>
@@ -347,7 +374,7 @@ export function SignupScreen() {
             contentContainerStyle={styles.legalContentContainer}
             bounces={false}
             showsVerticalScrollIndicator={false}>
-            <Text style={styles.legalText}>{privacyPolicy}</Text>
+            <BodySmall>{privacyPolicy}</BodySmall>
           </ScrollView>
         </View>
       </BottomSheet>
@@ -376,9 +403,6 @@ const styles = StyleSheet.create({
     height: 100,
   },
   welcomeText: {
-    fontSize: fontSizes.md,
-    color: colors.neutral.grey,
-    textAlign: 'center',
     marginBottom: spacing.xl,
   },
   form: {
@@ -395,9 +419,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.veryLightGrey,
   },
   dividerText: {
-    color: colors.neutral.grey,
     paddingHorizontal: spacing.md,
-    fontSize: fontSizes.sm,
   },
   socialButtonsContainer: {
     flexDirection: 'row',
@@ -417,15 +439,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing.md,
-  },
-  loginText: {
-    color: colors.neutral.grey,
-    fontSize: fontSizes.sm,
+    alignItems: 'center',
   },
   loginLink: {
     color: colors.primary.main,
-    fontSize: fontSizes.sm,
-    fontWeight: '600',
   },
   termsCheckbox: {
     marginTop: 0,
@@ -437,21 +454,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     flexDirection: 'row',
   },
-  termsText: {
-    color: colors.neutral.grey,
-    fontSize: fontSizes.sm,
-    lineHeight: fontSizes.sm * 1.5,
-  },
   termsLink: {
     fontSize: fontSizes.sm,
     lineHeight: fontSizes.sm,
     textDecorationLine: 'underline',
-  },
-  legalText: {
-    color: colors.neutral.black,
-    fontSize: fontSizes.sm,
-    lineHeight: fontSizes.md * 1.2,
-    paddingBottom: spacing.md,
   },
   bottomSheetContent: {
     flex: 1,
@@ -464,34 +470,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   successTitle: {
-    fontSize: fontSizes.lg,
-    fontWeight: '700',
-    color: colors.neutral.black,
     marginBottom: spacing.md,
-    textAlign: 'center',
   },
   successContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  successMessage: {
-    fontSize: fontSizes.md,
-    color: colors.neutral.black,
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-  emailText: {
-    fontSize: fontSizes.md,
-    fontWeight: '700',
-    color: colors.neutral.black,
-    marginBottom: spacing.md,
-    textAlign: 'center',
-  },
   successText: {
-    fontSize: fontSizes.sm,
-    color: colors.neutral.grey,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.md,
   },
 });

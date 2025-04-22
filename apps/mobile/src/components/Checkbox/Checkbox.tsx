@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  TouchableOpacity,
   View,
+  TouchableOpacity,
   Text,
   StyleSheet,
   ViewStyle,
@@ -15,6 +15,7 @@ import {
   FieldError,
 } from 'react-hook-form';
 import {colors, spacing, radius, typography} from '@theme';
+import {Caption} from '../Typography';
 
 interface BaseCheckboxProps {
   /**
@@ -248,15 +249,18 @@ function CheckboxBase({
         </View>
         {label &&
           (typeof label === 'string' ? (
-            <Text style={labelStyles}>{label}</Text>
+            <Body style={labelStyles}>{label}</Body>
           ) : (
             label
           ))}
       </TouchableOpacity>
       {error ? (
-        <Text style={styles.errorText} testID={`${testID}-error`}>
+        <Caption
+          color={colors.status.error}
+          style={styles.errorText}
+          testID={`${testID}-error`}>
           {error}
-        </Text>
+        </Caption>
       ) : null}
     </View>
   );
@@ -355,9 +359,7 @@ const styles = StyleSheet.create({
     color: colors.status.error,
   },
   errorText: {
-    color: colors.status.error,
-    fontSize: typography.bodySmall.fontSize,
-    marginTop: spacing.xs / 2,
-    marginLeft: spacing.md,
+    marginTop: spacing.xs,
+    marginLeft: spacing.sm,
   },
 });

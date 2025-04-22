@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,11 +13,18 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/index';
-import {Icon, AnimatedInput, Button} from '@components';
+import {
+  Icon,
+  AnimatedInput,
+  Button,
+  Body,
+  Typography,
+  Caption,
+} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {loginSchema, LoginFormValues} from '@utils/validation';
-import {colors, spacing, fontSizes, radius} from '@theme';
+import {colors, spacing, radius, fontSizes} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export function LoginScreen() {
@@ -97,9 +103,9 @@ export function LoginScreen() {
                 />
               </View>
 
-              <Text style={styles.welcomeText}>
+              <Body style={styles.welcomeText}>
                 Welcome back! Please login to continue
-              </Text>
+              </Body>
 
               <View style={styles.form}>
                 <AnimatedInput
@@ -143,7 +149,7 @@ export function LoginScreen() {
 
                 <View style={styles.dividerContainer}>
                   <View style={styles.divider} />
-                  <Text style={styles.dividerText}>or continue with</Text>
+                  <Caption style={styles.dividerText}>or continue with</Caption>
                   <View style={styles.divider} />
                 </View>
 
@@ -176,10 +182,17 @@ export function LoginScreen() {
                 </View>
 
                 <View style={styles.signupContainer}>
-                  <Text style={styles.signupText}>Don't have an account? </Text>
-                  <TouchableOpacity onPress={handleSignUp}>
-                    <Text style={styles.signupLink}>Sign up</Text>
-                  </TouchableOpacity>
+                  <Body color={colors.neutral.grey}>
+                    Don't have an account?{' '}
+                  </Body>
+                  <Button
+                    title="Sign up"
+                    variant="text"
+                    onPress={handleSignUp}
+                    textStyle={styles.signupLink}
+                    testID="signup-button">
+                    Sign up
+                  </Button>
                 </View>
               </View>
             </View>
@@ -201,7 +214,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing.screen.horizontal,
-    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
@@ -212,7 +224,6 @@ const styles = StyleSheet.create({
     height: 100,
   },
   welcomeText: {
-    fontSize: fontSizes.md,
     color: colors.neutral.grey,
     textAlign: 'center',
     marginBottom: spacing.xl,
@@ -222,7 +233,7 @@ const styles = StyleSheet.create({
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   dividerContainer: {
     flexDirection: 'row',
@@ -237,7 +248,6 @@ const styles = StyleSheet.create({
   dividerText: {
     color: colors.neutral.grey,
     paddingHorizontal: spacing.md,
-    fontSize: fontSizes.sm,
   },
   socialButtonsContainer: {
     flexDirection: 'row',
@@ -257,14 +267,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing.md,
-  },
-  signupText: {
-    color: colors.neutral.grey,
-    fontSize: fontSizes.sm,
+    alignItems: 'center',
   },
   signupLink: {
     color: colors.primary.main,
-    fontSize: fontSizes.sm,
-    fontWeight: '600',
   },
 });

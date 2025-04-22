@@ -8,3 +8,4 @@ export * from './Checkbox';
 export * from './BottomSheet';
 export * from './Wizard';
 export * from './ProgressIndicator';
+export * from './Typography';

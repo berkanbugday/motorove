@@ -4,9 +4,10 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-import {colors, spacing} from '@theme';
+import {View, StyleSheet} from 'react-native';
+import {spacing} from '@theme';
 import {ProgressIndicator, ProgressIndicatorType} from '../ProgressIndicator';
+import {Subtitle} from '../Typography';
 
 export type WizardStep = {
   id: string;
@@ -140,10 +141,10 @@ export const Wizard = forwardRef<WizardHandle, WizardProps>(
           type={progressIndicatorType}
         />
 
-        <Text style={styles.stepTitle}>
+        <Subtitle align="center" weight="semiBold" style={styles.stepTitle}>
           {currentStep.title}
           {currentStep.optional ? ' (Optional)' : ''}
-        </Text>
+        </Subtitle>
 
         <View style={styles.content}>{currentStep.content}</View>
       </View>
@@ -159,11 +160,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   stepTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: spacing.md,
-    color: colors.neutral.darkGrey,
+    marginBottom: spacing.xl,
   },
   content: {
     flex: 1,

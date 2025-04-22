@@ -2,18 +2,25 @@ import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   SafeAreaView,
   Image,
   useWindowDimensions,
-  TextStyle,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Icon, AnimatedInput, Button, Header} from '@components';
+import {
+  Icon,
+  AnimatedInput,
+  Button,
+  Header,
+  Title,
+  Body,
+  BodySmall,
+  Caption,
+} from '@components';
 import {
   ForgotPasswordFormValues,
   forgotPasswordSchema,
@@ -21,7 +28,6 @@ import {
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors} from '@theme/colors';
-import {typography} from '@theme/typography';
 import {spacing} from '@theme/spacing';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -85,21 +91,25 @@ export function ForgotPasswordScreen() {
     return (
       <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
         <View style={styles.content}>
-          <Text style={styles.title}>Check your email</Text>
+          <Title align="center" style={styles.title}>
+            Check your email
+          </Title>
           <View style={styles.successContainer}>
             <Icon name="envelope" size={60} color={colors.status.success} />
-            <Text style={styles.successTitle}>We've sent a email to</Text>
-            <Text style={styles.emailText}>{userEmail}</Text>
-            <Text style={styles.successText}>
+            <Body>We've sent a email to</Body>
+            <Body color={colors.neutral.black} weight="semiBold">
+              {userEmail}
+            </Body>
+            <BodySmall align="center" style={styles.emailText}>
               If you don't see the email, please check your spam folder
-            </Text>
+            </BodySmall>
           </View>
           <Button
             title="Resend Reset Link"
             variant="primary"
             shape="round"
             onPress={handleResetPassword}
-            style={{marginBottom: spacing.lg}}
+            style={{marginVertical: spacing.sm}}
             testID="resend-reset-link-button"
           />
 
@@ -108,6 +118,7 @@ export function ForgotPasswordScreen() {
             variant="outline"
             shape="round"
             onPress={handleLoginPress}
+            style={{marginVertical: spacing.sm}}
             testID="back-to-login-button"
           />
         </View>
@@ -123,7 +134,7 @@ export function ForgotPasswordScreen() {
         includeStatusBar={true}
         onBackPress={handleGoBack}
       />
-      <SafeAreaView style={[{flex: 1}, {paddingTop: insets.top}]}>
+      <SafeAreaView style={{flex: 1}}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}>
@@ -139,11 +150,16 @@ export function ForgotPasswordScreen() {
                 />
               </View>
 
-              <Text style={styles.title}>Reset your password</Text>
-              <Text style={styles.subtitle}>
+              <Title align="center" style={styles.title}>
+                Reset your password
+              </Title>
+              <Body
+                align="center"
+                color={colors.neutral.grey}
+                style={styles.subtitle}>
                 Enter your email address and we'll send you instructions to
                 reset your password.
-              </Text>
+              </Body>
 
               <View style={styles.form}>
                 <AnimatedInput
@@ -166,26 +182,37 @@ export function ForgotPasswordScreen() {
                   testID="send-reset-button"
                 />
 
-                <Button
-                  title="Remember your password? Login"
-                  variant="text"
-                  onPress={handleLoginPress}
-                  style={styles.linkContainer}
-                  testID="back-to-login-button"
-                />
+                <View style={styles.linkContainer}>
+                  <Body style={styles.linkText}>Remember your password? </Body>
+                  <Button
+                    title="Login"
+                    variant="text"
+                    size="medium"
+                    onPress={handleLoginPress}
+                    textStyle={styles.linkButton}
+                    testID="login-link"
+                  />
+                </View>
 
-                <Button
-                  title="Need help? Contact Support"
-                  variant="text"
-                  onPress={handleSupportPress}
-                  style={styles.linkContainer}
-                  testID="contact-support-button"
-                />
+                <View style={styles.linkContainer}>
+                  <Body style={styles.linkText}>Need help? </Body>
+                  <Button
+                    title="Contact Support"
+                    variant="text"
+                    size="medium"
+                    onPress={handleSupportPress}
+                    textStyle={styles.linkButton}
+                    testID="support-link"
+                  />
+                </View>
 
-                <Text style={styles.securityNotice}>
+                <Caption
+                  align="center"
+                  color={colors.neutral.grey}
+                  style={styles.securityNotice}>
                   For your security, a password reset link will be sent to your
                   registered email address. The link will expire in 24 hours.
-                </Text>
+                </Caption>
               </View>
             </View>
           </ScrollView>
@@ -216,19 +243,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   logo: {
-    width: 180,
-    height: 60,
+    width: 100,
+    height: 100,
   },
   title: {
-    ...(typography.title as TextStyle),
-    color: colors.neutral.black,
     marginBottom: spacing.md,
-    textAlign: 'center',
   },
   subtitle: {
-    ...(typography.body as TextStyle),
-    color: colors.neutral.grey,
-    textAlign: 'center',
     marginBottom: spacing.xl,
   },
   form: {
@@ -240,34 +261,24 @@ const styles = StyleSheet.create({
   },
   linkContainer: {
     marginTop: spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  linkText: {
+    color: colors.neutral.grey,
+  },
+  linkButton: {
+    color: colors.primary.main,
   },
   securityNotice: {
-    ...(typography.caption as TextStyle),
-    color: colors.neutral.grey,
     marginTop: spacing.lg,
-    textAlign: 'center',
   },
   successContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  successTitle: {
-    ...(typography.body as TextStyle),
-    color: colors.neutral.black,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
   emailText: {
-    ...(typography.body as TextStyle),
-    fontWeight: '700',
-    color: colors.neutral.black,
     marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-  successText: {
-    ...(typography.bodySmall as TextStyle),
-    color: colors.neutral.grey,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
   },
 });

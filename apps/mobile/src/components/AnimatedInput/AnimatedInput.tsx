@@ -1,7 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -17,6 +16,7 @@ import {
 } from 'react-hook-form';
 import {Icon} from '@components/Icon';
 import {colors, spacing, radius, fontSizes} from '@theme';
+import {Caption} from '@components/Typography';
 
 // Animation constants
 const ANIMATION_DURATION = 200;
@@ -223,14 +223,28 @@ function AnimatedInputBase({
     return iconPosition === 'left' ? styles.leftIcon : styles.rightIcon;
   };
 
+  const renderLabelView = () => {
+    return (
+      <Animated.View style={{zIndex: zIndex.elevated}}>
+        <Animated.Text style={labelStyle} onPress={handleLabelPress}>
+          {label}
+        </Animated.Text>
+      </Animated.View>
+    );
+  };
+
+  const renderError = () => {
+    if (!error) return null;
+    return (
+      <View style={styles.errorContainer}>
+        <Caption color={colors.status.error}>{error}</Caption>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.inputContainer} testID={testID}>
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={handleLabelPress}
-        style={styles.labelContainer}>
-        <Animated.Text style={labelStyle}>{label}</Animated.Text>
-      </TouchableOpacity>
+      {renderLabelView()}
       <TextInput
         ref={inputRef}
         style={getInputStyles()}
@@ -254,11 +268,7 @@ function AnimatedInputBase({
           icon
         )}
       </View>
-      {error ? (
-        <Text style={styles.errorText} testID={`${testID}-error`}>
-          {error}
-        </Text>
-      ) : null}
+      {renderError()}
     </View>
   );
 }
@@ -308,5 +318,9 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.xs,
     marginTop: spacing.xs,
     marginLeft: spacing.md,
+  },
+  errorContainer: {
+    marginTop: spacing.xs,
+    marginLeft: spacing.sm,
   },
 });

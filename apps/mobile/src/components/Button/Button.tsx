@@ -1,13 +1,13 @@
 import React from 'react';
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import {colors, spacing, componentRadius, typography} from '@theme';
+import {colors, spacing, componentRadius} from '@theme';
+import {Typography} from '../Typography';
 
 interface ButtonProps {
   title: string;
@@ -48,17 +48,20 @@ export function Button({
     style,
   ];
 
-  const textStyles = [
-    styles.buttonText,
-    variant === 'primary' && styles.primaryButtonText,
-    variant === 'secondary' && styles.secondaryButtonText,
-    variant === 'outline' && styles.outlineButtonText,
-    variant === 'text' && styles.textButtonText,
-    size === 'small' && styles.smallButtonText,
-    size === 'large' && styles.largeButtonText,
-    (disabled || loading) && styles.disabledButtonText,
-    textStyle,
-  ];
+  const getTypographyVariant = () => {
+    if (size === 'small') return 'smallButtonText';
+    if (size === 'large') return 'largeButtonText';
+    return 'buttonText';
+  };
+
+  const getTextColor = () => {
+    if (disabled || loading) return undefined; // Let the Typography component handle disabled state
+    if (variant === 'primary') return colors.neutral.white;
+    if (variant === 'secondary') return colors.neutral.darkGrey;
+    if (variant === 'outline') return colors.neutral.black;
+    if (variant === 'text') return colors.neutral.darkGrey;
+    return colors.neutral.black;
+  };
 
   return (
     <TouchableOpacity
@@ -75,7 +78,12 @@ export function Button({
           }
         />
       ) : (
-        <Text style={textStyles}>{title}</Text>
+        <Typography
+          variant={getTypographyVariant() as any}
+          color={getTextColor()}
+          style={textStyle}>
+          {title}
+        </Typography>
       )}
     </TouchableOpacity>
   );
@@ -103,7 +111,7 @@ const styles = StyleSheet.create({
   },
   textButton: {
     backgroundColor: 'transparent',
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.xs,
     paddingVertical: spacing.xs,
   },
   roundButton: {
@@ -125,34 +133,5 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
-  },
-  buttonText: {
-    fontSize: typography.buttonText.fontSize,
-    fontWeight: typography.buttonText.fontWeight as TextStyle['fontWeight'],
-  },
-  smallButtonText: {
-    fontSize: typography.smallButtonText.fontSize,
-    fontWeight: typography.smallButtonText
-      .fontWeight as TextStyle['fontWeight'],
-  },
-  largeButtonText: {
-    fontSize: typography.largeButtonText.fontSize,
-    fontWeight: typography.largeButtonText
-      .fontWeight as TextStyle['fontWeight'],
-  },
-  primaryButtonText: {
-    color: colors.neutral.white,
-  },
-  secondaryButtonText: {
-    color: colors.neutral.darkGrey,
-  },
-  outlineButtonText: {
-    color: colors.neutral.black,
-  },
-  textButtonText: {
-    color: colors.neutral.darkGrey,
-  },
-  disabledButtonText: {
-    // No additional styles needed, opacity is applied to the button
   },
 });

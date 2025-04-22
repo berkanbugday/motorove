@@ -1,8 +1,8 @@
 import React from 'react';
-import {View, Text, StyleSheet, SafeAreaView, Image} from 'react-native';
+import {View, StyleSheet, SafeAreaView, Image} from 'react-native';
 import {useAuth} from '@navigation/index';
-import {Button} from '@components';
-import {colors, spacing, typography, commonStyles} from '@theme';
+import {Button, Title, Body} from '@components';
+import {colors, spacing, commonStyles} from '@theme';
 
 export function HomeScreen() {
   const {logout} = useAuth();
@@ -22,8 +22,8 @@ export function HomeScreen() {
           resizeMode="contain"
         />
 
-        <Text style={styles.title}>Welcome to Motorove</Text>
-        <Text style={styles.subtitle}>You are logged in!</Text>
+        <Title style={styles.title}>Welcome to Motorove</Title>
+        <Body style={styles.subtitle}>You are logged in!</Body>
 
         <Button
           title="Logout"
@@ -52,12 +52,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   title: {
-    ...typography.title,
     marginBottom: spacing.xs,
     color: colors.neutral.darkGrey,
   },
   subtitle: {
-    ...typography.body,
     marginBottom: spacing.lg,
     color: colors.neutral.grey,
   },

@@ -1,7 +1,6 @@
 import React, {useState, useRef, useCallback} from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Dimensions,
   Platform,
@@ -11,10 +10,10 @@ import {
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
-import {Button} from '@components';
+import {Button, Title, Body, Typography} from '@components';
 import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
-import {colors, spacing, radius, fontSizes} from '@theme';
+import {colors, spacing, radius} from '@theme';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -56,11 +55,17 @@ const CarouselItemComponent = ({item}: {item: CarouselItem}) => (
       {item.image ? (
         <Image source={item.image} style={styles.image} resizeMode="contain" />
       ) : (
-        <Text style={styles.imageText}>{item.title}</Text>
+        <Typography
+          variant="title"
+          color="#FFFFFF"
+          align="center"
+          style={styles.imageText}>
+          {item.title}
+        </Typography>
       )}
     </View>
-    <Text style={styles.title}>{item.title}</Text>
-    <Text style={styles.text}>{item.text}</Text>
+    <Title style={styles.title}>{item.title}</Title>
+    <Body style={styles.text}>{item.text}</Body>
   </View>
 );
 
@@ -202,19 +207,14 @@ const styles = StyleSheet.create({
     height: '80%',
   },
   imageText: {
-    fontSize: fontSizes.lg,
-    fontWeight: 'bold',
     color: colors.neutral.white,
   },
   title: {
-    fontSize: fontSizes.xl,
-    fontWeight: 'bold',
     color: colors.neutral.darkGrey,
     textAlign: 'center',
     marginBottom: spacing.xs,
   },
   text: {
-    fontSize: fontSizes.md,
     color: colors.neutral.grey,
     textAlign: 'center',
   },

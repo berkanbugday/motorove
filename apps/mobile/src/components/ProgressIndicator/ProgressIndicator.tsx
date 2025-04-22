@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {colors, spacing} from '@theme';
+import {Body} from '../Typography';
 
 export type ProgressIndicatorStep = {
   id: string;
@@ -61,13 +62,11 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
             {step.icon ? (
               <View style={styles.iconContainer}>{step.icon}</View>
             ) : (
-              <Text
-                style={[
-                  styles.stepNumber,
-                  index <= currentStepIndex && styles.activeStepNumber,
-                ]}>
+              <Body
+                color={colors.neutral.grey}
+                style={index <= currentStepIndex && styles.activeStepNumber}>
                 {index + 1}
-              </Text>
+              </Body>
             )}
           </TouchableOpacity>
         );
@@ -129,11 +128,6 @@ const styles = StyleSheet.create({
   completedStepCircle: {
     backgroundColor: colors.primary.main,
     borderColor: colors.primary.main,
-  },
-  stepNumber: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.neutral.grey,
   },
   activeStepNumber: {
     color: colors.neutral.white,

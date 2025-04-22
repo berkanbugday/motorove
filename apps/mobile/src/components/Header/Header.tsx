@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
@@ -10,8 +9,9 @@ import {
   Platform,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {colors, spacing, typography} from '@theme';
+import {colors, spacing} from '@theme';
 import {Icon, IconName} from '../Icon';
+import {Typography, Title, BodySmall} from '../Typography';
 
 export interface HeaderProps {
   /**
@@ -155,18 +155,14 @@ export function Header({
         {/* Middle section (title) */}
         <View style={styles.titleSection}>
           {title && (
-            <Text
-              style={[styles.title, {color: textColor}, titleStyle]}
-              numberOfLines={1}>
+            <Title color={textColor} style={titleStyle} numberOfLines={1}>
               {title}
-            </Text>
+            </Title>
           )}
           {subtitle && (
-            <Text
-              style={[styles.subtitle, {color: textColor}]}
-              numberOfLines={1}>
+            <BodySmall color={textColor} numberOfLines={1}>
               {subtitle}
-            </Text>
+            </BodySmall>
           )}
         </View>
 
@@ -180,9 +176,9 @@ export function Header({
               {rightIconName ? (
                 <Icon name={rightIconName} size={24} color={textColor} />
               ) : rightButtonText ? (
-                <Text style={[styles.rightButtonText, {color: textColor}]}>
+                <Typography variant="buttonText" color={textColor}>
                   {rightButtonText}
-                </Text>
+                </Typography>
               ) : null}
             </TouchableOpacity>
           )}
@@ -228,28 +224,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: {
-    fontSize: typography.subtitle.fontSize,
-    fontWeight: typography.subtitle.fontWeight as TextStyle['fontWeight'],
-    lineHeight: typography.subtitle.lineHeight,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: typography.caption.fontSize,
-    fontWeight: typography.caption.fontWeight as TextStyle['fontWeight'],
-    lineHeight: typography.caption.lineHeight,
-    textAlign: 'center',
-    marginTop: spacing.xs,
-  },
   rightSection: {
     width: 40,
     alignItems: 'flex-end',
   },
   rightButton: {
     padding: spacing.xs,
-  },
-  rightButtonText: {
-    fontSize: typography.bodySmall.fontSize,
-    fontWeight: typography.buttonText.fontWeight as TextStyle['fontWeight'],
   },
 });

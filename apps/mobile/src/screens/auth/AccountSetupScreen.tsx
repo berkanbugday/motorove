@@ -24,6 +24,7 @@ import {
   Wizard,
   WizardHandle,
   WizardStep,
+  Title,
 } from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -347,10 +348,10 @@ export function AccountSetupScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled">
           <View style={[styles.content, {minHeight: height * 0.8}]}>
-            <Text style={styles.welcomeText}>
+            <Title align="center" style={styles.welcomeText}>
               {fullName ? `Hi ${fullName.split(' ')[0]}!` : 'Almost there!'}{' '}
               Let's complete your profile
-            </Text>
+            </Title>
 
             <Wizard
               ref={wizardRef}
@@ -381,11 +382,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   welcomeText: {
-    fontSize: 24,
-    fontWeight: '600',
-    textAlign: 'center',
     marginBottom: spacing.xl,
-    color: colors.neutral.darkGrey,
   },
   stepContent: {
     width: '100%',
