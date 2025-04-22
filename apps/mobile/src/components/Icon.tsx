@@ -12,6 +12,7 @@ import User from '@assets/icons/user.svg';
 import Close from '@assets/icons/close.svg';
 import ChevronUp from '@assets/icons/chevron-up.svg';
 import ChevronDown from '@assets/icons/chevron-down.svg';
+import Check from '@assets/icons/check.svg';
 
 // Type for icons
 export type IconName =
@@ -25,7 +26,8 @@ export type IconName =
   | 'user'
   | 'close'
   | 'chevron-up'
-  | 'chevron-down';
+  | 'chevron-down'
+  | 'check';
 
 interface IconProps {
   name: IconName;
@@ -67,6 +69,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <ChevronUp {...commonProps} />;
     case 'chevron-down':
       return <ChevronDown {...commonProps} />;
+    case 'check':
+      return <Check {...commonProps} />;
     default:
       return null;
   }

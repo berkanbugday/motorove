@@ -36,13 +36,6 @@ export const colors = {
     error: '#FF3B30',
     info: '#007AFF',
   },
-
-  // Social media colors
-  social: {
-    facebook: '#121212',
-    google: '#121212',
-    apple: '#121212',
-  },
 };
 
 // Type for accessing colors with type safety

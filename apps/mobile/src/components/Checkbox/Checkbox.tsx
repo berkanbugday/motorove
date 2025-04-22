@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   TouchableOpacity,
-  Text,
   StyleSheet,
   ViewStyle,
   TextStyle,
@@ -15,7 +14,8 @@ import {
   FieldError,
 } from 'react-hook-form';
 import {colors, spacing, radius, typography} from '@theme';
-import {Caption} from '../Typography';
+import {Caption, Body} from '../Typography';
+import {Icon} from '../Icon';
 
 interface BaseCheckboxProps {
   /**
@@ -234,6 +234,9 @@ function CheckboxBase({
     labelStyle,
   ];
 
+  // Size mapping for the check icon
+  const iconSize = size === 'small' ? 10 : size === 'large' ? 16 : 14;
+
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity
@@ -243,8 +246,13 @@ function CheckboxBase({
         activeOpacity={0.7}
         testID={testID}>
         <View style={checkboxStyles}>
-          {checked && variant === 'outline' && (
-            <View style={styles.innerFill} />
+          {checked && (
+            <Icon
+              name="check"
+              size={iconSize}
+              color={colors.neutral.white}
+              style={styles.checkIcon}
+            />
           )}
         </View>
         {label &&
@@ -308,14 +316,11 @@ const styles = StyleSheet.create({
     borderColor: colors.secondary.main,
   },
   outlineChecked: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.primary.main,
     borderColor: colors.primary.main,
   },
-  innerFill: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: colors.primary.main,
-    borderRadius: radius.xs / 2,
+  checkIcon: {
+    alignSelf: 'center',
   },
   smallCheckbox: {
     width: BOX_SIZE_MEDIUM - 4,

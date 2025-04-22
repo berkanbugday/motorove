@@ -160,14 +160,14 @@ export function LoginScreen() {
                     <Icon
                       name="google"
                       size={18}
-                      color={colors.social.google}
+                      color={colors.neutral.black}
                     />
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.socialButton}
                     onPress={() => handleSocialLogin('apple')}>
-                    <Icon name="apple" size={18} color={colors.social.apple} />
+                    <Icon name="apple" size={18} color={colors.neutral.black} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -176,7 +176,7 @@ export function LoginScreen() {
                     <Icon
                       name="facebook"
                       size={18}
-                      color={colors.social.facebook}
+                      color={colors.neutral.black}
                     />
                   </TouchableOpacity>
                 </View>
