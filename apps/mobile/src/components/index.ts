@@ -10,3 +10,4 @@ export * from './Wizard';
 export * from './ProgressIndicator';
 export * from './Typography';
 export * from './SearchableDropdown';
+export * from './Chip';

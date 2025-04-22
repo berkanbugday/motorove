@@ -71,6 +71,7 @@ export const accountSetupSchema = z.object({
     .max(new Date(), 'Date cannot be in the future')
     .optional(),
   profilePhotoUrl: z.string().optional(),
+  interests: z.array(z.string()).optional(),
 });
 
 export type AccountSetupFormValues = z.infer<typeof accountSetupSchema>;

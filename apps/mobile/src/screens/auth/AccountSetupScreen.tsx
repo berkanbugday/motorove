@@ -25,6 +25,7 @@ import {
   WizardHandle,
   WizardStep,
   Title,
+  Chip,
 } from '@components';
 import SearchableDropdown, {DropdownItem} from '@components/SearchableDropdown';
 import {useForm} from 'react-hook-form';
@@ -53,6 +54,22 @@ const userTypeOptions: DropdownItem[] = [
   {id: '13', label: 'Editor', value: 'editor'},
 ];
 
+// User interests options for chips
+const interestOptions = [
+  {id: '1', label: 'Sport Bikes'},
+  {id: '2', label: 'Cruisers'},
+  {id: '3', label: 'Adventure'},
+  {id: '4', label: 'Touring'},
+  {id: '5', label: 'Off-Road'},
+  {id: '6', label: 'Vintage'},
+  {id: '7', label: 'Racing'},
+  {id: '8', label: 'Stunts'},
+  {id: '9', label: 'Customization'},
+  {id: '10', label: 'Maintenance'},
+  {id: '11', label: 'Community'},
+  {id: '12', label: 'Events'},
+];
+
 export function AccountSetupScreen() {
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -60,6 +77,7 @@ export function AccountSetupScreen() {
   const [selectedUserType, setSelectedUserType] = useState<DropdownItem | null>(
     null,
   );
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const {height} = useWindowDimensions();
   const navigation = useNavigation<AuthScreenNavigationProp<'AccountSetup'>>();
   const route = useRoute<AuthScreenRouteProp<'AccountSetup'>>();
@@ -83,6 +101,7 @@ export function AccountSetupScreen() {
       birthDate: undefined,
       profilePhotoUrl: '',
       userType: '',
+      interests: [],
     },
     mode: 'onChange',
   });
@@ -93,6 +112,19 @@ export function AccountSetupScreen() {
   const handleUserTypeSelect = (item: DropdownItem) => {
     setSelectedUserType(item);
     setValue('userType', item.value || '', {shouldValidate: true});
+  };
+
+  // Handle interest selection
+  const handleInterestToggle = (interestId: string) => {
+    setSelectedInterests(prevInterests => {
+      const newInterests = prevInterests.includes(interestId)
+        ? prevInterests.filter(id => id !== interestId)
+        : [...prevInterests, interestId];
+
+      // Update the form value
+      setValue('interests', newInterests, {shouldValidate: true});
+      return newInterests;
+    });
   };
 
   const handleDateChange = () => {
@@ -130,6 +162,7 @@ export function AccountSetupScreen() {
       // In a real app, you would submit this data to your API
       console.log('Form data submitted:', data);
       console.log('Selected user type:', data.userType);
+      console.log('Selected interests:', data.interests);
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -175,8 +208,7 @@ export function AccountSetupScreen() {
     id: 'basic-info',
     title: 'Basic Information',
     validate: async () => {
-      // Validate username and userType fields
-      // Make sure userType has a value before triggering validation
+      // Validate username, userType, and interests fields
       const result = await trigger(['username', 'userType']);
       return result;
     },
@@ -202,14 +234,27 @@ export function AccountSetupScreen() {
           />
         </View>
 
-        <AnimatedInput
-          control={control}
-          name="bio"
-          label="Bio (Optional)"
-          icon={<Icon name="user" size={20} />}
-          error={errors.bio}
-          testID="setup-bio"
-        />
+        <View>
+          <Text style={styles.interestsLabel}>Select Your Interests</Text>
+          <View style={styles.chipsContainer}>
+            {interestOptions.map(interest => (
+              <Chip
+                key={interest.id}
+                label={interest.label}
+                variant={
+                  selectedInterests.includes(interest.id)
+                    ? 'filled'
+                    : 'outlined'
+                }
+                color="neutral"
+                selected={selectedInterests.includes(interest.id)}
+                onPress={() => handleInterestToggle(interest.id)}
+                testID={`interest-chip-${interest.id}`}
+              />
+            ))}
+          </View>
+        </View>
+
         <Button
           title="Continue"
           variant="primary"
@@ -550,5 +595,16 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     marginTop: spacing.sm,
+  },
+  interestsLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.neutral.darkGrey,
+    marginBottom: spacing.sm,
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
 });
