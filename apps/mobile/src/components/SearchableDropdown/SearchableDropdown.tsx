@@ -282,11 +282,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         onLayout={handleLayout}>
         {/* Animated Label */}
         {label && (
-          <Animated.View style={{zIndex: 5}}>
-            <Animated.Text style={labelStyle} onPress={handleLabelPress}>
-              {label}
-            </Animated.Text>
-          </Animated.View>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={handleLabelPress}
+            style={{zIndex: 5}}>
+            <Animated.Text style={labelStyle}>{label}</Animated.Text>
+          </TouchableOpacity>
         )}
 
         {/* Make the entire container clickable */}

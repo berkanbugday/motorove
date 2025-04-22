@@ -88,7 +88,7 @@ export const createStyles = (props: {
       paddingHorizontal: spacing.md,
     },
     selectedItem: {
-      backgroundColor: colors.neutral.black,
+      backgroundColor: colors.neutral.veryLightGrey,
     },
     selectedItemContainer: {
       flex: 1,
@@ -100,7 +100,7 @@ export const createStyles = (props: {
     },
     selectedItemText: {
       fontWeight: '500',
-      color: colors.neutral.white,
+      color: colors.neutral.black,
     },
     noResults: {
       padding: spacing.md,

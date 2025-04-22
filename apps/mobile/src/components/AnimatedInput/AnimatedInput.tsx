@@ -226,11 +226,12 @@ function AnimatedInputBase({
 
   const renderLabelView = () => {
     return (
-      <Animated.View style={{zIndex: zIndex.elevated}}>
-        <Animated.Text style={labelStyle} onPress={handleLabelPress}>
-          {label}
-        </Animated.Text>
-      </Animated.View>
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={handleLabelPress}
+        style={styles.labelContainer}>
+        <Animated.Text style={labelStyle}>{label}</Animated.Text>
+      </TouchableOpacity>
     );
   };
 
