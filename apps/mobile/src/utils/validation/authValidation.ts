@@ -46,3 +46,28 @@ export const signupSchema = z
   });
 
 export type SignupFormValues = z.infer<typeof signupSchema>;
+
+// Account setup form schema
+export const accountSetupSchema = z.object({
+  username: z
+    .string({required_error: 'Username is required'})
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be at most 30 characters')
+    .regex(
+      /^[a-zA-Z0-9._]+$/,
+      'Username can only contain letters, numbers, dots and underscores',
+    ),
+  bio: z.string().max(150, 'Bio cannot exceed 150 characters').optional(),
+  phoneNumber: z
+    .string()
+    .regex(/^\+?[0-9]{10,15}$/, 'Please enter a valid phone number')
+    .optional(),
+  birthDate: z
+    .date({invalid_type_error: 'Please select a valid date'})
+    .min(new Date(1900, 0, 1), 'Date is too far in the past')
+    .max(new Date(), 'Date cannot be in the future')
+    .optional(),
+  profilePhotoUrl: z.string().optional(),
+});
+
+export type AccountSetupFormValues = z.infer<typeof accountSetupSchema>;

@@ -14,12 +14,12 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/index';
-import {Icon, AnimatedInput, Button, Checkbox, Header} from '@components/index';
+import {Icon, AnimatedInput, Button, Checkbox, Header} from '@components';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signupSchema, SignupFormValues} from '@utils/validation';
-import {colors, spacing, fontSizes, radius} from '@theme/index';
+import {colors, spacing, fontSizes, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {termsOfService, privacyPolicy} from '@constants/legalContent';
 
@@ -43,11 +43,11 @@ export function SignupScreen() {
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      agreeToTerms: false,
+      fullName: 'Berkan Buğday',
+      email: 'berkan.bugday@gmail.com',
+      password: '12345678',
+      confirmPassword: '12345678',
+      agreeToTerms: true,
     },
   });
 
@@ -73,10 +73,15 @@ export function SignupScreen() {
           message: error,
         });
       } else if (success) {
-        // Store email for confirmation screen
-        setUserEmail(data.email);
-        // Set signup success flag to show confirmation view
-        setSignupSuccess(true);
+        // // Store email for confirmation screen
+        // setUserEmail(data.email);
+        // // Set signup success flag to show confirmation view
+        // setSignupSuccess(true);
+
+        navigation.navigate('AccountSetup', {
+          email: data.email,
+          fullName: data.fullName,
+        });
       }
       // If successful, the useAuth hook will update isAuthenticated
       // which will trigger the navigation to switch to MainNavigator

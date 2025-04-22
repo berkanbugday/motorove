@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, SafeAreaView, Image} from 'react-native';
 import {useAuth} from '@navigation/index';
-import {Button} from '@components/index';
+import {Button} from '@components';
 import {colors, spacing, typography, commonStyles} from '@theme';
 
 export function HomeScreen() {

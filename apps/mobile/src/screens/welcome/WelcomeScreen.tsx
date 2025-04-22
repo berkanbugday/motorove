@@ -11,10 +11,10 @@ import {
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
-import {Button} from '@components/index';
+import {Button} from '@components';
 import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
-import {colors, spacing, radius, fontSizes} from '@theme/index';
+import {colors, spacing, radius, fontSizes} from '@theme';
 
 const {width: screenWidth} = Dimensions.get('window');
 

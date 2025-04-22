@@ -14,11 +14,11 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/index';
-import {Icon, AnimatedInput, Button} from '@components/index';
+import {Icon, AnimatedInput, Button} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {loginSchema, LoginFormValues} from '@utils/validation';
-import {colors, spacing, fontSizes, radius} from '@theme/index';
+import {colors, spacing, fontSizes, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export function LoginScreen() {

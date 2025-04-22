@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {colors, spacing, typography} from '@theme/index';
+import {colors, spacing, typography} from '@theme';
 import {Icon, IconName} from '../Icon';
 
 export interface HeaderProps {

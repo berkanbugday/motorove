@@ -14,7 +14,7 @@ import {
   FieldValues,
   FieldError,
 } from 'react-hook-form';
-import {colors, spacing, radius, typography} from '@theme/index';
+import {colors, spacing, radius, typography} from '@theme';
 
 interface BaseCheckboxProps {
   /**

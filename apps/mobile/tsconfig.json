@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@components/*": ["src/components/*"],
+      "@components": ["src/components"],
       "@screens/*": ["src/screens/*"],
       "@navigation/*": ["src/navigation/*"],
       "@utils/*": ["src/utils/*"],
@@ -11,6 +12,7 @@
       "@types/*": ["src/types/*"],
       "@assets/*": ["src/assets/*"],
       "@theme/*": ["src/theme/*"],
+      "@theme": ["src/theme"],
       "@constants/*": ["src/constants/*"],
       "@/*": ["src/*"]
     }

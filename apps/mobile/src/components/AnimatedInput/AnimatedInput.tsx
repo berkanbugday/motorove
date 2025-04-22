@@ -16,7 +16,7 @@ import {
   FieldError,
 } from 'react-hook-form';
 import {Icon} from '@components/Icon';
-import {colors, spacing, radius, fontSizes} from '@theme/index';
+import {colors, spacing, radius, fontSizes} from '@theme';
 
 // Animation constants
 const ANIMATION_DURATION = 200;
