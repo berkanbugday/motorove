@@ -201,6 +201,7 @@ function AnimatedInputBase({
     backgroundColor: colors.neutral.white,
     paddingHorizontal: spacing.xs,
     zIndex: zIndex.elevated,
+    fontWeight: '500',
   };
 
   const handleLabelPress = () => {
@@ -275,7 +276,6 @@ function AnimatedInputBase({
 
 const styles = StyleSheet.create({
   inputContainer: {
-    marginBottom: spacing.form.inputMarginBottom,
     position: 'relative',
   },
   labelContainer: {

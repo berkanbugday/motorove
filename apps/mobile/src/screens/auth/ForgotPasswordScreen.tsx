@@ -254,13 +254,12 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
+    gap: spacing.lg,
   },
   resetButton: {
-    marginTop: spacing.md,
     backgroundColor: colors.primary.main,
   },
   linkContainer: {
-    marginTop: spacing.md,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -271,9 +270,7 @@ const styles = StyleSheet.create({
   linkButton: {
     color: colors.primary.main,
   },
-  securityNotice: {
-    marginTop: spacing.lg,
-  },
+  securityNotice: {},
   successContainer: {
     alignItems: 'center',
     justifyContent: 'center',

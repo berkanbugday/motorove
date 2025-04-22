@@ -407,11 +407,11 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
+    gap: spacing.lg,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.lg,
   },
   divider: {
     flex: 1,
@@ -424,7 +424,6 @@ const styles = StyleSheet.create({
   socialButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: spacing.sm,
   },
   socialButton: {
     width: 50,
@@ -438,7 +437,6 @@ const styles = StyleSheet.create({
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: spacing.md,
     alignItems: 'center',
   },
   loginLink: {

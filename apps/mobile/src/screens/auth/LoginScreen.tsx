@@ -230,15 +230,14 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
+    gap: spacing.lg,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginBottom: spacing.md,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.lg,
   },
   divider: {
     flex: 1,
@@ -252,7 +251,6 @@ const styles = StyleSheet.create({
   socialButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: spacing.lg,
   },
   socialButton: {
     width: 50,
@@ -266,7 +264,6 @@ const styles = StyleSheet.create({
   signupContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: spacing.md,
     alignItems: 'center',
   },
   signupLink: {

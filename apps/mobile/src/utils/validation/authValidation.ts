@@ -57,6 +57,9 @@ export const accountSetupSchema = z.object({
       /^[a-zA-Z0-9._]+$/,
       'Username can only contain letters, numbers, dots and underscores',
     ),
+  userType: z
+    .string({required_error: 'User type is required'})
+    .min(1, 'Please select a user type'),
   bio: z.string().max(150, 'Bio cannot exceed 150 characters').optional(),
   phoneNumber: z
     .string()

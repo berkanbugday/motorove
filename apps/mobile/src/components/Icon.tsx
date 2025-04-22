@@ -10,6 +10,9 @@ import Facebook from '@assets/icons/facebook.svg';
 import ArrowLeft from '@assets/icons/arrow-left.svg';
 import User from '@assets/icons/user.svg';
 import Close from '@assets/icons/close.svg';
+import ChevronUp from '@assets/icons/chevron-up.svg';
+import ChevronDown from '@assets/icons/chevron-down.svg';
+
 // Type for icons
 export type IconName =
   | 'eye'
@@ -20,7 +23,9 @@ export type IconName =
   | 'facebook'
   | 'arrow-left'
   | 'user'
-  | 'close';
+  | 'close'
+  | 'chevron-up'
+  | 'chevron-down';
 
 interface IconProps {
   name: IconName;
@@ -58,6 +63,10 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <User {...commonProps} />;
     case 'close':
       return <Close {...commonProps} />;
+    case 'chevron-up':
+      return <ChevronUp {...commonProps} />;
+    case 'chevron-down':
+      return <ChevronDown {...commonProps} />;
     default:
       return null;
   }

@@ -26,6 +26,7 @@ import {
   WizardStep,
   Title,
 } from '@components';
+import SearchableDropdown, {DropdownItem} from '@components/SearchableDropdown';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
@@ -35,10 +36,30 @@ import {
 import {colors, spacing, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
+// User type options for dropdown
+const userTypeOptions: DropdownItem[] = [
+  {id: '1', label: 'Rider', value: 'rider'},
+  {id: '2', label: 'Mechanic', value: 'mechanic'},
+  {id: '3', label: 'Enthusiast', value: 'enthusiast'},
+  {id: '4', label: 'Professional', value: 'professional'},
+  {id: '5', label: 'Beginner', value: 'beginner'},
+  {id: '6', label: 'Other', value: 'other'},
+  {id: '7', label: 'Admin', value: 'admin'},
+  {id: '8', label: 'Moderator', value: 'moderator'},
+  {id: '9', label: 'Support', value: 'support'},
+  {id: '10', label: 'Developer', value: 'developer'},
+  {id: '11', label: 'Designer', value: 'designer'},
+  {id: '12', label: 'Writer', value: 'writer'},
+  {id: '13', label: 'Editor', value: 'editor'},
+];
+
 export function AccountSetupScreen() {
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedUserType, setSelectedUserType] = useState<DropdownItem | null>(
+    null,
+  );
   const {height} = useWindowDimensions();
   const navigation = useNavigation<AuthScreenNavigationProp<'AccountSetup'>>();
   const route = useRoute<AuthScreenRouteProp<'AccountSetup'>>();
@@ -56,16 +77,23 @@ export function AccountSetupScreen() {
   } = useForm<AccountSetupFormValues>({
     resolver: zodResolver(accountSetupSchema),
     defaultValues: {
-      username: '',
+      username: 'berkanbugday',
       bio: '',
       phoneNumber: '',
       birthDate: undefined,
       profilePhotoUrl: '',
+      userType: '',
     },
     mode: 'onChange',
   });
 
   const birthDateValue = watch('birthDate');
+
+  // Handle user type selection
+  const handleUserTypeSelect = (item: DropdownItem) => {
+    setSelectedUserType(item);
+    setValue('userType', item.value || '', {shouldValidate: true});
+  };
 
   const handleDateChange = () => {
     // In a real implementation, this would use DateTimePicker
@@ -101,6 +129,7 @@ export function AccountSetupScreen() {
       setLoading(true);
       // In a real app, you would submit this data to your API
       console.log('Form data submitted:', data);
+      console.log('Selected user type:', data.userType);
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -146,8 +175,9 @@ export function AccountSetupScreen() {
     id: 'basic-info',
     title: 'Basic Information',
     validate: async () => {
-      // Validate username field
-      const result = await trigger('username');
+      // Validate username and userType fields
+      // Make sure userType has a value before triggering validation
+      const result = await trigger(['username', 'userType']);
       return result;
     },
     content: (
@@ -160,6 +190,18 @@ export function AccountSetupScreen() {
           error={errors.username}
           testID="setup-username"
         />
+
+        <View style={styles.dropdownContainer}>
+          <SearchableDropdown
+            data={userTypeOptions}
+            label="User Type"
+            selectedItem={selectedUserType}
+            onSelect={handleUserTypeSelect}
+            error={errors.userType?.message}
+            testID="user-type-dropdown"
+          />
+        </View>
+
         <AnimatedInput
           control={control}
           name="bio"
@@ -386,11 +428,13 @@ const styles = StyleSheet.create({
   },
   stepContent: {
     width: '100%',
-    gap: spacing.md,
+    gap: spacing.lg,
+  },
+  dropdownContainer: {
+    width: '100%',
   },
   photoContainer: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
   },
   photoButton: {
     position: 'relative',
