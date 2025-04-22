@@ -173,34 +173,33 @@ export function SignupScreen() {
                   testID="signup-confirm-password"
                 />
 
-                <View style={styles.termsContainer}>
-                  <Checkbox
-                    control={control}
-                    name="agreeToTerms"
-                    error={errors.agreeToTerms}
-                    testID="terms-checkbox"
-                    variant="outline"
-                    size="medium"
-                    style={styles.termsCheckbox}
-                  />
-                  <View style={styles.termsTextContainer}>
-                    <Text style={styles.termsText}>I agree to the</Text>
-                    <Button
-                      title="Terms of Service"
-                      variant="text"
-                      onPress={handleTermsPress}
-                      textStyle={styles.termsLink}
-                    />
-                    <Text style={styles.termsText}>and</Text>
-                    <Button
-                      title="Privacy Policy"
-                      variant="text"
-                      onPress={handlePrivacyPress}
-                      textStyle={styles.termsLink}
-                    />
-                  </View>
-                </View>
-
+                <Checkbox
+                  control={control}
+                  name="agreeToTerms"
+                  error={errors.agreeToTerms}
+                  testID="terms-checkbox"
+                  variant="outline"
+                  size="medium"
+                  label={
+                    <View style={styles.termsTextContainer}>
+                      <Text style={styles.termsText}>I agree to the</Text>
+                      <Button
+                        title="Terms of Service"
+                        variant="text"
+                        onPress={handleTermsPress}
+                        textStyle={styles.termsLink}
+                      />
+                      <Text style={styles.termsText}>and</Text>
+                      <Button
+                        title="Privacy Policy"
+                        variant="text"
+                        onPress={handlePrivacyPress}
+                        textStyle={styles.termsLink}
+                      />
+                    </View>
+                  }
+                  style={styles.termsCheckbox}
+                />
                 <Button
                   title="Sign Up"
                   shape="round"
@@ -369,12 +368,6 @@ const styles = StyleSheet.create({
     color: colors.primary.main,
     fontSize: fontSizes.sm,
     fontWeight: '600',
-  },
-  termsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.lg,
-    marginTop: spacing.sm,
   },
   termsCheckbox: {
     marginTop: 0,

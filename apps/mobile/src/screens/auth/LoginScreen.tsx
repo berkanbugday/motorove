@@ -127,6 +127,7 @@ export function LoginScreen() {
                 <Button
                   title="Forgot password?"
                   variant="text"
+                  size="small"
                   onPress={handleForgotPassword}
                   style={styles.forgotPasswordContainer}
                 />

@@ -18,9 +18,9 @@ import {colors, spacing, radius, typography} from '@theme/index';
 
 interface BaseCheckboxProps {
   /**
-   * Label text to display next to checkbox
+   * Label content to display next to checkbox
    */
-  label?: string;
+  label?: React.ReactNode;
   /**
    * Visual variant of the checkbox
    */
@@ -176,7 +176,7 @@ export function Checkbox<T extends FieldValues = any>(props: CheckboxProps<T>) {
 interface CheckboxBaseProps {
   checked: boolean;
   onToggle: () => void;
-  label?: string;
+  label?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
@@ -246,7 +246,12 @@ function CheckboxBase({
             <View style={styles.innerFill} />
           )}
         </View>
-        {label && <Text style={labelStyles}>{label}</Text>}
+        {label &&
+          (typeof label === 'string' ? (
+            <Text style={labelStyles}>{label}</Text>
+          ) : (
+            label
+          ))}
       </TouchableOpacity>
       {error ? (
         <Text style={styles.errorText} testID={`${testID}-error`}>
