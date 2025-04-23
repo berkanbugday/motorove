@@ -18,7 +18,7 @@ import {
   PageIndicator,
 } from '@components';
 import {colors, commonStyles, fontSizes, radius, spacing} from '@theme';
-
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 // Route data
 const recommendedRoutes = [
   {
@@ -102,7 +102,7 @@ export function HomeScreen() {
 
   // Reference to the FlatList for programmatic scrolling
   const eventsListRef = useRef<FlatList>(null);
-
+  const insets = useSafeAreaInsets();
   const rotateRecommendedRoute = useCallback(() => {
     const nextIndex = (currentRouteIndex + 1) % recommendedRoutes.length;
     setCurrentRouteIndex(nextIndex);
@@ -205,7 +205,8 @@ export function HomeScreen() {
         rightIconBadgeCount={5}
         onRightButtonPress={() => console.log('Notifications pressed')}
       />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[styles.container, {marginBottom: 70 + insets.bottom}]}>
         <LocationPermissionOverlay
           visible={showLocationPermission}
           onAllowPress={handleAllowLocationAccess}
@@ -239,6 +240,42 @@ export function HomeScreen() {
             <Subtitle weight="bold" style={styles.sectionTitle}>
               Recommended Route of the Week
             </Subtitle>
+            <Card
+              title={currentRoute.title}
+              subtitle={currentRoute.subtitle}
+              image={{uri: currentRoute.image}}
+              variant="elevated"
+              fullImage
+              size="small"
+              style={styles.card}
+              titleStyle={styles.cardTitle}
+              subtitleStyle={styles.cardSubtitle}
+              onPress={() => console.log('Card pressed')}
+            />
+            <Card
+              title={currentRoute.title}
+              subtitle={currentRoute.subtitle}
+              image={{uri: currentRoute.image}}
+              variant="elevated"
+              fullImage
+              size="small"
+              style={styles.card}
+              titleStyle={styles.cardTitle}
+              subtitleStyle={styles.cardSubtitle}
+              onPress={() => console.log('Card pressed')}
+            />
+            <Card
+              title={currentRoute.title}
+              subtitle={currentRoute.subtitle}
+              image={{uri: currentRoute.image}}
+              variant="elevated"
+              fullImage
+              size="small"
+              style={styles.card}
+              titleStyle={styles.cardTitle}
+              subtitleStyle={styles.cardSubtitle}
+              onPress={() => console.log('Card pressed')}
+            />
             <Card
               title={currentRoute.title}
               subtitle={currentRoute.subtitle}
