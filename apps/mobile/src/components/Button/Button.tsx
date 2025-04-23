@@ -79,6 +79,7 @@ export function Button({
         />
       ) : (
         <Typography
+          align="center"
           variant={getTypographyVariant() as any}
           color={getTextColor()}
           style={textStyle}>

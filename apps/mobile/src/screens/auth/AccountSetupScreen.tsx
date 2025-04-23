@@ -34,7 +34,7 @@ import {
   accountSetupSchema,
   AccountSetupFormValues,
 } from '@utils/validation/authValidation';
-import {colors, spacing, radius} from '@theme';
+import {colors, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 // User type options for dropdown
@@ -72,7 +72,6 @@ const interestOptions = [
 
 export function AccountSetupScreen() {
   const [loading, setLoading] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedUserType, setSelectedUserType] = useState<DropdownItem | null>(
     null,
@@ -90,7 +89,6 @@ export function AccountSetupScreen() {
     handleSubmit,
     formState: {errors},
     setValue,
-    watch,
     trigger,
   } = useForm<AccountSetupFormValues>({
     resolver: zodResolver(accountSetupSchema),
@@ -98,15 +96,12 @@ export function AccountSetupScreen() {
       username: 'berkanbugday',
       bio: '',
       phoneNumber: '',
-      birthDate: undefined,
       profilePhotoUrl: '',
       userType: '',
       interests: [],
     },
     mode: 'onChange',
   });
-
-  const birthDateValue = watch('birthDate');
 
   // Handle user type selection
   const handleUserTypeSelect = (item: DropdownItem) => {
@@ -125,14 +120,6 @@ export function AccountSetupScreen() {
       setValue('interests', newInterests, {shouldValidate: true});
       return newInterests;
     });
-  };
-
-  const handleDateChange = () => {
-    // In a real implementation, this would use DateTimePicker
-    // For now, we'll just simulate selecting today's date
-    const today = new Date();
-    setShowDatePicker(false);
-    setValue('birthDate', today, {shouldValidate: true});
   };
 
   const handleChoosePhoto = () => {
@@ -181,26 +168,6 @@ export function AccountSetupScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (date: Date) => {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return `${
-      months[date.getMonth()]
-    } ${date.getDate()}, ${date.getFullYear()}`;
   };
 
   // Define wizard steps
@@ -273,7 +240,7 @@ export function AccountSetupScreen() {
     validate: async () => {
       // Since the contact info fields are optional, we'll always return true
       // But if we had required fields here, we would validate them
-      const result = await trigger(['phoneNumber', 'birthDate']);
+      const result = await trigger(['phoneNumber']);
       return result;
     },
     optional: true,
@@ -288,43 +255,6 @@ export function AccountSetupScreen() {
           error={errors.phoneNumber}
           testID="setup-phone"
         />
-
-        {/* Birth Date Selector */}
-        <TouchableOpacity
-          style={styles.datePickerButton}
-          onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.datePickerLabel}>Birth Date (Optional)</Text>
-          <Text style={styles.datePickerValue}>
-            {birthDateValue ? formatDate(birthDateValue) : 'Select date'}
-          </Text>
-          <Icon name="user" size={20} color={colors.neutral.grey} />
-        </TouchableOpacity>
-        {errors.birthDate && (
-          <Text style={styles.errorText}>
-            {errors.birthDate.message?.toString()}
-          </Text>
-        )}
-
-        {showDatePicker && (
-          // This would be a DateTimePicker in a real implementation
-          <View style={styles.datePickerModal}>
-            <View style={styles.datePickerContent}>
-              <Text style={styles.datePickerTitle}>Select Birth Date</Text>
-              <Button
-                title="Select Today (Demo)"
-                variant="primary"
-                onPress={handleDateChange}
-                testID="select-date-button"
-              />
-              <Button
-                title="Cancel"
-                variant="text"
-                onPress={() => setShowDatePicker(false)}
-                testID="cancel-date-button"
-              />
-            </View>
-          </View>
-        )}
 
         <View style={styles.navigationButtons}>
           <Button
@@ -397,24 +327,10 @@ export function AccountSetupScreen() {
             onPress={handleSubmit(onSubmit)}
             loading={loading}
             style={styles.continueButton}
+            textStyle={{fontSize: fontSizes.sm}}
             testID="complete-setup-button"
           />
         </View>
-
-        <Button
-          title="Skip for now"
-          variant="text"
-          shape="round"
-          onPress={() => {
-            // Skip profile setup and go to main app
-            navigation.reset({
-              index: 0,
-              routes: [{name: 'Main' as any}],
-            });
-          }}
-          style={styles.skipButton}
-          testID="skip-setup-button"
-        />
       </View>
     ),
   };
@@ -521,56 +437,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.neutral.grey,
   },
-  datePickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: colors.neutral.lightGrey,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    height: 56,
-  },
-  datePickerLabel: {
-    fontSize: 14,
-    color: colors.neutral.grey,
-    position: 'absolute',
-    top: 5,
-    left: spacing.md,
-    backgroundColor: colors.neutral.white,
-    paddingHorizontal: 4,
-  },
-  datePickerValue: {
-    fontSize: 16,
-    color: colors.neutral.darkGrey,
-    flex: 1,
-    marginLeft: spacing.sm,
-  },
-  datePickerModal: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  datePickerContent: {
-    backgroundColor: colors.neutral.white,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    width: '80%',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  datePickerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-  },
   errorText: {
     color: colors.status.error,
     fontSize: 12,
@@ -584,17 +450,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: spacing.lg,
+    gap: spacing.md,
   },
   backButton: {
     flex: 1,
-    marginRight: spacing.sm,
   },
   continueButton: {
     flex: 1,
-    marginLeft: spacing.sm,
-  },
-  skipButton: {
-    marginTop: spacing.sm,
   },
   interestsLabel: {
     fontSize: 16,
