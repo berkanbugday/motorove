@@ -1,16 +1,40 @@
-import React from 'react';
-import {View, StyleSheet, SafeAreaView, Image} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, SafeAreaView, Image, Platform} from 'react-native';
 import {useAuth} from '@navigation/index';
 import {Button, Title, Body} from '@components';
+import {LocationPermissionOverlay} from '../../components/LocationPermissionOverlay/LocationPermissionOverlay';
 import {colors, spacing, commonStyles} from '@theme';
 
 export function HomeScreen() {
   const {logout} = useAuth();
+  const [showLocationPermission, setShowLocationPermission] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
+    setShowLocationPermission(true);
     // Navigation to login screen will happen automatically
     // because the useAuth hook updates isAuthenticated state
+  };
+
+  const handleAllowLocationAccess = () => {
+    // Request location permission
+    // This would typically use the Geolocation API or a library like
+    // react-native-permissions to request location access
+    if (Platform.OS === 'ios') {
+      // iOS permission logic
+      console.log('Requesting iOS location permission');
+    } else {
+      // Android permission logic
+      console.log('Requesting Android location permission');
+    }
+
+    // Close the overlay
+    setShowLocationPermission(false);
+  };
+
+  const handleDismissLocationPermission = () => {
+    // User declined location permission
+    console.log('User declined location permission');
+    setShowLocationPermission(false);
   };
 
   return (
@@ -32,6 +56,13 @@ export function HomeScreen() {
           testID="logout-button"
         />
       </View>
+
+      {/* Location Permission Overlay */}
+      <LocationPermissionOverlay
+        visible={showLocationPermission}
+        onAllowPress={handleAllowLocationAccess}
+        onDismiss={handleDismissLocationPermission}
+      />
     </SafeAreaView>
   );
 }

@@ -39,7 +39,7 @@ export const useFirstTimeCheck = () => {
 export function useAuth() {
   // For simplicity, we're using state here
   // In a real app, this would use Supabase Auth or similar
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   const login = async (email: string, password: string) => {
     // TODO: Implement actual login with Supabase
