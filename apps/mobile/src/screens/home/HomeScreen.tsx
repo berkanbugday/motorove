@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useCallback, useEffect, useRef} from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -9,7 +9,14 @@ import {
   Dimensions,
 } from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
-import {Header, Banner, Card, Subtitle, GroupEventBanner} from '@components';
+import {
+  Header,
+  Banner,
+  Card,
+  Subtitle,
+  GroupEventBanner,
+  PageIndicator,
+} from '@components';
 import {colors, commonStyles, fontSizes, radius, spacing} from '@theme';
 
 // Route data
@@ -84,16 +91,6 @@ const upcomingEvents: EventItem[] = [
     participantCount: 8,
     memberCount: 25,
   },
-  {
-    id: '4',
-    day: '05',
-    month: 'JUL',
-    time: '12:00',
-    title: 'Weekend Countryside Ride',
-    organizer: 'Country Road Enthusiasts',
-    participantCount: 12,
-    memberCount: 30,
-  },
 ];
 
 export function HomeScreen() {
@@ -101,6 +98,10 @@ export function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
+
+  // Reference to the FlatList for programmatic scrolling
+  const eventsListRef = useRef<FlatList>(null);
 
   const rotateRecommendedRoute = useCallback(() => {
     const nextIndex = (currentRouteIndex + 1) % recommendedRoutes.length;
@@ -131,6 +132,45 @@ export function HomeScreen() {
   useEffect(() => {
     setCurrentRoute(recommendedRoutes[currentRouteIndex]);
   }, [currentRouteIndex]);
+
+  // Handle FlatList scroll event to update the current page
+  const handleEventScroll = useCallback((event: any) => {
+    const contentOffset = event.nativeEvent.contentOffset;
+    const viewSize = event.nativeEvent.layoutMeasurement;
+
+    // Calculate page number by dividing offset by width
+    const pageNum = Math.floor(contentOffset.x / (viewSize.width - spacing.xl));
+    setCurrentEventIndex(pageNum);
+  }, []);
+
+  // Handle page indicator press to scroll to that event
+  const handleEventPageChange = useCallback((pageIndex: number) => {
+    // Scroll to the selected event
+    eventsListRef.current?.scrollToIndex({
+      index: pageIndex,
+      animated: true,
+      viewPosition: 0.5,
+    });
+  }, []);
+
+  // Event scroll fail handler for cases where the index doesn't exist
+  const handleScrollToIndexFailed = useCallback(
+    (info: {
+      index: number;
+      highestMeasuredFrameIndex: number;
+      averageItemLength: number;
+    }) => {
+      // This handles situations where we might try to scroll to an item that isn't rendered yet
+      setTimeout(() => {
+        eventsListRef.current?.scrollToIndex({
+          index: info.index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      }, 100);
+    },
+    [],
+  );
 
   // Render event banner item
   const renderEventBanner = useCallback(
@@ -215,9 +255,10 @@ export function HomeScreen() {
 
           <View>
             <Subtitle weight="bold" style={styles.sectionTitle}>
-              Upcoming Events
+              Upcoming Group Events
             </Subtitle>
             <FlatList
+              ref={eventsListRef}
               data={upcomingEvents}
               renderItem={renderEventBanner}
               keyExtractor={keyExtractor}
@@ -225,6 +266,19 @@ export function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               snapToInterval={Dimensions.get('window').width - spacing.xl} // Adjust based on item width
               decelerationRate="fast"
+              onScroll={handleEventScroll}
+              scrollEventThrottle={16} // For smooth scrolling performance
+              onScrollToIndexFailed={handleScrollToIndexFailed}
+            />
+            <PageIndicator
+              totalPages={upcomingEvents.length}
+              currentPage={currentEventIndex}
+              onPageChange={handleEventPageChange}
+              containerStyle={styles.pageIndicator}
+              type="pill"
+              indicatorSize={8}
+              activeIndicatorSize={10}
+              spacing={8}
             />
           </View>
         </ScrollView>
@@ -302,5 +356,8 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
     marginLeft: spacing.sm,
     width: Dimensions.get('window').width - spacing.xxl,
+  },
+  pageIndicator: {
+    marginTop: spacing.sm,
   },
 });
