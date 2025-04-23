@@ -1,0 +1,279 @@
+import React from 'react';
+import {
+  View,
+  Image,
+  ImageSourcePropType,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+  ImageStyle,
+} from 'react-native';
+import {Typography} from '../Typography';
+import {Icon} from '../Icon';
+import {Card} from '../Card';
+import {colors} from '@theme';
+import {Chip, ChipColor} from '../Chip';
+import {styles} from './GroupEventCard.styles';
+
+export interface ParticipantInfo {
+  id: string;
+  name: string;
+  avatar?: ImageSourcePropType;
+}
+
+export interface GroupEventCardProps {
+  /**
+   * Title of the event
+   */
+  title: string;
+
+  /**
+   * Date and time of the event (ISO string or Date object)
+   */
+  dateTime: string | Date;
+
+  /**
+   * Location of the event
+   */
+  location: string;
+
+  /**
+   * Distance to the event location (optional)
+   */
+  distance?: string;
+
+  /**
+   * Image for the event card
+   */
+  image?: ImageSourcePropType;
+
+  /**
+   * Event category (e.g., 'Ride', 'Meet', 'Race')
+   */
+  category?: string;
+
+  /**
+   * List of participants (optional)
+   */
+  participants?: ParticipantInfo[];
+
+  /**
+   * Maximum number of participants (optional)
+   */
+  maxParticipants?: number;
+
+  /**
+   * Whether the event is featured
+   */
+  featured?: boolean;
+
+  /**
+   * Handler for when the card is pressed
+   */
+  onPress?: () => void;
+
+  /**
+   * Additional styles for the card container
+   */
+  style?: StyleProp<ViewStyle>;
+
+  /**
+   * Additional styles for the content container
+   */
+  contentStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Additional styles for the image
+   */
+  imageStyle?: StyleProp<ImageStyle>;
+
+  /**
+   * Additional styles for the title text
+   */
+  titleStyle?: StyleProp<TextStyle>;
+}
+
+/**
+ * A card component for displaying group events.
+ */
+const GroupEventCard: React.FC<GroupEventCardProps> = ({
+  title,
+  dateTime,
+  location,
+  distance,
+  image,
+  category,
+  participants = [],
+  maxParticipants,
+  featured = false,
+  onPress,
+  style,
+  contentStyle,
+  imageStyle,
+  titleStyle,
+}) => {
+  // Format date to show only the day and month
+  const getFormattedDate = () => {
+    const date = typeof dateTime === 'string' ? new Date(dateTime) : dateTime;
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  // Format time to show only hours and minutes
+  const getFormattedTime = () => {
+    const date = typeof dateTime === 'string' ? new Date(dateTime) : dateTime;
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+  // Get color for category chip
+  const getCategoryColor = (): ChipColor => {
+    // Map categories to colors - can be extended
+    switch (category?.toLowerCase()) {
+      case 'group ride':
+        return 'primary';
+      case 'night ride':
+        return 'info';
+      case 'off-road':
+        return 'warning';
+      default:
+        return 'primary';
+    }
+  };
+
+  // Calculate the number of participants to display
+  const displayedParticipantsCount = Math.min(participants.length, 3);
+  const remainingParticipants = Math.max(
+    0,
+    participants.length - displayedParticipantsCount,
+  );
+
+  // Card header with category chip and featured badge
+  const headerComponent = (
+    <>
+      {image && (
+        <Image
+          source={image}
+          style={[styles.image, imageStyle]}
+          resizeMode="cover"
+        />
+      )}
+
+      {/* Featured Badge */}
+      {featured && (
+        <View style={styles.featuredBadge}>
+          <Icon name="check" size={12} color={colors.neutral.white} />
+          <Typography
+            variant="caption"
+            color={colors.neutral.white}
+            style={styles.featuredText}>
+            Featured
+          </Typography>
+        </View>
+      )}
+
+      {/* Category Chip */}
+      {category && (
+        <View style={styles.categoryContainer}>
+          <Chip
+            label={category}
+            color={getCategoryColor()}
+            size="small"
+            variant="filled"
+          />
+        </View>
+      )}
+    </>
+  );
+
+  // Render card content
+  const cardContent = (
+    <>
+      {/* Date and Time */}
+      <View style={styles.dateTimeContainer}>
+        <Icon name="chevron-down" size={14} color={colors.neutral.grey} />
+        <Typography
+          variant="caption"
+          color={colors.neutral.grey}
+          style={styles.dateTime}>
+          {getFormattedDate()} • {getFormattedTime()}
+        </Typography>
+      </View>
+
+      {/* Location */}
+      <View style={styles.locationContainer}>
+        <Icon name="map-pin" size={14} color={colors.neutral.grey} />
+        <Typography
+          variant="caption"
+          color={colors.neutral.grey}
+          style={styles.location}>
+          {location}
+          {distance && ` • ${distance}`}
+        </Typography>
+      </View>
+
+      {/* Participants */}
+      {participants.length > 0 && (
+        <View style={styles.participantsContainer}>
+          <View style={styles.participantsAvatars}>
+            {participants
+              .slice(0, displayedParticipantsCount)
+              .map((participant, index) => (
+                <View
+                  key={participant.id}
+                  style={[
+                    styles.avatarContainer,
+                    {zIndex: 10 - index, marginLeft: index > 0 ? -10 : 0},
+                  ]}>
+                  <Image
+                    source={
+                      participant.avatar ||
+                      require('@assets/images/default-avatar.png')
+                    }
+                    style={styles.participantAvatar}
+                  />
+                </View>
+              ))}
+
+            {remainingParticipants > 0 && (
+              <View style={[styles.avatarContainer, styles.remainingAvatars]}>
+                <Typography
+                  variant="caption"
+                  color={colors.neutral.white}
+                  align="center">
+                  +{remainingParticipants}
+                </Typography>
+              </View>
+            )}
+          </View>
+
+          <Typography variant="caption" color={colors.neutral.grey}>
+            {participants.length}{' '}
+            {participants.length === 1 ? 'rider' : 'riders'}
+            {maxParticipants ? ` / ${maxParticipants}` : ''}
+          </Typography>
+        </View>
+      )}
+    </>
+  );
+
+  return (
+    <Card
+      onPress={onPress}
+      style={[featured && styles.featuredContainer, style]}
+      headerComponent={headerComponent}
+      title={title}
+      titleStyle={titleStyle}
+      contentStyle={[styles.content, contentStyle]}
+      variant="elevated">
+      {cardContent}
+    </Card>
+  );
+};
+
+export default GroupEventCard;

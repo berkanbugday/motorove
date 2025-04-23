@@ -191,7 +191,7 @@ export function Header({
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               {rightIconName ? (
                 <View>
-                  <Icon name={rightIconName} size={24} color={textColor} />
+                  <Icon name={rightIconName} size={20} color={textColor} />
                   {rightIconBadgeCount > 0 && (
                     <View style={styles.badgeContainer}>
                       <Text style={styles.badgeText}>
@@ -250,8 +250,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rightSection: {
-    width: 50,
-    height: 50,
+    width: 46,
+    height: 46,
     padding: spacing.sm,
     borderWidth: 1,
     borderColor: 'transparent',
@@ -264,8 +264,8 @@ const styles = StyleSheet.create({
   },
   badgeContainer: {
     position: 'absolute',
-    top: -10,
-    right: -10,
+    top: -15,
+    right: -15,
     backgroundColor: colors.primary.main,
     borderRadius: 10,
     minWidth: 20,

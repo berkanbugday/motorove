@@ -3,6 +3,7 @@ import {View, Text, TouchableOpacity, ViewStyle, TextStyle} from 'react-native';
 import {colors} from '@theme';
 import {Icon, IconName} from '../Icon';
 import {styles} from './Banner.styles';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 export type BannerVariant =
   | 'info'
@@ -15,6 +16,7 @@ export type BannerAction = {
   label: string;
   onPress: () => void;
 };
+export type BannerPosition = 'top' | 'bottom';
 
 export interface BannerProps {
   /**
@@ -76,6 +78,20 @@ export interface BannerProps {
    * @default true
    */
   filled?: boolean;
+  /**
+   * Whether the banner should stick to the top or bottom of the screen
+   * @default undefined
+   */
+  sticky?: BannerPosition;
+  /**
+   * Whether to respect safe area insets when sticky
+   * @default true
+   */
+  respectSafeArea?: boolean;
+  /**
+   * Custom inset values to use when positioned (overrides safe area)
+   */
+  customInsets?: {top?: number; bottom?: number};
 }
 
 /**
@@ -96,7 +112,12 @@ const Banner: React.FC<BannerProps> = ({
   subtitleStyle,
   messageStyle,
   filled = true,
+  sticky,
+  respectSafeArea = true,
+  customInsets,
 }) => {
+  const safeAreaInsets = useSafeAreaInsets();
+
   // Get the appropriate colors based on the variant
   const getVariantStyles = () => {
     const variantColors = {
@@ -153,8 +174,25 @@ const Banner: React.FC<BannerProps> = ({
     color: variantStyles.text,
   };
 
+  // Calculate insets based on respectSafeArea and customInsets
+  const insets = {
+    bottom:
+      customInsets?.bottom ?? (respectSafeArea ? safeAreaInsets.bottom : 0),
+  };
+
+  // Add position styles if sticky is provided
+  const stickyStyle: ViewStyle = sticky
+    ? {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        ...(sticky === 'top' ? {top: 0} : {bottom: 60 + insets.bottom}),
+      }
+    : {};
+
   return (
-    <View style={[styles.container, containerStyle, style]}>
+    <View style={[styles.container, containerStyle, stickyStyle, style]}>
       {/* Icon */}
       {iconName && (
         <View style={styles.iconContainer}>

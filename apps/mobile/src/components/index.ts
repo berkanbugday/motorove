@@ -14,3 +14,4 @@ export * from './Overlay';
 export * from './LocationPermissionOverlay';
 export * from './Banner';
 export * from './Card';
+export {GroupEventCard} from './GroupEventCard';

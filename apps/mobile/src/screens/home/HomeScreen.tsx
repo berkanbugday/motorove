@@ -1,51 +1,38 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   StyleSheet,
   SafeAreaView,
-  Platform,
   View,
   ScrollView,
-  Text,
+  RefreshControl,
 } from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
-import {Header, Banner, Card, Title, Subtitle} from '@components';
+import {Header, Banner, Card, Subtitle} from '@components';
 import {colors, commonStyles, fontSizes, radius, spacing} from '@theme';
+
 export function HomeScreen() {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
-
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setShowLocationPermission(true);
-  //   }, 3000); // 3 seconds delay
-
-  //   return () => clearTimeout(timer); // Cleanup the timer on component unmount
-  // }, []);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleAllowLocationAccess = () => {
-    // Request location permission
-    // This would typically use the Geolocation API or a library like
-    // react-native-permissions to request location access
-    if (Platform.OS === 'ios') {
-      // iOS permission logic
-      console.log('Requesting iOS location permission');
-    } else {
-      // Android permission logic
-      console.log('Requesting Android location permission');
-    }
-
-    // Close the overlay
+    // Request location permission logic would go here
     setShowLocationPermission(false);
   };
 
   const handleDismissLocationPermission = () => {
-    // User declined location permission
-    console.log('User declined location permission');
     setShowLocationPermission(false);
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    // Simulate data fetching
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
   return (
     <View style={styles.container}>
-      {/* Header Component */}
       <Header
         title="Hi there 👋🏻"
         subtitle="Michael Thompson"
@@ -56,28 +43,36 @@ export function HomeScreen() {
         onRightButtonPress={() => console.log('Notifications pressed')}
       />
       <SafeAreaView style={styles.container}>
-        {/* Location Permission Overlay */}
         <LocationPermissionOverlay
           visible={showLocationPermission}
           onAllowPress={handleAllowLocationAccess}
           onDismiss={handleDismissLocationPermission}
         />
+
+        <Banner
+          title="Today's weather"
+          subtitle="25°C"
+          message="Perfect conditions for riding!"
+          style={styles.banner}
+          textContainerStyle={styles.textContainer}
+          titleStyle={styles.bannerTitle}
+          subtitleStyle={styles.bannerSubtitle}
+          messageStyle={styles.bannerMessage}
+          variant="contrast"
+        />
+
         <ScrollView
           style={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}>
-          <Banner
-            title="Today's weather"
-            subtitle="25°C"
-            message="Perfect conditions for riding!"
-            style={styles.banner}
-            textContainerStyle={styles.textContainer}
-            titleStyle={styles.bannerTitle}
-            subtitleStyle={styles.bannerSubtitle}
-            messageStyle={styles.bannerMessage}
-            variant="contrast"
-          />
-
-          <View style={styles.sectionContainer}>
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.neutral.black]}
+              tintColor={colors.neutral.black}
+            />
+          }>
+          <View>
             <Subtitle weight="bold" style={styles.sectionTitle}>
               Recommended Route of the Week
             </Subtitle>
@@ -88,6 +83,7 @@ export function HomeScreen() {
               variant="elevated"
               fullImage
               size="small"
+              style={styles.card}
               titleStyle={styles.cardTitle}
               subtitleStyle={styles.cardSubtitle}
               onPress={() => console.log('Card pressed')}
@@ -106,7 +102,6 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
   },
   title: {
     alignSelf: 'flex-start',
@@ -120,7 +115,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     borderRadius: radius.lg,
-    height: 80,
+    height: 85,
   },
   textContainer: {
     flexDirection: 'row',
@@ -147,6 +142,9 @@ const styles = StyleSheet.create({
     top: 30,
     right: 0,
   },
+  card: {
+    height: 180,
+  },
   cardTitle: {
     fontSize: fontSizes.lg,
     fontWeight: 'bold',
@@ -158,11 +156,8 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.lg,
     color: colors.neutral.lightGrey,
   },
-  sectionContainer: {
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
   sectionTitle: {
+    marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
 });

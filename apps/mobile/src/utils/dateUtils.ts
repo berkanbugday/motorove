@@ -1,0 +1,109 @@
+/**
+ * Utility functions for date and time formatting
+ */
+
+/**
+ * Format a date for display in the UI
+ * @param date - The date to format
+ * @returns A formatted date string like "Mon, Apr 15, 2024 • 6:30 PM"
+ */
+export function formatDate(date: Date): string {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  };
+
+  const timeOptions: Intl.DateTimeFormatOptions = {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  };
+
+  const dateStr = date.toLocaleDateString('en-US', options);
+  const timeStr = date.toLocaleTimeString('en-US', timeOptions);
+
+  return `${dateStr} • ${timeStr}`;
+}
+
+/**
+ * Get a relative time string (e.g., "in 2 days" or "3 hours ago")
+ * @param date - The date to get relative time for
+ * @returns A relative time string
+ */
+export function getRelativeTimeString(date: Date): string {
+  const now = new Date();
+  const diffMs = date.getTime() - now.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+  if (diffMs < 0) {
+    // Past
+    if (Math.abs(diffDays) >= 1) {
+      return `${Math.abs(diffDays)} day${
+        Math.abs(diffDays) === 1 ? '' : 's'
+      } ago`;
+    } else if (Math.abs(diffHours) >= 1) {
+      return `${Math.abs(diffHours)} hour${
+        Math.abs(diffHours) === 1 ? '' : 's'
+      } ago`;
+    } else if (Math.abs(diffMinutes) >= 1) {
+      return `${Math.abs(diffMinutes)} minute${
+        Math.abs(diffMinutes) === 1 ? '' : 's'
+      } ago`;
+    } else {
+      return 'just now';
+    }
+  } else {
+    // Future
+    if (diffDays >= 1) {
+      return `in ${diffDays} day${diffDays === 1 ? '' : 's'}`;
+    } else if (diffHours >= 1) {
+      return `in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
+    } else if (diffMinutes >= 1) {
+      return `in ${diffMinutes} minute${diffMinutes === 1 ? '' : 's'}`;
+    } else {
+      return 'now';
+    }
+  }
+}
+
+/**
+ * Format a date range for display in the UI
+ * @param startDate - The start date of the range
+ * @param endDate - The end date of the range
+ * @returns A formatted date range string like "Apr 15 - Apr 17, 2024"
+ */
+export function formatDateRange(startDate: Date, endDate: Date): string {
+  const startOptions: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+  };
+
+  const endOptions: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  };
+
+  // If both dates are in the same month and year
+  if (
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getFullYear() === endDate.getFullYear()
+  ) {
+    return `${startDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    })} - ${endDate.toLocaleDateString('en-US', {
+      day: 'numeric',
+      year: 'numeric',
+    })}`;
+  }
+
+  return `${startDate.toLocaleDateString(
+    'en-US',
+    startOptions,
+  )} - ${endDate.toLocaleDateString('en-US', endOptions)}`;
+}
