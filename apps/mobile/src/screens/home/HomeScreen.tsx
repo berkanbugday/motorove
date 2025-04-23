@@ -1,17 +1,18 @@
 import React, {useState} from 'react';
-import {View, StyleSheet, SafeAreaView, Image, Platform} from 'react-native';
-import {Button, Title, Body} from '@components';
-import {LocationPermissionOverlay} from '../../components/LocationPermissionOverlay/LocationPermissionOverlay';
-import {colors, spacing, commonStyles} from '@theme';
-
+import {StyleSheet, SafeAreaView, Platform, View} from 'react-native';
+import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
+import {Header, Banner} from '@components';
+import {colors, commonStyles, fontSizes, radius} from '@theme';
 export function HomeScreen() {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
 
-  const handleLogout = async () => {
-    setShowLocationPermission(true);
-    // Navigation to login screen will happen automatically
-    // because the useAuth hook updates isAuthenticated state
-  };
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setShowLocationPermission(true);
+  //   }, 3000); // 3 seconds delay
+
+  //   return () => clearTimeout(timer); // Cleanup the timer on component unmount
+  // }, []);
 
   const handleAllowLocationAccess = () => {
     // Request location permission
@@ -36,57 +37,63 @@ export function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Image
-          source={require('@assets/images/motorove_logo_dark.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-
-        <Title style={styles.title}>Welcome to Motorove</Title>
-        <Body style={styles.subtitle}>You are logged in!</Body>
-
-        <Button
-          title="Logout"
-          onPress={handleLogout}
-          variant="primary"
-          testID="logout-button"
-        />
-      </View>
-
-      {/* Location Permission Overlay */}
-      <LocationPermissionOverlay
-        visible={showLocationPermission}
-        onAllowPress={handleAllowLocationAccess}
-        onDismiss={handleDismissLocationPermission}
+    <View style={styles.container}>
+      {/* Header Component */}
+      <Header
+        title="Hi there 👋🏻"
+        subtitle="Michael Thompson"
+        titleStyle={styles.title}
+        subtitleStyle={styles.subtitle}
+        rightIconName="bell"
+        rightIconBadgeCount={5}
+        onRightButtonPress={() => console.log('Notifications pressed')}
       />
-    </SafeAreaView>
+      <SafeAreaView style={styles.container}>
+        {/* Location Permission Overlay */}
+        <LocationPermissionOverlay
+          visible={showLocationPermission}
+          onAllowPress={handleAllowLocationAccess}
+          onDismiss={handleDismissLocationPermission}
+        />
+
+        <Banner
+          title="Today's weather"
+          subtitle="25°C"
+          message="Perfect conditions for riding!"
+          style={styles.banner}
+          titleStyle={styles.bannerTitle}
+          subtitleStyle={styles.bannerSubtitle}
+          variant="contrast"
+        />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
-    backgroundColor: colors.neutral.backgroundLight,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.lg,
-  },
-  logo: {
-    width: 180,
-    height: 60,
-    marginBottom: spacing.xl,
   },
   title: {
-    marginBottom: spacing.xs,
-    color: colors.neutral.darkGrey,
+    alignSelf: 'flex-start',
+    fontWeight: 'light',
+    fontSize: fontSizes.md,
   },
   subtitle: {
-    marginBottom: spacing.lg,
-    color: colors.neutral.grey,
+    alignSelf: 'flex-start',
+    fontWeight: 'bold',
+    fontSize: fontSizes.lg,
+  },
+  banner: {
+    backgroundColor: colors.neutral.black,
+    borderRadius: radius.lg,
+  },
+  bannerTitle: {
+    fontSize: fontSizes.sm,
+    fontWeight: 'light',
+  },
+  bannerSubtitle: {
+    fontSize: fontSizes.xxl,
+    fontWeight: 'bold',
   },
 });

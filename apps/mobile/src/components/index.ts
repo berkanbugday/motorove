@@ -13,3 +13,4 @@ export * from './SearchableDropdown';
 export * from './Chip';
 export * from './Overlay';
 export * from './LocationPermissionOverlay';
+export * from './Banner';

@@ -7,6 +7,7 @@ import {
   TextStyle,
   StatusBar,
   Platform,
+  Text,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, spacing} from '@theme';
@@ -60,6 +61,11 @@ export interface HeaderProps {
   onRightButtonPress?: () => void;
 
   /**
+   * Number to display as a badge on the right icon (if > 0)
+   */
+  rightIconBadgeCount?: number;
+
+  /**
    * Background color for the header
    */
   backgroundColor?: string;
@@ -78,6 +84,11 @@ export interface HeaderProps {
    * Additional styles for the header title
    */
   titleStyle?: TextStyle;
+
+  /**
+   * Additional styles for the header subtitle
+   */
+  subtitleStyle?: TextStyle;
 
   /**
    * Whether to show a shadow under the header
@@ -100,12 +111,14 @@ export function Header({
   rightIconName,
   rightButtonText,
   onRightButtonPress,
+  rightIconBadgeCount = 0,
   backgroundColor = colors.neutral.white,
   textColor = colors.neutral.black,
   containerStyle,
   titleStyle,
+  subtitleStyle,
   showShadow = false,
-  includeStatusBar = false,
+  includeStatusBar = true,
 }: HeaderProps) {
   // Get status bar height from safe area insets
   const insets = useSafeAreaInsets();
@@ -160,7 +173,10 @@ export function Header({
             </Title>
           )}
           {subtitle && (
-            <BodySmall color={textColor} numberOfLines={1}>
+            <BodySmall
+              color={textColor}
+              style={subtitleStyle}
+              numberOfLines={1}>
               {subtitle}
             </BodySmall>
           )}
@@ -174,7 +190,16 @@ export function Header({
               style={styles.rightButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               {rightIconName ? (
-                <Icon name={rightIconName} size={24} color={textColor} />
+                <View>
+                  <Icon name={rightIconName} size={24} color={textColor} />
+                  {rightIconBadgeCount > 0 && (
+                    <View style={styles.badgeContainer}>
+                      <Text style={styles.badgeText}>
+                        {rightIconBadgeCount > 99 ? '99+' : rightIconBadgeCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               ) : rightButtonText ? (
                 <Typography variant="buttonText" color={textColor}>
                   {rightButtonText}
@@ -225,10 +250,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rightSection: {
-    width: 40,
+    width: 50,
+    height: 50,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    borderRadius: 50,
     alignItems: 'flex-end',
+    backgroundColor: colors.neutral.backgroundLight,
   },
   rightButton: {
     padding: spacing.xs,
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    backgroundColor: colors.primary.main,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: colors.neutral.white,
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });

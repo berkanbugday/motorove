@@ -195,6 +195,10 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     borderTopWidth: 0,
     borderTopLeftRadius: 20,
@@ -230,7 +234,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: colors.primary.light,
     opacity: 0.15,
-    zIndex: -1,
   },
   badgeContainer: {
     position: 'absolute',

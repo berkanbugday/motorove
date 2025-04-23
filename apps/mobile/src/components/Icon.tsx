@@ -20,6 +20,7 @@ import Wrench from '@assets/icons/wrench.svg';
 import Home from '@assets/icons/home.svg';
 import MapLocation from '@assets/icons/map-location.svg';
 import UserGear from '@assets/icons/user-gear.svg';
+import Bell from '@assets/icons/bell.svg';
 
 // Type for icons
 export type IconName =
@@ -41,7 +42,8 @@ export type IconName =
   | 'wrench'
   | 'home'
   | 'map-location'
-  | 'user-gear';
+  | 'user-gear'
+  | 'bell';
 
 interface IconProps {
   name: IconName;
@@ -99,6 +101,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <MapLocation {...commonProps} />;
     case 'user-gear':
       return <UserGear {...commonProps} />;
+    case 'bell':
+      return <Bell {...commonProps} />;
     default:
       return null;
   }
