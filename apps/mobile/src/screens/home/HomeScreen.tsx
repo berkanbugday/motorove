@@ -1,8 +1,15 @@
 import React, {useState} from 'react';
-import {StyleSheet, SafeAreaView, Platform, View} from 'react-native';
+import {
+  StyleSheet,
+  SafeAreaView,
+  Platform,
+  View,
+  ScrollView,
+  Text,
+} from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
-import {Header, Banner} from '@components';
-import {colors, commonStyles, fontSizes, radius} from '@theme';
+import {Header, Banner, Card, Title, Subtitle} from '@components';
+import {colors, commonStyles, fontSizes, radius, spacing} from '@theme';
 export function HomeScreen() {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
 
@@ -55,16 +62,38 @@ export function HomeScreen() {
           onAllowPress={handleAllowLocationAccess}
           onDismiss={handleDismissLocationPermission}
         />
+        <ScrollView
+          style={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}>
+          <Banner
+            title="Today's weather"
+            subtitle="25°C"
+            message="Perfect conditions for riding!"
+            style={styles.banner}
+            textContainerStyle={styles.textContainer}
+            titleStyle={styles.bannerTitle}
+            subtitleStyle={styles.bannerSubtitle}
+            messageStyle={styles.bannerMessage}
+            variant="contrast"
+          />
 
-        <Banner
-          title="Today's weather"
-          subtitle="25°C"
-          message="Perfect conditions for riding!"
-          style={styles.banner}
-          titleStyle={styles.bannerTitle}
-          subtitleStyle={styles.bannerSubtitle}
-          variant="contrast"
-        />
+          <View style={styles.sectionContainer}>
+            <Subtitle weight="bold" style={styles.sectionTitle}>
+              Recommended Route of the Week
+            </Subtitle>
+            <Card
+              title="Coastal Highway Ride"
+              subtitle="80km - 2h 15m"
+              image={{uri: 'https://picsum.photos/500/300'}}
+              variant="elevated"
+              fullImage
+              size="small"
+              titleStyle={styles.cardTitle}
+              subtitleStyle={styles.cardSubtitle}
+              onPress={() => console.log('Card pressed')}
+            />
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -73,6 +102,11 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
+  },
+  scrollContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   title: {
     alignSelf: 'flex-start',
@@ -85,15 +119,50 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.lg,
   },
   banner: {
-    backgroundColor: colors.neutral.black,
     borderRadius: radius.lg,
+    height: 80,
+  },
+  textContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    position: 'relative',
   },
   bannerTitle: {
     fontSize: fontSizes.sm,
     fontWeight: 'light',
+    color: colors.neutral.lightGrey,
   },
   bannerSubtitle: {
     fontSize: fontSizes.xxl,
     fontWeight: 'bold',
+    position: 'absolute',
+    top: 20,
+    left: 0,
+  },
+  bannerMessage: {
+    fontSize: fontSizes.sm,
+    fontWeight: 'light',
+    color: colors.neutral.lightGrey,
+    position: 'absolute',
+    top: 30,
+    right: 0,
+  },
+  cardTitle: {
+    fontSize: fontSizes.lg,
+    fontWeight: 'bold',
+  },
+  cardSubtitle: {
+    fontSize: fontSizes.md,
+    fontWeight: 'light',
+    marginTop: spacing.sm,
+    paddingLeft: spacing.lg,
+    color: colors.neutral.lightGrey,
+  },
+  sectionContainer: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  sectionTitle: {
+    marginBottom: spacing.sm,
   },
 });

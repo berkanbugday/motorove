@@ -56,6 +56,10 @@ export interface BannerProps {
    */
   style?: ViewStyle;
   /**
+   * Additional styles for the text container
+   */
+  textContainerStyle?: ViewStyle;
+  /**
    * Additional styles for the title text
    */
   titleStyle?: TextStyle;
@@ -87,6 +91,7 @@ const Banner: React.FC<BannerProps> = ({
   dismissible = false,
   onDismiss,
   style,
+  textContainerStyle,
   titleStyle,
   subtitleStyle,
   messageStyle,
@@ -159,7 +164,7 @@ const Banner: React.FC<BannerProps> = ({
 
       <View style={styles.contentContainer}>
         {/* Title, subtitle and message */}
-        <View style={styles.textContainer}>
+        <View style={[styles.textContainer, textContainerStyle]}>
           {title && (
             <Text style={[styles.title, textStyle, titleStyle]}>{title}</Text>
           )}

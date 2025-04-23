@@ -3,12 +3,9 @@ import {radius, spacing} from '@theme';
 
 export const styles = StyleSheet.create({
   container: {
-    // width: '95%',
     flexDirection: 'row',
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     padding: spacing.md,
-    marginHorizontal: spacing.md,
-    marginVertical: spacing.sm,
     alignItems: 'flex-start',
     alignSelf: 'center',
     overflow: 'hidden',
@@ -35,7 +32,6 @@ export const styles = StyleSheet.create({
   message: {
     fontSize: 14,
     lineHeight: 20,
-    alignSelf: 'flex-end',
   },
   actionsContainer: {
     flexDirection: 'row',
