@@ -3,10 +3,12 @@ import {
   StyleSheet,
   SafeAreaView,
   View,
-  ScrollView,
   RefreshControl,
   FlatList,
   Dimensions,
+  Animated,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
 import {
@@ -99,6 +101,53 @@ export function HomeScreen() {
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
+
+  // Create a stable animated value for scroll position
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Track the previous scroll position to determine scroll direction
+  const previousScrollY = useRef(0);
+  const isScrollingUp = useRef(false);
+
+  // Modified animation approach for ghosting when scrolling up
+  const bannerOpacity = scrollY.interpolate({
+    inputRange: [-20, 0, 40, 80],
+    outputRange: [1, 1, 0.5, 0],
+    extrapolate: 'clamp',
+  });
+
+  // Use translateY with more subtle transitions
+  const bannerTranslateY = scrollY.interpolate({
+    inputRange: [-20, 0, 40, 80],
+    outputRange: [0, 0, -15, -30],
+    extrapolate: 'clamp',
+  });
+
+  // Track whether banner should be fully hidden from DOM
+
+  // Create a separate handler for scroll events to handle both refresh and animation
+  const handleScroll = Animated.event(
+    [{nativeEvent: {contentOffset: {y: scrollY}}}],
+    {
+      useNativeDriver: true,
+      listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        // Extract scroll position from the event
+        const offsetY = event.nativeEvent.contentOffset.y;
+
+        // Determine scroll direction
+        isScrollingUp.current = offsetY < previousScrollY.current;
+        previousScrollY.current = offsetY;
+      },
+    },
+  );
+
+  // Update hidden state based on scroll position
+  useEffect(() => {
+    return () => {
+      // Cleanup function
+      scrollY.removeAllListeners();
+    };
+  }, [scrollY]);
 
   // Reference to the FlatList for programmatic scrolling
   const eventsListRef = useRef<FlatList>(null);
@@ -213,23 +262,40 @@ export function HomeScreen() {
           onDismiss={handleDismissLocationPermission}
         />
 
-        <Banner
-          title="Today's weather"
-          subtitle="25°C"
-          message="Perfect conditions for riding!"
-          style={styles.banner}
-          textContainerStyle={styles.textContainer}
-          titleStyle={styles.bannerTitle}
-          subtitleStyle={styles.bannerSubtitle}
-          messageStyle={styles.bannerMessage}
-          variant="contrast"
-        />
+        {/* Weather Banner with ghost effect when scrolling up */}
+        <View style={styles.bannerContainer}>
+          <Animated.View
+            style={[
+              styles.animatedBannerContainer,
+              {
+                opacity: bannerOpacity,
+                transform: [{translateY: bannerTranslateY}],
+                zIndex: isScrollingUp.current ? 2 : 1,
+              },
+            ]}>
+            <Banner
+              title="Today's weather"
+              subtitle="25°C"
+              message="Perfect conditions for riding!"
+              style={styles.banner}
+              textContainerStyle={styles.textContainer}
+              titleStyle={styles.bannerTitle}
+              subtitleStyle={styles.bannerSubtitle}
+              messageStyle={styles.bannerMessage}
+              variant="contrast"
+            />
+          </Animated.View>
+        </View>
 
-        <ScrollView
+        <Animated.ScrollView
           style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContentContainer}
           showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          onScroll={handleScroll}
           refreshControl={
             <RefreshControl
+              progressViewOffset={95} // Add this to make refresh control visible above the banner
               refreshing={refreshing}
               onRefresh={onRefresh}
               colors={[colors.neutral.black]}
@@ -240,42 +306,6 @@ export function HomeScreen() {
             <Subtitle weight="bold" style={styles.sectionTitle}>
               Recommended Route of the Week
             </Subtitle>
-            <Card
-              title={currentRoute.title}
-              subtitle={currentRoute.subtitle}
-              image={{uri: currentRoute.image}}
-              variant="elevated"
-              fullImage
-              size="small"
-              style={styles.card}
-              titleStyle={styles.cardTitle}
-              subtitleStyle={styles.cardSubtitle}
-              onPress={() => console.log('Card pressed')}
-            />
-            <Card
-              title={currentRoute.title}
-              subtitle={currentRoute.subtitle}
-              image={{uri: currentRoute.image}}
-              variant="elevated"
-              fullImage
-              size="small"
-              style={styles.card}
-              titleStyle={styles.cardTitle}
-              subtitleStyle={styles.cardSubtitle}
-              onPress={() => console.log('Card pressed')}
-            />
-            <Card
-              title={currentRoute.title}
-              subtitle={currentRoute.subtitle}
-              image={{uri: currentRoute.image}}
-              variant="elevated"
-              fullImage
-              size="small"
-              style={styles.card}
-              titleStyle={styles.cardTitle}
-              subtitleStyle={styles.cardSubtitle}
-              onPress={() => console.log('Card pressed')}
-            />
             <Card
               title={currentRoute.title}
               subtitle={currentRoute.subtitle}
@@ -318,7 +348,7 @@ export function HomeScreen() {
               spacing={8}
             />
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -331,6 +361,21 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: spacing.md,
+  },
+  scrollContentContainer: {
+    paddingTop: 95, // Reserve space for the banner
+  },
+  bannerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  animatedBannerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
   title: {
     alignSelf: 'flex-start',
@@ -372,7 +417,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   card: {
-    height: 180,
+    height: 200,
   },
   cardTitle: {
     fontSize: fontSizes.lg,
@@ -390,6 +435,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   eventBanner: {
+    backgroundColor: colors.neutral.white,
     marginRight: spacing.sm,
     marginLeft: spacing.sm,
     width: Dimensions.get('window').width - spacing.xxl,
