@@ -13,11 +13,13 @@ import Close from '@assets/icons/close.svg';
 import ChevronUp from '@assets/icons/chevron-up.svg';
 import ChevronDown from '@assets/icons/chevron-down.svg';
 import Check from '@assets/icons/check.svg';
-// Add location-related icons
 import MapPin from '@assets/icons/map-pin.svg';
 import Route from '@assets/icons/route.svg';
 import Users from '@assets/icons/users.svg';
 import Wrench from '@assets/icons/wrench.svg';
+import Home from '@assets/icons/home.svg';
+import MapLocation from '@assets/icons/map-location.svg';
+import UserGear from '@assets/icons/user-gear.svg';
 
 // Type for icons
 export type IconName =
@@ -36,7 +38,10 @@ export type IconName =
   | 'map-pin'
   | 'route'
   | 'users'
-  | 'wrench';
+  | 'wrench'
+  | 'home'
+  | 'map-location'
+  | 'user-gear';
 
 interface IconProps {
   name: IconName;
@@ -88,6 +93,12 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Users {...commonProps} />;
     case 'wrench':
       return <Wrench {...commonProps} />;
+    case 'home':
+      return <Home {...commonProps} />;
+    case 'map-location':
+      return <MapLocation {...commonProps} />;
+    case 'user-gear':
+      return <UserGear {...commonProps} />;
     default:
       return null;
   }

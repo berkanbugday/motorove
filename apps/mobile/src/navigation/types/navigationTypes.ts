@@ -1,5 +1,6 @@
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
+import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 
 // AUTH STACK
 export type AuthStackParamList = {
@@ -18,8 +19,25 @@ export type AuthScreenRouteProp<T extends keyof AuthStackParamList> = RouteProp<
   T
 >;
 
+// TAB NAVIGATION
+export type TabParamList = {
+  HomeTab: undefined;
+  ExploreTab: undefined;
+  ProfileTab: undefined;
+  SettingsTab: undefined;
+};
+
+export type TabScreenNavigationProp<T extends keyof TabParamList> =
+  BottomTabNavigationProp<TabParamList, T>;
+
+export type TabScreenRouteProp<T extends keyof TabParamList> = RouteProp<
+  TabParamList,
+  T
+>;
+
 // MAIN STACK
 export type MainStackParamList = {
+  Tabs: undefined;
   Home: undefined;
   // Add more screens here as your app grows
   // Profile: {userId: string};

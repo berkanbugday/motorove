@@ -3,6 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {HomeScreen} from '@screens/home';
 import {MainStackParamList} from '../types/navigationTypes';
+import {TabNavigator} from '../tabs/TabNavigator';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -13,16 +14,22 @@ const Stack = createNativeStackNavigator<MainStackParamList>();
 export function MainNavigator() {
   return (
     <Stack.Navigator
+      initialRouteName="Tabs"
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
       }}>
+      <Stack.Screen name="Tabs" component={TabNavigator} />
+
+      {/* Individual screens that can be navigated to from tabs */}
       <Stack.Screen
         name="Home"
         component={HomeScreen}
         options={{
           title: 'Motorove',
+          headerShown: true,
         }}
       />
+
       {/* Add more screens here as your app grows */}
       {/* Example:
       <Stack.Screen
@@ -30,6 +37,7 @@ export function MainNavigator() {
         component={ProfileScreen}
         options={{
           title: 'My Profile',
+          headerShown: true,
         }}
       />
       <Stack.Screen
@@ -37,6 +45,7 @@ export function MainNavigator() {
         component={SettingsScreen}
         options={{
           title: 'Settings',
+          headerShown: true,
         }}
       />
       */}

@@ -1,12 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {View, StyleSheet, SafeAreaView, Image, Platform} from 'react-native';
-import {useAuth} from '@navigation/index';
 import {Button, Title, Body} from '@components';
 import {LocationPermissionOverlay} from '../../components/LocationPermissionOverlay/LocationPermissionOverlay';
 import {colors, spacing, commonStyles} from '@theme';
 
 export function HomeScreen() {
-  const {logout} = useAuth();
   const [showLocationPermission, setShowLocationPermission] = useState(false);
 
   const handleLogout = async () => {
@@ -70,6 +68,7 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
+    backgroundColor: colors.neutral.backgroundLight,
   },
   content: {
     flex: 1,
