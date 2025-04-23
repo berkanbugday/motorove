@@ -1,18 +1,112 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
   StyleSheet,
   SafeAreaView,
   View,
   ScrollView,
   RefreshControl,
+  FlatList,
+  Dimensions,
 } from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
-import {Header, Banner, Card, Subtitle} from '@components';
+import {Header, Banner, Card, Subtitle, GroupEventBanner} from '@components';
 import {colors, commonStyles, fontSizes, radius, spacing} from '@theme';
+
+// Route data
+const recommendedRoutes = [
+  {
+    id: 1,
+    title: 'Coastal Highway Ride',
+    subtitle: '80km - 2h 15m',
+    image: 'https://picsum.photos/id/88/500/300', // Coast/ocean image
+  },
+  {
+    id: 2,
+    title: 'Mountain Trail Adventure',
+    subtitle: '65km - 3h 30m',
+    image: 'https://picsum.photos/id/29/500/300', // Mountain image
+  },
+  {
+    id: 3,
+    title: 'City Loop Tour',
+    subtitle: '35km - 1h 45m',
+    image: 'https://picsum.photos/id/43/500/300', // Urban image
+  },
+  {
+    id: 4,
+    title: 'Forest Exploration Route',
+    subtitle: '50km - 2h 10m',
+    image: 'https://picsum.photos/id/11/500/300', // Forest image
+  },
+];
+
+// Define event interface
+interface EventItem {
+  id: string;
+  day: string;
+  month: string;
+  time: string;
+  title: string;
+  organizer: string;
+  participantCount: number;
+  memberCount: number;
+}
+
+// Group events data
+const upcomingEvents: EventItem[] = [
+  {
+    id: '1',
+    day: '15',
+    month: 'JUN',
+    time: '10:00',
+    title: 'Sunday Breakfast Ride',
+    organizer: 'Coastal Riders Club',
+    participantCount: 10,
+    memberCount: 34,
+  },
+  {
+    id: '2',
+    day: '22',
+    month: 'JUN',
+    time: '09:30',
+    title: 'Mountain Pass Challenge',
+    organizer: 'Adventure Motorcycles',
+    participantCount: 16,
+    memberCount: 40,
+  },
+  {
+    id: '3',
+    day: '28',
+    month: 'JUN',
+    time: '14:00',
+    title: 'Evening City Tour',
+    organizer: 'Urban Moto Group',
+    participantCount: 8,
+    memberCount: 25,
+  },
+  {
+    id: '4',
+    day: '05',
+    month: 'JUL',
+    time: '12:00',
+    title: 'Weekend Countryside Ride',
+    organizer: 'Country Road Enthusiasts',
+    participantCount: 12,
+    memberCount: 30,
+  },
+];
 
 export function HomeScreen() {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
+  const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
+
+  const rotateRecommendedRoute = useCallback(() => {
+    const nextIndex = (currentRouteIndex + 1) % recommendedRoutes.length;
+    setCurrentRouteIndex(nextIndex);
+    setCurrentRoute(recommendedRoutes[nextIndex]);
+  }, [currentRouteIndex]);
 
   const handleAllowLocationAccess = () => {
     // Request location permission logic would go here
@@ -25,11 +119,40 @@ export function HomeScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate data fetching
+    // Change route on refresh
+    rotateRecommendedRoute();
+    // Simulate data fetching delay
     setTimeout(() => {
       setRefreshing(false);
-    }, 2000);
-  }, []);
+    }, 1000);
+  }, [rotateRecommendedRoute]);
+
+  // Set initial route
+  useEffect(() => {
+    setCurrentRoute(recommendedRoutes[currentRouteIndex]);
+  }, [currentRouteIndex]);
+
+  // Render event banner item
+  const renderEventBanner = useCallback(
+    ({item}: {item: EventItem}) => (
+      <GroupEventBanner
+        day={item.day}
+        month={item.month}
+        time={item.time}
+        title={item.title}
+        organizer={item.organizer}
+        participantCount={item.participantCount}
+        memberCount={item.memberCount}
+        onChatPress={() => console.log(`Chat pressed for event: ${item.title}`)}
+        onPress={() => console.log(`Event banner pressed: ${item.title}`)}
+        style={styles.eventBanner}
+      />
+    ),
+    [],
+  );
+
+  // Event keyExtractor
+  const keyExtractor = useCallback((item: EventItem) => item.id, []);
 
   return (
     <View style={styles.container}>
@@ -77,9 +200,9 @@ export function HomeScreen() {
               Recommended Route of the Week
             </Subtitle>
             <Card
-              title="Coastal Highway Ride"
-              subtitle="80km - 2h 15m"
-              image={{uri: 'https://picsum.photos/500/300'}}
+              title={currentRoute.title}
+              subtitle={currentRoute.subtitle}
+              image={{uri: currentRoute.image}}
               variant="elevated"
               fullImage
               size="small"
@@ -87,6 +210,21 @@ export function HomeScreen() {
               titleStyle={styles.cardTitle}
               subtitleStyle={styles.cardSubtitle}
               onPress={() => console.log('Card pressed')}
+            />
+          </View>
+
+          <View>
+            <Subtitle weight="bold" style={styles.sectionTitle}>
+              Upcoming Events
+            </Subtitle>
+            <FlatList
+              data={upcomingEvents}
+              renderItem={renderEventBanner}
+              keyExtractor={keyExtractor}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={Dimensions.get('window').width - spacing.xl} // Adjust based on item width
+              decelerationRate="fast"
             />
           </View>
         </ScrollView>
@@ -159,5 +297,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: spacing.md,
     marginBottom: spacing.sm,
+  },
+  eventBanner: {
+    marginRight: spacing.sm,
+    marginLeft: spacing.sm,
+    width: Dimensions.get('window').width - spacing.xxl,
   },
 });
