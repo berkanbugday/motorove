@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
   temperature: {
     fontSize: 36,
     fontWeight: 'bold',
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
   condition: {
     fontSize: 16,
