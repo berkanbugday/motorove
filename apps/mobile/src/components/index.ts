@@ -18,3 +18,5 @@ export * from './GroupEventBanner';
 export * from './PageIndicator';
 export * from './WeatherWidget';
 export * from './FeedCard';
+export * from './Comment/CommentItem';
+export * from './Comment/CommentInput';

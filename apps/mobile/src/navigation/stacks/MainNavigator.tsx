@@ -2,6 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {HomeScreen} from '@screens/home';
+import {CommentDetailScreen} from '@screens/comments';
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
 
@@ -27,6 +28,14 @@ export function MainNavigator() {
         options={{
           title: 'Motorove',
           headerShown: true,
+        }}
+      />
+
+      <Stack.Screen
+        name="CommentDetail"
+        component={CommentDetailScreen}
+        options={{
+          headerShown: false,
         }}
       />
 

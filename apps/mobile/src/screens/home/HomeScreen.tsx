@@ -25,6 +25,8 @@ import {colors, commonStyles, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import type {WeatherData} from '@components/WeatherWidget/weather';
 import type {IconName} from '@components/Icon';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {MainStackParamList} from '@navigation/types/navigationTypes';
 // Route data
 const recommendedRoutes = [
   {
@@ -179,7 +181,9 @@ const feedPosts: FeedPost[] = [
   },
 ];
 
-export function HomeScreen() {
+type Props = NativeStackScreenProps<MainStackParamList, 'Home'>;
+
+export function HomeScreen({navigation}: Props) {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
@@ -333,7 +337,12 @@ export function HomeScreen() {
   // Event keyExtractor
   const keyExtractor = useCallback((item: EventItem) => item.id, []);
 
-  // Render feed post item
+  // Handle navigation to comment details
+  const handleCommentPress = (postId: string) => {
+    navigation.navigate('CommentDetail', {postId});
+  };
+
+  // Render feed post with comment navigation
   const renderFeedPost = useCallback(
     ({item}: {item: FeedPost}) => (
       <FeedCard
@@ -353,14 +362,12 @@ export function HomeScreen() {
         // onPress={() => console.log(`Post pressed: ${item.id}`)}
         onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
         onLikePress={() => console.log(`Like pressed for post: ${item.id}`)}
-        onCommentPress={() =>
-          console.log(`Comment pressed for post: ${item.id}`)
-        }
+        onCommentPress={() => handleCommentPress(item.id)}
         onSavePress={() => console.log(`Save pressed for post: ${item.id}`)}
         style={styles.feedCard}
       />
     ),
-    [],
+    [navigation],
   );
 
   // Feed keyExtractor
