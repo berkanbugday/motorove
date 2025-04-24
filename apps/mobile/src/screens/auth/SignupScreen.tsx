@@ -35,7 +35,7 @@ export function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
+  const [userEmail, _setUserEmail] = useState('');
   const termsBottomSheetRef = useRef<BottomSheetRef>(null);
   const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
   const {signup} = useAuth();
@@ -324,9 +324,8 @@ export function SignupScreen() {
                     variant="text"
                     onPress={handleLogin}
                     textStyle={styles.loginLink}
-                    testID="login-button">
-                    Log in
-                  </Button>
+                    testID="login-button"
+                  />
                 </View>
               </View>
             </View>

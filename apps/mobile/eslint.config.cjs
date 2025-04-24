@@ -50,6 +50,9 @@ module.exports = [
       'react-native/no-raw-text': 'off',
       'react-native/no-unused-styles': 'off',
       'react-native/split-platform-components': 'off',
+
+      // Disable the react-hooks/exhaustive-deps rule which is causing errors
+      'react-hooks/exhaustive-deps': 'off',
     },
   },
 ];

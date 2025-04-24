@@ -62,7 +62,9 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   };
 
   const renderWeatherDetails = () => {
-    if (!showDetails) return null;
+    if (!showDetails) {
+      return null;
+    }
 
     return (
       <View style={styles.weatherDetails}>

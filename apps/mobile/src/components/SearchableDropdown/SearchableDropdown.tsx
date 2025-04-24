@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Animated,
   TextStyle,
-  TouchableWithoutFeedback,
   LayoutChangeEvent,
   ScrollView,
 } from 'react-native';
@@ -43,7 +42,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   helperText,
   loading = false,
   initiallyOpen = false,
-  windowSize = 10,
+  windowSize: _windowSize = 10,
   onClose,
   onOpen,
   testID,
@@ -51,7 +50,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const [isOpen, setIsOpen] = useState(initiallyOpen);
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({
+  const [_dropdownPosition, setDropdownPosition] = useState({
     top: 0,
     left: 0,
     width: 0,
@@ -107,7 +106,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   };
 
   // Handle layout changes
-  const handleLayout = (event: LayoutChangeEvent) => {
+  const handleLayout = (_event: LayoutChangeEvent) => {
     if (isOpen) {
       updateDropdownPosition();
     }
@@ -115,7 +114,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Handle dropdown visibility
   const openDropdown = useCallback(() => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     setIsOpen(true);
     setIsFocused(true);
@@ -125,7 +126,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
       setInternalSearchQuery('');
     }
 
-    if (onOpen) onOpen();
+    if (onOpen) {
+      onOpen();
+    }
     // Focus the input when dropdown opens
     if (inputRef.current) {
       inputRef.current.focus();
@@ -156,7 +159,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const closeDropdown = useCallback(() => {
     setIsOpen(false);
     setIsFocused(false);
-    if (onClose) onClose();
+    if (onClose) {
+      onClose();
+    }
     Keyboard.dismiss();
   }, [onClose]);
 
@@ -180,10 +185,13 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Get display text for selected item
   const getSelectedText = () => {
-    return selectedItem &&
+    if (
+      selectedItem &&
       selectedItem[searchProperty as keyof typeof selectedItem]
-      ? selectedItem[searchProperty as keyof typeof selectedItem]
-      : '';
+    ) {
+      return selectedItem[searchProperty as keyof typeof selectedItem];
+    }
+    return '';
   };
 
   // Handle item selection

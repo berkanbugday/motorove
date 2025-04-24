@@ -49,17 +49,31 @@ export function Button({
   ];
 
   const getTypographyVariant = () => {
-    if (size === 'small') return 'smallButtonText';
-    if (size === 'large') return 'largeButtonText';
+    if (size === 'small') {
+      return 'smallButtonText';
+    }
+    if (size === 'large') {
+      return 'largeButtonText';
+    }
     return 'buttonText';
   };
 
   const getTextColor = () => {
-    if (disabled || loading) return undefined; // Let the Typography component handle disabled state
-    if (variant === 'primary') return colors.neutral.white;
-    if (variant === 'secondary') return colors.neutral.darkGrey;
-    if (variant === 'outline') return colors.neutral.black;
-    if (variant === 'text') return colors.neutral.darkGrey;
+    if (disabled || loading) {
+      return undefined; // Let the Typography component handle disabled state
+    }
+    if (variant === 'primary') {
+      return colors.neutral.white;
+    }
+    if (variant === 'secondary') {
+      return colors.neutral.darkGrey;
+    }
+    if (variant === 'outline') {
+      return colors.neutral.black;
+    }
+    if (variant === 'text') {
+      return colors.neutral.darkGrey;
+    }
     return colors.neutral.black;
   };
 

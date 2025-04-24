@@ -236,7 +236,9 @@ function AnimatedInputBase({
   };
 
   const renderError = () => {
-    if (!error) return null;
+    if (!error) {
+      return null;
+    }
     return (
       <View style={styles.errorContainer}>
         <Caption color={colors.status.error}>{error}</Caption>

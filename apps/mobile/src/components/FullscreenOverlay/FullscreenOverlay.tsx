@@ -1,4 +1,4 @@
-import React, {ReactNode, useEffect} from 'react';
+import React, {ReactNode, useEffect, useCallback} from 'react';
 import {
   StyleSheet,
   View,
@@ -93,39 +93,12 @@ export function FullscreenOverlay({
   closeButtonPosition = 'top-right',
   closeButtonContent,
 }: FullscreenOverlayProps) {
-  // Animation value for content visibility
   const contentAnimation = React.useRef(new Animated.Value(0)).current;
   const slideAnimation = React.useRef(
     new Animated.Value(Dimensions.get('window').height),
   ).current;
 
-  useEffect(() => {
-    if (visible) {
-      showOverlay();
-    } else {
-      hideOverlay();
-    }
-  }, [visible]);
-
-  useEffect(() => {
-    if (Platform.OS === 'android' && closeOnBackButton && visible) {
-      const backHandler = BackHandler.addEventListener(
-        'hardwareBackPress',
-        handleBackPress,
-      );
-      return () => backHandler.remove();
-    }
-  }, [closeOnBackButton, visible]);
-
-  const handleBackPress = () => {
-    if (visible && closeOnBackButton) {
-      onDismiss();
-      return true;
-    }
-    return false;
-  };
-
-  const showOverlay = () => {
+  const showOverlay = useCallback(() => {
     // Run animations concurrently
     Animated.parallel([
       Animated.timing(contentAnimation, {
@@ -139,9 +112,9 @@ export function FullscreenOverlay({
         useNativeDriver: true,
       }),
     ]).start();
-  };
+  }, [contentAnimation, slideAnimation, animationDuration]);
 
-  const hideOverlay = () => {
+  const hideOverlay = useCallback(() => {
     Animated.parallel([
       Animated.timing(contentAnimation, {
         toValue: 0,
@@ -154,7 +127,33 @@ export function FullscreenOverlay({
         useNativeDriver: true,
       }),
     ]).start();
-  };
+  }, [contentAnimation, slideAnimation, animationDuration]);
+
+  const handleBackPress = useCallback(() => {
+    if (visible && closeOnBackButton) {
+      onDismiss();
+      return true;
+    }
+    return false;
+  }, [visible, closeOnBackButton, onDismiss]);
+
+  useEffect(() => {
+    if (visible) {
+      showOverlay();
+    } else {
+      hideOverlay();
+    }
+  }, [visible, showOverlay, hideOverlay]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android' && closeOnBackButton && visible) {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        handleBackPress,
+      );
+      return () => backHandler.remove();
+    }
+  }, [closeOnBackButton, visible, handleBackPress]);
 
   // Calculate position styles
   const getPositionStyle = (): ViewStyle => {
@@ -217,7 +216,9 @@ export function FullscreenOverlay({
 
   // Render close button if enabled
   const renderCloseButton = () => {
-    if (!showCloseButton) return null;
+    if (!showCloseButton) {
+      return null;
+    }
 
     return (
       <TouchableOpacity

@@ -197,7 +197,9 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
         active.value = true;
       })
       .onUpdate(event => {
-        if (!enableGestureControl) return;
+        if (!enableGestureControl) {
+          return;
+        }
 
         // If the sheet is fully expanded and content is being scrolled,
         // don't move the sheet until the scroll view reaches the top
@@ -230,7 +232,9 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
         }
       })
       .onEnd(event => {
-        if (!enableGestureControl) return;
+        if (!enableGestureControl) {
+          return;
+        }
 
         const currentPosition = SCREEN_HEIGHT - translateY.value;
 
