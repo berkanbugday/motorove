@@ -21,6 +21,14 @@ import Home from '@assets/icons/home.svg';
 import MapLocation from '@assets/icons/map-location.svg';
 import UserGear from '@assets/icons/user-gear.svg';
 import Bell from '@assets/icons/bell.svg';
+import Sunny from '@assets/icons/weather/sunny.svg';
+import Cloudy from '@assets/icons/weather/cloudy.svg';
+import PartlyCloudy from '@assets/icons/weather/partly-cloudy.svg';
+import Rainy from '@assets/icons/weather/rainy.svg';
+import Stormy from '@assets/icons/weather/stormy.svg';
+import Snowy from '@assets/icons/weather/snowy.svg';
+import Foggy from '@assets/icons/weather/foggy.svg';
+import Windy from '@assets/icons/weather/windy.svg';
 
 // Type for icons
 export type IconName =
@@ -43,7 +51,15 @@ export type IconName =
   | 'home'
   | 'map-location'
   | 'user-gear'
-  | 'bell';
+  | 'bell'
+  | 'sunny'
+  | 'cloudy'
+  | 'partly-cloudy'
+  | 'rainy'
+  | 'stormy'
+  | 'snowy'
+  | 'foggy'
+  | 'windy';
 
 interface IconProps {
   name: IconName;
@@ -103,6 +119,22 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <UserGear {...commonProps} />;
     case 'bell':
       return <Bell {...commonProps} />;
+    case 'sunny':
+      return <Sunny {...commonProps} />;
+    case 'cloudy':
+      return <Cloudy {...commonProps} />;
+    case 'partlyCloudy':
+      return <PartlyCloudy {...commonProps} />;
+    case 'rainy':
+      return <Rainy {...commonProps} />;
+    case 'stormy':
+      return <Stormy {...commonProps} />;
+    case 'snowy':
+      return <Snowy {...commonProps} />;
+    case 'foggy':
+      return <Foggy {...commonProps} />;
+    case 'windy':
+      return <Windy {...commonProps} />;
     default:
       return null;
   }

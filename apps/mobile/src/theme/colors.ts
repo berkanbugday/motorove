@@ -29,6 +29,16 @@ export const colors = {
     background: '#F9FAFB',
     backgroundLight: '#F5F5F7',
   },
+  weather: {
+    sunny: '#FFD700',
+    cloudy: '#E0E0E0',
+    partlyCloudy: '#B0C4DE',
+    rainy: '#87CEEB',
+    stormy: '#4682B4',
+    snowy: '#FFFFFF',
+    foggy: '#D3D3D3',
+    windy: '#ADD8E6',
+  },
 
   // Status colors
   status: {

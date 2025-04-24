@@ -17,3 +17,4 @@ export * from './Card';
 export {GroupEventCard} from './GroupEventCard';
 export * from './GroupEventBanner';
 export * from './PageIndicator';
+export * from './WeatherWidget';

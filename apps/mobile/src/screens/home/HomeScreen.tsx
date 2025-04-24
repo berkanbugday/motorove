@@ -13,14 +13,15 @@ import {
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
 import {
   Header,
-  Banner,
   Card,
   Subtitle,
   GroupEventBanner,
   PageIndicator,
 } from '@components';
-import {colors, commonStyles, fontSizes, radius, spacing} from '@theme';
+import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
+import {colors, commonStyles, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import type {WeatherData} from '@components/WeatherWidget/weather';
 // Route data
 const recommendedRoutes = [
   {
@@ -123,7 +124,13 @@ export function HomeScreen() {
     extrapolate: 'clamp',
   });
 
-  // Track whether banner should be fully hidden from DOM
+  // Weather data for the widget
+  const weatherData: WeatherData = {
+    temperature: 25,
+    unit: 'C',
+    condition: 'sunny',
+    location: 'Current Location',
+  };
 
   // Create a separate handler for scroll events to handle both refresh and animation
   const handleScroll = Animated.event(
@@ -262,7 +269,7 @@ export function HomeScreen() {
           onDismiss={handleDismissLocationPermission}
         />
 
-        {/* Weather Banner with ghost effect when scrolling up */}
+        {/* Weather Widget with ghost effect when scrolling up */}
         <View style={styles.bannerContainer}>
           <Animated.View
             style={[
@@ -273,16 +280,10 @@ export function HomeScreen() {
                 zIndex: isScrollingUp.current ? 2 : 1,
               },
             ]}>
-            <Banner
-              title="Today's weather"
-              subtitle="25°C"
-              message="Perfect conditions for riding!"
-              style={styles.banner}
-              textContainerStyle={styles.textContainer}
-              titleStyle={styles.bannerTitle}
-              subtitleStyle={styles.bannerSubtitle}
-              messageStyle={styles.bannerMessage}
-              variant="contrast"
+            <WeatherWidget
+              data={weatherData}
+              showDetails={false}
+              style={styles.weatherWidget}
             />
           </Animated.View>
         </View>
@@ -377,6 +378,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  weatherWidget: {
+    height: 85,
+  },
   title: {
     alignSelf: 'flex-start',
     fontWeight: 'light',
@@ -386,35 +390,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     fontWeight: 'bold',
     fontSize: fontSizes.lg,
-  },
-  banner: {
-    borderRadius: radius.lg,
-    height: 85,
-  },
-  textContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    position: 'relative',
-  },
-  bannerTitle: {
-    fontSize: fontSizes.sm,
-    fontWeight: 'light',
-    color: colors.neutral.lightGrey,
-  },
-  bannerSubtitle: {
-    fontSize: fontSizes.xxl,
-    fontWeight: 'bold',
-    position: 'absolute',
-    top: 20,
-    left: 0,
-  },
-  bannerMessage: {
-    fontSize: fontSizes.sm,
-    fontWeight: 'light',
-    color: colors.neutral.lightGrey,
-    position: 'absolute',
-    top: 30,
-    right: 0,
   },
   card: {
     height: 200,
