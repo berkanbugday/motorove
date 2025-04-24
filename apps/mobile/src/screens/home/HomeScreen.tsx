@@ -26,7 +26,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import type {WeatherData} from '@components/WeatherWidget/weather';
 import type {IconName} from '@components/Icon';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {MainStackParamList} from '@navigation/types/navigationTypes';
+import {
+  MainStackParamList,
+  TabParamList,
+} from '@navigation/types/navigationTypes';
 // Route data
 const recommendedRoutes = [
   {
@@ -181,7 +184,10 @@ const feedPosts: FeedPost[] = [
   },
 ];
 
-type Props = NativeStackScreenProps<MainStackParamList, 'Home'>;
+// Change from MainStackParamList to accepting both TabParamList and MainStackParamList
+type Props =
+  | NativeStackScreenProps<MainStackParamList, 'Home'>
+  | NativeStackScreenProps<TabParamList, 'HomeTab'>;
 
 export function HomeScreen({navigation}: Props) {
   const [showLocationPermission, setShowLocationPermission] = useState(false);

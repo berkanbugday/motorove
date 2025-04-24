@@ -114,7 +114,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
         const textColor = animatedValue.interpolate({
           inputRange: [0, 1],
-          outputRange: [colors.neutral.grey, colors.neutral.black],
+          outputRange: [colors.neutral.black, colors.primary.main],
         });
 
         const onPress = () => {
@@ -154,7 +154,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
                 }}>
                 <Icon
                   name={getIconName(route.name)}
-                  color={isFocused ? colors.primary.main : colors.neutral.grey}
+                  color={isFocused ? colors.primary.main : colors.neutral.black}
                   size={24}
                 />
               </Animated.View>

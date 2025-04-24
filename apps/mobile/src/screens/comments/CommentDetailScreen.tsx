@@ -134,7 +134,9 @@ export function CommentDetailScreen({navigation, route: {params}}: Props) {
   }, [params.postId]);
 
   const handleLikeComment = (commentId: string) => {
-    if (!post) return;
+    if (!post) {
+      return;
+    }
 
     // Update the like status for the comment
     const updatedComments = post.comments.map(comment => {
@@ -162,7 +164,9 @@ export function CommentDetailScreen({navigation, route: {params}}: Props) {
   };
 
   const handleSubmitComment = (text: string) => {
-    if (!post) return;
+    if (!post) {
+      return;
+    }
 
     // Create a new comment
     const newComment: Comment = {
@@ -194,7 +198,9 @@ export function CommentDetailScreen({navigation, route: {params}}: Props) {
 
   const renderItem = ({item}: {item: Comment}) => {
     // Only render top-level comments (no parentId)
-    if (item.parentId) return null;
+    if (item.parentId) {
+      return null;
+    }
 
     // Find any replies to this comment
     const replies = post?.comments.filter(
