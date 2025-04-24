@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Image,
@@ -7,11 +7,14 @@ import {
   StyleProp,
   ViewStyle,
   ImageStyle,
+  Dimensions,
+  LayoutChangeEvent,
 } from 'react-native';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {Typography} from '../Typography/Typography';
-import {Icon, IconName} from '../Icon';
-import {colors} from '@theme/colors';
+import {colors} from '@theme';
 import {styles} from './FeedCard.styles';
+import {Button, Chip, Icon, IconName} from '@components';
 
 export interface FeedCardProps {
   /**
@@ -43,9 +46,9 @@ export interface FeedCardProps {
   content?: string;
 
   /**
-   * Main image for the post
+   * Main images for the post (can be a single image or multiple)
    */
-  image?: ImageSourcePropType;
+  images?: ImageSourcePropType[];
 
   /**
    * Title for the route or location
@@ -71,6 +74,16 @@ export interface FeedCardProps {
    * Number of comments
    */
   commentCount?: number;
+
+  /**
+   * Whether the post is liked by the current user
+   */
+  isLiked?: boolean;
+
+  /**
+   * Whether the post has been commented on by the current user
+   */
+  isCommented?: boolean;
 
   /**
    * Whether the post is saved
@@ -106,7 +119,29 @@ export interface FeedCardProps {
    * Additional styles for the image
    */
   imageStyle?: StyleProp<ImageStyle>;
+
+  /**
+   * Props for the image overlay
+   */
+  overlayProps?: {
+    /**
+     * Color of the overlay
+     */
+    color?: string;
+
+    /**
+     * Opacity of the overlay (0-1)
+     */
+    opacity?: number;
+
+    /**
+     * Additional styles for the overlay
+     */
+    style?: StyleProp<ViewStyle>;
+  };
 }
+
+const {width: screenWidth} = Dimensions.get('window');
 
 /**
  * A reusable card component for feed items.
@@ -117,12 +152,14 @@ const FeedCard: React.FC<FeedCardProps> = ({
   timeAgo,
   labels = [],
   content,
-  image,
+  images,
   routeTitle,
   onPress,
   onRoutePress,
   likeCount = 0,
   commentCount = 0,
+  isLiked = false,
+  isCommented = false,
   isSaved = false,
   onLikePress,
   onCommentPress,
@@ -130,18 +167,57 @@ const FeedCard: React.FC<FeedCardProps> = ({
   style,
   contentStyle,
   imageStyle,
+  overlayProps = {
+    color: colors.neutral.black,
+    opacity: 0.3,
+  },
 }) => {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [cardWidth, setCardWidth] = useState(0);
+  const carouselRef = useRef(null);
+
+  // For backward compatibility, convert single image to array
+  const imageArray = images ? (Array.isArray(images) ? images : [images]) : [];
+
   const handlePress = () => {
     if (onPress) onPress();
   };
 
-  const handleRoutePress = (e: any) => {
-    e.stopPropagation();
+  const handleRoutePress = () => {
     if (onRoutePress) onRoutePress();
   };
 
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const {width} = event.nativeEvent.layout;
+    setCardWidth(width);
+  };
+
+  const renderCarouselItem = ({item}: {item: ImageSourcePropType}) => {
+    return (
+      <View style={styles.imageContainer}>
+        <View style={{position: 'relative'}}>
+          <Image
+            source={item}
+            style={[styles.mainImage, imageStyle]}
+            resizeMode="stretch"
+          />
+          <View
+            style={[
+              styles.imageOverlay,
+              {
+                backgroundColor: overlayProps.color || colors.neutral.black,
+                opacity: overlayProps.opacity || 0.2,
+              },
+              overlayProps.style,
+            ]}
+          />
+        </View>
+      </View>
+    );
+  };
+
   const renderCard = () => (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, style]} onLayout={handleLayout}>
       {/* Card Header */}
       <View style={styles.header}>
         <Image source={avatarSource} style={styles.avatar} />
@@ -160,22 +236,15 @@ const FeedCard: React.FC<FeedCardProps> = ({
       {labels.length > 0 && (
         <View style={styles.labelsContainer}>
           {labels.map((label, index) => (
-            <View key={index} style={styles.label}>
-              {label.icon && (
-                <Icon
-                  name={label.icon}
-                  size={14}
-                  color={colors.neutral.grey}
-                  style={styles.labelIcon}
-                />
-              )}
-              <Typography
-                variant="caption"
-                color={colors.neutral.grey}
-                style={styles.labelText}>
-                {label.text}
-              </Typography>
-            </View>
+            <Chip
+              key={index}
+              label={label.text}
+              leadingIcon={label.icon}
+              size="small"
+              variant="filled"
+              color="secondary"
+              style={styles.labelChip}
+            />
           ))}
         </View>
       )}
@@ -187,13 +256,30 @@ const FeedCard: React.FC<FeedCardProps> = ({
         </Typography>
       )}
 
-      {/* Main Image */}
-      {image && (
-        <Image
-          source={image}
-          style={[styles.mainImage, imageStyle]}
-          resizeMode="cover"
-        />
+      {/* Image Carousel */}
+      {imageArray.length > 0 && (
+        <View style={styles.carouselContainer}>
+          <Carousel
+            ref={carouselRef}
+            data={imageArray}
+            renderItem={renderCarouselItem}
+            sliderWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
+            itemWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
+            onSnapToItem={index => setActiveSlide(index)}
+            inactiveSlideScale={1}
+            inactiveSlideOpacity={1}
+            activeSlideAlignment="center"
+          />
+          <Pagination
+            dotsLength={imageArray.length}
+            activeDotIndex={activeSlide}
+            containerStyle={styles.paginationContainer}
+            dotStyle={styles.paginationDot}
+            inactiveDotStyle={styles.paginationInactiveDot}
+            inactiveDotOpacity={0.4}
+            inactiveDotScale={1}
+          />
+        </View>
       )}
 
       {/* Route Information (if applicable) */}
@@ -206,13 +292,14 @@ const FeedCard: React.FC<FeedCardProps> = ({
             style={styles.routeTitle}>
             {routeTitle}
           </Typography>
-          <TouchableOpacity
+          <Button
+            title="View Route"
+            variant="primary"
+            shape="round"
+            size="small"
             onPress={handleRoutePress}
-            style={styles.routeButton}>
-            <Typography variant="caption" color={colors.neutral.white}>
-              View Route
-            </Typography>
-          </TouchableOpacity>
+            testID="view-route-button"
+          />
         </View>
       )}
 
@@ -220,10 +307,14 @@ const FeedCard: React.FC<FeedCardProps> = ({
       <View style={styles.actionBar}>
         {/* Like Button */}
         <TouchableOpacity onPress={onLikePress} style={styles.actionButton}>
-          <Icon name="users" size={20} color={colors.neutral.grey} />
+          <Icon
+            name={isLiked ? 'like-filled' : 'like'}
+            size={20}
+            color={isLiked ? colors.primary.main : colors.neutral.grey}
+          />
           <Typography
             variant="caption"
-            color={colors.neutral.grey}
+            color={isLiked ? colors.primary.main : colors.neutral.grey}
             style={styles.actionText}>
             {likeCount}
           </Typography>
@@ -231,10 +322,14 @@ const FeedCard: React.FC<FeedCardProps> = ({
 
         {/* Comment Button */}
         <TouchableOpacity onPress={onCommentPress} style={styles.actionButton}>
-          <Icon name="users" size={20} color={colors.neutral.grey} />
+          <Icon
+            name={isCommented ? 'comment-filled' : 'comment'}
+            size={20}
+            color={isCommented ? colors.primary.main : colors.neutral.grey}
+          />
           <Typography
             variant="caption"
-            color={colors.neutral.grey}
+            color={isCommented ? colors.primary.main : colors.neutral.grey}
             style={styles.actionText}>
             {commentCount}
           </Typography>
@@ -244,12 +339,16 @@ const FeedCard: React.FC<FeedCardProps> = ({
         <TouchableOpacity
           onPress={onSavePress}
           style={[styles.actionButton, styles.saveButton]}>
-          <Icon name="user" size={20} color={colors.neutral.grey} />
+          <Icon
+            name={isSaved ? 'save-filled' : 'save'}
+            size={20}
+            color={isSaved ? colors.primary.main : colors.neutral.grey}
+          />
           <Typography
             variant="caption"
-            color={colors.neutral.grey}
+            color={isSaved ? colors.primary.main : colors.neutral.grey}
             style={styles.actionText}>
-            Save
+            {isSaved ? 'Saved' : 'Save'}
           </Typography>
         </TouchableOpacity>
       </View>

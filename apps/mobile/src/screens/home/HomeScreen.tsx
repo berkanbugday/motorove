@@ -72,11 +72,13 @@ interface FeedPost {
   avatarSource: any;
   timeAgo: string;
   content: string;
-  image?: any;
+  images?: any[];
   routeTitle?: string;
   likeCount: number;
   commentCount: number;
   isSaved: boolean;
+  isLiked: boolean;
+  isCommented: boolean;
   labels: Array<{
     icon?: IconName;
     text: string;
@@ -126,11 +128,13 @@ const feedPosts: FeedPost[] = [
     timeAgo: '2h ago',
     content:
       'Just completed an amazing coastal ride with perfect weather! The views were breathtaking.',
-    image: {uri: 'https://picsum.photos/id/30/500/300'},
+    images: [{uri: 'https://picsum.photos/id/15/500/300'}],
     routeTitle: 'Pacific Coast Highway',
     likeCount: 24,
     commentCount: 5,
     isSaved: false,
+    isLiked: true,
+    isCommented: false,
     labels: [
       {icon: 'users', text: 'Coastal Riders Club'},
       {icon: 'map-pin', text: 'San Francisco, CA'},
@@ -143,10 +147,12 @@ const feedPosts: FeedPost[] = [
     timeAgo: '5h ago',
     content:
       'First time taking my new bike out on the mountain trails. The handling was superb!',
-    image: {uri: 'https://picsum.photos/id/58/500/300'},
+    images: [{uri: 'https://picsum.photos/id/16/500/300'}],
     likeCount: 18,
     commentCount: 3,
     isSaved: true,
+    isLiked: false,
+    isCommented: true,
     labels: [{icon: 'map-pin', text: 'Big Bear Mountain, CA'}],
   },
   {
@@ -156,11 +162,17 @@ const feedPosts: FeedPost[] = [
     timeAgo: 'Yesterday',
     content:
       "Group night ride through downtown was epic! Can't wait for the next one.",
-    image: {uri: 'https://picsum.photos/id/42/500/300'},
+    images: [
+      {uri: 'https://picsum.photos/id/10/500/300'},
+      {uri: 'https://picsum.photos/id/11/500/300'}, // Adding duplicate for demo purposes
+      {uri: 'https://picsum.photos/id/32/500/300'}, // Another image for carousel demo
+    ],
     routeTitle: 'City Lights Tour',
     likeCount: 32,
     commentCount: 7,
     isSaved: false,
+    isLiked: true,
+    isCommented: false,
     labels: [
       {icon: 'users', text: 'Urban Moto Group'},
       {icon: 'map-pin', text: 'Los Angeles, CA'},
@@ -331,12 +343,14 @@ export function HomeScreen() {
         timeAgo={item.timeAgo}
         labels={item.labels}
         content={item.content}
-        image={item.image}
+        images={item.images}
         routeTitle={item.routeTitle}
         likeCount={item.likeCount}
         commentCount={item.commentCount}
         isSaved={item.isSaved}
-        onPress={() => console.log(`Post pressed: ${item.id}`)}
+        isLiked={item.isLiked}
+        isCommented={item.isCommented}
+        // onPress={() => console.log(`Post pressed: ${item.id}`)}
         onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
         onLikePress={() => console.log(`Like pressed for post: ${item.id}`)}
         onCommentPress={() =>

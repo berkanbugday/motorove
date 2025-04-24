@@ -21,6 +21,13 @@ import Home from '@assets/icons/home.svg';
 import MapLocation from '@assets/icons/map-location.svg';
 import UserGear from '@assets/icons/user-gear.svg';
 import Bell from '@assets/icons/bell.svg';
+import Like from '@assets/icons/like.svg';
+import LikeFilled from '@assets/icons/like-filled.svg';
+import Comment from '@assets/icons/comment.svg';
+import CommentFilled from '@assets/icons/comment-filled.svg';
+import Save from '@assets/icons/save.svg';
+import SaveFilled from '@assets/icons/save-filled.svg';
+//Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
 import PartlyCloudy from '@assets/icons/weather/partly-cloudy.svg';
@@ -52,9 +59,15 @@ export type IconName =
   | 'map-location'
   | 'user-gear'
   | 'bell'
+  | 'like'
+  | 'like-filled'
+  | 'comment'
+  | 'comment-filled'
+  | 'save'
+  | 'save-filled'
   | 'sunny'
   | 'cloudy'
-  | 'partly-cloudy'
+  | 'partlyCloudy'
   | 'rainy'
   | 'stormy'
   | 'snowy'
@@ -119,6 +132,18 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <UserGear {...commonProps} />;
     case 'bell':
       return <Bell {...commonProps} />;
+    case 'like':
+      return <Like {...commonProps} />;
+    case 'like-filled':
+      return <LikeFilled {...commonProps} />;
+    case 'comment':
+      return <Comment {...commonProps} />;
+    case 'comment-filled':
+      return <CommentFilled {...commonProps} />;
+    case 'save':
+      return <Save {...commonProps} />;
+    case 'save-filled':
+      return <SaveFilled {...commonProps} />;
     case 'sunny':
       return <Sunny {...commonProps} />;
     case 'cloudy':

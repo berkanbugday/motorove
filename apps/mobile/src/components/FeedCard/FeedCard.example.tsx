@@ -16,7 +16,10 @@ const FeedCardExample = () => {
             {icon: 'map-pin', text: 'Colorado Springs'},
           ]}
           content="Just completed an incredible 25-mile mountain trail ride through Garden of the Gods! The red rock formations were breathtaking."
-          image={require('@assets/images/placeholder-image.jpg')}
+          images={[
+            require('@assets/images/placeholder-image.jpg'),
+            require('@assets/images/placeholder-image.jpg'), // Add a second image for carousel demo
+          ]}
           routeTitle="Garden of the Gods Loop"
           likeCount={128}
           commentCount={12}

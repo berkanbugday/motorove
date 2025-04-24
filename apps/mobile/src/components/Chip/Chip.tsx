@@ -318,6 +318,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   contentContainer: {
+    paddingRight: spacing.xs,
+    paddingLeft: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

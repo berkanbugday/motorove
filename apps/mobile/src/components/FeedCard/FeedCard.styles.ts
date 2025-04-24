@@ -49,42 +49,78 @@ export const styles = StyleSheet.create({
   },
   mainImage: {
     width: '100%',
-    height: 240,
+    height: 200,
+    alignSelf: 'center',
+    borderRadius: radius.lg,
+  },
+  imageContainer: {
+    paddingHorizontal: spacing.md,
+    position: 'relative',
+  },
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.neutral.black,
+    borderRadius: radius.lg,
+  },
+  carouselContainer: {
+    position: 'relative',
+    overflow: 'hidden',
   },
   routeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.neutral.lightGrey,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.secondary.light,
+    borderRadius: radius.sm,
+    marginTop: spacing.md,
+    marginLeft: spacing.md,
+    marginRight: spacing.md,
   },
   routeTitle: {
     flex: 1,
     marginLeft: spacing.sm,
   },
-  routeButton: {
-    backgroundColor: colors.primary.main,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.sm,
-  },
   actionBar: {
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: spacing.lg,
+    marginRight: spacing.xl,
   },
   saveButton: {
     marginLeft: 'auto',
     marginRight: 0,
   },
   actionText: {
-    marginLeft: spacing.xs / 2,
+    marginLeft: spacing.xs,
+  },
+  labelChip: {
+    marginRight: spacing.xs,
+  },
+  // Pagination styles
+  paginationContainer: {
+    paddingVertical: spacing.sm,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  paginationDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.neutral.white,
+    marginHorizontal: spacing.xs / 2,
+  },
+  paginationInactiveDot: {
+    backgroundColor: colors.neutral.white,
   },
 });
