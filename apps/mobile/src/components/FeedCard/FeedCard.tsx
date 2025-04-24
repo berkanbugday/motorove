@@ -180,11 +180,15 @@ const FeedCard: React.FC<FeedCardProps> = ({
   const imageArray = images ? (Array.isArray(images) ? images : [images]) : [];
 
   const handlePress = () => {
-    if (onPress) onPress();
+    if (onPress) {
+      onPress();
+    }
   };
 
   const handleRoutePress = () => {
-    if (onRoutePress) onRoutePress();
+    if (onRoutePress) {
+      onRoutePress();
+    }
   };
 
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -206,7 +210,31 @@ const FeedCard: React.FC<FeedCardProps> = ({
               styles.imageOverlay,
               {
                 backgroundColor: overlayProps.color || colors.neutral.black,
-                opacity: overlayProps.opacity || 0.2,
+                opacity: overlayProps.opacity || 0.3,
+              },
+              overlayProps.style,
+            ]}
+          />
+        </View>
+      </View>
+    );
+  };
+
+  const renderSingleImage = (image: ImageSourcePropType) => {
+    return (
+      <View style={styles.imageContainer}>
+        <View style={{position: 'relative'}}>
+          <Image
+            source={image}
+            style={[styles.mainImage, imageStyle]}
+            resizeMode="stretch"
+          />
+          <View
+            style={[
+              styles.imageOverlay,
+              {
+                backgroundColor: overlayProps.color || colors.neutral.black,
+                opacity: overlayProps.opacity || 0.3,
               },
               overlayProps.style,
             ]}
@@ -256,29 +284,35 @@ const FeedCard: React.FC<FeedCardProps> = ({
         </Typography>
       )}
 
-      {/* Image Carousel */}
+      {/* Images */}
       {imageArray.length > 0 && (
         <View style={styles.carouselContainer}>
-          <Carousel
-            ref={carouselRef}
-            data={imageArray}
-            renderItem={renderCarouselItem}
-            sliderWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
-            itemWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
-            onSnapToItem={index => setActiveSlide(index)}
-            inactiveSlideScale={1}
-            inactiveSlideOpacity={1}
-            activeSlideAlignment="center"
-          />
-          <Pagination
-            dotsLength={imageArray.length}
-            activeDotIndex={activeSlide}
-            containerStyle={styles.paginationContainer}
-            dotStyle={styles.paginationDot}
-            inactiveDotStyle={styles.paginationInactiveDot}
-            inactiveDotOpacity={0.4}
-            inactiveDotScale={1}
-          />
+          {imageArray.length > 1 ? (
+            <>
+              <Carousel
+                ref={carouselRef}
+                data={imageArray}
+                renderItem={renderCarouselItem}
+                sliderWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
+                itemWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
+                onSnapToItem={index => setActiveSlide(index)}
+                inactiveSlideScale={1}
+                inactiveSlideOpacity={1}
+                activeSlideAlignment="center"
+              />
+              <Pagination
+                dotsLength={imageArray.length}
+                activeDotIndex={activeSlide}
+                containerStyle={styles.paginationContainer}
+                dotStyle={styles.paginationDot}
+                inactiveDotStyle={styles.paginationInactiveDot}
+                inactiveDotOpacity={0.4}
+                inactiveDotScale={1}
+              />
+            </>
+          ) : (
+            renderSingleImage(imageArray[0])
+          )}
         </View>
       )}
 

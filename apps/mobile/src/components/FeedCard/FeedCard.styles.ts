@@ -5,7 +5,6 @@ export const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.neutral.white,
     borderRadius: radius.lg,
-    overflow: 'hidden',
     marginVertical: spacing.sm,
     ...getShadow('small'),
   },

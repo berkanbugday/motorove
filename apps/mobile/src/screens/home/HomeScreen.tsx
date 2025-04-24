@@ -366,6 +366,12 @@ export function HomeScreen() {
   // Feed keyExtractor
   const feedKeyExtractor = useCallback((item: FeedPost) => item.id, []);
 
+  // Post separator component
+  const PostSeparator = useCallback(
+    () => <View style={styles.postSeparator} />,
+    [],
+  );
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -479,9 +485,7 @@ export function HomeScreen() {
               keyExtractor={feedKeyExtractor}
               scrollEnabled={false} // Disable scrolling to prevent nested scroll issues
               showsVerticalScrollIndicator={false}
-              ItemSeparatorComponent={() => (
-                <View style={styles.postSeparator} />
-              )}
+              ItemSeparatorComponent={PostSeparator}
             />
           </View>
         </Animated.ScrollView>
