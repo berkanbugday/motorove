@@ -9,6 +9,7 @@ import {
   ImageStyle,
   Dimensions,
   LayoutChangeEvent,
+  Animated,
 } from 'react-native';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {Typography} from '../Typography/Typography';
@@ -181,6 +182,8 @@ const FeedCard: React.FC<FeedCardProps> = ({
   const [activeSlide, setActiveSlide] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
   const carouselRef = useRef(null);
+  const likeAnimatedValue = useRef(new Animated.Value(1)).current;
+  const saveAnimatedValue = useRef(new Animated.Value(1)).current;
 
   // For backward compatibility, convert single image to array
   const imageArray = images ? (Array.isArray(images) ? images : [images]) : [];
@@ -200,6 +203,53 @@ const FeedCard: React.FC<FeedCardProps> = ({
   const handleLayout = (event: LayoutChangeEvent) => {
     const {width} = event.nativeEvent.layout;
     setCardWidth(width);
+  };
+
+  const handleLikePress = () => {
+    // Animate the like button
+    Animated.sequence([
+      Animated.timing(likeAnimatedValue, {
+        toValue: 1.3,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(likeAnimatedValue, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Call the original onLikePress handler
+    if (onLikePress) {
+      onLikePress();
+    }
+  };
+
+  const handleSavePress = () => {
+    // Simple pop animation for save button
+    Animated.sequence([
+      Animated.timing(saveAnimatedValue, {
+        toValue: 0.8,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(saveAnimatedValue, {
+        toValue: 1.1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(saveAnimatedValue, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Call the original onSavePress handler
+    if (onSavePress) {
+      onSavePress();
+    }
   };
 
   const renderCarouselItem = ({item}: {item: ImageSourcePropType}) => {
@@ -355,12 +405,14 @@ const FeedCard: React.FC<FeedCardProps> = ({
       {/* Action Bar */}
       <View style={styles.actionBar}>
         {/* Like Button */}
-        <TouchableOpacity onPress={onLikePress} style={styles.actionButton}>
-          <Icon
-            name={isLiked ? 'like-filled' : 'like'}
-            size={20}
-            color={isLiked ? colors.primary.main : colors.neutral.grey}
-          />
+        <TouchableOpacity onPress={handleLikePress} style={styles.actionButton}>
+          <Animated.View style={{transform: [{scale: likeAnimatedValue}]}}>
+            <Icon
+              name={isLiked ? 'like-filled' : 'like'}
+              size={20}
+              color={isLiked ? colors.primary.main : colors.neutral.grey}
+            />
+          </Animated.View>
           <Typography
             variant="caption"
             color={isLiked ? colors.primary.main : colors.neutral.grey}
@@ -386,13 +438,18 @@ const FeedCard: React.FC<FeedCardProps> = ({
 
         {/* Save Button */}
         <TouchableOpacity
-          onPress={onSavePress}
+          onPress={handleSavePress}
           style={[styles.actionButton, styles.saveButton]}>
-          <Icon
-            name={isSaved ? 'save-filled' : 'save'}
-            size={20}
-            color={isSaved ? colors.primary.main : colors.neutral.grey}
-          />
+          <Animated.View
+            style={{
+              transform: [{scale: saveAnimatedValue}],
+            }}>
+            <Icon
+              name={isSaved ? 'save-filled' : 'save'}
+              size={20}
+              color={isSaved ? colors.primary.main : colors.neutral.grey}
+            />
+          </Animated.View>
           <Typography
             variant="caption"
             color={isSaved ? colors.primary.main : colors.neutral.grey}

@@ -189,6 +189,7 @@ export function HomeScreen({navigation}: Props) {
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
+  const [posts, setPosts] = useState<FeedPost[]>(feedPosts);
 
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -342,6 +343,30 @@ export function HomeScreen({navigation}: Props) {
     navigation.navigate('CommentDetail', {postId});
   };
 
+  // Handle like press with state update
+  const handleLikePress = useCallback((postId: string) => {
+    setPosts(currentPosts =>
+      currentPosts.map(post =>
+        post.id === postId
+          ? {
+              ...post,
+              isLiked: !post.isLiked,
+              likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+            }
+          : post,
+      ),
+    );
+  }, []);
+
+  // Handle save press with state update
+  const handleSavePress = useCallback((postId: string) => {
+    setPosts(currentPosts =>
+      currentPosts.map(post =>
+        post.id === postId ? {...post, isSaved: !post.isSaved} : post,
+      ),
+    );
+  }, []);
+
   // Render feed post with comment navigation
   const renderFeedPost = useCallback(
     ({item}: {item: FeedPost}) => (
@@ -361,13 +386,13 @@ export function HomeScreen({navigation}: Props) {
         onMorePress={() => console.log(`More pressed for post: ${item.id}`)}
         // onPress={() => console.log(`Post pressed: ${item.id}`)}
         onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
-        onLikePress={() => console.log(`Like pressed for post: ${item.id}`)}
+        onLikePress={() => handleLikePress(item.id)}
         onCommentPress={() => handleCommentPress(item.id)}
-        onSavePress={() => console.log(`Save pressed for post: ${item.id}`)}
+        onSavePress={() => handleSavePress(item.id)}
         style={styles.feedCard}
       />
     ),
-    [navigation],
+    [navigation, handleLikePress, handleSavePress],
   );
 
   // Feed keyExtractor
@@ -487,7 +512,7 @@ export function HomeScreen({navigation}: Props) {
               Shared Posts
             </Subtitle>
             <FlatList
-              data={feedPosts}
+              data={posts}
               renderItem={renderFeedPost}
               keyExtractor={feedKeyExtractor}
               scrollEnabled={false} // Disable scrolling to prevent nested scroll issues
