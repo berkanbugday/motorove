@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-import {colors, spacing, radius, getShadow} from '@theme';
+import {colors, spacing, radius, getShadow, fontSizes} from '@theme';
 
 export const styles = StyleSheet.create({
   card: {
@@ -23,18 +23,29 @@ export const styles = StyleSheet.create({
 
   // Size styles
   smallCard: {
-    minHeight: 80,
+    minHeight: 120,
+    maxHeight: 200,
   },
   mediumCard: {
-    minHeight: 120,
+    minHeight: 180,
+    maxHeight: 260,
   },
   largeCard: {
-    minHeight: 160,
+    minHeight: 240,
+    maxHeight: 320,
   },
 
-  // Content padding based on size
+  // Image background style
+  imageBackground: {
+    width: '100%',
+    height: '100%',
+  },
+
+  // Content styles
   content: {
     flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent overlay
   },
   smallContent: {
     padding: spacing.sm,
@@ -46,33 +57,37 @@ export const styles = StyleSheet.create({
     padding: spacing.lg,
   },
 
-  // Image styles
-  image: {
-    width: '100%',
-    height: 150,
+  // Header styles
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    padding: spacing.sm,
   },
 
-  // Full image overlay styles
-  fullImageContent: {
-    padding: spacing.md,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-
-  // Text styles
+  // Title styles
   title: {
-    marginBottom: spacing.xs,
+    padding: spacing.xs,
+    fontSize: fontSizes.lg,
+    fontWeight: 'bold',
   },
   titleContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: radius.round,
     alignSelf: 'flex-start',
-    paddingTop: spacing.sm,
+    marginBottom: spacing.sm,
   },
+
+  // Text styles
   subtitle: {
+    fontSize: fontSizes.md,
+    fontWeight: 'light',
+    marginTop: spacing.xs,
+    marginLeft: spacing.lg,
     marginBottom: spacing.sm,
   },
   text: {
@@ -82,12 +97,9 @@ export const styles = StyleSheet.create({
   // Footer styles
   footer: {
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.veryLightGrey,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-  },
-  fullImageFooter: {
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
   },
 
   // State styles

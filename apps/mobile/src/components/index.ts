@@ -12,7 +12,7 @@ export * from './SearchableDropdown';
 export * from './Chip';
 export * from './LocationPermissionOverlay';
 export * from './Banner';
-export * from './Card';
+export * from './FullImageCard';
 export * from './GroupEventCard';
 export * from './GroupEventBanner';
 export * from './PageIndicator';

@@ -7,11 +7,11 @@ import {
   ViewStyle,
   TextStyle,
   ImageStyle,
+  TouchableOpacity,
 } from 'react-native';
 import {Typography} from '../Typography';
 import {Icon} from '../Icon';
-import {Card} from '../Card';
-import {colors} from '@theme';
+import {colors, getShadow, radius} from '@theme';
 import {Chip, ChipColor} from '../Chip';
 import {styles} from './GroupEventCard.styles';
 
@@ -155,7 +155,7 @@ const GroupEventCard: React.FC<GroupEventCardProps> = ({
 
   // Card header with category chip and featured badge
   const headerComponent = (
-    <>
+    <View>
       {image && (
         <Image
           source={image}
@@ -188,12 +188,19 @@ const GroupEventCard: React.FC<GroupEventCardProps> = ({
           />
         </View>
       )}
-    </>
+    </View>
   );
 
-  // Render card content
+  // Card content
   const cardContent = (
-    <>
+    <View style={[styles.content, contentStyle]}>
+      {/* Title */}
+      {title && (
+        <Typography variant="subtitle" style={titleStyle}>
+          {title}
+        </Typography>
+      )}
+
       {/* Date and Time */}
       <View style={styles.dateTimeContainer}>
         <Icon name="chevron-down" size={14} color={colors.neutral.grey} />
@@ -259,20 +266,38 @@ const GroupEventCard: React.FC<GroupEventCardProps> = ({
           </Typography>
         </View>
       )}
-    </>
+    </View>
   );
 
+  // Base card style
+  const cardStyle: StyleProp<ViewStyle> = [
+    {
+      backgroundColor: colors.neutral.white,
+      borderRadius: radius.lg,
+      overflow: 'hidden',
+      marginVertical: 8,
+      ...getShadow('small'),
+    },
+    featured && styles.featuredContainer,
+    style,
+  ];
+
+  // If card is clickable, wrap in TouchableOpacity
+  if (onPress) {
+    return (
+      <TouchableOpacity style={cardStyle} onPress={onPress} activeOpacity={0.7}>
+        {headerComponent}
+        {cardContent}
+      </TouchableOpacity>
+    );
+  }
+
+  // Otherwise render as a regular View
   return (
-    <Card
-      onPress={onPress}
-      style={[featured && styles.featuredContainer, style]}
-      headerComponent={headerComponent}
-      title={title}
-      titleStyle={titleStyle}
-      contentStyle={[styles.content, contentStyle]}
-      variant="elevated">
+    <View style={cardStyle}>
+      {headerComponent}
       {cardContent}
-    </Card>
+    </View>
   );
 };
 

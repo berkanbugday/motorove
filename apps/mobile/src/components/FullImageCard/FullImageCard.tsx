@@ -1,27 +1,27 @@
 import React from 'react';
 import {
-  View,
-  TouchableOpacity,
-  StyleProp,
-  ViewStyle,
-  Image,
+  ImageBackground,
   ImageSourcePropType,
   ImageStyle,
-  DimensionValue,
-  ImageBackground,
+  StyleProp,
   TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+  DimensionValue,
 } from 'react-native';
-import {colors} from '@theme';
 import {Typography} from '../Typography';
-import {styles} from './Card.styles';
+import {colors} from '@theme';
+import {styles} from './FullImageCard.styles';
 
-export interface CardProps {
+export interface FullImageCardProps {
+  // Required props
+  image: ImageSourcePropType;
+
   // Content props
   title?: string;
   subtitle?: string;
   content?: string;
-  image?: ImageSourcePropType;
-  fullImage?: boolean;
 
   // Action props
   onPress?: () => void;
@@ -32,7 +32,6 @@ export interface CardProps {
   size?: 'small' | 'medium' | 'large';
   width?: DimensionValue;
   height?: DimensionValue;
-  backgroundColor?: string;
   disabled?: boolean;
 
   // Custom content
@@ -52,13 +51,14 @@ export interface CardProps {
   accessibilityLabel?: string;
 }
 
-export const Card: React.FC<CardProps> = ({
+export const FullImageCard: React.FC<FullImageCardProps> = ({
+  // Required props
+  image,
+
   // Content props
   title,
   subtitle,
   content,
-  image,
-  fullImage = false,
 
   // Action props
   onPress,
@@ -69,7 +69,6 @@ export const Card: React.FC<CardProps> = ({
   size = 'medium',
   width,
   height,
-  backgroundColor,
   disabled = false,
 
   // Custom content
@@ -101,17 +100,14 @@ export const Card: React.FC<CardProps> = ({
     size === 'large' && styles.largeCard,
     width !== undefined && {width},
     height !== undefined && {height},
-    backgroundColor !== undefined && {backgroundColor},
     disabled && styles.disabledCard,
     style,
   ];
 
-  // Determine padding for content based on size and fullImage mode
-  const contentPadding = [
+  // Determine content style based on size
+  const contentContainerStyle = [
     styles.content,
-    fullImage
-      ? styles.fullImageContent
-      : size === 'small'
+    size === 'small'
       ? styles.smallContent
       : size === 'medium'
       ? styles.mediumContent
@@ -120,10 +116,10 @@ export const Card: React.FC<CardProps> = ({
   ];
 
   const renderContent = () => (
-    <View style={contentPadding}>
-      {/* Title and Subtitle */}
+    <View style={contentContainerStyle}>
+      {/* Title */}
       {title && (
-        <View style={fullImage ? styles.titleContainer : undefined}>
+        <View style={styles.titleContainer}>
           <Typography
             variant={
               size === 'large'
@@ -132,17 +128,18 @@ export const Card: React.FC<CardProps> = ({
                 ? 'bodySmall'
                 : 'subtitle'
             }
-            color={fullImage ? colors.neutral.white : undefined}
+            color={colors.neutral.white}
             style={[styles.title, titleStyle]}>
             {title}
           </Typography>
         </View>
       )}
 
+      {/* Subtitle */}
       {subtitle && (
         <Typography
           variant={size === 'small' ? 'caption' : 'bodySmall'}
-          color={fullImage ? colors.neutral.white : colors.neutral.grey}
+          color={colors.neutral.white}
           style={[styles.subtitle, subtitleStyle]}>
           {subtitle}
         </Typography>
@@ -153,7 +150,7 @@ export const Card: React.FC<CardProps> = ({
         <Typography
           variant="body"
           style={styles.text}
-          color={fullImage ? colors.neutral.white : undefined}>
+          color={colors.neutral.white}>
           {content}
         </Typography>
       )}
@@ -163,44 +160,21 @@ export const Card: React.FC<CardProps> = ({
     </View>
   );
 
-  const cardContent =
-    fullImage && image ? (
-      <ImageBackground
-        source={image}
-        style={[{width: '100%', height: '100%'}, imageStyle]}
-        resizeMode="cover">
-        {renderContent()}
-        {/* Card Footer (custom or action) */}
-        {(footerComponent || actionComponent) && (
-          <View style={[styles.footer, styles.fullImageFooter]}>
-            {footerComponent || actionComponent}
-          </View>
-        )}
-      </ImageBackground>
-    ) : (
-      <>
-        {/* Card Header (custom or default) */}
-        {headerComponent
-          ? headerComponent
-          : image && (
-              <Image
-                source={image}
-                style={[styles.image, imageStyle]}
-                resizeMode="cover"
-              />
-            )}
+  const cardContent = (
+    <ImageBackground
+      source={image}
+      style={[styles.imageBackground, imageStyle]}
+      resizeMode="cover">
+      {headerComponent && <View style={styles.header}>{headerComponent}</View>}
 
-        {/* Card Content */}
-        {renderContent()}
+      {renderContent()}
 
-        {/* Card Footer (custom or action) */}
-        {(footerComponent || actionComponent) && (
-          <View style={styles.footer}>
-            {footerComponent || actionComponent}
-          </View>
-        )}
-      </>
-    );
+      {/* Card Footer (custom or action) */}
+      {(footerComponent || actionComponent) && (
+        <View style={styles.footer}>{footerComponent || actionComponent}</View>
+      )}
+    </ImageBackground>
+  );
 
   // Render as TouchableOpacity if the card is clickable
   if (isClickable) {

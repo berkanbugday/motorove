@@ -13,11 +13,11 @@ import {
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
 import {
   TopHeaderBar,
-  Card,
   Subtitle,
   GroupEventBanner,
   PageIndicator,
 } from '@components';
+import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
 import {colors, commonStyles, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -307,16 +307,12 @@ export function HomeScreen() {
             <Subtitle weight="bold" style={styles.sectionTitle}>
               Recommended Route of the Week
             </Subtitle>
-            <Card
+            <FullImageCard
               title={currentRoute.title}
               subtitle={currentRoute.subtitle}
               image={{uri: currentRoute.image}}
               variant="elevated"
-              fullImage
               size="small"
-              style={styles.card}
-              titleStyle={styles.cardTitle}
-              subtitleStyle={styles.cardSubtitle}
               onPress={() => console.log('Card pressed')}
             />
           </View>
@@ -390,20 +386,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     fontWeight: 'bold',
     fontSize: fontSizes.lg,
-  },
-  card: {
-    height: 200,
-  },
-  cardTitle: {
-    fontSize: fontSizes.lg,
-    fontWeight: 'bold',
-  },
-  cardSubtitle: {
-    fontSize: fontSizes.md,
-    fontWeight: 'light',
-    marginTop: spacing.sm,
-    paddingLeft: spacing.lg,
-    color: colors.neutral.lightGrey,
   },
   sectionTitle: {
     marginTop: spacing.md,
