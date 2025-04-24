@@ -44,7 +44,6 @@ export const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
   },
   mainImage: {
     width: '100%',
@@ -54,6 +53,7 @@ export const styles = StyleSheet.create({
   },
   imageContainer: {
     paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
     position: 'relative',
   },
   imageOverlay: {

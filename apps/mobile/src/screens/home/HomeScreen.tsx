@@ -128,7 +128,6 @@ const feedPosts: FeedPost[] = [
     timeAgo: '2h ago',
     content:
       'Just completed an amazing coastal ride with perfect weather! The views were breathtaking.',
-    images: [{uri: 'https://picsum.photos/id/15/500/300'}],
     routeTitle: 'Pacific Coast Highway',
     likeCount: 24,
     commentCount: 5,
@@ -350,6 +349,7 @@ export function HomeScreen() {
         isSaved={item.isSaved}
         isLiked={item.isLiked}
         isCommented={item.isCommented}
+        onMorePress={() => console.log(`More pressed for post: ${item.id}`)}
         // onPress={() => console.log(`Post pressed: ${item.id}`)}
         onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
         onLikePress={() => console.log(`Like pressed for post: ${item.id}`)}

@@ -106,6 +106,11 @@ export interface FeedCardProps {
   onSavePress?: () => void;
 
   /**
+   * Handler for when the more button is pressed
+   */
+  onMorePress?: () => void;
+
+  /**
    * Additional styles for the card container
    */
   style?: StyleProp<ViewStyle>;
@@ -164,6 +169,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
   onLikePress,
   onCommentPress,
   onSavePress,
+  onMorePress,
   style,
   contentStyle,
   imageStyle,
@@ -258,6 +264,15 @@ const FeedCard: React.FC<FeedCardProps> = ({
             {timeAgo}
           </Typography>
         </View>
+
+        {/* More Button */}
+        {onMorePress && (
+          <TouchableOpacity
+            onPress={onMorePress}
+            hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
+            <Icon name="more-vertical" size={24} color={colors.neutral.grey} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Labels */}
