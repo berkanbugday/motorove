@@ -6,7 +6,6 @@ import {
   ViewStyle,
   TextStyle,
   StatusBar,
-  Platform,
   Text,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -128,11 +127,11 @@ export function TopHeaderBar({
     <View
       style={[
         styles.container,
+        showShadow && styles.shadow,
         {
           backgroundColor,
           paddingTop: statusBarHeight,
         },
-        showShadow && styles.shadow,
         containerStyle,
       ]}>
       <StatusBar
@@ -216,19 +215,20 @@ export function TopHeaderBar({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
+    zIndex: 10,
+    paddingBottom: spacing.sm,
+    borderBottomEndRadius: 20,
+    borderBottomStartRadius: 20,
   },
   shadow: {
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.neutral.black,
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    shadowColor: colors.neutral.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 5,
   },
   contentContainer: {
     flexDirection: 'row',

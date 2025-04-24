@@ -16,12 +16,15 @@ import {
   Subtitle,
   GroupEventBanner,
   PageIndicator,
+  Button,
+  FeedCard,
 } from '@components';
 import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
 import {colors, commonStyles, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import type {WeatherData} from '@components/WeatherWidget/weather';
+import type {IconName} from '@components/Icon';
 // Route data
 const recommendedRoutes = [
   {
@@ -62,6 +65,24 @@ interface EventItem {
   memberCount: number;
 }
 
+// Feed post interface
+interface FeedPost {
+  id: string;
+  userName: string;
+  avatarSource: any;
+  timeAgo: string;
+  content: string;
+  image?: any;
+  routeTitle?: string;
+  likeCount: number;
+  commentCount: number;
+  isSaved: boolean;
+  labels: Array<{
+    icon?: IconName;
+    text: string;
+  }>;
+}
+
 // Group events data
 const upcomingEvents: EventItem[] = [
   {
@@ -93,6 +114,57 @@ const upcomingEvents: EventItem[] = [
     organizer: 'Urban Moto Group',
     participantCount: 8,
     memberCount: 25,
+  },
+];
+
+// Sample feed posts data
+const feedPosts: FeedPost[] = [
+  {
+    id: '1',
+    userName: 'Alex Johnson',
+    avatarSource: {uri: 'https://picsum.photos/id/1005/100/100'},
+    timeAgo: '2h ago',
+    content:
+      'Just completed an amazing coastal ride with perfect weather! The views were breathtaking.',
+    image: {uri: 'https://picsum.photos/id/30/500/300'},
+    routeTitle: 'Pacific Coast Highway',
+    likeCount: 24,
+    commentCount: 5,
+    isSaved: false,
+    labels: [
+      {icon: 'users', text: 'Coastal Riders Club'},
+      {icon: 'map-pin', text: 'San Francisco, CA'},
+    ],
+  },
+  {
+    id: '2',
+    userName: 'Sarah Miller',
+    avatarSource: {uri: 'https://picsum.photos/id/1027/100/100'},
+    timeAgo: '5h ago',
+    content:
+      'First time taking my new bike out on the mountain trails. The handling was superb!',
+    image: {uri: 'https://picsum.photos/id/58/500/300'},
+    likeCount: 18,
+    commentCount: 3,
+    isSaved: true,
+    labels: [{icon: 'map-pin', text: 'Big Bear Mountain, CA'}],
+  },
+  {
+    id: '3',
+    userName: 'David Wilson',
+    avatarSource: {uri: 'https://picsum.photos/id/1012/100/100'},
+    timeAgo: 'Yesterday',
+    content:
+      "Group night ride through downtown was epic! Can't wait for the next one.",
+    image: {uri: 'https://picsum.photos/id/42/500/300'},
+    routeTitle: 'City Lights Tour',
+    likeCount: 32,
+    commentCount: 7,
+    isSaved: false,
+    labels: [
+      {icon: 'users', text: 'Urban Moto Group'},
+      {icon: 'map-pin', text: 'Los Angeles, CA'},
+    ],
   },
 ];
 
@@ -250,6 +322,36 @@ export function HomeScreen() {
   // Event keyExtractor
   const keyExtractor = useCallback((item: EventItem) => item.id, []);
 
+  // Render feed post item
+  const renderFeedPost = useCallback(
+    ({item}: {item: FeedPost}) => (
+      <FeedCard
+        avatarSource={item.avatarSource}
+        userName={item.userName}
+        timeAgo={item.timeAgo}
+        labels={item.labels}
+        content={item.content}
+        image={item.image}
+        routeTitle={item.routeTitle}
+        likeCount={item.likeCount}
+        commentCount={item.commentCount}
+        isSaved={item.isSaved}
+        onPress={() => console.log(`Post pressed: ${item.id}`)}
+        onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
+        onLikePress={() => console.log(`Like pressed for post: ${item.id}`)}
+        onCommentPress={() =>
+          console.log(`Comment pressed for post: ${item.id}`)
+        }
+        onSavePress={() => console.log(`Save pressed for post: ${item.id}`)}
+        style={styles.feedCard}
+      />
+    ),
+    [],
+  );
+
+  // Feed keyExtractor
+  const feedKeyExtractor = useCallback((item: FeedPost) => item.id, []);
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -257,12 +359,13 @@ export function HomeScreen() {
         subtitle="Michael Thompson"
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
+        showShadow={true}
         rightIconName="bell"
         rightIconBadgeCount={5}
         onRightButtonPress={() => console.log('Notifications pressed')}
       />
       <SafeAreaView
-        style={[styles.container, {marginBottom: 70 + insets.bottom}]}>
+        style={[styles.container, {marginBottom: 60 + insets.bottom}]}>
         <LocationPermissionOverlay
           visible={showLocationPermission}
           onAllowPress={handleAllowLocationAccess}
@@ -318,9 +421,16 @@ export function HomeScreen() {
           </View>
 
           <View>
-            <Subtitle weight="bold" style={styles.sectionTitle}>
-              Upcoming Group Events
-            </Subtitle>
+            <View style={styles.sectionHeaderContainer}>
+              <Subtitle weight="bold" style={styles.sectionTitle}>
+                Upcoming Group Events
+              </Subtitle>
+              <Button
+                variant="text"
+                onPress={() => console.log('View all')}
+                title="View all"
+              />
+            </View>
             <FlatList
               ref={eventsListRef}
               data={upcomingEvents}
@@ -343,6 +453,21 @@ export function HomeScreen() {
               indicatorSize={8}
               activeIndicatorSize={10}
               spacing={8}
+            />
+          </View>
+          <View>
+            <Subtitle weight="bold" style={styles.sectionTitle}>
+              Shared Posts
+            </Subtitle>
+            <FlatList
+              data={feedPosts}
+              renderItem={renderFeedPost}
+              keyExtractor={feedKeyExtractor}
+              scrollEnabled={false} // Disable scrolling to prevent nested scroll issues
+              showsVerticalScrollIndicator={false}
+              ItemSeparatorComponent={() => (
+                <View style={styles.postSeparator} />
+              )}
             />
           </View>
         </Animated.ScrollView>
@@ -387,6 +512,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: fontSizes.lg,
   },
+  sectionHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   sectionTitle: {
     marginTop: spacing.md,
     marginBottom: spacing.sm,
@@ -399,5 +529,11 @@ const styles = StyleSheet.create({
   },
   pageIndicator: {
     marginTop: spacing.sm,
+  },
+  feedCard: {
+    marginVertical: spacing.xs,
+  },
+  postSeparator: {
+    height: spacing.md,
   },
 });
