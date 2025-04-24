@@ -12,20 +12,13 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useAuth} from '@navigation/index';
-import {
-  Icon,
-  AnimatedInput,
-  Button,
-  Body,
-  Typography,
-  Caption,
-} from '@components';
+import {Icon, AnimatedInput, Button, Body, Caption} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {loginSchema, LoginFormValues} from '@utils/validation';
-import {colors, spacing, radius, fontSizes} from '@theme';
+import {colors, spacing, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useAuth} from '@navigation/utils/navigationUtils';
 
 export function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);

@@ -339,11 +339,6 @@ export function AccountSetupScreen() {
 
   return (
     <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
-      {/* <Header
-        title="Complete Your Profile"
-        showBackButton
-        onBackPress={() => navigation.goBack()}
-      /> */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}>

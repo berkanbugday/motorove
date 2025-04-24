@@ -15,7 +15,7 @@ import {
   Icon,
   AnimatedInput,
   Button,
-  Header,
+  TopHeaderBar,
   Title,
   Body,
   BodySmall,
@@ -129,7 +129,7 @@ export function ForgotPasswordScreen() {
   // Reset password form view
   return (
     <View style={styles.container}>
-      <Header
+      <TopHeaderBar
         showBackButton
         includeStatusBar={true}
         onBackPress={handleGoBack}

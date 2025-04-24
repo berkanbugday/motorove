@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
 import {
-  Header,
+  TopHeaderBar,
   Card,
   Subtitle,
   GroupEventBanner,
@@ -252,7 +252,7 @@ export function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Header
+      <TopHeaderBar
         title="Hi there 👋🏻"
         subtitle="Michael Thompson"
         titleStyle={styles.title}

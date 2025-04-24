@@ -2,7 +2,7 @@
 export * from './Icon';
 export * from './AnimatedInput';
 export * from './Button';
-export * from './Header';
+export * from './TopHeaderBar';
 export * from './Checkbox';
 export * from './BottomSheet';
 export * from './Wizard';
@@ -13,7 +13,7 @@ export * from './Chip';
 export * from './LocationPermissionOverlay';
 export * from './Banner';
 export * from './Card';
-export {GroupEventCard} from './GroupEventCard';
+export * from './GroupEventCard';
 export * from './GroupEventBanner';
 export * from './PageIndicator';
 export * from './WeatherWidget';

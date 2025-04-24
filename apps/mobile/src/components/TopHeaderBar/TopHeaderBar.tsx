@@ -14,7 +14,7 @@ import {colors, spacing} from '@theme';
 import {Icon, IconName} from '../Icon';
 import {Typography, Title, BodySmall} from '../Typography';
 
-export interface HeaderProps {
+export interface TopHeaderBarProps {
   /**
    * Title text to display in the header
    */
@@ -101,7 +101,7 @@ export interface HeaderProps {
   includeStatusBar?: boolean;
 }
 
-export function Header({
+export function TopHeaderBar({
   title,
   subtitle,
   showBackButton = false,
@@ -119,7 +119,7 @@ export function Header({
   subtitleStyle,
   showShadow = false,
   includeStatusBar = true,
-}: HeaderProps) {
+}: TopHeaderBarProps) {
   // Get status bar height from safe area insets
   const insets = useSafeAreaInsets();
   const statusBarHeight = includeStatusBar ? insets.top : 0;

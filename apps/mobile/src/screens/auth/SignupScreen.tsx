@@ -12,13 +12,12 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useAuth} from '@navigation/index';
+import {useAuth} from '@navigation/utils/navigationUtils';
 import {
   Icon,
   AnimatedInput,
   Button,
   Checkbox,
-  Header,
   Title,
   Body,
   BodySmall,
@@ -128,14 +127,6 @@ export function SignupScreen() {
 
   function handlePrivacyPress() {
     privacyBottomSheetRef.current?.open('full');
-  }
-
-  function closeTermsModal() {
-    termsBottomSheetRef.current?.close();
-  }
-
-  function closePrivacyModal() {
-    privacyBottomSheetRef.current?.close();
   }
 
   // View when signup is successful
@@ -344,13 +335,14 @@ export function SignupScreen() {
       </SafeAreaView>
 
       {/* Terms of Service Bottom Sheet */}
-      <BottomSheet ref={termsBottomSheetRef} initialSnap="closed">
+      <BottomSheet
+        ref={termsBottomSheetRef}
+        closeOnBackdropPress
+        initialSnap="closed">
         <View style={styles.bottomSheetContent}>
-          <Header
-            title="Terms of Service"
-            leftIconName="close"
-            onLeftIconPress={closeTermsModal}
-          />
+          <Title align="center" style={styles.bottomSheetTitle}>
+            Terms of Service
+          </Title>
           <ScrollView
             style={styles.legalScrollView}
             contentContainerStyle={styles.legalContentContainer}
@@ -362,13 +354,14 @@ export function SignupScreen() {
       </BottomSheet>
 
       {/* Privacy Policy Bottom Sheet */}
-      <BottomSheet ref={privacyBottomSheetRef} initialSnap="closed">
+      <BottomSheet
+        ref={privacyBottomSheetRef}
+        closeOnBackdropPress
+        initialSnap="closed">
         <View style={styles.bottomSheetContent}>
-          <Header
-            title="Privacy Policy"
-            leftIconName="close"
-            onLeftIconPress={closePrivacyModal}
-          />
+          <Title align="center" style={styles.bottomSheetTitle}>
+            Privacy Policy
+          </Title>
           <ScrollView
             style={styles.legalScrollView}
             contentContainerStyle={styles.legalContentContainer}
@@ -476,5 +469,8 @@ const styles = StyleSheet.create({
   },
   successText: {
     marginBottom: spacing.md,
+  },
+  bottomSheetTitle: {
+    marginBottom: spacing.sm,
   },
 });
