@@ -128,7 +128,7 @@ export function HomeScreen() {
   const weatherData: WeatherData = {
     temperature: 25,
     unit: 'C',
-    condition: 'stormy',
+    condition: 'sunny',
     location: 'Current Location',
   };
 

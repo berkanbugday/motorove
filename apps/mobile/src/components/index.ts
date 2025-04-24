@@ -10,7 +10,6 @@ export * from './ProgressIndicator';
 export * from './Typography';
 export * from './SearchableDropdown';
 export * from './Chip';
-export * from './Overlay';
 export * from './LocationPermissionOverlay';
 export * from './Banner';
 export * from './Card';

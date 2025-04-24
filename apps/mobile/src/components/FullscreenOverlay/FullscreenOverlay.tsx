@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import {colors, rs} from '../../theme';
 
-export interface OverlayProps {
+export interface FullscreenOverlayProps {
   /**
    * Whether the overlay is visible
    */
@@ -77,7 +77,7 @@ export interface OverlayProps {
   closeButtonContent?: ReactNode;
 }
 
-export function Overlay({
+export function FullscreenOverlay({
   visible,
   children,
   onDismiss,
@@ -92,7 +92,7 @@ export function Overlay({
   showCloseButton = false,
   closeButtonPosition = 'top-right',
   closeButtonContent,
-}: OverlayProps) {
+}: FullscreenOverlayProps) {
   // Animation value for content visibility
   const contentAnimation = React.useRef(new Animated.Value(0)).current;
   const slideAnimation = React.useRef(

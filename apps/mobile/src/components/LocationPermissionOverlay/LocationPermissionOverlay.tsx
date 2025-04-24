@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet, Image} from 'react-native';
-import {Overlay} from '../Overlay/Overlay';
+import {FullscreenOverlay} from '../FullscreenOverlay/FullscreenOverlay';
 import {colors, spacing, rs, rh} from '../../theme';
 import {Icon} from '../Icon';
 import {Body, Caption, Subtitle, Title} from '../Typography';
@@ -18,7 +18,7 @@ export function LocationPermissionOverlay({
   onDismiss,
 }: LocationPermissionOverlayProps) {
   return (
-    <Overlay
+    <FullscreenOverlay
       animationType="slide"
       visible={visible}
       onDismiss={onDismiss}
@@ -76,7 +76,7 @@ export function LocationPermissionOverlay({
           You can always change location settings later in the app preferences
         </Caption>
       </View>
-    </Overlay>
+    </FullscreenOverlay>
   );
 }
 
