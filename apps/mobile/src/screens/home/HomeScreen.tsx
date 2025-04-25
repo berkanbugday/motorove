@@ -383,12 +383,12 @@ export function HomeScreen({navigation}: Props) {
         {
           id: 'share',
           label: 'Share',
-          icon: 'paper-plane',
+          icon: 'share',
         },
         {
           id: 'report',
           label: 'Report',
-          icon: 'bell',
+          icon: 'report',
           isHighlighted: true,
         },
       ];
@@ -399,12 +399,12 @@ export function HomeScreen({navigation}: Props) {
           {
             id: 'edit',
             label: 'Edit Post',
-            icon: 'wrench',
+            icon: 'pen',
           },
           {
             id: 'delete',
             label: 'Delete Post',
-            icon: 'close',
+            icon: 'trash',
             isHighlighted: true,
           },
         );

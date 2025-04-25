@@ -29,6 +29,11 @@ import Save from '@assets/icons/save.svg';
 import SaveFilled from '@assets/icons/save-filled.svg';
 import MoreVertical from '@assets/icons/more-vertical.svg';
 import PaperPlane from '@assets/icons/paper-plane.svg';
+import Trash from '@assets/icons/trash.svg';
+import Pen from '@assets/icons/pen.svg';
+import Report from '@assets/icons/report.svg';
+import Share from '@assets/icons/share.svg';
+
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -76,7 +81,11 @@ export type IconName =
   | 'foggy'
   | 'windy'
   | 'more-vertical'
-  | 'paper-plane';
+  | 'paper-plane'
+  | 'trash'
+  | 'pen'
+  | 'report'
+  | 'share';
 
 interface IconProps {
   name: IconName;
@@ -168,6 +177,14 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <MoreVertical {...commonProps} />;
     case 'paper-plane':
       return <PaperPlane {...commonProps} />;
+    case 'trash':
+      return <Trash {...commonProps} />;
+    case 'pen':
+      return <Pen {...commonProps} />;
+    case 'report':
+      return <Report {...commonProps} />;
+    case 'share':
+      return <Share {...commonProps} />;
     default:
       return null;
   }
