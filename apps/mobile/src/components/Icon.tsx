@@ -28,6 +28,7 @@ import CommentFilled from '@assets/icons/comment-filled.svg';
 import Save from '@assets/icons/save.svg';
 import SaveFilled from '@assets/icons/save-filled.svg';
 import MoreVertical from '@assets/icons/more-vertical.svg';
+import PaperPlane from '@assets/icons/paper-plane.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -74,7 +75,8 @@ export type IconName =
   | 'snowy'
   | 'foggy'
   | 'windy'
-  | 'more-vertical';
+  | 'more-vertical'
+  | 'paper-plane';
 
 interface IconProps {
   name: IconName;
@@ -164,6 +166,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Windy {...commonProps} />;
     case 'more-vertical':
       return <MoreVertical {...commonProps} />;
+    case 'paper-plane':
+      return <PaperPlane {...commonProps} />;
     default:
       return null;
   }

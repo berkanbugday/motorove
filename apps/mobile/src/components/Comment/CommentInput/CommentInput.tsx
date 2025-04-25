@@ -43,7 +43,6 @@ const CommentInput: React.FC<CommentInputProps> = ({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={100}
       style={[styles.container, style]}>
       {replyingTo && (
         <View style={styles.replyingContainer}>
@@ -79,14 +78,13 @@ const CommentInput: React.FC<CommentInputProps> = ({
             text.trim().length === 0 && styles.disabledButton,
           ]}>
           <Icon
-            name="arrow-left"
+            name="paper-plane"
             size={20}
             color={
               text.trim().length === 0
                 ? colors.neutral.lightGrey
                 : colors.neutral.white
             }
-            style={styles.sendIcon}
           />
         </TouchableOpacity>
       </View>
@@ -142,9 +140,6 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: colors.neutral.veryLightGrey,
-  },
-  sendIcon: {
-    transform: [{rotate: '180deg'}],
   },
 });
 

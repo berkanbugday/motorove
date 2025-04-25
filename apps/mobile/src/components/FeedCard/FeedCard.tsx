@@ -384,7 +384,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
       {/* Route Information (if applicable) */}
       {routeTitle && (
         <View style={styles.routeContainer}>
-          <Icon name="route" size={18} color={colors.neutral.black} />
+          <Icon name="route" size={20} color={colors.neutral.black} />
           <Typography
             variant="bodySmall"
             weight="medium"
