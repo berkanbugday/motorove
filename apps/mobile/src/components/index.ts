@@ -20,3 +20,4 @@ export * from './WeatherWidget';
 export * from './FeedCard';
 export * from './Comment/CommentItem';
 export * from './Comment/CommentInput';
+export * from './DropdownMenu';

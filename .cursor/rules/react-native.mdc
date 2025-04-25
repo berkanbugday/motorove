@@ -68,7 +68,7 @@ alwaysApply: true
         - Use Redux, Zustand, or Jotai for complex state management.
         - Consider using Recoil for fine-grained state management.
     - **API Calls:**
-        - Use `axios` or `fetch` for making API requests.
+        - Use `axios`for making API requests.
         - Create a service layer to handle API calls and data transformations.
     - **Navigation:**
         - Use React Navigation for managing app navigation.

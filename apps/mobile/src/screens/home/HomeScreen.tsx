@@ -30,6 +30,8 @@ import {
   MainStackParamList,
   TabParamList,
 } from '@navigation/types/navigationTypes';
+import {navigateToScreen} from '@navigation/utils/navigationHelpers';
+import {DropdownMenuItem} from '@components/DropdownMenu';
 // Route data
 const recommendedRoutes = [
   {
@@ -346,7 +348,8 @@ export function HomeScreen({navigation}: Props) {
 
   // Handle navigation to comment details
   const handleCommentPress = (postId: string) => {
-    navigation.navigate('CommentDetail', {postId});
+    // Use our utility function that handles cross-stack navigation
+    navigateToScreen(navigation, 'CommentDetail', {postId});
   };
 
   // Handle like press with state update
@@ -373,32 +376,107 @@ export function HomeScreen({navigation}: Props) {
     );
   }, []);
 
-  // Render feed post with comment navigation
+  // Create dropdown menu items for the feed posts
+  const createPostDropdownItems = useCallback(
+    (postId: string, isOwnPost: boolean): DropdownMenuItem[] => {
+      const items: DropdownMenuItem[] = [
+        {
+          id: 'share',
+          label: 'Share',
+          icon: 'paper-plane',
+        },
+        {
+          id: 'report',
+          label: 'Report',
+          icon: 'bell',
+          isHighlighted: true,
+        },
+      ];
+
+      // Add edit and delete options if it's the user's own post
+      if (isOwnPost) {
+        items.unshift(
+          {
+            id: 'edit',
+            label: 'Edit Post',
+            icon: 'wrench',
+          },
+          {
+            id: 'delete',
+            label: 'Delete Post',
+            icon: 'close',
+            isHighlighted: true,
+          },
+        );
+      }
+
+      return items;
+    },
+    [],
+  );
+
+  // Handle dropdown menu item selection
+  const handleDropdownSelect = useCallback(
+    (item: DropdownMenuItem, postId: string) => {
+      switch (item.id) {
+        case 'share':
+          console.log(`Share post: ${postId}`);
+          break;
+        case 'report':
+          console.log(`Report post: ${postId}`);
+          break;
+        case 'edit':
+          console.log(`Edit post: ${postId}`);
+          break;
+        case 'delete':
+          console.log(`Delete post: ${postId}`);
+          // You could also update the posts state to remove the deleted post
+          // setPosts(currentPosts => currentPosts.filter(post => post.id !== postId));
+          break;
+        default:
+          console.log(`Unhandled action: ${item.id} for post: ${postId}`);
+      }
+    },
+    [],
+  );
+
+  // Render feed post with comment navigation and dropdown menu
   const renderFeedPost = useCallback(
-    ({item}: {item: FeedPost}) => (
-      <FeedCard
-        avatarSource={item.avatarSource}
-        userName={item.userName}
-        timeAgo={item.timeAgo}
-        labels={item.labels}
-        content={item.content}
-        images={item.images}
-        routeTitle={item.routeTitle}
-        likeCount={item.likeCount}
-        commentCount={item.commentCount}
-        isSaved={item.isSaved}
-        isLiked={item.isLiked}
-        isCommented={item.isCommented}
-        onMorePress={() => console.log(`More pressed for post: ${item.id}`)}
-        // onPress={() => console.log(`Post pressed: ${item.id}`)}
-        onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
-        onLikePress={() => handleLikePress(item.id)}
-        onCommentPress={() => handleCommentPress(item.id)}
-        onSavePress={() => handleSavePress(item.id)}
-        style={styles.feedCard}
-      />
-    ),
-    [navigation, handleLikePress, handleSavePress],
+    ({item}: {item: FeedPost}) => {
+      // Determine if this is the user's own post (for this example, let's assume the first post is the user's)
+      const isOwnPost = item.id === '1';
+
+      return (
+        <FeedCard
+          avatarSource={item.avatarSource}
+          userName={item.userName}
+          timeAgo={item.timeAgo}
+          labels={item.labels}
+          content={item.content}
+          images={item.images}
+          routeTitle={item.routeTitle}
+          likeCount={item.likeCount}
+          commentCount={item.commentCount}
+          isSaved={item.isSaved}
+          isLiked={item.isLiked}
+          isCommented={item.isCommented}
+          dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
+          onDropdownSelect={menuItem => handleDropdownSelect(menuItem, item.id)}
+          onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
+          onLikePress={() => handleLikePress(item.id)}
+          onCommentPress={() => handleCommentPress(item.id)}
+          onSavePress={() => handleSavePress(item.id)}
+          style={styles.feedCard}
+        />
+      );
+    },
+    [
+      navigation,
+      handleLikePress,
+      handleSavePress,
+      createPostDropdownItems,
+      handleDropdownSelect,
+    ],
   );
 
   // Feed keyExtractor

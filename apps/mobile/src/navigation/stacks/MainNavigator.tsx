@@ -2,7 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {HomeScreen} from '@screens/home';
-import {CommentDetailScreen} from '@screens/comments';
+import {CommentDetailScreen} from '@screens/comment';
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
 

@@ -16,6 +16,7 @@ import {Typography} from '../Typography/Typography';
 import {colors} from '@theme';
 import {styles} from './FeedCard.styles';
 import {Button, Chip, Icon, IconName} from '@components';
+import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 
 export interface FeedCardProps {
   /**
@@ -112,6 +113,16 @@ export interface FeedCardProps {
   onMorePress?: () => void;
 
   /**
+   * Dropdown menu items for the card
+   */
+  dropdownMenu?: DropdownMenuItem[];
+
+  /**
+   * Handler for when a dropdown menu item is selected
+   */
+  onDropdownSelect?: (item: DropdownMenuItem) => void;
+
+  /**
    * Additional styles for the card container
    */
   style?: StyleProp<ViewStyle>;
@@ -171,6 +182,8 @@ const FeedCard: React.FC<FeedCardProps> = ({
   onCommentPress,
   onSavePress,
   onMorePress,
+  dropdownMenu,
+  onDropdownSelect,
   style,
   contentStyle,
   imageStyle,
@@ -252,6 +265,12 @@ const FeedCard: React.FC<FeedCardProps> = ({
     }
   };
 
+  const handleDropdownSelect = (item: DropdownMenuItem) => {
+    if (onDropdownSelect) {
+      onDropdownSelect(item);
+    }
+  };
+
   const renderCarouselItem = ({item}: {item: ImageSourcePropType}) => {
     return (
       <View style={styles.imageContainer}>
@@ -315,14 +334,24 @@ const FeedCard: React.FC<FeedCardProps> = ({
           </Typography>
         </View>
 
-        {/* More Button */}
-        {onMorePress && (
+        {/* More Button or Dropdown Menu */}
+        {dropdownMenu && onDropdownSelect ? (
+          <DropdownMenu
+            items={dropdownMenu}
+            onSelect={handleDropdownSelect}
+            position="bottom"
+            triggerIcon="more-vertical"
+            triggerIconSize={24}
+            triggerIconColor={colors.neutral.grey}
+            testID="feed-card-dropdown-menu"
+          />
+        ) : onMorePress ? (
           <TouchableOpacity
             onPress={onMorePress}
             hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
             <Icon name="more-vertical" size={24} color={colors.neutral.grey} />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
 
       {/* Labels */}

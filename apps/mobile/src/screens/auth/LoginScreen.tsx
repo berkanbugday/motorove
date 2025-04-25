@@ -183,9 +183,8 @@ export function LoginScreen() {
                     variant="text"
                     onPress={handleSignUp}
                     textStyle={styles.signupLink}
-                    testID="signup-button">
-                    Sign up
-                  </Button>
+                    testID="signup-button"
+                  />
                 </View>
               </View>
             </View>
