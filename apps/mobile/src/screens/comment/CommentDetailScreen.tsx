@@ -1,14 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  SafeAreaView,
-} from 'react-native';
+import {View, StyleSheet, FlatList, ActivityIndicator} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
-import {colors, spacing} from '@theme';
+import {colors, commonStyles, spacing} from '@theme';
 import {
   Typography,
   FeedCard,
@@ -17,7 +11,6 @@ import {
   TopHeaderBar,
 } from '@components';
 import {Comment, PostWithComments} from '../../components/Comment/comments';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 // Mock data for a post with comments
 // In a real app, this would come from an API
@@ -110,7 +103,6 @@ const currentUser = {
 type Props = NativeStackScreenProps<MainStackParamList, 'CommentDetail'>;
 
 export function CommentDetailScreen({navigation, route: {params}}: Props) {
-  const insets = useSafeAreaInsets();
   const [post, setPost] = useState<PostWithComments | null>(null);
   const [loading, setLoading] = useState(true);
   const [replyingTo, setReplyingTo] = useState<{
@@ -251,46 +243,42 @@ export function CommentDetailScreen({navigation, route: {params}}: Props) {
         onBackPress={() => navigation.goBack()}
         containerStyle={styles.headerContainer}
       />
-      <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
-        <FlatList
-          data={post.comments}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          ListHeaderComponent={
-            <View style={styles.postContainer}>
-              <FeedCard
-                userName={post.userName}
-                avatarSource={post.avatarSource}
-                timeAgo={post.timeAgo}
-                content={post.content}
-                images={post.images}
-                routeTitle={post.routeTitle}
-                likeCount={post.likeCount}
-                commentCount={post.commentCount}
-                isLiked={post.isLiked}
-                isSaved={post.isSaved}
-                isCommented={post.isCommented}
-                labels={post.labels}
-              />
-            </View>
-          }
-          contentContainerStyle={styles.listContent}
-        />
-
-        <CommentInput
-          onSubmit={handleSubmitComment}
-          replyingTo={replyingTo?.userName}
-          onCancelReply={handleCancelReply}
-        />
-      </SafeAreaView>
+      <FlatList
+        data={post.comments}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        ListHeaderComponent={
+          <View style={styles.postContainer}>
+            <FeedCard
+              userName={post.userName}
+              avatarSource={post.avatarSource}
+              timeAgo={post.timeAgo}
+              content={post.content}
+              images={post.images}
+              routeTitle={post.routeTitle}
+              likeCount={post.likeCount}
+              commentCount={post.commentCount}
+              isLiked={post.isLiked}
+              isSaved={post.isSaved}
+              isCommented={post.isCommented}
+              labels={post.labels}
+            />
+          </View>
+        }
+        contentContainerStyle={styles.listContent}
+      />
+      <CommentInput
+        onSubmit={handleSubmitComment}
+        replyingTo={replyingTo?.userName}
+        onCancelReply={handleCancelReply}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.background,
+    ...commonStyles.container,
   },
   center: {
     justifyContent: 'center',

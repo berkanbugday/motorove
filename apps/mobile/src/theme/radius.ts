@@ -10,6 +10,7 @@ export const radius = {
   md: 12,
   lg: 16,
   xl: 24,
+  xxl: 32,
   round: 50, // for circular elements
 };
 

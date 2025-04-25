@@ -8,6 +8,7 @@ import {
   ViewStyle,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, spacing, radius} from '@theme';
@@ -38,56 +39,54 @@ const CommentInput: React.FC<CommentInputProps> = ({
     }
   };
 
-  // Using insets.bottom ensures we account for the safe area
-  const keyboardOffset = Platform.OS === 'ios' ? insets.bottom + 90 : 0;
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={keyboardOffset}
-      style={[styles.container, style]}>
-      {replyingTo && (
-        <View style={styles.replyingContainer}>
-          <Typography variant="caption" color={colors.neutral.grey}>
-            Replying to{' '}
-            <Typography variant="caption" weight="bold">
-              {replyingTo}
+      style={style}>
+      <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
+        {replyingTo && (
+          <View style={styles.replyingContainer}>
+            <Typography variant="caption" color={colors.neutral.grey}>
+              Replying to{' '}
+              <Typography variant="caption" weight="bold">
+                {replyingTo}
+              </Typography>
             </Typography>
-          </Typography>
+            <TouchableOpacity
+              onPress={onCancelReply}
+              hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
+              <Icon name="close" size={16} color={colors.neutral.grey} />
+            </TouchableOpacity>
+          </View>
+        )}
+        <View style={styles.inputContainer}>
+          <TextInput
+            value={text}
+            onChangeText={setText}
+            style={styles.input}
+            placeholder={placeholder}
+            multiline
+            maxLength={500}
+          />
           <TouchableOpacity
-            onPress={onCancelReply}
-            hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
-            <Icon name="close" size={16} color={colors.neutral.grey} />
+            onPress={handleSubmit}
+            disabled={text.trim().length === 0}
+            style={[
+              styles.sendButton,
+              text.trim().length === 0 && styles.disabledButton,
+            ]}>
+            <Icon
+              name="paper-plane"
+              size={20}
+              color={
+                text.trim().length === 0
+                  ? colors.neutral.lightGrey
+                  : colors.neutral.white
+              }
+            />
           </TouchableOpacity>
         </View>
-      )}
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          style={styles.input}
-          placeholder={placeholder}
-          multiline
-          maxLength={500}
-        />
-        <TouchableOpacity
-          onPress={handleSubmit}
-          disabled={text.trim().length === 0}
-          style={[
-            styles.sendButton,
-            text.trim().length === 0 && styles.disabledButton,
-          ]}>
-          <Icon
-            name="paper-plane"
-            size={20}
-            color={
-              text.trim().length === 0
-                ? colors.neutral.lightGrey
-                : colors.neutral.white
-            }
-          />
-        </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 };

@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import {Typography} from '../../Typography/Typography';
-import {colors, spacing} from '@theme';
+import {colors, getShadow, radius, spacing} from '@theme';
 import {Comment} from '../comments';
 import {Icon} from '@components';
 
@@ -114,6 +114,11 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+    ...getShadow('small'),
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.lg,
+    borderTopLeftRadius: 0,
+    padding: spacing.md,
   },
   header: {
     flexDirection: 'row',
