@@ -4,9 +4,11 @@ import React from 'react';
 import Eye from '@assets/icons/eye.svg';
 import EyeSlash from '@assets/icons/eye-slash.svg';
 import Envelope from '@assets/icons/envelope.svg';
-import Google from '@assets/icons/google.svg';
-import Apple from '@assets/icons/apple.svg';
-import Facebook from '@assets/icons/facebook.svg';
+// Brand Icons
+import Google from '@assets/icons/brands/google.svg';
+import Apple from '@assets/icons/brands/apple.svg';
+import Facebook from '@assets/icons/brands/facebook.svg';
+// Common Icons
 import ArrowLeft from '@assets/icons/arrow-left.svg';
 import User from '@assets/icons/user.svg';
 import Close from '@assets/icons/close.svg';

@@ -118,10 +118,6 @@
 			dependencies = (
 			);
 			name = motorove;
-			packageProductDependencies = (
-				42066A573DFDEB9CB0B87936 /* MapLibre */,
-				6494B1FE30BBFDA1609957FA /* MapLibre */,
-			);
 			productName = motorove;
 			productReference = 13B07F961A680F5B00A75B9A /* motorove.app */;
 			productType = "com.apple.product-type.application";
@@ -148,9 +144,6 @@
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
-			packageReferences = (
-				3EE0E479131CF491DFB79E14 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
-			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -494,30 +487,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		3EE0E479131CF491DFB79E14 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
-			requirement = {
-				kind = exactVersion;
-				version = 6.11.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		42066A573DFDEB9CB0B87936 /* MapLibre */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3EE0E479131CF491DFB79E14 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
-			productName = MapLibre;
-		};
-		6494B1FE30BBFDA1609957FA /* MapLibre */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 46EB2E00026CD0 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
-			productName = MapLibre;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }

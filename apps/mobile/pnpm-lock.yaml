@@ -11,9 +11,6 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.0.1
         version: 5.0.1(react-hook-form@7.56.1(react@19.0.0))
-      '@maplibre/maplibre-react-native':
-        specifier: ^10.1.4
-        version: 10.1.4(@types/geojson@7946.0.16)(@types/react@19.1.2)(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0)
       '@react-native-async-storage/async-storage':
         specifier: ^2.1.2
         version: 2.1.2(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))
@@ -986,22 +983,6 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@maplibre/maplibre-react-native@10.1.4':
-    resolution: {integrity: sha512-Y+1FBOmTomyUFbkHCrIcDrScGxWUIINAiJnLq7WYr6D1v1+IdPrnhdsmif+YrXNLMTAgQB+bTtqDn8j4LNgwrQ==}
-    peerDependencies:
-      '@expo/config-plugins': '>=7'
-      '@types/geojson': ^7946.0.0
-      '@types/react': '>=16.6.1'
-      react: '>=16.6.1'
-      react-native: '>=0.59.9'
-    peerDependenciesMeta:
-      '@expo/config-plugins':
-        optional: true
-      '@types/geojson':
-        optional: true
-      '@types/react':
-        optional: true
-
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}
 
@@ -1303,24 +1284,6 @@ packages:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
 
-  '@turf/distance@7.2.0':
-    resolution: {integrity: sha512-HBjjXIgEcD/wJYjv7/6OZj5yoky2oUvTtVeIAqO3lL80XRvoYmVg6vkOIu6NswkerwLDDNT9kl7+BFLJoHbh6Q==}
-
-  '@turf/helpers@7.2.0':
-    resolution: {integrity: sha512-cXo7bKNZoa7aC7ydLmUR02oB3IgDe7MxiPuRz3cCtYQHn+BJ6h1tihmamYDWWUlPHgSNF0i3ATc4WmDECZafKw==}
-
-  '@turf/invariant@7.2.0':
-    resolution: {integrity: sha512-kV4u8e7Gkpq+kPbAKNC21CmyrXzlbBgFjO1PhrHPgEdNqXqDawoZ3i6ivE3ULJj2rSesCjduUaC/wyvH/sNr2Q==}
-
-  '@turf/length@7.2.0':
-    resolution: {integrity: sha512-LBmYN+iCgVtWNLsckVnpQIJENqIIPO63mogazMp23lrDGfWXu07zZQ9ZinJVO5xYurXNhc/QI2xxoqt2Xw90Ig==}
-
-  '@turf/meta@7.2.0':
-    resolution: {integrity: sha512-igzTdHsQc8TV1RhPuOLVo74Px/hyPrVgVOTgjWQZzt3J9BVseCdpfY/0cJBdlSRI4S/yTmmHl7gAqjhpYH5Yaw==}
-
-  '@turf/nearest-point-on-line@7.2.0':
-    resolution: {integrity: sha512-UOhAeoDPVewBQV+PWg1YTMQcYpJsIqfW5+EuZ5vJl60XwUa0+kqB/eVfSLNXmHENjKKIlEt9Oy9HIDF4VeWmXA==}
-
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
 
@@ -1335,9 +1298,6 @@ packages:
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
-
-  '@types/geojson@7946.0.16':
-    resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
 
   '@types/graceful-fs@4.1.9':
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
@@ -1934,10 +1894,6 @@ packages:
 
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
-
-  debounce@2.2.0:
-    resolution: {integrity: sha512-Xks6RUDLZFdz8LIdR6q0MTH44k7FikOmnh5xkSjMig6ch45afc8sjTjRQf3P6ax8dMgcQrYO/AR2RGWURrruqw==}
-    engines: {node: '>=18'}
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -5319,19 +5275,6 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@maplibre/maplibre-react-native@10.1.4(@types/geojson@7946.0.16)(@types/react@19.1.2)(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      '@turf/distance': 7.2.0
-      '@turf/helpers': 7.2.0
-      '@turf/length': 7.2.0
-      '@turf/nearest-point-on-line': 7.2.0
-      debounce: 2.2.0
-      react: 19.0.0
-      react-native: 0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0)
-    optionalDependencies:
-      '@types/geojson': 7946.0.16
-      '@types/react': 19.1.2
-
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     dependencies:
       eslint-scope: 5.1.1
@@ -5635,9 +5578,7 @@ snapshots:
       metro-runtime: 0.82.1
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.73.2': {}
 
@@ -5825,46 +5766,6 @@ snapshots:
 
   '@trysound/sax@0.2.0': {}
 
-  '@turf/distance@7.2.0':
-    dependencies:
-      '@turf/helpers': 7.2.0
-      '@turf/invariant': 7.2.0
-      '@types/geojson': 7946.0.16
-      tslib: 2.8.1
-
-  '@turf/helpers@7.2.0':
-    dependencies:
-      '@types/geojson': 7946.0.16
-      tslib: 2.8.1
-
-  '@turf/invariant@7.2.0':
-    dependencies:
-      '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.16
-      tslib: 2.8.1
-
-  '@turf/length@7.2.0':
-    dependencies:
-      '@turf/distance': 7.2.0
-      '@turf/helpers': 7.2.0
-      '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.16
-      tslib: 2.8.1
-
-  '@turf/meta@7.2.0':
-    dependencies:
-      '@turf/helpers': 7.2.0
-      '@types/geojson': 7946.0.16
-
-  '@turf/nearest-point-on-line@7.2.0':
-    dependencies:
-      '@turf/distance': 7.2.0
-      '@turf/helpers': 7.2.0
-      '@turf/invariant': 7.2.0
-      '@turf/meta': 7.2.0
-      '@types/geojson': 7946.0.16
-      tslib: 2.8.1
-
   '@types/babel__core@7.20.5':
     dependencies:
       '@babel/parser': 7.27.0
@@ -5887,8 +5788,6 @@ snapshots:
       '@babel/types': 7.27.0
 
   '@types/estree@1.0.7': {}
-
-  '@types/geojson@7946.0.16': {}
 
   '@types/graceful-fs@4.1.9':
     dependencies:
@@ -6641,8 +6540,6 @@ snapshots:
       is-data-view: 1.0.2
 
   dayjs@1.11.13: {}
-
-  debounce@2.2.0: {}
 
   debug@2.6.9:
     dependencies:

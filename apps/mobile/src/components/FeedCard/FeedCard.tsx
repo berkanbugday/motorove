@@ -389,7 +389,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
                 renderItem={renderCarouselItem}
                 sliderWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
                 itemWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
-                onSnapToItem={index => setActiveSlide(index)}
+                onSnapToItem={(index: number) => setActiveSlide(index)}
                 inactiveSlideScale={1}
                 inactiveSlideOpacity={1}
                 activeSlideAlignment="center"

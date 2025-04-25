@@ -17,9 +17,6 @@ end
 target 'motorove' do
   config = use_native_modules!
 
-  # Add MapLibre via Swift Package Manager
-  $MLRN_NATIVE_VERSION = "6.11.0"
-
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
@@ -35,51 +32,5 @@ target 'motorove' do
       # :ccache_enabled => true
     )
     
-    # Add MapLibre SPM to relevant targets
-    project = installer.pods_project
-    maplibre_target = project.targets.find { |t| t.name == "maplibre-react-native"}
-    
-    if maplibre_target
-      # Add SPM package reference
-      pkg_class = Xcodeproj::Project::Object::XCRemoteSwiftPackageReference
-      ref_class = Xcodeproj::Project::Object::XCSwiftPackageProductDependency
-      
-      spm_url = "https://github.com/maplibre/maplibre-gl-native-distribution"
-      spm_requirement = { kind: "exactVersion", version: $MLRN_NATIVE_VERSION }
-      product_name = "MapLibre"
-      
-      # Add package reference to project
-      pkg = project.root_object.package_references.find { |p| p.class == pkg_class && p.repositoryURL == spm_url }
-      if !pkg
-        pkg = project.new(pkg_class)
-        pkg.repositoryURL = spm_url
-        pkg.requirement = spm_requirement
-        project.root_object.package_references << pkg
-      end
-      
-      # Link package to maplibre-react-native target
-      ref = maplibre_target.package_product_dependencies.find { |r| r.class == ref_class && r.package == pkg && r.product_name == product_name }
-      if !ref
-        ref = project.new(ref_class)
-        ref.package = pkg
-        ref.product_name = product_name
-        maplibre_target.package_product_dependencies << ref
-      end
-      
-      # Also link package to user targets
-      installer.aggregate_targets.group_by(&:user_project).each do |user_project, targets|
-        targets.each do |target|
-          target.user_targets.each do |user_target|
-            ref = user_target.package_product_dependencies.find { |r| r.class == ref_class && r.package == pkg && r.product_name == product_name }
-            if !ref
-              ref = user_project.new(ref_class)
-              ref.package = pkg
-              ref.product_name = product_name
-              user_target.package_product_dependencies << ref
-            end
-          end
-        end
-      end
-    end
   end
 end
