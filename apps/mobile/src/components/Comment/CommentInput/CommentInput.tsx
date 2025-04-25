@@ -6,17 +6,15 @@ import {
   StyleSheet,
   StyleProp,
   ViewStyle,
-  Image,
-  ImageSourcePropType,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, spacing, radius} from '@theme';
 import {Typography, Icon} from '@components';
 
 interface CommentInputProps {
   onSubmit: (text: string) => void;
-  userAvatar: ImageSourcePropType;
   placeholder?: string;
   style?: StyleProp<ViewStyle>;
   replyingTo?: string;
@@ -25,13 +23,13 @@ interface CommentInputProps {
 
 const CommentInput: React.FC<CommentInputProps> = ({
   onSubmit,
-  userAvatar,
   placeholder = 'Add a comment...',
   style,
   replyingTo,
   onCancelReply,
 }) => {
   const [text, setText] = useState('');
+  const insets = useSafeAreaInsets();
 
   const handleSubmit = () => {
     if (text.trim().length > 0) {
@@ -40,9 +38,13 @@ const CommentInput: React.FC<CommentInputProps> = ({
     }
   };
 
+  // Using insets.bottom ensures we account for the safe area
+  const keyboardOffset = Platform.OS === 'ios' ? insets.bottom + 90 : 0;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={keyboardOffset}
       style={[styles.container, style]}>
       {replyingTo && (
         <View style={styles.replyingContainer}>
@@ -60,13 +62,11 @@ const CommentInput: React.FC<CommentInputProps> = ({
         </View>
       )}
       <View style={styles.inputContainer}>
-        <Image source={userAvatar} style={styles.avatar} />
         <TextInput
           value={text}
           onChangeText={setText}
           style={styles.input}
           placeholder={placeholder}
-          placeholderTextColor={colors.neutral.grey}
           multiline
           maxLength={500}
         />
@@ -112,21 +112,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: spacing.sm,
-  },
   input: {
     flex: 1,
     minHeight: 36,
     maxHeight: 100,
     borderWidth: 1,
     borderColor: colors.neutral.veryLightGrey,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.sm,
     color: colors.neutral.black,
   },
   sendButton: {

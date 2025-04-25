@@ -116,7 +116,7 @@ export function TopHeaderBar({
   containerStyle,
   titleStyle,
   subtitleStyle,
-  showShadow = false,
+  showShadow = true,
   includeStatusBar = true,
 }: TopHeaderBarProps) {
   // Get status bar height from safe area insets
@@ -253,14 +253,14 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     padding: spacing.sm,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    borderRadius: 50,
     alignItems: 'flex-end',
-    backgroundColor: colors.neutral.backgroundLight,
   },
   rightButton: {
-    padding: spacing.xs,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.backgroundLight,
+    borderRadius: 50,
+    backgroundColor: colors.neutral.backgroundLight,
   },
   badgeContainer: {
     position: 'absolute',

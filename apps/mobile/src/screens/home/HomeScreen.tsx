@@ -495,7 +495,6 @@ export function HomeScreen({navigation}: Props) {
         subtitle="Michael Thompson"
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
-        showShadow={true}
         rightIconName="bell"
         rightIconBadgeCount={5}
         onRightButtonPress={() => console.log('Notifications pressed')}

@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
@@ -15,7 +14,7 @@ import {
   FeedCard,
   CommentItem,
   CommentInput,
-  Icon,
+  TopHeaderBar,
 } from '@components';
 import {Comment, PostWithComments} from '../../components/Comment/comments';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -245,52 +244,46 @@ export function CommentDetailScreen({navigation, route: {params}}: Props) {
   }
 
   return (
-    <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}
-          style={styles.backButton}>
-          <Icon name="arrow-left" size={24} color={colors.neutral.black} />
-        </TouchableOpacity>
-        <Typography variant="subtitle" weight="medium">
-          Comments ({post.commentCount})
-        </Typography>
-        <View style={styles.headerRight} />
-      </View>
-
-      <FlatList
-        data={post.comments}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        ListHeaderComponent={
-          <View style={styles.postContainer}>
-            <FeedCard
-              userName={post.userName}
-              avatarSource={post.avatarSource}
-              timeAgo={post.timeAgo}
-              content={post.content}
-              images={post.images}
-              routeTitle={post.routeTitle}
-              likeCount={post.likeCount}
-              commentCount={post.commentCount}
-              isLiked={post.isLiked}
-              isSaved={post.isSaved}
-              isCommented={post.isCommented}
-              labels={post.labels}
-            />
-          </View>
-        }
-        contentContainerStyle={styles.listContent}
+    <View style={styles.container}>
+      <TopHeaderBar
+        title={`Comments (${post.commentCount})`}
+        showBackButton
+        onBackPress={() => navigation.goBack()}
+        containerStyle={styles.headerContainer}
       />
+      <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
+        <FlatList
+          data={post.comments}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={
+            <View style={styles.postContainer}>
+              <FeedCard
+                userName={post.userName}
+                avatarSource={post.avatarSource}
+                timeAgo={post.timeAgo}
+                content={post.content}
+                images={post.images}
+                routeTitle={post.routeTitle}
+                likeCount={post.likeCount}
+                commentCount={post.commentCount}
+                isLiked={post.isLiked}
+                isSaved={post.isSaved}
+                isCommented={post.isCommented}
+                labels={post.labels}
+              />
+            </View>
+          }
+          contentContainerStyle={styles.listContent}
+        />
 
-      <CommentInput
-        onSubmit={handleSubmitComment}
-        userAvatar={currentUser.avatarSource}
-        replyingTo={replyingTo?.userName}
-        onCancelReply={handleCancelReply}
-      />
-    </SafeAreaView>
+        <CommentInput
+          onSubmit={handleSubmitComment}
+          replyingTo={replyingTo?.userName}
+          onCancelReply={handleCancelReply}
+        />
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -303,26 +296,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.veryLightGrey,
-    backgroundColor: colors.neutral.white,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    left: spacing.md,
-    zIndex: 1,
-  },
-  headerRight: {
-    width: 24,
-    height: 24,
+  headerContainer: {
+    borderBottomEndRadius: 0,
+    borderBottomStartRadius: 0,
   },
   postContainer: {
     paddingHorizontal: spacing.sm,
