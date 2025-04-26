@@ -35,6 +35,9 @@ alwaysApply: true
         
     - Separate concerns into distinct directories (e.g., components, screens, navigation, services, utils, types).
 
+- **Package Manager:**
+    - Use pnpm
+
 - **File Naming Conventions:**
     - Use descriptive names for files and components (e.g., `HomeScreen.tsx`, `useUserData.ts`).
     - Follow a consistent naming convention (e.g., PascalCase for components, camelCase for functions and variables).
