@@ -26,6 +26,7 @@ import Bell from '@assets/icons/bell.svg';
 import Like from '@assets/icons/like.svg';
 import LikeFilled from '@assets/icons/like-filled.svg';
 import Comment from '@assets/icons/comment.svg';
+import Comments from '@assets/icons/comments.svg';
 import CommentFilled from '@assets/icons/comment-filled.svg';
 import Save from '@assets/icons/save.svg';
 import SaveFilled from '@assets/icons/save-filled.svg';
@@ -71,6 +72,7 @@ export type IconName =
   | 'like'
   | 'like-filled'
   | 'comment'
+  | 'comments'
   | 'comment-filled'
   | 'save'
   | 'save-filled'
@@ -153,6 +155,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <LikeFilled {...commonProps} />;
     case 'comment':
       return <Comment {...commonProps} />;
+    case 'comments':
+      return <Comments {...commonProps} />;
     case 'comment-filled':
       return <CommentFilled {...commonProps} />;
     case 'save':

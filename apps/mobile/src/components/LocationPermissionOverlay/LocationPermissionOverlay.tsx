@@ -1,21 +1,24 @@
 import React from 'react';
-import {View, StyleSheet, Image} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {FullscreenOverlay} from '../FullscreenOverlay/FullscreenOverlay';
-import {colors, spacing, rs, rh} from '../../theme';
+import {colors, spacing, rs} from '@theme';
 import {Icon} from '../Icon';
-import {Body, Caption, Subtitle, Title} from '../Typography';
+import {Body, Caption, Title} from '../Typography';
 import {Button} from '../Button';
+import LottieView from 'lottie-react-native';
 
 interface LocationPermissionOverlayProps {
   visible: boolean;
   onAllowPress: () => void;
   onDismiss: () => void;
+  onOpenSettings?: () => void;
 }
 
 export function LocationPermissionOverlay({
   visible,
   onAllowPress,
   onDismiss,
+  onOpenSettings,
 }: LocationPermissionOverlayProps) {
   return (
     <FullscreenOverlay
@@ -25,17 +28,18 @@ export function LocationPermissionOverlay({
       contentContainerStyle={styles.overlayContent}>
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
+        {/* <View style={styles.header}>
           <Icon name="map-pin" size={24} color={colors.neutral.black} />
           <Subtitle style={styles.headerText}>Enable Location Access</Subtitle>
-        </View>
+        </View> */}
 
         {/* Hero Image */}
         <View style={styles.imageContainer}>
-          <Image
-            source={require('../../assets/images/location_permission.png')}
+          <LottieView
+            source={require('../../assets/lottie/location_permission.json')}
             style={styles.heroImage}
-            resizeMode="contain"
+            autoPlay
+            loop
           />
         </View>
 
@@ -50,7 +54,7 @@ export function LocationPermissionOverlay({
         {/* Features */}
         <View style={styles.featuresContainer}>
           <FeatureItem icon="route" text="Find the best local riding routes" />
-          <FeatureItem icon="users" text="Connect with nearby riders" />
+          <FeatureItem icon="comments" text="Connect with nearby riders" />
           <FeatureItem icon="wrench" text="Locate motorcycle services" />
         </View>
 
@@ -63,9 +67,19 @@ export function LocationPermissionOverlay({
           style={styles.allowButton}
         />
 
+        {onOpenSettings && (
+          <Button
+            title="Open Settings"
+            variant="outline"
+            shape="round"
+            onPress={onOpenSettings}
+            style={styles.laterButton}
+          />
+        )}
+
         <Button
           title="Not Now"
-          variant="outline"
+          variant="text"
           shape="round"
           onPress={onDismiss}
           style={styles.laterButton}
@@ -81,7 +95,7 @@ export function LocationPermissionOverlay({
 }
 
 interface FeatureItemProps {
-  icon: 'map-pin' | 'route' | 'users' | 'wrench';
+  icon: 'map-pin' | 'route' | 'comments' | 'wrench';
   text: string;
 }
 
@@ -119,9 +133,9 @@ const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   imageContainer: {
-    width: '100%',
-    height: rh(180),
-    marginVertical: spacing.md,
+    width: 80,
+    height: 80,
+    marginVertical: spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -149,9 +163,9 @@ const styles = StyleSheet.create({
     marginVertical: spacing.xs,
   },
   featureIconContainer: {
-    width: rs(32),
-    height: rs(32),
-    borderRadius: rs(16),
+    width: rs(36),
+    height: rs(36),
+    borderRadius: rs(18),
     backgroundColor: colors.neutral.veryLightGrey,
     justifyContent: 'center',
     alignItems: 'center',
