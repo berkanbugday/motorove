@@ -5,18 +5,24 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  View,
 } from 'react-native';
 import {colors, spacing, componentRadius} from '@theme';
 import {Typography} from '../Typography';
+import {Icon, IconName} from '../Icon';
 
 interface ButtonProps {
-  title: string;
+  title?: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'text';
   shape?: 'default' | 'round' | 'circle';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
+  iconName?: IconName;
+  iconSize?: number;
+  iconColor?: string;
+  iconPosition?: 'left' | 'right';
   style?: ViewStyle;
   textStyle?: TextStyle;
   testID?: string;
@@ -30,6 +36,10 @@ export function Button({
   size = 'medium',
   disabled = false,
   loading = false,
+  iconName,
+  iconSize,
+  iconColor,
+  iconPosition = 'left',
   style,
   textStyle,
   testID,
@@ -77,6 +87,79 @@ export function Button({
     return colors.neutral.black;
   };
 
+  const getIconColor = () => {
+    return iconColor || getTextColor() || colors.neutral.black;
+  };
+
+  const getIconSize = () => {
+    if (iconSize) return iconSize;
+
+    if (size === 'small') return 16;
+    if (size === 'large') return 24;
+    return 20; // medium size default
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <ActivityIndicator
+          size="small"
+          color={
+            variant === 'primary' ? colors.neutral.white : colors.primary.main
+          }
+        />
+      );
+    }
+
+    if (iconName && !title) {
+      return (
+        <Icon name={iconName} size={getIconSize()} color={getIconColor()} />
+      );
+    }
+
+    if (iconName && title) {
+      return (
+        <View style={styles.contentContainer}>
+          {iconPosition === 'left' && (
+            <View style={styles.iconContainer}>
+              <Icon
+                name={iconName}
+                size={getIconSize()}
+                color={getIconColor()}
+              />
+            </View>
+          )}
+          <Typography
+            align="center"
+            variant={getTypographyVariant() as any}
+            color={getTextColor()}
+            style={textStyle}>
+            {title}
+          </Typography>
+          {iconPosition === 'right' && (
+            <View style={styles.iconContainer}>
+              <Icon
+                name={iconName}
+                size={getIconSize()}
+                color={getIconColor()}
+              />
+            </View>
+          )}
+        </View>
+      );
+    }
+
+    return (
+      <Typography
+        align="center"
+        variant={getTypographyVariant() as any}
+        color={getTextColor()}
+        style={textStyle}>
+        {title}
+      </Typography>
+    );
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -84,22 +167,7 @@ export function Button({
       onPress={onPress}
       disabled={disabled || loading}
       testID={testID}>
-      {loading ? (
-        <ActivityIndicator
-          size="small"
-          color={
-            variant === 'primary' ? colors.neutral.white : colors.primary.main
-          }
-        />
-      ) : (
-        <Typography
-          align="center"
-          variant={getTypographyVariant() as any}
-          color={getTextColor()}
-          style={textStyle}>
-          {title}
-        </Typography>
-      )}
+      {renderContent()}
     </TouchableOpacity>
   );
 }
@@ -148,5 +216,13 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainer: {
+    marginHorizontal: spacing.xs,
   },
 });

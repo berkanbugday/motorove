@@ -1,14 +1,41 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
-import {View, StyleSheet, ActivityIndicator, Text} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ScrollView,
+} from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import {useLocationPermission} from '@hooks/useLocationPermission';
-import {Button, LocationPermissionOverlay} from '@components';
-import {colors, rs, spacing, getShadow} from '@theme';
+import {
+  Button,
+  Icon,
+  LocationPermissionOverlay,
+  Chip,
+  ChipColor,
+} from '@components';
+import {colors, rs, spacing, getShadow, radius} from '@theme';
+import {IconName} from '@components/Icon';
 
 // Configure Mapbox access token
 Mapbox.setAccessToken(
   'pk.eyJ1IjoiYmVya2FuYnVnZGF5IiwiYSI6ImNtOXhoMGprYjB4M2EycXM3OWc4OXA3YnUifQ.SxRjIA3GMzguYeD4Zpjsaw',
 );
+
+export interface Tag {
+  id: string;
+  label: string;
+  color?: ChipColor;
+  onPress?: () => void;
+  onRemove?: () => void;
+  removable?: boolean;
+  leadingIcon?: IconName;
+}
 
 export interface MapViewProps {
   /**
@@ -58,6 +85,30 @@ export interface MapViewProps {
    * Callback when the map finishes loading
    */
   onMapLoaded?: () => void;
+  /**
+   * Whether to show search functionality
+   */
+  showSearch?: boolean;
+  /**
+   * Callback when a location is searched and selected
+   */
+  onSearchResult?: (result: {
+    name: string;
+    coordinates: [number, number];
+    address?: string;
+  }) => void;
+  /**
+   * Whether to show filter button
+   */
+  showFilterButton?: boolean;
+  /**
+   * Callback when the filter button is pressed
+   */
+  onFilterPress?: () => void;
+  /**
+   * Tags to display above the map
+   */
+  tags?: Tag[];
 }
 
 export const MapView: React.FC<MapViewProps> = ({
@@ -68,10 +119,15 @@ export const MapView: React.FC<MapViewProps> = ({
   styleURL = Mapbox.StyleURL.Street,
   fullscreen = false,
   style,
-  showZoomControls = true,
+  showZoomControls = false,
   children,
   onMapPress,
   onMapLoaded,
+  showSearch = false,
+  onSearchResult,
+  showFilterButton = false,
+  onFilterPress,
+  tags = [],
 }) => {
   const camera = useRef<Mapbox.Camera>(null);
   const [currentZoom, setCurrentZoom] = useState(initialZoom);
@@ -83,6 +139,19 @@ export const MapView: React.FC<MapViewProps> = ({
   } | null>(null);
   const [showPermissionOverlay, setShowPermissionOverlay] = useState(false);
   const prevStatus = useRef(status);
+
+  // Search related state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<
+    Array<{
+      id: string;
+      name: string;
+      coordinates: [number, number];
+      address?: string;
+    }>
+  >([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Handle location permission
   useEffect(() => {
@@ -126,6 +195,11 @@ export const MapView: React.FC<MapViewProps> = ({
 
   // Handle map press
   const handleMapPress = (feature: GeoJSON.Feature) => {
+    // Hide search results when map is pressed
+    setShowSearchResults(false);
+    // Dismiss keyboard when map is pressed
+    Keyboard.dismiss();
+
     if (onMapPress && feature.geometry.type === 'Point') {
       const coordinates = feature.geometry.coordinates as [number, number];
       onMapPress(coordinates);
@@ -187,6 +261,85 @@ export const MapView: React.FC<MapViewProps> = ({
     });
   }, [checkPermission, status]);
 
+  // Handle search query changes
+  const handleSearchQueryChange = (text: string) => {
+    setSearchQuery(text);
+    if (text.length > 2) {
+      performSearch(text);
+    } else {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
+  // Perform search using Mapbox Geocoding API
+  const performSearch = async (query: string) => {
+    if (!query.trim()) return;
+
+    setIsSearching(true);
+
+    try {
+      // Build Mapbox Geocoding API URL
+      const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+        query,
+      )}.json?access_token=pk.eyJ1IjoiYmVya2FuYnVnZGF5IiwiYSI6ImNtOXhoMGprYjB4M2EycXM3OWc4OXA3YnUifQ.SxRjIA3GMzguYeD4Zpjsaw&limit=5`;
+
+      const response = await fetch(endpoint);
+      const data = await response.json();
+
+      if (data.features) {
+        const formattedResults = data.features.map((feature: any) => ({
+          id: feature.id,
+          name: feature.text,
+          coordinates: feature.center as [number, number],
+          address: feature.place_name,
+        }));
+
+        setSearchResults(formattedResults);
+        setShowSearchResults(true);
+      }
+    } catch (error) {
+      console.error('Error searching for location:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle selecting a search result
+  const handleSelectSearchResult = (result: {
+    name: string;
+    coordinates: [number, number];
+    address?: string;
+  }) => {
+    // Move camera to the selected location
+    if (camera.current) {
+      camera.current.setCamera({
+        centerCoordinate: result.coordinates,
+        zoomLevel: 15,
+        animationDuration: 1000,
+      });
+    }
+
+    // Clear search
+    setSearchQuery('');
+    setSearchResults([]);
+    setShowSearchResults(false);
+    Keyboard.dismiss();
+
+    // Call the callback if provided
+    if (onSearchResult) {
+      onSearchResult(result);
+    }
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setShowSearchResults(false);
+    Keyboard.dismiss();
+  };
+
   // Render loading UI
   if (status === 'requesting') {
     return (
@@ -232,81 +385,193 @@ export const MapView: React.FC<MapViewProps> = ({
     return null;
   };
 
-  return (
-    <>
-      <View style={[fullscreen ? styles.fullscreen : styles.container, style]}>
-        <Mapbox.MapView
-          style={styles.map}
-          styleURL={styleURL}
-          onPress={handleMapPress}
-          onDidFinishLoadingMap={onMapLoaded}>
-          {/* Camera */}
-          <Mapbox.Camera
-            ref={camera}
-            defaultSettings={{
-              centerCoordinate: [
-                initialCoordinates.longitude,
-                initialCoordinates.latitude,
-              ],
-              zoomLevel: initialZoom,
+  // Render tags
+  const renderTags = () => {
+    if (!tags || tags.length === 0) return null;
+
+    return (
+      <View style={styles.tagsContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tagsScrollViewContent}>
+          {tags.map(tag => (
+            <Chip
+              key={tag.id}
+              label={tag.label}
+              onPress={tag.onPress}
+              onRemove={tag.onRemove}
+              color={tag.color || 'light'}
+              variant="filled"
+              size="large"
+              removable={tag.removable}
+              leadingIcon={tag.leadingIcon}
+            />
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
+
+  // Render search bar and results
+  const renderSearchBar = () => {
+    if (!showSearch) return null;
+
+    return (
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <Icon
+            name="search"
+            size={14}
+            color={colors.neutral.grey}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search locations..."
+            value={searchQuery}
+            onChangeText={handleSearchQueryChange}
+            onFocus={() => {
+              if (searchResults.length > 0) {
+                setShowSearchResults(true);
+              }
             }}
-            animationMode="flyTo"
-            animationDuration={1000}
           />
-
-          {/* User Location - Extract to separate method to avoid Fragment issues */}
-          {renderUserLocation()}
-
-          {/* Additional Map Elements */}
-          {renderMapElements()}
-        </Mapbox.MapView>
-
-        {/* Map Controls */}
-        {showZoomControls && (
-          <View style={styles.zoomControlsContainer}>
-            <Button
-              onPress={handleZoomIn}
-              variant="primary"
-              shape="round"
+          {searchQuery.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearSearchButton}
+              onPress={handleClearSearch}>
+              <Icon name="close" size={16} />
+            </TouchableOpacity>
+          )}
+          {isSearching && (
+            <ActivityIndicator
               size="small"
-              style={styles.zoomButton}
-              title="+"
+              color={colors.primary.main}
+              style={styles.searchLoader}
             />
-            <Button
-              onPress={handleZoomOut}
-              variant="primary"
-              shape="round"
-              size="small"
-              style={styles.zoomButton}
-              title="-"
-            />
-          </View>
+          )}
+        </View>
+
+        {showSearchResults && searchResults.length > 0 && (
+          <ScrollView
+            style={styles.searchResultsContainer}
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled">
+            {searchResults.map(result => (
+              <TouchableOpacity
+                key={result.id}
+                style={styles.searchResultItem}
+                onPress={() => handleSelectSearchResult(result)}>
+                <Text style={styles.searchResultName}>{result.name}</Text>
+                {result.address && (
+                  <Text style={styles.searchResultAddress} numberOfLines={1}>
+                    {result.address}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         )}
-
-        {/* Recenter Button */}
-        {showUserLocation && status === 'granted' && userLocation && (
+        {showFilterButton && (
           <Button
-            onPress={handleRecenterToUser}
             variant="primary"
             shape="round"
             size="small"
-            style={styles.recenterButton}
-            title="↻"
-          />
-        )}
-
-        {/* Request Location Button (when denied) */}
-        {showUserLocation && status !== 'granted' && !showPermissionOverlay && (
-          <Button
-            onPress={handleReopenOverlay}
-            variant="primary"
-            shape="round"
-            size="small"
-            style={styles.locationRequestButton}
-            title="📍"
+            iconName="sliders"
+            iconSize={16}
+            style={styles.filterButton}
+            iconColor={colors.neutral.black}
+            onPress={onFilterPress || (() => {})}
           />
         )}
       </View>
+    );
+  };
+
+  return (
+    <>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View
+          style={[fullscreen ? styles.fullscreen : styles.container, style]}>
+          <Mapbox.MapView
+            style={styles.map}
+            logoEnabled={false}
+            attributionEnabled={false}
+            styleURL={styleURL}
+            onPress={handleMapPress}
+            onDidFinishLoadingMap={onMapLoaded}>
+            {/* Camera */}
+            <Mapbox.Camera
+              ref={camera}
+              defaultSettings={{
+                centerCoordinate: [
+                  initialCoordinates.longitude,
+                  initialCoordinates.latitude,
+                ],
+                zoomLevel: initialZoom,
+              }}
+              animationMode="flyTo"
+              animationDuration={1000}
+            />
+
+            {/* User Location - Extract to separate method to avoid Fragment issues */}
+            {renderUserLocation()}
+
+            {/* Additional Map Elements */}
+            {renderMapElements()}
+          </Mapbox.MapView>
+
+          {/* Search Bar */}
+          {renderSearchBar()}
+
+          {/* Tags */}
+          {renderTags()}
+
+          {/* Zoom Controls */}
+          {showZoomControls && (
+            <View style={styles.controlButtonsContainer}>
+              <Button
+                onPress={handleZoomIn}
+                variant="primary"
+                shape="round"
+                size="small"
+                style={styles.zoomButton}
+                iconName="plus"
+                iconSize={16}
+                iconColor={colors.neutral.black}
+              />
+              <Button
+                onPress={handleZoomOut}
+                variant="primary"
+                shape="round"
+                size="small"
+                style={styles.zoomButton}
+                iconName="minus"
+                iconSize={16}
+                iconColor={colors.neutral.black}
+              />
+              {/* Location Button - Combined for all location states */}
+              {showUserLocation && (
+                <Button
+                  onPress={
+                    status === 'granted' && userLocation
+                      ? handleRecenterToUser
+                      : handleReopenOverlay
+                  }
+                  variant="primary"
+                  shape="round"
+                  size="small"
+                  iconName="user-location"
+                  iconSize={20}
+                  style={styles.recenterButton}
+                />
+              )}
+            </View>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
 
       {/* Location Permission Overlay */}
       <LocationPermissionOverlay
@@ -332,35 +597,25 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  zoomControlsContainer: {
+  controlButtonsContainer: {
     position: 'absolute',
     right: spacing.md,
-    top: spacing.md,
-    borderRadius: rs(8),
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    padding: spacing.xs,
-    ...getShadow('small'),
+    top: rs(250),
+    flexDirection: 'column',
+    gap: spacing.sm,
   },
   zoomButton: {
-    marginVertical: spacing.xs / 2,
     width: 40,
     height: 40,
+    backgroundColor: colors.neutral.white,
+    ...getShadow('small'),
   },
   recenterButton: {
-    position: 'absolute',
-    right: spacing.md,
-    bottom: spacing.md,
-    width: 44,
-    height: 44,
-    backgroundColor: colors.primary.main,
-  },
-  locationRequestButton: {
-    position: 'absolute',
-    right: spacing.md,
-    bottom: spacing.md,
-    width: 44,
-    height: 44,
-    backgroundColor: colors.primary.main,
+    width: 40,
+    height: 40,
+    backgroundColor: colors.neutral.black,
+    marginTop: spacing.sm,
+    ...getShadow('small'),
   },
   permissionContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -388,5 +643,79 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: spacing.md,
     color: colors.neutral.darkGrey,
+  },
+  searchContainer: {
+    position: 'absolute',
+    top: spacing.xxxl,
+    left: spacing.md,
+    right: spacing.md,
+    zIndex: 11,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.round,
+    padding: spacing.sm,
+    width: '85%',
+    ...getShadow('small'),
+  },
+  filterButton: {
+    backgroundColor: colors.neutral.white,
+    height: '100%',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    ...getShadow('small'),
+  },
+  searchInput: {
+    flex: 1,
+    height: 30,
+    paddingHorizontal: spacing.sm,
+  },
+  searchIcon: {
+    marginLeft: spacing.sm,
+  },
+  clearSearchButton: {
+    paddingRight: spacing.md,
+  },
+  searchLoader: {
+    paddingRight: spacing.sm,
+  },
+  searchResultsContainer: {
+    position: 'absolute',
+    width: '77%',
+    top: spacing.xxl,
+    left: spacing.md,
+    backgroundColor: colors.neutral.white,
+    borderRadius: rs(16),
+    maxHeight: rs(300),
+    overflow: 'hidden',
+  },
+  searchResultItem: {
+    padding: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral.veryLightGrey,
+  },
+  searchResultName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.neutral.black,
+  },
+  searchResultAddress: {
+    fontSize: 12,
+    color: colors.neutral.grey,
+    marginTop: spacing.xs,
+  },
+  tagsContainer: {
+    position: 'absolute',
+    width: '100%',
+    top: rs(150),
+    left: spacing.md,
+    zIndex: 10,
+    ...getShadow('small'),
+  },
+  tagsScrollViewContent: {
+    gap: spacing.sm,
   },
 });

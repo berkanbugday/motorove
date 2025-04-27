@@ -213,7 +213,7 @@ export function AccountSetupScreen() {
                     ? 'filled'
                     : 'outlined'
                 }
-                color="neutral"
+                color="dark"
                 selected={selectedInterests.includes(interest.id)}
                 onPress={() => handleInterestToggle(interest.id)}
                 testID={`interest-chip-${interest.id}`}

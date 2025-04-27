@@ -36,7 +36,11 @@ import Trash from '@assets/icons/trash.svg';
 import Pen from '@assets/icons/pen.svg';
 import Report from '@assets/icons/report.svg';
 import Share from '@assets/icons/share.svg';
-
+import UserLocation from '@assets/icons/user-location.svg';
+import Plus from '@assets/icons/plus.svg';
+import Minus from '@assets/icons/minus.svg';
+import Sliders from '@assets/icons/sliders.svg';
+import Search from '@assets/icons/search.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -89,7 +93,12 @@ export type IconName =
   | 'trash'
   | 'pen'
   | 'report'
-  | 'share';
+  | 'share'
+  | 'user-location'
+  | 'plus'
+  | 'minus'
+  | 'sliders'
+  | 'search';
 
 interface IconProps {
   name: IconName;
@@ -191,6 +200,16 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Report {...commonProps} />;
     case 'share':
       return <Share {...commonProps} />;
+    case 'user-location':
+      return <UserLocation {...commonProps} />;
+    case 'plus':
+      return <Plus {...commonProps} />;
+    case 'minus':
+      return <Minus {...commonProps} />;
+    case 'sliders':
+      return <Sliders {...commonProps} />;
+    case 'search':
+      return <Search {...commonProps} />;
     default:
       return null;
   }

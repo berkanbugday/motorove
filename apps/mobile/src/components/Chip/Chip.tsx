@@ -20,7 +20,8 @@ export type ChipColor =
   | 'warning'
   | 'error'
   | 'info'
-  | 'neutral';
+  | 'dark'
+  | 'light';
 
 export interface ChipProps {
   /** Text content of the chip */
@@ -60,7 +61,7 @@ export const Chip: React.FC<ChipProps> = ({
   onRemove,
   variant = 'outlined',
   size = 'medium',
-  color = 'neutral',
+  color = 'light',
   selected = false,
   disabled = false,
   leadingIcon,
@@ -90,8 +91,10 @@ export const Chip: React.FC<ChipProps> = ({
             return colors.status.error;
           case 'info':
             return colors.status.info;
-          case 'neutral':
-            return colors.neutral.darkGrey;
+          case 'dark':
+            return colors.neutral.black;
+          case 'light':
+            return colors.neutral.white;
           default:
             return colors.primary.main;
         }
@@ -109,8 +112,10 @@ export const Chip: React.FC<ChipProps> = ({
             return colors.status.error;
           case 'info':
             return colors.status.info;
-          case 'neutral':
-            return colors.neutral.grey;
+          case 'dark':
+            return colors.neutral.black;
+          case 'light':
+            return colors.neutral.white;
           default:
             return colors.primary.main;
         }
@@ -136,8 +141,10 @@ export const Chip: React.FC<ChipProps> = ({
         return `${colors.status.error}20`;
       case 'info':
         return `${colors.status.info}20`;
-      case 'neutral':
-        return `${colors.neutral.grey}20`;
+      case 'dark':
+        return `${colors.neutral.black}20`;
+      case 'light':
+        return `${colors.neutral.white}20`;
       default:
         return `${colors.primary.main}20`;
     }
@@ -164,8 +171,10 @@ export const Chip: React.FC<ChipProps> = ({
         return colors.status.error;
       case 'info':
         return colors.status.info;
-      case 'neutral':
-        return colors.neutral.lightGrey;
+      case 'dark':
+        return colors.neutral.black;
+      case 'light':
+        return colors.neutral.white;
       default:
         return colors.primary.main;
     }
@@ -181,6 +190,7 @@ export const Chip: React.FC<ChipProps> = ({
       switch (color) {
         case 'secondary':
         case 'warning':
+        case 'light':
           return colors.neutral.black;
         default:
           return colors.neutral.white;
@@ -201,8 +211,10 @@ export const Chip: React.FC<ChipProps> = ({
         return colors.status.error;
       case 'info':
         return colors.status.info;
-      case 'neutral':
-        return colors.neutral.darkGrey;
+      case 'dark':
+        return colors.neutral.black;
+      case 'light':
+        return colors.neutral.white;
       default:
         return colors.primary.main;
     }
@@ -260,7 +272,7 @@ export const Chip: React.FC<ChipProps> = ({
       activeOpacity={onPress ? 0.7 : 1}
       style={containerStyles}
       onPress={handlePress}
-      disabled={disabled || !onPress}
+      disabled={disabled}
       testID={testID}>
       <View style={styles.contentContainer}>
         {leadingIcon && (

@@ -146,23 +146,26 @@ export function TopHeaderBar({
 
       <View style={styles.contentContainer}>
         {/* Left section (back button or custom icon) */}
-        <View style={styles.leftSection}>
-          {showBackButton ? (
+
+        {showBackButton ? (
+          <View style={styles.leftSection}>
             <TouchableOpacity
               onPress={onBackPress}
               style={styles.backButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               <Icon name="arrow-left" size={24} color={textColor} />
             </TouchableOpacity>
-          ) : leftIconName ? (
+          </View>
+        ) : leftIconName ? (
+          <View style={styles.leftSection}>
             <TouchableOpacity
               onPress={onLeftIconPress}
               style={styles.backButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               <Icon name={leftIconName} size={24} color={textColor} />
             </TouchableOpacity>
-          ) : null}
-        </View>
+          </View>
+        ) : null}
 
         {/* Middle section (title) */}
         <View style={styles.titleSection}>
@@ -238,7 +241,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screen.horizontal,
   },
   leftSection: {
-    width: 40,
+    width: 46,
     alignItems: 'flex-start',
   },
   backButton: {

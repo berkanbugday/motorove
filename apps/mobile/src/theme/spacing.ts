@@ -11,7 +11,8 @@ export const spacing = {
   lg: 24,
   xl: 32,
   xxl: 48,
-
+  xxxl: 64,
+  xxxxl: 80,
   // Specific spacing for components
   button: {
     paddingVertical: {
