@@ -368,9 +368,9 @@ export const MapView: React.FC<MapViewProps> = ({
           ]}
           collapsable={false}>
           {marker.icon ? (
-            <Icon name={marker.icon} size={10} color={colors.neutral.white} />
+            <Icon name={marker.icon} size={12} color={colors.neutral.white} />
           ) : (
-            <Icon name="map-pin" size={10} color={colors.neutral.white} />
+            <Icon name="map-pin" size={12} color={colors.neutral.white} />
           )}
         </View>
       </Mapbox.PointAnnotation>
@@ -761,8 +761,8 @@ const styles = StyleSheet.create({
   },
   markerContainer: {
     padding: 10,
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
     borderRadius: radius.round,
     backgroundColor: colors.primary.main,
     justifyContent: 'center',

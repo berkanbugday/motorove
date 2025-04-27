@@ -13,8 +13,8 @@ import {Icon, IconName} from '../Icon';
 
 interface ButtonProps {
   title?: string;
-  onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'text';
+  onPress?: () => void;
+  variant?: 'primary' | 'dark' | 'secondary' | 'outline' | 'text';
   shape?: 'default' | 'round' | 'circle';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
@@ -47,12 +47,14 @@ export function Button({
   const buttonStyles = [
     styles.button,
     variant === 'primary' && styles.primaryButton,
+    variant === 'dark' && styles.darkButton,
     variant === 'secondary' && styles.secondaryButton,
     variant === 'outline' && styles.outlineButton,
     variant === 'text' && styles.textButton,
     shape === 'round' && styles.roundButton,
     shape === 'circle' && styles.circleButton,
     size === 'small' && styles.smallButton,
+    size === 'medium' && styles.mediumButton,
     size === 'large' && styles.largeButton,
     (disabled || loading) && styles.disabledButton,
     style,
@@ -61,6 +63,9 @@ export function Button({
   const getTypographyVariant = () => {
     if (size === 'small') {
       return 'smallButtonText';
+    }
+    if (size === 'medium') {
+      return 'mediumButtonText';
     }
     if (size === 'large') {
       return 'largeButtonText';
@@ -73,6 +78,9 @@ export function Button({
       return undefined; // Let the Typography component handle disabled state
     }
     if (variant === 'primary') {
+      return colors.neutral.white;
+    }
+    if (variant === 'dark') {
       return colors.neutral.white;
     }
     if (variant === 'secondary') {
@@ -94,9 +102,10 @@ export function Button({
   const getIconSize = () => {
     if (iconSize) return iconSize;
 
-    if (size === 'small') return 16;
-    if (size === 'large') return 24;
-    return 20; // medium size default
+    if (size === 'small') return 14;
+    if (size === 'medium') return 16;
+    if (size === 'large') return 20;
+    return 16; // medium size default
   };
 
   const renderContent = () => {
@@ -184,6 +193,9 @@ const styles = StyleSheet.create({
   primaryButton: {
     backgroundColor: colors.primary.main,
   },
+  darkButton: {
+    backgroundColor: colors.neutral.black,
+  },
   secondaryButton: {
     backgroundColor: colors.secondary.main,
   },
@@ -209,6 +221,10 @@ const styles = StyleSheet.create({
   smallButton: {
     paddingVertical: spacing.button.paddingVertical.small,
     paddingHorizontal: spacing.button.paddingHorizontal.small,
+  },
+  mediumButton: {
+    paddingVertical: spacing.button.paddingVertical.medium,
+    paddingHorizontal: spacing.button.paddingHorizontal.medium,
   },
   largeButton: {
     paddingVertical: spacing.button.paddingVertical.large,

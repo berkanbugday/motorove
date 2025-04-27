@@ -43,6 +43,7 @@ export const colors = {
   // Status colors
   status: {
     success: '#34C759',
+    successDark: '#16A34A',
     warning: '#FFCC00',
     error: '#FF3B30',
     info: '#007AFF',

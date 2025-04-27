@@ -32,6 +32,7 @@ import Save from '@assets/icons/save.svg';
 import SaveFilled from '@assets/icons/save-filled.svg';
 import MoreVertical from '@assets/icons/more-vertical.svg';
 import PaperPlane from '@assets/icons/paper-plane.svg';
+import PaperPlaneFilled from '@assets/icons/paper-plane-filled.svg';
 import Trash from '@assets/icons/trash.svg';
 import Pen from '@assets/icons/pen.svg';
 import Report from '@assets/icons/report.svg';
@@ -44,6 +45,8 @@ import Search from '@assets/icons/search.svg';
 import WrenchFilled from '@assets/icons/wrench-filled.svg';
 import Shop from '@assets/icons/shop.svg';
 import Droplet from '@assets/icons/droplet.svg';
+import Clock from '@assets/icons/clock.svg';
+import Phone from '@assets/icons/phone.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -93,6 +96,7 @@ export type IconName =
   | 'windy'
   | 'more-vertical'
   | 'paper-plane'
+  | 'paper-plane-filled'
   | 'trash'
   | 'pen'
   | 'report'
@@ -104,7 +108,9 @@ export type IconName =
   | 'search'
   | 'wrench-filled'
   | 'shop'
-  | 'droplet';
+  | 'droplet'
+  | 'clock'
+  | 'phone';
 
 interface IconProps {
   name: IconName;
@@ -198,6 +204,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <MoreVertical {...commonProps} />;
     case 'paper-plane':
       return <PaperPlane {...commonProps} />;
+    case 'paper-plane-filled':
+      return <PaperPlaneFilled {...commonProps} />;
     case 'trash':
       return <Trash {...commonProps} />;
     case 'pen':
@@ -222,6 +230,10 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Shop {...commonProps} />;
     case 'droplet':
       return <Droplet {...commonProps} />;
+    case 'clock':
+      return <Clock {...commonProps} />;
+    case 'phone':
+      return <Phone {...commonProps} />;
     default:
       return null;
   }
