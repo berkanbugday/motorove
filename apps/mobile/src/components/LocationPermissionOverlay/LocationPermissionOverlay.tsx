@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   description: {
     textAlign: 'center',
     marginBottom: spacing.md,
-    lineHeight: rs(20),
+    lineHeight: rs(23),
   },
   featuresContainer: {
     width: '100%',

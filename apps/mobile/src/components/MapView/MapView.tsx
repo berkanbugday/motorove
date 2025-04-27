@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {View, StyleSheet, ActivityIndicator, Text} from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import {useLocationPermission} from '@hooks/useLocationPermission';
@@ -75,23 +75,33 @@ export const MapView: React.FC<MapViewProps> = ({
 }) => {
   const camera = useRef<Mapbox.Camera>(null);
   const [currentZoom, setCurrentZoom] = useState(initialZoom);
-  const {status, requestPermission, openSettings} = useLocationPermission();
+  const {status, requestPermission, openSettings, checkPermission} =
+    useLocationPermission();
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const [showPermissionOverlay, setShowPermissionOverlay] = useState(false);
+  const prevStatus = useRef(status);
 
   // Handle location permission
   useEffect(() => {
-    if (showUserLocation && status !== 'granted' && status !== 'requesting') {
-      // Show permission overlay if we need location but don't have it
-      if (status === 'denied' || status === 'blocked') {
-        setShowPermissionOverlay(true);
-      } else {
-        requestPermission();
+    if (showUserLocation) {
+      if (status !== 'granted' && status !== 'requesting') {
+        // Show permission overlay if we need location but don't have it
+        if (status === 'denied' || status === 'blocked') {
+          setShowPermissionOverlay(true);
+        } else {
+          requestPermission();
+        }
+      } else if (status === 'granted' && prevStatus.current !== 'granted') {
+        // If we just received permission, hide overlay
+        setShowPermissionOverlay(false);
       }
     }
+
+    // Keep track of previous status to detect changes
+    prevStatus.current = status;
   }, [showUserLocation, status, requestPermission]);
 
   // Update camera when user location changes (if following)
@@ -158,15 +168,24 @@ export const MapView: React.FC<MapViewProps> = ({
   };
 
   // Handle permission overlay allow press
-  const handleAllowLocationPress = () => {
+  const handleAllowLocationPress = useCallback(() => {
     requestPermission();
     setShowPermissionOverlay(false);
-  };
+  }, [requestPermission]);
 
   // Handle permission overlay dismiss
-  const handleDismissOverlay = () => {
+  const handleDismissOverlay = useCallback(() => {
     setShowPermissionOverlay(false);
-  };
+  }, []);
+
+  // Handle reopening the overlay
+  const handleReopenOverlay = useCallback(() => {
+    checkPermission().then(() => {
+      if (status !== 'granted') {
+        setShowPermissionOverlay(true);
+      }
+    });
+  }, [checkPermission, status]);
 
   // Render loading UI
   if (status === 'requesting') {
@@ -181,6 +200,37 @@ export const MapView: React.FC<MapViewProps> = ({
       </View>
     );
   }
+
+  // Render user location component only if permission is granted
+  const renderUserLocation = () => {
+    if (showUserLocation && status === 'granted') {
+      return (
+        <Mapbox.UserLocation
+          onUpdate={handleUserLocationUpdate}
+          visible={true}
+          showsUserHeadingIndicator={true}
+        />
+      );
+    }
+    return null;
+  };
+
+  // Render additional map elements
+  const renderMapElements = () => {
+    if (children) {
+      // If children is a React element array, map through it
+      if (Array.isArray(children)) {
+        return children.map((child, index) =>
+          React.isValidElement(child)
+            ? React.cloneElement(child, {key: `map-element-${index}`})
+            : child,
+        );
+      }
+      // If children is a single element
+      return children;
+    }
+    return null;
+  };
 
   return (
     <>
@@ -204,17 +254,11 @@ export const MapView: React.FC<MapViewProps> = ({
             animationDuration={1000}
           />
 
-          {/* User Location */}
-          {showUserLocation && status === 'granted' && (
-            <Mapbox.UserLocation
-              onUpdate={handleUserLocationUpdate}
-              visible={true}
-              showsUserHeadingIndicator={true}
-            />
-          )}
+          {/* User Location - Extract to separate method to avoid Fragment issues */}
+          {renderUserLocation()}
 
           {/* Additional Map Elements */}
-          {children}
+          {renderMapElements()}
         </Mapbox.MapView>
 
         {/* Map Controls */}
@@ -248,6 +292,18 @@ export const MapView: React.FC<MapViewProps> = ({
             size="small"
             style={styles.recenterButton}
             title="↻"
+          />
+        )}
+
+        {/* Request Location Button (when denied) */}
+        {showUserLocation && status !== 'granted' && !showPermissionOverlay && (
+          <Button
+            onPress={handleReopenOverlay}
+            variant="primary"
+            shape="round"
+            size="small"
+            style={styles.locationRequestButton}
+            title="📍"
           />
         )}
       </View>
@@ -291,6 +347,14 @@ const styles = StyleSheet.create({
     height: 40,
   },
   recenterButton: {
+    position: 'absolute',
+    right: spacing.md,
+    bottom: spacing.md,
+    width: 44,
+    height: 44,
+    backgroundColor: colors.primary.main,
+  },
+  locationRequestButton: {
     position: 'absolute',
     right: spacing.md,
     bottom: spacing.md,

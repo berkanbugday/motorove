@@ -1,5 +1,11 @@
-import {useEffect, useState, useCallback} from 'react';
-import {Alert, Linking, Platform, PermissionsAndroid} from 'react-native';
+import {useEffect, useState, useCallback, useRef} from 'react';
+import {
+  Alert,
+  Linking,
+  Platform,
+  PermissionsAndroid,
+  AppState,
+} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 
 type LocationPermissionStatus =
@@ -21,6 +27,8 @@ type LocationPermissionStatus =
 export const useLocationPermission = () => {
   const [status, setStatus] = useState<LocationPermissionStatus>('requesting');
   const [highAccuracy, setHighAccuracy] = useState<boolean>(false);
+  const appState = useRef(AppState.currentState);
+  const [permissionRequestCount, setPermissionRequestCount] = useState(0);
 
   /**
    * Check the current location permission status
@@ -45,7 +53,12 @@ export const useLocationPermission = () => {
               error => {
                 if (error.code === 1) {
                   // PERMISSION_DENIED
-                  setStatus('denied');
+                  // Check if this is likely a block based on request count
+                  if (permissionRequestCount > 1) {
+                    setStatus('blocked');
+                  } else {
+                    setStatus('denied');
+                  }
                 } else {
                   setStatus('unavailable');
                 }
@@ -86,7 +99,12 @@ export const useLocationPermission = () => {
               setStatus('granted');
               checkHighAccuracy();
             } else {
-              setStatus('denied');
+              // Check if this is likely a block based on request count
+              if (permissionRequestCount > 1) {
+                setStatus('blocked');
+              } else {
+                setStatus('denied');
+              }
             }
           }
         } catch (err) {
@@ -98,7 +116,7 @@ export const useLocationPermission = () => {
       console.error('Error checking location permission:', error);
       setStatus('unavailable');
     }
-  }, []);
+  }, [permissionRequestCount]);
 
   /**
    * Check if high accuracy location is available
@@ -117,6 +135,8 @@ export const useLocationPermission = () => {
   const requestPermission = useCallback(async () => {
     try {
       setStatus('requesting');
+      // Increment request count to help identify potential blocks
+      setPermissionRequestCount(prev => prev + 1);
 
       if (Platform.OS === 'ios') {
         // Setup geolocation
@@ -136,7 +156,15 @@ export const useLocationPermission = () => {
               error => {
                 if (error.code === 1) {
                   // PERMISSION_DENIED
-                  setStatus('denied');
+                  // If this is not the first request, likely permission is blocked in settings
+                  if (permissionRequestCount > 1) {
+                    setStatus('blocked');
+                    setTimeout(() => {
+                      openSettings();
+                    }, 500);
+                  } else {
+                    setStatus('denied');
+                  }
                 } else {
                   setStatus('unavailable');
                 }
@@ -173,7 +201,15 @@ export const useLocationPermission = () => {
           setStatus('granted');
           checkHighAccuracy();
         } else {
-          setStatus('denied');
+          // If not the first request, consider it blocked
+          if (permissionRequestCount > 1) {
+            setStatus('blocked');
+            setTimeout(() => {
+              openSettings();
+            }, 500);
+          } else {
+            setStatus('denied');
+          }
         }
 
         return permissionGranted;
@@ -183,7 +219,7 @@ export const useLocationPermission = () => {
       setStatus('unavailable');
       return false;
     }
-  }, [checkHighAccuracy, status]);
+  }, [checkHighAccuracy, permissionRequestCount, status]);
 
   /**
    * Open app settings if permission is blocked
@@ -198,6 +234,25 @@ export const useLocationPermission = () => {
       ],
     );
   }, []);
+
+  // Listen for app state changes to refresh permission status
+  // This handles the case where the user grants permission in settings and returns to the app
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        // App has come to the foreground
+        checkPermission();
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [checkPermission]);
 
   // Check permission on mount
   useEffect(() => {
