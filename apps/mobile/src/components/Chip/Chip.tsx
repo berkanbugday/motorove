@@ -269,7 +269,7 @@ export const Chip: React.FC<ChipProps> = ({
 
   return (
     <TouchableOpacity
-      activeOpacity={onPress ? 0.7 : 1}
+      activeOpacity={1}
       style={containerStyles}
       onPress={handlePress}
       disabled={disabled}
