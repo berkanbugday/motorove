@@ -41,6 +41,9 @@ import Plus from '@assets/icons/plus.svg';
 import Minus from '@assets/icons/minus.svg';
 import Sliders from '@assets/icons/sliders.svg';
 import Search from '@assets/icons/search.svg';
+import WrenchFilled from '@assets/icons/wrench-filled.svg';
+import Shop from '@assets/icons/shop.svg';
+import Droplet from '@assets/icons/droplet.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -98,7 +101,10 @@ export type IconName =
   | 'plus'
   | 'minus'
   | 'sliders'
-  | 'search';
+  | 'search'
+  | 'wrench-filled'
+  | 'shop'
+  | 'droplet';
 
 interface IconProps {
   name: IconName;
@@ -210,6 +216,12 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Sliders {...commonProps} />;
     case 'search':
       return <Search {...commonProps} />;
+    case 'wrench-filled':
+      return <WrenchFilled {...commonProps} />;
+    case 'shop':
+      return <Shop {...commonProps} />;
+    case 'droplet':
+      return <Droplet {...commonProps} />;
     default:
       return null;
   }

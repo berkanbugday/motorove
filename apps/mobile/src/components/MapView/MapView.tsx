@@ -35,6 +35,14 @@ export interface Tag {
   leadingIcon?: IconName;
 }
 
+export interface MapMarker {
+  id: string;
+  coordinates: [number, number];
+  onPress?: () => void;
+  icon?: IconName;
+  color?: string;
+}
+
 export interface MapViewProps {
   /**
    * Initial center coordinates of the map
@@ -107,6 +115,10 @@ export interface MapViewProps {
    * Tags to display above the map
    */
   tags?: Tag[];
+  /**
+   * Markers to display on the map
+   */
+  markers?: MapMarker[];
 }
 
 export const MapView: React.FC<MapViewProps> = ({
@@ -126,6 +138,7 @@ export const MapView: React.FC<MapViewProps> = ({
   showFilterButton = false,
   onFilterPress,
   tags = [],
+  markers = [],
 }) => {
   const camera = useRef<Mapbox.Camera>(null);
   const [currentZoom, setCurrentZoom] = useState(initialZoom);
@@ -233,7 +246,7 @@ export const MapView: React.FC<MapViewProps> = ({
     if (camera.current && userLocation) {
       camera.current.setCamera({
         centerCoordinate: [userLocation.longitude, userLocation.latitude],
-        zoomLevel: 15,
+        zoomLevel: 14,
         animationDuration: 1000,
       });
     }
@@ -336,6 +349,32 @@ export const MapView: React.FC<MapViewProps> = ({
     setSearchResults([]);
     setShowSearchResults(false);
     Keyboard.dismiss();
+  };
+
+  // Render markers
+  const renderMarkers = () => {
+    if (!markers || markers.length === 0) return null;
+
+    return markers.map(marker => (
+      <Mapbox.PointAnnotation
+        key={marker.id}
+        id={marker.id}
+        coordinate={marker.coordinates}
+        onSelected={marker.onPress}>
+        <View
+          style={[
+            styles.markerContainer,
+            marker.color ? {backgroundColor: marker.color} : null,
+          ]}
+          collapsable={false}>
+          {marker.icon ? (
+            <Icon name={marker.icon} size={10} color={colors.neutral.white} />
+          ) : (
+            <Icon name="map-pin" size={10} color={colors.neutral.white} />
+          )}
+        </View>
+      </Mapbox.PointAnnotation>
+    ));
   };
 
   // Render loading UI
@@ -499,7 +538,8 @@ export const MapView: React.FC<MapViewProps> = ({
             attributionEnabled={false}
             styleURL={styleURL}
             onPress={handleMapPress}
-            onDidFinishLoadingMap={onMapLoaded}>
+            onDidFinishLoadingMap={onMapLoaded}
+            pitchEnabled={false}>
             {/* Camera */}
             <Mapbox.Camera
               ref={camera}
@@ -516,6 +556,9 @@ export const MapView: React.FC<MapViewProps> = ({
 
             {/* User Location - Extract to separate method to avoid Fragment issues */}
             {renderUserLocation()}
+
+            {/* Individual Markers */}
+            {renderMarkers()}
 
             {/* Additional Map Elements */}
             {renderMapElements()}
@@ -715,5 +758,15 @@ const styles = StyleSheet.create({
   },
   tagsScrollViewContent: {
     gap: spacing.sm,
+  },
+  markerContainer: {
+    padding: 10,
+    width: 20,
+    height: 20,
+    borderRadius: radius.round,
+    backgroundColor: colors.primary.main,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...getShadow('small'),
   },
 });

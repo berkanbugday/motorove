@@ -7,8 +7,8 @@ export const colors = {
   // Primary brand colors
   primary: {
     main: '#FF3B30',
-    light: '#FF6B62',
-    dark: '#CC2F26',
+    light: '#FF6B61',
+    dark: '#D32F2F',
   },
 
   // Secondary brand colors
