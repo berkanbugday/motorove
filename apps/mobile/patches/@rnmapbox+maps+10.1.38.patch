@@ -1,0 +1,14 @@
+diff --git a/node_modules/@rnmapbox/maps/src/components/UserLocation.tsx b/node_modules/@rnmapbox/maps/src/components/UserLocation.tsx
+index 0000000..0000000 100644
+--- a/node_modules/@rnmapbox/maps/src/components/UserLocation.tsx
++++ b/node_modules/@rnmapbox/maps/src/components/UserLocation.tsx
+@@ -51,8 +51,8 @@ const normalIcon = (
+     style={layerStyles.normal.foreground}
+   />,
+   ...(showsUserHeadingIndicator && typeof heading === 'number'
+-    ? [HeadingIndicator({ heading, key: 'mapboxUserLocationHeadingIndicator' })]
++    ? [<HeadingIndicator key='mapboxUserLocationHeadingIndicator' heading={heading} />]
+     : []),
+ ];
+ 
+ export enum UserLocationRenderMode {
