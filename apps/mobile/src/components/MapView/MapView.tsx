@@ -21,11 +21,9 @@ import {
 } from '@components';
 import {colors, rs, spacing, getShadow, radius} from '@theme';
 import {IconName} from '@components/Icon';
-
+import {MAPBOX_ACCESS_TOKEN} from '@env';
 // Configure Mapbox access token
-Mapbox.setAccessToken(
-  'pk.eyJ1IjoiYmVya2FuYnVnZGF5IiwiYSI6ImNtOXhoMGprYjB4M2EycXM3OWc4OXA3YnUifQ.SxRjIA3GMzguYeD4Zpjsaw',
-);
+Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
 
 export interface Tag {
   id: string;
@@ -282,7 +280,7 @@ export const MapView: React.FC<MapViewProps> = ({
       // Build Mapbox Geocoding API URL
       const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
         query,
-      )}.json?access_token=pk.eyJ1IjoiYmVya2FuYnVnZGF5IiwiYSI6ImNtOXhoMGprYjB4M2EycXM3OWc4OXA3YnUifQ.SxRjIA3GMzguYeD4Zpjsaw&limit=5`;
+      )}.json?access_token=${MAPBOX_ACCESS_TOKEN}&limit=5`;
 
       const response = await fetch(endpoint);
       const data = await response.json();
@@ -321,7 +319,7 @@ export const MapView: React.FC<MapViewProps> = ({
     }
 
     // Clear search
-    setSearchQuery('');
+    setSearchQuery(result.name);
     setSearchResults([]);
     setShowSearchResults(false);
     Keyboard.dismiss();
@@ -600,7 +598,7 @@ const styles = StyleSheet.create({
   controlButtonsContainer: {
     position: 'absolute',
     right: spacing.md,
-    top: rs(250),
+    top: 230,
     flexDirection: 'column',
     gap: spacing.sm,
   },
@@ -710,7 +708,7 @@ const styles = StyleSheet.create({
   tagsContainer: {
     position: 'absolute',
     width: '100%',
-    top: rs(150),
+    top: 130,
     left: spacing.md,
     zIndex: 10,
     ...getShadow('small'),
