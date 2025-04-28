@@ -54,10 +54,6 @@ export interface MapViewProps {
    */
   styleURL?: string;
   /**
-   * Whether the map should take up the full screen
-   */
-  fullscreen?: boolean;
-  /**
    * Custom style for the map container
    */
   style?: any;
@@ -129,7 +125,6 @@ export const MapView: React.FC<MapViewProps> = ({
   showUserLocation = true,
   followUserLocation = false,
   styleURL = Mapbox.StyleURL.Street,
-  fullscreen = false,
   style,
   showZoomControls = false,
   children,
@@ -360,8 +355,7 @@ export const MapView: React.FC<MapViewProps> = ({
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View
-          style={[fullscreen ? styles.fullscreen : styles.container, style]}>
+        <View style={[styles.container, style]}>
           <Mapbox.MapView
             ref={mapRef}
             style={styles.map}

@@ -158,7 +158,6 @@ export const ExploreScreen: React.FC = () => {
         showSearch={true}
         showFilterButton={true}
         showUserLocation={true}
-        fullscreen={true}
         showZoomControls={true}
         style={styles.map}
         onMapLoaded={() => console.log('Map loaded')}

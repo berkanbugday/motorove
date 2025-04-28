@@ -3,12 +3,6 @@ import {colors, rs, spacing, getShadow, radius} from '@theme';
 
 export const styles = StyleSheet.create({
   container: {
-    height: 300,
-    width: '100%',
-    borderRadius: rs(12),
-    overflow: 'hidden',
-  },
-  fullscreen: {
     ...StyleSheet.absoluteFillObject,
   },
   map: {

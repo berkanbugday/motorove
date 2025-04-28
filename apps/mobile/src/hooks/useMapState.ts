@@ -30,18 +30,18 @@ export const useMapState = ({
       return 100; // Very zoomed out (country level)
     }
     if (zoom <= 6) {
-      return 50; // Continent/large country level
+      return 75; // Continent/large country level
     }
     if (zoom <= 8) {
-      return 25; // Region level
+      return 50; // Region level
     }
     if (zoom <= 10) {
-      return 10; // City level
+      return 25; // City level
     }
     if (zoom <= 12) {
-      return 5; // Neighborhood level
+      return 10; // Neighborhood level
     }
-    return 2; // Very zoomed in
+    return 5; // Very zoomed in
   }, []);
 
   // Current dynamic radius - memoized based on current zoom
