@@ -373,7 +373,7 @@ export const MapView: React.FC<MapViewProps> = ({
             onPress={handleMapPress}
             onDidFinishLoadingMap={handleMapLoaded}
             pitchEnabled={false}
-            onTouchStart={handleMapMoveStart}
+            onTouchMove={handleMapMoveStart}
             onTouchEnd={handleMapMoveEnd}>
             {/* Camera */}
             <Mapbox.Camera
