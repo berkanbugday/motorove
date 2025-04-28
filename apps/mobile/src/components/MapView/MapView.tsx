@@ -1,47 +1,30 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
 import {
   View,
-  StyleSheet,
   ActivityIndicator,
   Text,
-  TextInput,
-  TouchableOpacity,
   Keyboard,
   TouchableWithoutFeedback,
-  ScrollView,
 } from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import {useLocationPermission} from '@hooks/useLocationPermission';
-import {
-  Button,
-  Icon,
-  LocationPermissionOverlay,
-  Chip,
-  ChipColor,
-} from '@components';
-import {colors, rs, spacing, getShadow, radius} from '@theme';
-import {IconName} from '@components/Icon';
+import {useMapState} from '@hooks/useMapState';
+import {useMapMarkers} from '@hooks/useMapMarkers';
+import {useMapSearch} from '@hooks/useMapSearch';
+import {LocationPermissionOverlay} from '@components';
+import {colors} from '@theme';
 import {MAPBOX_ACCESS_TOKEN} from '@env';
+import {styles} from './MapView.styles';
+import {SearchBar} from './SearchBar';
+import {TagsList} from './TagsList';
+import {ZoomControls} from './ZoomControls';
+import {MapMarkers} from './MapMarkers';
+import {LoadMarkerButton} from './LoadMarkerButton';
+import {DebugInfo} from './DebugInfo';
+import {Tag, MapMarker} from './types';
+
 // Configure Mapbox access token
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
-
-export interface Tag {
-  id: string;
-  label: string;
-  color?: ChipColor;
-  onPress?: () => void;
-  onRemove?: () => void;
-  removable?: boolean;
-  leadingIcon?: IconName;
-}
-
-export interface MapMarker {
-  id: string;
-  coordinates: [number, number];
-  onPress?: () => void;
-  icon?: IconName;
-  color?: string;
-}
 
 export interface MapViewProps {
   /**
@@ -119,6 +102,22 @@ export interface MapViewProps {
    * Markers to display on the map
    */
   markers?: MapMarker[];
+  /**
+   * Radius in kilometers to show markers around map center
+   */
+  markerRadiusKm?: number;
+  /**
+   * Max number of markers to render at once
+   */
+  maxVisibleMarkers?: number;
+  /**
+   * Whether to show the load marker button
+   */
+  showLoadMarkerButton?: boolean;
+  /**
+   * Callback when the load marker button is pressed
+   */
+  onLoadMarkerPress?: () => void;
 }
 
 export const MapView: React.FC<MapViewProps> = ({
@@ -139,30 +138,53 @@ export const MapView: React.FC<MapViewProps> = ({
   onFilterPress,
   tags = [],
   markers = [],
+  markerRadiusKm: _markerRadius,
+  maxVisibleMarkers = 1000,
+  showLoadMarkerButton = true,
+  onLoadMarkerPress,
 }) => {
-  const camera = useRef<Mapbox.Camera>(null);
-  const [currentZoom, setCurrentZoom] = useState(initialZoom);
+  // Use custom hooks
   const {status, requestPermission, openSettings, checkPermission} =
     useLocationPermission();
+
+  // Map state hook
+  const {
+    mapRef,
+    camera,
+    mapCenter,
+    dynamicRadiusKm,
+    refreshMapState,
+    handleZoomIn,
+    handleZoomOut,
+    setMapCenter,
+  } = useMapState({initialCoordinates, initialZoom});
+
+  // Map markers hook
+  const {visibleMarkers} = useMapMarkers({
+    markers,
+    mapCenter,
+    dynamicRadiusKm,
+    maxVisibleMarkers,
+  });
+
+  // Map search hook
+  const {
+    searchQuery,
+    searchResults,
+    isSearching,
+    showSearchResults,
+    setShowSearchResults,
+    handleSearchQueryChange,
+    handleSelectSearchResult,
+    handleClearSearch,
+  } = useMapSearch({onSearchResult});
+
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const [showPermissionOverlay, setShowPermissionOverlay] = useState(false);
   const prevStatus = useRef(status);
-
-  // Search related state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<
-    Array<{
-      id: string;
-      name: string;
-      coordinates: [number, number];
-      address?: string;
-    }>
-  >([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Handle location permission
   useEffect(() => {
@@ -187,12 +209,17 @@ export const MapView: React.FC<MapViewProps> = ({
   // Update camera when user location changes (if following)
   useEffect(() => {
     if (followUserLocation && userLocation && camera.current) {
+      const newCenter: [number, number] = [
+        userLocation.longitude,
+        userLocation.latitude,
+      ];
+      setMapCenter(newCenter);
       camera.current.setCamera({
-        centerCoordinate: [userLocation.longitude, userLocation.latitude],
+        centerCoordinate: newCenter,
         animationDuration: 1000,
       });
     }
-  }, [followUserLocation, userLocation]);
+  }, [followUserLocation, userLocation, setMapCenter]);
 
   // Handle user location updates
   const handleUserLocationUpdate = (location: Mapbox.Location) => {
@@ -217,35 +244,16 @@ export const MapView: React.FC<MapViewProps> = ({
     }
   };
 
-  // Handle zoom in
-  const handleZoomIn = () => {
-    if (camera.current) {
-      const newZoom = Math.min(currentZoom + 1, 20);
-      setCurrentZoom(newZoom);
-      camera.current.setCamera({
-        zoomLevel: newZoom,
-        animationDuration: 300,
-      });
-    }
-  };
-
-  // Handle zoom out
-  const handleZoomOut = () => {
-    if (camera.current) {
-      const newZoom = Math.max(currentZoom - 1, 1);
-      setCurrentZoom(newZoom);
-      camera.current.setCamera({
-        zoomLevel: newZoom,
-        animationDuration: 300,
-      });
-    }
-  };
-
   // Handle recenter to user location
   const handleRecenterToUser = () => {
     if (camera.current && userLocation) {
+      const newCenter: [number, number] = [
+        userLocation.longitude,
+        userLocation.latitude,
+      ];
+      setMapCenter(newCenter);
       camera.current.setCamera({
-        centerCoordinate: [userLocation.longitude, userLocation.latitude],
+        centerCoordinate: newCenter,
         zoomLevel: 14,
         animationDuration: 1000,
       });
@@ -272,124 +280,22 @@ export const MapView: React.FC<MapViewProps> = ({
     });
   }, [checkPermission, status]);
 
-  // Handle search query changes
-  const handleSearchQueryChange = (text: string) => {
-    setSearchQuery(text);
-    if (text.length > 2) {
-      performSearch(text);
-    } else {
-      setSearchResults([]);
-      setShowSearchResults(false);
-    }
-  };
-
-  // Perform search using Mapbox Geocoding API
-  const performSearch = async (query: string) => {
-    if (!query.trim()) return;
-
-    setIsSearching(true);
-
-    try {
-      // Build Mapbox Geocoding API URL
-      const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        query,
-      )}.json?access_token=${MAPBOX_ACCESS_TOKEN}&limit=5`;
-
-      const response = await fetch(endpoint);
-      const data = await response.json();
-
-      if (data.features) {
-        const formattedResults = data.features.map((feature: any) => ({
-          id: feature.id,
-          name: feature.text,
-          coordinates: feature.center as [number, number],
-          address: feature.place_name,
-        }));
-
-        setSearchResults(formattedResults);
-        setShowSearchResults(true);
-      }
-    } catch (error) {
-      console.error('Error searching for location:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // Handle selecting a search result
-  const handleSelectSearchResult = (result: {
-    name: string;
-    coordinates: [number, number];
-    address?: string;
-  }) => {
-    // Move camera to the selected location
-    if (camera.current) {
-      camera.current.setCamera({
-        centerCoordinate: result.coordinates,
-        zoomLevel: 15,
-        animationDuration: 1000,
+  // Handle map loaded event
+  const handleMapLoaded = () => {
+    // Get initial map center
+    if (mapRef.current) {
+      mapRef.current.getCenter().then(center => {
+        if (center) {
+          setMapCenter(center as [number, number]);
+        }
       });
     }
 
-    // Clear search
-    setSearchQuery(result.name);
-    setSearchResults([]);
-    setShowSearchResults(false);
-    Keyboard.dismiss();
-
-    // Call the callback if provided
-    if (onSearchResult) {
-      onSearchResult(result);
+    // Call the onMapLoaded callback if provided
+    if (onMapLoaded) {
+      onMapLoaded();
     }
   };
-
-  // Clear search
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    setSearchResults([]);
-    setShowSearchResults(false);
-    Keyboard.dismiss();
-  };
-
-  // Render markers
-  const renderMarkers = () => {
-    if (!markers || markers.length === 0) return null;
-
-    return markers.map(marker => (
-      <Mapbox.PointAnnotation
-        key={marker.id}
-        id={marker.id}
-        coordinate={marker.coordinates}
-        onSelected={marker.onPress}>
-        <View
-          style={[
-            styles.markerContainer,
-            marker.color ? {backgroundColor: marker.color} : null,
-          ]}
-          collapsable={false}>
-          {marker.icon ? (
-            <Icon name={marker.icon} size={12} color={colors.neutral.white} />
-          ) : (
-            <Icon name="map-pin" size={12} color={colors.neutral.white} />
-          )}
-        </View>
-      </Mapbox.PointAnnotation>
-    ));
-  };
-
-  // Render loading UI
-  if (status === 'requesting') {
-    return (
-      <View style={[styles.container, style]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary.main} />
-          <Text style={styles.loadingText}>
-            Requesting location permission...
-          </Text>
-        </View>
-      </View>
-    );
-  }
 
   // Render user location component only if permission is granted
   const renderUserLocation = () => {
@@ -422,110 +328,19 @@ export const MapView: React.FC<MapViewProps> = ({
     return null;
   };
 
-  // Render tags
-  const renderTags = () => {
-    if (!tags || tags.length === 0) return null;
-
+  // Render loading UI
+  if (status === 'requesting') {
     return (
-      <View style={styles.tagsContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tagsScrollViewContent}>
-          {tags.map(tag => (
-            <Chip
-              key={tag.id}
-              label={tag.label}
-              onPress={tag.onPress}
-              onRemove={tag.onRemove}
-              color={tag.color || 'light'}
-              variant="filled"
-              size="large"
-              removable={tag.removable}
-              leadingIcon={tag.leadingIcon}
-            />
-          ))}
-        </ScrollView>
-      </View>
-    );
-  };
-
-  // Render search bar and results
-  const renderSearchBar = () => {
-    if (!showSearch) return null;
-
-    return (
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Icon
-            name="search"
-            size={14}
-            color={colors.neutral.grey}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search locations..."
-            value={searchQuery}
-            onChangeText={handleSearchQueryChange}
-            onFocus={() => {
-              if (searchResults.length > 0) {
-                setShowSearchResults(true);
-              }
-            }}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity
-              style={styles.clearSearchButton}
-              onPress={handleClearSearch}>
-              <Icon name="close" size={16} />
-            </TouchableOpacity>
-          )}
-          {isSearching && (
-            <ActivityIndicator
-              size="small"
-              color={colors.primary.main}
-              style={styles.searchLoader}
-            />
-          )}
+      <View style={[styles.container, style]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary.main} />
+          <Text style={styles.loadingText}>
+            Requesting location permission...
+          </Text>
         </View>
-
-        {showSearchResults && searchResults.length > 0 && (
-          <ScrollView
-            style={styles.searchResultsContainer}
-            bounces={false}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled">
-            {searchResults.map(result => (
-              <TouchableOpacity
-                key={result.id}
-                style={styles.searchResultItem}
-                onPress={() => handleSelectSearchResult(result)}>
-                <Text style={styles.searchResultName}>{result.name}</Text>
-                {result.address && (
-                  <Text style={styles.searchResultAddress} numberOfLines={1}>
-                    {result.address}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
-        {showFilterButton && (
-          <Button
-            variant="primary"
-            shape="round"
-            size="small"
-            iconName="sliders"
-            iconSize={16}
-            style={styles.filterButton}
-            iconColor={colors.neutral.black}
-            onPress={onFilterPress || (() => {})}
-          />
-        )}
       </View>
     );
-  };
+  }
 
   return (
     <>
@@ -533,6 +348,7 @@ export const MapView: React.FC<MapViewProps> = ({
         <View
           style={[fullscreen ? styles.fullscreen : styles.container, style]}>
           <Mapbox.MapView
+            ref={mapRef}
             style={styles.map}
             logoEnabled={false}
             attributionEnabled={false}
@@ -540,7 +356,7 @@ export const MapView: React.FC<MapViewProps> = ({
             compassEnabled={false}
             styleURL={styleURL}
             onPress={handleMapPress}
-            onDidFinishLoadingMap={onMapLoaded}
+            onDidFinishLoadingMap={handleMapLoaded}
             pitchEnabled={false}>
             {/* Camera */}
             <Mapbox.Camera
@@ -556,62 +372,67 @@ export const MapView: React.FC<MapViewProps> = ({
               animationDuration={1000}
             />
 
-            {/* User Location - Extract to separate method to avoid Fragment issues */}
+            {/* User Location */}
             {renderUserLocation()}
 
-            {/* Individual Markers */}
-            {renderMarkers()}
+            {/* Map Markers */}
+            {visibleMarkers && visibleMarkers.length > 0 && (
+              <MapMarkers markers={visibleMarkers} />
+            )}
 
             {/* Additional Map Elements */}
             {renderMapElements()}
           </Mapbox.MapView>
 
           {/* Search Bar */}
-          {renderSearchBar()}
+          {showSearch && (
+            <SearchBar
+              searchQuery={searchQuery}
+              searchResults={searchResults}
+              isSearching={isSearching}
+              showSearchResults={showSearchResults}
+              showFilterButton={showFilterButton}
+              onSearchQueryChange={handleSearchQueryChange}
+              onClearSearch={handleClearSearch}
+              onSelectSearchResult={handleSelectSearchResult}
+              onFilterPress={onFilterPress}
+              setShowSearchResults={setShowSearchResults}
+              camera={camera}
+              setMapCenter={setMapCenter}
+            />
+          )}
 
           {/* Tags */}
-          {renderTags()}
+          {tags.length > 0 && <TagsList tags={tags} />}
 
           {/* Zoom Controls */}
           {showZoomControls && (
-            <View style={styles.controlButtonsContainer}>
-              <Button
-                onPress={handleZoomIn}
-                variant="primary"
-                shape="round"
-                size="small"
-                style={styles.zoomButton}
-                iconName="plus"
-                iconSize={16}
-                iconColor={colors.neutral.black}
-              />
-              <Button
-                onPress={handleZoomOut}
-                variant="primary"
-                shape="round"
-                size="small"
-                style={styles.zoomButton}
-                iconName="minus"
-                iconSize={16}
-                iconColor={colors.neutral.black}
-              />
-              {/* Location Button - Combined for all location states */}
-              {showUserLocation && (
-                <Button
-                  onPress={
-                    status === 'granted' && userLocation
-                      ? handleRecenterToUser
-                      : handleReopenOverlay
-                  }
-                  variant="primary"
-                  shape="round"
-                  size="small"
-                  iconName="user-location"
-                  iconSize={20}
-                  style={styles.recenterButton}
-                />
-              )}
-            </View>
+            <ZoomControls
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
+              onRecenter={handleRecenterToUser}
+              showUserLocation={showUserLocation}
+              locationStatus={status}
+              userLocation={userLocation}
+              onReopenOverlay={handleReopenOverlay}
+            />
+          )}
+
+          {/* Load Marker Button */}
+          {showLoadMarkerButton && (
+            <LoadMarkerButton
+              onPress={onLoadMarkerPress || (() => {})}
+              refreshMapState={refreshMapState}
+            />
+          )}
+
+          {/* Debug Info */}
+          {markers.length > 0 && (
+            <DebugInfo
+              visibleMarkers={visibleMarkers.length}
+              totalMarkers={markers.length}
+              radiusKm={dynamicRadiusKm}
+            />
           )}
         </View>
       </TouchableWithoutFeedback>
@@ -626,149 +447,3 @@ export const MapView: React.FC<MapViewProps> = ({
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: 300,
-    width: '100%',
-    borderRadius: rs(12),
-    overflow: 'hidden',
-  },
-  fullscreen: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  map: {
-    flex: 1,
-  },
-  controlButtonsContainer: {
-    position: 'absolute',
-    right: spacing.md,
-    top: 230,
-    flexDirection: 'column',
-    gap: spacing.sm,
-  },
-  zoomButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: colors.neutral.white,
-    ...getShadow('small'),
-  },
-  recenterButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: colors.neutral.black,
-    marginTop: spacing.sm,
-    ...getShadow('small'),
-  },
-  permissionContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.neutral.white,
-    padding: spacing.md,
-  },
-  permissionText: {
-    textAlign: 'center',
-    marginBottom: spacing.md,
-    color: colors.neutral.darkGrey,
-    fontSize: 16,
-  },
-  permissionButton: {
-    marginVertical: spacing.sm,
-    width: '80%',
-  },
-  loadingContainer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.neutral.white,
-  },
-  loadingText: {
-    marginTop: spacing.md,
-    color: colors.neutral.darkGrey,
-  },
-  searchContainer: {
-    position: 'absolute',
-    top: spacing.xxxl,
-    left: spacing.md,
-    right: spacing.md,
-    zIndex: 11,
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.neutral.white,
-    borderRadius: radius.round,
-    padding: spacing.sm,
-    width: '85%',
-    ...getShadow('small'),
-  },
-  filterButton: {
-    backgroundColor: colors.neutral.white,
-    height: '100%',
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    ...getShadow('small'),
-  },
-  searchInput: {
-    flex: 1,
-    height: 30,
-    paddingHorizontal: spacing.sm,
-  },
-  searchIcon: {
-    marginLeft: spacing.sm,
-  },
-  clearSearchButton: {
-    paddingRight: spacing.md,
-  },
-  searchLoader: {
-    paddingRight: spacing.sm,
-  },
-  searchResultsContainer: {
-    position: 'absolute',
-    width: '77%',
-    top: spacing.xxl,
-    left: spacing.md,
-    backgroundColor: colors.neutral.white,
-    borderRadius: rs(16),
-    maxHeight: rs(300),
-    overflow: 'hidden',
-  },
-  searchResultItem: {
-    padding: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.veryLightGrey,
-  },
-  searchResultName: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.neutral.black,
-  },
-  searchResultAddress: {
-    fontSize: 12,
-    color: colors.neutral.grey,
-    marginTop: spacing.xs,
-  },
-  tagsContainer: {
-    position: 'absolute',
-    width: '100%',
-    top: 130,
-    left: spacing.md,
-    zIndex: 10,
-    ...getShadow('small'),
-  },
-  tagsScrollViewContent: {
-    gap: spacing.sm,
-  },
-  markerContainer: {
-    padding: 10,
-    width: 25,
-    height: 25,
-    borderRadius: radius.round,
-    backgroundColor: colors.primary.main,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...getShadow('small'),
-  },
-});

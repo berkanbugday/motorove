@@ -67,9 +67,6 @@ const ISTANBUL_REGION = {
 // Icons to use for markers
 const MARKER_ICONS: IconName[] = ['wrench-filled', 'shop', 'droplet'];
 
-// Colors to use for markers
-const MARKER_COLORS: string[] = [colors.status.success, colors.status.info];
-
 // Generate random coordinates within Istanbul area
 const generateIstanbulCoordinates = (): [number, number] => {
   // Generate coordinates within Istanbul bounds
@@ -98,7 +95,7 @@ const generateTurkeyCoordinates = (): [number, number] => {
 };
 
 // Generate 100 random markers across Turkey mainland
-export const turkeyMarkers: MapMarker[] = Array.from({length: 100}, (_, i) => {
+export const turkeyMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
   // Generate mainland coordinates
   const [longitude, latitude] = generateTurkeyCoordinates();
 
@@ -108,7 +105,7 @@ export const turkeyMarkers: MapMarker[] = Array.from({length: 100}, (_, i) => {
     icon === 'wrench-filled'
       ? colors.primary.main
       : icon === 'shop'
-      ? colors.status.info
+      ? colors.neutral.black
       : colors.status.success;
 
   return {
@@ -121,7 +118,7 @@ export const turkeyMarkers: MapMarker[] = Array.from({length: 100}, (_, i) => {
 });
 
 // Generate 300 additional markers specifically in Istanbul
-const istanbulMarkers: MapMarker[] = Array.from({length: 300}, (_, i) => {
+const istanbulMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
   // Get coordinates within Istanbul
   const coordinates = generateIstanbulCoordinates();
 
@@ -131,7 +128,7 @@ const istanbulMarkers: MapMarker[] = Array.from({length: 300}, (_, i) => {
     icon === 'wrench-filled'
       ? colors.primary.main
       : icon === 'shop'
-      ? colors.status.info
+      ? colors.neutral.black
       : colors.status.success;
 
   return {

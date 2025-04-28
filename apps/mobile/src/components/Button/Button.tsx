@@ -100,11 +100,19 @@ export function Button({
   };
 
   const getIconSize = () => {
-    if (iconSize) return iconSize;
+    if (iconSize) {
+      return iconSize;
+    }
 
-    if (size === 'small') return 14;
-    if (size === 'medium') return 16;
-    if (size === 'large') return 20;
+    if (size === 'small') {
+      return 14;
+    }
+    if (size === 'medium') {
+      return 16;
+    }
+    if (size === 'large') {
+      return 20;
+    }
     return 16; // medium size default
   };
 

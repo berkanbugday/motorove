@@ -150,11 +150,6 @@ export const ExploreScreen: React.FC = () => {
     setSelectedMarker(null);
   };
 
-  const handleCardPress = () => {
-    console.log('Card pressed, should navigate to details screen');
-    // You can add navigation to a details screen here
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <MapView
@@ -187,7 +182,6 @@ export const ExploreScreen: React.FC = () => {
             onPrimaryAction={() => console.log('Navigate pressed')}
             secondaryAction="Call Now"
             onSecondaryAction={() => console.log('Call Now pressed')}
-            // onPress={handleCardPress}
             thirdyAction="Save to Favorites"
             onThirdyAction={() => console.log('Save to Favorites pressed')}
             onClose={() => setSelectedMarker(null)}
