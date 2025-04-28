@@ -5,6 +5,7 @@ import {
   Text,
   Keyboard,
   TouchableWithoutFeedback,
+  Animated,
 } from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import {useLocationPermission} from '@hooks/useLocationPermission';
@@ -186,6 +187,28 @@ export const MapView: React.FC<MapViewProps> = ({
   const [showPermissionOverlay, setShowPermissionOverlay] = useState(false);
   const prevStatus = useRef(status);
 
+  // Animation state
+  const [isMapMoving, setIsMapMoving] = useState(false);
+  const slideAnimation = useRef(new Animated.Value(0)).current;
+
+  // Start slide animation when map is moving
+  useEffect(() => {
+    Animated.timing(slideAnimation, {
+      toValue: isMapMoving ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [isMapMoving, slideAnimation]);
+
+  // Handle map movement state
+  const handleMapMoveStart = () => {
+    setIsMapMoving(true);
+  };
+
+  const handleMapMoveEnd = () => {
+    setIsMapMoving(false);
+  };
+
   // Handle location permission
   useEffect(() => {
     if (showUserLocation) {
@@ -328,6 +351,32 @@ export const MapView: React.FC<MapViewProps> = ({
     return null;
   };
 
+  // Define animation translations for different components
+  const searchBarTranslate = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -300],
+  });
+
+  const tagsTranslate = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -300],
+  });
+
+  const zoomControlsTranslate = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 300],
+  });
+
+  const loadButtonTranslate = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 300],
+  });
+
+  const debugInfoTranslate = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 300],
+  });
+
   // Render loading UI
   if (status === 'requesting') {
     return (
@@ -357,7 +406,9 @@ export const MapView: React.FC<MapViewProps> = ({
             styleURL={styleURL}
             onPress={handleMapPress}
             onDidFinishLoadingMap={handleMapLoaded}
-            pitchEnabled={false}>
+            pitchEnabled={false}
+            onTouchStart={handleMapMoveStart}
+            onTouchEnd={handleMapMoveEnd}>
             {/* Camera */}
             <Mapbox.Camera
               ref={camera}
@@ -386,53 +437,86 @@ export const MapView: React.FC<MapViewProps> = ({
 
           {/* Search Bar */}
           {showSearch && (
-            <SearchBar
-              searchQuery={searchQuery}
-              searchResults={searchResults}
-              isSearching={isSearching}
-              showSearchResults={showSearchResults}
-              showFilterButton={showFilterButton}
-              onSearchQueryChange={handleSearchQueryChange}
-              onClearSearch={handleClearSearch}
-              onSelectSearchResult={handleSelectSearchResult}
-              onFilterPress={onFilterPress}
-              setShowSearchResults={setShowSearchResults}
-              camera={camera}
-              setMapCenter={setMapCenter}
-            />
+            <Animated.View
+              style={{
+                position: 'absolute',
+                width: '100%',
+                transform: [{translateY: searchBarTranslate}],
+              }}>
+              <SearchBar
+                searchQuery={searchQuery}
+                searchResults={searchResults}
+                isSearching={isSearching}
+                showSearchResults={showSearchResults}
+                showFilterButton={showFilterButton}
+                onSearchQueryChange={handleSearchQueryChange}
+                onClearSearch={handleClearSearch}
+                onSelectSearchResult={handleSelectSearchResult}
+                onFilterPress={onFilterPress}
+                setShowSearchResults={setShowSearchResults}
+                camera={camera}
+                setMapCenter={setMapCenter}
+              />
+            </Animated.View>
           )}
 
           {/* Tags */}
-          {tags.length > 0 && <TagsList tags={tags} />}
+          {tags.length > 0 && (
+            <Animated.View
+              style={{
+                position: 'absolute',
+                width: '100%',
+                transform: [{translateY: tagsTranslate}],
+              }}>
+              <TagsList tags={tags} />
+            </Animated.View>
+          )}
 
           {/* Zoom Controls */}
           {showZoomControls && (
-            <ZoomControls
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onRecenter={handleRecenterToUser}
-              showUserLocation={showUserLocation}
-              locationStatus={status}
-              userLocation={userLocation}
-              onReopenOverlay={handleReopenOverlay}
-            />
+            <Animated.View
+              style={{
+                position: 'absolute',
+                width: '100%',
+                transform: [{translateX: zoomControlsTranslate}],
+              }}>
+              <ZoomControls
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onRecenter={handleRecenterToUser}
+                showUserLocation={showUserLocation}
+                locationStatus={status}
+                userLocation={userLocation}
+                onReopenOverlay={handleReopenOverlay}
+              />
+            </Animated.View>
           )}
 
           {/* Load Marker Button */}
           {showLoadMarkerButton && (
-            <LoadMarkerButton
-              onPress={onLoadMarkerPress || (() => {})}
-              refreshMapState={refreshMapState}
-            />
+            <Animated.View
+              style={{
+                transform: [{translateY: loadButtonTranslate}],
+              }}>
+              <LoadMarkerButton
+                onPress={onLoadMarkerPress || (() => {})}
+                refreshMapState={refreshMapState}
+              />
+            </Animated.View>
           )}
 
           {/* Debug Info */}
           {markers.length > 0 && (
-            <DebugInfo
-              visibleMarkers={visibleMarkers.length}
-              totalMarkers={markers.length}
-              radiusKm={dynamicRadiusKm}
-            />
+            <Animated.View
+              style={{
+                transform: [{translateY: debugInfoTranslate}],
+              }}>
+              <DebugInfo
+                visibleMarkers={visibleMarkers.length}
+                totalMarkers={markers.length}
+                radiusKm={dynamicRadiusKm}
+              />
+            </Animated.View>
           )}
         </View>
       </TouchableWithoutFeedback>

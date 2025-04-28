@@ -105,7 +105,7 @@ export const turkeyMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
     icon === 'wrench-filled'
       ? colors.primary.main
       : icon === 'shop'
-      ? colors.neutral.black
+      ? colors.status.info
       : colors.status.success;
 
   return {
@@ -128,7 +128,7 @@ const istanbulMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
     icon === 'wrench-filled'
       ? colors.primary.main
       : icon === 'shop'
-      ? colors.neutral.black
+      ? colors.status.info
       : colors.status.success;
 
   return {
