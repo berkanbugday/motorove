@@ -12,6 +12,8 @@ import {useLocationPermission} from '@hooks/useLocationPermission';
 import {useMapState} from '@hooks/useMapState';
 import {useMapMarkers} from '@hooks/useMapMarkers';
 import {useMapSearch} from '@hooks/useMapSearch';
+import {useMapMovement} from '@hooks/useMapMovement';
+import {useComponentAnimation} from '@hooks/useComponentAnimation';
 import {LocationPermissionOverlay} from '@components';
 import {colors} from '@theme';
 import {MAPBOX_ACCESS_TOKEN} from '@env';
@@ -180,34 +182,24 @@ export const MapView: React.FC<MapViewProps> = ({
     handleClearSearch,
   } = useMapSearch({onSearchResult});
 
+  // Map movement hook
+  const {isMapMoving, handleMapMoveStart, handleMapMoveEnd} = useMapMovement();
+
+  // Component animation hook
+  const {
+    searchBarTranslate,
+    tagsTranslate,
+    zoomControlsTranslate,
+    loadButtonTranslate,
+    debugInfoTranslate,
+  } = useComponentAnimation(isMapMoving);
+
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const [showPermissionOverlay, setShowPermissionOverlay] = useState(false);
   const prevStatus = useRef(status);
-
-  // Animation state
-  const [isMapMoving, setIsMapMoving] = useState(false);
-  const slideAnimation = useRef(new Animated.Value(0)).current;
-
-  // Start slide animation when map is moving
-  useEffect(() => {
-    Animated.timing(slideAnimation, {
-      toValue: isMapMoving ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [isMapMoving, slideAnimation]);
-
-  // Handle map movement state
-  const handleMapMoveStart = () => {
-    setIsMapMoving(true);
-  };
-
-  const handleMapMoveEnd = () => {
-    setIsMapMoving(false);
-  };
 
   // Handle location permission
   useEffect(() => {
@@ -350,32 +342,6 @@ export const MapView: React.FC<MapViewProps> = ({
     }
     return null;
   };
-
-  // Define animation translations for different components
-  const searchBarTranslate = slideAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -300],
-  });
-
-  const tagsTranslate = slideAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -300],
-  });
-
-  const zoomControlsTranslate = slideAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 300],
-  });
-
-  const loadButtonTranslate = slideAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 300],
-  });
-
-  const debugInfoTranslate = slideAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 300],
-  });
 
   // Render loading UI
   if (status === 'requesting') {
