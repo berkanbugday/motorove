@@ -115,11 +115,17 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('RELEASE_UPLOAD_STORE_FILE')) {
+            if (project.hasProperty('RELEASE_UPLOAD_STORE_FILE') && RELEASE_UPLOAD_STORE_FILE) {
                 storeFile file(RELEASE_UPLOAD_STORE_FILE)
                 storePassword RELEASE_UPLOAD_STORE_PASSWORD
                 keyAlias RELEASE_UPLOAD_KEY_ALIAS
                 keyPassword RELEASE_UPLOAD_KEY_PASSWORD
+            } else {
+                // Fallback to debug keystore if release keystore isn't configured
+                storeFile file('debug.keystore')
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
             }
         }
     }
@@ -177,7 +183,9 @@ android {
         // Configure proper env file for build tasks
         if (variant.hasProperty("mergedFlavor")) {
             variant.mergedFlavor.manifestPlaceholders = [
-                appName: variant.resValues.get("APP_ENV").value
+                appName: variant.name.endsWith("Dev") ? "Motorove Dev" : 
+                         variant.name.endsWith("Staging") ? "Motorove Staging" : 
+                         "Motorove"
             ]
         }
         

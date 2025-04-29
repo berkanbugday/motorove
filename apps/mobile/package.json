@@ -9,7 +9,7 @@
     "android:release:dev": "ENVFILE=.env.dev react-native run-android --variant=devRelease",
     "android:release:staging": "ENVFILE=.env.staging react-native run-android --variant=stagingRelease",
     "android:release:prod": "ENVFILE=.env.prod react-native run-android --variant=prodRelease",
-    "build:android:dev": "cd android && ENVFILE=.env.dev ./gradlew assembleDevRelease",
+    "build:android:dev": "cd android && ENVFILE=.env.dev ./gradlew assembleDevDebug",
     "build:android:staging": "cd android && ENVFILE=.env.staging ./gradlew assembleStagingRelease",
     "build:android:prod": "cd android && ENVFILE=.env.prod ./gradlew assembleProdRelease",
     "ios:dev": "ENVFILE=.env.dev react-native run-ios --scheme 'motoroveDev'",
