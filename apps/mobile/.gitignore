@@ -73,3 +73,11 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Common Environment Variables
+.env.*
+!.env.sample
+
+# Fastlane environment files
+fastlane/.env.*
+!fastlane/.env.sample

@@ -26,6 +26,7 @@ const extraNodeModules = {
   '@assets': path.resolve(srcPath, 'assets'),
   '@theme': path.resolve(srcPath, 'theme'),
   '@constants': path.resolve(srcPath, 'constants'),
+  '@config': path.resolve(srcPath, 'config'),
   '@': srcPath,
 };
 

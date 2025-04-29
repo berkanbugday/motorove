@@ -1,5 +1,5 @@
 import {useCallback, useState, useRef, useEffect, useMemo} from 'react';
-import {MAPBOX_ACCESS_TOKEN} from '@env';
+import {MapboxConfig} from '@config';
 import Mapbox from '@rnmapbox/maps';
 import {Keyboard} from 'react-native';
 
@@ -92,7 +92,7 @@ export const useMapSearch = ({
       // Build Mapbox Geocoding API URL
       const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
         query,
-      )}.json?access_token=${MAPBOX_ACCESS_TOKEN}&limit=5`;
+      )}.json?access_token=${MapboxConfig.mapboxAccessToken}&limit=5`;
 
       const response = await fetch(endpoint, {signal});
 

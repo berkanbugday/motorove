@@ -1,0 +1,130 @@
+module Fastlane
+  module Helper
+    # Prepares build environment for a specific platform and environment
+    def self.prepare_build(platform:, env:)
+      UI.message("Preparing #{platform} build for #{env} environment")
+      
+      # Common build preparation tasks
+      ensure_git_status_clean unless ENV["SKIP_GIT_CLEAN_CHECK"]
+      
+      # Environment-specific tasks
+      case env
+      when "dev"
+        UI.message("Setting up dev environment")
+        # Dev specific setup
+      when "staging"
+        UI.message("Setting up staging environment")
+        # Staging specific setup
+      when "prod"
+        UI.message("Setting up prod environment")
+        # Production specific setup
+        # Add extra verification steps for production
+        UI.confirm("Are you sure you want to deploy to PRODUCTION?") unless ENV["CI"]
+      end
+      
+      # Platform-specific tasks
+      case platform
+      when "ios"
+        setup_ios_signing(env: env)
+      when "android"
+        setup_android_signing(env: env)
+      end
+    end
+    
+    # Sets up iOS certificates and provisioning profiles
+    def self.setup_ios_signing(env:)
+      UI.message("Setting up iOS signing for #{env}")
+      
+      match_type = case env
+                  when "dev"
+                    "development"
+                  when "staging"
+                    "appstore"
+                  when "prod"
+                    "appstore"
+                  end
+      
+      match(
+        type: match_type,
+        app_identifier: ENV["IOS_APP_IDENTIFIER"],
+        readonly: true,
+        keychain_name: ENV["MATCH_KEYCHAIN_NAME"],
+        keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"]
+      )
+    end
+    
+    # Sets up Android signing configuration
+    def self.setup_android_signing(env:)
+      UI.message("Setting up Android signing for #{env}")
+      
+      # Verify keystore exists
+      keystore_path = ENV["ANDROID_KEYSTORE_PATH"]
+      unless File.exist?(keystore_path)
+        UI.error("Keystore file not found at: #{keystore_path}")
+        UI.error("Please ensure the keystore file exists or update ANDROID_KEYSTORE_PATH")
+        raise "Keystore file not found"
+      end
+      
+      # Verify all required env variables are present
+      required_vars = [
+        "ANDROID_KEYSTORE_PASSWORD",
+        "ANDROID_KEY_ALIAS",
+        "ANDROID_KEY_PASSWORD"
+      ]
+      
+      missing_vars = required_vars.select { |var| ENV[var].nil? || ENV[var].empty? }
+      
+      unless missing_vars.empty?
+        UI.error("Missing required environment variables: #{missing_vars.join(', ')}")
+        raise "Missing environment variables for Android signing"
+      end
+    end
+    
+    # Validates app version before release
+    def self.validate_version(platform:)
+      UI.message("Validating version for #{platform}")
+      
+      case platform
+      when "ios"
+        # Read current version from Info.plist
+        current_version = get_info_plist_value(
+          path: "ios/#{ENV['APP_NAME']}/Info.plist",
+          key: "CFBundleShortVersionString"
+        )
+        
+        # Verify version follows semantic versioning
+        unless current_version =~ /^\d+\.\d+\.\d+$/
+          UI.error("iOS version '#{current_version}' doesn't follow semantic versioning (x.y.z)")
+          raise "Invalid version format"
+        end
+      
+      when "android"
+        # Read current version from build.gradle
+        build_gradle = File.read("android/app/build.gradle")
+        version_name = build_gradle.match(/versionName "([^"]+)"/)[1]
+        
+        # Verify version follows semantic versioning
+        unless version_name =~ /^\d+\.\d+\.\d+$/
+          UI.error("Android version '#{version_name}' doesn't follow semantic versioning (x.y.z)")
+          raise "Invalid version format"
+        end
+      end
+      
+      UI.success("Version validation passed")
+    end
+  end
+end
+
+# Make helper methods available to lanes
+def prepare_build(options)
+  Fastlane::Helper.prepare_build(
+    platform: options[:platform],
+    env: options[:env]
+  )
+end
+
+def validate_version(options)
+  Fastlane::Helper.validate_version(
+    platform: options[:platform]
+  )
+end 

@@ -15,6 +15,8 @@
       "@theme/*": ["src/theme/*"],
       "@theme": ["src/theme"],
       "@constants/*": ["src/constants/*"],
+      "@config/*": ["src/config/*"],
+      "@config": ["src/config"],
       "@/*": ["src/*"]
     }
   }

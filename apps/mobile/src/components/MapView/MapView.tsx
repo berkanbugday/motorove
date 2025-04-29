@@ -16,7 +16,7 @@ import {useMapMovement} from '@hooks/useMapMovement';
 import {useComponentAnimation} from '@hooks/useComponentAnimation';
 import {LocationPermissionOverlay} from '@components';
 import {colors} from '@theme';
-import {MAPBOX_ACCESS_TOKEN} from '@env';
+import {MapboxConfig} from '@config';
 import {styles} from './MapView.styles';
 import {SearchBar} from './SearchBar';
 import {TagsList} from './TagsList';
@@ -27,7 +27,7 @@ import {DebugInfo} from './DebugInfo';
 import {Tag, MapMarker} from './types';
 
 // Configure Mapbox access token
-Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN);
+Mapbox.setAccessToken(MapboxConfig.mapboxAccessToken || '');
 
 export interface MapViewProps {
   /**

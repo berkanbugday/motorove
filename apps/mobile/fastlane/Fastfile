@@ -1,0 +1,171 @@
+fastlane_version "2.219.0"
+
+# Import helper files
+import "./helpers/Fastlane.helper"
+
+# Environment handling
+before_all do |lane, options|
+  # Use appropriate .env file by default
+  env = options[:env] || "dev"
+  env_file = "./fastlane/.env.#{env}"
+  UI.message("Loading environment from #{env_file}")
+  Dotenv.load(env_file)
+end
+
+# Error handling for all lanes
+error do |lane, exception|
+  # Error reporting logic
+  UI.error("Lane #{lane} failed with: #{exception}")
+  # Notify your team here (Slack, Email, etc)
+end
+
+#####################
+# PLATFORM: iOS
+#####################
+platform :ios do
+  desc "Build the iOS application for specified environment"
+  lane :build do |options|
+    # Load environment-specific configuration
+    env = options[:env] || "dev"
+    prepare_build(platform: "ios", env: env)
+    
+    # Build iOS app
+    gym(
+      scheme: ENV["IOS_SCHEME"],
+      workspace: ENV["IOS_WORKSPACE"],
+      configuration: ENV["IOS_CONFIGURATION"],
+      export_method: ENV["IOS_EXPORT_METHOD"],
+      output_directory: "build/ios/#{env}",
+      output_name: "#{ENV['APP_NAME']}-#{env}.ipa",
+      clean: true
+    )
+  end
+  
+  desc "Release to App Store Connect"
+  lane :release_appstore do |options|
+    env = options[:env] || "prod"
+    build(env: env)
+    
+    deliver(
+      submit_for_review: false,
+      automatic_release: false,
+      skip_metadata: true,
+      skip_screenshots: true,
+      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa"
+    )
+  end
+  
+  desc "Deploy a beta build to TestFlight"
+  lane :deploy_testflight do |options|
+    env = options[:env] || "staging"
+    build(env: env)
+    
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa"
+    )
+  end
+  
+  desc "Deploy a beta build to Firebase App Distribution"
+  lane :deploy_firebase do |options|
+    env = options[:env] || "dev"
+    build(env: env)
+    
+    firebase_app_distribution(
+      app: ENV["FIREBASE_IOS_APP_ID"],
+      groups: ENV["FIREBASE_TEST_GROUPS"],
+      release_notes: options[:notes] || "New build for testing",
+      ipa_path: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa"
+    )
+  end
+  
+  # Add more lanes as needed for iOS
+end
+
+#####################
+# PLATFORM: Android
+#####################
+platform :android do
+  desc "Build the Android application for specified environment"
+  lane :build do |options|
+    # Load environment-specific configuration
+    env = options[:env] || "dev"
+    prepare_build(platform: "android", env: env)
+    
+    # Build Android app
+    gradle(
+      task: "clean assembleRelease",
+      project_dir: "android",
+      properties: {
+        "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+        "versionCode" => ENV["ANDROID_VERSION_CODE"],
+        "versionName" => ENV["ANDROID_VERSION_NAME"]
+      }
+    )
+    
+    # Move and rename APK to consistent location
+    sh("mkdir -p build/android/#{env}")
+    sh("cp android/app/build/outputs/apk/release/app-release.apk build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk")
+  end
+  
+  desc "Release to Google Play Store"
+  lane :release_playstore do |options|
+    env = options[:env] || "prod"
+    build(env: env)
+    
+    upload_to_play_store(
+      track: ENV["ANDROID_TRACK"] || "prod",
+      release_status: ENV["ANDROID_RELEASE_STATUS"] || "completed",
+      apk: "build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk"
+    )
+  end
+  
+  desc "Deploy a beta build to Google Play Beta track"
+  lane :deploy_play_beta do |options|
+    env = options[:env] || "staging"
+    build(env: env)
+    
+    upload_to_play_store(
+      track: "beta",
+      release_status: "completed",
+      apk: "build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk"
+    )
+  end
+  
+  desc "Deploy a beta build to Firebase App Distribution"
+  lane :deploy_firebase do |options|
+    env = options[:env] || "dev"
+    build(env: env)
+    
+    firebase_app_distribution(
+      app: ENV["FIREBASE_ANDROID_APP_ID"],
+      groups: ENV["FIREBASE_TEST_GROUPS"],
+      release_notes: options[:notes] || "New build for testing",
+      apk_path: "build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk"
+    )
+  end
+  
+  # Add more lanes as needed for Android
+end
+
+# Cross-platform lanes
+desc "Bump build numbers on both platforms"
+lane :bump_version do |options|
+  # Bump iOS build number
+  increment_build_number(
+    xcodeproj: "ios/#{ENV['APP_NAME']}.xcodeproj"
+  )
+  
+  # Bump Android version code
+  current_version_code = google_play_track_version_codes(
+    track: "prod",
+    json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
+  )[0]
+  
+  # Update build.gradle with new version code
+  new_version_code = current_version_code + 1
+  sh("sed -i '' 's/versionCode \\([0-9]\\+\\)/versionCode #{new_version_code}/' android/app/build.gradle")
+end
