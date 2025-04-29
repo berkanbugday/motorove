@@ -13,7 +13,7 @@ Create the following environment files in the `fastlane` directory:
 APP_NAME="motorove"
 
 # iOS specific
-IOS_APP_IDENTIFIER="com.motorove.app.dev"
+IOS_APP_IDENTIFIER="com.motorove.dev"
 IOS_SCHEME="motoroveDev"
 IOS_WORKSPACE="ios/motorove.xcworkspace"
 IOS_CONFIGURATION="Debug"
@@ -49,11 +49,11 @@ CI="false"
 APP_NAME="motorove"
 
 # iOS specific
-IOS_APP_IDENTIFIER="com.motorove.app.staging"
+IOS_APP_IDENTIFIER="com.motorove.staging"
 IOS_SCHEME="motoroveStaging"
 IOS_WORKSPACE="ios/motorove.xcworkspace"
 IOS_CONFIGURATION="Release"
-IOS_EXPORT_METHOD="app-store"
+IOS_EXPORT_METHOD="ad-hoc"
 
 # Match (code signing)
 MATCH_GIT_URL="your_certificates_repo_url_here"
@@ -90,7 +90,7 @@ CI="false"
 APP_NAME="motorove"
 
 # iOS specific
-IOS_APP_IDENTIFIER="com.motorove.app"
+IOS_APP_IDENTIFIER="com.motorove"
 IOS_SCHEME="motorove"
 IOS_WORKSPACE="ios/motorove.xcworkspace"
 IOS_CONFIGURATION="Release"
