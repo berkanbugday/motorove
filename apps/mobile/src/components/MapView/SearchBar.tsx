@@ -57,7 +57,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search locations..."
+          placeholder="Search"
           value={searchQuery}
           onChangeText={onSearchQueryChange}
           onFocus={() => {
