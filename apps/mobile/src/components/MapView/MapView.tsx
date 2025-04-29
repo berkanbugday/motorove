@@ -16,7 +16,7 @@ import {useMapMovement} from '@hooks/useMapMovement';
 import {useComponentAnimation} from '@hooks/useComponentAnimation';
 import {LocationPermissionOverlay} from '@components';
 import {colors} from '@theme';
-import {MapboxConfig} from '@config';
+import {MapboxConfig} from '@configs';
 import {styles} from './MapView.styles';
 import {SearchBar} from './SearchBar';
 import {TagsList} from './TagsList';

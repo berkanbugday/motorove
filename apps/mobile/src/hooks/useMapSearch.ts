@@ -1,5 +1,5 @@
 import {useCallback, useState, useRef, useEffect, useMemo} from 'react';
-import {MapboxConfig} from '@config';
+import {MapboxConfig} from '@configs';
 import Mapbox from '@rnmapbox/maps';
 import {Keyboard} from 'react-native';
 
