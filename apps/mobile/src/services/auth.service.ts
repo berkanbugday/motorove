@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import {apolloClient, resetApolloStore} from '../configs/apollo';
+import {apolloClient, resetApolloStore} from '@configs/apolloClientConfig';
 import {SIGN_IN, SIGN_UP, REFRESH_TOKEN} from './graphql';
 import {
   AuthUser,
@@ -225,7 +225,7 @@ class AuthService {
     const {user, session} = graphQLResponse;
 
     // If session exists, convert expires_in to expires_at
-    let processedSession = undefined;
+    let processedSession;
     if (session) {
       const expiresIn = session.expires_in || 3600; // Default to 1 hour if not provided
       const expiresAt = Date.now() + expiresIn * 1000;

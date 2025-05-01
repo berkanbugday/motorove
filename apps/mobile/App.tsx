@@ -9,10 +9,10 @@ import React, {useEffect, useState} from 'react';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {View, ActivityIndicator, StyleSheet} from 'react-native';
-import {RootNavigator} from './src/navigation';
-import {AuthProvider} from './src/contexts/AuthContext';
+import {RootNavigator} from '@navigation/RootNavigator';
+import {AuthProvider} from '@contexts';
 import {ApolloProvider} from '@apollo/client';
-import {apolloClient} from './src/configs/apollo';
+import {apolloClient} from '@configs/apolloClientConfig';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
 function App(): React.JSX.Element {

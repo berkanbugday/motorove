@@ -8,7 +8,7 @@ export const AppConfig = {
   /**
    * API URL for backend services
    */
-  API_URL: Config.API_URL || 'https://dev-api.motorove.app',
+  API_URL: Config.API_URL || 'http://localhost:3000',
 
   /**
    * Current application environment (development, staging, production)

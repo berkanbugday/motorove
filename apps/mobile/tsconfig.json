@@ -10,13 +10,18 @@
       "@navigation/*": ["src/navigation/*"],
       "@utils/*": ["src/utils/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@types/*": ["src/types/*"],
+      "@app-types/*": ["src/types/*"],
+      "@app-types": ["src/types"],
       "@assets/*": ["src/assets/*"],
       "@theme/*": ["src/theme/*"],
       "@theme": ["src/theme"],
       "@constants/*": ["src/constants/*"],
       "@configs/*": ["src/configs/*"],
       "@configs": ["src/configs"],
+      "@contexts/*": ["src/contexts/*"],
+      "@contexts": ["src/contexts"],
+      "@services/*": ["src/services/*"],
+      "@services": ["src/services"],
       "@/*": ["src/*"]
     }
   }

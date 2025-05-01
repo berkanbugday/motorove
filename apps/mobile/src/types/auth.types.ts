@@ -47,3 +47,12 @@ export const AUTH_STORAGE_KEYS = {
   EXPIRES_AT: 'auth_expires_at',
   AUTH_DATA: 'encrypted_auth_data',
 };
+
+export interface AuthContextType {
+  user: AuthUser | null;
+  accessToken: string | null;
+  isLoading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+}

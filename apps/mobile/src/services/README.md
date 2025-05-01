@@ -24,7 +24,7 @@ This directory contains the authentication services for the mobile app.
 The authentication system is integrated with the app via the `AuthProvider` in `src/contexts/AuthContext.tsx`.
 
 ```tsx
-import {useAuth} from '@contexts/AuthContext';
+import {useAuth} from '@contexts';
 
 function MyComponent() {
   const {user, signIn, signUp, signOut, accessToken, isLoading} = useAuth();

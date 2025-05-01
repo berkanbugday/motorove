@@ -1,5 +1,6 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
-import authService, {AuthState, AuthResponse} from '../services/auth.service';
+import authService from '../services/auth.service';
+import {AuthState, AuthResponse} from '../types/auth.types';
 
 // Default auth state
 const defaultAuthState: AuthState = {
@@ -11,7 +12,7 @@ const defaultAuthState: AuthState = {
 };
 
 // Context type
-interface AuthContextType extends AuthState {
+export interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<AuthResponse>;
   signUp: (
     email: string,

@@ -6,12 +6,13 @@ import {
 } from '@apollo/client';
 import {setContext} from '@apollo/client/link/context';
 import {onError} from '@apollo/client/link/error';
-import authService from '../services/auth.service';
-import {API_URL} from './api';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import {AppConfig} from './appConfig';
+import {AUTH_STORAGE_KEYS} from '../types/auth.types';
 // Create an HTTP link that points to our GraphQL endpoint
 const httpLink = createHttpLink({
-  uri: `${API_URL}/graphql`,
+  uri: `${AppConfig.API_URL}/graphql`,
 });
 
 // Error handling link
@@ -28,10 +29,31 @@ const errorLink = onError(({graphQLErrors, networkError}) => {
   }
 });
 
+// Get access token directly from storage to avoid circular dependency
+async function getAccessToken(): Promise<string | null> {
+  try {
+    // Try encrypted storage first
+    const encryptedAuthData = await EncryptedStorage.getItem(
+      AUTH_STORAGE_KEYS.AUTH_DATA,
+    );
+
+    if (encryptedAuthData) {
+      const parsedData = JSON.parse(encryptedAuthData);
+      return parsedData.accessToken;
+    }
+
+    // Fallback to AsyncStorage
+    return await AsyncStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+  } catch (error) {
+    console.error('Error getting access token:', error);
+    return null;
+  }
+}
+
 // Authentication link to add the token to the header
 const authLink = setContext(async (_, {headers}) => {
-  // Get the authentication token from auth service
-  const token = await authService.getAccessToken();
+  // Get the authentication token directly from storage
+  const token = await getAccessToken();
 
   // Return the headers to the context so httpLink can read them
   return {

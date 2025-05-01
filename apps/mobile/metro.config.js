@@ -22,11 +22,13 @@ const extraNodeModules = {
   '@navigation': path.resolve(srcPath, 'navigation'),
   '@utils': path.resolve(srcPath, 'utils'),
   '@hooks': path.resolve(srcPath, 'hooks'),
-  '@types': path.resolve(srcPath, 'types'),
+  '@app-types': path.resolve(srcPath, 'types'),
   '@assets': path.resolve(srcPath, 'assets'),
   '@theme': path.resolve(srcPath, 'theme'),
   '@constants': path.resolve(srcPath, 'constants'),
   '@configs': path.resolve(srcPath, 'configs'),
+  '@contexts': path.resolve(srcPath, 'contexts'),
+  '@services': path.resolve(srcPath, 'services'),
   '@': srcPath,
 };
 
