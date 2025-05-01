@@ -9,6 +9,7 @@ import {
   Image,
   TouchableOpacity,
   useWindowDimensions,
+  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -69,35 +70,31 @@ export function SignupScreen() {
 
   async function onSubmit(data: SignupFormValues) {
     try {
-      const {success, error} = await signup(
-        data.fullName,
-        data.email,
-        data.password,
-      );
+      // Split fullName into firstName and lastName for our API
+      const nameParts = data.fullName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
-      if (!success && error) {
+      await signup(firstName, data.email, data.password, lastName);
+
+      // Navigate to account setup screen
+      navigation.navigate('AccountSetup', {
+        email: data.email,
+        fullName: data.fullName,
+      });
+    } catch (error) {
+      // Handle specific error types
+      if (error instanceof Error) {
         setError('confirmPassword', {
           type: 'manual',
-          message: error,
+          message: error.message || 'Registration failed',
         });
-      } else if (success) {
-        // // Store email for confirmation screen
-        // setUserEmail(data.email);
-        // // Set signup success flag to show confirmation view
-        // setSignupSuccess(true);
-
-        navigation.navigate('AccountSetup', {
-          email: data.email,
-          fullName: data.fullName,
+      } else {
+        setError('confirmPassword', {
+          type: 'manual',
+          message: 'An unexpected error occurred. Please try again.',
         });
       }
-      // If successful, the useAuth hook will update isAuthenticated
-      // which will trigger the navigation to switch to MainNavigator
-    } catch (error) {
-      setError('confirmPassword', {
-        type: 'manual',
-        message: 'An unexpected error occurred. Please try again.',
-      });
     }
   }
 
@@ -117,8 +114,12 @@ export function SignupScreen() {
   }
 
   function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
-    // Handle social signup based on provider type
-    console.log(`Social signup with ${provider}`);
+    // Notify user that social signup is not implemented yet
+    Alert.alert(
+      'Not Implemented',
+      `Social signup with ${provider} is not implemented yet.`,
+      [{text: 'OK'}],
+    );
   }
 
   function handleTermsPress() {

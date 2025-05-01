@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 - **Code Organization and Structure:**
   - **Directory Structure:**
@@ -32,6 +32,9 @@ alwaysApply: false
       │   │   └── logging.interceptor.ts
       │   └── ...
       └── main.ts
+
+  - **Package Manager:**
+    - Use pnpm
       
   - **File Naming Conventions:**
     - Use descriptive and consistent naming conventions.  Prefix files based on their role (e.g., `user.controller.ts`, `auth.service.ts`, `create-user.dto.ts`).

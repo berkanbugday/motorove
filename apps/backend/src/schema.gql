@@ -1,0 +1,57 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthResponse {
+  session: Session
+  user: User!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  signIn(signInInput: SignInInput!): AuthResponse!
+  signUp(signUpInput: SignUpInput!): AuthResponse!
+}
+
+type Query {
+  me: User!
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+type Session {
+  access_token: String!
+  expires_in: Float!
+  refresh_token: String!
+}
+
+input SignInInput {
+  email: String!
+  password: String!
+}
+
+input SignUpInput {
+  email: String!
+  firstName: String
+  lastName: String
+  password: String!
+}
+
+type User {
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  firstName: String
+  id: ID!
+  lastName: String
+  role: Role!
+  supabaseId: String!
+  updatedAt: DateTime!
+}

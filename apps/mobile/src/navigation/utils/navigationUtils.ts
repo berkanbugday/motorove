@@ -1,5 +1,9 @@
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useAuth as useAuthContext} from '../../contexts/AuthContext';
+
+// Storage key
+const FIRST_TIME_KEY = 'isFirstTime';
 
 // Check if this is the first time the user is opening the app
 export const useFirstTimeCheck = () => {
@@ -9,7 +13,8 @@ export const useFirstTimeCheck = () => {
   useEffect(() => {
     const checkFirstTimeUser = async () => {
       try {
-        const value = await AsyncStorage.getItem('isFirstTime');
+        // This is not sensitive data, so we can use AsyncStorage
+        const value = await AsyncStorage.getItem(FIRST_TIME_KEY);
         setIsFirstTime(value === null); // If value is null, this is the first time
         setIsLoading(false);
       } catch (error) {
@@ -25,7 +30,7 @@ export const useFirstTimeCheck = () => {
   // Mark user as not first time
   const markAsNotFirstTime = async () => {
     try {
-      await AsyncStorage.setItem('isFirstTime', 'false');
+      await AsyncStorage.setItem(FIRST_TIME_KEY, 'false');
       setIsFirstTime(false);
     } catch (error) {
       console.error('Error marking as not first time:', error);
@@ -37,58 +42,27 @@ export const useFirstTimeCheck = () => {
 
 // Hook to handle authentication
 export function useAuth() {
-  // For simplicity, we're using state here
-  // In a real app, this would use Supabase Auth or similar
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  // Use the context from our AuthContext
+  const authContext = useAuthContext();
 
-  const login = async (email: string, password: string) => {
-    // TODO: Implement actual login with Supabase
-    // Example: const { error } = await supabase.auth.signInWithPassword({ email, password });
+  // Create a memoized isAuthenticated value to prevent unnecessary rerenders
+  const isAuthenticated = !!authContext.user && !!authContext.accessToken;
 
-    // For demo purposes:
-    return new Promise<{success: boolean; error?: string}>(resolve => {
-      setTimeout(() => {
-        // Simulate successful login
-        if (email && password) {
-          setIsAuthenticated(true);
-          resolve({success: true});
-        } else {
-          resolve({success: false, error: 'Invalid credentials'});
-        }
-      }, 1000);
+  // Debug log when auth state changes
+  useEffect(() => {
+    console.log('Auth state in useAuth hook:', {
+      hasUser: !!authContext.user,
+      hasToken: !!authContext.accessToken,
+      isAuthenticated,
     });
-  };
-
-  const signup = async (fullName: string, email: string, password: string) => {
-    // TODO: Implement actual signup with Supabase
-    // Example: const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
-
-    // For demo purposes:
-    return new Promise<{success: boolean; error?: string}>(resolve => {
-      setTimeout(() => {
-        // Simulate successful signup
-        if (fullName && email && password) {
-          setIsAuthenticated(true);
-          resolve({success: true});
-        } else {
-          resolve({success: false, error: 'Registration failed'});
-        }
-      }, 1000);
-    });
-  };
-
-  const logout = async () => {
-    // TODO: Implement actual logout with Supabase
-    // Example: await supabase.auth.signOut();
-
-    setIsAuthenticated(false);
-    return {success: true};
-  };
+  }, [authContext.user, authContext.accessToken, isAuthenticated]);
 
   return {
     isAuthenticated,
-    login,
-    signup,
-    logout,
+    isLoading: authContext.isLoading,
+    user: authContext.user,
+    login: authContext.signIn,
+    signup: authContext.signUp,
+    logout: authContext.signOut,
   };
 }

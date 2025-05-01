@@ -9,6 +9,7 @@ import {
   Image,
   TouchableOpacity,
   useWindowDimensions,
+  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -46,21 +47,21 @@ export function LoginScreen() {
 
   async function onSubmit(data: LoginFormValues) {
     try {
-      const {success, error} = await login(data.email, data.password);
-
-      if (!success && error) {
+      await login(data.email, data.password);
+      // If successful, the navigation in RootNavigator will change to MainNavigator
+    } catch (error) {
+      // Handle specific error types
+      if (error instanceof Error) {
         setError('password', {
           type: 'manual',
-          message: error,
+          message: error.message || 'Invalid credentials',
+        });
+      } else {
+        setError('password', {
+          type: 'manual',
+          message: 'An unexpected error occurred. Please try again.',
         });
       }
-      // If successful, the useAuth hook will update isAuthenticated
-      // which will trigger the navigation to switch to MainNavigator
-    } catch (error) {
-      setError('password', {
-        type: 'manual',
-        message: 'An unexpected error occurred. Please try again.',
-      });
     }
   }
 
@@ -74,8 +75,12 @@ export function LoginScreen() {
   }
 
   function handleSocialLogin(provider: 'google' | 'apple' | 'facebook') {
-    // Handle social login based on provider type
-    console.log(`Social login with ${provider}`);
+    // Notify user that social login is not implemented yet
+    Alert.alert(
+      'Not Implemented',
+      `Social login with ${provider} is not implemented yet.`,
+      [{text: 'OK'}],
+    );
   }
 
   return (
