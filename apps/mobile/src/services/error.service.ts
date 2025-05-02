@@ -29,7 +29,7 @@ export interface ErrorHandlingOptions {
  * Default options for error handling
  */
 const defaultOptions: ErrorHandlingOptions = {
-  showToast: true,
+  showToast: false,
   logToSentry: true,
 };
 
@@ -130,8 +130,13 @@ class ErrorService {
       type: 'error',
       text1: 'Error',
       text2: message,
-      position: 'bottom',
-      visibilityTime: 4000,
+      topOffset: 60,
+      text1Style: {
+        fontSize: 14,
+      },
+      text2Style: {
+        fontSize: 12,
+      },
     });
   }
 
@@ -143,8 +148,12 @@ class ErrorService {
       type: 'success',
       text1: 'Success',
       text2: message,
-      position: 'bottom',
-      visibilityTime: 3000,
+      text1Style: {
+        fontSize: 14,
+      },
+      text2Style: {
+        fontSize: 12,
+      },
     });
   }
 
@@ -156,8 +165,13 @@ class ErrorService {
       type: 'info',
       text1: 'Info',
       text2: message,
-      position: 'bottom',
-      visibilityTime: 3000,
+      position: 'top',
+      text1Style: {
+        fontSize: 14,
+      },
+      text2Style: {
+        fontSize: 12,
+      },
     });
   }
 }

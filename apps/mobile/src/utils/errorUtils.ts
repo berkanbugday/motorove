@@ -12,7 +12,7 @@ export function errorToMessage(
   error: any,
   fallbackMessage = 'Something went wrong. Please try again.',
 ): string {
-  if (!error) {
+  if (fallbackMessage) {
     return fallbackMessage;
   }
 
@@ -22,8 +22,8 @@ export function errorToMessage(
   }
 
   // Handle GraphQL errors
-  if (error.graphQLErrors && error.graphQLErrors.length > 0) {
-    return extractGraphQLErrorMessage(error.graphQLErrors[0]);
+  if (error && error.message.length > 0) {
+    return extractGraphQLErrorMessage(error);
   }
 
   // Handle network errors
@@ -122,6 +122,10 @@ function humanizeErrorMessage(message: string): string {
   // Remove technical prefixes
   message = message.replace(/^error:/i, '').trim();
   message = message.replace(/^exception:/i, '').trim();
+
+  if (message.includes('Invalid login credentials')) {
+    return 'Invalid email or password';
+  }
 
   // Make first letter uppercase if it's not
   if (message.length > 0 && /[a-z]/.test(message[0])) {

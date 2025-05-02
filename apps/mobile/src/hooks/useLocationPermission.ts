@@ -117,10 +117,7 @@ export const useLocationPermission = () => {
         }
       }
     } catch (error) {
-      loggingService.error(
-        'Error checking location permission:',
-        error as Error,
-      );
+      loggingService.error('Error checking location permission:', error);
       setStatus('unavailable');
     }
   }, [permissionRequestCount]);
@@ -222,10 +219,7 @@ export const useLocationPermission = () => {
         return permissionGranted;
       }
     } catch (error) {
-      loggingService.error(
-        'Error requesting location permission:',
-        error as Error,
-      );
+      loggingService.error('Error requesting location permission:', error);
       setStatus('unavailable');
       return false;
     }

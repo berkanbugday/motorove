@@ -29,8 +29,9 @@ const errorLink = onError(
       for (const err of graphQLErrors) {
         const {message, locations, path, extensions} = err;
         // Log error details to console for debugging
+        const pathString = path ? path.join('.') : '';
         loggingService.error(
-          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+          `[GraphQL error]: Message: ${message}, Path: ${pathString}`,
         );
 
         // Send to Sentry with relevant metadata
@@ -125,7 +126,7 @@ async function getAccessToken(): Promise<string | null> {
     // Fallback to AsyncStorage
     return await AsyncStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
   } catch (error) {
-    loggingService.error('Error getting access token:', error as Error);
+    loggingService.error('Error getting access token:', error);
     return null;
   }
 }

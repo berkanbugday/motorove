@@ -19,10 +19,7 @@ export const useFirstTimeCheck = () => {
         setIsFirstTime(value === null); // If value is null, this is the first time
         setIsLoading(false);
       } catch (error) {
-        loggingService.error(
-          'Error checking first time status:',
-          error as Error,
-        );
+        loggingService.error('Error checking first time status:', error);
         setIsFirstTime(true);
         setIsLoading(false);
       }
@@ -37,7 +34,7 @@ export const useFirstTimeCheck = () => {
       await AsyncStorage.setItem(FIRST_TIME_KEY, 'false');
       setIsFirstTime(false);
     } catch (error) {
-      loggingService.error('Error marking as not first time:', error as Error);
+      loggingService.error('Error marking as not first time:', error);
     }
   };
 

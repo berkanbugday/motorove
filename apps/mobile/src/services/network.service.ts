@@ -90,7 +90,7 @@ class NetworkService {
       try {
         listener(this.isConnected);
       } catch (error) {
-        loggingService.error('Error in network listener:', error as Error);
+        loggingService.error('Error in network listener:', error);
       }
     });
   }

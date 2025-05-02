@@ -118,7 +118,7 @@ export const useMapSearch = ({
     } catch (error) {
       // Only log errors if they're not from an aborted request
       if (error instanceof Error && error.name !== 'AbortError') {
-        loggingService.error('Error searching for location:', error as Error);
+        loggingService.error('Error searching for location:', error);
       }
     } finally {
       // Only update state if the request wasn't aborted

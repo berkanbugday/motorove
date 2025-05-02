@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       setAuthState({...state, isLoading: false});
     } catch (error) {
-      loggingService.error('Error loading auth state:', error as Error);
+      loggingService.error('Error loading auth state:', error);
       setAuthState({...defaultAuthState, isLoading: false});
     }
   };
@@ -154,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       await authService.signOut();
       setAuthState({...defaultAuthState, isLoading: false});
     } catch (error) {
-      loggingService.error('Error signing out:', error as Error);
+      loggingService.error('Error signing out:', error);
       setAuthState(prevState => ({...prevState, isLoading: false}));
       throw error;
     }

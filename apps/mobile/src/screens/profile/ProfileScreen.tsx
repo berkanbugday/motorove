@@ -28,7 +28,7 @@ export const ProfileScreen: React.FC = () => {
               await logout();
               // Navigation will be handled by RootNavigator when auth state changes
             } catch (error) {
-              loggingService.error('Error logging out:', error as Error);
+              loggingService.error('Error logging out:', error);
               Alert.alert('Error', 'Failed to logout. Please try again.');
             }
           },

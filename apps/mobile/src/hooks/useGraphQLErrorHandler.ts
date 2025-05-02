@@ -2,9 +2,9 @@ import {useCallback} from 'react';
 import {ApolloError} from '@apollo/client';
 import {useErrorHandler} from './useErrorHandler';
 import {ErrorType} from '@services/error.service';
-import {errorToMessage} from '@utils/errorUtils';
 import authService from '@services/auth.service';
 import {loggingService} from '@services/logging.service';
+import {GraphQLFormattedError} from 'graphql';
 
 /**
  * Custom hook for handling GraphQL errors with more detailed control
@@ -16,13 +16,14 @@ export const useGraphQLErrorHandler = () => {
    * Handle specific GraphQL error codes
    */
   const handleGraphQLError = useCallback(
-    async (error: ApolloError) => {
+    async (error: GraphQLFormattedError) => {
       // Default error type
       let errorType = ErrorType.API;
       let handled = false;
 
       // Get error code(s) from the GraphQL error
-      const errorCode = error.graphQLErrors?.[0]?.extensions?.code;
+      const errorCode = error.extensions?.code;
+      const errorMessage = error.message;
 
       // Handle based on error code
       if (errorCode) {
@@ -45,6 +46,16 @@ export const useGraphQLErrorHandler = () => {
               authService.signOut();
               handled = true;
             }
+            break;
+          case 'UNAUTHORIZED':
+            errorType = ErrorType.AUTHORIZATION;
+            await handleError(error, errorType, {
+              showToast: true,
+              fallbackMessage:
+                errorMessage === 'Invalid login credentials'
+                  ? 'Invalid email or password'
+                  : 'You do not have permission to perform this action.',
+            });
             break;
 
           case 'FORBIDDEN':
@@ -88,16 +99,6 @@ export const useGraphQLErrorHandler = () => {
         }
       }
 
-      // Handle network errors
-      if (error.networkError) {
-        errorType = ErrorType.NETWORK;
-        await handleError(error, errorType, {
-          fallbackMessage:
-            'Network error. Please check your connection and try again.',
-        });
-        handled = true;
-      }
-
       // If not handled by specific cases above, handle as a general API error
       if (!handled) {
         await handleError(error, errorType);
@@ -137,7 +138,7 @@ export const useGraphQLErrorHandler = () => {
           return result;
         } catch (error) {
           if (error instanceof ApolloError) {
-            await handleGraphQLError(error);
+            await handleGraphQLError(error.graphQLErrors[0]);
           } else {
             await handleError(error, ErrorType.API, {
               fallbackMessage: options.fallbackErrorMessage,

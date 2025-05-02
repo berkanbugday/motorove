@@ -165,7 +165,7 @@ export function AccountSetupScreen() {
         routes: [{name: 'Main' as any}],
       });
     } catch (error) {
-      loggingService.error('Error submitting form:', error as Error);
+      loggingService.error('Error submitting form:', error);
       Alert.alert(
         'Error',
         'There was a problem setting up your account. Please try again.',

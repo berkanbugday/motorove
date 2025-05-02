@@ -199,7 +199,7 @@ class LoggingService {
   /**
    * Log an error message
    */
-  error(message: string, error?: Error, context?: LogContext): void {
+  error(message: string, error?: any, context?: LogContext): void {
     if (AppConfig.DEBUG_MODE) {
       console.error(message, error, context);
     }
@@ -223,7 +223,7 @@ class LoggingService {
   /**
    * Log a fatal error message
    */
-  fatal(message: string, error?: Error, context?: LogContext): void {
+  fatal(message: string, error?: any, context?: LogContext): void {
     if (AppConfig.DEBUG_MODE) {
       console.error('FATAL:', message, error, context);
     }

@@ -20,6 +20,8 @@ import {signinSchema, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAuth} from '@navigation/utils/navigationUtils';
+import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
+import {GraphQLFormattedError} from 'graphql';
 
 export function SigninScreen() {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +29,7 @@ export function SigninScreen() {
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
+  const {handleGraphQLError} = useGraphQLErrorHandler();
 
   const {
     control,
@@ -50,6 +53,7 @@ export function SigninScreen() {
       await signin(data.email, data.password);
       // If successful, the navigation in RootNavigator will change to MainNavigator
     } catch (error) {
+      await handleGraphQLError(error as GraphQLFormattedError);
       // Handle specific error types
       if (error instanceof Error) {
         setError('password', {
@@ -134,6 +138,8 @@ export function SigninScreen() {
                   size="small"
                   onPress={handleForgotPassword}
                   style={styles.forgotPasswordContainer}
+                  textStyle={{fontWeight: '500'}}
+                  testID="forgot-password-button"
                 />
 
                 <Button
@@ -142,6 +148,7 @@ export function SigninScreen() {
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
                   disabled={isSubmitting}
+                  textStyle={{fontWeight: 'bold'}}
                   testID="signin-button"
                 />
 
@@ -266,5 +273,6 @@ const styles = StyleSheet.create({
   signupLink: {
     color: colors.primary.main,
     marginLeft: -20,
+    fontWeight: 'bold',
   },
 });

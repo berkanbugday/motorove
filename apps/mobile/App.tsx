@@ -68,10 +68,7 @@ function App(): React.JSX.Element {
         await EncryptedStorage.removeItem('storage_test');
         setIsStorageReady(true);
       } catch (error) {
-        loggingService.error(
-          'Error initializing encrypted storage',
-          error as Error,
-        );
+        loggingService.error('Error initializing encrypted storage', error);
         // Fall back to continue anyway if there's an issue
         setIsStorageReady(true);
       }
@@ -99,7 +96,7 @@ function App(): React.JSX.Element {
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </ApolloProvider>
-      <Toast />
+      <Toast position="top" visibilityTime={5000} topOffset={60} />
     </ErrorBoundary>
   );
 }

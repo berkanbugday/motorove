@@ -22,7 +22,7 @@ import {Caption} from '@components/Typography';
 const ANIMATION_DURATION = 200;
 
 // Input layout constants
-const INPUT_ICON_WIDTH = spacing.xl;
+const INPUT_ICON_WIDTH = spacing.xxl;
 const LABEL_LEFT_POSITION = spacing.md;
 const LABEL_TOP_POSITION = spacing.md;
 const ICON_HORIZONTAL_POSITION = spacing.md;

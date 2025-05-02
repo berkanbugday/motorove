@@ -67,7 +67,7 @@ export const Wizard = forwardRef<WizardHandle, WizardProps>(
         const isValid = await Promise.resolve(currentStep.validate());
         return isValid;
       } catch (error) {
-        loggingService.error('Validation error:', error as Error);
+        loggingService.error('Validation error:', error);
         return false;
       }
     };

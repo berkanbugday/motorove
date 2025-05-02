@@ -19,7 +19,7 @@ class AuthService {
     lastName?: string,
   ): Promise<AuthResponse> {
     try {
-      const {data} = await apolloClient.mutate({
+      const {data, errors} = await apolloClient.mutate({
         mutation: SIGN_UP,
         variables: {
           input: {
@@ -31,12 +31,17 @@ class AuthService {
         },
       });
 
+      if (errors) {
+        loggingService.error('Signup error:', errors[0]);
+        throw errors[0];
+      }
+
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.signUp);
       await this.saveAuthData(authResponse);
       return authResponse;
     } catch (error) {
-      loggingService.error('Signup error:', error as Error);
+      loggingService.error('Signup error:', error);
       throw error;
     }
   }
@@ -44,7 +49,7 @@ class AuthService {
   // Sign in an existing user
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
-      const {data} = await apolloClient.mutate({
+      const {data, errors} = await apolloClient.mutate({
         mutation: SIGN_IN,
         variables: {
           input: {
@@ -54,12 +59,17 @@ class AuthService {
         },
       });
 
+      if (errors) {
+        loggingService.error('Signin error:', errors[0]);
+        throw errors[0];
+      }
+
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.signIn);
       await this.saveAuthData(authResponse);
       return authResponse;
     } catch (error) {
-      loggingService.error('Signin error:', error as Error);
+      loggingService.error('Signin error:', error);
       throw error;
     }
   }
@@ -72,7 +82,7 @@ class AuthService {
       await this.clearAuthData();
       await resetApolloStore();
     } catch (error) {
-      loggingService.error('Signout error:', error as Error);
+      loggingService.error('Signout error:', error);
       // Still clear local auth data even if something fails
       await this.clearAuthData();
     }
@@ -88,19 +98,24 @@ class AuthService {
         throw new Error('No refresh token available');
       }
 
-      const {data} = await apolloClient.mutate({
+      const {data, errors} = await apolloClient.mutate({
         mutation: REFRESH_TOKEN,
         variables: {
           token: refreshToken,
         },
       });
 
+      if (errors) {
+        loggingService.error('Token refresh error:', errors[0]);
+        throw errors[0];
+      }
+
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.refreshToken);
       await this.saveAuthData(authResponse);
       return authResponse;
     } catch (error) {
-      loggingService.error('Token refresh error:', error as Error);
+      loggingService.error('Token refresh error:', error);
       // Clear auth data on refresh failure
       await this.clearAuthData();
       throw error;
@@ -193,7 +208,7 @@ class AuthService {
         isLoading: false,
       };
     } catch (error) {
-      loggingService.error('Error getting auth state:', error as Error);
+      loggingService.error('Error getting auth state:', error);
       return {
         user: null,
         accessToken: null,
@@ -267,7 +282,7 @@ class AuthService {
         expiresAt: authState.expiresAt,
       });
     } catch (error) {
-      loggingService.error('Error saving auth data:', error as Error);
+      loggingService.error('Error saving auth data:', error);
       throw error;
     }
   }
@@ -282,10 +297,7 @@ class AuthService {
         JSON.stringify(authState),
       );
     } catch (error) {
-      loggingService.error(
-        'Error saving to encrypted storage:',
-        error as Error,
-      );
+      loggingService.error('Error saving to encrypted storage:', error);
       throw error;
     }
   }
@@ -301,7 +313,7 @@ class AuthService {
 
       loggingService.info('Auth data cleared from storage');
     } catch (error) {
-      loggingService.error('Error clearing auth data:', error as Error);
+      loggingService.error('Error clearing auth data:', error);
       throw error;
     }
   }
@@ -317,10 +329,7 @@ class AuthService {
       ];
       await AsyncStorage.multiRemove(keys);
     } catch (error) {
-      loggingService.error(
-        'Error clearing AsyncStorage auth data:',
-        error as Error,
-      );
+      loggingService.error('Error clearing AsyncStorage auth data:', error);
     }
   }
 }
