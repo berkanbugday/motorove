@@ -97,7 +97,7 @@ const ButtonSection = ({
       testID="welcome-signup-button"
     />
     <Button
-      title="Signin"
+      title="Sign In"
       onPress={onSigninPress}
       variant="outline"
       shape="round"

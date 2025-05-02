@@ -93,9 +93,7 @@ export function SigninScreen() {
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled">
+          <ScrollView keyboardShouldPersistTaps="handled">
             <View style={[styles.content, {minHeight: height * 0.8}]}>
               <View style={styles.logoContainer}>
                 <Image
@@ -138,7 +136,6 @@ export function SigninScreen() {
                   size="small"
                   onPress={handleForgotPassword}
                   style={styles.forgotPasswordContainer}
-                  textStyle={{fontWeight: '500'}}
                   testID="forgot-password-button"
                 />
 
@@ -148,7 +145,6 @@ export function SigninScreen() {
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
                   disabled={isSubmitting}
-                  textStyle={{fontWeight: 'bold'}}
                   testID="signin-button"
                 />
 
@@ -211,9 +207,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.white,
-  },
-  scrollContent: {
-    flexGrow: 1,
   },
   content: {
     flex: 1,

@@ -21,7 +21,7 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=true eslint --config eslint.config.cjs .",
     "start": "react-native start",
     "test": "jest",
-    "run-both": "concurrently \"pnpm android\" \"pnpm ios\"",
+    "run-both": "concurrently \"pnpm android:dev\" \"pnpm ios:dev\"",
     "postinstall": "patch-package",
     "clear-cache": "node scripts/clear-metro-cache.js",
     "start:clean": "pnpm clear-cache && RESET_CACHE=true react-native start"

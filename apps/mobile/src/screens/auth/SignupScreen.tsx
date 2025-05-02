@@ -23,6 +23,7 @@ import {
   Body,
   BodySmall,
   Subtitle,
+  TopHeaderBar,
 } from '@components';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
@@ -60,6 +61,10 @@ export function SignupScreen() {
     },
   });
 
+  function handleGoBack(): void {
+    navigation.goBack();
+  }
+
   function togglePasswordVisibility() {
     setShowPassword(!showPassword);
   }
@@ -75,7 +80,7 @@ export function SignupScreen() {
       const firstName = nameParts[0];
       const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
-      await signup(firstName, data.email, data.password, lastName);
+      await signup(data.email, data.password, firstName, lastName);
 
       // Navigate to account setup screen
       navigation.navigate('AccountSetup', {
@@ -171,13 +176,16 @@ export function SignupScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
+      <TopHeaderBar
+        showBackButton
+        showShadow={false}
+        onBackPress={handleGoBack}
+      />
+      <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.container}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled">
+          style={styles.keyboardAvoidingView}>
+          <ScrollView keyboardShouldPersistTaps="handled">
             <View style={[styles.content, {minHeight: height * 0.8}]}>
               <View style={styles.logoContainer}>
                 <Image
@@ -266,7 +274,6 @@ export function SignupScreen() {
                       />
                     </View>
                   }
-                  style={styles.termsCheckbox}
                 />
                 <Button
                   title="Sign Up"
@@ -275,10 +282,9 @@ export function SignupScreen() {
                   loading={isSubmitting}
                   disabled={isSubmitting}
                   testID="signup-button"
-                  style={{marginTop: spacing.md}}
                 />
 
-                <View style={styles.dividerContainer}>
+                {/* <View style={styles.dividerContainer}>
                   <View style={styles.divider} />
                   <BodySmall
                     color={colors.neutral.grey}
@@ -286,9 +292,9 @@ export function SignupScreen() {
                     or continue with
                   </BodySmall>
                   <View style={styles.divider} />
-                </View>
+                </View> */}
 
-                <View style={styles.socialButtonsContainer}>
+                {/* <View style={styles.socialButtonsContainer}>
                   <TouchableOpacity
                     style={styles.socialButton}
                     onPress={() => handleSocialSignup('google')}>
@@ -314,7 +320,7 @@ export function SignupScreen() {
                       color={colors.neutral.black}
                     />
                   </TouchableOpacity>
-                </View>
+                </View> */}
 
                 <View style={styles.signinContainer}>
                   <Body color={colors.neutral.grey}>
@@ -380,8 +386,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.neutral.white,
   },
-  scrollContent: {
-    flexGrow: 1,
+  keyboardAvoidingView: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -436,20 +442,18 @@ const styles = StyleSheet.create({
     color: colors.primary.main,
     marginLeft: -20,
   },
-  termsCheckbox: {
-    marginTop: 0,
-    marginRight: 0,
-  },
   termsTextContainer: {
-    flex: 1,
-    marginLeft: spacing.xs,
     flexWrap: 'wrap',
     flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: spacing.xs,
   },
   termsLink: {
     fontSize: fontSizes.sm,
-    lineHeight: fontSizes.sm,
     textDecorationLine: 'underline',
+    marginLeft: -20,
+    marginRight: -20,
   },
   bottomSheetContent: {
     flex: 1,
