@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth as useAuthContext} from '@contexts';
-import {AuthContextType} from '../../types/auth.types';
 import {loggingService} from '@services/logging.service';
 // Storage key
 const FIRST_TIME_KEY = 'isFirstTime';
@@ -44,7 +43,7 @@ export const useFirstTimeCheck = () => {
 // Hook to handle authentication
 export function useAuth() {
   // Use the context from our AuthContext
-  const authContext: AuthContextType = useAuthContext();
+  const authContext = useAuthContext();
 
   // Create a memoized isAuthenticated value to prevent unnecessary rerenders
   const isAuthenticated =

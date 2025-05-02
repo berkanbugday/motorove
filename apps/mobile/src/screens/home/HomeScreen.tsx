@@ -33,6 +33,8 @@ import {
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
+import {useAuth} from '@contexts';
+
 // Route data
 const recommendedRoutes = [
   {
@@ -199,7 +201,7 @@ export function HomeScreen({navigation}: Props) {
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [posts, setPosts] = useState<FeedPost[]>(feedPosts);
-
+  const {user} = useAuth();
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -501,7 +503,7 @@ export function HomeScreen({navigation}: Props) {
     <View style={styles.container}>
       <TopHeaderBar
         title="Hi there 👋🏻"
-        subtitle="Michael Thompson"
+        subtitle={`${user?.firstName || ''} ${user?.lastName || ''}`}
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
         rightIconName="bell"
