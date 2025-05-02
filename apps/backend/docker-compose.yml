@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: motorove-postgres
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-motorove}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - motorove-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # API - Development environment
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: motorove-api-dev
+    ports:
+      - "${API_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-motorove}?schema=public
+    env_file:
+      - .env
+      - .env.development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - motorove-network
+
+  # API - Staging environment
+  api-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: staging
+    container_name: motorove-api-staging
+    ports:
+      - "${API_PORT:-3001}:3000"
+    environment:
+      - NODE_ENV=staging
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-motorove_staging}?schema=public
+    env_file:
+      - .env
+      - .env.staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - motorove-network
+
+  # API - Production environment
+  api-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: motorove-api-prod
+    ports:
+      - "${API_PORT:-3002}:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-motorove_prod}?schema=public
+    env_file:
+      - .env
+      - .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - motorove-network
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+networks:
+  motorove-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

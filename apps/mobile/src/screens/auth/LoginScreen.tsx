@@ -181,7 +181,7 @@ export function LoginScreen() {
 
                 <View style={styles.signupContainer}>
                   <Body color={colors.neutral.grey}>
-                    Don't have an account?{' '}
+                    Don't have an account?
                   </Body>
                   <Button
                     title="Sign up"
@@ -265,5 +265,6 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     color: colors.primary.main,
+    marginLeft: -10,
   },
 });

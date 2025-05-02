@@ -3,25 +3,59 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { CoreModule } from './core/core.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
+import { ConfigService } from './core/config/config.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    CoreModule,
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
+      imports: [CoreModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        sortSchema: true,
+        formatError: (error) => {
+          // Only return stacktrace in development mode
+          const isDev = configService.isDevelopment();
+          const { extensions = {}, ...rest } = error;
+
+          // If we're not in development, strip out sensitive information
+          const hasStacktrace =
+            extensions.exception &&
+            typeof extensions.exception === 'object' &&
+            extensions.exception !== null &&
+            'stacktrace' in extensions.exception;
+
+          if (!isDev && hasStacktrace) {
+            return {
+              ...rest,
+              extensions: {
+                code: extensions.code,
+              },
+            };
+          }
+
+          return error;
+        },
+      }),
     }),
     PrismaModule,
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}
