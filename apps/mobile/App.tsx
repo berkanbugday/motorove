@@ -8,19 +8,18 @@
 import React, {useEffect, useState} from 'react';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {View, ActivityIndicator, StyleSheet, Text} from 'react-native';
+import {View, ActivityIndicator, StyleSheet} from 'react-native';
 import {RootNavigator} from '@navigation/RootNavigator';
 import {AuthProvider} from '@contexts';
 import {ApolloProvider} from '@apollo/client';
 import {apolloClient} from '@configs/apolloClientConfig';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import * as Sentry from '@sentry/react-native';
-import Toast from 'react-native-toast-message';
 import {AppConfig} from '@configs/appConfig';
 import ErrorBoundary from '@components/ErrorBoundary';
 import {loggingService} from '@services/logging.service';
 import {networkService} from '@services/network.service';
-
+import ToastMessage from '@components/ToastMessage';
 // Initialize Sentry if DSN is provided
 if (
   AppConfig.ENABLE_LOGS &&
@@ -90,94 +89,14 @@ function App(): React.JSX.Element {
       <ApolloProvider client={apolloClient}>
         <GestureHandlerRootView style={{flex: 1}}>
           <SafeAreaProvider>
-            <AuthProvider>
-              <RootNavigator />
-            </AuthProvider>
+            <ToastMessage.Provider>
+              <AuthProvider>
+                <RootNavigator />
+              </AuthProvider>
+            </ToastMessage.Provider>
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </ApolloProvider>
-      <Toast
-        position="top"
-        visibilityTime={5000}
-        topOffset={60}
-        config={{
-          success: ({text1, text2, ..._rest}) => (
-            <View
-              style={{
-                height: 60,
-                width: '90%',
-                backgroundColor: '#4CAF50',
-                borderRadius: 8,
-                padding: 16,
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                marginVertical: 4,
-                alignSelf: 'center',
-                elevation: 3,
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.1,
-                shadowRadius: 3,
-              }}>
-              <Text style={{fontWeight: 'bold', color: 'white', fontSize: 14}}>
-                {text1}
-              </Text>
-              {text2 ? (
-                <Text style={{color: 'white', fontSize: 12}}>{text2}</Text>
-              ) : null}
-            </View>
-          ),
-          error: ({text1, text2, ..._rest}) => (
-            <View
-              style={{
-                height: 60,
-                width: '90%',
-                backgroundColor: '#F44336',
-                borderRadius: 8,
-                padding: 16,
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                marginVertical: 4,
-                alignSelf: 'center',
-                elevation: 3,
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.1,
-                shadowRadius: 3,
-              }}>
-              <Text style={{fontWeight: 'bold', color: 'white', fontSize: 14}}>
-                {text1}
-              </Text>
-              {text2 ? (
-                <Text style={{color: 'white', fontSize: 12}}>{text2}</Text>
-              ) : null}
-            </View>
-          ),
-          info: ({text1, text2, ..._rest}) => (
-            <View
-              style={{
-                height: 60,
-                width: '90%',
-                backgroundColor: '#2196F3',
-                borderRadius: 8,
-                padding: 16,
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                marginVertical: 4,
-                alignSelf: 'center',
-                elevation: 3,
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.1,
-                shadowRadius: 3,
-              }}>
-              <Text style={{fontWeight: 'bold', color: 'white', fontSize: 14}}>
-                {text1}
-              </Text>
-              {text2 ? (
-                <Text style={{color: 'white', fontSize: 12}}>{text2}</Text>
-              ) : null}
-            </View>
-          ),
-        }}
-      />
     </ErrorBoundary>
   );
 }

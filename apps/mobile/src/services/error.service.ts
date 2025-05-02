@@ -1,6 +1,6 @@
 import {captureException} from '@sentry/react-native';
 import NetInfo from '@react-native-community/netinfo';
-import Toast from 'react-native-toast-message';
+import {showToast} from '@components';
 import {errorToMessage} from '@utils/errorUtils';
 
 /**
@@ -126,17 +126,10 @@ class ErrorService {
    * Show an error toast message
    */
   showErrorToast(message: string): void {
-    Toast.show({
+    showToast({
       type: 'error',
       text1: 'Error',
       text2: message,
-      topOffset: 60,
-      text1Style: {
-        fontSize: 14,
-      },
-      text2Style: {
-        fontSize: 12,
-      },
     });
   }
 
@@ -144,16 +137,10 @@ class ErrorService {
    * Show a success toast message
    */
   showSuccessToast(message: string): void {
-    Toast.show({
+    showToast({
       type: 'success',
       text1: 'Success',
       text2: message,
-      text1Style: {
-        fontSize: 14,
-      },
-      text2Style: {
-        fontSize: 12,
-      },
     });
   }
 
@@ -161,17 +148,10 @@ class ErrorService {
    * Show an info toast message
    */
   showInfoToast(message: string): void {
-    Toast.show({
+    showToast({
       type: 'info',
       text1: 'Info',
       text2: message,
-      position: 'top',
-      text1Style: {
-        fontSize: 14,
-      },
-      text2Style: {
-        fontSize: 12,
-      },
     });
   }
 }
