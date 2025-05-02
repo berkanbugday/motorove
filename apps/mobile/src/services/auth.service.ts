@@ -8,6 +8,7 @@ import {
   AuthState,
   AUTH_STORAGE_KEYS as STORAGE_KEYS,
 } from '../types/auth.types';
+import {loggingService} from './logging.service';
 
 class AuthService {
   // Sign up a new user
@@ -35,7 +36,7 @@ class AuthService {
       await this.saveAuthData(authResponse);
       return authResponse;
     } catch (error) {
-      console.error('Signup error:', error);
+      loggingService.error('Signup error:', error as Error);
       throw error;
     }
   }
@@ -58,7 +59,7 @@ class AuthService {
       await this.saveAuthData(authResponse);
       return authResponse;
     } catch (error) {
-      console.error('Signin error:', error);
+      loggingService.error('Signin error:', error as Error);
       throw error;
     }
   }
@@ -71,7 +72,7 @@ class AuthService {
       await this.clearAuthData();
       await resetApolloStore();
     } catch (error) {
-      console.error('Signout error:', error);
+      loggingService.error('Signout error:', error as Error);
       // Still clear local auth data even if something fails
       await this.clearAuthData();
     }
@@ -99,7 +100,7 @@ class AuthService {
       await this.saveAuthData(authResponse);
       return authResponse;
     } catch (error) {
-      console.error('Token refresh error:', error);
+      loggingService.error('Token refresh error:', error as Error);
       // Clear auth data on refresh failure
       await this.clearAuthData();
       throw error;
@@ -130,7 +131,10 @@ class AuthService {
             return this.getAuthState();
           } catch (refreshError) {
             // If refresh fails, return logged out state
-            console.error('Token refresh failed:', refreshError);
+            loggingService.error(
+              'Token refresh failed:',
+              refreshError as Error,
+            );
             return {
               user: null,
               accessToken: null,
@@ -189,7 +193,7 @@ class AuthService {
         isLoading: false,
       };
     } catch (error) {
-      console.error('Error getting auth state:', error);
+      loggingService.error('Error getting auth state:', error as Error);
       return {
         user: null,
         accessToken: null,
@@ -257,13 +261,13 @@ class AuthService {
       await this.saveAuthDataToEncryptedStorage(authState);
 
       // Debug log
-      console.log('Auth data saved to EncryptedStorage', {
+      loggingService.info('Auth data saved to EncryptedStorage', {
         user: !!authState.user,
         accessToken: !!authState.accessToken,
         expiresAt: authState.expiresAt,
       });
     } catch (error) {
-      console.error('Error saving auth data:', error);
+      loggingService.error('Error saving auth data:', error as Error);
       throw error;
     }
   }
@@ -278,7 +282,10 @@ class AuthService {
         JSON.stringify(authState),
       );
     } catch (error) {
-      console.error('Error saving to encrypted storage:', error);
+      loggingService.error(
+        'Error saving to encrypted storage:',
+        error as Error,
+      );
       throw error;
     }
   }
@@ -292,9 +299,9 @@ class AuthService {
       // Clear from AsyncStorage for backward compatibility
       await this.clearAsyncStorageAuthData();
 
-      console.log('Auth data cleared from storage');
+      loggingService.info('Auth data cleared from storage');
     } catch (error) {
-      console.error('Error clearing auth data:', error);
+      loggingService.error('Error clearing auth data:', error as Error);
       throw error;
     }
   }
@@ -310,7 +317,10 @@ class AuthService {
       ];
       await AsyncStorage.multiRemove(keys);
     } catch (error) {
-      console.error('Error clearing AsyncStorage auth data:', error);
+      loggingService.error(
+        'Error clearing AsyncStorage auth data:',
+        error as Error,
+      );
     }
   }
 }

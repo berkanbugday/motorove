@@ -71,13 +71,13 @@ const CarouselItemComponent = ({item}: {item: CarouselItem}) => (
 
 // Button Section Component
 type ButtonSectionProps = {
-  onLoginPress: () => void;
+  onSigninPress: () => void;
   onSignupPress: () => void;
   bottomPadding: number;
 };
 
 const ButtonSection = ({
-  onLoginPress,
+  onSigninPress,
   onSignupPress,
   bottomPadding,
 }: ButtonSectionProps) => (
@@ -97,12 +97,12 @@ const ButtonSection = ({
       testID="welcome-signup-button"
     />
     <Button
-      title="Login"
-      onPress={onLoginPress}
+      title="Signin"
+      onPress={onSigninPress}
       variant="outline"
       shape="round"
       style={styles.button}
-      testID="welcome-login-button"
+      testID="welcome-signin-button"
     />
   </View>
 );
@@ -115,9 +115,9 @@ export function WelcomeScreen(): React.JSX.Element {
   const {markAsNotFirstTime} = useFirstTimeCheck();
 
   // Event Handlers - memoized with useCallback
-  const handleLogin = useCallback(async () => {
+  const handleSignin = useCallback(async () => {
     await markAsNotFirstTime();
-    navigation.replace('Login', {mode: 'login'});
+    navigation.replace('Signin', {mode: 'signin'});
   }, [navigation, markAsNotFirstTime]);
 
   const handleSignup = useCallback(async () => {
@@ -165,7 +165,7 @@ export function WelcomeScreen(): React.JSX.Element {
         </View>
 
         <ButtonSection
-          onLoginPress={handleLogin}
+          onSigninPress={handleSignin}
           onSignupPress={handleSignup}
           bottomPadding={bottomPadding}
         />

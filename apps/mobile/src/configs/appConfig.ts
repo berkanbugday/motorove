@@ -1,3 +1,4 @@
+import {loggingService} from '@services/logging.service';
 import Config from 'react-native-config';
 
 /**
@@ -54,7 +55,7 @@ export const AppConfig = {
   DEBUG_MODE: Config.DEBUG_MODE === 'true',
   ANALYTICS_ENABLED: Config.ANALYTICS_ENABLED !== 'false',
   CRASH_REPORTING_ENABLED: Config.CRASH_REPORTING_ENABLED !== 'false',
-
+  SENTRY_DSN: Config.SENTRY_DSN || '',
   /**
    * Returns true if app is running in development environment
    */
@@ -80,11 +81,18 @@ export const AppConfig = {
    */
   logEnvironmentInfo: (): void => {
     if (AppConfig.isDevelopment() || AppConfig.isStaging()) {
-      console.log('Environment:', AppConfig.APP_ENV);
-      console.log('API URL:', AppConfig.API_URL);
-      console.log('App Version:', AppConfig.getFullVersion());
-      console.log('Debug Mode:', AppConfig.DEBUG_MODE);
-      console.log('Analytics Enabled:', AppConfig.ANALYTICS_ENABLED);
+      loggingService.info('Environment:', {
+        environment: AppConfig.APP_ENV,
+      });
+      loggingService.info('API URL:', {
+        apiUrl: AppConfig.API_URL,
+      });
+      loggingService.info('App Version:', {
+        version: AppConfig.getFullVersion(),
+      });
+      loggingService.info('Debug Mode:', {
+        debugMode: AppConfig.DEBUG_MODE,
+      });
     }
   },
 };

@@ -54,8 +54,8 @@ export function ForgotPasswordScreen() {
     navigation.goBack();
   }
 
-  function handleLoginPress() {
-    navigation.navigate('Login');
+  function handleSigninPress() {
+    navigation.navigate('Signin');
   }
 
   function handleSupportPress() {
@@ -114,12 +114,12 @@ export function ForgotPasswordScreen() {
           />
 
           <Button
-            title="Back to Login"
+            title="Back to Signin"
             variant="outline"
             shape="round"
-            onPress={handleLoginPress}
+            onPress={handleSigninPress}
             style={{marginVertical: spacing.sm}}
-            testID="back-to-login-button"
+            testID="back-to-signin-button"
           />
         </View>
       </SafeAreaView>
@@ -185,12 +185,12 @@ export function ForgotPasswordScreen() {
                 <View style={styles.linkContainer}>
                   <Body style={styles.linkText}>Remember your password? </Body>
                   <Button
-                    title="Login"
+                    title="Signin"
                     variant="text"
                     size="medium"
-                    onPress={handleLoginPress}
+                    onPress={handleSigninPress}
                     textStyle={styles.linkButton}
-                    testID="login-link"
+                    testID="signin-link"
                   />
                 </View>
 

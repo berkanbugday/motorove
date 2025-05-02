@@ -36,6 +36,7 @@ import {
 } from '@utils/validation/authValidation';
 import {colors, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {loggingService} from '@services/logging.service';
 
 // User type options for dropdown
 const userTypeOptions: DropdownItem[] = [
@@ -147,9 +148,13 @@ export function AccountSetupScreen() {
     try {
       setLoading(true);
       // In a real app, you would submit this data to your API
-      console.log('Form data submitted:', data);
-      console.log('Selected user type:', data.userType);
-      console.log('Selected interests:', data.interests);
+      loggingService.info('Form data submitted:', {
+        username: data.username,
+        userType: data.userType,
+        interests: data.interests,
+        phoneNumber: data.phoneNumber,
+        profilePhotoUrl: data.profilePhotoUrl,
+      });
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -160,7 +165,7 @@ export function AccountSetupScreen() {
         routes: [{name: 'Main' as any}],
       });
     } catch (error) {
-      console.error('Error submitting form:', error);
+      loggingService.error('Error submitting form:', error as Error);
       Alert.alert(
         'Error',
         'There was a problem setting up your account. Please try again.',

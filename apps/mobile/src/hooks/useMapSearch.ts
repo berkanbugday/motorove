@@ -2,6 +2,7 @@ import {useCallback, useState, useRef, useEffect, useMemo} from 'react';
 import {MapboxConfig} from '@configs';
 import Mapbox from '@rnmapbox/maps';
 import {Keyboard} from 'react-native';
+import {loggingService} from '@services/logging.service';
 
 export interface SearchResult {
   id: string;
@@ -117,7 +118,7 @@ export const useMapSearch = ({
     } catch (error) {
       // Only log errors if they're not from an aborted request
       if (error instanceof Error && error.name !== 'AbortError') {
-        console.error('Error searching for location:', error);
+        loggingService.error('Error searching for location:', error as Error);
       }
     } finally {
       // Only update state if the request wasn't aborted

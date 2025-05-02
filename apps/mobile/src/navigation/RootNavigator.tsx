@@ -7,6 +7,7 @@ import {AuthNavigator} from './stacks/AuthNavigator';
 import {MainNavigator} from './stacks/MainNavigator';
 import {useFirstTimeCheck, useAuth} from './utils/navigationUtils';
 import {RootStackParamList} from '../types/navigation.types';
+import {loggingService} from '@services/logging.service';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -20,7 +21,7 @@ export function RootNavigator() {
 
   // Debug log for authentication state
   useEffect(() => {
-    console.log('RootNavigator: Authentication state changed', {
+    loggingService.info('RootNavigator: Authentication state changed', {
       isAuthenticated,
       authLoading,
       isFirstTime,

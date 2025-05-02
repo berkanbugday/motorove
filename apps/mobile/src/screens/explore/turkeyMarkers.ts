@@ -1,5 +1,6 @@
 import {IconName} from '@components/Icon';
 import {MapMarker} from '@components/MapView';
+import {loggingService} from '@services/logging.service';
 import {colors} from '@theme/colors';
 
 // Define Turkey mainland regions as polygons to avoid sea
@@ -113,7 +114,7 @@ export const turkeyMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
     coordinates: [longitude, latitude] as [number, number],
     icon,
     color,
-    onPress: () => console.log(`Turkey marker ${i + 1} pressed`),
+    onPress: () => loggingService.info(`Turkey marker ${i + 1} pressed`),
   };
 });
 
@@ -136,7 +137,7 @@ const istanbulMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
     coordinates,
     icon,
     color,
-    onPress: () => console.log(`Istanbul marker ${i + 1} pressed`),
+    onPress: () => loggingService.info(`Istanbul marker ${i + 1} pressed`),
   };
 });
 

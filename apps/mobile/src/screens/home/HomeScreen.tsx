@@ -32,6 +32,7 @@ import {
 } from '@navigation/types/navigationTypes';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
+import {loggingService} from '@services/logging.service';
 // Route data
 const recommendedRoutes = [
   {
@@ -335,8 +336,12 @@ export function HomeScreen({navigation}: Props) {
         organizer={item.organizer}
         participantCount={item.participantCount}
         memberCount={item.memberCount}
-        onChatPress={() => console.log(`Chat pressed for event: ${item.title}`)}
-        onPress={() => console.log(`Event banner pressed: ${item.title}`)}
+        onChatPress={() =>
+          loggingService.info(`Chat pressed for event: ${item.title}`)
+        }
+        onPress={() =>
+          loggingService.info(`Event banner pressed: ${item.title}`)
+        }
         style={styles.eventBanner}
       />
     ),
@@ -420,21 +425,23 @@ export function HomeScreen({navigation}: Props) {
     (item: DropdownMenuItem, postId: string) => {
       switch (item.id) {
         case 'share':
-          console.log(`Share post: ${postId}`);
+          loggingService.info(`Share post: ${postId}`);
           break;
         case 'report':
-          console.log(`Report post: ${postId}`);
+          loggingService.info(`Report post: ${postId}`);
           break;
         case 'edit':
-          console.log(`Edit post: ${postId}`);
+          loggingService.info(`Edit post: ${postId}`);
           break;
         case 'delete':
-          console.log(`Delete post: ${postId}`);
+          loggingService.info(`Delete post: ${postId}`);
           // You could also update the posts state to remove the deleted post
           // setPosts(currentPosts => currentPosts.filter(post => post.id !== postId));
           break;
         default:
-          console.log(`Unhandled action: ${item.id} for post: ${postId}`);
+          loggingService.info(
+            `Unhandled action: ${item.id} for post: ${postId}`,
+          );
       }
     },
     [],
@@ -462,7 +469,9 @@ export function HomeScreen({navigation}: Props) {
           isCommented={item.isCommented}
           dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
           onDropdownSelect={menuItem => handleDropdownSelect(menuItem, item.id)}
-          onRoutePress={() => console.log(`Route pressed: ${item.routeTitle}`)}
+          onRoutePress={() =>
+            loggingService.info(`Route pressed: ${item.routeTitle}`)
+          }
           onLikePress={() => handleLikePress(item.id)}
           onCommentPress={() => handleCommentPress(item.id)}
           onSavePress={() => handleSavePress(item.id)}
@@ -497,7 +506,7 @@ export function HomeScreen({navigation}: Props) {
         subtitleStyle={styles.subtitle}
         rightIconName="bell"
         rightIconBadgeCount={5}
-        onRightButtonPress={() => console.log('Notifications pressed')}
+        onRightButtonPress={() => loggingService.info('Notifications pressed')}
       />
       <SafeAreaView
         style={[styles.container, {marginBottom: 60 + insets.bottom}]}>
@@ -551,7 +560,7 @@ export function HomeScreen({navigation}: Props) {
               image={{uri: currentRoute.image}}
               variant="elevated"
               size="small"
-              onPress={() => console.log('Card pressed')}
+              onPress={() => loggingService.info('Card pressed')}
             />
           </View>
 
@@ -562,7 +571,7 @@ export function HomeScreen({navigation}: Props) {
               </Subtitle>
               <Button
                 variant="text"
-                onPress={() => console.log('View all')}
+                onPress={() => loggingService.info('View all')}
                 title="View all"
               />
             </View>

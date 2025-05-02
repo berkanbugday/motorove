@@ -16,14 +16,14 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Icon, AnimatedInput, Button, Body, Caption} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {loginSchema, LoginFormValues} from '@utils/validation';
+import {signinSchema, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAuth} from '@navigation/utils/navigationUtils';
 
-export function LoginScreen() {
+export function SigninScreen() {
   const [showPassword, setShowPassword] = useState(false);
-  const {login} = useAuth();
+  const {signin} = useAuth();
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
@@ -33,8 +33,8 @@ export function LoginScreen() {
     handleSubmit,
     formState: {errors, isSubmitting},
     setError,
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<SigninFormValues>({
+    resolver: zodResolver(signinSchema),
     defaultValues: {
       email: '',
       password: '',
@@ -45,9 +45,9 @@ export function LoginScreen() {
     setShowPassword(!showPassword);
   }
 
-  async function onSubmit(data: LoginFormValues) {
+  async function onSubmit(data: SigninFormValues) {
     try {
-      await login(data.email, data.password);
+      await signin(data.email, data.password);
       // If successful, the navigation in RootNavigator will change to MainNavigator
     } catch (error) {
       // Handle specific error types
@@ -74,11 +74,11 @@ export function LoginScreen() {
     navigation.navigate('ForgotPassword');
   }
 
-  function handleSocialLogin(provider: 'google' | 'apple' | 'facebook') {
-    // Notify user that social login is not implemented yet
+  function handleSocialSignin(provider: 'google' | 'apple' | 'facebook') {
+    // Notify user that social signin is not implemented yet
     Alert.alert(
       'Not Implemented',
-      `Social login with ${provider} is not implemented yet.`,
+      `Social signin with ${provider} is not implemented yet.`,
       [{text: 'OK'}],
     );
   }
@@ -102,7 +102,7 @@ export function LoginScreen() {
               </View>
 
               <Body style={styles.welcomeText}>
-                Welcome back! Please login to continue
+                Welcome back! Please signin to continue
               </Body>
 
               <View style={styles.form}>
@@ -113,7 +113,7 @@ export function LoginScreen() {
                   keyboardType="email-address"
                   icon={<Icon name="envelope" size={20} />}
                   error={errors.email}
-                  testID="login-email"
+                  testID="signin-email"
                 />
 
                 <AnimatedInput
@@ -125,7 +125,7 @@ export function LoginScreen() {
                   error={errors.password}
                   onToggleSecureEntry={togglePasswordVisibility}
                   showPassword={showPassword}
-                  testID="login-password"
+                  testID="signin-password"
                 />
 
                 <Button
@@ -137,12 +137,12 @@ export function LoginScreen() {
                 />
 
                 <Button
-                  title="Login"
+                  title="Sign In"
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
                   disabled={isSubmitting}
-                  testID="login-button"
+                  testID="signin-button"
                 />
 
                 <View style={styles.dividerContainer}>
@@ -154,7 +154,7 @@ export function LoginScreen() {
                 <View style={styles.socialButtonsContainer}>
                   <TouchableOpacity
                     style={styles.socialButton}
-                    onPress={() => handleSocialLogin('google')}>
+                    onPress={() => handleSocialSignin('google')}>
                     <Icon
                       name="google"
                       size={18}
@@ -164,13 +164,13 @@ export function LoginScreen() {
 
                   <TouchableOpacity
                     style={styles.socialButton}
-                    onPress={() => handleSocialLogin('apple')}>
+                    onPress={() => handleSocialSignin('apple')}>
                     <Icon name="apple" size={18} color={colors.neutral.black} />
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.socialButton}
-                    onPress={() => handleSocialLogin('facebook')}>
+                    onPress={() => handleSocialSignin('facebook')}>
                     <Icon
                       name="facebook"
                       size={18}
@@ -265,6 +265,6 @@ const styles = StyleSheet.create({
   },
   signupLink: {
     color: colors.primary.main,
-    marginLeft: -10,
+    marginLeft: -20,
   },
 });

@@ -1,6 +1,7 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
+import {loggingService} from '@services/logging.service';
 
 // Default auth state
 const defaultAuthState: AuthState = {
@@ -62,7 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       const state = await authService.getAuthState();
 
       // Log authentication state for debugging
-      console.log('Auth state loaded:', {
+      loggingService.info('Auth state loaded:', {
         hasUser: !!state.user,
         hasToken: !!state.accessToken,
         expiresAt: state.expiresAt,
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       setAuthState({...state, isLoading: false});
     } catch (error) {
-      console.error('Error loading auth state:', error);
+      loggingService.error('Error loading auth state:', error as Error);
       setAuthState({...defaultAuthState, isLoading: false});
     }
   };
@@ -84,7 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       setAuthState(prevState => ({...prevState, isLoading: true}));
       const response = await authService.signIn(email, password);
 
-      // Ensure we're setting the state correctly after login
+      // Ensure we're setting the state correctly after signin
       const newState = {
         user: response.user,
         accessToken: response.session?.access_token || null,
@@ -93,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isLoading: false,
       };
 
-      console.log('Setting auth state after login:', {
+      loggingService.info('Setting auth state after signin:', {
         hasUser: !!newState.user,
         hasToken: !!newState.accessToken,
       });
@@ -132,7 +133,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         isLoading: false,
       };
 
-      console.log('Setting auth state after signup:', {
+      loggingService.info('Setting auth state after signup:', {
         hasUser: !!newState.user,
         hasToken: !!newState.accessToken,
       });
@@ -153,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       await authService.signOut();
       setAuthState({...defaultAuthState, isLoading: false});
     } catch (error) {
-      console.error('Error signing out:', error);
+      loggingService.error('Error signing out:', error as Error);
       setAuthState(prevState => ({...prevState, isLoading: false}));
       throw error;
     }

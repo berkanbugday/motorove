@@ -3,6 +3,7 @@ import {
   InMemoryCache,
   createHttpLink,
   from,
+  Observable,
 } from '@apollo/client';
 import {setContext} from '@apollo/client/link/context';
 import {onError} from '@apollo/client/link/error';
@@ -10,24 +11,103 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {AppConfig} from './appConfig';
 import {AUTH_STORAGE_KEYS} from '../types/auth.types';
+import {captureException} from '@sentry/react-native';
+import NetInfo from '@react-native-community/netinfo';
+import authService from '@services/auth.service';
+import {loggingService} from '@services/index';
+
 // Create an HTTP link that points to our GraphQL endpoint
 const httpLink = createHttpLink({
   uri: `${AppConfig.API_URL}/graphql`,
 });
 
-// Error handling link
-const errorLink = onError(({graphQLErrors, networkError}) => {
-  if (graphQLErrors) {
-    graphQLErrors.forEach(({message, locations, path}) => {
-      console.error(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-      );
-    });
-  }
-  if (networkError) {
-    console.error(`[Network error]: ${networkError}`);
-  }
-});
+// Enhanced error handling link
+const errorLink = onError(
+  ({graphQLErrors, networkError, operation, forward}) => {
+    // Handle GraphQL errors
+    if (graphQLErrors) {
+      for (const err of graphQLErrors) {
+        const {message, locations, path, extensions} = err;
+        // Log error details to console for debugging
+        loggingService.error(
+          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+        );
+
+        // Send to Sentry with relevant metadata
+        captureException(err, {
+          tags: {
+            graphql: true,
+            operationName: operation.operationName,
+            errorCode: extensions?.code as string,
+          },
+          extra: {
+            operationName: operation.operationName,
+            variables: operation.variables,
+            path,
+            locations,
+            extensions,
+          },
+        });
+
+        // Handle authentication errors with automatic token refresh
+        if (extensions?.code === 'UNAUTHENTICATED') {
+          // Return a new observable for the refresh token flow
+          return new Observable(observer => {
+            // Attempt to refresh the token
+            authService
+              .refreshToken()
+              .then(() => {
+                // If successful, retry the original operation and chain the results to our observer
+                const subscriber = {
+                  next: observer.next.bind(observer),
+                  error: observer.error.bind(observer),
+                  complete: observer.complete.bind(observer),
+                };
+
+                // Retry the operation with the new token
+                forward(operation).subscribe(subscriber);
+              })
+              .catch(refreshError => {
+                loggingService.error('Token refresh failed:', refreshError);
+
+                // Clear auth if refresh token is invalid
+                authService.signOut();
+
+                // Forward the original error
+                observer.error(err);
+                observer.complete();
+              });
+          });
+        }
+      }
+    }
+
+    // Handle network errors
+    if (networkError) {
+      loggingService.error(`[Network error]: ${networkError}`);
+
+      // Check connectivity
+      NetInfo.fetch().then(state => {
+        // Only log to Sentry if connected but still getting network error
+        if (state.isConnected) {
+          captureException(networkError, {
+            tags: {
+              network: true,
+              operationName: operation.operationName,
+            },
+            extra: {
+              operationName: operation.operationName,
+              variables: operation.variables,
+              networkError,
+            },
+          });
+        } else {
+          loggingService.warning('Device is offline. Network error expected.');
+        }
+      });
+    }
+  },
+);
 
 // Get access token directly from storage to avoid circular dependency
 async function getAccessToken(): Promise<string | null> {
@@ -45,7 +125,7 @@ async function getAccessToken(): Promise<string | null> {
     // Fallback to AsyncStorage
     return await AsyncStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
   } catch (error) {
-    console.error('Error getting access token:', error);
+    loggingService.error('Error getting access token:', error as Error);
     return null;
   }
 }

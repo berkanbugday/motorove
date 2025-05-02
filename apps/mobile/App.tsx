@@ -14,9 +14,50 @@ import {AuthProvider} from '@contexts';
 import {ApolloProvider} from '@apollo/client';
 import {apolloClient} from '@configs/apolloClientConfig';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import * as Sentry from '@sentry/react-native';
+import Toast from 'react-native-toast-message';
+import {AppConfig} from '@configs/appConfig';
+import ErrorBoundary from '@components/ErrorBoundary';
+import {loggingService} from '@services/logging.service';
+import {networkService} from '@services/network.service';
+
+// Initialize Sentry if DSN is provided
+if (
+  AppConfig.ENABLE_LOGS &&
+  AppConfig.SENTRY_DSN &&
+  AppConfig.SENTRY_DSN !== ''
+) {
+  Sentry.init({
+    dsn: AppConfig.SENTRY_DSN,
+    environment: AppConfig.APP_ENV || 'development',
+    debug: AppConfig.DEBUG_MODE,
+    // Enable performance monitoring
+    tracesSampleRate: 0.2,
+    // Enable session tracking
+    enableAutoSessionTracking: true,
+  });
+}
 
 function App(): React.JSX.Element {
   const [isStorageReady, setIsStorageReady] = useState(false);
+
+  // Initialize services
+  useEffect(() => {
+    if (AppConfig.ENABLE_LOGS) {
+      // Initialize logging service
+      loggingService.initialize({
+        environment: AppConfig.APP_ENV,
+      });
+    }
+
+    // Initialize network monitoring
+    networkService.initialize();
+
+    // Cleanup when component unmounts
+    return () => {
+      networkService.cleanup();
+    };
+  }, []);
 
   // Initialize encrypted storage
   useEffect(() => {
@@ -27,7 +68,10 @@ function App(): React.JSX.Element {
         await EncryptedStorage.removeItem('storage_test');
         setIsStorageReady(true);
       } catch (error) {
-        console.error('Error initializing encrypted storage:', error);
+        loggingService.error(
+          'Error initializing encrypted storage',
+          error as Error,
+        );
         // Fall back to continue anyway if there's an issue
         setIsStorageReady(true);
       }
@@ -45,15 +89,18 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <GestureHandlerRootView style={{flex: 1}}>
-        <SafeAreaProvider>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
-    </ApolloProvider>
+    <ErrorBoundary>
+      <ApolloProvider client={apolloClient}>
+        <GestureHandlerRootView style={{flex: 1}}>
+          <SafeAreaProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </ApolloProvider>
+      <Toast />
+    </ErrorBoundary>
   );
 }
 

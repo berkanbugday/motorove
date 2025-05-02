@@ -7,6 +7,7 @@ import {
   AppState,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
+import {loggingService} from '@services/logging.service';
 
 type LocationPermissionStatus =
   | 'granted'
@@ -108,12 +109,18 @@ export const useLocationPermission = () => {
             }
           }
         } catch (err) {
-          console.error('Error checking Android permissions:', err);
+          loggingService.error(
+            'Error checking Android permissions:',
+            err as Error,
+          );
           setStatus('unavailable');
         }
       }
     } catch (error) {
-      console.error('Error checking location permission:', error);
+      loggingService.error(
+        'Error checking location permission:',
+        error as Error,
+      );
       setStatus('unavailable');
     }
   }, [permissionRequestCount]);
@@ -215,7 +222,10 @@ export const useLocationPermission = () => {
         return permissionGranted;
       }
     } catch (error) {
-      console.error('Error requesting location permission:', error);
+      loggingService.error(
+        'Error requesting location permission:',
+        error as Error,
+      );
       setStatus('unavailable');
       return false;
     }

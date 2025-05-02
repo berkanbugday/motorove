@@ -20,6 +20,7 @@ declare module 'react-native-config' {
     DEBUG_MODE: string;
     ANALYTICS_ENABLED: string;
     CRASH_REPORTING_ENABLED: string;
+    SENTRY_DSN: string;
 
     // Allow for additional keys
     [key: string]: string | undefined;

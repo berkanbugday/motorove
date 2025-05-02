@@ -6,6 +6,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {allMarkers} from './turkeyMarkers';
 import {MarkerInfoCard, InfoLine} from '@components/MarkerInfoCard';
 import {colors, rs} from '@theme';
+import {loggingService} from '@services/logging.service';
 
 interface MarkerInfo {
   id: string;
@@ -102,7 +103,7 @@ export const ExploreScreen: React.FC = () => {
     coordinates: [number, number],
     type: string,
   ) => {
-    console.log(`Marker ${id} pressed at ${coordinates}`);
+    loggingService.info(`Marker ${id} pressed at ${coordinates}`);
 
     // Create mock data for this marker based on its type
     const info: MarkerInfo = {
@@ -145,7 +146,7 @@ export const ExploreScreen: React.FC = () => {
   };
 
   const handleMapPress = (coords: [number, number]) => {
-    console.log('Map pressed at', coords);
+    loggingService.info('Map pressed at', coords);
     // Hide the marker info card when clicking elsewhere on the map
     setSelectedMarker(null);
   };
@@ -160,7 +161,7 @@ export const ExploreScreen: React.FC = () => {
         showUserLocation={true}
         showZoomControls={true}
         style={styles.map}
-        onMapLoaded={() => console.log('Map loaded')}
+        onMapLoaded={() => loggingService.info('Map loaded')}
         onMapPress={handleMapPress}
         // Set initial coordinates to Turkey
         initialCoordinates={{latitude: 39.1667, longitude: 35.6667}}
@@ -178,11 +179,13 @@ export const ExploreScreen: React.FC = () => {
             tags={selectedMarker.tags}
             distance={selectedMarker.distance}
             primaryAction="Get Directions"
-            onPrimaryAction={() => console.log('Navigate pressed')}
+            onPrimaryAction={() => loggingService.info('Navigate pressed')}
             secondaryAction="Call Now"
-            onSecondaryAction={() => console.log('Call Now pressed')}
+            onSecondaryAction={() => loggingService.info('Call Now pressed')}
             thirdyAction="Save to Favorites"
-            onThirdyAction={() => console.log('Save to Favorites pressed')}
+            onThirdyAction={() =>
+              loggingService.info('Save to Favorites pressed')
+            }
             onClose={() => setSelectedMarker(null)}
             variant="normal"
             style={styles.infoCard}

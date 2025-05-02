@@ -8,6 +8,7 @@ import {View, StyleSheet} from 'react-native';
 import {spacing} from '@theme';
 import {ProgressIndicator, ProgressIndicatorType} from '../ProgressIndicator';
 import {Subtitle} from '../Typography';
+import {loggingService} from '@services/logging.service';
 
 export type WizardStep = {
   id: string;
@@ -66,7 +67,7 @@ export const Wizard = forwardRef<WizardHandle, WizardProps>(
         const isValid = await Promise.resolve(currentStep.validate());
         return isValid;
       } catch (error) {
-        console.error('Validation error:', error);
+        loggingService.error('Validation error:', error as Error);
         return false;
       }
     };

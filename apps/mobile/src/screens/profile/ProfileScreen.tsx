@@ -3,6 +3,7 @@ import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useAuth} from '@navigation/utils/navigationUtils';
 import {colors, spacing} from '@theme';
+import {loggingService} from '@services/logging.service';
 
 /**
  * Profile Screen - Shows user profile and logout button
@@ -27,7 +28,7 @@ export const ProfileScreen: React.FC = () => {
               await logout();
               // Navigation will be handled by RootNavigator when auth state changes
             } catch (error) {
-              console.error('Error logging out:', error);
+              loggingService.error('Error logging out:', error as Error);
               Alert.alert('Error', 'Failed to logout. Please try again.');
             }
           },

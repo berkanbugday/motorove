@@ -98,9 +98,9 @@ export function SignupScreen() {
     }
   }
 
-  function handleLogin() {
-    // Navigate to login screen
-    navigation.navigate('Login');
+  function handleSignin() {
+    // Navigate to signin screen
+    navigation.navigate('Signin');
   }
 
   function handleResendVerificationEmail() {
@@ -316,16 +316,16 @@ export function SignupScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.loginContainer}>
+                <View style={styles.signinContainer}>
                   <Body color={colors.neutral.grey}>
-                    Already have an account?{' '}
+                    Already have an account?
                   </Body>
                   <Button
-                    title="Log in"
+                    title="Sign In"
                     variant="text"
-                    onPress={handleLogin}
-                    textStyle={styles.loginLink}
-                    testID="login-button"
+                    onPress={handleSignin}
+                    textStyle={styles.signinLink}
+                    testID="signin-button"
                   />
                 </View>
               </View>
@@ -427,13 +427,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loginContainer: {
+  signinContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loginLink: {
+  signinLink: {
     color: colors.primary.main,
+    marginLeft: -20,
   },
   termsCheckbox: {
     marginTop: 0,

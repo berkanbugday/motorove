@@ -1,5 +1,6 @@
 import {useCallback, useRef, useState, useMemo} from 'react';
 import Mapbox from '@rnmapbox/maps';
+import {loggingService} from '@services/logging.service';
 
 export interface MapStateHookProps {
   initialCoordinates?: {
@@ -70,7 +71,7 @@ export const useMapState = ({
           }
         })
         .catch(err => {
-          console.warn('Error updating map state:', err);
+          loggingService.warning('Error updating map state:', err);
         });
     });
   }, []);

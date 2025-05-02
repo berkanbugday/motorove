@@ -1,4 +1,5 @@
 import {NavigationProp, ParamListBase} from '@react-navigation/native';
+import {loggingService} from '@services/logging.service';
 
 /**
  * Helper function to navigate across stacks safely
@@ -26,10 +27,10 @@ export function navigateToScreen(
         // @ts-ignore - This works at runtime even if TypeScript doesn't recognize the screen
         parentNav.navigate(screenName, params);
       } catch (innerError) {
-        console.warn(`Failed to navigate to ${screenName}`, innerError);
+        loggingService.warning(`Failed to navigate to ${screenName}`);
       }
     } else {
-      console.warn(
+      loggingService.warning(
         `No parent navigator available to navigate to ${screenName}`,
       );
     }

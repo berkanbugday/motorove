@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuth as useAuthContext} from '@contexts';
 import {AuthContextType} from '../../types/auth.types';
-
+import {loggingService} from '@services/logging.service';
 // Storage key
 const FIRST_TIME_KEY = 'isFirstTime';
 
@@ -19,7 +19,10 @@ export const useFirstTimeCheck = () => {
         setIsFirstTime(value === null); // If value is null, this is the first time
         setIsLoading(false);
       } catch (error) {
-        console.error('Error checking first time status:', error);
+        loggingService.error(
+          'Error checking first time status:',
+          error as Error,
+        );
         setIsFirstTime(true);
         setIsLoading(false);
       }
@@ -34,7 +37,7 @@ export const useFirstTimeCheck = () => {
       await AsyncStorage.setItem(FIRST_TIME_KEY, 'false');
       setIsFirstTime(false);
     } catch (error) {
-      console.error('Error marking as not first time:', error);
+      loggingService.error('Error marking as not first time:', error as Error);
     }
   };
 
@@ -52,7 +55,7 @@ export function useAuth() {
 
   // Debug log when auth state changes
   useEffect(() => {
-    console.log('Auth state in useAuth hook:', {
+    loggingService.info('Auth state in useAuth hook:', {
       hasUser: Boolean(authContext.user),
       hasToken: Boolean(authContext.accessToken),
       isAuthenticated,
@@ -63,7 +66,7 @@ export function useAuth() {
     isAuthenticated,
     isLoading: authContext.isLoading,
     user: authContext.user,
-    login: authContext.signIn,
+    signin: authContext.signIn,
     signup: authContext.signUp,
     logout: authContext.signOut,
   };
