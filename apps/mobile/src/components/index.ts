@@ -1,26 +1,36 @@
-// UI Components
-export * from './Icon';
-export * from './AnimatedInput';
-export * from './Button';
-export * from './TopHeaderBar';
-export * from './Checkbox';
-export * from './BottomSheet';
-export * from './Wizard';
-export * from './ProgressIndicator';
-export * from './Typography';
+// UI Components - Export everything from each component
+export * from './ErrorBoundary';
+export * from './NetworkAware';
+export * from './ToastMessage';
+export * from './Tab';
 export * from './Dropdown';
-export * from './Chip';
-export * from './LocationPermissionOverlay';
-export * from './Banner';
-export * from './FullImageCard';
-export * from './GroupEventCard';
-export * from './GroupEventBanner';
-export * from './PageIndicator';
-export * from './WeatherWidget';
+export * from './DropdownMenu';
 export * from './FeedCard';
 export * from './Comment/CommentItem';
 export * from './Comment/CommentInput';
-export * from './DropdownMenu';
+export * from './FullImageCard';
+export * from './TopHeaderBar';
+export * from './FullscreenOverlay';
+export * from './Banner';
+export * from './WeatherWidget';
+export * from './PageIndicator';
+export * from './GroupEventBanner';
+export * from './GroupEventCard';
+export * from './LocationPermissionOverlay';
+export * from './Checkbox';
+export * from './Chip';
+export * from './Typography';
+export * from './ProgressIndicator';
+export * from './Wizard';
+export * from './BottomSheet';
+export * from './Button';
+export * from './AnimatedInput';
 export * from './MapView';
 export * from './MarkerInfoCard';
-export * from './ToastMessage';
+export * from './FAB';
+
+// Higher-order components
+export * from './withErrorHandling';
+
+// Export the Icon component
+export {Icon} from './Icon';

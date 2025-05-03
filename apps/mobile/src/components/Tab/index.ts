@@ -1,0 +1,15 @@
+export {
+  Tabs,
+  Tab,
+  TabContent,
+  TabPanel,
+  type TabVariant,
+  type TabSize,
+  type TabPosition,
+  type TabAlign,
+  type TabItem,
+  type TabsProps,
+  type TabItemProps,
+  type TabContentProps,
+  type TabPanelProps,
+} from './Tab';
