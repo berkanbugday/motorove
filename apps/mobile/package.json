@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android:dev": "ENVFILE=.env.dev react-native run-android --mode=devDebug --appId com.motorove.dev",
-    "android:staging": "ENVFILE=.env.staging react-native run-android --mode=stagingDebug --appId com.motorove.staging",
-    "android:prod": "ENVFILE=.env.prod react-native run-android --mode=prodDebug",
+    "android:dev": "ENVFILE=.env.dev react-native run-android --port 8082 --mode=devDebug --appId com.motorove.dev",
+    "android:staging": "ENVFILE=.env.staging react-native run-android --port 8082 --mode=stagingDebug --appId com.motorove.staging",
+    "android:prod": "ENVFILE=.env.prod react-native run-android --port 8082 --mode=prodDebug",
     "android:release:dev": "ENVFILE=.env.dev react-native run-android --mode=devRelease --appId com.motorove.dev",
     "android:release:staging": "ENVFILE=.env.staging react-native run-android --mode=stagingRelease --appId com.motorove.staging",
     "android:release:prod": "ENVFILE=.env.prod react-native run-android --mode=prodRelease",
