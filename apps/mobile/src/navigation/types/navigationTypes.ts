@@ -40,6 +40,7 @@ export type MainStackParamList = {
   Tabs: undefined;
   Home: undefined;
   CommentDetail: {postId: string};
+  CreatePost: undefined;
   // Add more screens here as your app grows
   // Profile: {userId: string};
   // Settings: undefined;

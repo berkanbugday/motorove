@@ -194,7 +194,7 @@ type Props =
   | NativeStackScreenProps<MainStackParamList, 'Home'>
   | NativeStackScreenProps<TabParamList, 'HomeTab'>;
 
-export function HomeScreen({navigation}: Props) {
+export const HomeScreen = ({navigation}: Props) => {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
@@ -506,9 +506,13 @@ export function HomeScreen({navigation}: Props) {
         subtitle={`${user?.firstName || ''} ${user?.lastName || ''}`}
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
-        rightIconName="bell"
-        rightIconBadgeCount={5}
-        onRightButtonPress={() => loggingService.info('Notifications pressed')}
+        rightIconName="plus"
+        onRightButtonPress={() => navigateToScreen(navigation, 'CreatePost')}
+        secondRightIconName="bell"
+        secondRightIconBadgeCount={5}
+        onSecondRightButtonPress={() =>
+          loggingService.info('Notifications pressed')
+        }
       />
       <SafeAreaView
         style={[styles.container, {marginBottom: 60 + insets.bottom}]}>
@@ -618,7 +622,7 @@ export function HomeScreen({navigation}: Props) {
       </SafeAreaView>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

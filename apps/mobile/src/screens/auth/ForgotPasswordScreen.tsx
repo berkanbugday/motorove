@@ -31,7 +31,7 @@ import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-export function ForgotPasswordScreen() {
+export const ForgotPasswordScreen = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -219,7 +219,7 @@ export function ForgotPasswordScreen() {
       </SafeAreaView>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

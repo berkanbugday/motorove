@@ -60,9 +60,24 @@ export interface TopHeaderBarProps {
   onRightButtonPress?: () => void;
 
   /**
-   * Number to display as a badge on the right icon (if > 0)
+   * Optional icon name for the second right button
    */
-  rightIconBadgeCount?: number;
+  secondRightIconName?: IconName;
+
+  /**
+   * Optional text for the second right button
+   */
+  secondRightButtonText?: string;
+
+  /**
+   * Function to call when the second right button is pressed
+   */
+  onSecondRightButtonPress?: () => void;
+
+  /**
+   * Number to display as a badge on the second right icon (if > 0)
+   */
+  secondRightIconBadgeCount?: number;
 
   /**
    * Background color for the header
@@ -110,7 +125,10 @@ export function TopHeaderBar({
   rightIconName,
   rightButtonText,
   onRightButtonPress,
-  rightIconBadgeCount = 0,
+  secondRightIconName,
+  secondRightButtonText,
+  onSecondRightButtonPress,
+  secondRightIconBadgeCount = 0,
   backgroundColor = colors.neutral.white,
   textColor = colors.neutral.black,
   containerStyle,
@@ -184,7 +202,7 @@ export function TopHeaderBar({
           )}
         </View>
 
-        {/* Right section (optional button/icon) */}
+        {/* Right section (optional buttons/icons) */}
         <View style={styles.rightSection}>
           {(rightIconName || rightButtonText) && (
             <TouchableOpacity
@@ -194,17 +212,39 @@ export function TopHeaderBar({
               {rightIconName ? (
                 <View>
                   <Icon name={rightIconName} size={20} color={textColor} />
-                  {rightIconBadgeCount > 0 && (
-                    <View style={styles.badgeContainer}>
-                      <Text style={styles.badgeText}>
-                        {rightIconBadgeCount > 99 ? '99+' : rightIconBadgeCount}
-                      </Text>
-                    </View>
-                  )}
                 </View>
               ) : rightButtonText ? (
                 <Typography variant="buttonText" color={textColor}>
                   {rightButtonText}
+                </Typography>
+              ) : null}
+            </TouchableOpacity>
+          )}
+          {(secondRightIconName || secondRightButtonText) && (
+            <TouchableOpacity
+              onPress={onSecondRightButtonPress}
+              style={styles.rightButton}
+              hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
+              {secondRightIconName ? (
+                <View>
+                  <Icon
+                    name={secondRightIconName}
+                    size={20}
+                    color={textColor}
+                  />
+                  {secondRightIconBadgeCount > 0 && (
+                    <View style={styles.badgeContainer}>
+                      <Text style={styles.badgeText}>
+                        {secondRightIconBadgeCount > 99
+                          ? '99+'
+                          : secondRightIconBadgeCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              ) : secondRightButtonText ? (
+                <Typography variant="buttonText" color={textColor}>
+                  {secondRightButtonText}
                 </Typography>
               ) : null}
             </TouchableOpacity>
@@ -253,10 +293,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rightSection: {
+    flexDirection: 'row',
     width: 46,
     height: 46,
-    padding: spacing.sm,
     alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+    gap: spacing.sm,
   },
   rightButton: {
     padding: spacing.sm,

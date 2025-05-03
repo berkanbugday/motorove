@@ -30,7 +30,7 @@ interface MarkerInfo {
   distance: string;
 }
 
-export const ExploreScreen: React.FC = () => {
+export const ExploreScreen = () => {
   const [tags, setTags] = useState<Tag[]>([
     {
       id: '1',

@@ -5,6 +5,7 @@ import {HomeScreen} from '@screens/home';
 import {CommentDetailScreen} from '@screens/comment';
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
+import {CreatePostScreen} from '@screens/post';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -37,6 +38,12 @@ export function MainNavigator() {
         options={{
           headerShown: false,
         }}
+      />
+
+      <Stack.Screen
+        name="CreatePost"
+        component={CreatePostScreen}
+        options={{headerShown: false}}
       />
 
       {/* Add more screens here as your app grows */}

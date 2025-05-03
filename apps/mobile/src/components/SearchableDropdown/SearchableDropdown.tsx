@@ -46,6 +46,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   onClose,
   onOpen,
   testID,
+  searchable = true,
 }) => {
   const [isOpen, setIsOpen] = useState(initiallyOpen);
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
@@ -82,7 +83,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const filteredItems = data.filter(item => {
     // When dropdown is open and a selectedItem exists but no search query,
     // we want to show all items with the selected one highlighted
-    if (isOpen && selectedItem?.id && !searchQuery) {
+    if ((isOpen && selectedItem?.id && !searchQuery) || !searchable) {
       return true;
     }
 
@@ -129,8 +130,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     if (onOpen) {
       onOpen();
     }
-    // Focus the input when dropdown opens
-    if (inputRef.current) {
+    // Focus the input when dropdown opens if searchable
+    if (inputRef.current && searchable) {
       inputRef.current.focus();
     }
 
@@ -154,7 +155,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         }
       }
     }, 100);
-  }, [disabled, onOpen, selectedItem, data, isOpen]);
+  }, [disabled, onOpen, selectedItem, data, isOpen, searchable]);
 
   const closeDropdown = useCallback(() => {
     setIsOpen(false);
@@ -176,6 +177,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Handle search query change
   const handleSearchChange = (text: string) => {
+    if (!searchable) return;
+
     if (onSearchQueryChange) {
       onSearchQueryChange(text);
     } else {
@@ -205,7 +208,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const handleClear = () => {
     onSelect({id: '', label: '', value: null});
     setInternalSearchQuery('');
-    if (inputRef.current) {
+    if (inputRef.current && searchable) {
       inputRef.current.focus();
     }
   };
@@ -249,7 +252,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Handle label press to focus the input
   const handleLabelPress = () => {
-    if (inputRef.current) {
+    if (inputRef.current && searchable) {
       inputRef.current.focus();
     }
     openDropdown();
@@ -334,15 +337,15 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     ? {color: colors.neutral.black}
                     : {},
                 ]}
-                editable={!disabled && isOpen}
+                editable={!disabled && isOpen && searchable}
                 onFocus={openDropdown}
                 onBlur={() => setIsFocused(false)}
-                pointerEvents={isOpen ? 'auto' : 'none'}
+                pointerEvents={isOpen && searchable ? 'auto' : 'none'}
               />
             )}
 
             {/* Clear button */}
-            {(isOpen && searchQuery) ||
+            {(isOpen && searchQuery && searchable) ||
             (!isOpen && selectedItem && selectedItem.id) ? (
               <TouchableOpacity
                 onPress={handleClear}

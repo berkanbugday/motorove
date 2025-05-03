@@ -102,7 +102,7 @@ const currentUser = {
 
 type Props = NativeStackScreenProps<MainStackParamList, 'CommentDetail'>;
 
-export function CommentDetailScreen({navigation, route: {params}}: Props) {
+export const CommentDetailScreen = ({navigation, route: {params}}: Props) => {
   const [post, setPost] = useState<PostWithComments | null>(null);
   const [loading, setLoading] = useState(true);
   const [replyingTo, setReplyingTo] = useState<{
@@ -274,7 +274,7 @@ export function CommentDetailScreen({navigation, route: {params}}: Props) {
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

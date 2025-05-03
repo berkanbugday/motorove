@@ -37,6 +37,12 @@ export class SupabaseService {
     });
   }
 
+  async refreshToken(refreshToken: string) {
+    return this.supabase.auth.refreshSession({
+      refresh_token: refreshToken,
+    });
+  }
+
   async signOut() {
     return this.supabase.auth.signOut();
   }

@@ -33,7 +33,7 @@ import {colors, spacing, fontSizes, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {termsOfService, privacyPolicy} from '@constants/legalContent';
 
-export function SignupScreen() {
+export const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
@@ -379,7 +379,7 @@ export function SignupScreen() {
       </BottomSheet>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

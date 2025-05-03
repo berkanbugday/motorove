@@ -1,8 +1,9 @@
 import React, {Component, ErrorInfo, ReactNode} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {loggingService} from '@services/logging.service';
 import {errorService} from '@services/error.service';
-
+import {Body, Button, Title} from '@components';
+import {colors, spacing} from '@theme';
 interface Props {
   children: ReactNode;
   fallbackComponent?: ReactNode;
@@ -76,13 +77,18 @@ class ErrorBoundary extends Component<Props, State> {
       // Otherwise render the default fallback UI
       return (
         <View style={styles.container}>
-          <Text style={styles.title}>Something went wrong</Text>
-          <Text style={styles.message}>
+          <Title align="center" color={colors.primary.main}>
+            Something went wrong
+          </Title>
+          <Body align="center" color={colors.neutral.grey}>
             The application has encountered an unexpected error.
-          </Text>
-          <TouchableOpacity style={styles.button} onPress={this.resetError}>
-            <Text style={styles.buttonText}>Try Again</Text>
-          </TouchableOpacity>
+          </Body>
+          <Button
+            onPress={this.resetError}
+            variant="primary"
+            shape="round"
+            title="Try Again"
+          />
         </View>
       );
     }
@@ -95,31 +101,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#dc3545',
-  },
-  message: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#495057',
-  },
-  button: {
-    backgroundColor: '#0d6efd',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    paddingHorizontal: spacing.xl,
+    gap: spacing.md,
   },
 });
 

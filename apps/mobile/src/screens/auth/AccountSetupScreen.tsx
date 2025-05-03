@@ -71,7 +71,7 @@ const interestOptions = [
   {id: '12', label: 'Events'},
 ];
 
-export function AccountSetupScreen() {
+export const AccountSetupScreen = () => {
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedUserType, setSelectedUserType] = useState<DropdownItem | null>(
@@ -369,7 +369,7 @@ export function AccountSetupScreen() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

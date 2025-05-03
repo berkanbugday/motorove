@@ -24,4 +24,9 @@ export class AuthResolver {
     const { email, password } = signInInput;
     return this.authService.signIn(email, password);
   }
+
+  @Mutation(() => AuthResponse)
+  async refreshToken(@Args('token') token: string): Promise<AuthResponse> {
+    return this.authService.refreshToken(token);
+  }
 }

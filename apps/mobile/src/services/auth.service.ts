@@ -91,29 +91,47 @@ class AuthService {
   // Refresh token
   async refreshToken(): Promise<AuthResponse> {
     try {
-      const authState = await this.getAuthState();
-      const refreshToken = authState.refreshToken;
+      loggingService.info('Starting token refresh process');
+      const refreshToken = await EncryptedStorage.getItem(
+        STORAGE_KEYS.REFRESH_TOKEN,
+      );
 
-      if (!refreshToken) {
+      if (refreshToken) {
+        const parsedRefreshToken = JSON.parse(refreshToken);
+
+        loggingService.info('Making refresh token request to server');
+        const {data, errors} = await apolloClient.mutate({
+          mutation: REFRESH_TOKEN,
+          variables: {
+            token: parsedRefreshToken,
+          },
+        });
+
+        if (errors) {
+          loggingService.error('Token refresh error from GraphQL:', errors[0]);
+          throw errors[0];
+        }
+
+        if (!data || !data.refreshToken) {
+          loggingService.error('Refresh token response missing data');
+          throw new Error('Invalid refresh token response');
+        }
+
+        // Convert GraphQL response to our AuthResponse format
+        const authResponse = this.convertGraphQLAuthResponse(data.refreshToken);
+
+        if (!authResponse.session || !authResponse.session.access_token) {
+          loggingService.error('Refresh token response missing token data');
+          throw new Error('Invalid token data in refresh response');
+        }
+
+        loggingService.info('Token refresh successful, saving new auth data');
+        await this.saveAuthData(authResponse);
+        return authResponse;
+      } else {
+        loggingService.error('No refresh token available');
         throw new Error('No refresh token available');
       }
-
-      const {data, errors} = await apolloClient.mutate({
-        mutation: REFRESH_TOKEN,
-        variables: {
-          token: refreshToken,
-        },
-      });
-
-      if (errors) {
-        loggingService.error('Token refresh error:', errors[0]);
-        throw errors[0];
-      }
-
-      // Convert GraphQL response to our AuthResponse format
-      const authResponse = this.convertGraphQLAuthResponse(data.refreshToken);
-      await this.saveAuthData(authResponse);
-      return authResponse;
     } catch (error) {
       loggingService.error('Token refresh error:', error);
       // Clear auth data on refresh failure
@@ -295,6 +313,10 @@ class AuthService {
       await EncryptedStorage.setItem(
         STORAGE_KEYS.AUTH_DATA,
         JSON.stringify(authState),
+      );
+      await EncryptedStorage.setItem(
+        STORAGE_KEYS.REFRESH_TOKEN,
+        JSON.stringify(authState.refreshToken),
       );
     } catch (error) {
       loggingService.error('Error saving to encrypted storage:', error);

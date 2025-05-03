@@ -100,6 +100,46 @@ export class AuthService {
     };
   }
 
+  async refreshToken(token: string): Promise<AuthResponse> {
+    try {
+      // Use Supabase's refresh token functionality
+      const { data, error } = await this.supabaseService.refreshToken(token);
+
+      if (error) {
+        throw new UnauthorizedException(
+          error.message || 'Failed to refresh token',
+        );
+      }
+
+      if (!data.user) {
+        throw new UnauthorizedException('User not found during token refresh');
+      }
+
+      // Get user from our database
+      const user = await this.prismaService.user.findUnique({
+        where: { supabaseId: data.user.id },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return {
+        user: {
+          ...user,
+          firstName: user.firstName || undefined,
+          lastName: user.lastName || undefined,
+          avatar: user.avatar || undefined,
+        },
+        session: data.session || undefined,
+      };
+    } catch (error: any) {
+      const errorMessage = error.message || 'Token refresh failed';
+      console.error('Token refresh error:', errorMessage);
+      throw new UnauthorizedException(errorMessage);
+    }
+  }
+
   async validateUser(token: string): Promise<User> {
     const { data, error } = await this.supabaseService.getUser(token);
 

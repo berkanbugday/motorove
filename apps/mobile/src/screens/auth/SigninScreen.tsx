@@ -23,7 +23,7 @@ import {useAuth} from '@navigation/utils/navigationUtils';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {GraphQLFormattedError} from 'graphql';
 
-export function SigninScreen() {
+export const SigninScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const {signin} = useAuth();
   const {height} = useWindowDimensions();
@@ -201,7 +201,7 @@ export function SigninScreen() {
       </SafeAreaView>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

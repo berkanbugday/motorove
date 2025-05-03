@@ -129,4 +129,10 @@ export interface SearchableDropdownProps {
    * Optional test ID for UI testing
    */
   testID?: string;
+
+  /**
+   * Whether the dropdown allows searching
+   * When false, dropdown works as a regular select dropdown
+   */
+  searchable?: boolean;
 }
