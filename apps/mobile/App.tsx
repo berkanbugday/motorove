@@ -86,17 +86,17 @@ function App(): React.JSX.Element {
 
   return (
     <ErrorBoundary>
-      <ApolloProvider client={apolloClient}>
-        <GestureHandlerRootView style={{flex: 1}}>
-          <SafeAreaProvider>
-            <ToastMessage.Provider>
+      <ToastMessage.Provider>
+        <ApolloProvider client={apolloClient}>
+          <GestureHandlerRootView style={{flex: 1}}>
+            <SafeAreaProvider>
               <AuthProvider>
                 <RootNavigator />
               </AuthProvider>
-            </ToastMessage.Provider>
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
-      </ApolloProvider>
+            </SafeAreaProvider>
+          </GestureHandlerRootView>
+        </ApolloProvider>
+      </ToastMessage.Provider>
     </ErrorBoundary>
   );
 }

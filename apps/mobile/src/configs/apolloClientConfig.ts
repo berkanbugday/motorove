@@ -15,10 +15,32 @@ import {captureException} from '@sentry/react-native';
 import NetInfo from '@react-native-community/netinfo';
 import authService from '@services/auth.service';
 import {loggingService} from '@services/index';
+import {RetryLink} from '@apollo/client/link/retry';
+import {Platform} from 'react-native';
+
+// Create a retry link to automatically retry failed requests
+const retryLink = new RetryLink({
+  delay: {
+    initial: 300,
+    max: 10000,
+    jitter: true,
+  },
+  attempts: {
+    max: 3,
+    retryIf: (error, _operation) => {
+      // Only retry on network errors, not user errors
+      return !!error && error.name !== 'UserInputError';
+    },
+  },
+});
 
 // Create an HTTP link that points to our GraphQL endpoint
 const httpLink = createHttpLink({
   uri: `${AppConfig.API_URL}/graphql`,
+  // Add timeout config
+  fetchOptions: {
+    timeout: AppConfig.API_TIMEOUT,
+  },
 });
 
 // Enhanced error handling link
@@ -95,6 +117,7 @@ const errorLink = onError(
             tags: {
               network: true,
               operationName: operation.operationName,
+              platform: Platform.OS,
             },
             extra: {
               operationName: operation.operationName,
@@ -147,7 +170,7 @@ const authLink = setContext(async (_, {headers}) => {
 
 // Create the Apollo Client instance
 export const apolloClient = new ApolloClient({
-  link: from([errorLink, authLink, httpLink]),
+  link: from([retryLink, errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
