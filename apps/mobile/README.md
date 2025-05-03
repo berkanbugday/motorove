@@ -185,3 +185,97 @@ If you continue to face issues, consider using a more modern carousel library li
 
 - `react-native-reanimated-carousel`
 - `react-native-pager-view`
+
+## Image Configuration Guide
+
+### iOS Image Display Troubleshooting
+
+If images aren't displaying on iOS, check the following:
+
+1. **Info.plist Configuration**
+
+   - Ensure NSAppTransportSecurity allows loading from HTTP URLs
+   - Add required privacy permissions for photo library access
+
+   ```xml
+   <key>NSAppTransportSecurity</key>
+   <dict>
+      <key>NSAllowsArbitraryLoads</key>
+   	    <true/>
+   	  <key>NSAllowsLocalNetworking</key>
+   	    <true/>
+   	  <key>NSAllowsArbitraryLoadsInWebContent</key>
+   	    <true/>
+   </dict>
+   <key>NSPhotoLibraryUsageDescription</key>
+   <string>We need access to your photo library to let you share images</string>
+   <key>NSCameraUsageDescription</key>
+   <string>We need access to your camera to let you take photos</string>
+   <key>NSPhotoLibraryAddUsageDescription</key>
+   <string>We need access to save photos to your library</string>
+   ```
+
+2. **Image Loading Best Practices**
+
+   - **For local images**: Always use the `require()` method with a static string
+
+     ```jsx
+     <Image source={require('@assets/images/logo.png')} />
+     ```
+
+   - **For remote images**: Use secure URLs (https) when possible and provide dimensions
+
+     ```jsx
+     <Image
+       source={{uri: 'https://example.com/image.jpg'}}
+       style={{width: 200, height: 200}}
+     />
+     ```
+
+   - **For dynamic local images**: Pre-load images in an array or object
+     ```jsx
+     const images = {
+       profile: require('@assets/images/profile.png'),
+       logo: require('@assets/images/logo.png'),
+     };
+     // Then use with:
+     <Image source={images.profile} />;
+     ```
+
+3. **Common Issues and Solutions**
+
+   - **Cache issues**: Add cache control to remote images
+
+     ```jsx
+     <Image
+       source={{
+         uri: 'https://example.com/image.jpg',
+         cache: 'force-cache',
+       }}
+     />
+     ```
+
+   - **Image not scaling properly**: Set resizeMode property
+
+     ```jsx
+     <Image
+       source={{uri: imageUrl}}
+       style={{width: '100%', height: 200}}
+       resizeMode="cover"
+     />
+     ```
+
+   - **SVG support**: Use react-native-svg and react-native-svg-transformer for SVG files
+
+4. **Performance Optimization**
+
+   - Use FastImage library for better performance with remote images
+   - Implement image caching for frequently used images
+   - Properly size images before loading them in the app
+
+5. **Debug Tools**
+   - Use the React Native Debugger to inspect network requests
+   - Check XCode console for any image loading errors
+   - Verify the image URLs are accessible from the device
+
+After making changes to Info.plist, run `pod install` in the iOS directory to ensure changes are applied.

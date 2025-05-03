@@ -31,12 +31,9 @@ export const TabNavigator: React.FC<TabNavigatorProps> = ({
       })}
       tabBar={useCustomTabBar ? renderCustomTabBar : undefined}>
       <Tab.Screen name="HomeTab" component={HomeScreen} />
-
       <Tab.Screen name="ExploreTab" component={ExploreScreen} />
-
-      <Tab.Screen name="ProfileTab" component={ProfileScreen} />
-
       <Tab.Screen name="SettingsTab" component={SettingsScreen} />
+      <Tab.Screen name="ProfileTab" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };
