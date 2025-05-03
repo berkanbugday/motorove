@@ -11,7 +11,7 @@ import {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, spacing} from '@theme';
 import {Icon, IconName} from '../Icon';
-import {Typography, Title, BodySmall} from '../Typography';
+import {Typography, BodySmall, Subtitle} from '../Typography';
 
 export interface TopHeaderBarProps {
   /**
@@ -188,9 +188,9 @@ export function TopHeaderBar({
         {/* Middle section (title) */}
         <View style={styles.titleSection}>
           {title && (
-            <Title color={textColor} style={titleStyle} numberOfLines={1}>
+            <Subtitle color={textColor} style={titleStyle} numberOfLines={1}>
               {title}
-            </Title>
+            </Subtitle>
           )}
           {subtitle && (
             <BodySmall

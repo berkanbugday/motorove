@@ -50,7 +50,7 @@ export const SigninScreen = () => {
 
   async function onSubmit(data: SigninFormValues) {
     try {
-      await signin(data.email, data.password);
+      await signin(data.email.trim(), data.password.trim());
       // If successful, the navigation in RootNavigator will change to MainNavigator
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
