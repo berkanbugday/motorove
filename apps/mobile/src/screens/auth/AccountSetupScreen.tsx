@@ -27,7 +27,7 @@ import {
   Title,
   Chip,
 } from '@components';
-import SearchableDropdown, {DropdownItem} from '@components/SearchableDropdown';
+import Dropdown, {DropdownItem} from '@components/Dropdown';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
@@ -105,9 +105,9 @@ export const AccountSetupScreen = () => {
   });
 
   // Handle user type selection
-  const handleUserTypeSelect = (item: DropdownItem) => {
+  const handleUserTypeSelect = (item: DropdownItem | null) => {
     setSelectedUserType(item);
-    setValue('userType', item.value || '', {shouldValidate: true});
+    setValue('userType', item?.value || '', {shouldValidate: true});
   };
 
   // Handle interest selection
@@ -196,7 +196,7 @@ export const AccountSetupScreen = () => {
         />
 
         <View style={styles.dropdownContainer}>
-          <SearchableDropdown
+          <Dropdown
             data={userTypeOptions}
             label="User Type"
             selectedItem={selectedUserType}

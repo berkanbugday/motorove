@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
   TextInput,
   Image,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
   SafeAreaView,
   ImageStyle,
   TextStyle,
+  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {colors} from '../../theme/colors';
@@ -19,17 +19,20 @@ import {typography} from '../../theme/typography';
 import {Icon} from '../../components/Icon';
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {useAuth} from '@contexts/AuthContext';
-import {SearchableDropdown, Subtitle} from '@components';
-
+import {Button, Chip, DropdownItem, Dropdown, Subtitle} from '@components';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
   const [postText, setPostText] = useState('');
-  const [selectedImages] = useState([
-    {id: 1, uri: 'https://example.com/beach-sunset.jpg'},
-    {id: 2, uri: 'https://example.com/cafe.jpg'},
-  ]);
-
+  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
+    null,
+  );
+  const [selectedImages, setSelectedImages] = useState<
+    {id: number; uri: string}[]
+  >([]);
   const {user} = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -41,6 +44,35 @@ export const CreatePostScreen = () => {
     navigation.goBack();
   };
 
+  const handleSelectImage = async () => {
+    if (selectedImages.length >= 3) {
+      Alert.alert('Limit Reached', 'You can select a maximum of 3 images');
+      return;
+    }
+
+    try {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+        quality: 0.8,
+        selectionLimit: 1,
+      });
+
+      if (result.assets && result.assets.length > 0) {
+        const newImage = {
+          id: Date.now(),
+          uri: result.assets[0].uri || '',
+        };
+        setSelectedImages([...selectedImages, newImage]);
+      }
+    } catch (error) {
+      console.error('Error selecting image:', error);
+    }
+  };
+
+  const handleRemoveImage = (id: number) => {
+    setSelectedImages(selectedImages.filter(image => image.id !== id));
+  };
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -49,28 +81,40 @@ export const CreatePostScreen = () => {
         onBackPress={handleGoBack}
         containerStyle={styles.topHeaderBar}
       />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
         <ScrollView>
           {/* User Profile Section */}
           <View style={styles.profileSection}>
             <Image
-              source={{uri: 'https://example.com/profile-avatar.jpg'}}
+              source={{uri: 'https://picsum.photos/id/1005/100/100'}}
               style={styles.avatar as ImageStyle}
             />
             <View style={styles.profileInfo}>
               <Subtitle style={styles.profileName}>
                 {user?.firstName} {user?.lastName}
               </Subtitle>
-              <SearchableDropdown
+              <Dropdown
                 data={[
                   {id: 1, label: 'Public', value: 'public'},
-                  {id: 2, label: 'Private', value: 'private'},
+                  {id: 2, label: 'Group', value: 'group'},
                 ]}
                 placeholder="Select privacy"
-                onSelect={() => {}}
+                onSelect={item => setSelectedPrivacy(item)}
                 searchable={false}
+                selectedItem={selectedPrivacy}
                 containerStyle={styles.privacySelector}
+                inputStyle={styles.privacyInput}
               />
+
+              {selectedPrivacy?.value === 'group' && (
+                <Chip
+                  label="IMG Motorcycle Group"
+                  leadingIcon="users"
+                  size="small"
+                  variant="filled"
+                  color="secondary"
+                />
+              )}
             </View>
           </View>
 
@@ -86,45 +130,79 @@ export const CreatePostScreen = () => {
 
           {/* Image Gallery */}
           <View style={styles.imagesContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView
+              contentContainerStyle={styles.imageWrapper}
+              horizontal
+              showsHorizontalScrollIndicator={false}>
               {selectedImages.map(image => (
-                <View key={image.id}>
+                <View key={image.id} style={styles.imageContainer}>
                   <Image
                     source={{uri: image.uri}}
                     style={styles.postImage as ImageStyle}
                   />
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleRemoveImage(image.id)}>
+                    <Icon name="close" size={14} color={colors.neutral.white} />
+                  </TouchableOpacity>
                 </View>
               ))}
-              <TouchableOpacity style={styles.addImageButton}>
-                <Icon name="plus" size={24} color={colors.neutral.grey} />
-              </TouchableOpacity>
+              {selectedImages.length < 3 && (
+                <TouchableOpacity
+                  style={styles.addImageButton}
+                  onPress={handleSelectImage}>
+                  <Icon name="plus" size={24} color={colors.neutral.grey} />
+                </TouchableOpacity>
+              )}
             </ScrollView>
           </View>
 
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity style={styles.actionButton}>
+            {/* <TouchableOpacity style={styles.actionButton}>
               <Icon name="map-pin" size={20} color={colors.neutral.black} />
               <Text style={styles.actionButtonText}>Add location</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+            <Button
+              variant="text"
+              iconName="map-pin"
+              iconColor={colors.neutral.black}
+              iconSize={18}
+              onPress={() => {}}
+              textStyle={styles.actionButtonText}
+              title="Add location"
+            />
+            <Button
+              variant="text"
+              iconName="route"
+              iconColor={colors.neutral.black}
+              iconSize={18}
+              onPress={() => {}}
+              textStyle={styles.actionButtonText}
+              title="Add route"
+            />
 
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="route" size={20} color={colors.neutral.black} />
-              <Text style={styles.actionButtonText}>Add route</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="users" size={20} color={colors.neutral.black} />
-              <Text style={styles.actionButtonText}>Tag people</Text>
-            </TouchableOpacity>
+            <Button
+              variant="text"
+              iconName="users"
+              iconColor={colors.neutral.black}
+              iconSize={18}
+              onPress={() => {}}
+              textStyle={styles.actionButtonText}
+              title="Tag people"
+            />
           </View>
         </ScrollView>
 
         {/* Post Button */}
         <View style={styles.postButtonContainer}>
-          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
-            <Text style={styles.postButtonText as TextStyle}>Post</Text>
-          </TouchableOpacity>
+          <Button
+            variant="dark"
+            size="medium"
+            shape="round"
+            onPress={handlePost}
+            title="Post"
+          />
         </View>
       </SafeAreaView>
     </View>
@@ -142,13 +220,12 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     flexDirection: 'row',
-    alignItems: 'center',
     padding: spacing.md,
   },
   avatar: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: radius.round,
     backgroundColor: colors.secondary.light,
   },
   profileInfo: {
@@ -159,23 +236,29 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   privacySelector: {
-    width: '60%',
+    width: '70%',
+    marginBottom: spacing.sm,
   },
-  privacyText: {
-    ...(typography.bodySmall as TextStyle),
-    marginRight: spacing.xs,
-    color: colors.neutral.black,
+  privacyInput: {
+    height: 40,
   },
   postInput: {
     ...(typography.body as TextStyle),
     color: colors.neutral.black,
     padding: spacing.md,
-    maxHeight: 200,
+    height: 200,
     textAlignVertical: 'top',
   },
   imagesContainer: {
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
+  },
+  imageWrapper: {
+    padding: 10,
+    gap: spacing.md,
+  },
+  imageContainer: {
+    position: 'relative',
   },
   postImage: {
     width: 100,
@@ -190,35 +273,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  deleteButton: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    backgroundColor: colors.primary.main,
+    borderRadius: radius.round,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   actionButtonsContainer: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.light,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
+    alignItems: 'flex-start',
   },
   actionButtonText: {
     ...(typography.bodySmall as TextStyle),
-    color: colors.neutral.black,
-    marginLeft: spacing.sm,
   },
   postButtonContainer: {
-    padding: spacing.md,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.light,
-  },
-  postButton: {
-    backgroundColor: colors.neutral.black,
-    paddingVertical: spacing.md,
-    borderRadius: radius.lg,
-    alignItems: 'center',
-  },
-  postButtonText: {
-    ...(typography.buttonText as TextStyle),
-    color: colors.neutral.white,
   },
 });

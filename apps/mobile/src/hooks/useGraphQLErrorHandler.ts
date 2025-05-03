@@ -10,7 +10,7 @@ import {GraphQLFormattedError} from 'graphql';
  * Custom hook for handling GraphQL errors with more detailed control
  */
 export const useGraphQLErrorHandler = () => {
-  const {handleError, showErrorToast} = useErrorHandler();
+  const {handleError, showSuccessToast} = useErrorHandler();
 
   /**
    * Handle specific GraphQL error codes
@@ -132,7 +132,7 @@ export const useGraphQLErrorHandler = () => {
 
           // Show success message if provided
           if (options.successMessage) {
-            useErrorHandler().showSuccessToast(options.successMessage);
+            showSuccessToast(options.successMessage);
           }
 
           return result;
@@ -148,7 +148,7 @@ export const useGraphQLErrorHandler = () => {
         }
       };
     },
-    [handleError, handleGraphQLError],
+    [handleError, handleGraphQLError, showSuccessToast],
   );
 
   return {

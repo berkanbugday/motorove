@@ -1,5 +1,5 @@
 /**
- * SearchableDropdown types
+ * Dropdown types
  */
 
 export interface DropdownItem {
@@ -9,7 +9,7 @@ export interface DropdownItem {
   [key: string]: any; // Allow for additional properties
 }
 
-export interface SearchableDropdownProps {
+export interface DropdownProps {
   /**
    * Array of items to display in the dropdown
    */
@@ -33,7 +33,7 @@ export interface SearchableDropdownProps {
   /**
    * Callback function when an item is selected
    */
-  onSelect: (item: DropdownItem) => void;
+  onSelect: (item: DropdownItem | null) => void;
 
   /**
    * Optional custom render function for list items

@@ -21,6 +21,11 @@ interface GqlContext {
   };
 }
 
+interface ExceptionExtension {
+  stacktrace: string[];
+  originalError?: string;
+}
+
 @Catch()
 export class GraphqlExceptionFilter implements GqlExceptionFilter {
   constructor(
@@ -78,21 +83,44 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       extra: {
         statusCode,
         path: request?.path,
-        context,
+        context:
+          typeof context === 'object' && context !== null
+            ? JSON.stringify(context)
+            : undefined,
       },
     });
 
     // Create and return a GraphQL error
-    return new GraphQLError(message, {
-      extensions: {
-        code: this.errorCodeToString(statusCode),
-        exception: {
-          stacktrace: stack?.split('\n') || [],
-          ...(this.configService.isDevelopment()
-            ? { originalError: error }
-            : {}),
-        },
+    const extensions: {
+      code: string;
+      exception: ExceptionExtension;
+    } = {
+      code: this.errorCodeToString(statusCode),
+      exception: {
+        stacktrace: stack?.split('\n') || [],
       },
+    };
+
+    // Only include original error in development mode
+    if (this.configService.isDevelopment()) {
+      // Handle different error types safely
+      if (error === undefined || error === null) {
+        extensions.exception.originalError = String(error);
+      } else if (error instanceof Error) {
+        extensions.exception.originalError = error.message;
+      } else if (typeof error === 'object') {
+        try {
+          extensions.exception.originalError = JSON.stringify(error);
+        } catch {
+          extensions.exception.originalError = '[Unstringifiable Object]';
+        }
+      } else {
+        extensions.exception.originalError = String(error);
+      }
+    }
+
+    return new GraphQLError(message, {
+      extensions,
     });
   }
 
@@ -125,7 +153,7 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       error: exception,
       message: 'Internal server error',
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      stack: exception instanceof Error ? exception.stack : undefined,
+      stack: undefined,
     };
   }
 

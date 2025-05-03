@@ -42,13 +42,25 @@ export class CustomLogger implements LoggerService {
             format.printf((info) => {
               const { timestamp, level, message, context, ...rest } = info;
               const contextValue = context || this.context;
-              const contextStr = contextValue
-                ? `[${
-                    typeof contextValue === 'object'
-                      ? JSON.stringify(contextValue)
-                      : String(contextValue)
-                  }]`
-                : '';
+              let contextStr = '';
+              if (contextValue) {
+                if (typeof contextValue === 'object' && contextValue !== null) {
+                  contextStr = `[${JSON.stringify(contextValue)}]`;
+                } else if (contextValue === null) {
+                  contextStr = '[null]';
+                } else if (contextValue === undefined) {
+                  contextStr = '[undefined]';
+                } else if (typeof contextValue === 'string') {
+                  contextStr = `[${contextValue}]`;
+                } else if (
+                  typeof contextValue === 'number' ||
+                  typeof contextValue === 'boolean'
+                ) {
+                  contextStr = `[${contextValue.toString()}]`;
+                } else {
+                  contextStr = `[${JSON.stringify(contextValue)}]`;
+                }
+              }
               const metaStr = Object.keys(rest).length
                 ? JSON.stringify(rest)
                 : '';

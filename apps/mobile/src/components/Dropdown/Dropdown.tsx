@@ -11,8 +11,8 @@ import {
   LayoutChangeEvent,
   ScrollView,
 } from 'react-native';
-import {createStyles} from './SearchableDropdown.styles';
-import {DropdownItem, SearchableDropdownProps} from './types';
+import {createStyles} from './Dropdown.styles';
+import {DropdownItem, DropdownProps} from './types';
 import {colors, fontSizes, spacing} from '@theme';
 import {Icon} from '@components/Icon';
 
@@ -21,7 +21,7 @@ const ANIMATION_DURATION = 200;
 const LABEL_LEFT_POSITION = spacing.md;
 const LABEL_TOP_POSITION = spacing.md;
 
-const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
+const Dropdown: React.FC<DropdownProps> = ({
   data,
   label,
   placeholder = 'Search...',
@@ -177,7 +177,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Handle search query change
   const handleSearchChange = (text: string) => {
-    if (!searchable) return;
+    if (!searchable) {
+      return;
+    }
 
     if (onSearchQueryChange) {
       onSearchQueryChange(text);
@@ -206,7 +208,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 
   // Clear selection
   const handleClear = () => {
-    onSelect({id: '', label: '', value: null});
+    onSelect(null);
     setInternalSearchQuery('');
     if (inputRef.current && searchable) {
       inputRef.current.focus();
@@ -462,4 +464,4 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   );
 };
 
-export default SearchableDropdown;
+export default Dropdown;

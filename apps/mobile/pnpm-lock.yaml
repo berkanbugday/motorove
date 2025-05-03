@@ -71,6 +71,9 @@ importers:
       react-native-gesture-handler:
         specifier: ^2.25.0
         version: 2.25.0(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0)
+      react-native-image-picker:
+        specifier: ^8.2.0
+        version: 8.2.0(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0)
       react-native-reanimated:
         specifier: ^3.17.4
         version: 3.17.5(@babel/core@7.26.10)(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0)
@@ -3817,6 +3820,12 @@ packages:
 
   react-native-gesture-handler@2.25.0:
     resolution: {integrity: sha512-NPjJi6mislXxvjxQPU9IYwBjb1Uejp8GvAbE1Lhh+xMIMEvmgAvVIp5cz1P+xAbV6uYcRRArm278+tEInGOqWg==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+
+  react-native-image-picker@8.2.0:
+    resolution: {integrity: sha512-jIGllQJuJIn0YKss/JEeb0Kos1HSsnIpU+i3bYxR27sOxSyDZQyP9dKR22olssQPlfH+rGNR/Jc6xKRkhm48vw==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -9238,6 +9247,11 @@ snapshots:
       '@egjs/hammerjs': 2.0.17
       hoist-non-react-statics: 3.3.2
       invariant: 2.2.4
+      react: 19.0.0
+      react-native: 0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0)
+
+  react-native-image-picker@8.2.0(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0):
+    dependencies:
       react: 19.0.0
       react-native: 0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0)
 

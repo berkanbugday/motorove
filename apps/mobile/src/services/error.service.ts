@@ -46,7 +46,12 @@ class ErrorService {
     options: ErrorHandlingOptions = {},
   ): Promise<void> {
     const opts = {...defaultOptions, ...options};
-    const {showToast, logToSentry, context, fallbackMessage} = opts;
+    const {
+      showToast: shouldShowToast,
+      logToSentry,
+      context,
+      fallbackMessage,
+    } = opts;
 
     // Get user-friendly error message
     const errorMessage = errorToMessage(error, fallbackMessage);
@@ -56,7 +61,7 @@ class ErrorService {
       const netInfo = await NetInfo.fetch();
       if (!netInfo.isConnected) {
         this.handleNetworkError(errorMessage, {
-          showToast,
+          showToast: shouldShowToast,
           logToSentry,
           context: {...context, netInfo},
         });
@@ -73,7 +78,7 @@ class ErrorService {
     }
 
     // Show toast if enabled
-    if (showToast) {
+    if (shouldShowToast) {
       this.showErrorToast(errorMessage);
     }
   }
@@ -85,7 +90,7 @@ class ErrorService {
     message: string = 'Network connection is unavailable',
     options: ErrorHandlingOptions = {},
   ): void {
-    const {showToast, logToSentry, context} = options;
+    const {showToast: shouldShowToast, logToSentry, context} = options;
 
     // Log to Sentry if enabled
     if (logToSentry) {
@@ -96,7 +101,7 @@ class ErrorService {
     }
 
     // Show toast if enabled
-    if (showToast) {
+    if (shouldShowToast) {
       this.showErrorToast(
         message || 'Please check your internet connection and try again',
       );
@@ -107,7 +112,9 @@ class ErrorService {
    * Check if an error is likely a network error
    */
   private isNetworkError(error: any): boolean {
-    if (!error) return false;
+    if (!error) {
+      return false;
+    }
 
     // Common network error patterns
     return (

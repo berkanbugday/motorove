@@ -7,9 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
   Image,
-  TouchableOpacity,
   useWindowDimensions,
-  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -118,14 +116,15 @@ export const SignupScreen = () => {
     navigation.navigate('Signup');
   }
 
-  function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
-    // Notify user that social signup is not implemented yet
-    Alert.alert(
-      'Not Implemented',
-      `Social signup with ${provider} is not implemented yet.`,
-      [{text: 'OK'}],
-    );
-  }
+  // Social signup is commented out in UI, so this function is not currently used
+  // function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
+  //   // Notify user that social signup is not implemented yet
+  //   Alert.alert(
+  //     'Not Implemented',
+  //     `Social signup with ${provider} is not implemented yet.`,
+  //     [{text: 'OK'}],
+  //   );
+  // }
 
   function handleTermsPress() {
     termsBottomSheetRef.current?.open('full');

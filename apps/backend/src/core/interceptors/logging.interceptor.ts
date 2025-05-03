@@ -9,6 +9,18 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CustomLogger } from '../utils/logger.service';
 import { Request } from 'express';
+import { GraphQLResolveInfo } from 'graphql';
+
+interface GqlInfo {
+  operation: {
+    operation: string;
+  };
+  fieldName: string;
+}
+
+interface GqlContextType {
+  req?: Request;
+}
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -19,13 +31,13 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const now = Date.now();
     const gqlContext = GqlExecutionContext.create(context);
-    const info = gqlContext.getInfo();
-    const ctx = gqlContext.getContext();
+    const info = gqlContext.getInfo<GraphQLResolveInfo>() as GqlInfo;
+    const ctx = gqlContext.getContext<GqlContextType>();
 
     // Get the operation name and type
     const operationType = info.operation.operation;
     const operationName = info.fieldName;
-    const variables = gqlContext.getArgs();
+    const variables = gqlContext.getArgs<Record<string, unknown>>();
     const userAgent = ctx.req?.headers?.['user-agent'] || 'unknown';
     const ip = this.getClientIp(ctx.req);
 
@@ -52,7 +64,7 @@ export class LoggingInterceptor implements NestInterceptor {
             ip,
           });
         },
-        error: (error) => {
+        error: (error: Error) => {
           const duration = Date.now() - now;
           this.logger.warn({
             message: `GraphQL ${operationType} ${operationName} failed in ${duration}ms`,
@@ -72,21 +84,20 @@ export class LoggingInterceptor implements NestInterceptor {
     if (!request) return undefined;
 
     // Get IP from various headers that might be set by proxies
-    const xForwardedFor = (request.headers?.['x-forwarded-for'] as string)
-      ?.split(',')[0]
-      ?.trim();
+    const forwardedHeader = request.headers?.['x-forwarded-for'];
+    const xForwardedFor =
+      typeof forwardedHeader === 'string'
+        ? forwardedHeader.split(',')[0]?.trim()
+        : undefined;
+
     if (xForwardedFor) return xForwardedFor;
 
     // Check other common headers
-    const xRealIp = request.headers?.['x-real-ip'] as string;
+    const xRealIp = request.headers?.['x-real-ip'] as string | undefined;
     if (xRealIp) return xRealIp;
 
     // Fallback to socket address
-    const remoteAddress =
-      (request as any).connection?.remoteAddress ||
-      (request as any).socket?.remoteAddress ||
-      'unknown';
-
-    return remoteAddress;
+    const connection = request.socket?.remoteAddress || 'unknown';
+    return connection;
   }
 }

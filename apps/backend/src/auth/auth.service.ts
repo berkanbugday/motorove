@@ -133,8 +133,9 @@ export class AuthService {
         },
         session: data.session || undefined,
       };
-    } catch (error: any) {
-      const errorMessage = error.message || 'Token refresh failed';
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Token refresh failed';
       console.error('Token refresh error:', errorMessage);
       throw new UnauthorizedException(errorMessage);
     }
