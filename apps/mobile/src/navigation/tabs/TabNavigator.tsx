@@ -4,7 +4,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {HomeScreen} from '@screens/home';
 import {ExploreScreen} from '@screens/explore';
 import {ProfileScreen} from '@screens/profile';
-import {SettingsScreen} from '@screens/settings';
+import {GroupScreen} from '@screens/group';
 import {TabParamList} from '../types/navigationTypes';
 import {CustomTabBar} from './CustomTabBar';
 
@@ -32,7 +32,11 @@ export const TabNavigator: React.FC<TabNavigatorProps> = ({
       tabBar={useCustomTabBar ? renderCustomTabBar : undefined}>
       <Tab.Screen name="HomeTab" component={HomeScreen} />
       <Tab.Screen name="ExploreTab" component={ExploreScreen} />
-      <Tab.Screen name="SettingsTab" component={SettingsScreen} />
+      <Tab.Screen
+        name="GroupTab"
+        options={{title: 'Groups'}}
+        component={GroupScreen}
+      />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} />
     </Tab.Navigator>
   );

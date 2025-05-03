@@ -16,7 +16,7 @@ export const useTabBadge = () => {
    */
   const setTabBadge = useCallback(
     (
-      tabName: 'HomeTab' | 'ExploreTab' | 'ProfileTab' | 'SettingsTab',
+      tabName: 'HomeTab' | 'ExploreTab' | 'GroupTab' | 'ProfileTab',
       count: number | undefined,
     ) => {
       navigation.setOptions({
@@ -60,12 +60,12 @@ export const useTabBadge = () => {
   );
 
   /**
-   * Set a badge for the settings tab
+   * Set a badge for the group tab
    * @param count Badge count value (set to undefined to hide badge)
    */
-  const setSettingsBadge = useCallback(
+  const setGroupBadge = useCallback(
     (count: number | undefined) => {
-      setTabBadge('SettingsTab', count);
+      setTabBadge('GroupTab', count);
     },
     [setTabBadge],
   );
@@ -75,6 +75,6 @@ export const useTabBadge = () => {
     setHomeBadge,
     setExploreBadge,
     setProfileBadge,
-    setSettingsBadge,
+    setGroupBadge,
   };
 };

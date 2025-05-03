@@ -9,7 +9,7 @@ import {
   Text,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {colors, spacing} from '@theme';
+import {colors, radius, spacing} from '@theme';
 import {Icon, IconName} from '../Icon';
 import {Typography, BodySmall, Subtitle} from '../Typography';
 
@@ -165,25 +165,23 @@ export function TopHeaderBar({
       <View style={styles.contentContainer}>
         {/* Left section (back button or custom icon) */}
 
-        {showBackButton ? (
-          <View style={styles.leftSection}>
+        <View style={styles.leftSection}>
+          {showBackButton ? (
             <TouchableOpacity
               onPress={onBackPress}
               style={styles.backButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               <Icon name="arrow-left" size={24} color={textColor} />
             </TouchableOpacity>
-          </View>
-        ) : leftIconName ? (
-          <View style={styles.leftSection}>
+          ) : leftIconName ? (
             <TouchableOpacity
               onPress={onLeftIconPress}
               style={styles.backButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               <Icon name={leftIconName} size={24} color={textColor} />
             </TouchableOpacity>
-          </View>
-        ) : null}
+          ) : null}
+        </View>
 
         {/* Middle section (title) */}
         <View style={styles.titleSection}>
@@ -281,7 +279,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screen.horizontal,
   },
   leftSection: {
-    width: 46,
+    width: '5%',
     alignItems: 'flex-start',
   },
   backButton: {
@@ -289,22 +287,20 @@ const styles = StyleSheet.create({
   },
   titleSection: {
     flex: 1,
+    width: '85%',
     alignItems: 'center',
     justifyContent: 'center',
   },
   rightSection: {
+    width: '10%',
     flexDirection: 'row',
-    width: 46,
-    height: 46,
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
     gap: spacing.sm,
   },
   rightButton: {
     padding: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.backgroundLight,
-    borderRadius: 50,
+    borderRadius: radius.round,
     backgroundColor: colors.neutral.backgroundLight,
   },
   badgeContainer: {

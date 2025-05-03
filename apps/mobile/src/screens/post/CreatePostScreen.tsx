@@ -109,7 +109,7 @@ export const CreatePostScreen = () => {
               {selectedPrivacy?.value === 'group' && (
                 <Chip
                   label="IMG Motorcycle Group"
-                  leadingIcon="users"
+                  leadingIcon="users-filled"
                   size="small"
                   variant="filled"
                   color="secondary"
@@ -184,7 +184,7 @@ export const CreatePostScreen = () => {
 
             <Button
               variant="text"
-              iconName="users"
+              iconName="users-filled"
               iconColor={colors.neutral.black}
               iconSize={18}
               onPress={() => {}}

@@ -18,10 +18,14 @@ import Check from '@assets/icons/check.svg';
 import MapPin from '@assets/icons/map-pin.svg';
 import Route from '@assets/icons/route.svg';
 import Users from '@assets/icons/users.svg';
+import UsersFilled from '@assets/icons/users-filled.svg';
 import Wrench from '@assets/icons/wrench.svg';
 import Home from '@assets/icons/home.svg';
+import HomeFilled from '@assets/icons/home-filled.svg';
 import MapLocation from '@assets/icons/map-location.svg';
+import MapLocationFilled from '@assets/icons/map-location-filled.svg';
 import UserGear from '@assets/icons/user-gear.svg';
+import UserGearFilled from '@assets/icons/user-gear-filled.svg';
 import Bell from '@assets/icons/bell.svg';
 import Like from '@assets/icons/like.svg';
 import LikeFilled from '@assets/icons/like-filled.svg';
@@ -74,10 +78,14 @@ export type IconName =
   | 'map-pin'
   | 'route'
   | 'users'
+  | 'users-filled'
   | 'wrench'
   | 'home'
+  | 'home-filled'
   | 'map-location'
+  | 'map-location-filled'
   | 'user-gear'
+  | 'user-gear-filled'
   | 'bell'
   | 'like'
   | 'like-filled'
@@ -160,14 +168,22 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Route {...commonProps} />;
     case 'users':
       return <Users {...commonProps} />;
+    case 'users-filled':
+      return <UsersFilled {...commonProps} />;
     case 'wrench':
       return <Wrench {...commonProps} />;
     case 'home':
       return <Home {...commonProps} />;
+    case 'home-filled':
+      return <HomeFilled {...commonProps} />;
     case 'map-location':
       return <MapLocation {...commonProps} />;
+    case 'map-location-filled':
+      return <MapLocationFilled {...commonProps} />;
     case 'user-gear':
       return <UserGear {...commonProps} />;
+    case 'user-gear-filled':
+      return <UserGearFilled {...commonProps} />;
     case 'bell':
       return <Bell {...commonProps} />;
     case 'like':

@@ -108,7 +108,7 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
           {organizer}
         </Caption>
         <View style={styles.participantsContainer}>
-          <Icon name="users" size={14} />
+          <Icon name="users-filled" size={14} />
           <Caption color={colors.neutral.grey} style={styles.participantsText}>
             {participantCount} / {memberCount} members
           </Caption>

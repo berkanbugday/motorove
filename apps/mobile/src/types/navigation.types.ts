@@ -27,8 +27,8 @@ export type AuthScreenRouteProp<T extends keyof AuthStackParamList> = RouteProp<
 export type TabParamList = {
   HomeTab: undefined;
   ExploreTab: undefined;
+  GroupTab: undefined;
   ProfileTab: undefined;
-  SettingsTab: undefined;
 };
 
 export type TabScreenNavigationProp<T extends keyof TabParamList> =

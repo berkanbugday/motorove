@@ -1,7 +1,6 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import {HomeScreen} from '@screens/home';
 import {CommentDetailScreen} from '@screens/comment';
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
@@ -24,15 +23,6 @@ export function MainNavigator() {
 
       {/* Individual screens that can be navigated to from tabs */}
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          title: 'Motorove',
-          headerShown: true,
-        }}
-      />
-
-      <Stack.Screen
         name="CommentDetail"
         component={CommentDetailScreen}
         options={{
@@ -45,26 +35,6 @@ export function MainNavigator() {
         component={CreatePostScreen}
         options={{headerShown: false}}
       />
-
-      {/* Add more screens here as your app grows */}
-      {/* Example:
-      <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          title: 'My Profile',
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          title: 'Settings',
-          headerShown: true,
-        }}
-      />
-      */}
     </Stack.Navigator>
   );
 }
