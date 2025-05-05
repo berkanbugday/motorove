@@ -16,6 +16,7 @@ export default () => {
     app: {
       name: process.env.APP_NAME || 'Motorove API',
       port: parseInt(process.env.PORT || '3000', 10),
+      host: process.env.HOST || '0.0.0.0',
       apiPrefix: process.env.API_PREFIX || 'api',
       corsOrigin: process.env.CORS_ORIGIN || '*',
       swaggerEnable: process.env.SWAGGER_ENABLE === 'true',

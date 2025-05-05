@@ -71,6 +71,7 @@ export class ConfigService {
   getAppConfig(): {
     name: string;
     port: number;
+    host: string;
     apiPrefix: string;
     corsOrigin: string;
     swaggerEnable: boolean;
@@ -79,12 +80,14 @@ export class ConfigService {
       this.configService.get<{
         name: string;
         port: number;
+        host: string;
         apiPrefix: string;
         corsOrigin: string;
         swaggerEnable: boolean;
       }>('app') ?? {
         name: 'Motorove API',
         port: 3000,
+        host: '0.0.0.0',
         apiPrefix: 'api',
         corsOrigin: '*',
         swaggerEnable: false,

@@ -42,20 +42,22 @@ async function bootstrap() {
     app.setGlobalPrefix(apiPrefix);
   }
 
-  // Get port from configuration
+  // Get port and host from configuration
   const port = configService.getAppConfig().port;
+  const host = configService.getAppConfig().host;
   const environment = configService.getEnvironment();
 
   // Start the server
-  await app.listen(port);
+  await app.listen(port, host);
+  const url = await app.getUrl();
 
   // Log startup information
   logger.log(`Application is running in ${environment} mode`);
-  logger.log(`Server running on: http://localhost:${port}`);
+  logger.log(`Server running on: ${url}`);
 
   if (!configService.isProduction()) {
-    logger.log(`API available at: http://localhost:${port}/${apiPrefix}`);
-    logger.log(`GraphQL Playground: http://localhost:${port}/graphql`);
+    logger.log(`API available at: ${url}/${apiPrefix}`);
+    logger.log(`GraphQL Playground: ${url}/graphql`);
   }
 }
 

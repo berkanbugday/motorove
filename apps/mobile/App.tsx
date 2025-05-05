@@ -42,7 +42,7 @@ function App(): React.JSX.Element {
 
   // Initialize services
   useEffect(() => {
-    if (AppConfig.ENABLE_LOGS) {
+    if (AppConfig.DEBUG_MODE) {
       // Initialize logging service
       loggingService.initialize({
         environment: AppConfig.APP_ENV,

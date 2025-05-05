@@ -187,7 +187,7 @@ export const SigninScreen = () => {
                     Don't have an account?
                   </Body>
                   <Button
-                    title="Sign up"
+                    title="Sign Up"
                     variant="text"
                     onPress={handleSignUp}
                     textStyle={styles.signupLink}

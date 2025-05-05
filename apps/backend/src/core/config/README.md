@@ -23,6 +23,7 @@ The application uses the following environment files in order of precedence:
 | -------------- | ------------------------------ | -------- | ------------- |
 | NODE_ENV       | Application environment        | No       | `development` |
 | PORT           | HTTP server port               | No       | `3000`        |
+| HOST           | IP address to bind server to   | No       | `0.0.0.0`     |
 | DATABASE_URL   | PostgreSQL connection string   | Yes      | -             |
 | JWT_SECRET     | Secret key for JWT signing     | Yes      | -             |
 | JWT_EXPIRATION | JWT token expiration           | No       | `1d`          |
@@ -41,6 +42,7 @@ The application uses the following environment files in order of precedence:
 # APPLICATION SETTINGS
 NODE_ENV=development
 PORT=3000
+HOST=0.0.0.0
 APP_NAME="Motorove API (Dev)"
 API_PREFIX=api
 CORS_ORIGIN=*
@@ -72,6 +74,7 @@ FEATURE_Y_ENABLED=true
 # APPLICATION SETTINGS
 NODE_ENV=staging
 PORT=3000
+HOST=0.0.0.0
 APP_NAME="Motorove API (Staging)"
 API_PREFIX=api
 CORS_ORIGIN=https://staging.example.com
@@ -103,6 +106,7 @@ FEATURE_Y_ENABLED=true
 # APPLICATION SETTINGS
 NODE_ENV=production
 PORT=3000
+HOST=0.0.0.0
 APP_NAME="Motorove API"
 API_PREFIX=api
 CORS_ORIGIN=https://example.com
