@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Animated, StyleSheet, Text} from 'react-native';
 import {networkService} from '@services/network.service';
+import {colors} from '@theme/colors';
 
 interface Props {
   offlineMessage?: string;
@@ -13,8 +14,8 @@ interface Props {
  */
 const NetworkStatusBar: React.FC<Props> = ({
   offlineMessage = 'No internet connection',
-  offlineBackgroundColor = '#ffc107',
-  offlineTextColor = '#212529',
+  offlineBackgroundColor = colors.status.warning,
+  offlineTextColor = colors.neutral.black,
 }) => {
   // Initialize animation value for the network status banner
   const [animation] = useState(new Animated.Value(0));

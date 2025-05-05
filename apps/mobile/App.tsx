@@ -20,6 +20,7 @@ import ErrorBoundary from '@components/ErrorBoundary';
 import {loggingService} from '@services/logging.service';
 import {networkService} from '@services/network.service';
 import ToastMessage from '@components/ToastMessage';
+import NetworkStatusBar from '@components/NetworkAware';
 // Initialize Sentry if DSN is provided
 if (
   AppConfig.ENABLE_LOGS &&
@@ -86,6 +87,7 @@ function App(): React.JSX.Element {
 
   return (
     <ErrorBoundary>
+      <NetworkStatusBar />
       <ToastMessage.Provider>
         <ApolloProvider client={apolloClient}>
           <GestureHandlerRootView style={{flex: 1}}>

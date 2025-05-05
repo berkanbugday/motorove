@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
   postButtonContainer: {
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
+    paddingBottom: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.light,
   },
