@@ -298,7 +298,6 @@ export const ProfileScreen: React.FC = () => {
           onTabChange={tab => setActiveTab(tab as ProfileTab)}
           variant="pill"
           equalWidth
-          containerStyle={styles.tabContainer}
         />
       </ScrollView>
     </SafeAreaView>
@@ -357,10 +356,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.white,
     fontSize: 12,
     fontWeight: '600',
-  },
-  tabContainer: {
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.sm,
   },
   tabContent: {
     padding: spacing.md,

@@ -11,7 +11,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     position: 'relative',
     marginHorizontal: spacing.md,
-    marginTop: spacing.md,
   },
   contentContainer: {
     paddingTop: spacing.md,
@@ -152,26 +151,24 @@ export const styles = StyleSheet.create({
 
   // Pill variant
   pillContainer: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.neutral.black,
+    backgroundColor: colors.neutral.backgroundLight,
     borderRadius: radius.round,
-    padding: 2,
+    padding: 4,
   },
   pillTab: {
-    borderRadius: radius.xl,
+    borderRadius: radius.round,
     backgroundColor: 'transparent',
   },
   pillActiveTab: {
-    backgroundColor: colors.neutral.black,
+    backgroundColor: colors.neutral.white,
     ...getShadow('small'),
-    borderRadius: radius.xl,
+    borderRadius: radius.round,
   },
   pillText: {
-    color: colors.neutral.black,
+    color: colors.neutral.grey,
   },
   pillActiveText: {
-    color: colors.neutral.white,
+    color: colors.neutral.black,
   },
 
   // Underlined variant

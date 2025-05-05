@@ -1,5 +1,5 @@
 import {TopHeaderBar} from '@components/TopHeaderBar';
-import {colors, commonStyles, spacing} from '@theme';
+import {colors, spacing} from '@theme';
 import React, {useState} from 'react';
 import {View, StyleSheet, Text, FlatList} from 'react-native';
 import {Tabs} from '@components/Tab';
@@ -217,6 +217,7 @@ export const GroupScreen = () => {
         title="Groups"
         containerStyle={styles.topHeaderBar}
         rightIconName="search"
+        showShadow={false}
         onRightButtonPress={() => {}}
         secondRightIconName="sliders"
         onSecondRightButtonPress={() => {}}
@@ -232,25 +233,22 @@ export const GroupScreen = () => {
       />
 
       {/* FAB Component */}
-      {/* <FAB
+      <FAB
         icon={<Icon name="plus" />}
+        shape="extended"
         onPress={() => {}}
-        accessibilityLabel="Create new group"
-        variant="custom"
-        backgroundColor={colors.neutral.black}
-        position="custom"
-        customPosition={{
-          bottom: 120,
-          right: 30,
-        }}
-      /> */}
+        size="small"
+        label="Create Group"
+        variant="primary"
+        position="bottomCenter"
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    ...commonStyles.container,
+    flex: 1,
     backgroundColor: colors.neutral.white,
   },
   topHeaderBar: {
@@ -262,10 +260,9 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     flex: 1,
-    paddingBottom: spacing.lg,
   },
   listContainer: {
-    paddingVertical: spacing.sm,
+    // paddingVertical: spacing.sm,
   },
   emptyState: {
     flex: 1,

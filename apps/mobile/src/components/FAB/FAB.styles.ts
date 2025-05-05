@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-import {colors, spacing, getShadow} from '../../theme';
+import {colors, spacing, getShadow, rh} from '../../theme';
 import {
   FABPosition,
   FABSize,
@@ -14,17 +14,17 @@ import {
 export const FAB_SIZES = {
   small: {
     size: 40,
-    iconSize: 20,
+    iconSize: 16,
     paddingHorizontal: spacing.md,
   },
   medium: {
     size: 56,
-    iconSize: 24,
+    iconSize: 20,
     paddingHorizontal: spacing.lg,
   },
   large: {
     size: 72,
-    iconSize: 28,
+    iconSize: 24,
     paddingHorizontal: spacing.xl,
   },
 };
@@ -42,32 +42,47 @@ export const getPositionStyles = (
   },
 ) => {
   // Default margin from screen edge
-  const margin = spacing.lg;
+  const bottomMargin = rh(90);
+  const topMargin = spacing.lg;
+  const leftMargin = spacing.lg;
+  const rightMargin = spacing.lg;
 
   switch (position) {
     case 'bottomRight':
       return {
         position: 'absolute',
-        bottom: margin,
-        right: margin,
+        bottom: bottomMargin,
+        right: rightMargin,
       };
     case 'bottomLeft':
       return {
         position: 'absolute',
-        bottom: margin,
-        left: margin,
+        bottom: bottomMargin,
+        left: leftMargin,
+      };
+    case 'bottomCenter':
+      return {
+        position: 'absolute',
+        bottom: bottomMargin,
+        alignSelf: 'center',
       };
     case 'topRight':
       return {
         position: 'absolute',
-        top: margin,
-        right: margin,
+        top: topMargin,
+        right: rightMargin,
       };
     case 'topLeft':
       return {
         position: 'absolute',
-        top: margin,
-        left: margin,
+        top: topMargin,
+        left: leftMargin,
+      };
+    case 'topCenter':
+      return {
+        position: 'absolute',
+        top: topMargin,
+        alignSelf: 'center',
       };
     case 'custom':
       return {
@@ -77,8 +92,8 @@ export const getPositionStyles = (
     default:
       return {
         position: 'absolute',
-        bottom: margin,
-        right: margin,
+        bottom: bottomMargin,
+        right: rightMargin,
       };
   }
 };
@@ -92,6 +107,7 @@ export const getSizeStyles = (size: FABSize, shape: FABShape) => {
   const paddingHorizontal = sizeConfig.paddingHorizontal;
 
   const baseStyle = {
+    width: '40%',
     height: fabSize,
     minWidth: fabSize,
   };

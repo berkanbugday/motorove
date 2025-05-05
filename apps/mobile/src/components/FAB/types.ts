@@ -8,8 +8,10 @@ import {ShadowSizeType as ThemeShadowSizeType} from '../../theme';
 export type FABPosition =
   | 'bottomRight'
   | 'bottomLeft'
+  | 'bottomCenter'
   | 'topRight'
   | 'topLeft'
+  | 'topCenter'
   | 'custom';
 
 /**
