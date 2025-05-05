@@ -1,16 +1,9 @@
 import {TopHeaderBar} from '@components/TopHeaderBar';
-import {colors, spacing} from '@theme';
+import {colors, commonStyles, spacing} from '@theme';
 import React, {useState} from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  FlatList,
-  Image,
-  TouchableOpacity,
-} from 'react-native';
+import {View, StyleSheet, Text, FlatList} from 'react-native';
 import {Tabs} from '@components/Tab';
-import {Icon} from '@components/Icon';
+import {Icon, GroupCard} from '@components';
 import {FAB} from '@components/FAB';
 
 // Define types for our data
@@ -20,8 +13,15 @@ interface JoinedGroup {
   members: number;
   image: string;
   description: string;
+  location?: string;
+  tags?: string[];
   lastActive: string;
   isAdmin: boolean;
+  badge?: {
+    text: string;
+    backgroundColor: string;
+    textColor: string;
+  };
 }
 
 interface ExploreGroup {
@@ -31,6 +31,13 @@ interface ExploreGroup {
   image: string;
   description: string;
   location: string;
+  tags?: string[];
+  privacy?: string;
+  badge?: {
+    text: string;
+    backgroundColor: string;
+    textColor: string;
+  };
 }
 
 // Mock data for user's joined groups
@@ -42,6 +49,13 @@ const joinedGroups: JoinedGroup[] = [
     image: 'https://picsum.photos/id/88/500/300',
     description: 'Group for motorcycle enthusiasts who love coastal rides.',
     lastActive: '2 hours ago',
+    location: 'Los Angeles',
+    tags: ['Touring', 'Off-Road'],
+    badge: {
+      text: 'Official',
+      backgroundColor: colors.primary.light,
+      textColor: colors.neutral.white,
+    },
     isAdmin: true,
   },
   {
@@ -74,6 +88,13 @@ const exploreGroups: ExploreGroup[] = [
     description:
       'Dedicated to discovering the best mountain trails for motorcycles.',
     location: 'National',
+    tags: ['Touring', 'Off-Road'],
+    privacy: 'private',
+    badge: {
+      text: 'Official',
+      backgroundColor: colors.primary.light,
+      textColor: colors.neutral.white,
+    },
   },
   {
     id: '5',
@@ -82,6 +103,7 @@ const exploreGroups: ExploreGroup[] = [
     image: 'https://picsum.photos/id/21/500/300',
     description: 'For collectors and enthusiasts of vintage motorcycles.',
     location: 'Istanbul',
+    tags: ['Vintage', 'Classic'],
   },
   {
     id: '6',
@@ -90,6 +112,8 @@ const exploreGroups: ExploreGroup[] = [
     image: 'https://picsum.photos/id/24/500/300',
     description: 'Track day enthusiasts and sport bike lovers.',
     location: 'Ankara',
+    tags: ['Sport', 'Racing'],
+    privacy: 'public',
   },
   {
     id: '7',
@@ -98,6 +122,7 @@ const exploreGroups: ExploreGroup[] = [
     image: 'https://picsum.photos/id/26/500/300',
     description: 'Organizing weekend tours and long-distance rides.',
     location: 'Izmir',
+    tags: ['Touring', 'Weekend Rides'],
   },
 ];
 
@@ -108,50 +133,31 @@ export const GroupScreen = () => {
   const [activeTab, setActiveTab] = useState('joined');
 
   const renderJoinedGroupItem = ({item}: {item: JoinedGroup}) => (
-    <TouchableOpacity style={styles.groupCard}>
-      <Image source={{uri: item.image}} style={styles.groupImage} />
-      <View style={styles.groupInfo}>
-        <View style={styles.groupHeader}>
-          <Text style={styles.groupName}>{item.name}</Text>
-          {item.isAdmin && (
-            <View style={styles.adminBadge}>
-              <Text style={styles.adminText}>Admin</Text>
-            </View>
-          )}
-        </View>
-        <Text style={styles.groupDescription}>{item.description}</Text>
-        <View style={styles.groupFooter}>
-          <View style={styles.memberInfo}>
-            <Icon name="users" size={16} color={colors.neutral.grey} />
-            <Text style={styles.memberCount}>{item.members} members</Text>
-          </View>
-          <Text style={styles.lastActive}>Active {item.lastActive}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+    <GroupCard
+      logoSource={{uri: item.image}}
+      name={item.name}
+      location="Location" // Placeholder since JoinedGroup doesn't have location
+      tags={[item.isAdmin ? 'Admin' : '']} // Show admin status as a tag
+      currentMembers={item.members}
+      onPress={() => {}}
+      onJoinPress={() => {}}
+      isMember={true}
+    />
   );
 
   const renderExploreGroupItem = ({item}: {item: ExploreGroup}) => (
-    <TouchableOpacity style={styles.groupCard}>
-      <Image source={{uri: item.image}} style={styles.groupImage} />
-      <View style={styles.groupInfo}>
-        <Text style={styles.groupName}>{item.name}</Text>
-        <Text style={styles.groupDescription}>{item.description}</Text>
-        <View style={styles.groupFooter}>
-          <View style={styles.memberInfo}>
-            <Icon name="users" size={16} color={colors.neutral.grey} />
-            <Text style={styles.memberCount}>{item.members} members</Text>
-          </View>
-          <View style={styles.locationContainer}>
-            <Icon name="map-pin" size={16} color={colors.neutral.grey} />
-            <Text style={styles.locationText}>{item.location}</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.joinButton}>
-          <Text style={styles.joinButtonText}>Join Group</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+    <GroupCard
+      logoSource={{uri: item.image}}
+      name={item.name}
+      location={item.location}
+      tags={item.tags || []}
+      currentMembers={item.members}
+      privacy={item.privacy}
+      badge={item.badge}
+      onPress={() => {}}
+      onJoinPress={() => {}}
+      isMember={false}
+    />
   );
 
   const tabItems = [
@@ -192,13 +198,13 @@ export const GroupScreen = () => {
             keyExtractor={item => item.id}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
-            ListHeaderComponent={
-              <View style={styles.exploreHeader}>
-                <Text style={styles.exploreHeaderText}>
-                  Discover groups to connect with fellow riders
-                </Text>
-              </View>
-            }
+            // ListHeaderComponent={
+            //   <View style={styles.exploreHeader}>
+            //     <Text style={styles.exploreHeaderText}>
+            //       Discover groups to connect with fellow riders
+            //     </Text>
+            //   </View>
+            // }
           />
         </View>
       ),
@@ -212,6 +218,8 @@ export const GroupScreen = () => {
         containerStyle={styles.topHeaderBar}
         rightIconName="search"
         onRightButtonPress={() => {}}
+        secondRightIconName="sliders"
+        onSecondRightButtonPress={() => {}}
       />
       <Tabs
         items={tabItems}
@@ -224,7 +232,7 @@ export const GroupScreen = () => {
       />
 
       {/* FAB Component */}
-      <FAB
+      {/* <FAB
         icon={<Icon name="plus" />}
         onPress={() => {}}
         accessibilityLabel="Create new group"
@@ -235,14 +243,14 @@ export const GroupScreen = () => {
           bottom: 120,
           right: 30,
         }}
-      />
+      /> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...commonStyles.container,
     backgroundColor: colors.neutral.white,
   },
   topHeaderBar: {
@@ -251,80 +259,13 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flex: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
   },
   tabContent: {
     flex: 1,
     paddingBottom: spacing.lg,
   },
   listContainer: {
-    padding: spacing.md,
-  },
-  groupCard: {
-    backgroundColor: colors.neutral.white,
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
-  },
-  groupImage: {
-    height: 130,
-    width: '100%',
-    resizeMode: 'cover',
-  },
-  groupInfo: {
-    padding: spacing.md,
-  },
-  groupHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  groupName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.neutral.black,
-    flex: 1,
-  },
-  adminBadge: {
-    backgroundColor: colors.primary.light,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  adminText: {
-    fontSize: 12,
-    color: colors.primary.main,
-    fontWeight: '500',
-  },
-  groupDescription: {
-    fontSize: 14,
-    color: colors.neutral.grey,
-    marginBottom: spacing.sm,
-  },
-  groupFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  memberInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  memberCount: {
-    fontSize: 13,
-    color: colors.neutral.grey,
-    marginLeft: spacing.xs,
-  },
-  lastActive: {
-    fontSize: 13,
-    color: colors.neutral.grey,
+    paddingVertical: spacing.sm,
   },
   emptyState: {
     flex: 1,
@@ -350,26 +291,5 @@ const styles = StyleSheet.create({
   exploreHeaderText: {
     fontSize: 16,
     color: colors.neutral.grey,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationText: {
-    fontSize: 13,
-    color: colors.neutral.grey,
-    marginLeft: spacing.xs,
-  },
-  joinButton: {
-    backgroundColor: colors.primary.main,
-    borderRadius: 8,
-    paddingVertical: spacing.xs,
-    alignItems: 'center',
-    marginTop: spacing.md,
-  },
-  joinButtonText: {
-    color: colors.neutral.white,
-    fontWeight: '600',
-    fontSize: 14,
   },
 });

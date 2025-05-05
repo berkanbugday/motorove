@@ -51,6 +51,8 @@ import Shop from '@assets/icons/shop.svg';
 import Droplet from '@assets/icons/droplet.svg';
 import Clock from '@assets/icons/clock.svg';
 import Phone from '@assets/icons/phone.svg';
+import Lock from '@assets/icons/lock.svg';
+import Earth from '@assets/icons/earth.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -118,7 +120,9 @@ export type IconName =
   | 'shop'
   | 'droplet'
   | 'clock'
-  | 'phone';
+  | 'phone'
+  | 'lock'
+  | 'earth';
 
 interface IconProps {
   name: IconName;
@@ -250,6 +254,10 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Clock {...commonProps} />;
     case 'phone':
       return <Phone {...commonProps} />;
+    case 'lock':
+      return <Lock {...commonProps} />;
+    case 'earth':
+      return <Earth {...commonProps} />;
     default:
       return null;
   }

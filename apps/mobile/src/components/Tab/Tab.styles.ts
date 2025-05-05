@@ -4,11 +4,14 @@ import {colors, spacing, radius, getShadow} from '@theme';
 export const styles = StyleSheet.create({
   // Container styles
   container: {
+    flex: 1,
     width: '100%',
   },
   tabsContainer: {
     flexDirection: 'row',
     position: 'relative',
+    marginHorizontal: spacing.md,
+    marginTop: spacing.md,
   },
   contentContainer: {
     paddingTop: spacing.md,
@@ -149,8 +152,10 @@ export const styles = StyleSheet.create({
 
   // Pill variant
   pillContainer: {
-    backgroundColor: colors.neutral.backgroundLight,
-    borderRadius: radius.xl,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
+    borderRadius: radius.round,
     padding: 2,
   },
   pillTab: {
@@ -158,15 +163,15 @@ export const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   pillActiveTab: {
-    backgroundColor: colors.neutral.white,
+    backgroundColor: colors.neutral.black,
     ...getShadow('small'),
     borderRadius: radius.xl,
   },
   pillText: {
-    color: colors.neutral.grey,
+    color: colors.neutral.black,
   },
   pillActiveText: {
-    color: colors.neutral.black,
+    color: colors.neutral.white,
   },
 
   // Underlined variant

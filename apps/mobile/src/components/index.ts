@@ -16,6 +16,7 @@ export * from './WeatherWidget';
 export * from './PageIndicator';
 export * from './GroupEventBanner';
 export * from './GroupEventCard';
+export * from './GroupCard';
 export * from './LocationPermissionOverlay';
 export * from './Checkbox';
 export * from './Chip';
