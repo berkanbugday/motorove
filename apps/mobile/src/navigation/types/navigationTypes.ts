@@ -41,6 +41,7 @@ export type MainStackParamList = {
   Home: undefined;
   CommentDetail: {postId: string};
   CreatePost: undefined;
+  CreateGroup: undefined;
   // Add more screens here as your app grows
   // Profile: {userId: string};
   // Settings: undefined;

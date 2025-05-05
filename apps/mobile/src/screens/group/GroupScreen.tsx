@@ -5,6 +5,8 @@ import {View, StyleSheet, Text, FlatList} from 'react-native';
 import {Tabs} from '@components/Tab';
 import {Icon, GroupCard} from '@components';
 import {FAB} from '@components/FAB';
+import {useNavigation} from '@react-navigation/native';
+import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 
 // Define types for our data
 interface JoinedGroup {
@@ -131,6 +133,7 @@ const exploreGroups: ExploreGroup[] = [
  */
 export const GroupScreen = () => {
   const [activeTab, setActiveTab] = useState('joined');
+  const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
 
   const renderJoinedGroupItem = ({item}: {item: JoinedGroup}) => (
     <GroupCard
@@ -216,10 +219,10 @@ export const GroupScreen = () => {
       <TopHeaderBar
         title="Groups"
         containerStyle={styles.topHeaderBar}
-        rightIconName="search"
         showShadow={false}
-        onRightButtonPress={() => {}}
-        secondRightIconName="sliders"
+        rightIconName="plus"
+        onRightButtonPress={() => navigation.navigate('CreateGroup')}
+        secondRightIconName="search"
         onSecondRightButtonPress={() => {}}
       />
       <Tabs
@@ -233,15 +236,15 @@ export const GroupScreen = () => {
       />
 
       {/* FAB Component */}
-      <FAB
+      {/* <FAB
         icon={<Icon name="plus" />}
         shape="extended"
-        onPress={() => {}}
+        onPress={() => navigation.navigate('CreateGroup')}
         size="small"
         label="Create Group"
         variant="primary"
         position="bottomCenter"
-      />
+      /> */}
     </View>
   );
 };
