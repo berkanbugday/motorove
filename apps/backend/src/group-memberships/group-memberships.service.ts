@@ -94,6 +94,12 @@ export class GroupMembershipsService {
           connect: { id: userId },
         },
         role: GroupMemberRole.MEMBER,
+        createdBy: {
+          connect: { id: adminId },
+        },
+        updatedBy: {
+          connect: { id: adminId },
+        },
       },
       include: {
         group: true,
@@ -152,6 +158,9 @@ export class GroupMembershipsService {
       },
       data: {
         role: newRole,
+        updatedBy: {
+          connect: { id: adminId },
+        },
       },
       include: {
         group: true,

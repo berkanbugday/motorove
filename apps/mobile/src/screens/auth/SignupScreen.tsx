@@ -30,19 +30,21 @@ import {signupSchema, SignupFormValues} from '@utils/validation';
 import {colors, spacing, fontSizes, radius} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {termsOfService, privacyPolicy} from '@constants/legalContent';
+import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
+import {GraphQLFormattedError} from 'graphql';
 
 export const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
-  const [userEmail, _setUserEmail] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const termsBottomSheetRef = useRef<BottomSheetRef>(null);
   const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
   const {signup} = useAuth();
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
-
+  const {handleGraphQLError} = useGraphQLErrorHandler();
   const {
     control,
     handleSubmit,
@@ -52,7 +54,7 @@ export const SignupScreen = () => {
     resolver: zodResolver(signupSchema),
     defaultValues: {
       fullName: 'Berkan Buğday',
-      email: 'berkan.bugday@gmail.com',
+      email: 'berkan.bugday92@gmail.com',
       password: '12345678',
       confirmPassword: '12345678',
       agreeToTerms: true,
@@ -80,6 +82,7 @@ export const SignupScreen = () => {
 
       await signup(data.email, data.password, firstName, lastName);
 
+      setUserEmail(data.email);
       setSignupSuccess(true);
       // // Navigate to account setup screen
       // navigation.navigate('AccountSetup', {
@@ -87,6 +90,7 @@ export const SignupScreen = () => {
       //   fullName: data.fullName,
       // });
     } catch (error) {
+      await handleGraphQLError(error as GraphQLFormattedError);
       // Handle specific error types
       if (error instanceof Error) {
         setError('confirmPassword', {

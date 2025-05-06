@@ -83,10 +83,7 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       extra: {
         statusCode,
         path: request?.path,
-        context:
-          typeof context === 'object' && context !== null
-            ? JSON.stringify(context)
-            : undefined,
+        context: this.extractSafeContext(context),
       },
     });
 
@@ -122,6 +119,36 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
     return new GraphQLError(message, {
       extensions,
     });
+  }
+
+  private extractSafeContext(context: any): Record<string, any> | undefined {
+    if (!context) return undefined;
+
+    // Extract only safe properties from context that won't cause circular reference issues
+    const safeContext: Record<string, any> = {};
+
+    try {
+      // Add user info if available
+      if (context.req?.user) {
+        safeContext.user = {
+          id: context.req.user.id,
+          email: context.req.user.email,
+          username: context.req.user.username,
+        };
+      }
+
+      // Add GraphQL operation info if available
+      if (context.operation) {
+        safeContext.operationName = context.operation.name?.value;
+        safeContext.operationType = context.operation.operation;
+      }
+
+      // Add any additional safe context properties you need
+
+      return safeContext;
+    } catch {
+      return { error: 'Failed to extract safe context' };
+    }
   }
 
   private transformException(exception: unknown): {

@@ -54,8 +54,10 @@ export const useGraphQLErrorHandler = () => {
               fallbackMessage:
                 errorMessage === 'Invalid login credentials'
                   ? 'Invalid email or password'
-                  : 'You do not have permission to perform this action.',
+                  : errorMessage ||
+                    'You do not have permission to perform this action.',
             });
+            handled = true;
             break;
 
           case 'FORBIDDEN':
@@ -63,6 +65,17 @@ export const useGraphQLErrorHandler = () => {
             await handleError(error, errorType, {
               fallbackMessage:
                 'You do not have permission to perform this action.',
+            });
+            handled = true;
+            break;
+
+          case 'CONFLICT':
+            errorType = ErrorType.VALIDATION;
+            await handleError(error, errorType, {
+              showToast: true,
+              fallbackMessage:
+                errorMessage ||
+                'A conflict occurred. This resource may already exist.',
             });
             handled = true;
             break;

@@ -25,6 +25,15 @@ export class AuthService {
     lastName?: string,
   ): Promise<AuthResponse> {
     try {
+      // First, check if the email already exists in our database
+      const existingUser = await this.prismaService.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+
       // Register user with Supabase
       const { data, error } = await this.supabaseService.signUp(
         email,
@@ -32,6 +41,9 @@ export class AuthService {
       );
 
       if (error) {
+        if (error.message.includes('already registered')) {
+          throw new ConflictException('Email already exists');
+        }
         throw new UnauthorizedException(error.message);
       }
 

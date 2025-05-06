@@ -124,6 +124,7 @@ type Group {
   cover: String
   createdAt: DateTime!
   createdBy: User!
+  createdById: String!
   description: String!
   id: ID!
   logo: String
@@ -133,6 +134,8 @@ type Group {
   privacy: GroupPrivacy!
   tags: [GroupTag!]!
   updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
 }
 
 """The role of a user in a group"""
@@ -142,11 +145,17 @@ enum GroupMemberRole {
 }
 
 type GroupMembership {
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
   group: Group!
   groupId: String!
   id: ID!
   joinedAt: DateTime!
   role: GroupMemberRole!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
   user: User!
   userId: String!
 }

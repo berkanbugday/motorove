@@ -31,6 +31,9 @@ export class GroupsService {
         createdBy: {
           connect: { id: userId },
         },
+        updatedBy: {
+          connect: { id: userId },
+        },
       };
 
       const group = await tx.group.create({
@@ -47,6 +50,12 @@ export class GroupsService {
             connect: { id: userId },
           },
           role: 'ADMIN', // Creator is automatically an admin
+          createdBy: {
+            connect: { id: userId },
+          },
+          updatedBy: {
+            connect: { id: userId },
+          },
         },
       });
 
@@ -114,7 +123,7 @@ export class GroupsService {
   async findCreatedByUser(userId: string) {
     return await this.prisma.group.findMany({
       where: {
-        creatorId: userId,
+        createdById: userId,
       },
       include: {
         createdBy: true,
@@ -148,7 +157,11 @@ export class GroupsService {
     }
 
     // Handle enum conversions
-    const processedUpdateData: any = { ...updateData };
+    const processedUpdateData: any = {
+      ...updateData,
+      updatedById: userId, // Update the updatedBy field
+    };
+
     if (updateData.city) {
       processedUpdateData.city = updateData.city as unknown as $Enums.City;
     }
