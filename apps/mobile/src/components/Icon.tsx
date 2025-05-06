@@ -53,6 +53,7 @@ import Clock from '@assets/icons/clock.svg';
 import Phone from '@assets/icons/phone.svg';
 import Lock from '@assets/icons/lock.svg';
 import Earth from '@assets/icons/earth.svg';
+import Filter from '@assets/icons/filter.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -122,7 +123,8 @@ export type IconName =
   | 'clock'
   | 'phone'
   | 'lock'
-  | 'earth';
+  | 'earth'
+  | 'filter';
 
 interface IconProps {
   name: IconName;
@@ -258,6 +260,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Lock {...commonProps} />;
     case 'earth':
       return <Earth {...commonProps} />;
+    case 'filter':
+      return <Filter {...commonProps} />;
     default:
       return null;
   }

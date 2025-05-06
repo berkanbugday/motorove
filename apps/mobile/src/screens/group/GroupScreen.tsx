@@ -4,7 +4,6 @@ import React, {useState} from 'react';
 import {View, StyleSheet, Text, FlatList} from 'react-native';
 import {Tabs} from '@components/Tab';
 import {Icon, GroupCard} from '@components';
-import {FAB} from '@components/FAB';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 
@@ -222,8 +221,10 @@ export const GroupScreen = () => {
         showShadow={false}
         rightIconName="plus"
         onRightButtonPress={() => navigation.navigate('CreateGroup')}
-        secondRightIconName="search"
+        secondRightIconName="filter"
         onSecondRightButtonPress={() => {}}
+        leftIconName="search"
+        onLeftIconPress={() => {}}
       />
       <Tabs
         items={tabItems}
@@ -234,17 +235,6 @@ export const GroupScreen = () => {
         contentContainerStyle={styles.tabContent}
         containerStyle={styles.tabContainer}
       />
-
-      {/* FAB Component */}
-      {/* <FAB
-        icon={<Icon name="plus" />}
-        shape="extended"
-        onPress={() => navigation.navigate('CreateGroup')}
-        size="small"
-        label="Create Group"
-        variant="primary"
-        position="bottomCenter"
-      /> */}
     </View>
   );
 };

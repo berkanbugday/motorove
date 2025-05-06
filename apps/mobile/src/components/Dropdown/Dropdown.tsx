@@ -233,7 +233,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     }),
     fontSize: animatedIsFocused.interpolate({
       inputRange: [0, 1],
-      outputRange: [fontSizes.md, fontSizes.xs],
+      outputRange: [fontSizes.sm, fontSizes.xs],
     }),
     color: animatedIsFocused.interpolate({
       inputRange: [0, 1],

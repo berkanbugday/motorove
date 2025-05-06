@@ -11,6 +11,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
 import {
   TopHeaderBar,
   AnimatedInput,
@@ -22,21 +23,34 @@ import {
 } from '@components';
 import {colors, spacing, radius, getShadow} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
-
-// Form data type
-interface GroupFormData {
-  name: string;
-  description: string;
-  location: string;
-  privacy: string;
-  maxMembers: number | null;
-  tags: string[];
-}
+import {
+  createGroupSchema,
+  CreateGroupFormValues,
+} from '@utils/validation/groupValidation';
 
 // Privacy options for dropdown
 const privacyOptions: DropdownItem[] = [
   {id: 1, label: 'Public', value: 'public'},
   {id: 2, label: 'Private', value: 'private'},
+];
+
+// City options for dropdown
+const cityOptions: DropdownItem[] = [
+  {id: 1, label: 'New York', value: 'new-york'},
+  {id: 2, label: 'Los Angeles', value: 'los-angeles'},
+  {id: 3, label: 'Chicago', value: 'chicago'},
+  {id: 4, label: 'Houston', value: 'houston'},
+  {id: 5, label: 'Phoenix', value: 'phoenix'},
+  {id: 6, label: 'Philadelphia', value: 'philadelphia'},
+  {id: 7, label: 'San Antonio', value: 'san-antonio'},
+  {id: 8, label: 'San Diego', value: 'san-diego'},
+  {id: 9, label: 'Dallas', value: 'dallas'},
+  {id: 10, label: 'San Francisco', value: 'san-francisco'},
+  {id: 11, label: 'Austin', value: 'austin'},
+  {id: 12, label: 'Seattle', value: 'seattle'},
+  {id: 13, label: 'Denver', value: 'denver'},
+  {id: 14, label: 'Boston', value: 'boston'},
+  {id: 15, label: 'Portland', value: 'portland'},
 ];
 
 // Tags for selection
@@ -58,25 +72,31 @@ export const CreateGroupScreen: React.FC = () => {
   const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
     null,
   );
+  const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [groupImage, setGroupImage] = useState<string | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Setup form (simplified without validation library)
+  // Setup form with Zod validation
   const {
     control,
     handleSubmit,
     formState: {errors},
     setValue,
-  } = useForm<GroupFormData>({
+  } = useForm<CreateGroupFormValues>({
+    resolver: zodResolver(createGroupSchema),
     defaultValues: {
       name: '',
       description: '',
-      location: '',
+      city: '',
       privacy: '',
       maxMembers: null,
       tags: [],
+      groupImage: null,
+      coverImage: null,
     },
+    mode: 'onChange',
   });
 
   const handleGoBack = () => {
@@ -92,7 +112,9 @@ export const CreateGroupScreen: React.FC = () => {
       });
 
       if (result.assets && result.assets.length > 0) {
-        setGroupImage(result.assets[0].uri || '');
+        const uri = result.assets[0].uri || '';
+        setGroupImage(uri);
+        setValue('groupImage', uri, {shouldValidate: true});
       }
     } catch (error) {
       console.error('Error selecting image:', error);
@@ -108,7 +130,9 @@ export const CreateGroupScreen: React.FC = () => {
       });
 
       if (result.assets && result.assets.length > 0) {
-        setCoverImage(result.assets[0].uri || '');
+        const uri = result.assets[0].uri || '';
+        setCoverImage(uri);
+        setValue('coverImage', uri, {shouldValidate: true});
       }
     } catch (error) {
       console.error('Error selecting cover image:', error);
@@ -117,10 +141,14 @@ export const CreateGroupScreen: React.FC = () => {
 
   const handleTagToggle = (tag: string) => {
     if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
+      const newTags = selectedTags.filter(t => t !== tag);
+      setSelectedTags(newTags);
+      setValue('tags', newTags, {shouldValidate: true});
     } else {
       if (selectedTags.length < 3) {
-        setSelectedTags([...selectedTags, tag]);
+        const newTags = [...selectedTags, tag];
+        setSelectedTags(newTags);
+        setValue('tags', newTags, {shouldValidate: true});
       } else {
         Alert.alert('Limit Reached', 'You can select up to 3 tags');
       }
@@ -132,23 +160,40 @@ export const CreateGroupScreen: React.FC = () => {
     setValue('privacy', item?.value || '', {shouldValidate: true});
   }
 
-  const onSubmit = (data: GroupFormData) => {
-    // Combine form data with selected images and tags
-    const groupData = {
-      ...data,
-      privacy: selectedPrivacy?.value || 'public',
-      groupImage,
-      coverImage,
-      tags: selectedTags,
-    };
+  function handleCitySelect(item: DropdownItem | null) {
+    setSelectedCity(item);
+    setValue('city', item?.value || '', {shouldValidate: true});
+  }
 
-    console.log('Creating group with data:', groupData);
+  const onSubmit = async (data: CreateGroupFormValues) => {
+    try {
+      setIsSubmitting(true);
 
-    // Here you would call your API to create the group
-    // For now, just navigate back
-    Alert.alert('Success', 'Group created successfully!', [
-      {text: 'OK', onPress: () => navigation.goBack()},
-    ]);
+      // Combine form data with selected images and tags
+      const groupData = {
+        ...data,
+        privacy: selectedPrivacy?.value || 'public',
+        city: selectedCity?.value || '',
+        groupImage,
+        coverImage,
+        tags: selectedTags,
+      };
+
+      console.log('Creating group with data:', groupData);
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Here you would call your API to create the group
+      Alert.alert('Success', 'Group created successfully!', [
+        {text: 'OK', onPress: () => navigation.goBack()},
+      ]);
+    } catch (error) {
+      console.error('Error creating group:', error);
+      Alert.alert('Error', 'Failed to create group. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -209,7 +254,6 @@ export const CreateGroupScreen: React.FC = () => {
               />
 
               {/* Group Description */}
-
               <AnimatedInput
                 control={control}
                 name="description"
@@ -218,18 +262,23 @@ export const CreateGroupScreen: React.FC = () => {
                 error={errors.description}
               />
 
-              {/* Location */}
-
-              <AnimatedInput
-                control={control}
-                name="location"
-                label="Location"
-                error={errors.location}
+              {/* City Dropdown */}
+              <Dropdown
+                data={cityOptions}
+                label="City"
+                placeholder="Select city"
+                onSelect={item => {
+                  handleCitySelect(item);
+                }}
+                searchable={true}
+                selectedItem={selectedCity}
+                error={errors.city?.message}
               />
 
               {/* Privacy Setting Dropdown */}
               <Dropdown
                 data={privacyOptions}
+                label="Privacy"
                 placeholder="Select privacy"
                 onSelect={item => {
                   handlePrivacySelect(item);
@@ -240,7 +289,6 @@ export const CreateGroupScreen: React.FC = () => {
               />
 
               {/* Max Members */}
-
               <AnimatedInput
                 control={control}
                 name="maxMembers"
@@ -255,6 +303,14 @@ export const CreateGroupScreen: React.FC = () => {
               <Typography variant="bodySmall" style={styles.fieldLabel}>
                 Tags (Select up to 3)
               </Typography>
+              {errors.tags && (
+                <Typography
+                  variant="caption"
+                  color={colors.status.error}
+                  style={styles.errorText}>
+                  {errors.tags.message}
+                </Typography>
+              )}
               <View style={styles.tagsContainer}>
                 {availableTags.map(tag => (
                   <Chip
@@ -275,11 +331,12 @@ export const CreateGroupScreen: React.FC = () => {
         {/* Create Button */}
         <View style={styles.buttonContainer}>
           <Button
-            title="Create Group"
+            title={isSubmitting ? 'Creating...' : 'Create Group'}
             variant="dark"
             size="medium"
             shape="round"
             onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
           />
         </View>
       </SafeAreaView>
@@ -374,5 +431,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.light,
+  },
+  errorText: {
+    marginBottom: spacing.xs,
   },
 });
