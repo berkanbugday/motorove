@@ -13,7 +13,7 @@ export const commonStyles = StyleSheet.create({
   // Layout styles
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.backgroundLight,
+    backgroundColor: colors.secondary.light,
   },
 
   row: {

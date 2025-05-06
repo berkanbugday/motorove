@@ -10,26 +10,18 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
-import {useForm, Controller} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {
   TopHeaderBar,
   AnimatedInput,
   Button,
   Typography,
   Dropdown,
-  Icon,
   Chip,
+  DropdownItem,
 } from '@components';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {colors, spacing, radius, screenWidth, screenHeight} from '@theme';
+import {colors, spacing, radius, getShadow} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
-
-// Interface for dropdown items
-interface PrivacyOption {
-  id: number;
-  label: string;
-  value: string;
-}
 
 // Form data type
 interface GroupFormData {
@@ -42,10 +34,9 @@ interface GroupFormData {
 }
 
 // Privacy options for dropdown
-const privacyOptions: PrivacyOption[] = [
+const privacyOptions: DropdownItem[] = [
   {id: 1, label: 'Public', value: 'public'},
   {id: 2, label: 'Private', value: 'private'},
-  {id: 3, label: 'Members Only', value: 'members-only'},
 ];
 
 // Tags for selection
@@ -64,8 +55,7 @@ const availableTags = [
 
 export const CreateGroupScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateGroup'>>();
-  const insets = useSafeAreaInsets();
-  const [selectedPrivacy, setSelectedPrivacy] = useState<PrivacyOption | null>(
+  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
     null,
   );
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -77,6 +67,7 @@ export const CreateGroupScreen: React.FC = () => {
     control,
     handleSubmit,
     formState: {errors},
+    setValue,
   } = useForm<GroupFormData>({
     defaultValues: {
       name: '',
@@ -128,13 +119,18 @@ export const CreateGroupScreen: React.FC = () => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(t => t !== tag));
     } else {
-      if (selectedTags.length < 5) {
+      if (selectedTags.length < 3) {
         setSelectedTags([...selectedTags, tag]);
       } else {
-        Alert.alert('Limit Reached', 'You can select up to 5 tags');
+        Alert.alert('Limit Reached', 'You can select up to 3 tags');
       }
     }
   };
+
+  function handlePrivacySelect(item: DropdownItem | null) {
+    setSelectedPrivacy(item);
+    setValue('privacy', item?.value || '', {shouldValidate: true});
+  }
 
   const onSubmit = (data: GroupFormData) => {
     // Combine form data with selected images and tags
@@ -163,11 +159,25 @@ export const CreateGroupScreen: React.FC = () => {
         onBackPress={handleGoBack}
         containerStyle={styles.topHeaderBar}
       />
-      <SafeAreaView style={[styles.safeArea, {paddingBottom: insets.bottom}]}>
+      <SafeAreaView style={styles.container}>
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollViewContent}
           showsVerticalScrollIndicator={false}>
+          {/* Group Cover Image Selection - Moved to top */}
+          <TouchableOpacity
+            style={styles.coverImageContainer}
+            onPress={handleSelectCoverImage}
+            activeOpacity={0.8}>
+            {coverImage ? (
+              <Image source={{uri: coverImage}} style={styles.coverImage} />
+            ) : (
+              <View style={styles.coverPlaceholder}>
+                <Typography variant="bodySmall" color={colors.neutral.grey}>
+                  Upload cover image
+                </Typography>
+              </View>
+            )}
+          </TouchableOpacity>
           {/* Group Profile Image Selection */}
           <View style={styles.imageSelectionContainer}>
             <TouchableOpacity
@@ -178,132 +188,86 @@ export const CreateGroupScreen: React.FC = () => {
                 <Image source={{uri: groupImage}} style={styles.groupImage} />
               ) : (
                 <View style={styles.placeholderContainer}>
-                  <Icon name="users" size={24} color={colors.neutral.grey} />
                   <Typography
                     variant="caption"
                     color={colors.neutral.grey}
                     style={styles.uploadText}>
-                    Upload group logo
+                    Upload logo
                   </Typography>
                 </View>
               )}
             </TouchableOpacity>
           </View>
+          <View style={styles.content}>
+            {/* Group Name */}
+            <View style={styles.formFields}>
+              <AnimatedInput
+                control={control}
+                name="name"
+                label="Group Name"
+                error={errors.name}
+              />
 
-          {/* Group Cover Image Selection */}
-          <TouchableOpacity
-            style={styles.coverImageContainer}
-            onPress={handleSelectCoverImage}
-            activeOpacity={0.8}>
-            {coverImage ? (
-              <Image source={{uri: coverImage}} style={styles.coverImage} />
-            ) : (
-              <View style={styles.coverPlaceholder}>
-                <Icon name="plus" size={24} color={colors.neutral.grey} />
-                <Typography variant="bodySmall" color={colors.neutral.grey}>
-                  Upload cover image (optional)
-                </Typography>
+              {/* Group Description */}
+
+              <AnimatedInput
+                control={control}
+                name="description"
+                label="Description"
+                multiline
+                error={errors.description}
+              />
+
+              {/* Location */}
+
+              <AnimatedInput
+                control={control}
+                name="location"
+                label="Location"
+                error={errors.location}
+              />
+
+              {/* Privacy Setting Dropdown */}
+              <Dropdown
+                data={privacyOptions}
+                placeholder="Select privacy"
+                onSelect={item => {
+                  handlePrivacySelect(item);
+                }}
+                searchable={false}
+                selectedItem={selectedPrivacy}
+                error={errors.privacy?.message}
+              />
+
+              {/* Max Members */}
+
+              <AnimatedInput
+                control={control}
+                name="maxMembers"
+                label="Members Capacity (optional)"
+                error={errors.maxMembers}
+                keyboardType="numeric"
+              />
+            </View>
+
+            {/* Tags Selection */}
+            <View style={styles.tagsSection}>
+              <Typography variant="bodySmall" style={styles.fieldLabel}>
+                Tags (Select up to 3)
+              </Typography>
+              <View style={styles.tagsContainer}>
+                {availableTags.map(tag => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    onPress={() => handleTagToggle(tag)}
+                    size="medium"
+                    variant={selectedTags.includes(tag) ? 'filled' : 'outlined'}
+                    color="dark"
+                    style={styles.tagChip}
+                  />
+                ))}
               </View>
-            )}
-          </TouchableOpacity>
-
-          {/* Group Name */}
-          <View style={styles.formField}>
-            <AnimatedInput
-              control={control}
-              name="name"
-              label="Group Name"
-              error={errors.name}
-              iconPosition="left"
-              icon={<Icon name="users" size={20} color={colors.neutral.grey} />}
-            />
-          </View>
-
-          {/* Group Description */}
-          <View style={styles.formField}>
-            <AnimatedInput
-              control={control}
-              name="description"
-              label="Description"
-              error={errors.description}
-              iconPosition="left"
-              icon={
-                <Icon name="comment" size={20} color={colors.neutral.grey} />
-              }
-            />
-          </View>
-
-          {/* Location */}
-          <View style={styles.formField}>
-            <AnimatedInput
-              control={control}
-              name="location"
-              label="Location"
-              error={errors.location}
-              iconPosition="left"
-              icon={
-                <Icon name="map-pin" size={20} color={colors.neutral.grey} />
-              }
-            />
-          </View>
-
-          {/* Privacy Setting Dropdown */}
-          <View style={styles.formField}>
-            <Typography variant="bodySmall" style={styles.fieldLabel}>
-              Privacy Setting
-            </Typography>
-            <Controller
-              control={control}
-              name="privacy"
-              render={({field: {onChange}}) => (
-                <Dropdown
-                  data={privacyOptions}
-                  placeholder="Select privacy setting"
-                  onSelect={item => {
-                    if (item) {
-                      setSelectedPrivacy(item as PrivacyOption);
-                      onChange(item.value);
-                    }
-                  }}
-                  searchable={false}
-                  selectedItem={selectedPrivacy}
-                  containerStyle={styles.dropdown}
-                  error={errors.privacy?.message}
-                />
-              )}
-            />
-          </View>
-
-          {/* Max Members */}
-          <View style={styles.formField}>
-            <AnimatedInput
-              control={control}
-              name="maxMembers"
-              label="Maximum Members (optional)"
-              error={errors.maxMembers}
-              iconPosition="left"
-              keyboardType="numeric"
-              icon={<Icon name="users" size={20} color={colors.neutral.grey} />}
-            />
-          </View>
-
-          {/* Tags Selection */}
-          <View style={styles.tagsSection}>
-            <Typography variant="bodySmall" style={styles.fieldLabel}>
-              Tags (Select up to 5)
-            </Typography>
-            <View style={styles.tagsContainer}>
-              {availableTags.map(tag => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  onPress={() => handleTagToggle(tag)}
-                  size="small"
-                  variant={selectedTags.includes(tag) ? 'filled' : 'outlined'}
-                  color={selectedTags.includes(tag) ? 'primary' : undefined}
-                  style={styles.tagChip}
-                />
-              ))}
             </View>
           </View>
         </ScrollView>
@@ -312,8 +276,8 @@ export const CreateGroupScreen: React.FC = () => {
         <View style={styles.buttonContainer}>
           <Button
             title="Create Group"
-            variant="primary"
-            size="large"
+            variant="dark"
+            size="medium"
             shape="round"
             onPress={handleSubmit(onSubmit)}
           />
@@ -334,9 +298,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  scrollViewContent: {
+  content: {
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xl * 2,
+    paddingBottom: spacing.md,
   },
   topHeaderBar: {
     borderBottomRightRadius: 0,
@@ -344,16 +308,16 @@ const styles = StyleSheet.create({
   },
   imageSelectionContainer: {
     alignItems: 'center',
-    marginTop: spacing.md,
+    marginTop: -50,
   },
   groupImageContainer: {
-    width: screenWidth * 0.3,
-    height: screenWidth * 0.3,
+    width: 100,
+    height: 100,
     borderRadius: radius.round,
-    overflow: 'hidden',
-    backgroundColor: colors.neutral.lightGrey,
+    backgroundColor: colors.secondary.light,
     justifyContent: 'center',
     alignItems: 'center',
+    ...getShadow('small'),
   },
   groupImage: {
     width: '100%',
@@ -370,31 +334,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   coverImageContainer: {
-    height: screenHeight * 0.2,
-    marginTop: spacing.lg,
-    borderRadius: radius.md,
+    height: 150,
     overflow: 'hidden',
-    backgroundColor: colors.neutral.lightGrey,
+    backgroundColor: colors.secondary.light,
   },
   coverImage: {
     width: '100%',
     height: '100%',
-    borderRadius: radius.md,
+    resizeMode: 'cover',
   },
   coverPlaceholder: {
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  formField: {
-    marginTop: spacing.lg,
+  formFields: {
+    marginTop: spacing.md,
+    gap: spacing.lg,
   },
   fieldLabel: {
     marginBottom: spacing.xs,
     color: colors.neutral.darkGrey,
-  },
-  dropdown: {
-    marginBottom: spacing.sm,
   },
   tagsSection: {
     marginTop: spacing.lg,
@@ -409,9 +369,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   buttonContainer: {
-    padding: spacing.md,
-    backgroundColor: colors.neutral.white,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.lightGrey,
+    borderTopColor: colors.secondary.light,
   },
 });

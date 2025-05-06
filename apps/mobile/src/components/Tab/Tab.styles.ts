@@ -129,7 +129,7 @@ export const styles = StyleSheet.create({
 
   // Filled variant
   filledContainer: {
-    backgroundColor: colors.neutral.backgroundLight,
+    backgroundColor: colors.secondary.light,
     borderRadius: radius.md,
     padding: 2,
   },
@@ -151,7 +151,7 @@ export const styles = StyleSheet.create({
 
   // Pill variant
   pillContainer: {
-    backgroundColor: colors.neutral.backgroundLight,
+    backgroundColor: colors.secondary.light,
     borderRadius: radius.round,
     padding: 4,
   },

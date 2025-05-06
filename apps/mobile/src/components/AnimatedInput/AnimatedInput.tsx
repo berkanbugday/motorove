@@ -43,6 +43,7 @@ interface BaseAnimatedInputProps {
   onToggleSecureEntry?: () => void;
   showPassword?: boolean;
   testID?: string;
+  multiline?: boolean;
 }
 
 interface StandaloneAnimatedInputProps extends BaseAnimatedInputProps {
@@ -86,6 +87,7 @@ export function AnimatedInput<T extends FieldValues = any>(
       onToggleSecureEntry,
       showPassword,
       testID,
+      multiline = false,
     } = props as FormAnimatedInputProps<T>;
 
     return (
@@ -105,6 +107,7 @@ export function AnimatedInput<T extends FieldValues = any>(
             onToggleSecureEntry={onToggleSecureEntry}
             showPassword={showPassword}
             testID={testID}
+            multiline={multiline}
           />
         )}
       />
@@ -124,6 +127,7 @@ export function AnimatedInput<T extends FieldValues = any>(
     onToggleSecureEntry,
     showPassword,
     testID,
+    multiline = false,
   } = props as StandaloneAnimatedInputProps;
 
   return (
@@ -139,6 +143,7 @@ export function AnimatedInput<T extends FieldValues = any>(
       onToggleSecureEntry={onToggleSecureEntry}
       showPassword={showPassword}
       testID={testID}
+      multiline={multiline}
     />
   );
 }
@@ -156,6 +161,7 @@ interface AnimatedInputBaseProps {
   onToggleSecureEntry?: () => void;
   showPassword?: boolean;
   testID?: string;
+  multiline?: boolean;
 }
 
 function AnimatedInputBase({
@@ -170,6 +176,7 @@ function AnimatedInputBase({
   onToggleSecureEntry,
   showPassword,
   testID,
+  multiline = false,
 }: AnimatedInputBaseProps) {
   const [isFocused, setIsFocused] = useState(false);
   const animatedIsFocused = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -192,7 +199,7 @@ function AnimatedInputBase({
     }),
     fontSize: animatedIsFocused.interpolate({
       inputRange: [0, 1],
-      outputRange: [fontSizes.md, fontSizes.xs],
+      outputRange: [fontSizes.sm, fontSizes.xs],
     }),
     color: animatedIsFocused.interpolate({
       inputRange: [0, 1],
@@ -215,6 +222,10 @@ function AnimatedInputBase({
       baseStyles.push(styles.inputWithLeftIcon);
     } else if (iconPosition === 'right') {
       baseStyles.push(styles.inputWithRightIcon);
+    }
+
+    if (multiline) {
+      baseStyles.push(styles.multilineInput);
     }
 
     return baseStyles;
@@ -260,6 +271,8 @@ function AnimatedInputBase({
         onBlur={() => setIsFocused(false)}
         autoCapitalize="none"
         testID={`${testID}-input`}
+        multiline={multiline}
+        textAlignVertical={multiline ? 'top' : 'center'}
       />
       <View style={getIconContainerStyle()}>
         {onToggleSecureEntry ? (
@@ -294,6 +307,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: spacing.form.inputPaddingHorizontal,
     fontSize: fontSizes.md,
+  },
+  multilineInput: {
+    height: spacing.form.inputHeight * 2,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    textAlignVertical: 'top',
   },
   inputWithLeftIcon: {
     paddingLeft: INPUT_ICON_WIDTH,

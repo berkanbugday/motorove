@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   rightButton: {
     padding: spacing.sm,
     borderRadius: radius.round,
-    backgroundColor: colors.neutral.backgroundLight,
+    backgroundColor: colors.secondary.light,
   },
   badgeContainer: {
     position: 'absolute',

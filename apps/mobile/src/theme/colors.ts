@@ -27,7 +27,6 @@ export const colors = {
     veryLightGrey: '#E0E0E0',
     white: '#FFFFFF',
     background: '#F9FAFB',
-    backgroundLight: '#F5F5F7',
   },
   weather: {
     sunny: '#FFD700',
