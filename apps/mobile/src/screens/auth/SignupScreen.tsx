@@ -80,11 +80,12 @@ export const SignupScreen = () => {
 
       await signup(data.email, data.password, firstName, lastName);
 
-      // Navigate to account setup screen
-      navigation.navigate('AccountSetup', {
-        email: data.email,
-        fullName: data.fullName,
-      });
+      setSignupSuccess(true);
+      // // Navigate to account setup screen
+      // navigation.navigate('AccountSetup', {
+      //   email: data.email,
+      //   fullName: data.fullName,
+      // });
     } catch (error) {
       // Handle specific error types
       if (error instanceof Error) {
@@ -442,9 +443,7 @@ const styles = StyleSheet.create({
     marginLeft: -20,
   },
   termsTextContainer: {
-    flexWrap: 'wrap',
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
     marginLeft: spacing.xs,
   },

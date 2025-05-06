@@ -10,6 +10,8 @@ import { CoreModule } from './core/core.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { ConfigService } from './core/config/config.service';
+import { GroupsModule } from './groups/groups.module';
+import { GroupMembershipsModule } from './group-memberships/group-memberships.module';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { ConfigService } from './core/config/config.service';
     }),
     PrismaModule,
     AuthModule,
+    GroupsModule,
+    GroupMembershipsModule,
   ],
   controllers: [AppController],
   providers: [

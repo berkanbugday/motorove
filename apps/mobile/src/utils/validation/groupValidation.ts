@@ -5,7 +5,7 @@ export const createGroupSchema = z.object({
   name: z
     .string({required_error: 'Group name is required'})
     .min(3, 'Group name must be at least 3 characters')
-    .max(50, 'Group name must be at most 50 characters'),
+    .max(100, 'Group name must be at most 100 characters'),
   description: z
     .string({required_error: 'Description is required'})
     .min(10, 'Description must be at least 10 characters')
