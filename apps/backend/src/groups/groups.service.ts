@@ -22,6 +22,7 @@ export class GroupsService {
     base64Image: string | null | undefined,
     path: string,
     filePrefix: string,
+    authToken?: string,
   ): Promise<string | undefined> {
     if (!base64Image) return undefined;
 
@@ -34,10 +35,15 @@ export class GroupsService {
       // Upload to Supabase storage
       const contentType = this.getContentTypeFromBase64(base64Image);
       const filename = `${filePrefix}-${Date.now()}`;
-      const imageUrl = await this.storageService.uploadFile(base64Image, path, {
-        contentType,
-        filename,
-      });
+      const imageUrl = await this.storageService.uploadFile(
+        base64Image,
+        path,
+        {
+          contentType,
+          filename,
+        },
+        authToken,
+      );
 
       return imageUrl;
     } catch (error) {
@@ -58,18 +64,24 @@ export class GroupsService {
     return 'image/jpeg'; // Default
   }
 
-  async createGroup(userId: string, createGroupInput: CreateGroupInput) {
+  async createGroup(
+    userId: string,
+    createGroupInput: CreateGroupInput,
+    authToken?: string,
+  ) {
     // Process images if they exist
     const logoUrl = await this.processImageUpload(
       createGroupInput.logo,
       'groups/logos',
       `logo-${userId}`,
+      authToken,
     );
 
     const coverUrl = await this.processImageUpload(
       createGroupInput.cover,
       'groups/covers',
       `cover-${userId}`,
+      authToken,
     );
 
     // Create group and set the creator as an admin member in a transaction
@@ -192,7 +204,11 @@ export class GroupsService {
     });
   }
 
-  async updateGroup(userId: string, updateGroupInput: UpdateGroupInput) {
+  async updateGroup(
+    userId: string,
+    updateGroupInput: UpdateGroupInput,
+    authToken?: string,
+  ) {
     const { id, ...updateData } = updateGroupInput;
 
     // Check if the group exists
@@ -221,6 +237,7 @@ export class GroupsService {
         updateData.logo,
         'groups/logos',
         `logo-${userId}`,
+        authToken,
       );
     }
 
@@ -229,6 +246,7 @@ export class GroupsService {
         updateData.cover,
         'groups/covers',
         `cover-${userId}`,
+        authToken,
       );
     }
 

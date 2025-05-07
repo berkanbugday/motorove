@@ -2,15 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { SupabaseService } from '../../auth/supabase.service';
 import { ConfigService } from '../config/config.service';
 import { randomUUID } from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class StorageService {
   private readonly bucketName: string;
+  private readonly supabaseUrl: string;
+  private readonly supabaseKey: string;
 
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly configService: ConfigService,
   ) {
+    this.supabaseUrl = this.configService.get<string>('SUPABASE_URL', '');
+    this.supabaseKey = this.configService.get<string>('SUPABASE_KEY', '');
     this.bucketName = this.configService.get<string>(
       'SUPABASE_STORAGE_BUCKET',
       'images',
@@ -22,14 +27,29 @@ export class StorageService {
    * @param file Base64 encoded file data
    * @param path Optional path within the bucket (e.g., 'groups', 'users')
    * @param fileOptions Optional file metadata like contentType
+   * @param authToken Optional JWT token for authenticated uploads
    * @returns The URL of the uploaded file
    */
   async uploadFile(
     file: string,
     path: string = '',
     fileOptions?: { contentType?: string; filename?: string },
+    authToken?: string,
   ): Promise<string> {
-    const supabase = this.supabaseService.getClient();
+    // Get default supabase client
+    let supabase = this.supabaseService.getClient();
+
+    // If auth token is provided, create a new client with the token
+    if (authToken) {
+      // Create a new Supabase client with the auth token
+      supabase = createClient(this.supabaseUrl, this.supabaseKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      });
+    }
 
     // Remove data URI prefix if present (e.g., "data:image/jpeg;base64,")
     const base64Data = file.includes('base64,')
@@ -63,9 +83,23 @@ export class StorageService {
   /**
    * Delete a file from Supabase storage
    * @param path The full path to the file including the filename
+   * @param authToken Optional JWT token for authenticated operations
    */
-  async deleteFile(path: string): Promise<void> {
-    const supabase = this.supabaseService.getClient();
+  async deleteFile(path: string, authToken?: string): Promise<void> {
+    // Get default supabase client
+    let supabase = this.supabaseService.getClient();
+
+    // If auth token is provided, create a new client with the token
+    if (authToken) {
+      // Create a new Supabase client with the auth token
+      supabase = createClient(this.supabaseUrl, this.supabaseKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      });
+    }
 
     const { error } = await supabase.storage
       .from(this.bucketName)
@@ -80,10 +114,28 @@ export class StorageService {
    * Get a signed URL for a file
    * @param path The full path to the file
    * @param expiresIn The number of seconds until the signed URL expires
+   * @param authToken Optional JWT token for authenticated operations
    * @returns The signed URL
    */
-  async getSignedUrl(path: string, expiresIn: number = 60): Promise<string> {
-    const supabase = this.supabaseService.getClient();
+  async getSignedUrl(
+    path: string,
+    expiresIn: number = 60,
+    authToken?: string,
+  ): Promise<string> {
+    // Get default supabase client
+    let supabase = this.supabaseService.getClient();
+
+    // If auth token is provided, create a new client with the token
+    if (authToken) {
+      // Create a new Supabase client with the auth token
+      supabase = createClient(this.supabaseUrl, this.supabaseKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      });
+    }
 
     const { data, error } = await supabase.storage
       .from(this.bucketName)

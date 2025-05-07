@@ -8,7 +8,10 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Request } from 'express';
 
 interface GqlContext {
-  req: Request & { user: { id: string } };
+  req: Request & {
+    user: { id: string };
+    headers: { authorization?: string };
+  };
 }
 
 @Resolver(() => Group)
@@ -22,7 +25,10 @@ export class GroupsResolver {
     @Context() context: GqlContext,
   ) {
     const userId = context.req.user.id;
-    return this.groupsService.createGroup(userId, createGroupInput);
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.groupsService.createGroup(userId, createGroupInput, authToken);
   }
 
   @Query(() => [Group], { name: 'groups' })
@@ -56,6 +62,9 @@ export class GroupsResolver {
     @Context() context: GqlContext,
   ) {
     const userId = context.req.user.id;
-    return this.groupsService.updateGroup(userId, updateGroupInput);
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.groupsService.updateGroup(userId, updateGroupInput, authToken);
   }
 }
