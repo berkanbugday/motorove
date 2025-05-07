@@ -1,7 +1,7 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { City } from '../models/city.enum';
-import { GroupPrivacy } from '../models/group-privacy.enum';
-import { GroupTag } from '../models/group-tag.enum';
+import { City } from '../../enums/models/city.enum';
+import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
+import { GroupTag } from '../../enums/models/group-tag.enum';
 import {
   IsString,
   IsOptional,
@@ -47,10 +47,7 @@ export class CreateGroupInput {
   @IsNotEmpty({ message: 'City is required' })
   city: City;
 
-  @Field(() => GroupPrivacy, {
-    nullable: true,
-    defaultValue: GroupPrivacy.PUBLIC,
-  })
+  @Field(() => GroupPrivacy)
   @IsEnum(GroupPrivacy)
   @IsNotEmpty({ message: 'Privacy setting is required' })
   privacy: GroupPrivacy;

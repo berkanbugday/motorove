@@ -1,8 +1,8 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum GroupMemberRole {
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER',
+  ADMIN = 'Admin',
+  MEMBER = 'Member',
 }
 
 registerEnumType(GroupMemberRole, {

@@ -508,7 +508,7 @@ export const HomeScreen = ({navigation}: Props) => {
         subtitleStyle={styles.subtitle}
         rightIconName="plus"
         onRightButtonPress={() => navigateToScreen(navigation, 'CreatePost')}
-        secondRightIconName="bell"
+        secondRightIconName="bell-filled"
         secondRightIconBadgeCount={5}
         onSecondRightButtonPress={() =>
           loggingService.info('Notifications pressed')

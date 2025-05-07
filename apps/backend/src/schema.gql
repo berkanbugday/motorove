@@ -110,7 +110,7 @@ input CreateGroupInput {
   logo: String
   membersCapacity: Int
   name: String!
-  privacy: GroupPrivacy = PUBLIC
+  privacy: GroupPrivacy!
   tags: [GroupTag!]!
 }
 
@@ -118,6 +118,11 @@ input CreateGroupInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type EnumItem {
+  key: String!
+  value: String!
+}
 
 type Group {
   city: City!
@@ -171,48 +176,22 @@ enum GroupTag {
   ADVANCED
   ADVENTURE
   BEGINNER
-  BOBBER
   CAFE_RACER
-  CHARITY_RIDE
-  CHOPPER
-  CLASSIC
-  COASTAL_RIDER
-  COMPETITION
   CRUISER
   CUSTOM
   CUSTOMIZATION
   DAILY_COMMUTER
-  DIRT_BIKE
-  DUAL_SPORT
-  ECO_FRIENDLY
   ELECTRIC
-  ENDURO
   INTERMEDIATE
   LONG_DISTANCE
   MECHANICS
   MEETUP
-  MOTO_CROSS
-  MOUNTAIN_RIDER
   NAKED
-  NIGHT_RIDER
-  OFF_ROAD
-  PHOTOGRAPHY
-  PROFESSIONAL
-  RALLY
   RESTORATION
-  SCOOTER
-  SIDECAR
   SPORT
-  SUPER_MOTO
-  TECHNOLOGY
   TOURING
-  TRACK_DAY
-  TRACK_EVENT
-  TRAINING
-  TRIKE
   URBAN_RIDER
   VINTAGE
-  VINTAGE_ENTHUSIAST
   WEEKEND_RIDER
 }
 
@@ -229,6 +208,10 @@ type Mutation {
 
 type Query {
   createdGroups: [Group!]!
+  getCities: [EnumItem!]!
+  getGroupMemberRoles: [EnumItem!]!
+  getGroupPrivacyOptions: [EnumItem!]!
+  getGroupTags: [EnumItem!]!
   group(id: String!): Group!
   groupMembers(groupId: String!): [GroupMembership!]!
   groupMembership(id: String!): GroupMembership!
@@ -242,11 +225,6 @@ type Query {
 input RemoveGroupMemberInput {
   groupId: String!
   memberId: String!
-}
-
-enum Role {
-  ADMIN
-  USER
 }
 
 type Session {
@@ -275,7 +253,7 @@ input UpdateGroupInput {
   logo: String
   membersCapacity: Int
   name: String
-  privacy: GroupPrivacy = PUBLIC
+  privacy: GroupPrivacy
   tags: [GroupTag!]
 }
 
@@ -288,7 +266,6 @@ type User {
   groupMemberships: [GroupMembership!]
   id: ID!
   lastName: String
-  role: Role!
   supabaseId: String!
   updatedAt: DateTime!
 }

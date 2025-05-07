@@ -4,7 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { GroupMemberRole } from './models/group-member-role.enum';
+import { GroupMemberRole } from 'generated/prisma';
 
 @Injectable()
 export class GroupMembershipsService {

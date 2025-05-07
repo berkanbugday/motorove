@@ -73,22 +73,22 @@ const getToastIcon = (type: ToastType): {name: IconName; color: string} => {
       };
     case 'error':
       return {
-        name: 'report',
+        name: 'error-filled',
         color: colors.status.error,
       };
     case 'info':
       return {
-        name: 'bell',
+        name: 'bell-filled',
         color: colors.status.info,
       };
     case 'warning':
       return {
-        name: 'bell',
+        name: 'bell-exclamation-filled',
         color: colors.status.warning,
       };
     default:
       return {
-        name: 'bell',
+        name: 'bell-filled',
         color: colors.status.info,
       };
   }

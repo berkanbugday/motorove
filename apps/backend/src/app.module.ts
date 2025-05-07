@@ -12,6 +12,7 @@ import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { ConfigService } from './core/config/config.service';
 import { GroupsModule } from './groups/groups.module';
 import { GroupMembershipsModule } from './group-memberships/group-memberships.module';
+import { EnumsModule } from './enums/enums.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { GroupMembershipsModule } from './group-memberships/group-memberships.mo
     AuthModule,
     GroupsModule,
     GroupMembershipsModule,
+    EnumsModule,
   ],
   controllers: [AppController],
   providers: [

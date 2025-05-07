@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -20,6 +19,7 @@ import {
   Dropdown,
   Chip,
   DropdownItem,
+  showToast,
 } from '@components';
 import {colors, spacing, radius, getShadow} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -27,45 +27,12 @@ import {
   createGroupSchema,
   CreateGroupFormValues,
 } from '@utils/validation/groupValidation';
-
-// Privacy options for dropdown
-const privacyOptions: DropdownItem[] = [
-  {id: 1, label: 'Public', value: 'public'},
-  {id: 2, label: 'Private', value: 'private'},
-];
-
-// City options for dropdown
-const cityOptions: DropdownItem[] = [
-  {id: 1, label: 'New York', value: 'new-york'},
-  {id: 2, label: 'Los Angeles', value: 'los-angeles'},
-  {id: 3, label: 'Chicago', value: 'chicago'},
-  {id: 4, label: 'Houston', value: 'houston'},
-  {id: 5, label: 'Phoenix', value: 'phoenix'},
-  {id: 6, label: 'Philadelphia', value: 'philadelphia'},
-  {id: 7, label: 'San Antonio', value: 'san-antonio'},
-  {id: 8, label: 'San Diego', value: 'san-diego'},
-  {id: 9, label: 'Dallas', value: 'dallas'},
-  {id: 10, label: 'San Francisco', value: 'san-francisco'},
-  {id: 11, label: 'Austin', value: 'austin'},
-  {id: 12, label: 'Seattle', value: 'seattle'},
-  {id: 13, label: 'Denver', value: 'denver'},
-  {id: 14, label: 'Boston', value: 'boston'},
-  {id: 15, label: 'Portland', value: 'portland'},
-];
-
-// Tags for selection
-const availableTags = [
-  'Touring',
-  'Off-Road',
-  'Adventure',
-  'Sport',
-  'Cruiser',
-  'Vintage',
-  'Racing',
-  'Weekend Rides',
-  'Daily Commute',
-  'Long Distance',
-];
+import {useQuery} from '@apollo/client';
+import {
+  GET_CITIES,
+  GET_GROUP_PRIVACY_OPTIONS,
+  GET_GROUP_TAGS,
+} from '@services/graphql/enum.graphql';
 
 export const CreateGroupScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateGroup'>>();
@@ -73,11 +40,58 @@ export const CreateGroupScreen: React.FC = () => {
     null,
   );
   const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<
+    {key: string; value: string}[]
+  >([]);
   const [groupImage, setGroupImage] = useState<string | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Fetch cities from GraphQL API
+  const {data: citiesData, loading: citiesLoading} = useQuery(GET_CITIES);
+
+  // Fetch privacy options from GraphQL API
+  const {data: privacyData, loading: privacyLoading} = useQuery(
+    GET_GROUP_PRIVACY_OPTIONS,
+  );
+
+  // Fetch tags from GraphQL API
+  const {data: tagsData} = useQuery(GET_GROUP_TAGS);
+
+  // Transform cities data for dropdown
+  const cityOptions: DropdownItem[] = React.useMemo(() => {
+    if (!citiesData?.getCities) {
+      return [];
+    }
+    return citiesData.getCities.map(
+      (city: {key: string; value: string}, index: number) => ({
+        id: index + 1,
+        label: city.value,
+        value: city.key,
+      }),
+    );
+  }, [citiesData]);
+
+  // Transform privacy options data for dropdown
+  const privacyOptions: DropdownItem[] = React.useMemo(() => {
+    if (!privacyData?.getGroupPrivacyOptions) {
+      return [];
+    }
+    return privacyData.getGroupPrivacyOptions.map(
+      (privacy: {key: string; value: string}, index: number) => ({
+        id: index + 1,
+        label: privacy.value,
+        value: privacy.key,
+      }),
+    );
+  }, [privacyData]);
+
+  const tags: {key: string; value: string}[] = React.useMemo(() => {
+    if (!tagsData?.getGroupTags) {
+      return [];
+    }
+    return tagsData.getGroupTags;
+  }, [tagsData]);
   // Setup form with Zod validation
   const {
     control,
@@ -139,18 +153,30 @@ export const CreateGroupScreen: React.FC = () => {
     }
   };
 
-  const handleTagToggle = (tag: string) => {
+  const handleTagToggle = (tag: {key: string; value: string}) => {
     if (selectedTags.includes(tag)) {
       const newTags = selectedTags.filter(t => t !== tag);
       setSelectedTags(newTags);
-      setValue('tags', newTags, {shouldValidate: true});
+      setValue(
+        'tags',
+        newTags.map(t => t.key),
+        {shouldValidate: true},
+      );
     } else {
       if (selectedTags.length < 3) {
         const newTags = [...selectedTags, tag];
         setSelectedTags(newTags);
-        setValue('tags', newTags, {shouldValidate: true});
+        setValue(
+          'tags',
+          newTags.map(t => t.key),
+          {shouldValidate: true},
+        );
       } else {
-        Alert.alert('Limit Reached', 'You can select up to 3 tags');
+        showToast({
+          type: 'warning',
+          text1: 'Limit Reached',
+          text2: 'You can select up to 3 tags',
+        });
       }
     }
   };
@@ -185,12 +211,21 @@ export const CreateGroupScreen: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Here you would call your API to create the group
-      Alert.alert('Success', 'Group created successfully!', [
-        {text: 'OK', onPress: () => navigation.goBack()},
-      ]);
+      showToast({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Group created successfully!',
+      });
+      setTimeout(() => {
+        navigation.goBack();
+      }, 3000);
     } catch (error) {
       console.error('Error creating group:', error);
-      Alert.alert('Error', 'Failed to create group. Please try again.');
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to create group. Please try again.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -266,13 +301,13 @@ export const CreateGroupScreen: React.FC = () => {
               <Dropdown
                 data={cityOptions}
                 label="City"
-                placeholder="Select city"
                 onSelect={item => {
                   handleCitySelect(item);
                 }}
                 searchable={true}
                 selectedItem={selectedCity}
                 error={errors.city?.message}
+                loading={citiesLoading}
               />
 
               {/* Privacy Setting Dropdown */}
@@ -286,6 +321,7 @@ export const CreateGroupScreen: React.FC = () => {
                 searchable={false}
                 selectedItem={selectedPrivacy}
                 error={errors.privacy?.message}
+                loading={privacyLoading}
               />
 
               {/* Max Members */}
@@ -312,10 +348,10 @@ export const CreateGroupScreen: React.FC = () => {
                 </Typography>
               )}
               <View style={styles.tagsContainer}>
-                {availableTags.map(tag => (
+                {tags.map((tag: {key: string; value: string}) => (
                   <Chip
-                    key={tag}
-                    label={tag}
+                    key={tag.key}
+                    label={tag.value}
                     onPress={() => handleTagToggle(tag)}
                     size="medium"
                     variant={selectedTags.includes(tag) ? 'filled' : 'outlined'}

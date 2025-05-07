@@ -29,6 +29,13 @@ export * from './AnimatedInput';
 export * from './MapView';
 export * from './MarkerInfoCard';
 export * from './FAB';
+export {default as Dialog} from './Dialog';
+export type {
+  DialogRef,
+  DialogProps,
+  DialogButtonProps,
+  DialogVariant,
+} from './Dialog';
 
 // Higher-order components
 export * from './withErrorHandling';

@@ -27,6 +27,9 @@ import MapLocationFilled from '@assets/icons/map-location-filled.svg';
 import UserGear from '@assets/icons/user-gear.svg';
 import UserGearFilled from '@assets/icons/user-gear-filled.svg';
 import Bell from '@assets/icons/bell.svg';
+import BellFilled from '@assets/icons/bell-filled.svg';
+import BellExclamation from '@assets/icons/bell-exclamation.svg';
+import BellExclamationFilled from '@assets/icons/bell-exclamation-filled.svg';
 import Like from '@assets/icons/like.svg';
 import LikeFilled from '@assets/icons/like-filled.svg';
 import Comment from '@assets/icons/comment.svg';
@@ -39,7 +42,8 @@ import PaperPlane from '@assets/icons/paper-plane.svg';
 import PaperPlaneFilled from '@assets/icons/paper-plane-filled.svg';
 import Trash from '@assets/icons/trash.svg';
 import Pen from '@assets/icons/pen.svg';
-import Report from '@assets/icons/report.svg';
+import Error from '@assets/icons/error.svg';
+import ErrorFilled from '@assets/icons/error-filled.svg';
 import Share from '@assets/icons/share.svg';
 import UserLocation from '@assets/icons/user-location.svg';
 import Plus from '@assets/icons/plus.svg';
@@ -90,6 +94,9 @@ export type IconName =
   | 'user-gear'
   | 'user-gear-filled'
   | 'bell'
+  | 'bell-filled'
+  | 'bell-exclamation'
+  | 'bell-exclamation-filled'
   | 'like'
   | 'like-filled'
   | 'comment'
@@ -110,7 +117,8 @@ export type IconName =
   | 'paper-plane-filled'
   | 'trash'
   | 'pen'
-  | 'report'
+  | 'error'
+  | 'error-filled'
   | 'share'
   | 'user-location'
   | 'plus'
@@ -192,6 +200,12 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <UserGearFilled {...commonProps} />;
     case 'bell':
       return <Bell {...commonProps} />;
+    case 'bell-filled':
+      return <BellFilled {...commonProps} />;
+    case 'bell-exclamation':
+      return <BellExclamation {...commonProps} />;
+    case 'bell-exclamation-filled':
+      return <BellExclamationFilled {...commonProps} />;
     case 'like':
       return <Like {...commonProps} />;
     case 'like-filled':
@@ -232,8 +246,10 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Trash {...commonProps} />;
     case 'pen':
       return <Pen {...commonProps} />;
-    case 'report':
-      return <Report {...commonProps} />;
+    case 'error':
+      return <Error {...commonProps} />;
+    case 'error-filled':
+      return <ErrorFilled {...commonProps} />;
     case 'share':
       return <Share {...commonProps} />;
     case 'user-location':

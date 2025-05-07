@@ -105,7 +105,7 @@ export class GroupsService {
           user: {
             connect: { id: userId },
           },
-          role: 'ADMIN', // Creator is automatically an admin
+          role: $Enums.GroupMemberRole.ADMIN, // Creator is automatically an admin
           createdBy: {
             connect: { id: userId },
           },

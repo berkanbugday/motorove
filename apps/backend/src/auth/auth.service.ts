@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ConfigService } from '@nestjs/config';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { User } from './models/user.model';
 import { AuthResponse } from './models/auth-response.model';
@@ -15,7 +14,6 @@ export class AuthService {
   constructor(
     private supabaseService: SupabaseService,
     private prismaService: PrismaService,
-    private configService: ConfigService,
   ) {}
 
   async signUp(
