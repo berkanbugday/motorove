@@ -18,7 +18,7 @@ input ChangeMemberRoleInput {
   role: GroupMemberRole!
 }
 
-"""Cities in Turkey with their license plate codes"""
+"""The city of the group"""
 enum City {
   P01
   P02
@@ -165,13 +165,13 @@ type GroupMembership {
   userId: String!
 }
 
-"""Privacy levels for groups"""
+"""The privacy of the group"""
 enum GroupPrivacy {
   PRIVATE
   PUBLIC
 }
 
-"""Tags that can be associated with groups"""
+"""The tag of the group"""
 enum GroupTag {
   ADVANCED
   ADVENTURE

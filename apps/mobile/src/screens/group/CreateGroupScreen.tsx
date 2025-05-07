@@ -71,7 +71,7 @@ export const CreateGroupScreen: React.FC = () => {
         });
         setTimeout(() => {
           navigation.goBack();
-        }, 2000);
+        }, 1000);
       },
       onError: error => {
         loggingService.error('Error creating group:', error);

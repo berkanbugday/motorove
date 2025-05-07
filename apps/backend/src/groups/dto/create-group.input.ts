@@ -1,7 +1,5 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
-import { City } from '../../enums/models/city.enum';
-import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
-import { GroupTag } from '../../enums/models/group-tag.enum';
+import { InputType, Field, Int, registerEnumType } from '@nestjs/graphql';
+import { City, GroupPrivacy, GroupTag } from 'generated/prisma';
 import {
   IsString,
   IsOptional,
@@ -16,6 +14,20 @@ import {
   ArrayMaxSize,
 } from 'class-validator';
 
+registerEnumType(City, {
+  name: 'City',
+  description: 'The city of the group',
+});
+
+registerEnumType(GroupPrivacy, {
+  name: 'GroupPrivacy',
+  description: 'The privacy of the group',
+});
+
+registerEnumType(GroupTag, {
+  name: 'GroupTag',
+  description: 'The tag of the group',
+});
 @InputType()
 export class CreateGroupInput {
   @Field()
