@@ -171,14 +171,14 @@ export function TopHeaderBar({
               onPress={onBackPress}
               style={styles.backButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
-              <Icon name="arrow-left" size={24} color={textColor} />
+              <Icon name="arrow-left" size={20} color={textColor} />
             </TouchableOpacity>
           ) : leftIconName ? (
             <TouchableOpacity
               onPress={onLeftIconPress}
               style={styles.backButton}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
-              <Icon name={leftIconName} size={24} color={textColor} />
+              <Icon name={leftIconName} size={20} color={textColor} />
             </TouchableOpacity>
           ) : null}
         </View>

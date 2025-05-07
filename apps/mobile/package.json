@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
-    "@bam.tech/react-native-image-resizer": "^3.0.11",
     "@hookform/resolvers": "^5.0.1",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/geolocation": "^3.4.0",

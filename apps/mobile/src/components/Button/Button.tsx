@@ -56,7 +56,6 @@ export function Button({
     size === 'small' && styles.smallButton,
     size === 'medium' && styles.mediumButton,
     size === 'large' && styles.largeButton,
-    (disabled || loading) && styles.disabledButton,
     style,
   ];
 
@@ -237,9 +236,6 @@ const styles = StyleSheet.create({
   largeButton: {
     paddingVertical: spacing.button.paddingVertical.large,
     paddingHorizontal: spacing.button.paddingHorizontal.large,
-  },
-  disabledButton: {
-    opacity: 0.6,
   },
   contentContainer: {
     flexDirection: 'row',
