@@ -198,12 +198,12 @@ enum GroupTag {
 type Mutation {
   addGroupMember(input: AddGroupMemberInput!): GroupMembership!
   changeMemberRole(input: ChangeMemberRoleInput!): GroupMembership!
-  createGroup(input: CreateGroupInput!): Group!
+  createGroup(createGroupInput: CreateGroupInput!): Group!
   refreshToken(token: String!): AuthResponse!
   removeGroupMember(input: RemoveGroupMemberInput!): Boolean!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
-  updateGroup(input: UpdateGroupInput!): Group!
+  updateGroup(updateGroupInput: UpdateGroupInput!): Group!
 }
 
 type Query {

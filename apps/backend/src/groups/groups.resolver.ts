@@ -18,7 +18,7 @@ export class GroupsResolver {
   @UseGuards(JwtGuard)
   @Mutation(() => Group)
   createGroup(
-    @Args('input') createGroupInput: CreateGroupInput,
+    @Args('createGroupInput') createGroupInput: CreateGroupInput,
     @Context() context: GqlContext,
   ) {
     const userId = context.req.user.id;
@@ -52,7 +52,7 @@ export class GroupsResolver {
   @UseGuards(JwtGuard)
   @Mutation(() => Group)
   updateGroup(
-    @Args('input') updateGroupInput: UpdateGroupInput,
+    @Args('updateGroupInput') updateGroupInput: UpdateGroupInput,
     @Context() context: GqlContext,
   ) {
     const userId = context.req.user.id;
