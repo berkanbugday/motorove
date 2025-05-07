@@ -127,13 +127,13 @@ export const CreateGroupScreen: React.FC = () => {
   } = useForm<CreateGroupFormValues>({
     resolver: zodResolver(createGroupSchema),
     defaultValues: {
-      name: '',
-      description: '',
+      name: 'Deneme',
+      description: 'Deneme test',
       logo: null,
       cover: null,
       city: '',
       privacy: '',
-      maxMembers: null,
+      membersCapacity: null,
       tags: [],
     },
     mode: 'onChange',
@@ -246,8 +246,8 @@ export const CreateGroupScreen: React.FC = () => {
         cover: data.cover,
         city: selectedCity?.value,
         privacy: selectedPrivacy?.value,
-        maxMembers: data.maxMembers
-          ? parseInt(data.maxMembers.toString(), 10)
+        membersCapacity: data.membersCapacity
+          ? parseInt(data.membersCapacity.toString(), 10)
           : null,
         tags: tagKeys,
       };
@@ -364,9 +364,9 @@ export const CreateGroupScreen: React.FC = () => {
               {/* Max Members */}
               <AnimatedInput
                 control={control}
-                name="maxMembers"
+                name="membersCapacity"
                 label="Members Capacity (optional)"
-                error={errors.maxMembers}
+                error={errors.membersCapacity}
                 keyboardType="numeric"
               />
             </View>

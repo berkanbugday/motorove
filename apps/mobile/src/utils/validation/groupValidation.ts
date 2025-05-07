@@ -16,7 +16,7 @@ export const createGroupSchema = z.object({
   privacy: z
     .string({required_error: 'Privacy setting is required'})
     .min(1, 'Please select a privacy setting'),
-  maxMembers: z
+  membersCapacity: z
     .number({invalid_type_error: 'Members capacity must be a number'})
     .int('Members capacity must be a whole number')
     .positive('Members capacity must be a positive number')

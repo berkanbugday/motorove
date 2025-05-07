@@ -59,7 +59,7 @@ export interface GroupCardProps {
   /**
    * Maximum number of members allowed in the group
    */
-  maxMembers?: number;
+  membersCapacity?: number;
 
   /**
    * Privacy level of the group ("public", "private", "members-only")
@@ -101,7 +101,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   location,
   tags = [],
   currentMembers = 0,
-  maxMembers,
+  membersCapacity,
   privacy = 'public',
   badge,
   onPress,
@@ -169,8 +169,8 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   };
 
   const renderMemberCount = () => {
-    const memberText = maxMembers
-      ? `${currentMembers} / ${maxMembers} members`
+    const memberText = membersCapacity
+      ? `${currentMembers} / ${membersCapacity} members`
       : `${currentMembers} members`;
 
     return (
