@@ -1,29 +1,13 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { GraphqlExceptionFilter } from './filters/graphql-exception.filter';
-import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { Module, Global } from '@nestjs/common';
+import { ConfigModule } from './config/config.module';
+import { CustomLogger } from './utils/logger.service';
 import { SentryModule } from './sentry/sentry.module';
-import { LoggerModule } from './utils/logger.module';
+import { StorageModule } from './storage/storage.module';
 
+@Global()
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    SentryModule,
-    LoggerModule,
-  ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: GraphqlExceptionFilter,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
-  ],
-  exports: [ConfigModule, SentryModule, LoggerModule],
+  imports: [ConfigModule, SentryModule, StorageModule],
+  providers: [CustomLogger],
+  exports: [ConfigModule, CustomLogger, SentryModule, StorageModule],
 })
 export class CoreModule {}

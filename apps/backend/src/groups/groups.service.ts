@@ -2,28 +2,84 @@ import {
   Injectable,
   ForbiddenException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGroupInput } from './dto/create-group.input';
 import { UpdateGroupInput } from './dto/update-group.input';
 import { $Enums } from '../../generated/prisma';
+import { StorageService } from '../core/storage/storage.service';
 
 @Injectable()
 export class GroupsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
-  // These methods are placeholders until the Prisma schema is migrated
-  // and the Prisma client is generated with the new Group model
+  // Process base64 image and upload to Supabase storage
+  private async processImageUpload(
+    base64Image: string | null | undefined,
+    path: string,
+    filePrefix: string,
+  ): Promise<string | undefined> {
+    if (!base64Image) return undefined;
+
+    try {
+      // Check if it's a URL or base64 data
+      if (base64Image.startsWith('http')) {
+        return base64Image; // Already a URL, just return it
+      }
+
+      // Upload to Supabase storage
+      const contentType = this.getContentTypeFromBase64(base64Image);
+      const filename = `${filePrefix}-${Date.now()}`;
+      const imageUrl = await this.storageService.uploadFile(base64Image, path, {
+        contentType,
+        filename,
+      });
+
+      return imageUrl;
+    } catch (error) {
+      throw new BadRequestException(`Failed to upload image: ${error.message}`);
+    }
+  }
+
+  // Extract content type from base64 data
+  private getContentTypeFromBase64(base64Data: string): string {
+    if (base64Data.includes('data:')) {
+      const matches = base64Data.match(
+        /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/,
+      );
+      if (matches && matches.length > 1) {
+        return matches[1];
+      }
+    }
+    return 'image/jpeg'; // Default
+  }
 
   async createGroup(userId: string, createGroupInput: CreateGroupInput) {
+    // Process images if they exist
+    const logoUrl = await this.processImageUpload(
+      createGroupInput.logo,
+      'groups/logos',
+      `logo-${userId}`,
+    );
+
+    const coverUrl = await this.processImageUpload(
+      createGroupInput.cover,
+      'groups/covers',
+      `cover-${userId}`,
+    );
+
     // Create group and set the creator as an admin member in a transaction
     return await this.prisma.$transaction(async (tx) => {
       // Create the group with proper type conversions
       const prismaData = {
         name: createGroupInput.name,
         description: createGroupInput.description,
-        logo: createGroupInput.logo,
-        cover: createGroupInput.cover,
+        logo: logoUrl,
+        cover: coverUrl,
         city: createGroupInput.city as unknown as $Enums.City,
         privacy: createGroupInput.privacy as unknown as $Enums.GroupPrivacy,
         membersCapacity: createGroupInput.membersCapacity,
@@ -156,9 +212,31 @@ export class GroupsService {
       );
     }
 
+    // Process images if they exist
+    let logoUrl = updateData.logo;
+    let coverUrl = updateData.cover;
+
+    if (updateData.logo && updateData.logo !== group.logo) {
+      logoUrl = await this.processImageUpload(
+        updateData.logo,
+        'groups/logos',
+        `logo-${userId}`,
+      );
+    }
+
+    if (updateData.cover && updateData.cover !== group.cover) {
+      coverUrl = await this.processImageUpload(
+        updateData.cover,
+        'groups/covers',
+        `cover-${userId}`,
+      );
+    }
+
     // Handle enum conversions
     const processedUpdateData: any = {
       ...updateData,
+      logo: logoUrl,
+      cover: coverUrl,
       updatedById: userId, // Update the updatedBy field
     };
 

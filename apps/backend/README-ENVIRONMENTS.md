@@ -55,6 +55,9 @@ At minimum, your environment files should contain:
 NODE_ENV=development
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/motorove?schema=public
 JWT_SECRET=your_jwt_secret_key
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+SUPABASE_STORAGE_BUCKET=images
 ```
 
 See `src/core/config/README.md` for a complete list of supported variables and their default values.
