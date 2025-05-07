@@ -154,6 +154,17 @@ export const CreateGroupScreen: React.FC = () => {
 
       if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
+
+        // Check file size - 10MB limit
+        if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
+          showToast({
+            type: 'error',
+            text1: 'File too large',
+            text2: 'Please select an image smaller than 10MB',
+          });
+          return;
+        }
+
         // Use base64 data instead of URI
         setLogo(asset.uri || '');
         setValue(
@@ -180,6 +191,17 @@ export const CreateGroupScreen: React.FC = () => {
 
       if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
+
+        // Check file size - 10MB limit
+        if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
+          showToast({
+            type: 'error',
+            text1: 'File too large',
+            text2: 'Please select an image smaller than 10MB',
+          });
+          return;
+        }
+
         // Use base64 data instead of URI
         setCover(asset.uri || '');
         setValue(

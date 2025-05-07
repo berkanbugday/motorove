@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { CustomLogger } from './core/utils/logger.service';
 import { ConfigService } from './core/config/config.service';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   // Create the app with our custom logger
@@ -16,6 +17,10 @@ async function bootstrap() {
 
   // Set our custom logger as the app logger
   app.useLogger(logger);
+
+  // Configure body parser with larger limit
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
 
   // Apply validation pipe globally
   app.useGlobalPipes(
