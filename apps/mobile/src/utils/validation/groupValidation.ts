@@ -26,8 +26,8 @@ export const createGroupSchema = z.object({
     .array(z.string())
     .min(1, 'Please select at least 1 tag')
     .max(3, 'You can select up to 3 tags'),
-  groupImage: z.string().nullable().optional(),
-  coverImage: z.string().nullable().optional(),
+  logo: z.string().nullable().optional(),
+  cover: z.string().nullable().optional(),
 });
 
 export type CreateGroupFormValues = z.infer<typeof createGroupSchema>;

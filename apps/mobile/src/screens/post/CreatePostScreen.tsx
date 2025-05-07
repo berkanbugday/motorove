@@ -22,6 +22,7 @@ import {useAuth} from '@contexts/AuthContext';
 import {Button, Chip, DropdownItem, Dropdown, Subtitle} from '@components';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {loggingService} from '@services/logging.service';
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
   const [postText, setPostText] = useState('');
@@ -40,7 +41,7 @@ export const CreatePostScreen = () => {
 
   const handlePost = () => {
     // Implement post functionality
-    console.log('Posting:', {text: postText, images: selectedImages});
+    loggingService.info('Posting:', {text: postText, images: selectedImages});
     navigation.goBack();
   };
 
@@ -65,7 +66,7 @@ export const CreatePostScreen = () => {
         setSelectedImages([...selectedImages, newImage]);
       }
     } catch (error) {
-      console.error('Error selecting image:', error);
+      loggingService.error('Error selecting image:', error);
     }
   };
 

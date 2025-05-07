@@ -27,12 +27,14 @@ import {
   createGroupSchema,
   CreateGroupFormValues,
 } from '@utils/validation/groupValidation';
-import {useQuery} from '@apollo/client';
+import {useQuery, useMutation} from '@apollo/client';
 import {
   GET_CITIES,
   GET_GROUP_PRIVACY_OPTIONS,
   GET_GROUP_TAGS,
 } from '@services/graphql/enum.graphql';
+import {CREATE_GROUP} from '@services/graphql/group.graphql';
+import {loggingService} from '@services/logging.service';
 
 export const CreateGroupScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateGroup'>>();
@@ -43,9 +45,8 @@ export const CreateGroupScreen: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<
     {key: string; value: string}[]
   >([]);
-  const [groupImage, setGroupImage] = useState<string | null>(null);
-  const [coverImage, setCoverImage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [logo, setLogo] = useState<string | null>(null);
+  const [cover, setCover] = useState<string | null>(null);
 
   // Fetch cities from GraphQL API
   const {data: citiesData, loading: citiesLoading} = useQuery(GET_CITIES);
@@ -57,6 +58,31 @@ export const CreateGroupScreen: React.FC = () => {
 
   // Fetch tags from GraphQL API
   const {data: tagsData} = useQuery(GET_GROUP_TAGS);
+
+  // Initialize create group mutation
+  const [createGroup, {loading: createGroupLoading}] = useMutation(
+    CREATE_GROUP,
+    {
+      onCompleted: () => {
+        showToast({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Group created successfully!',
+        });
+        setTimeout(() => {
+          navigation.goBack();
+        }, 2000);
+      },
+      onError: error => {
+        loggingService.error('Error creating group:', error);
+        showToast({
+          type: 'error',
+          text1: 'Error',
+          text2: error.message || 'Failed to create group. Please try again.',
+        });
+      },
+    },
+  );
 
   // Transform cities data for dropdown
   const cityOptions: DropdownItem[] = React.useMemo(() => {
@@ -103,12 +129,12 @@ export const CreateGroupScreen: React.FC = () => {
     defaultValues: {
       name: '',
       description: '',
+      logo: null,
+      cover: null,
       city: '',
       privacy: '',
       maxMembers: null,
       tags: [],
-      groupImage: null,
-      coverImage: null,
     },
     mode: 'onChange',
   });
@@ -117,39 +143,55 @@ export const CreateGroupScreen: React.FC = () => {
     navigation.goBack();
   };
 
-  const handleSelectGroupImage = async () => {
+  const handleSelectLogo = async () => {
     try {
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
         selectionLimit: 1,
+        includeBase64: true,
       });
 
       if (result.assets && result.assets.length > 0) {
-        const uri = result.assets[0].uri || '';
-        setGroupImage(uri);
-        setValue('groupImage', uri, {shouldValidate: true});
+        const asset = result.assets[0];
+        // Use base64 data instead of URI
+        setLogo(asset.uri || '');
+        setValue(
+          'logo',
+          asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : null,
+          {
+            shouldValidate: true,
+          },
+        );
       }
     } catch (error) {
-      console.error('Error selecting image:', error);
+      loggingService.error('Error selecting image:', error);
     }
   };
 
-  const handleSelectCoverImage = async () => {
+  const handleSelectCover = async () => {
     try {
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.8,
         selectionLimit: 1,
+        includeBase64: true,
       });
 
       if (result.assets && result.assets.length > 0) {
-        const uri = result.assets[0].uri || '';
-        setCoverImage(uri);
-        setValue('coverImage', uri, {shouldValidate: true});
+        const asset = result.assets[0];
+        // Use base64 data instead of URI
+        setCover(asset.uri || '');
+        setValue(
+          'cover',
+          asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : null,
+          {
+            shouldValidate: true,
+          },
+        );
       }
     } catch (error) {
-      console.error('Error selecting cover image:', error);
+      loggingService.error('Error selecting cover image:', error);
     }
   };
 
@@ -193,41 +235,36 @@ export const CreateGroupScreen: React.FC = () => {
 
   const onSubmit = async (data: CreateGroupFormValues) => {
     try {
-      setIsSubmitting(true);
+      // Prepare tags data
+      const tagKeys = selectedTags.map(tag => tag.key);
 
-      // Combine form data with selected images and tags
-      const groupData = {
-        ...data,
-        privacy: selectedPrivacy?.value || 'public',
-        city: selectedCity?.value || '',
-        groupImage,
-        coverImage,
-        tags: selectedTags,
+      // Prepare form data for the GraphQL mutation
+      const createGroupInput = {
+        name: data.name,
+        description: data.description,
+        logo: data.logo,
+        cover: data.cover,
+        city: selectedCity?.value,
+        privacy: selectedPrivacy?.value,
+        maxMembers: data.maxMembers
+          ? parseInt(data.maxMembers.toString(), 10)
+          : null,
+        tags: tagKeys,
       };
 
-      console.log('Creating group with data:', groupData);
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Here you would call your API to create the group
-      showToast({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Group created successfully!',
+      // Execute the mutation
+      await createGroup({
+        variables: {
+          input: createGroupInput,
+        },
       });
-      setTimeout(() => {
-        navigation.goBack();
-      }, 3000);
     } catch (error) {
-      console.error('Error creating group:', error);
+      loggingService.error('Error in onSubmit:', error);
       showToast({
         type: 'error',
         text1: 'Error',
         text2: 'Failed to create group. Please try again.',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -245,11 +282,11 @@ export const CreateGroupScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}>
           {/* Group Cover Image Selection - Moved to top */}
           <TouchableOpacity
-            style={styles.coverImageContainer}
-            onPress={handleSelectCoverImage}
+            style={styles.coverContainer}
+            onPress={handleSelectCover}
             activeOpacity={0.8}>
-            {coverImage ? (
-              <Image source={{uri: coverImage}} style={styles.coverImage} />
+            {cover ? (
+              <Image source={{uri: cover}} style={styles.cover} />
             ) : (
               <View style={styles.coverPlaceholder}>
                 <Typography variant="bodySmall" color={colors.neutral.grey}>
@@ -261,11 +298,11 @@ export const CreateGroupScreen: React.FC = () => {
           {/* Group Profile Image Selection */}
           <View style={styles.imageSelectionContainer}>
             <TouchableOpacity
-              style={styles.groupImageContainer}
-              onPress={handleSelectGroupImage}
+              style={styles.logoContainer}
+              onPress={handleSelectLogo}
               activeOpacity={0.8}>
-              {groupImage ? (
-                <Image source={{uri: groupImage}} style={styles.groupImage} />
+              {logo ? (
+                <Image source={{uri: logo}} style={styles.logo} />
               ) : (
                 <View style={styles.placeholderContainer}>
                   <Typography
@@ -367,12 +404,12 @@ export const CreateGroupScreen: React.FC = () => {
         {/* Create Button */}
         <View style={styles.buttonContainer}>
           <Button
-            title={isSubmitting ? 'Creating...' : 'Create Group'}
+            title={createGroupLoading ? 'Creating...' : 'Create Group'}
             variant="dark"
             size="medium"
             shape="round"
             onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
+            loading={createGroupLoading}
           />
         </View>
       </SafeAreaView>
@@ -403,7 +440,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: -50,
   },
-  groupImageContainer: {
+  logoContainer: {
     width: 100,
     height: 100,
     borderRadius: radius.round,
@@ -412,7 +449,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...getShadow('small'),
   },
-  groupImage: {
+  logo: {
     width: '100%',
     height: '100%',
     borderRadius: radius.round,
@@ -426,12 +463,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     textAlign: 'center',
   },
-  coverImageContainer: {
+  coverContainer: {
     height: 150,
     overflow: 'hidden',
     backgroundColor: colors.secondary.light,
   },
-  coverImage: {
+  cover: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
