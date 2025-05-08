@@ -13,10 +13,10 @@ export interface GroupInput {
   description: string;
   logo: string | null | undefined;
   cover: string | null | undefined;
-  city: string | undefined;
+  city: {id: string; value: string};
   privacy: string | undefined;
   membersCapacity: number | null;
-  tags: string[];
+  tags: {id: string; value: string}[];
 }
 
 export interface Group {
@@ -28,7 +28,7 @@ export interface Group {
   city: string;
   privacy: string;
   membersCapacity: number | null;
-  tags: string[];
+  tags: {id: string; value: string}[];
 }
 
 // Hook for creating a group

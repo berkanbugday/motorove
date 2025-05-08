@@ -19,6 +19,10 @@ interface GqlContext {
       username?: string;
     };
   };
+  operation?: {
+    name?: { value: string };
+    operation: string;
+  };
 }
 
 interface ExceptionExtension {
@@ -121,11 +125,13 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
     });
   }
 
-  private extractSafeContext(context: any): Record<string, any> | undefined {
+  private extractSafeContext(
+    context: GqlContext | null | undefined,
+  ): Record<string, unknown> | undefined {
     if (!context) return undefined;
 
     // Extract only safe properties from context that won't cause circular reference issues
-    const safeContext: Record<string, any> = {};
+    const safeContext: Record<string, unknown> = {};
 
     try {
       // Add user info if available

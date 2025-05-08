@@ -1,5 +1,6 @@
 import {useQuery} from '@apollo/client';
 import {GET_GROUP_PRIVACY_OPTIONS} from './graphql/enum.graphql';
+import {toPascalCase} from '@utils/stringUtils';
 
 // Type definitions
 export interface EnumItem {
@@ -19,7 +20,7 @@ export const useEnumPrivacyOptions = () => {
   const privacyOptions: DropdownItem[] = data?.getGroupPrivacyOptions
     ? data.getGroupPrivacyOptions.map((privacy: EnumItem, index: number) => ({
         id: index + 1,
-        label: privacy.key,
+        label: toPascalCase(privacy.value),
         value: privacy.value,
       }))
     : [];

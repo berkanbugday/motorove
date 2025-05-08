@@ -40,7 +40,7 @@ export const CreateGroupScreen: React.FC = () => {
   );
   const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
   const [selectedTags, setSelectedTags] = useState<
-    {key: string; value: string}[]
+    {id: string; value: string}[]
   >([]);
   const [logo, setLogo] = useState<string | null>(null);
   const [cover, setCover] = useState<string | null>(null);
@@ -157,13 +157,13 @@ export const CreateGroupScreen: React.FC = () => {
     }
   };
 
-  const handleTagToggle = (tag: {key: string; value: string}) => {
+  const handleTagToggle = (tag: {id: string; value: string}) => {
     if (selectedTags.includes(tag)) {
       const newTags = selectedTags.filter(t => t !== tag);
       setSelectedTags(newTags);
       setValue(
         'tags',
-        newTags.map(t => t.key),
+        newTags.map(t => t.id),
         {shouldValidate: true},
       );
     } else {
@@ -172,7 +172,7 @@ export const CreateGroupScreen: React.FC = () => {
         setSelectedTags(newTags);
         setValue(
           'tags',
-          newTags.map(t => t.key),
+          newTags.map(t => t.id),
           {shouldValidate: true},
         );
       } else {
@@ -197,21 +197,21 @@ export const CreateGroupScreen: React.FC = () => {
 
   const onSubmit = async (data: CreateGroupFormValues) => {
     try {
-      // Prepare tags data
-      const tagKeys = selectedTags.map(tag => tag.key);
-
       // Prepare form data for the group service
       const createGroupInput: GroupInput = {
         name: data.name,
         description: data.description,
         logo: data.logo,
         cover: data.cover,
-        city: selectedCity?.value,
+        city: {
+          id: selectedCity?.id as string,
+          value: selectedCity?.label as string,
+        },
         privacy: selectedPrivacy?.value,
         membersCapacity: data.membersCapacity
           ? parseInt(data.membersCapacity.toString(), 10)
           : null,
-        tags: tagKeys,
+        tags: selectedTags,
       };
 
       // Call the group service createGroup method
@@ -352,11 +352,11 @@ export const CreateGroupScreen: React.FC = () => {
                     key={tag.id}
                     label={tag.value}
                     onPress={() =>
-                      handleTagToggle({key: tag.id, value: tag.value})
+                      handleTagToggle({id: tag.id, value: tag.value})
                     }
                     size="medium"
                     variant={
-                      selectedTags.includes({key: tag.id, value: tag.value})
+                      selectedTags.some(t => t.id === tag.id)
                         ? 'filled'
                         : 'outlined'
                     }

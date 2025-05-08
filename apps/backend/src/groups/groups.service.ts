@@ -137,6 +137,8 @@ export class GroupsService {
         where: { id: group.id },
         include: {
           createdBy: true,
+          city: true,
+          tags: true,
           memberships: {
             include: {
               user: true,
@@ -151,6 +153,8 @@ export class GroupsService {
     return await this.prisma.group.findMany({
       include: {
         createdBy: true,
+        city: true,
+        tags: true,
         memberships: {
           include: {
             user: true,
@@ -165,6 +169,8 @@ export class GroupsService {
       where: { id },
       include: {
         createdBy: true,
+        city: true,
+        tags: true,
         memberships: {
           include: {
             user: true,
@@ -185,6 +191,8 @@ export class GroupsService {
       },
       include: {
         createdBy: true,
+        city: true,
+        tags: true,
         memberships: {
           include: {
             user: true,
@@ -201,6 +209,8 @@ export class GroupsService {
       },
       include: {
         createdBy: true,
+        city: true,
+        tags: true,
         memberships: {
           include: {
             user: true,
@@ -220,7 +230,11 @@ export class GroupsService {
     // Check if the group exists
     const group = await this.prisma.group.findUnique({
       where: { id },
-      include: { createdBy: true },
+      include: {
+        createdBy: true,
+        city: true,
+        tags: true,
+      },
     });
 
     if (!group) {
@@ -257,26 +271,30 @@ export class GroupsService {
     }
 
     // Handle enum conversions
-    const processedUpdateData: any = {
+    const processedUpdateData: Record<string, unknown> = {
       ...updateData,
       logo: logoUrl,
       cover: coverUrl,
       updatedById: userId, // Update the updatedBy field
     };
 
-    if (updateData.city) {
+    if (updateData.city && 'id' in updateData.city) {
       processedUpdateData.city = {
         connect: { id: updateData.city.id },
       };
     }
+
     if (updateData.privacy) {
       processedUpdateData.privacy = updateData.privacy;
     }
-    if (updateData.tags) {
+
+    if (updateData.tags && Array.isArray(updateData.tags)) {
       processedUpdateData.tags = {
-        connect: updateData.tags.map((tag) => ({
-          id: tag.id,
-        })),
+        connect: updateData.tags
+          .map((tag) => ({
+            id: 'id' in tag ? tag.id : undefined,
+          }))
+          .filter((item) => item.id !== undefined),
       };
     }
 
@@ -286,6 +304,8 @@ export class GroupsService {
       data: processedUpdateData,
       include: {
         createdBy: true,
+        city: true,
+        tags: true,
         memberships: {
           include: {
             user: true,

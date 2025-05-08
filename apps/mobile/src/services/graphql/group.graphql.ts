@@ -8,10 +8,16 @@ export const GROUP_FRAGMENT = gql`
     description
     logo
     cover
-    city
+    city {
+      id
+      value
+    }
     privacy
     membersCapacity
-    tags
+    tags {
+      id
+      value
+    }
   }
 `;
 

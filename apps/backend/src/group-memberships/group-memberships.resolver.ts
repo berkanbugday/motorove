@@ -7,6 +7,15 @@ import { RemoveGroupMemberInput } from './dto/remove-group-member.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
+interface RequestContext {
+  req: {
+    user: {
+      id: string;
+      [key: string]: any;
+    };
+  };
+}
+
 @Resolver(() => GroupMembership)
 export class GroupMembershipsResolver {
   constructor(
@@ -25,8 +34,8 @@ export class GroupMembershipsResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => [GroupMembership], { name: 'myGroupMemberships' })
-  findByUser(@Context() context: any) {
-    const userId = context.req.user.id;
+  findByUser(@Context() context: RequestContext) {
+    const userId: string = context.req.user.id;
     return this.groupMembershipsService.findByUser(userId);
   }
 
@@ -39,9 +48,9 @@ export class GroupMembershipsResolver {
   @Mutation(() => GroupMembership)
   addGroupMember(
     @Args('input') addGroupMemberInput: AddGroupMemberInput,
-    @Context() context: any,
+    @Context() context: RequestContext,
   ) {
-    const adminId = context.req.user.id;
+    const adminId: string = context.req.user.id;
     return this.groupMembershipsService.addMember(
       addGroupMemberInput.groupId,
       addGroupMemberInput.userId,
@@ -53,9 +62,9 @@ export class GroupMembershipsResolver {
   @Mutation(() => GroupMembership)
   changeMemberRole(
     @Args('input') changeMemberRoleInput: ChangeMemberRoleInput,
-    @Context() context: any,
+    @Context() context: RequestContext,
   ) {
-    const adminId = context.req.user.id;
+    const adminId: string = context.req.user.id;
     return this.groupMembershipsService.changeMemberRole(
       changeMemberRoleInput.groupId,
       changeMemberRoleInput.memberId,
@@ -68,9 +77,9 @@ export class GroupMembershipsResolver {
   @Mutation(() => Boolean)
   async removeGroupMember(
     @Args('input') removeGroupMemberInput: RemoveGroupMemberInput,
-    @Context() context: any,
+    @Context() context: RequestContext,
   ) {
-    const adminId = context.req.user.id;
+    const adminId: string = context.req.user.id;
     const result = await this.groupMembershipsService.removeMember(
       removeGroupMemberInput.groupId,
       removeGroupMemberInput.memberId,

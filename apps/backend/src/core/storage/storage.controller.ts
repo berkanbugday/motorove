@@ -54,7 +54,7 @@ export class StorageController {
       };
     } catch (error) {
       throw new BadRequestException(
-        `File upload failed: ${error.message || 'Unknown error'}`,
+        `File upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
