@@ -1,17 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
-
--- CreateEnum
 CREATE TYPE "GroupPrivacy" AS ENUM ('PUBLIC', 'PRIVATE');
 
 -- CreateEnum
 CREATE TYPE "GroupMemberRole" AS ENUM ('ADMIN', 'MEMBER');
-
--- CreateEnum
-CREATE TYPE "City" AS ENUM ('P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19', 'P20', 'P21', 'P22', 'P23', 'P24', 'P25', 'P26', 'P27', 'P28', 'P29', 'P30', 'P31', 'P32', 'P33', 'P34', 'P35', 'P36', 'P37', 'P38', 'P39', 'P40', 'P41', 'P42', 'P43', 'P44', 'P45', 'P46', 'P47', 'P48', 'P49', 'P50', 'P51', 'P52', 'P53', 'P54', 'P55', 'P56', 'P57', 'P58', 'P59', 'P60', 'P61', 'P62', 'P63', 'P64', 'P65', 'P66', 'P67', 'P68', 'P69', 'P70', 'P71', 'P72', 'P73', 'P74', 'P75', 'P76', 'P77', 'P78', 'P79', 'P80', 'P81');
-
--- CreateEnum
-CREATE TYPE "GroupTag" AS ENUM ('TOURING', 'CAFE_RACER', 'CRUISER', 'SPORT', 'ADVENTURE', 'SCOOTER', 'NAKED', 'CUSTOM', 'VINTAGE', 'DUAL_SPORT', 'DIRT_BIKE', 'CHOPPER', 'BOBBER', 'ENDURO', 'MOTO_CROSS', 'SUPER_MOTO', 'TRIKE', 'SIDECAR', 'ELECTRIC', 'CLASSIC', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'PROFESSIONAL', 'WEEKEND_RIDER', 'DAILY_COMMUTER', 'NIGHT_RIDER', 'LONG_DISTANCE', 'URBAN_RIDER', 'MOUNTAIN_RIDER', 'COASTAL_RIDER', 'TRACK_DAY', 'OFF_ROAD', 'MECHANICS', 'CUSTOMIZATION', 'RESTORATION', 'PHOTOGRAPHY', 'ECO_FRIENDLY', 'TECHNOLOGY', 'VINTAGE_ENTHUSIAST', 'RALLY', 'MEETUP', 'CHARITY_RIDE', 'TRACK_EVENT', 'COMPETITION', 'TRAINING');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -20,12 +11,27 @@ CREATE TABLE "User" (
     "firstName" TEXT,
     "lastName" TEXT,
     "avatar" TEXT,
-    "role" "Role" NOT NULL DEFAULT 'USER',
     "supabaseId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "City" (
+    "id" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+
+    CONSTRAINT "City_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GroupTag" (
+    "id" TEXT NOT NULL,
+    "value" TEXT NOT NULL,
+
+    CONSTRAINT "GroupTag_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -35,9 +41,8 @@ CREATE TABLE "Group" (
     "description" TEXT NOT NULL,
     "logo" TEXT,
     "cover" TEXT,
-    "city" "City" NOT NULL,
+    "cityId" TEXT NOT NULL,
     "privacy" "GroupPrivacy" NOT NULL,
-    "tags" "GroupTag"[],
     "membersCapacity" INTEGER,
     "createdById" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -62,6 +67,14 @@ CREATE TABLE "GroupMembership" (
     CONSTRAINT "GroupMembership_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "_GroupToTags" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_GroupToTags_AB_pkey" PRIMARY KEY ("A","B")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -70,6 +83,12 @@ CREATE UNIQUE INDEX "User_supabaseId_key" ON "User"("supabaseId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "GroupMembership_groupId_userId_key" ON "GroupMembership"("groupId", "userId");
+
+-- CreateIndex
+CREATE INDEX "_GroupToTags_B_index" ON "_GroupToTags"("B");
+
+-- AddForeignKey
+ALTER TABLE "Group" ADD CONSTRAINT "Group_cityId_fkey" FOREIGN KEY ("cityId") REFERENCES "City"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Group" ADD CONSTRAINT "Group_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -88,3 +107,9 @@ ALTER TABLE "GroupMembership" ADD CONSTRAINT "GroupMembership_createdById_fkey" 
 
 -- AddForeignKey
 ALTER TABLE "GroupMembership" ADD CONSTRAINT "GroupMembership_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_GroupToTags" ADD CONSTRAINT "_GroupToTags_A_fkey" FOREIGN KEY ("A") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_GroupToTags" ADD CONSTRAINT "_GroupToTags_B_fkey" FOREIGN KEY ("B") REFERENCES "GroupTag"("id") ON DELETE CASCADE ON UPDATE CASCADE;

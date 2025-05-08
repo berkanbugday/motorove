@@ -1,8 +1,8 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum GroupPrivacy {
-  PUBLIC = 'Public',
-  PRIVATE = 'Private',
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
 }
 
 registerEnumType(GroupPrivacy, {

@@ -38,7 +38,7 @@ export const GET_GROUP = gql`
 // Get user groups query
 export const GET_USER_GROUPS = gql`
   query GetUserGroups {
-    getUserGroups {
+    myGroups {
       ...GroupFragment
     }
   }

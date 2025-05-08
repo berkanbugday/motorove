@@ -13,7 +13,8 @@ import { ConfigService } from './core/config/config.service';
 import { GroupsModule } from './groups/groups.module';
 import { GroupMembershipsModule } from './group-memberships/group-memberships.module';
 import { EnumsModule } from './enums/enums.module';
-
+import { CitiesModule } from './cities/cities.module';
+import { GroupTagsModule } from './group-tags/group-tags.module';
 @Module({
   imports: [
     CoreModule,
@@ -54,6 +55,8 @@ import { EnumsModule } from './enums/enums.module';
     GroupsModule,
     GroupMembershipsModule,
     EnumsModule,
+    CitiesModule,
+    GroupTagsModule,
   ],
   controllers: [AppController],
   providers: [

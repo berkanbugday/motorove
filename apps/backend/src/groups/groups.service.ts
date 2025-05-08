@@ -7,8 +7,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGroupInput } from './dto/create-group.input';
 import { UpdateGroupInput } from './dto/update-group.input';
-import { $Enums } from '../../generated/prisma';
 import { StorageService } from '../core/storage/storage.service';
+import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 
 @Injectable()
 export class GroupsService {
@@ -92,10 +92,16 @@ export class GroupsService {
         description: createGroupInput.description,
         logo: logoUrl,
         cover: coverUrl,
-        city: createGroupInput.city as unknown as $Enums.City,
-        privacy: createGroupInput.privacy as unknown as $Enums.GroupPrivacy,
+        city: {
+          connect: { id: createGroupInput.city.id },
+        },
+        privacy: createGroupInput.privacy,
         membersCapacity: createGroupInput.membersCapacity,
-        tags: createGroupInput.tags as unknown as $Enums.GroupTag[],
+        tags: {
+          connect: createGroupInput.tags.map((tag) => ({
+            id: tag.id,
+          })),
+        },
         createdBy: {
           connect: { id: userId },
         },
@@ -117,7 +123,7 @@ export class GroupsService {
           user: {
             connect: { id: userId },
           },
-          role: $Enums.GroupMemberRole.ADMIN, // Creator is automatically an admin
+          role: GroupMemberRole.ADMIN, // Creator is automatically an admin
           createdBy: {
             connect: { id: userId },
           },
@@ -259,15 +265,19 @@ export class GroupsService {
     };
 
     if (updateData.city) {
-      processedUpdateData.city = updateData.city as unknown as $Enums.City;
+      processedUpdateData.city = {
+        connect: { id: updateData.city.id },
+      };
     }
     if (updateData.privacy) {
-      processedUpdateData.privacy =
-        updateData.privacy as unknown as $Enums.GroupPrivacy;
+      processedUpdateData.privacy = updateData.privacy;
     }
     if (updateData.tags) {
-      processedUpdateData.tags =
-        updateData.tags as unknown as $Enums.GroupTag[];
+      processedUpdateData.tags = {
+        connect: updateData.tags.map((tag) => ({
+          id: tag.id,
+        })),
+      };
     }
 
     // Update the group

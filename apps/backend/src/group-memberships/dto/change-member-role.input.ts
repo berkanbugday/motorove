@@ -1,6 +1,6 @@
 import { InputType, Field, registerEnumType } from '@nestjs/graphql';
 import { IsUUID, IsNotEmpty, IsEnum } from 'class-validator';
-import { GroupMemberRole } from 'generated/prisma';
+import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
 
 registerEnumType(GroupMemberRole, {
   name: 'GroupMemberRole',

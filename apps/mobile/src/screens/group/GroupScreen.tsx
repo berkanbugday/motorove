@@ -1,18 +1,25 @@
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {colors, spacing} from '@theme';
 import React, {useState} from 'react';
-import {View, StyleSheet, Text, FlatList} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import {Tabs} from '@components/Tab';
-import {Icon, GroupCard} from '@components';
+import {Icon, GroupCard, showToast} from '@components';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {GroupService, Group} from '@services/group.service';
 
 // Define types for our data
 interface JoinedGroup {
   id: string;
   name: string;
   members: number;
-  image: string;
+  image: string | null;
   description: string;
   location?: string;
   tags?: string[];
@@ -41,45 +48,7 @@ interface ExploreGroup {
   };
 }
 
-// Mock data for user's joined groups
-const joinedGroups: JoinedGroup[] = [
-  {
-    id: '1',
-    name: 'Coastal Riders Club',
-    members: 34,
-    image: 'https://picsum.photos/id/88/500/300',
-    description: 'Group for motorcycle enthusiasts who love coastal rides.',
-    lastActive: '2 hours ago',
-    location: 'Los Angeles',
-    tags: ['Touring', 'Off-Road'],
-    badge: {
-      text: 'Official',
-      backgroundColor: colors.primary.light,
-      textColor: colors.neutral.white,
-    },
-    isAdmin: true,
-  },
-  {
-    id: '2',
-    name: 'Adventure Motorcycles',
-    members: 42,
-    image: 'https://picsum.photos/id/29/500/300',
-    description: 'For riders who love off-road and mountain adventures.',
-    lastActive: 'Yesterday',
-    isAdmin: false,
-  },
-  {
-    id: '3',
-    name: 'Urban Moto Group',
-    members: 27,
-    image: 'https://picsum.photos/id/43/500/300',
-    description: 'City riders sharing urban routes and meetups.',
-    lastActive: '3 days ago',
-    isAdmin: false,
-  },
-];
-
-// Mock data for groups to explore
+// Mock data for explore groups (to be replaced with API in future)
 const exploreGroups: ExploreGroup[] = [
   {
     id: '4',
@@ -134,12 +103,31 @@ export const GroupScreen = () => {
   const [activeTab, setActiveTab] = useState('joined');
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
 
+  // Fetch user groups from API
+  const {groups, loading, error, refetch} = GroupService.useGetUserGroups();
+
+  // Adapter function to convert API group data to UI format
+  const mapApiGroupToUiGroup = (group: Group): JoinedGroup => {
+    console.log(group.logo);
+    return {
+      id: group.id,
+      name: group.name,
+      members: 0, // API doesn't provide members count yet
+      image: group.logo, // Fallback image
+      description: group.description,
+      lastActive: 'Recently', // API doesn't provide this yet
+      location: group.city,
+      tags: group.tags,
+      isAdmin: false, // API doesn't provide admin status yet
+    };
+  };
+
   const renderJoinedGroupItem = ({item}: {item: JoinedGroup}) => (
     <GroupCard
-      logoSource={{uri: item.image}}
+      logoSource={{uri: item.image || ''}}
       name={item.name}
-      location="Location" // Placeholder since JoinedGroup doesn't have location
-      tags={[item.isAdmin ? 'Admin' : '']} // Show admin status as a tag
+      location={item.location || 'Unknown location'}
+      tags={item.tags || []}
       currentMembers={item.members}
       onPress={() => {}}
       onJoinPress={() => {}}
@@ -162,32 +150,68 @@ export const GroupScreen = () => {
     />
   );
 
+  const handleRefresh = () => {
+    refetch().catch(_error => {
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to refresh groups',
+      });
+    });
+  };
+
+  const renderJoinedContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary.main} />
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View style={styles.emptyState}>
+          <Icon name="users" size={48} color={colors.neutral.lightGrey} />
+          <Text style={styles.emptyStateTitle}>Something went wrong</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            We couldn't load your groups. Please try again later.
+          </Text>
+        </View>
+      );
+    }
+
+    if (!groups || groups.length === 0) {
+      return (
+        <View style={styles.emptyState}>
+          <Icon name="users" size={48} color={colors.neutral.lightGrey} />
+          <Text style={styles.emptyStateTitle}>No Groups Yet</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            You haven't joined any groups yet. Explore and join motorcycle
+            groups to connect with riders.
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <FlatList
+        data={groups.map(mapApiGroupToUiGroup)}
+        renderItem={renderJoinedGroupItem}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        onRefresh={handleRefresh}
+        refreshing={loading}
+      />
+    );
+  };
+
   const tabItems = [
     {
       key: 'joined',
       label: 'Joined',
-      content: (
-        <View style={styles.tabContent}>
-          {joinedGroups.length > 0 ? (
-            <FlatList
-              data={joinedGroups}
-              renderItem={renderJoinedGroupItem}
-              keyExtractor={item => item.id}
-              contentContainerStyle={styles.listContainer}
-              showsVerticalScrollIndicator={false}
-            />
-          ) : (
-            <View style={styles.emptyState}>
-              <Icon name="users" size={48} color={colors.neutral.lightGrey} />
-              <Text style={styles.emptyStateTitle}>No Groups Yet</Text>
-              <Text style={styles.emptyStateSubtitle}>
-                You haven't joined any groups yet. Explore and join motorcycle
-                groups to connect with riders.
-              </Text>
-            </View>
-          )}
-        </View>
-      ),
+      content: <View style={styles.tabContent}>{renderJoinedContent()}</View>,
     },
     {
       key: 'explore',
@@ -200,13 +224,6 @@ export const GroupScreen = () => {
             keyExtractor={item => item.id}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
-            // ListHeaderComponent={
-            //   <View style={styles.exploreHeader}>
-            //     <Text style={styles.exploreHeaderText}>
-            //       Discover groups to connect with fellow riders
-            //     </Text>
-            //   </View>
-            // }
           />
         </View>
       ),
@@ -281,5 +298,10 @@ const styles = StyleSheet.create({
   exploreHeaderText: {
     fontSize: 16,
     color: colors.neutral.grey,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

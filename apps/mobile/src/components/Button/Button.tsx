@@ -117,14 +117,7 @@ export function Button({
 
   const renderContent = () => {
     if (loading) {
-      return (
-        <ActivityIndicator
-          size="small"
-          color={
-            variant === 'primary' ? colors.neutral.white : colors.primary.main
-          }
-        />
-      );
+      return <ActivityIndicator size="small" color={colors.neutral.white} />;
     }
 
     if (iconName && !title) {

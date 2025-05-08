@@ -27,14 +27,11 @@ import {
   createGroupSchema,
   CreateGroupFormValues,
 } from '@utils/validation/groupValidation';
-import {useQuery, useMutation} from '@apollo/client';
-import {
-  GET_CITIES,
-  GET_GROUP_PRIVACY_OPTIONS,
-  GET_GROUP_TAGS,
-} from '@services/graphql/enum.graphql';
-import {CREATE_GROUP} from '@services/graphql/group.graphql';
 import {loggingService} from '@services/logging.service';
+import {useEnumPrivacyOptions} from '@services/enum.service';
+import {useCreateGroup, GroupInput} from '@services/group.service';
+import {useGetCities} from '@services/city.service';
+import {useGetGroupTags} from '@services/group-tag.service';
 
 export const CreateGroupScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateGroup'>>();
@@ -48,76 +45,19 @@ export const CreateGroupScreen: React.FC = () => {
   const [logo, setLogo] = useState<string | null>(null);
   const [cover, setCover] = useState<string | null>(null);
 
-  // Fetch cities from GraphQL API
-  const {data: citiesData, loading: citiesLoading} = useQuery(GET_CITIES);
+  // Use enum service hooks
+  const {cities, loading: citiesLoading} = useGetCities();
+  const {privacyOptions, loading: privacyLoading} = useEnumPrivacyOptions();
+  const {groupTags} = useGetGroupTags();
 
-  // Fetch privacy options from GraphQL API
-  const {data: privacyData, loading: privacyLoading} = useQuery(
-    GET_GROUP_PRIVACY_OPTIONS,
-  );
+  // Use group service hook for creating a group
+  const {createGroup, loading: createGroupLoading} = useCreateGroup(() => {
+    // On success callback
+    setTimeout(() => {
+      navigation.goBack();
+    }, 1000);
+  });
 
-  // Fetch tags from GraphQL API
-  const {data: tagsData} = useQuery(GET_GROUP_TAGS);
-
-  // Initialize create group mutation
-  const [createGroup, {loading: createGroupLoading}] = useMutation(
-    CREATE_GROUP,
-    {
-      onCompleted: () => {
-        showToast({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Group created successfully!',
-        });
-        setTimeout(() => {
-          navigation.goBack();
-        }, 1000);
-      },
-      onError: error => {
-        loggingService.error('Error creating group:', error);
-        showToast({
-          type: 'error',
-          text1: 'Error',
-          text2: error.message || 'Failed to create group. Please try again.',
-        });
-      },
-    },
-  );
-
-  // Transform cities data for dropdown
-  const cityOptions: DropdownItem[] = React.useMemo(() => {
-    if (!citiesData?.getCities) {
-      return [];
-    }
-    return citiesData.getCities.map(
-      (city: {key: string; value: string}, index: number) => ({
-        id: index + 1,
-        label: city.value,
-        value: city.key,
-      }),
-    );
-  }, [citiesData]);
-
-  // Transform privacy options data for dropdown
-  const privacyOptions: DropdownItem[] = React.useMemo(() => {
-    if (!privacyData?.getGroupPrivacyOptions) {
-      return [];
-    }
-    return privacyData.getGroupPrivacyOptions.map(
-      (privacy: {key: string; value: string}, index: number) => ({
-        id: index + 1,
-        label: privacy.value,
-        value: privacy.key,
-      }),
-    );
-  }, [privacyData]);
-
-  const tags: {key: string; value: string}[] = React.useMemo(() => {
-    if (!tagsData?.getGroupTags) {
-      return [];
-    }
-    return tagsData.getGroupTags;
-  }, [tagsData]);
   // Setup form with Zod validation
   const {
     control,
@@ -260,8 +200,8 @@ export const CreateGroupScreen: React.FC = () => {
       // Prepare tags data
       const tagKeys = selectedTags.map(tag => tag.key);
 
-      // Prepare form data for the GraphQL mutation
-      const createGroupInput = {
+      // Prepare form data for the group service
+      const createGroupInput: GroupInput = {
         name: data.name,
         description: data.description,
         logo: data.logo,
@@ -274,12 +214,8 @@ export const CreateGroupScreen: React.FC = () => {
         tags: tagKeys,
       };
 
-      // Execute the mutation
-      await createGroup({
-        variables: {
-          input: createGroupInput,
-        },
-      });
+      // Call the group service createGroup method
+      await createGroup(createGroupInput);
     } catch (error) {
       loggingService.error('Error in onSubmit:', error);
       showToast({
@@ -358,7 +294,11 @@ export const CreateGroupScreen: React.FC = () => {
 
               {/* City Dropdown */}
               <Dropdown
-                data={cityOptions}
+                data={cities.map(city => ({
+                  label: city.value,
+                  value: city.id,
+                  id: city.id,
+                }))}
                 label="City"
                 onSelect={item => {
                   handleCitySelect(item);
@@ -407,13 +347,19 @@ export const CreateGroupScreen: React.FC = () => {
                 </Typography>
               )}
               <View style={styles.tagsContainer}>
-                {tags.map((tag: {key: string; value: string}) => (
+                {groupTags.map(tag => (
                   <Chip
-                    key={tag.key}
+                    key={tag.id}
                     label={tag.value}
-                    onPress={() => handleTagToggle(tag)}
+                    onPress={() =>
+                      handleTagToggle({key: tag.id, value: tag.value})
+                    }
                     size="medium"
-                    variant={selectedTags.includes(tag) ? 'filled' : 'outlined'}
+                    variant={
+                      selectedTags.includes({key: tag.id, value: tag.value})
+                        ? 'filled'
+                        : 'outlined'
+                    }
                     color="dark"
                     style={styles.tagChip}
                   />

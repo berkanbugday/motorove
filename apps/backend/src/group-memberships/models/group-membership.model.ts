@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { GroupMemberRole } from 'generated/prisma';
+import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
 import { Group } from '../../groups/models/group.model';
 import { User } from '../../auth/models/user.model';
 import { BaseModel } from '../../core/models';

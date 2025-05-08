@@ -1,7 +1,9 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { City, GroupPrivacy, GroupTag } from 'generated/prisma';
+import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import { BaseModel } from '../../core/models';
 import { GroupMembership } from '../../group-memberships/models/group-membership.model';
+import { City } from '../../cities/models/city.model';
+import { GroupTag } from '../../group-tags/models/group-tag.model';
 
 @ObjectType()
 export class Group extends BaseModel {

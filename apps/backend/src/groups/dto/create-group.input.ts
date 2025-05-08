@@ -1,5 +1,5 @@
-import { InputType, Field, Int, registerEnumType } from '@nestjs/graphql';
-import { City, GroupPrivacy, GroupTag } from 'generated/prisma';
+import { InputType, Field, Int } from '@nestjs/graphql';
+import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import {
   IsString,
   IsOptional,
@@ -12,22 +12,12 @@ import {
   IsPositive,
   ArrayMinSize,
   ArrayMaxSize,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CityInput } from '../../cities/dto/city.input';
+import { GroupTagInput } from '../../group-tags/dto/group-tag.input';
 
-registerEnumType(City, {
-  name: 'City',
-  description: 'The city of the group',
-});
-
-registerEnumType(GroupPrivacy, {
-  name: 'GroupPrivacy',
-  description: 'The privacy of the group',
-});
-
-registerEnumType(GroupTag, {
-  name: 'GroupTag',
-  description: 'The tag of the group',
-});
 @InputType()
 export class CreateGroupInput {
   @Field()
@@ -54,10 +44,11 @@ export class CreateGroupInput {
   @IsOptional()
   cover?: string;
 
-  @Field(() => City)
-  @IsEnum(City)
+  @Field(() => CityInput)
+  @ValidateNested()
+  @Type(() => CityInput)
   @IsNotEmpty({ message: 'City is required' })
-  city: City;
+  city: CityInput;
 
   @Field(() => GroupPrivacy)
   @IsEnum(GroupPrivacy)
@@ -70,10 +61,11 @@ export class CreateGroupInput {
   @IsPositive({ message: 'Members capacity must be a positive number' })
   membersCapacity?: number;
 
-  @Field(() => [GroupTag])
+  @Field(() => [GroupTagInput])
   @IsArray()
-  @IsEnum(GroupTag, { each: true })
+  @ValidateNested({ each: true })
+  @Type(() => GroupTagInput)
   @ArrayMinSize(1, { message: 'Please select at least 1 tag' })
   @ArrayMaxSize(3, { message: 'You can select up to 3 tags' })
-  tags: GroupTag[];
+  tags: GroupTagInput[];
 }
