@@ -328,7 +328,12 @@ class AuthService {
   private async clearAuthData(): Promise<void> {
     try {
       // Clear from encrypted storage
-      await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
+      const encryptedAuthData = await EncryptedStorage.getItem(
+        STORAGE_KEYS.AUTH_DATA,
+      );
+      if (encryptedAuthData) {
+        await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
+      }
 
       // Clear from AsyncStorage for backward compatibility
       await this.clearAsyncStorageAuthData();
