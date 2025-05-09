@@ -8,7 +8,7 @@ import {loggingService} from './logging.service';
 import {showToast} from '@components';
 
 // Type definitions
-export interface GroupInput {
+export interface CreateGroupInput {
   name: string;
   description: string;
   logo: string | null | undefined;
@@ -28,7 +28,7 @@ export interface Group {
   city: string;
   privacy: string;
   membersCapacity: number | null;
-  tags: {id: string; value: string}[];
+  tags: string[];
 }
 
 // Hook for creating a group
@@ -55,7 +55,7 @@ export const useCreateGroup = (onSuccess?: () => void) => {
     },
   });
 
-  const createGroup = async (input: GroupInput) => {
+  const createGroup = async (input: CreateGroupInput) => {
     try {
       const result = await createGroupMutation({
         variables: {

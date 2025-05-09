@@ -187,7 +187,9 @@ export const Tabs: React.FC<TabsProps> = ({
 
   // Animate indicator when active key changes
   useEffect(() => {
-    if (!initialMeasurementComplete.current || !animated) return;
+    if (!initialMeasurementComplete.current || !animated) {
+      return;
+    }
 
     const position = tabPositions[activeKey] || 0;
     const width = tabWidths[activeKey] || 0;
@@ -344,7 +346,9 @@ export const Tabs: React.FC<TabsProps> = ({
   };
 
   const renderTabIndicator = () => {
-    if (variant === 'filled' || variant === 'pill' || !animated) return null;
+    if (variant === 'filled' || variant === 'pill' || !animated) {
+      return null;
+    }
 
     return (
       <Animated.View
@@ -389,7 +393,9 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const renderContent = () => {
     const activeItem = items.find(item => item.key === activeKey);
-    if (!activeItem?.content) return null;
+    if (!activeItem?.content) {
+      return null;
+    }
 
     return (
       <View
@@ -456,7 +462,9 @@ const getIconStyle = (
   iconPosition: 'left' | 'right' | 'top',
   showLabel: boolean,
 ): ViewStyle => {
-  if (!showLabel) return {};
+  if (!showLabel) {
+    return {};
+  }
 
   if (iconPosition === 'left') {
     return {marginRight: 8};

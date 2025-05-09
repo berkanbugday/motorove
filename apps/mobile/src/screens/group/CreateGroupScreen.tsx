@@ -29,7 +29,7 @@ import {
 } from '@utils/validation/groupValidation';
 import {loggingService} from '@services/logging.service';
 import {useEnumPrivacyOptions} from '@services/enum.service';
-import {useCreateGroup, GroupInput} from '@services/group.service';
+import {useCreateGroup, CreateGroupInput} from '@services/group.service';
 import {useGetCities} from '@services/city.service';
 import {useGetGroupTags} from '@services/group-tag.service';
 
@@ -198,7 +198,7 @@ export const CreateGroupScreen: React.FC = () => {
   const onSubmit = async (data: CreateGroupFormValues) => {
     try {
       // Prepare form data for the group service
-      const createGroupInput: GroupInput = {
+      const createGroupInput: CreateGroupInput = {
         name: data.name,
         description: data.description,
         logo: data.logo,
@@ -209,7 +209,7 @@ export const CreateGroupScreen: React.FC = () => {
         },
         privacy: selectedPrivacy?.value,
         membersCapacity: data.membersCapacity
-          ? parseInt(data.membersCapacity.toString(), 10)
+          ? parseInt(data.membersCapacity, 10)
           : null,
         tags: selectedTags.map(tag => ({
           id: tag.id,

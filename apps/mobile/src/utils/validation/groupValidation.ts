@@ -18,7 +18,7 @@ export const createGroupSchema = z.object({
     .min(1, 'Please select a privacy setting'),
   membersCapacity: z
     .string()
-    .transform(val => (val === '' ? null : Number(val)))
+    .transform(val => (val === '' ? null : val))
     .refine(val => val === null || Number.isInteger(Number(val)), {
       message: 'Members capacity must be a number',
     })

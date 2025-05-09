@@ -16,12 +16,12 @@ export const GroupScreen = () => {
     {
       key: 'joined',
       label: 'Joined',
-      content: <View style={styles.tabContent}></View>,
+      content: <View style={styles.tabContent} />,
     },
     {
       key: 'explore',
       label: 'Explore',
-      content: <View style={styles.tabContent}></View>,
+      content: <View style={styles.tabContent} />,
     },
   ];
 
