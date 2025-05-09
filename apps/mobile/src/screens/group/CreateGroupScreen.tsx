@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
   },
   tagChip: {
     marginRight: spacing.sm,

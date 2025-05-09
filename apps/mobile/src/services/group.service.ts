@@ -45,12 +45,12 @@ export const useCreateGroup = (onSuccess?: () => void) => {
         onSuccess();
       }
     },
-    onError: error => {
-      loggingService.error('Error creating group:', error);
+    onError: errorObj => {
+      loggingService.error('Error creating group:', errorObj);
       showToast({
         type: 'error',
         text1: 'Error',
-        text2: error.message || 'Failed to create group. Please try again.',
+        text2: errorObj.message || 'Failed to create group. Please try again.',
       });
     },
   });
@@ -67,8 +67,8 @@ export const useCreateGroup = (onSuccess?: () => void) => {
         },
       });
       return result.data?.createGroup;
-    } catch (error) {
-      loggingService.error('Error in createGroup:', error);
+    } catch (err) {
+      loggingService.error('Error in createGroup:', err);
       // Error is already handled in onError callback
       return null;
     }
@@ -86,8 +86,8 @@ export const useGetGroup = (id: string) => {
   const {data, loading, error, refetch} = useQuery(GET_GROUP, {
     variables: {id},
     skip: !id,
-    onError: error => {
-      loggingService.error('Error fetching group:', error);
+    onError: errorObj => {
+      loggingService.error('Error fetching group:', errorObj);
     },
   });
 
@@ -102,8 +102,8 @@ export const useGetGroup = (id: string) => {
 // Hook for getting user's groups
 export const useGetUserGroups = () => {
   const {data, loading, error, refetch} = useQuery(GET_USER_GROUPS, {
-    onError: error => {
-      loggingService.error('Error fetching user groups:', error);
+    onError: errorObj => {
+      loggingService.error('Error fetching user groups:', errorObj);
     },
   });
 

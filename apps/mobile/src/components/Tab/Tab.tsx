@@ -191,12 +191,12 @@ export const Tabs: React.FC<TabsProps> = ({
       return;
     }
 
-    const position = tabPositions[activeKey] || 0;
+    const tabPosition = tabPositions[activeKey] || 0;
     const width = tabWidths[activeKey] || 0;
 
     Animated.parallel([
       Animated.timing(indicatorAnimation, {
-        toValue: position,
+        toValue: tabPosition,
         duration: animationDuration,
         useNativeDriver: false,
       }),
@@ -210,7 +210,7 @@ export const Tabs: React.FC<TabsProps> = ({
     // Scroll to make active tab visible if scrollable
     if (scrollable && scrollViewRef.current) {
       scrollViewRef.current.scrollTo({
-        x: Math.max(0, position - 50), // Center active tab with some padding
+        x: Math.max(0, tabPosition - 50), // Center active tab with some padding
         animated: true,
       });
     }
@@ -225,10 +225,10 @@ export const Tabs: React.FC<TabsProps> = ({
       initialMeasurementComplete.current = true;
 
       // Initial animation to position indicator
-      const position = tabPositions[activeKey] || 0;
+      const tabPosition = tabPositions[activeKey] || 0;
       const width = tabWidths[activeKey] || 0;
 
-      indicatorAnimation.setValue(position);
+      indicatorAnimation.setValue(tabPosition);
       indicatorWidthAnimation.setValue(width);
     }
   }, [tabWidths, tabPositions, items.length]);

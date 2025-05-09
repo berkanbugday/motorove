@@ -11,8 +11,8 @@ export interface GroupTag {
 // Hook for getting all group tags
 export const useGetGroupTags = () => {
   const {data, loading, error, refetch} = useQuery(GET_GROUP_TAGS, {
-    onError: error => {
-      loggingService.error('Error fetching group tags:', error);
+    onError: errorObj => {
+      loggingService.error('Error fetching group tags:', errorObj);
     },
   });
 
@@ -29,8 +29,8 @@ export const useGetGroupTag = (id: string) => {
   const {data, loading, error, refetch} = useQuery(GET_GROUP_TAG, {
     variables: {id},
     skip: !id,
-    onError: error => {
-      loggingService.error('Error fetching group tag:', error);
+    onError: errorObj => {
+      loggingService.error('Error fetching group tag:', errorObj);
     },
   });
 

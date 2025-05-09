@@ -11,8 +11,8 @@ export interface City {
 // Hook for getting all cities
 export const useGetCities = () => {
   const {data, loading, error, refetch} = useQuery(GET_CITIES, {
-    onError: error => {
-      loggingService.error('Error fetching cities:', error);
+    onError: errorObj => {
+      loggingService.error('Error fetching cities:', errorObj);
     },
   });
 
@@ -29,8 +29,8 @@ export const useGetCity = (id: string) => {
   const {data, loading, error, refetch} = useQuery(GET_CITY, {
     variables: {id},
     skip: !id,
-    onError: error => {
-      loggingService.error('Error fetching city:', error);
+    onError: errorObj => {
+      loggingService.error('Error fetching city:', errorObj);
     },
   });
 
