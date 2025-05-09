@@ -158,8 +158,8 @@ export const CreateGroupScreen: React.FC = () => {
   };
 
   const handleTagToggle = (tag: {id: string; value: string}) => {
-    if (selectedTags.includes(tag)) {
-      const newTags = selectedTags.filter(t => t !== tag);
+    if (selectedTags.some(t => t.id === tag.id)) {
+      const newTags = selectedTags.filter(t => t.id !== tag.id);
       setSelectedTags(newTags);
       setValue(
         'tags',
@@ -211,7 +211,10 @@ export const CreateGroupScreen: React.FC = () => {
         membersCapacity: data.membersCapacity
           ? parseInt(data.membersCapacity.toString(), 10)
           : null,
-        tags: selectedTags,
+        tags: selectedTags.map(tag => ({
+          id: tag.id,
+          value: tag.value,
+        })),
       };
 
       // Call the group service createGroup method
@@ -351,9 +354,7 @@ export const CreateGroupScreen: React.FC = () => {
                   <Chip
                     key={tag.id}
                     label={tag.value}
-                    onPress={() =>
-                      handleTagToggle({id: tag.id, value: tag.value})
-                    }
+                    onPress={() => handleTagToggle(tag)}
                     size="medium"
                     variant={
                       selectedTags.some(t => t.id === tag.id)

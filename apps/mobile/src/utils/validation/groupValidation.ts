@@ -17,9 +17,14 @@ export const createGroupSchema = z.object({
     .string({required_error: 'Privacy setting is required'})
     .min(1, 'Please select a privacy setting'),
   membersCapacity: z
-    .number({invalid_type_error: 'Members capacity must be a number'})
-    .int('Members capacity must be a whole number')
-    .positive('Members capacity must be a positive number')
+    .string()
+    .transform(val => (val === '' ? null : Number(val)))
+    .refine(val => val === null || Number.isInteger(Number(val)), {
+      message: 'Members capacity must be a number',
+    })
+    .refine(val => val === null || Number(val) > 0, {
+      message: 'Members capacity must be a positive number',
+    })
     .nullable()
     .optional(),
   tags: z
