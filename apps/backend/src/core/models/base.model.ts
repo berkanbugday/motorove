@@ -23,4 +23,7 @@ export abstract class BaseModel {
 
   @Field()
   updatedAt: Date;
+
+  @Field()
+  isActive: boolean;
 }

@@ -33,4 +33,7 @@ export class User {
 
   @Field(() => [GroupMembership], { nullable: true })
   groupMemberships?: GroupMembership[];
+
+  @Field()
+  isActive: boolean;
 }

@@ -12,6 +12,9 @@ export class GroupMembershipsService {
 
   async findAll() {
     return await this.prisma.groupMembership.findMany({
+      where: {
+        isActive: true,
+      },
       include: {
         group: true,
         user: true,
@@ -23,6 +26,7 @@ export class GroupMembershipsService {
     return await this.prisma.groupMembership.findMany({
       where: {
         groupId,
+        isActive: true,
       },
       include: {
         user: true,
@@ -34,6 +38,7 @@ export class GroupMembershipsService {
     return await this.prisma.groupMembership.findMany({
       where: {
         userId,
+        isActive: true,
       },
       include: {
         group: true,
@@ -54,7 +59,7 @@ export class GroupMembershipsService {
   async addMember(groupId: string, userId: string, adminId: string) {
     // Check if the group exists
     const group = await this.prisma.group.findUnique({
-      where: { id: groupId },
+      where: { id: groupId, isActive: true },
       include: {
         memberships: true,
       },
@@ -116,7 +121,7 @@ export class GroupMembershipsService {
   ) {
     // Check if the group exists
     const group = await this.prisma.group.findUnique({
-      where: { id: groupId },
+      where: { id: groupId, isActive: true },
       include: {
         memberships: true,
       },
@@ -172,7 +177,7 @@ export class GroupMembershipsService {
   async removeMember(groupId: string, memberId: string, adminId: string) {
     // Check if the group exists
     const group = await this.prisma.group.findUnique({
-      where: { id: groupId },
+      where: { id: groupId, isActive: true },
       include: {
         memberships: true,
         createdBy: true,

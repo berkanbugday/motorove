@@ -145,8 +145,14 @@ export class GroupsService {
     });
   }
 
-  async findAll() {
-    return await this.prisma.group.findMany({
+  async findAll(userId: string, authToken?: string) {
+    const groups = await this.prisma.group.findMany({
+      where: {
+        memberships: {
+          none: { userId },
+        },
+        isActive: true,
+      },
       include: {
         createdBy: true,
         city: true,
@@ -158,11 +164,44 @@ export class GroupsService {
         },
       },
     });
+
+    return Promise.all(
+      groups.map(async (group) => {
+        let logoUrl = group.logo;
+        let coverUrl = group.cover;
+
+        try {
+          if (group.logo) {
+            logoUrl = await this.storageService.getSignedUrl(
+              group.logo,
+              60,
+              authToken,
+            );
+          }
+
+          if (group.cover) {
+            coverUrl = await this.storageService.getSignedUrl(
+              group.cover,
+              60,
+              authToken,
+            );
+          }
+        } catch (error) {
+          console.error('Error getting signed URLs:', error.message);
+        }
+
+        return {
+          ...group,
+          logo: logoUrl,
+          cover: coverUrl,
+        };
+      }),
+    );
   }
 
   async findOne(id: string) {
     return await this.prisma.group.findUnique({
-      where: { id },
+      where: { id, isActive: true },
       include: {
         createdBy: true,
         city: true,
@@ -184,6 +223,7 @@ export class GroupsService {
             userId,
           },
         },
+        isActive: true,
       },
       include: {
         createdBy: true,
@@ -235,6 +275,7 @@ export class GroupsService {
     return await this.prisma.group.findMany({
       where: {
         createdById: userId,
+        isActive: true,
       },
       include: {
         createdBy: true,

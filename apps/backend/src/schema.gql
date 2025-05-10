@@ -57,6 +57,7 @@ type Group {
   createdById: String!
   description: String!
   id: ID!
+  isActive: Boolean!
   logo: String
   membersCapacity: Int
   memberships: [GroupMembership!]!
@@ -81,6 +82,7 @@ type GroupMembership {
   group: Group!
   groupId: String!
   id: ID!
+  isActive: Boolean!
   joinedAt: DateTime!
   role: GroupMemberRole!
   updatedAt: DateTime!
@@ -178,6 +180,7 @@ type User {
   firstName: String
   groupMemberships: [GroupMembership!]
   id: ID!
+  isActive: Boolean!
   lastName: String
   supabaseId: String!
   updatedAt: DateTime!

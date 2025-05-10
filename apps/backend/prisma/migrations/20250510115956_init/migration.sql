@@ -14,6 +14,7 @@ CREATE TABLE "User" (
     "supabaseId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -30,6 +31,7 @@ CREATE TABLE "City" (
 CREATE TABLE "GroupTag" (
     "id" TEXT NOT NULL,
     "value" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "GroupTag_pkey" PRIMARY KEY ("id")
 );
@@ -48,6 +50,7 @@ CREATE TABLE "Group" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedById" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "Group_pkey" PRIMARY KEY ("id")
 );
@@ -63,6 +66,7 @@ CREATE TABLE "GroupMembership" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedById" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "GroupMembership_pkey" PRIMARY KEY ("id")
 );

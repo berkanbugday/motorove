@@ -11,12 +11,15 @@ export class GroupTagsService {
       orderBy: {
         value: 'asc',
       },
+      where: {
+        isActive: true,
+      },
     });
   }
 
   async findOne(id: string): Promise<GroupTag | null> {
     return await this.prisma.groupTag.findUnique({
-      where: { id },
+      where: { id, isActive: true },
     });
   }
 }
