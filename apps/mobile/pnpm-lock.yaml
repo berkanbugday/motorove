@@ -14,6 +14,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.0.1
         version: 5.0.1(react-hook-form@7.56.1(react@19.0.0))
+      '@legendapp/list':
+        specifier: ^1.0.11
+        version: 1.0.11(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0)
       '@react-native-async-storage/async-storage':
         specifier: ^2.1.2
         version: 2.1.2(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))
@@ -1041,6 +1044,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@legendapp/list@1.0.11':
+    resolution: {integrity: sha512-A1DK2Buqvev2c1nV77/M0Xnft5aIX+7AmUbLY/meHiK5SI98hX7qq3U1VSDHUbrk7fPOD1Skdt2F3THwRy9Ijw==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
 
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}
@@ -5727,6 +5736,12 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@legendapp/list@1.0.11(react-native@0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      react: 19.0.0
+      react-native: 0.79.1(@babel/core@7.26.10)(@react-native-community/cli@18.0.0(typescript@5.0.4))(@types/react@19.1.2)(react@19.0.0)
+      use-sync-external-store: 1.5.0(react@19.0.0)
 
   '@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1':
     dependencies:

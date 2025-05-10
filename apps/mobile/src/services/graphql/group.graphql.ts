@@ -55,6 +55,15 @@ export const CREATE_GROUP = gql`
   ${CREATE_GROUP_FRAGMENT}
 `;
 
+export const GET_GROUPS = gql`
+  query GetGroups {
+    groups {
+      ...GroupFragment
+    }
+  }
+  ${GROUP_FRAGMENT}
+`;
+
 // Get group by ID query
 export const GET_GROUP = gql`
   query GetGroup($id: ID!) {
@@ -66,9 +75,9 @@ export const GET_GROUP = gql`
 `;
 
 // Get user groups query
-export const GET_USER_GROUPS = gql`
-  query GetUserGroups {
-    myGroups {
+export const GET_JOINED_GROUPS = gql`
+  query GetJoinedGroups {
+    joinedGroups {
       ...GroupFragment
     }
   }

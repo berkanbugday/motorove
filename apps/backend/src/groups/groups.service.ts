@@ -215,7 +215,7 @@ export class GroupsService {
     });
   }
 
-  async findGroupsByUser(userId: string, authToken?: string) {
+  async findJoinedGroups(userId: string, authToken?: string) {
     const groups = await this.prisma.group.findMany({
       where: {
         memberships: {

@@ -243,7 +243,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
         <View style={styles.joinButtonContainer}>
           {!isMember ? (
             <Button
-              title={privacy === 'private' ? 'Request to join' : 'Join'}
+              title={privacy === 'PRIVATE' ? 'Request to join' : 'Join'}
               variant="dark"
               size="small"
               shape="round"

@@ -46,12 +46,12 @@ export class GroupsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => [Group], { name: 'myGroups' })
-  findMyGroups(@Context() context: GqlContext) {
+  @Query(() => [Group], { name: 'joinedGroups' })
+  findJoinedGroups(@Context() context: GqlContext) {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.groupsService.findGroupsByUser(userId, authToken);
+    return this.groupsService.findJoinedGroups(userId, authToken);
   }
 
   @UseGuards(JwtGuard)

@@ -2,7 +2,8 @@ import {useMutation, useQuery} from '@apollo/client';
 import {
   CREATE_GROUP,
   GET_GROUP,
-  GET_USER_GROUPS,
+  GET_GROUPS,
+  GET_JOINED_GROUPS,
 } from './graphql/group.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
@@ -101,15 +102,31 @@ export const useGetGroup = (id: string) => {
 };
 
 // Hook for getting user's groups
-export const useGetUserGroups = () => {
-  const {data, loading, error, refetch} = useQuery(GET_USER_GROUPS, {
+export const useGetJoinedGroups = () => {
+  const {data, loading, error, refetch} = useQuery(GET_JOINED_GROUPS, {
     onError: errorObj => {
       loggingService.error('Error fetching user groups:', errorObj);
     },
   });
 
   return {
-    groups: (data?.myGroups as Group[]) || [],
+    groups: (data?.joinedGroups as Group[]) || [],
+    loading,
+    error,
+    refetch,
+  };
+};
+
+// Hook for getting all groups
+export const useGetGroups = () => {
+  const {data, loading, error, refetch} = useQuery(GET_GROUPS, {
+    onError: errorObj => {
+      loggingService.error('Error fetching all groups:', errorObj);
+    },
+  });
+
+  return {
+    groups: (data?.groups as Group[]) || [],
     loading,
     error,
     refetch,
@@ -120,7 +137,8 @@ export const useGetUserGroups = () => {
 export const GroupService = {
   useCreateGroup,
   useGetGroup,
-  useGetUserGroups,
+  useGetJoinedGroups,
+  useGetGroups,
 };
 
 export default GroupService;

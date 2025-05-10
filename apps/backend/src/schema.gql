@@ -132,9 +132,9 @@ type Query {
   groupTag(id: ID!): GroupTag
   groupTags: [GroupTag!]!
   groups: [Group!]!
+  joinedGroups: [Group!]!
   me: User!
   myGroupMemberships: [GroupMembership!]!
-  myGroups: [Group!]!
 }
 
 input RemoveGroupMemberInput {
