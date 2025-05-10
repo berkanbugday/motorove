@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
+import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 
 @Injectable()
 export class GroupMembershipsService {
@@ -68,16 +69,17 @@ export class GroupMembershipsService {
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);
     }
-
-    // Check if the admin user has admin rights
-    const adminMembership = group.memberships.find(
-      (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
-    );
-
-    if (!adminMembership) {
-      throw new ForbiddenException(
-        'You are not authorized to add members to this group',
+    if (group.privacy === GroupPrivacy.PRIVATE) {
+      // Check if the admin user has admin rights
+      const adminMembership = group.memberships.find(
+        (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
       );
+
+      if (!adminMembership) {
+        throw new ForbiddenException(
+          'You are not authorized to add members to this group',
+        );
+      }
     }
 
     // Check if the user is already a member

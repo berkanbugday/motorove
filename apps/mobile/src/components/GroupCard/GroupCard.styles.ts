@@ -13,10 +13,11 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
   },
   logo: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 60,
+    height: 60,
+    borderRadius: radius.round,
     marginRight: spacing.md,
+    alignSelf: 'center',
   },
   infoContainer: {
     flex: 1,
@@ -25,7 +26,6 @@ export const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.xs / 2,
   },
   tagsContainer: {
     flexDirection: 'row',

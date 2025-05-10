@@ -201,6 +201,7 @@ export const GroupScreen = () => {
             currentMembers={item.memberships.length}
             membersCapacity={item.membersCapacity || undefined}
             privacy={item.privacy}
+            isMember={true}
             onPress={() => {
               // For future implementation
               console.log('Navigate to group details:', item.id);
