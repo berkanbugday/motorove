@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
   },
   backButtonTransparent: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: colors.neutral.white,
     padding: spacing.sm,
     borderRadius: radius.round,
   },
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary.light,
   },
   rightButtonTransparent: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: colors.neutral.white,
     paddingVertical: spacing.sm,
     borderRadius: radius.round,
   },

@@ -22,7 +22,7 @@ interface ButtonProps {
   iconName?: IconName;
   iconSize?: number;
   iconColor?: string;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: 'left' | 'right' | 'top' | 'bottom';
   style?: ViewStyle;
   textStyle?: TextStyle;
   testID?: string;
@@ -127,10 +127,20 @@ export function Button({
     }
 
     if (iconName && title) {
+      const isVerticalLayout =
+        iconPosition === 'top' || iconPosition === 'bottom';
       return (
-        <View style={styles.contentContainer}>
-          {iconPosition === 'left' && (
-            <View style={styles.iconContainer}>
+        <View
+          style={[
+            styles.contentContainer,
+            isVerticalLayout && styles.verticalContentContainer,
+          ]}>
+          {(iconPosition === 'left' || iconPosition === 'top') && (
+            <View
+              style={[
+                styles.iconContainer,
+                iconPosition === 'top' && styles.topIconContainer,
+              ]}>
               <Icon
                 name={iconName}
                 size={getIconSize()}
@@ -145,8 +155,12 @@ export function Button({
             style={textStyle}>
             {title}
           </Typography>
-          {iconPosition === 'right' && (
-            <View style={styles.iconContainer}>
+          {(iconPosition === 'right' || iconPosition === 'bottom') && (
+            <View
+              style={[
+                styles.iconContainer,
+                iconPosition === 'bottom' && styles.bottomIconContainer,
+              ]}>
               <Icon
                 name={iconName}
                 size={getIconSize()}
@@ -235,7 +249,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  verticalContentContainer: {
+    flexDirection: 'column',
+  },
   iconContainer: {
     marginHorizontal: spacing.xs,
+  },
+  topIconContainer: {
+    marginHorizontal: 0,
+    marginBottom: spacing.xs,
+  },
+  bottomIconContainer: {
+    marginHorizontal: 0,
+    marginTop: spacing.xs,
   },
 });

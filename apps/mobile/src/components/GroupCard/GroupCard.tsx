@@ -219,7 +219,9 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       activeOpacity={0.8}>
       {renderBadge()}
       <View style={styles.content}>
-        <Image source={logoSource} style={styles.logo} />
+        <View style={styles.logoContainer}>
+          <Image source={logoSource} style={styles.logo} />
+        </View>
         <View style={styles.infoContainer}>
           <Typography variant="subtitle" weight="bold" numberOfLines={1}>
             {name}

@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-import {colors, spacing, radius} from '@theme';
+import {colors, spacing, radius, getShadow} from '@theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -11,6 +11,9 @@ export const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
     padding: spacing.md,
+  },
+  logoContainer: {
+    ...getShadow('small'),
   },
   logo: {
     width: 70,
