@@ -169,7 +169,11 @@ export function TopHeaderBar({
           {showBackButton ? (
             <TouchableOpacity
               onPress={onBackPress}
-              style={styles.backButton}
+              style={
+                backgroundColor === 'transparent'
+                  ? styles.backButtonTransparent
+                  : styles.backButton
+              }
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               <Icon name="arrow-left" size={20} color={textColor} />
             </TouchableOpacity>
@@ -205,7 +209,11 @@ export function TopHeaderBar({
           {(rightIconName || rightButtonText) && (
             <TouchableOpacity
               onPress={onRightButtonPress}
-              style={styles.rightButton}
+              style={
+                backgroundColor === 'transparent'
+                  ? styles.rightButtonTransparent
+                  : styles.rightButton
+              }
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               {rightIconName ? (
                 <View>
@@ -285,6 +293,11 @@ const styles = StyleSheet.create({
   backButton: {
     padding: spacing.xs,
   },
+  backButtonTransparent: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    padding: spacing.sm,
+    borderRadius: radius.round,
+  },
   titleSection: {
     flex: 1,
     width: '85%',
@@ -302,6 +315,11 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     borderRadius: radius.round,
     backgroundColor: colors.secondary.light,
+  },
+  rightButtonTransparent: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    paddingVertical: spacing.sm,
+    borderRadius: radius.round,
   },
   badgeContainer: {
     position: 'absolute',

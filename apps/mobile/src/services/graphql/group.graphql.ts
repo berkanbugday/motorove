@@ -66,8 +66,8 @@ export const GET_GROUPS = gql`
 
 // Get group by ID query
 export const GET_GROUP = gql`
-  query GetGroup($id: ID!) {
-    getGroup(id: $id) {
+  query GetGroup($id: String!) {
+    group(id: $id) {
       ...GroupFragment
     }
   }

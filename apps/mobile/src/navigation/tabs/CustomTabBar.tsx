@@ -59,7 +59,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
         return isFocused ? 'home-filled' : 'home';
       case 'ExploreTab':
         return isFocused ? 'map-location-filled' : 'map-location';
-      case 'GroupTab':
+      case 'GroupsTab':
         return isFocused ? 'users-filled' : 'users';
       case 'ProfileTab':
         return isFocused ? 'user-gear-filled' : 'user-gear';

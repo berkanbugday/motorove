@@ -40,9 +40,13 @@ export class GroupsResolver {
     return this.groupsService.findAll(userId, authToken);
   }
 
+  @UseGuards(JwtGuard)
   @Query(() => Group, { name: 'group' })
-  findOne(@Args('id') id: string) {
-    return this.groupsService.findOne(id);
+  findOne(@Args('id') id: string, @Context() context: GqlContext) {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.groupsService.findOne(id, userId, authToken);
   }
 
   @UseGuards(JwtGuard)

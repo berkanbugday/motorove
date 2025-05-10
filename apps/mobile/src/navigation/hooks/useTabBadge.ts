@@ -16,7 +16,7 @@ export const useTabBadge = () => {
    */
   const setTabBadge = useCallback(
     (
-      tabName: 'HomeTab' | 'ExploreTab' | 'GroupTab' | 'ProfileTab',
+      tabName: 'HomeTab' | 'ExploreTab' | 'GroupsTab' | 'ProfileTab',
       count: number | undefined,
     ) => {
       navigation.setOptions({
@@ -65,7 +65,7 @@ export const useTabBadge = () => {
    */
   const setGroupBadge = useCallback(
     (count: number | undefined) => {
-      setTabBadge('GroupTab', count);
+      setTabBadge('GroupsTab', count);
     },
     [setTabBadge],
   );

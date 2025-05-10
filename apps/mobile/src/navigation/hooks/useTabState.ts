@@ -12,7 +12,7 @@ export const useTabState = () => {
   // Determine which tab is currently active
   const isHomeTab = route.name === 'HomeTab';
   const isExploreTab = route.name === 'ExploreTab';
-  const isGroupTab = route.name === 'GroupTab';
+  const isGroupsTab = route.name === 'GroupsTab';
   const isProfileTab = route.name === 'ProfileTab';
 
   // Get current tab name
@@ -23,7 +23,7 @@ export const useTabState = () => {
     currentTab,
     isHomeTab,
     isExploreTab,
-    isGroupTab,
+    isGroupsTab,
     isProfileTab,
   };
 };

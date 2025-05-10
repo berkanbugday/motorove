@@ -119,10 +119,9 @@ export const GroupScreen = () => {
             membersCapacity={item.membersCapacity || undefined}
             privacy={item.privacy}
             isMember={true}
-            onPress={() => {
-              // For future implementation
-              console.log('Navigate to group details:', item.id);
-            }}
+            onPress={() =>
+              navigation.navigate('GroupDetail', {groupId: item.id})
+            }
           />
         )}
         contentContainerStyle={styles.listContainer}
@@ -202,10 +201,9 @@ export const GroupScreen = () => {
             membersCapacity={item.membersCapacity || undefined}
             privacy={item.privacy}
             isMember={true}
-            onPress={() => {
-              // For future implementation
-              console.log('Navigate to group details:', item.id);
-            }}
+            onPress={() =>
+              navigation.navigate('GroupDetail', {groupId: item.id})
+            }
           />
         )}
         contentContainerStyle={styles.listContainer}

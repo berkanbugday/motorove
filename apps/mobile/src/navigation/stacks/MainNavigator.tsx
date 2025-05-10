@@ -5,7 +5,7 @@ import {CommentDetailScreen} from '@screens/comment';
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
 import {CreatePostScreen} from '@screens/post';
-import {CreateGroupScreen} from '@screens/group';
+import {CreateGroupScreen, GroupDetailScreen} from '@screens/group';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -40,6 +40,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="CreateGroup"
         component={CreateGroupScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="GroupDetail"
+        component={GroupDetailScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

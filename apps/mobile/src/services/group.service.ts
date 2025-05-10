@@ -94,7 +94,7 @@ export const useGetGroup = (id: string) => {
   });
 
   return {
-    group: data?.getGroup as Group | undefined,
+    group: data?.group as Group | undefined,
     loading,
     error,
     refetch,

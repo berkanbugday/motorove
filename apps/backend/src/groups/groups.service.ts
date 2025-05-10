@@ -199,8 +199,8 @@ export class GroupsService {
     );
   }
 
-  async findOne(id: string) {
-    return await this.prisma.group.findUnique({
+  async findOne(id: string, userId: string, authToken?: string) {
+    const group = await this.prisma.group.findUnique({
       where: { id, isActive: true },
       include: {
         createdBy: true,
@@ -213,6 +213,39 @@ export class GroupsService {
         },
       },
     });
+
+    if (!group) {
+      throw new NotFoundException(`Group with ID ${id} not found`);
+    }
+
+    let logoUrl = group.logo;
+    let coverUrl = group.cover;
+
+    try {
+      if (group.logo) {
+        logoUrl = await this.storageService.getSignedUrl(
+          group.logo,
+          60,
+          authToken,
+        );
+      }
+
+      if (group.cover) {
+        coverUrl = await this.storageService.getSignedUrl(
+          group.cover,
+          60,
+          authToken,
+        );
+      }
+    } catch (error) {
+      console.error('Error getting signed URLs:', error.message);
+    }
+
+    return {
+      ...group,
+      logo: logoUrl,
+      cover: coverUrl,
+    };
   }
 
   async findJoinedGroups(userId: string, authToken?: string) {

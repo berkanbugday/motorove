@@ -33,7 +33,7 @@ export const TabNavigator: React.FC<TabNavigatorProps> = ({
       <Tab.Screen name="HomeTab" component={HomeScreen} />
       <Tab.Screen name="ExploreTab" component={ExploreScreen} />
       <Tab.Screen
-        name="GroupTab"
+        name="GroupsTab"
         options={{title: 'Groups'}}
         component={GroupScreen}
       />
