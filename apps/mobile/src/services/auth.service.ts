@@ -10,6 +10,10 @@ import {
 } from '../types/auth.types';
 import {loggingService} from './logging.service';
 
+// Simple mutex for token refresh to avoid concurrent refresh attempts
+let isRefreshing = false;
+let refreshPromise: Promise<AuthResponse> | null = null;
+
 class AuthService {
   // Sign up a new user
   async signUp(
@@ -90,6 +94,24 @@ class AuthService {
 
   // Refresh token
   async refreshToken(): Promise<AuthResponse> {
+    // If there's already a refresh in progress, return the existing promise
+    if (isRefreshing && refreshPromise) {
+      loggingService.info('Refresh already in progress, reusing promise');
+      return refreshPromise;
+    }
+
+    try {
+      isRefreshing = true;
+      refreshPromise = this._refreshToken();
+      return await refreshPromise;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  }
+
+  // Internal refresh token implementation
+  private async _refreshToken(): Promise<AuthResponse> {
     try {
       loggingService.info('Starting token refresh process');
       const refreshToken = await EncryptedStorage.getItem(
@@ -98,6 +120,9 @@ class AuthService {
 
       if (refreshToken) {
         const parsedRefreshToken = JSON.parse(refreshToken);
+
+        // Clear the refresh token from storage immediately to prevent reuse
+        await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
 
         loggingService.info('Making refresh token request to server');
         const {data, errors} = await apolloClient.mutate({
@@ -151,28 +176,51 @@ class AuthService {
       if (encryptedAuthData) {
         const parsedData = JSON.parse(encryptedAuthData);
 
-        // Check if token is expired and needs refresh
-        if (
+        // Check if token is expired or will expire soon and needs refresh
+        const now = Date.now();
+        const isTokenExpired =
+          parsedData.expiresAt && parsedData.expiresAt <= now;
+        const willExpireSoon =
           parsedData.expiresAt &&
-          parsedData.refreshToken &&
-          parsedData.expiresAt < Date.now() + 60000
-        ) {
-          // Token expires in less than a minute, try to refresh it
+          parsedData.expiresAt > now &&
+          parsedData.expiresAt < now + 60000; // Will expire in less than a minute
+
+        // Only try to refresh if we have both an expired/expiring token AND a refresh token
+        if ((isTokenExpired || willExpireSoon) && parsedData.refreshToken) {
           try {
+            loggingService.info(
+              `Token ${
+                isTokenExpired ? 'expired' : 'expiring soon'
+              }, refreshing`,
+            );
             await this.refreshToken();
-            // After refresh, get updated state
+            // After refresh, get updated state recursively, but prevent infinite loops
             return this.getAuthState();
           } catch (refreshError) {
             // If refresh fails, return logged out state
             loggingService.error(
-              'Token refresh failed:',
+              'Token refresh failed during getAuthState:',
               refreshError as Error,
             );
+
+            // If token is expired, return logged out state
+            if (isTokenExpired) {
+              return {
+                user: null,
+                accessToken: null,
+                refreshToken: null,
+                expiresAt: null,
+                isLoading: false,
+              };
+            }
+
+            // If token is not expired but will soon, still use the existing token
+            // rather than logging the user out immediately
             return {
-              user: null,
-              accessToken: null,
-              refreshToken: null,
-              expiresAt: null,
+              user: parsedData.user,
+              accessToken: parsedData.accessToken,
+              refreshToken: parsedData.refreshToken,
+              expiresAt: parsedData.expiresAt,
               isLoading: false,
             };
           }
@@ -283,11 +331,16 @@ class AuthService {
   // Save authentication data
   private async saveAuthData(authResponse: AuthResponse): Promise<void> {
     try {
+      if (!authResponse.session) {
+        loggingService.error('Cannot save auth data: missing session data');
+        throw new Error('Missing session data');
+      }
+
       const authState = {
         user: authResponse.user,
-        accessToken: authResponse.session?.access_token || null,
-        refreshToken: authResponse.session?.refresh_token || null,
-        expiresAt: authResponse.session?.expires_at || null,
+        accessToken: authResponse.session.access_token || null,
+        refreshToken: authResponse.session.refresh_token || null,
+        expiresAt: authResponse.session.expires_at || null,
       };
 
       // Save to encrypted storage
@@ -310,14 +363,25 @@ class AuthService {
     authState: Omit<AuthState, 'isLoading'>,
   ): Promise<void> {
     try {
-      await EncryptedStorage.setItem(
-        STORAGE_KEYS.AUTH_DATA,
-        JSON.stringify(authState),
-      );
-      await EncryptedStorage.setItem(
-        STORAGE_KEYS.REFRESH_TOKEN,
-        JSON.stringify(authState.refreshToken),
-      );
+      // Save the main auth data and refresh token atomically (as much as possible)
+      const promises = [
+        EncryptedStorage.setItem(
+          STORAGE_KEYS.AUTH_DATA,
+          JSON.stringify(authState),
+        ),
+      ];
+
+      // Only save the refresh token if it exists
+      if (authState.refreshToken) {
+        promises.push(
+          EncryptedStorage.setItem(
+            STORAGE_KEYS.REFRESH_TOKEN,
+            JSON.stringify(authState.refreshToken),
+          ),
+        );
+      }
+
+      await Promise.all(promises);
     } catch (error) {
       loggingService.error('Error saving to encrypted storage:', error);
       throw error;

@@ -72,12 +72,7 @@ export class StorageService {
       throw new Error(`Failed to upload file: ${error.message}`);
     }
 
-    // Get the public URL
-    const { data: urlData } = supabase.storage
-      .from(this.bucketName)
-      .getPublicUrl(fullPath);
-
-    return urlData.publicUrl;
+    return fullPath;
   }
 
   /**

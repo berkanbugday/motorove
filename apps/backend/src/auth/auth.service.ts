@@ -116,6 +116,18 @@ export class AuthService {
       const { data, error } = await this.supabaseService.refreshToken(token);
 
       if (error) {
+        // Check for specific error types from Supabase
+        if (error.message.includes('Token has expired or is invalid')) {
+          throw new UnauthorizedException('Token has expired');
+        }
+
+        if (error.message.includes('Token already used')) {
+          console.error('Refresh token reuse detected:', error.message);
+          throw new UnauthorizedException(
+            'Invalid Refresh Token: Already Used',
+          );
+        }
+
         throw new UnauthorizedException(
           error.message || 'Failed to refresh token',
         );
@@ -147,6 +159,12 @@ export class AuthService {
       const errorMessage =
         error instanceof Error ? error.message : 'Token refresh failed';
       console.error('Token refresh error:', errorMessage);
+
+      // Rethrow the error with appropriate message
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new UnauthorizedException(errorMessage);
     }
   }

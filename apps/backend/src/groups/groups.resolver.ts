@@ -45,7 +45,9 @@ export class GroupsResolver {
   @Query(() => [Group], { name: 'myGroups' })
   findMyGroups(@Context() context: GqlContext) {
     const userId = context.req.user.id;
-    return this.groupsService.findGroupsByUser(userId);
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.groupsService.findGroupsByUser(userId, authToken);
   }
 
   @UseGuards(JwtGuard)

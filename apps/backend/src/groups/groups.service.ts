@@ -139,11 +139,7 @@ export class GroupsService {
           createdBy: true,
           city: true,
           tags: true,
-          memberships: {
-            include: {
-              user: true,
-            },
-          },
+          memberships: true,
         },
       });
     });
@@ -180,8 +176,8 @@ export class GroupsService {
     });
   }
 
-  async findGroupsByUser(userId: string) {
-    return await this.prisma.group.findMany({
+  async findGroupsByUser(userId: string, authToken?: string) {
+    const groups = await this.prisma.group.findMany({
       where: {
         memberships: {
           some: {
@@ -200,6 +196,39 @@ export class GroupsService {
         },
       },
     });
+
+    return Promise.all(
+      groups.map(async (group) => {
+        let logoUrl = group.logo;
+        let coverUrl = group.cover;
+
+        try {
+          if (group.logo) {
+            logoUrl = await this.storageService.getSignedUrl(
+              group.logo,
+              60,
+              authToken,
+            );
+          }
+
+          if (group.cover) {
+            coverUrl = await this.storageService.getSignedUrl(
+              group.cover,
+              60,
+              authToken,
+            );
+          }
+        } catch (error) {
+          console.error('Error getting signed URLs:', error.message);
+        }
+
+        return {
+          ...group,
+          logo: logoUrl,
+          cover: coverUrl,
+        };
+      }),
+    );
   }
 
   async findCreatedByUser(userId: string) {

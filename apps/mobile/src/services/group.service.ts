@@ -25,10 +25,11 @@ export interface Group {
   description: string;
   logo: string | null;
   cover: string | null;
-  city: string;
+  city: {id: string; value: string};
   privacy: string;
+  memberships: {id: string}[];
   membersCapacity: number | null;
-  tags: string[];
+  tags: {id: string; value: string}[];
 }
 
 // Hook for creating a group

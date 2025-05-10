@@ -12,6 +12,7 @@ import {Button} from '../Button';
 import {Icon, IconName} from '../Icon';
 import {colors} from '@theme';
 import {styles} from './GroupCard.styles';
+import {toPascalCase} from '@utils/stringUtils';
 
 export interface BadgeProps {
   /**
@@ -151,12 +152,17 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       <View style={styles.tagsContainer}>
         {tags.map((tag, index) => (
           <React.Fragment key={tag}>
-            <Typography variant="bodySmall" color={colors.neutral.darkGrey}>
+            <Typography
+              variant="caption"
+              color={colors.neutral.darkGrey}
+              style={{
+                textDecorationLine: 'underline',
+              }}>
               {tag}
             </Typography>
             {index < tags.length - 1 && (
               <Typography
-                variant="bodySmall"
+                variant="caption"
                 color={colors.neutral.darkGrey}
                 style={styles.tagSeparator}>
                 •
@@ -175,9 +181,9 @@ export const GroupCard: React.FC<GroupCardProps> = ({
 
     return (
       <View style={styles.memberContainer}>
-        <Icon name="users" size={14} />
+        <Icon name="users-filled" size={12} />
         <Typography
-          variant="bodySmall"
+          variant="caption"
           color={colors.neutral.darkGrey}
           style={styles.infoText}>
           {memberText}
@@ -187,20 +193,20 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   };
 
   const renderPrivacyBadge = () => {
-    let iconName: IconName = 'earth';
+    let iconName: IconName = 'earth-filled';
 
-    if (privacy === 'private') {
-      iconName = 'lock';
+    if (privacy === 'PRIVATE') {
+      iconName = 'lock-filled';
     }
 
     return (
       <View style={styles.privacyContainer}>
-        <Icon name={iconName} size={14} />
+        <Icon name={iconName} size={12} />
         <Typography
-          variant="bodySmall"
+          variant="caption"
           color={colors.neutral.darkGrey}
           style={styles.infoText}>
-          {privacy.charAt(0).toUpperCase() + privacy.slice(1)}
+          {toPascalCase(privacy)}
         </Typography>
       </View>
     );
@@ -219,9 +225,9 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             {name}
           </Typography>
           <View style={styles.locationContainer}>
-            <Icon name="map-pin" size={14} color={colors.neutral.grey} />
+            <Icon name="map-pin" size={12} color={colors.neutral.grey} />
             <Typography
-              variant="bodySmall"
+              variant="caption"
               color={colors.neutral.darkGrey}
               style={styles.infoText}
               numberOfLines={1}>

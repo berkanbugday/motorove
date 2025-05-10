@@ -56,7 +56,9 @@ import Droplet from '@assets/icons/droplet.svg';
 import Clock from '@assets/icons/clock.svg';
 import Phone from '@assets/icons/phone.svg';
 import Lock from '@assets/icons/lock.svg';
+import LockFilled from '@assets/icons/lock-filled.svg';
 import Earth from '@assets/icons/earth.svg';
+import EarthFilled from '@assets/icons/earth-filled.svg';
 import Filter from '@assets/icons/filter.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
@@ -131,7 +133,9 @@ export type IconName =
   | 'clock'
   | 'phone'
   | 'lock'
+  | 'lock-filled'
   | 'earth'
+  | 'earth-filled'
   | 'filter';
 
 interface IconProps {
@@ -274,8 +278,12 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Phone {...commonProps} />;
     case 'lock':
       return <Lock {...commonProps} />;
+    case 'lock-filled':
+      return <LockFilled {...commonProps} />;
     case 'earth':
       return <Earth {...commonProps} />;
+    case 'earth-filled':
+      return <EarthFilled {...commonProps} />;
     case 'filter':
       return <Filter {...commonProps} />;
     default:

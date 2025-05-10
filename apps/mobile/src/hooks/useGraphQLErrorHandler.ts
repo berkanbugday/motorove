@@ -31,6 +31,25 @@ export const useGraphQLErrorHandler = () => {
           case 'UNAUTHENTICATED':
             // Handle authentication errors
             errorType = ErrorType.AUTHENTICATION;
+
+            // Check for specific refresh token errors
+            if (
+              errorMessage &&
+              errorMessage.includes('Invalid Refresh Token: Already Used')
+            ) {
+              loggingService.warning(
+                'Refresh token already used, signing out user',
+              );
+              await handleError(error, errorType, {
+                fallbackMessage:
+                  'Your session has expired. Please sign in again.',
+                showToast: true,
+              });
+              authService.signOut();
+              handled = true;
+              break;
+            }
+
             // Attempt to refresh token if available
             try {
               await authService.refreshToken();

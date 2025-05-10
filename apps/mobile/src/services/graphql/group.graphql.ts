@@ -1,8 +1,8 @@
 import {gql} from '@apollo/client';
 
 // Group fragment
-export const GROUP_FRAGMENT = gql`
-  fragment GroupFragment on Group {
+export const CREATE_GROUP_FRAGMENT = gql`
+  fragment CreateGroupFragment on Group {
     id
     name
     description
@@ -21,14 +21,38 @@ export const GROUP_FRAGMENT = gql`
   }
 `;
 
+// Group fragment
+export const GROUP_FRAGMENT = gql`
+  fragment GroupFragment on Group {
+    id
+    name
+    description
+    logo
+    cover
+    city {
+      id
+      value
+    }
+    privacy
+    membersCapacity
+    tags {
+      id
+      value
+    }
+    memberships {
+      id
+    }
+  }
+`;
+
 // Create group mutation
 export const CREATE_GROUP = gql`
   mutation CreateGroup($input: CreateGroupInput!) {
     createGroup(createGroupInput: $input) {
-      ...GroupFragment
+      ...CreateGroupFragment
     }
   }
-  ${GROUP_FRAGMENT}
+  ${CREATE_GROUP_FRAGMENT}
 `;
 
 // Get group by ID query
