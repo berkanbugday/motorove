@@ -13,8 +13,8 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 70,
+    height: 70,
     borderRadius: radius.round,
     marginRight: spacing.md,
     alignSelf: 'center',
