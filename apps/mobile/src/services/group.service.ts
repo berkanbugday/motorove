@@ -26,9 +26,20 @@ export interface Group {
   description: string;
   logo: string | null;
   cover: string | null;
+  isMember: boolean;
+  isAdmin: boolean;
   city: {id: string; value: string};
   privacy: string;
-  memberships: {id: string}[];
+  memberships: {
+    id: string;
+    role: string;
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      avatar: string;
+    };
+  }[];
   membersCapacity: number | null;
   tags: {id: string; value: string}[];
 }

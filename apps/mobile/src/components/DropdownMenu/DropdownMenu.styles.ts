@@ -9,6 +9,8 @@ export const styles = StyleSheet.create({
   dropdown: {
     position: 'absolute',
     minWidth: 150,
+    height: 'auto',
+    maxHeight: 300,
     backgroundColor: colors.neutral.white,
     borderRadius: radius.sm,
     borderWidth: 1,
@@ -20,6 +22,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
+    backgroundColor: colors.neutral.white,
   },
   firstMenuItem: {
     borderTopLeftRadius: radius.sm,
@@ -33,11 +36,9 @@ export const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   itemText: {
+    flex: 1,
     fontSize: 14,
     color: colors.neutral.black,
-  },
-  highlightedItem: {
-    backgroundColor: colors.secondary.light,
   },
   highlightedText: {
     color: colors.status.error,
@@ -48,5 +49,11 @@ export const styles = StyleSheet.create({
   },
   disabledText: {
     color: colors.neutral.lightGrey,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.secondary.light,
+    width: '80%',
+    alignSelf: 'center',
   },
 });

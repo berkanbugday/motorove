@@ -58,6 +58,8 @@ type Group {
   description: String!
   id: ID!
   isActive: Boolean!
+  isAdmin: Boolean
+  isMember: Boolean
   logo: String
   membersCapacity: Int
   memberships: [GroupMembership!]!

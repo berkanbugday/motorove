@@ -17,12 +17,12 @@ export interface DropdownMenuItem {
   /**
    * Unique identifier for the menu item
    */
-  id: string;
+  id?: string;
 
   /**
    * Label text to display
    */
-  label: string;
+  label?: string;
 
   /**
    * Optional icon to display
@@ -67,6 +67,11 @@ export interface DropdownMenuProps {
   triggerIconColor?: string;
 
   /**
+   * Optional custom styles for the trigger icon
+   */
+  triggerContainerStyle?: ViewStyle;
+
+  /**
    * Function to call when a menu item is selected
    */
   onSelect: (item: DropdownMenuItem) => void;
@@ -109,6 +114,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   itemStyle,
   closeOnSelect = true,
   testID,
+  triggerContainerStyle,
 }) => {
   const [visible, setVisible] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({
@@ -229,7 +235,8 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       <TouchableOpacity
         ref={triggerRef}
         onPress={toggleDropdown}
-        testID={testID}>
+        testID={testID}
+        style={triggerContainerStyle}>
         {triggerComponent || (
           <Icon
             name={triggerIcon}
@@ -265,42 +272,44 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                 },
               ]}>
               {items.map((item, index) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={[
-                    styles.menuItem,
-                    index === 0 && styles.firstMenuItem,
-                    index === items.length - 1 && styles.lastMenuItem,
-                    item.isHighlighted && styles.highlightedItem,
-                    item.isDisabled && styles.disabledItem,
-                    itemStyle,
-                  ]}
-                  onPress={() => handleSelect(item)}
-                  disabled={item.isDisabled}
-                  activeOpacity={item.isDisabled ? 1 : 0.6}>
-                  {item.icon && (
-                    <Icon
-                      name={item.icon}
-                      size={18}
-                      color={
-                        item.isDisabled
-                          ? colors.neutral.lightGrey
-                          : item.isHighlighted
-                          ? colors.status.error
-                          : colors.neutral.black
-                      }
-                      style={styles.itemIcon}
-                    />
-                  )}
-                  <Text
+                <>
+                  <TouchableOpacity
+                    key={item?.id}
                     style={[
-                      styles.itemText,
-                      item.isHighlighted && styles.highlightedText,
-                      item.isDisabled && styles.disabledText,
-                    ]}>
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
+                      styles.menuItem,
+                      index === 0 && styles.firstMenuItem,
+                      index === items.length - 1 && styles.lastMenuItem,
+                      item?.isDisabled && styles.disabledItem,
+                      itemStyle,
+                    ]}
+                    onPress={() => handleSelect(item)}
+                    disabled={item?.isDisabled}
+                    activeOpacity={item?.isDisabled ? 1 : 0.6}>
+                    {item?.icon && (
+                      <Icon
+                        name={item?.icon}
+                        size={18}
+                        color={
+                          item?.isDisabled
+                            ? colors.neutral.lightGrey
+                            : item?.isHighlighted
+                            ? colors.status.error
+                            : colors.neutral.black
+                        }
+                        style={styles.itemIcon}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.itemText,
+                        item?.isHighlighted && styles.highlightedText,
+                        item?.isDisabled && styles.disabledText,
+                      ]}>
+                      {item?.label}
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={styles.divider} />
+                </>
               ))}
             </Animated.View>
           </View>

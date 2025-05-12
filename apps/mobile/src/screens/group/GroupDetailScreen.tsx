@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ImageSourcePropType,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import {LegendList} from '@legendapp/list';
 import {colors, commonStyles, getShadow, radius, spacing} from '@theme';
@@ -171,7 +172,7 @@ export const GroupDetailScreen = () => {
   });
 
   // Use the useGetGroup hook to fetch the group data
-  const {group} = useGetGroup(groupId);
+  const {group, loading} = useGetGroup(groupId);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -276,126 +277,171 @@ export const GroupDetailScreen = () => {
         showBackButton
         backgroundColor="transparent"
         onBackPress={handleGoBack}
-        rightIconName="more-vertical"
         containerStyle={styles.topHeaderBar}
+        dropdownMenuItems={
+          group?.isAdmin
+            ? [
+                {id: '1', label: 'Edit Group', icon: 'pen-filled'},
+                {id: '2', label: 'Add Member', icon: 'user-plus-filled'},
+                {
+                  id: '3',
+                  label: 'Remove Member',
+                  icon: 'user-slash-filled',
+                  isHighlighted: true,
+                },
+              ]
+            : group?.isMember
+            ? [
+                {id: '1', label: 'Members', icon: 'users-filled'},
+                {
+                  id: '2',
+                  label: 'Leave Group',
+                  icon: 'user-slash-filled',
+                  isHighlighted: true,
+                },
+              ]
+            : [{id: '1', label: 'Join Group', icon: 'user-plus-filled'}]
+        }
+        onDropdownItemSelect={item => {
+          console.log(`Dropdown item selected: ${item.id}`);
+        }}
       />
-      <Animated.View
-        style={[
-          styles.imageContainer,
-          {
-            height: headerHeight,
-          },
-        ]}>
-        <Image
-          source={{uri: group?.cover || ''}}
-          style={styles.cover}
-          resizeMode="cover"
-        />
-        <View style={styles.overlay} />
-      </Animated.View>
 
-      {/* Logo rendered outside the cover container for proper layering */}
-      <Animated.View
-        style={[
-          styles.logoWrapper,
-          {
-            transform: [{translateY: logoMarginTop}],
-          },
-        ]}>
-        <Animated.Image
-          source={{uri: group?.logo || ''}}
-          style={[
-            styles.logo,
-            {
-              width: logoSize,
-              height: logoSize,
-            },
-          ]}
-        />
-      </Animated.View>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary.main} />
+        </View>
+      ) : (
+        <>
+          <Animated.View
+            style={[
+              styles.imageContainer,
+              {
+                height: headerHeight,
+              },
+            ]}>
+            <Image
+              source={{uri: group?.cover || ''}}
+              style={styles.cover}
+              resizeMode="cover"
+            />
+            <View style={styles.overlay} />
+          </Animated.View>
 
-      <Animated.ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16} // Ensures smooth scrolling
-        onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {y: scrollY}}}],
-          {useNativeDriver: false},
-        )}>
-        <View style={styles.infoContainer}>
-          <Title align="center">{group?.name}</Title>
+          {/* Logo rendered outside the cover container for proper layering */}
+          <Animated.View
+            style={[
+              styles.logoWrapper,
+              {
+                transform: [{translateY: logoMarginTop}],
+              },
+            ]}>
+            <Animated.Image
+              source={{uri: group?.logo || ''}}
+              style={[
+                styles.logo,
+                {
+                  width: logoSize,
+                  height: logoSize,
+                },
+              ]}
+            />
+          </Animated.View>
 
-          <View style={styles.infoRow}>
-            <Icon name="users-filled" size={18} />
-            <Typography style={styles.infoText}>
-              {group?.memberships?.length || 0} members
-            </Typography>
-            <View style={styles.dot} />
-            <View style={styles.lockContainer}>
-              <Icon
-                name={
-                  group?.privacy === 'PUBLIC' ? 'earth-filled' : 'lock-filled'
-                }
-                size={18}
-              />
-              <Typography style={styles.infoText}>
-                {group?.privacy === 'PUBLIC' ? 'Public' : 'Private'} Group
-              </Typography>
+          <Animated.ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            scrollEventThrottle={16} // Ensures smooth scrolling
+            onScroll={Animated.event(
+              [{nativeEvent: {contentOffset: {y: scrollY}}}],
+              {useNativeDriver: false},
+            )}>
+            <View style={styles.infoContainer}>
+              <Title align="center">{group?.name}</Title>
+
+              <View style={styles.infoRow}>
+                <Icon name="users-filled" size={18} />
+                <Typography style={styles.infoText}>
+                  {group?.memberships?.length || 0} members
+                </Typography>
+                <View style={styles.dot} />
+                <View style={styles.lockContainer}>
+                  <Icon
+                    name={
+                      group?.privacy === 'PUBLIC'
+                        ? 'earth-filled'
+                        : 'lock-filled'
+                    }
+                    size={18}
+                  />
+                  <Typography style={styles.infoText}>
+                    {group?.privacy === 'PUBLIC' ? 'Public' : 'Private'} Group
+                  </Typography>
+                </View>
+              </View>
+
+              <View style={styles.infoRow}>
+                <Icon name="map-pin" size={18} />
+                <Typography style={styles.infoText}>
+                  {group?.city.value || 'No location'}
+                </Typography>
+              </View>
+
+              <View style={styles.tagsContainer}>
+                {group?.tags?.map((tag, index) => (
+                  <Chip
+                    variant="outlined"
+                    color="dark"
+                    size="small"
+                    key={index}
+                    label={tag.value}
+                  />
+                ))}
+              </View>
+
+              <View style={styles.descriptionContainer}>
+                {renderDescription()}
+              </View>
             </View>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Icon name="map-pin" size={18} />
-            <Typography style={styles.infoText}>
-              {group?.city.value || 'No location'}
-            </Typography>
-          </View>
-
-          <View style={styles.tagsContainer}>
-            {group?.tags?.map((tag, index) => (
-              <Chip
-                variant="outlined"
-                color="dark"
-                size="small"
-                key={index}
-                label={tag.value}
-              />
-            ))}
-          </View>
-
-          <View style={styles.descriptionContainer}>{renderDescription()}</View>
-        </View>
-        <View style={styles.shortcutsContainer}>
-          <Button
-            iconPosition="top"
-            iconName="plus"
-            iconSize={24}
-            variant="outline"
-            size="medium"
-            title="Create Post"
-          />
-          <Button
-            iconPosition="top"
-            iconName="route"
-            iconSize={24}
-            variant="dark"
-            size="medium"
-            title="Create Event"
-          />
-        </View>
-        <View style={styles.content}>
-          <Title>Recent Posts</Title>
-          <LegendList
-            data={posts}
-            renderItem={renderFeedPost}
-            keyExtractor={feedKeyExtractor}
-            scrollEnabled={false}
-            contentContainerStyle={styles.feedList}
-            recycleItems={true} // Enable component recycling for better performance
-            maintainVisibleContentPosition={true} // Maintain the visible position when data changes
-          />
-        </View>
-      </Animated.ScrollView>
+            <View style={styles.shortcutsContainer}>
+              {group?.isMember && (
+                <Button
+                  iconPosition="top"
+                  iconName="plus"
+                  iconSize={24}
+                  variant="outline"
+                  size="small"
+                  title="Create Post"
+                />
+              )}
+              {group?.isAdmin && (
+                <Button
+                  iconPosition="top"
+                  iconName="route"
+                  iconSize={24}
+                  variant="dark"
+                  size="small"
+                  title="Create Event"
+                />
+              )}
+            </View>
+            {group?.isMember && (
+              <View style={styles.content}>
+                <Title>Recent Posts</Title>
+                <LegendList
+                  data={posts}
+                  renderItem={renderFeedPost}
+                  keyExtractor={feedKeyExtractor}
+                  scrollEnabled={false}
+                  contentContainerStyle={styles.feedList}
+                  recycleItems={true} // Enable component recycling for better performance
+                  maintainVisibleContentPosition={true} // Maintain the visible position when data changes
+                />
+              </View>
+            )}
+          </Animated.ScrollView>
+        </>
+      )}
     </View>
   );
 };
@@ -415,7 +461,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 150,
-    zIndex: 1,
   },
   cover: {
     width: '100%',
@@ -432,11 +477,13 @@ const styles = StyleSheet.create({
   },
   logoWrapper: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    width: 100,
+    height: 100,
     top: 150, // Position from top
+    left: '50%', // Center horizontally
+    marginLeft: -50, // Offset by half the width
     alignItems: 'center',
-    zIndex: 20, // Higher zIndex to ensure it's above other elements
+    zIndex: 10, // Higher zIndex to ensure it's above other elements
     ...getShadow('medium'),
   },
   logo: {
@@ -492,7 +539,7 @@ const styles = StyleSheet.create({
   shortcutsContainer: {
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
-    justifyContent: 'space-around',
+    justifyContent: 'space-evenly',
     marginTop: spacing.md,
   },
   content: {
@@ -505,5 +552,10 @@ const styles = StyleSheet.create({
   },
   feedCard: {
     marginBottom: spacing.md,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

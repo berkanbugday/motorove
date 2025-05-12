@@ -12,6 +12,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, radius, spacing} from '@theme';
 import {Icon, IconName} from '../Icon';
 import {Typography, BodySmall, Subtitle} from '../Typography';
+import DropdownMenu, {DropdownMenuItem} from '../DropdownMenu';
 
 export interface TopHeaderBarProps {
   /**
@@ -80,6 +81,21 @@ export interface TopHeaderBarProps {
   secondRightIconBadgeCount?: number;
 
   /**
+   * Dropdown menu items for the header
+   */
+  dropdownMenuItems?: DropdownMenuItem[];
+
+  /**
+   * Function to call when a dropdown menu item is selected
+   */
+  onDropdownItemSelect?: (item: DropdownMenuItem) => void;
+
+  /**
+   * Position of the dropdown menu relative to the trigger
+   */
+  dropdownPosition?: 'top' | 'bottom' | 'left' | 'right';
+
+  /**
    * Background color for the header
    */
   backgroundColor?: string;
@@ -129,6 +145,9 @@ export function TopHeaderBar({
   secondRightButtonText,
   onSecondRightButtonPress,
   secondRightIconBadgeCount = 0,
+  dropdownMenuItems,
+  onDropdownItemSelect,
+  dropdownPosition = 'bottom',
   backgroundColor = colors.neutral.white,
   textColor = colors.neutral.black,
   containerStyle,
@@ -206,54 +225,74 @@ export function TopHeaderBar({
 
         {/* Right section (optional buttons/icons) */}
         <View style={styles.rightSection}>
-          {(rightIconName || rightButtonText) && (
-            <TouchableOpacity
-              onPress={onRightButtonPress}
-              style={
+          {dropdownMenuItems && onDropdownItemSelect ? (
+            <DropdownMenu
+              items={dropdownMenuItems}
+              onSelect={onDropdownItemSelect}
+              position={dropdownPosition}
+              triggerIcon="more-vertical"
+              triggerIconSize={20}
+              triggerIconColor={textColor}
+              containerStyle={styles.dropdownContainer}
+              triggerContainerStyle={
                 backgroundColor === 'transparent'
                   ? styles.rightButtonTransparent
                   : styles.rightButton
               }
-              hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
-              {rightIconName ? (
-                <View>
-                  <Icon name={rightIconName} size={20} color={textColor} />
-                </View>
-              ) : rightButtonText ? (
-                <Typography variant="buttonText" color={textColor}>
-                  {rightButtonText}
-                </Typography>
-              ) : null}
-            </TouchableOpacity>
-          )}
-          {(secondRightIconName || secondRightButtonText) && (
-            <TouchableOpacity
-              onPress={onSecondRightButtonPress}
-              style={styles.rightButton}
-              hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
-              {secondRightIconName ? (
-                <View>
-                  <Icon
-                    name={secondRightIconName}
-                    size={20}
-                    color={textColor}
-                  />
-                  {secondRightIconBadgeCount > 0 && (
-                    <View style={styles.badgeContainer}>
-                      <Text style={styles.badgeText}>
-                        {secondRightIconBadgeCount > 99
-                          ? '99+'
-                          : secondRightIconBadgeCount}
-                      </Text>
+              testID="header-dropdown-menu"
+            />
+          ) : (
+            <>
+              {(rightIconName || rightButtonText) && (
+                <TouchableOpacity
+                  onPress={onRightButtonPress}
+                  style={
+                    backgroundColor === 'transparent'
+                      ? styles.rightButtonTransparent
+                      : styles.rightButton
+                  }
+                  hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
+                  {rightIconName ? (
+                    <View>
+                      <Icon name={rightIconName} size={20} color={textColor} />
                     </View>
-                  )}
-                </View>
-              ) : secondRightButtonText ? (
-                <Typography variant="buttonText" color={textColor}>
-                  {secondRightButtonText}
-                </Typography>
-              ) : null}
-            </TouchableOpacity>
+                  ) : rightButtonText ? (
+                    <Typography variant="buttonText" color={textColor}>
+                      {rightButtonText}
+                    </Typography>
+                  ) : null}
+                </TouchableOpacity>
+              )}
+              {(secondRightIconName || secondRightButtonText) && (
+                <TouchableOpacity
+                  onPress={onSecondRightButtonPress}
+                  style={styles.rightButton}
+                  hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
+                  {secondRightIconName ? (
+                    <View>
+                      <Icon
+                        name={secondRightIconName}
+                        size={20}
+                        color={textColor}
+                      />
+                      {secondRightIconBadgeCount > 0 && (
+                        <View style={styles.badgeContainer}>
+                          <Text style={styles.badgeText}>
+                            {secondRightIconBadgeCount > 99
+                              ? '99+'
+                              : secondRightIconBadgeCount}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  ) : secondRightButtonText ? (
+                    <Typography variant="buttonText" color={textColor}>
+                      {secondRightButtonText}
+                    </Typography>
+                  ) : null}
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </View>
       </View>
@@ -337,5 +376,8 @@ const styles = StyleSheet.create({
     color: colors.neutral.white,
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  dropdownContainer: {
+    zIndex: 20,
   },
 });

@@ -19,6 +19,7 @@ import MapPin from '@assets/icons/map-pin.svg';
 import Route from '@assets/icons/route.svg';
 import Users from '@assets/icons/users.svg';
 import UsersFilled from '@assets/icons/users-filled.svg';
+import UsersSlashFilled from '@assets/icons/users-slash-filled.svg';
 import Wrench from '@assets/icons/wrench.svg';
 import Home from '@assets/icons/home.svg';
 import HomeFilled from '@assets/icons/home-filled.svg';
@@ -26,6 +27,8 @@ import MapLocation from '@assets/icons/map-location.svg';
 import MapLocationFilled from '@assets/icons/map-location-filled.svg';
 import UserGear from '@assets/icons/user-gear.svg';
 import UserGearFilled from '@assets/icons/user-gear-filled.svg';
+import UserPlusFilled from '@assets/icons/user-plus-filled.svg';
+import UserSlashFilled from '@assets/icons/user-slash-filled.svg';
 import Bell from '@assets/icons/bell.svg';
 import BellFilled from '@assets/icons/bell-filled.svg';
 import BellExclamation from '@assets/icons/bell-exclamation.svg';
@@ -42,6 +45,7 @@ import PaperPlane from '@assets/icons/paper-plane.svg';
 import PaperPlaneFilled from '@assets/icons/paper-plane-filled.svg';
 import Trash from '@assets/icons/trash.svg';
 import Pen from '@assets/icons/pen.svg';
+import PenFilled from '@assets/icons/pen-filled.svg';
 import Error from '@assets/icons/error.svg';
 import ErrorFilled from '@assets/icons/error-filled.svg';
 import Share from '@assets/icons/share.svg';
@@ -88,6 +92,7 @@ export type IconName =
   | 'route'
   | 'users'
   | 'users-filled'
+  | 'users-slash-filled'
   | 'wrench'
   | 'home'
   | 'home-filled'
@@ -95,6 +100,8 @@ export type IconName =
   | 'map-location-filled'
   | 'user-gear'
   | 'user-gear-filled'
+  | 'user-plus-filled'
+  | 'user-slash-filled'
   | 'bell'
   | 'bell-filled'
   | 'bell-exclamation'
@@ -119,6 +126,7 @@ export type IconName =
   | 'paper-plane-filled'
   | 'trash'
   | 'pen'
+  | 'pen-filled'
   | 'error'
   | 'error-filled'
   | 'share'
@@ -188,6 +196,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Users {...commonProps} />;
     case 'users-filled':
       return <UsersFilled {...commonProps} />;
+    case 'users-slash-filled':
+      return <UsersSlashFilled {...commonProps} />;
     case 'wrench':
       return <Wrench {...commonProps} />;
     case 'home':
@@ -202,6 +212,10 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <UserGear {...commonProps} />;
     case 'user-gear-filled':
       return <UserGearFilled {...commonProps} />;
+    case 'user-plus-filled':
+      return <UserPlusFilled {...commonProps} />;
+    case 'user-slash-filled':
+      return <UserSlashFilled {...commonProps} />;
     case 'bell':
       return <Bell {...commonProps} />;
     case 'bell-filled':
@@ -250,6 +264,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Trash {...commonProps} />;
     case 'pen':
       return <Pen {...commonProps} />;
+    case 'pen-filled':
+      return <PenFilled {...commonProps} />;
     case 'error':
       return <Error {...commonProps} />;
     case 'error-filled':

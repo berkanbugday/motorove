@@ -241,10 +241,20 @@ export class GroupsService {
       console.error('Error getting signed URLs:', error.message);
     }
 
+    // Check if the user is a member of the group
+    const membership = group.memberships.find(
+      (membership) => membership.user.id === userId,
+    );
+
+    const isMember = !!membership;
+    const isAdmin = isMember && membership.role === GroupMemberRole.ADMIN;
+
     return {
       ...group,
       logo: logoUrl,
       cover: coverUrl,
+      isMember,
+      isAdmin,
     };
   }
 

@@ -33,4 +33,10 @@ export class Group extends BaseModel {
 
   @Field(() => [GroupMembership])
   memberships: GroupMembership[];
+
+  @Field(() => Boolean, { nullable: true })
+  isMember?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  isAdmin?: boolean;
 }

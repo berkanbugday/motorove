@@ -29,6 +29,8 @@ export const GROUP_FRAGMENT = gql`
     description
     logo
     cover
+    isMember
+    isAdmin
     city {
       id
       value
@@ -41,6 +43,13 @@ export const GROUP_FRAGMENT = gql`
     }
     memberships {
       id
+      role
+      user {
+        id
+        firstName
+        lastName
+        avatar
+      }
     }
   }
 `;
