@@ -4,6 +4,7 @@ import {
   GET_GROUP,
   GET_GROUPS,
   GET_JOINED_GROUPS,
+  UPDATE_GROUP,
 } from './graphql/group.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
@@ -18,6 +19,10 @@ export interface CreateGroupInput {
   privacy: string | undefined;
   membersCapacity: number | null;
   tags: {id: string; value: string}[];
+}
+
+export interface UpdateGroupInput extends CreateGroupInput {
+  id: string;
 }
 
 export interface Group {
@@ -89,6 +94,56 @@ export const useCreateGroup = (onSuccess?: () => void) => {
 
   return {
     createGroup,
+    loading,
+    error,
+  };
+};
+
+// Hook for updating a group
+export const useUpdateGroup = (onSuccess?: () => void) => {
+  const [updateGroupMutation, {loading, error}] = useMutation(UPDATE_GROUP, {
+    onCompleted: _data => {
+      showToast({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Group updated successfully!',
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error updating group:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to update group. Please try again.',
+      });
+    },
+  });
+
+  const updateGroup = async (input: UpdateGroupInput) => {
+    try {
+      const result = await updateGroupMutation({
+        variables: {
+          input: {
+            ...input,
+            logo: input.logo ?? null,
+            cover: input.cover ?? null,
+          },
+        },
+      });
+      return result.data?.updateGroup;
+    } catch (err) {
+      loggingService.error('Error in updateGroup:', err);
+      // Error is already handled in onError callback
+      return null;
+    }
+  };
+
+  return {
+    updateGroup,
     loading,
     error,
   };

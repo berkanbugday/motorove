@@ -35,4 +35,9 @@ export const createGroupSchema = z.object({
   cover: z.string().nullable().optional(),
 });
 
+export const updateGroupSchema = createGroupSchema.extend({
+  id: z.string(),
+});
+
 export type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
+export type UpdateGroupFormValues = z.infer<typeof updateGroupSchema>;

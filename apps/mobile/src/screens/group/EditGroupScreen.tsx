@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -6,9 +6,9 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
@@ -24,17 +24,35 @@ import {
 import {colors, spacing, radius, getShadow} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {
-  createGroupSchema,
-  CreateGroupFormValues,
+  updateGroupSchema,
+  UpdateGroupFormValues,
 } from '@utils/validation/groupValidation';
 import {loggingService} from '@services/logging.service';
 import {useEnumPrivacyOptions} from '@services/enum.service';
-import {useCreateGroup, CreateGroupInput} from '@services/group.service';
+import {
+  useUpdateGroup,
+  UpdateGroupInput,
+  useGetGroup,
+} from '@services/group.service';
 import {useGetCities} from '@services/city.service';
 import {useGetGroupTags} from '@services/group-tag.service';
 
-export const CreateGroupScreen: React.FC = () => {
-  const navigation = useNavigation<MainScreenNavigationProp<'CreateGroup'>>();
+// Since we can't modify the navigationTypes file directly in this example,
+// define a local type for the route params
+type EditGroupParams = {
+  groupId: string;
+};
+
+// Note: Using Group type from the group service
+
+export const EditGroupScreen: React.FC = () => {
+  // We'll use 'any' for now to bypass the type checking, but in a real app
+  // you'd update the navigationTypes.ts file to include EditGroup
+  const navigation = useNavigation<any>();
+  const route =
+    useRoute<RouteProp<{EditGroup: EditGroupParams}, 'EditGroup'>>();
+  const {groupId} = route.params;
+
   const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
     null,
   );
@@ -44,19 +62,30 @@ export const CreateGroupScreen: React.FC = () => {
   >([]);
   const [logo, setLogo] = useState<string | null>(null);
   const [cover, setCover] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
 
-  // Use enum service hooks
+  // Track if data has been loaded to form
+  const isDataLoadedRef = useRef(false);
+  // Use service hooks
   const {cities, loading: citiesLoading} = useGetCities();
   const {privacyOptions, loading: privacyLoading} = useEnumPrivacyOptions();
   const {groupTags} = useGetGroupTags();
 
-  // Use group service hook for creating a group
-  const {createGroup, loading: createGroupLoading} = useCreateGroup(() => {
-    // On success callback
-    setTimeout(() => {
-      navigation.goBack();
-    }, 1000);
-  });
+  // Get group data using the group service
+  const {
+    group,
+    loading: groupLoading,
+    error: groupError,
+  } = useGetGroup(groupId);
+
+  // Use group service hook for updating a group
+  const {updateGroup: updateGroup, loading: updateGroupLoading} =
+    useUpdateGroup(() => {
+      // On success callback
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
+    });
 
   // Setup form with Zod validation
   const {
@@ -64,8 +93,9 @@ export const CreateGroupScreen: React.FC = () => {
     handleSubmit,
     formState: {errors},
     setValue,
-  } = useForm<CreateGroupFormValues>({
-    resolver: zodResolver(createGroupSchema),
+    reset,
+  } = useForm<UpdateGroupFormValues>({
+    resolver: zodResolver(updateGroupSchema),
     defaultValues: {
       name: '',
       description: '',
@@ -78,6 +108,86 @@ export const CreateGroupScreen: React.FC = () => {
     },
     mode: 'onChange',
   });
+
+  // Handle group fetch error
+  useEffect(() => {
+    if (groupError) {
+      loggingService.error('Error fetching group data:', groupError);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load group data',
+      });
+      navigation.goBack();
+    }
+  }, [groupError, navigation]);
+
+  // Populate form with existing group data only once when data is available
+  useEffect(() => {
+    // Skip if data already loaded or still loading
+    if (isDataLoadedRef.current || groupLoading || !group) {
+      return;
+    }
+
+    try {
+      // Update form values in one go
+      reset({
+        name: group.name,
+        description: group.description,
+        logo: group.logo,
+        cover: group.cover,
+        city: group.city?.id || '',
+        privacy: group.privacy || '',
+        membersCapacity: group.membersCapacity
+          ? group.membersCapacity.toString()
+          : null,
+        tags: group.tags.map(tag => tag.id),
+      });
+
+      // Set logo and cover preview
+      if (group.logo) {
+        setLogo(group.logo);
+      }
+      if (group.cover) {
+        setCover(group.cover);
+      }
+
+      // Set selected city
+      if (group.city) {
+        setSelectedCity({
+          id: group.city.id,
+          label: group.city.value,
+          value: group.city.id,
+        });
+      }
+
+      // Set selected privacy
+      if (group.privacy) {
+        const privacyOption = privacyOptions.find(
+          option => option.value === group.privacy,
+        );
+        if (privacyOption) {
+          setSelectedPrivacy(privacyOption);
+        }
+      }
+
+      // Set selected tags
+      if (group.tags && group.tags.length > 0) {
+        setSelectedTags(
+          group.tags.map(tag => ({
+            id: tag.id,
+            value: tag.value,
+          })),
+        );
+      }
+
+      // Mark data as loaded to prevent further updates
+      isDataLoadedRef.current = true;
+      setInitialLoading(false);
+    } catch (error) {
+      loggingService.error('Error populating form data:', error);
+    }
+  }, [group, groupLoading, privacyOptions, reset]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -195,10 +305,11 @@ export const CreateGroupScreen: React.FC = () => {
     setValue('city', item?.value || '', {shouldValidate: true});
   }
 
-  const onSubmit = async (data: CreateGroupFormValues) => {
+  const onSubmit = async (data: UpdateGroupFormValues) => {
     try {
       // Prepare form data for the group service
-      const createGroupInput: CreateGroupInput = {
+      const updateGroupInput: UpdateGroupInput = {
+        id: groupId,
         name: data.name,
         description: data.description,
         logo: data.logo,
@@ -217,22 +328,31 @@ export const CreateGroupScreen: React.FC = () => {
         })),
       };
 
-      // Call the group service createGroup method
-      await createGroup(createGroupInput);
+      // Call the group service updateGroup method
+      await updateGroup(updateGroupInput);
     } catch (error) {
       loggingService.error('Error in onSubmit:', error);
       showToast({
         type: 'error',
         text1: 'Error',
-        text2: 'Failed to create group. Please try again.',
+        text2: 'Failed to update group. Please try again.',
       });
     }
   };
 
+  // Show loading while fetching initial data
+  if (initialLoading || groupLoading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color={colors.primary.main} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Create Group"
+        title="Edit Group"
         showBackButton
         onBackPress={handleGoBack}
         containerStyle={styles.topHeaderBar}
@@ -370,15 +490,15 @@ export const CreateGroupScreen: React.FC = () => {
           </View>
         </ScrollView>
 
-        {/* Create Button */}
+        {/* Update Button */}
         <View style={styles.buttonContainer}>
           <Button
-            title={createGroupLoading ? 'Creating...' : 'Create Group'}
+            title={updateGroupLoading ? 'Updating...' : 'Update Group'}
             variant="dark"
             size="medium"
             shape="round"
             onPress={handleSubmit(onSubmit)}
-            loading={createGroupLoading}
+            loading={updateGroupLoading}
           />
         </View>
       </SafeAreaView>
@@ -390,6 +510,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.white,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   safeArea: {
     flex: 1,

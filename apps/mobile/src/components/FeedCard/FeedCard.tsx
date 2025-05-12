@@ -15,7 +15,8 @@ import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {Typography} from '../Typography/Typography';
 import {colors} from '@theme';
 import {styles} from './FeedCard.styles';
-import {Button, Chip, Icon, IconName} from '@components';
+import {Button, Chip, Icon} from '@components';
+import {IconName} from '@components/Icon';
 import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 
 export interface FeedCardProps {

@@ -22,6 +22,9 @@ import {Icon, IconName} from '@components/Icon';
 import {Chip} from '@components/Chip';
 import {Button} from '@components/Button';
 import {FeedCard} from '@components/FeedCard';
+import {navigateToScreen} from '@navigation/utils/navigationHelpers';
+import {DropdownMenuItem} from '@components/DropdownMenu';
+import {loggingService} from '@services/logging.service';
 
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
@@ -241,6 +244,61 @@ export const GroupDetailScreen = () => {
     );
   }, []);
 
+  // Create dropdown menu items for the group detail screen
+  const groupDropdownMenuItems = useCallback(
+    (isAdmin?: boolean, isMember?: boolean): DropdownMenuItem[] => {
+      const items: DropdownMenuItem[] = [];
+
+      if (isAdmin) {
+        items.push({
+          id: 'edit_group',
+          label: 'Edit Group',
+          icon: 'pen-filled',
+        });
+      }
+
+      if (isMember) {
+        items.push({id: 'members', label: 'Members', icon: 'users-filled'});
+        items.push({
+          id: 'leave_group',
+          label: 'Leave Group',
+          icon: 'users-slash-filled',
+          isHighlighted: true,
+        });
+      }
+
+      if (!isAdmin || !isMember) {
+        items.push({
+          id: 'join_group',
+          label: 'Join Group',
+          icon: 'user-plus-filled',
+        });
+      }
+
+      return items;
+    },
+    [],
+  );
+
+  // Handle dropdown item select
+  const handleDropdownMenuItemSelect = useCallback((item: DropdownMenuItem) => {
+    switch (item.id) {
+      case 'edit_group':
+        navigateToScreen(navigation, 'EditGroup', {groupId});
+        break;
+      case 'members':
+        break;
+      case 'leave_group':
+        break;
+      case 'join_group':
+        break;
+      default:
+        loggingService.info(
+          `Unhandled action: ${item.id} for group: ${groupId}`,
+        );
+    }
+  }, []);
+
   // Render feed post
   const renderFeedPost = useCallback(
     ({item}: {item: FeedPost}) => {
@@ -278,33 +336,11 @@ export const GroupDetailScreen = () => {
         backgroundColor="transparent"
         onBackPress={handleGoBack}
         containerStyle={styles.topHeaderBar}
-        dropdownMenuItems={
-          group?.isAdmin
-            ? [
-                {id: '1', label: 'Edit Group', icon: 'pen-filled'},
-                {id: '2', label: 'Add Member', icon: 'user-plus-filled'},
-                {
-                  id: '3',
-                  label: 'Remove Member',
-                  icon: 'user-slash-filled',
-                  isHighlighted: true,
-                },
-              ]
-            : group?.isMember
-            ? [
-                {id: '1', label: 'Members', icon: 'users-filled'},
-                {
-                  id: '2',
-                  label: 'Leave Group',
-                  icon: 'user-slash-filled',
-                  isHighlighted: true,
-                },
-              ]
-            : [{id: '1', label: 'Join Group', icon: 'user-plus-filled'}]
-        }
-        onDropdownItemSelect={item => {
-          console.log(`Dropdown item selected: ${item.id}`);
-        }}
+        dropdownMenuItems={groupDropdownMenuItems(
+          group?.isAdmin,
+          group?.isMember,
+        )}
+        onDropdownItemSelect={item => handleDropdownMenuItemSelect(item)}
       />
 
       {loading ? (
@@ -410,7 +446,6 @@ export const GroupDetailScreen = () => {
                   iconName="plus"
                   iconSize={24}
                   variant="outline"
-                  size="small"
                   title="Create Post"
                 />
               )}
@@ -420,7 +455,6 @@ export const GroupDetailScreen = () => {
                   iconName="route"
                   iconSize={24}
                   variant="dark"
-                  size="small"
                   title="Create Event"
                 />
               )}

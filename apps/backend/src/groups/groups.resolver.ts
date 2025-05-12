@@ -32,6 +32,19 @@ export class GroupsResolver {
   }
 
   @UseGuards(JwtGuard)
+  @Mutation(() => Group)
+  updateGroup(
+    @Args('updateGroupInput') updateGroupInput: UpdateGroupInput,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.groupsService.updateGroup(userId, updateGroupInput, authToken);
+  }
+
+  @UseGuards(JwtGuard)
   @Query(() => [Group], { name: 'groups' })
   findAll(@Context() context: GqlContext) {
     const userId = context.req.user.id;
@@ -63,18 +76,5 @@ export class GroupsResolver {
   findCreatedByMe(@Context() context: GqlContext) {
     const userId = context.req.user.id;
     return this.groupsService.findCreatedByUser(userId);
-  }
-
-  @UseGuards(JwtGuard)
-  @Mutation(() => Group)
-  updateGroup(
-    @Args('updateGroupInput') updateGroupInput: UpdateGroupInput,
-    @Context() context: GqlContext,
-  ) {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-
-    return this.groupsService.updateGroup(userId, updateGroupInput, authToken);
   }
 }

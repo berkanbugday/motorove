@@ -395,7 +395,7 @@ export const HomeScreen = ({navigation}: Props) => {
         {
           id: 'report',
           label: 'Report',
-          icon: 'report',
+          icon: 'error',
           isHighlighted: true,
         },
       ];

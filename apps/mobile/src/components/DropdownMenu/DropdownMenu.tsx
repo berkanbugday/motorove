@@ -271,46 +271,48 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                   ],
                 },
               ]}>
-              {items.map((item, index) => (
-                <>
-                  <TouchableOpacity
-                    key={item?.id}
-                    style={[
-                      styles.menuItem,
-                      index === 0 && styles.firstMenuItem,
-                      index === items.length - 1 && styles.lastMenuItem,
-                      item?.isDisabled && styles.disabledItem,
-                      itemStyle,
-                    ]}
-                    onPress={() => handleSelect(item)}
-                    disabled={item?.isDisabled}
-                    activeOpacity={item?.isDisabled ? 1 : 0.6}>
-                    {item?.icon && (
-                      <Icon
-                        name={item?.icon}
-                        size={18}
-                        color={
-                          item?.isDisabled
-                            ? colors.neutral.lightGrey
-                            : item?.isHighlighted
-                            ? colors.status.error
-                            : colors.neutral.black
-                        }
-                        style={styles.itemIcon}
-                      />
-                    )}
-                    <Text
+              {items
+                .filter(item => item !== undefined && item !== null)
+                .map((item, index) => (
+                  <>
+                    <TouchableOpacity
+                      key={item?.id}
                       style={[
-                        styles.itemText,
-                        item?.isHighlighted && styles.highlightedText,
-                        item?.isDisabled && styles.disabledText,
-                      ]}>
-                      {item?.label}
-                    </Text>
-                  </TouchableOpacity>
-                  <View style={styles.divider} />
-                </>
-              ))}
+                        styles.menuItem,
+                        index === 0 && styles.firstMenuItem,
+                        index === items.length - 1 && styles.lastMenuItem,
+                        item?.isDisabled && styles.disabledItem,
+                        itemStyle,
+                      ]}
+                      onPress={() => handleSelect(item)}
+                      disabled={item?.isDisabled}
+                      activeOpacity={item?.isDisabled ? 1 : 0.6}>
+                      {item?.icon && (
+                        <Icon
+                          name={item?.icon}
+                          size={18}
+                          color={
+                            item?.isDisabled
+                              ? colors.neutral.lightGrey
+                              : item?.isHighlighted
+                              ? colors.status.error
+                              : colors.neutral.black
+                          }
+                          style={styles.itemIcon}
+                        />
+                      )}
+                      <Text
+                        style={[
+                          styles.itemText,
+                          item?.isHighlighted && styles.highlightedText,
+                          item?.isDisabled && styles.disabledText,
+                        ]}>
+                        {item?.label}
+                      </Text>
+                    </TouchableOpacity>
+                    <View style={styles.divider} />
+                  </>
+                ))}
             </Animated.View>
           </View>
         </TouchableWithoutFeedback>

@@ -145,6 +145,101 @@ export class GroupsService {
     });
   }
 
+  async updateGroup(
+    userId: string,
+    updateGroupInput: UpdateGroupInput,
+    authToken?: string,
+  ) {
+    const { id, ...updateData } = updateGroupInput;
+
+    // Check if the group exists
+    const group = await this.prisma.group.findUnique({
+      where: { id },
+      include: {
+        createdBy: true,
+        city: true,
+        tags: true,
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException(`Group with ID ${id} not found`);
+    }
+
+    // Check if the user is the creator of the group
+    if (group.createdBy.id !== userId) {
+      throw new ForbiddenException(
+        'You are not authorized to update this group',
+      );
+    }
+
+    // Process images if they exist
+    let logoUrl = updateData.logo;
+    let coverUrl = updateData.cover;
+
+    if (updateData.logo && updateData.logo !== group.logo) {
+      logoUrl = await this.processImageUpload(
+        updateData.logo,
+        'groups/logos',
+        `logo-${userId}`,
+        authToken,
+      );
+    }
+
+    if (updateData.cover && updateData.cover !== group.cover) {
+      coverUrl = await this.processImageUpload(
+        updateData.cover,
+        'groups/covers',
+        `cover-${userId}`,
+        authToken,
+      );
+    }
+
+    // Handle enum conversions
+    const processedUpdateData: Record<string, unknown> = {
+      ...updateData,
+      logo: logoUrl,
+      cover: coverUrl,
+      updatedById: userId, // Update the updatedBy field
+    };
+
+    if (updateData.city && 'id' in updateData.city) {
+      processedUpdateData.city = {
+        connect: { id: updateData.city.id },
+      };
+    }
+
+    if (updateData.privacy) {
+      processedUpdateData.privacy = updateData.privacy;
+    }
+
+    if (updateData.tags && Array.isArray(updateData.tags)) {
+      processedUpdateData.tags = {
+        connect: updateData.tags
+          .map((tag) => ({
+            id: 'id' in tag ? tag.id : undefined,
+          }))
+          .filter((item) => item.id !== undefined),
+      };
+    }
+
+    // Update the group
+    return await this.prisma.group.update({
+      where: { id },
+      data: processedUpdateData,
+      include: {
+        createdBy: true,
+        city: true,
+        tags: true,
+        memberships: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+  }
+
   async findAll(userId: string, authToken?: string) {
     const groups = await this.prisma.group.findMany({
       where: {
@@ -320,101 +415,6 @@ export class GroupsService {
         createdById: userId,
         isActive: true,
       },
-      include: {
-        createdBy: true,
-        city: true,
-        tags: true,
-        memberships: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
-  }
-
-  async updateGroup(
-    userId: string,
-    updateGroupInput: UpdateGroupInput,
-    authToken?: string,
-  ) {
-    const { id, ...updateData } = updateGroupInput;
-
-    // Check if the group exists
-    const group = await this.prisma.group.findUnique({
-      where: { id },
-      include: {
-        createdBy: true,
-        city: true,
-        tags: true,
-      },
-    });
-
-    if (!group) {
-      throw new NotFoundException(`Group with ID ${id} not found`);
-    }
-
-    // Check if the user is the creator of the group
-    if (group.createdBy.id !== userId) {
-      throw new ForbiddenException(
-        'You are not authorized to update this group',
-      );
-    }
-
-    // Process images if they exist
-    let logoUrl = updateData.logo;
-    let coverUrl = updateData.cover;
-
-    if (updateData.logo && updateData.logo !== group.logo) {
-      logoUrl = await this.processImageUpload(
-        updateData.logo,
-        'groups/logos',
-        `logo-${userId}`,
-        authToken,
-      );
-    }
-
-    if (updateData.cover && updateData.cover !== group.cover) {
-      coverUrl = await this.processImageUpload(
-        updateData.cover,
-        'groups/covers',
-        `cover-${userId}`,
-        authToken,
-      );
-    }
-
-    // Handle enum conversions
-    const processedUpdateData: Record<string, unknown> = {
-      ...updateData,
-      logo: logoUrl,
-      cover: coverUrl,
-      updatedById: userId, // Update the updatedBy field
-    };
-
-    if (updateData.city && 'id' in updateData.city) {
-      processedUpdateData.city = {
-        connect: { id: updateData.city.id },
-      };
-    }
-
-    if (updateData.privacy) {
-      processedUpdateData.privacy = updateData.privacy;
-    }
-
-    if (updateData.tags && Array.isArray(updateData.tags)) {
-      processedUpdateData.tags = {
-        connect: updateData.tags
-          .map((tag) => ({
-            id: 'id' in tag ? tag.id : undefined,
-          }))
-          .filter((item) => item.id !== undefined),
-      };
-    }
-
-    // Update the group
-    return await this.prisma.group.update({
-      where: { id },
-      data: processedUpdateData,
       include: {
         createdBy: true,
         city: true,

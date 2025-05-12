@@ -3,7 +3,6 @@ import {gql} from '@apollo/client';
 // Group fragment
 export const CREATE_GROUP_FRAGMENT = gql`
   fragment CreateGroupFragment on Group {
-    id
     name
     description
     logo
@@ -19,6 +18,14 @@ export const CREATE_GROUP_FRAGMENT = gql`
       value
     }
   }
+`;
+
+export const UPDATE_GROUP_FRAGMENT = gql`
+  fragment UpdateGroupFragment on Group {
+    id
+    ...CreateGroupFragment
+  }
+  ${CREATE_GROUP_FRAGMENT}
 `;
 
 // Group fragment
@@ -62,6 +69,16 @@ export const CREATE_GROUP = gql`
     }
   }
   ${CREATE_GROUP_FRAGMENT}
+`;
+
+// Update group mutation
+export const UPDATE_GROUP = gql`
+  mutation UpdateGroup($input: UpdateGroupInput!) {
+    updateGroup(updateGroupInput: $input) {
+      ...UpdateGroupFragment
+    }
+  }
+  ${UPDATE_GROUP_FRAGMENT}
 `;
 
 export const GET_GROUPS = gql`

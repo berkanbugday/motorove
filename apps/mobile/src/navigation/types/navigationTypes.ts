@@ -43,6 +43,7 @@ export type MainStackParamList = {
   CreatePost: undefined;
   CreateGroup: undefined;
   GroupDetail: {groupId: string};
+  EditGroup: {groupId: string};
   // Add more screens here as your app grows
   // Profile: {userId: string};
   // Settings: undefined;
