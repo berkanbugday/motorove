@@ -200,7 +200,9 @@ export class GroupsService {
       ...updateData,
       logo: logoUrl,
       cover: coverUrl,
-      updatedById: userId, // Update the updatedBy field
+      updatedBy: {
+        connect: { id: userId },
+      },
     };
 
     if (updateData.city && 'id' in updateData.city) {
@@ -215,16 +217,17 @@ export class GroupsService {
 
     if (updateData.tags && Array.isArray(updateData.tags)) {
       processedUpdateData.tags = {
-        connect: updateData.tags
-          .map((tag) => ({
-            id: 'id' in tag ? tag.id : undefined,
-          }))
-          .filter((item) => item.id !== undefined),
+        disconnect: group.tags.map((tag) => ({
+          id: tag.id,
+        })),
+        connect: updateData.tags.map((tag) => ({
+          id: tag.id,
+        })),
       };
     }
 
     // Update the group
-    return await this.prisma.group.update({
+    await this.prisma.group.update({
       where: { id },
       data: processedUpdateData,
       include: {
@@ -238,6 +241,8 @@ export class GroupsService {
         },
       },
     });
+
+    return await this.findOne(id, userId, authToken);
   }
 
   async findAll(userId: string, authToken?: string) {
@@ -251,7 +256,11 @@ export class GroupsService {
       include: {
         createdBy: true,
         city: true,
-        tags: true,
+        tags: {
+          orderBy: {
+            value: 'asc',
+          },
+        },
         memberships: {
           include: {
             user: true,
@@ -300,7 +309,11 @@ export class GroupsService {
       include: {
         createdBy: true,
         city: true,
-        tags: true,
+        tags: {
+          orderBy: {
+            value: 'asc',
+          },
+        },
         memberships: {
           include: {
             user: true,
@@ -366,7 +379,11 @@ export class GroupsService {
       include: {
         createdBy: true,
         city: true,
-        tags: true,
+        tags: {
+          orderBy: {
+            value: 'asc',
+          },
+        },
         memberships: {
           include: {
             user: true,

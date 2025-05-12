@@ -97,6 +97,7 @@ export const EditGroupScreen: React.FC = () => {
   } = useForm<UpdateGroupFormValues>({
     resolver: zodResolver(updateGroupSchema),
     defaultValues: {
+      id: '',
       name: '',
       description: '',
       logo: null,
@@ -132,6 +133,7 @@ export const EditGroupScreen: React.FC = () => {
     try {
       // Update form values in one go
       reset({
+        id: groupId,
         name: group.name,
         description: group.description,
         logo: group.logo,
@@ -309,7 +311,7 @@ export const EditGroupScreen: React.FC = () => {
     try {
       // Prepare form data for the group service
       const updateGroupInput: UpdateGroupInput = {
-        id: groupId,
+        id: data.id,
         name: data.name,
         description: data.description,
         logo: data.logo,
@@ -331,6 +333,7 @@ export const EditGroupScreen: React.FC = () => {
       // Call the group service updateGroup method
       await updateGroup(updateGroupInput);
     } catch (error) {
+      console.log('error', error);
       loggingService.error('Error in onSubmit:', error);
       showToast({
         type: 'error',

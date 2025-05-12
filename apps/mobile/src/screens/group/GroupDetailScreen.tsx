@@ -344,7 +344,7 @@ export const GroupDetailScreen = () => {
       />
 
       {loading ? (
-        <View style={styles.loadingContainer}>
+        <View style={[styles.container, styles.centerContent]}>
           <ActivityIndicator size="large" color={colors.primary.main} />
         </View>
       ) : (
@@ -398,7 +398,10 @@ export const GroupDetailScreen = () => {
               <View style={styles.infoRow}>
                 <Icon name="users-filled" size={18} />
                 <Typography style={styles.infoText}>
-                  {group?.memberships?.length || 0} members
+                  {group?.memberships?.length || 0}
+                  {group?.membersCapacity
+                    ? ` / ${group?.membersCapacity}`
+                    : ' members'}
                 </Typography>
                 <View style={styles.dot} />
                 <View style={styles.lockContainer}>
@@ -483,6 +486,10 @@ export const GroupDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   topHeaderBar: {
     borderBottomRightRadius: 0,
