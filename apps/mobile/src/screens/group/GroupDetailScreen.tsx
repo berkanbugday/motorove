@@ -166,13 +166,7 @@ export const GroupDetailScreen = () => {
 
   const logoMarginTop = scrollY.interpolate({
     inputRange: [0, 100],
-    outputRange: [-50, -30],
-    extrapolate: 'clamp',
-  });
-
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 60, 100],
-    outputRange: [1, 0.6, 0.3],
+    outputRange: [-50, -100],
     extrapolate: 'clamp',
   });
 
@@ -290,7 +284,6 @@ export const GroupDetailScreen = () => {
           styles.imageContainer,
           {
             height: headerHeight,
-            opacity: headerOpacity,
           },
         ]}>
         <Image
@@ -299,25 +292,28 @@ export const GroupDetailScreen = () => {
           resizeMode="cover"
         />
         <View style={styles.overlay} />
-        <Animated.View
-          style={[
-            styles.logoContainer,
-            {
-              marginTop: logoMarginTop,
-            },
-          ]}>
-          <Animated.Image
-            source={{uri: group?.logo || ''}}
-            style={[
-              styles.logo,
-              {
-                width: logoSize,
-                height: logoSize,
-              },
-            ]}
-          />
-        </Animated.View>
       </Animated.View>
+
+      {/* Logo rendered outside the cover container for proper layering */}
+      <Animated.View
+        style={[
+          styles.logoWrapper,
+          {
+            transform: [{translateY: logoMarginTop}],
+          },
+        ]}>
+        <Animated.Image
+          source={{uri: group?.logo || ''}}
+          style={[
+            styles.logo,
+            {
+              width: logoSize,
+              height: logoSize,
+            },
+          ]}
+        />
+      </Animated.View>
+
       <Animated.ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -411,6 +407,7 @@ const styles = StyleSheet.create({
   topHeaderBar: {
     borderBottomRightRadius: 0,
     borderBottomLeftRadius: 0,
+    zIndex: 5,
   },
   imageContainer: {
     position: 'absolute',
@@ -418,6 +415,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 150,
+    zIndex: 1,
   },
   cover: {
     width: '100%',
@@ -432,20 +430,25 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.3)', // Semi-transparent overlay
   },
-  logoContainer: {
-    marginTop: -50,
+  logoWrapper: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 150, // Position from top
+    alignItems: 'center',
+    zIndex: 20, // Higher zIndex to ensure it's above other elements
     ...getShadow('medium'),
-    zIndex: 1,
   },
   logo: {
     width: 100,
     height: 100,
-    alignSelf: 'center',
     borderRadius: radius.round,
+    backgroundColor: colors.neutral.white, // Add background color to ensure opacity
   },
   scrollView: {
     flex: 1,
     paddingTop: 125,
+    zIndex: 2,
   },
   infoContainer: {
     alignItems: 'center',
