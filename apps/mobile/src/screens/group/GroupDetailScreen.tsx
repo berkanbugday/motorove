@@ -301,8 +301,8 @@ export const GroupDetailScreen = () => {
 
       if (!isAdmin || !isMember) {
         items.push({
-          id: 'join_group',
-          label: 'Join Group',
+          id: group?.privacy === 'PUBLIC' ? 'join_group' : 'request_to_join',
+          label: group?.privacy === 'PUBLIC' ? 'Join Group' : 'Request to Join',
           icon: 'user-plus-filled',
         });
       }
@@ -390,7 +390,7 @@ export const GroupDetailScreen = () => {
           activeOpacity={0.8}>
           <View style={styles.memberLeftContent}>
             <Image
-              source={{uri: item.user.avatar || 'https://picsum.photos/100'}}
+              source={{uri: item.user.avatar}}
               style={styles.memberAvatar}
             />
             <View style={styles.memberInfo}>
@@ -421,6 +421,7 @@ export const GroupDetailScreen = () => {
               <>
                 <Button
                   iconName="user-gear"
+                  iconSize={20}
                   variant="secondary"
                   shape="circle"
                   onPress={() =>
@@ -431,6 +432,7 @@ export const GroupDetailScreen = () => {
                 />
                 <Button
                   iconName="user-slash-filled"
+                  iconSize={20}
                   variant="primary"
                   shape="circle"
                   onPress={() =>
@@ -547,7 +549,7 @@ export const GroupDetailScreen = () => {
                     size={18}
                   />
                   <Typography style={styles.infoText}>
-                    {group?.privacy === 'PUBLIC' ? 'Public' : 'Private'} Group
+                    {toPascalCase(group?.privacy || '')} Group
                   </Typography>
                 </View>
               </View>
@@ -625,7 +627,7 @@ export const GroupDetailScreen = () => {
               </View>
               <Button
                 iconName="user-plus-filled"
-                iconSize={22}
+                iconSize={20}
                 variant="dark"
                 shape="circle"
               />
