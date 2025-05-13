@@ -4,6 +4,7 @@ import { GroupMembership } from './models/group-membership.model';
 import { AddGroupMemberInput } from './dto/add-group-member.input';
 import { ChangeMemberRoleInput } from './dto/change-member-role.input';
 import { RemoveGroupMemberInput } from './dto/remove-group-member.input';
+import { UpdateMembershipStatusInput } from './dto/update-membership-status.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
@@ -47,7 +48,7 @@ export class GroupMembershipsResolver {
   @UseGuards(JwtGuard)
   @Mutation(() => GroupMembership)
   addGroupMember(
-    @Args('input') addGroupMemberInput: AddGroupMemberInput,
+    @Args('addGroupMemberInput') addGroupMemberInput: AddGroupMemberInput,
     @Context() context: RequestContext,
   ) {
     const adminId: string = context.req.user.id;
@@ -61,7 +62,7 @@ export class GroupMembershipsResolver {
   @UseGuards(JwtGuard)
   @Mutation(() => GroupMembership)
   changeMemberRole(
-    @Args('input') changeMemberRoleInput: ChangeMemberRoleInput,
+    @Args('changeMemberRoleInput') changeMemberRoleInput: ChangeMemberRoleInput,
     @Context() context: RequestContext,
   ) {
     const adminId: string = context.req.user.id;
@@ -76,7 +77,8 @@ export class GroupMembershipsResolver {
   @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
   async removeGroupMember(
-    @Args('input') removeGroupMemberInput: RemoveGroupMemberInput,
+    @Args('removeGroupMemberInput')
+    removeGroupMemberInput: RemoveGroupMemberInput,
     @Context() context: RequestContext,
   ) {
     const adminId: string = context.req.user.id;
@@ -86,5 +88,21 @@ export class GroupMembershipsResolver {
       adminId,
     );
     return !!result;
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => GroupMembership)
+  updateMembershipStatus(
+    @Args('updateMembershipStatusInput')
+    updateStatusInput: UpdateMembershipStatusInput,
+    @Context() context: RequestContext,
+  ) {
+    const adminId: string = context.req.user.id;
+    return this.groupMembershipsService.updateMembershipStatus(
+      updateStatusInput.groupId,
+      updateStatusInput.memberId,
+      updateStatusInput.status,
+      adminId,
+    );
   }
 }

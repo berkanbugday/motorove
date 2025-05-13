@@ -9,6 +9,7 @@ import { CreateGroupInput } from './dto/create-group.input';
 import { UpdateGroupInput } from './dto/update-group.input';
 import { StorageService } from '../core/storage/storage.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
+import { GroupMembershipStatus } from 'src/enums/models/group-membership-status.enum';
 
 @Injectable()
 export class GroupsService {
@@ -124,6 +125,7 @@ export class GroupsService {
             connect: { id: userId },
           },
           role: GroupMemberRole.ADMIN, // Creator is automatically an admin
+          status: GroupMembershipStatus.APPROVED,
           createdBy: {
             connect: { id: userId },
           },
@@ -139,7 +141,14 @@ export class GroupsService {
           createdBy: true,
           city: true,
           tags: true,
-          memberships: true,
+          memberships: {
+            where: {
+              status: GroupMembershipStatus.APPROVED,
+            },
+            include: {
+              user: true,
+            },
+          },
         },
       });
     });
@@ -235,6 +244,9 @@ export class GroupsService {
         city: true,
         tags: true,
         memberships: {
+          where: {
+            status: GroupMembershipStatus.APPROVED,
+          },
           include: {
             user: true,
           },
@@ -249,7 +261,7 @@ export class GroupsService {
     const groups = await this.prisma.group.findMany({
       where: {
         memberships: {
-          none: { userId },
+          none: { userId, status: GroupMembershipStatus.APPROVED },
         },
         isActive: true,
       },
@@ -262,6 +274,9 @@ export class GroupsService {
           },
         },
         memberships: {
+          where: {
+            status: GroupMembershipStatus.APPROVED,
+          },
           include: {
             user: true,
           },
@@ -315,6 +330,9 @@ export class GroupsService {
           },
         },
         memberships: {
+          where: {
+            status: GroupMembershipStatus.APPROVED,
+          },
           include: {
             user: true,
           },
@@ -351,7 +369,9 @@ export class GroupsService {
 
     // Check if the user is a member of the group
     const membership = group.memberships.find(
-      (membership) => membership.user.id === userId,
+      (membership) =>
+        membership.user.id === userId &&
+        membership.status === GroupMembershipStatus.APPROVED,
     );
 
     const isMember = !!membership;
@@ -372,6 +392,7 @@ export class GroupsService {
         memberships: {
           some: {
             userId,
+            status: GroupMembershipStatus.APPROVED,
           },
         },
         isActive: true,
@@ -385,6 +406,9 @@ export class GroupsService {
           },
         },
         memberships: {
+          where: {
+            status: GroupMembershipStatus.APPROVED,
+          },
           include: {
             user: true,
           },

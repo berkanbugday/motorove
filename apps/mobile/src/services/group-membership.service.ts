@@ -95,7 +95,6 @@ export const useRemoveGroupMember = () => {
 export interface AddGroupMemberInput {
   groupId: string;
   userId: string;
-  role: string;
 }
 
 export interface ChangeMemberRoleInput {
@@ -105,4 +104,9 @@ export interface ChangeMemberRoleInput {
 
 export interface RemoveGroupMemberInput {
   membershipId: string;
+}
+
+export interface UpdateGroupMembershipStatusInput {
+  membershipId: string;
+  status: string;
 }

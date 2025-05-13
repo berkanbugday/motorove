@@ -87,11 +87,18 @@ type GroupMembership {
   isActive: Boolean!
   joinedAt: DateTime!
   role: GroupMemberRole!
+  status: GroupMembershipStatus!
   updatedAt: DateTime!
   updatedBy: User!
   updatedById: String!
   user: User!
   userId: String!
+}
+
+enum GroupMembershipStatus {
+  APPROVED
+  PENDING
+  REJECTED
 }
 
 """Privacy levels for groups"""
@@ -111,14 +118,15 @@ input GroupTagInput {
 }
 
 type Mutation {
-  addGroupMember(input: AddGroupMemberInput!): GroupMembership!
-  changeMemberRole(input: ChangeMemberRoleInput!): GroupMembership!
+  addGroupMember(addGroupMemberInput: AddGroupMemberInput!): GroupMembership!
+  changeMemberRole(changeMemberRoleInput: ChangeMemberRoleInput!): GroupMembership!
   createGroup(createGroupInput: CreateGroupInput!): Group!
   refreshToken(token: String!): AuthResponse!
-  removeGroupMember(input: RemoveGroupMemberInput!): Boolean!
+  removeGroupMember(removeGroupMemberInput: RemoveGroupMemberInput!): Boolean!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
   updateGroup(updateGroupInput: UpdateGroupInput!): Group!
+  updateMembershipStatus(updateMembershipStatusInput: UpdateMembershipStatusInput!): GroupMembership!
 }
 
 type Query {
@@ -126,6 +134,7 @@ type Query {
   city(id: ID!): City
   createdGroups: [Group!]!
   getGroupMemberRoles: [EnumItem!]!
+  getGroupMembershipStatuses: [EnumItem!]!
   getGroupPrivacyOptions: [EnumItem!]!
   group(id: String!): Group!
   groupMembers(groupId: String!): [GroupMembership!]!
@@ -172,6 +181,12 @@ input UpdateGroupInput {
   name: String
   privacy: GroupPrivacy
   tags: [GroupTagInput!]
+}
+
+input UpdateMembershipStatusInput {
+  groupId: String!
+  memberId: String!
+  status: GroupMembershipStatus!
 }
 
 type User {

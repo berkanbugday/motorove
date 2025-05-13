@@ -12,6 +12,7 @@ export const styles = StyleSheet.create({
     borderRightWidth: 5,
     borderColor: colors.neutral.black,
     alignItems: 'center',
+    marginVertical: spacing.xs,
   },
 
   // Date section styles
@@ -24,8 +25,6 @@ export const styles = StyleSheet.create({
     paddingLeft: spacing.md,
     paddingTop: spacing.xs,
     paddingBottom: spacing.xs,
-    // width: 70,
-    // height: 70,
     left: spacing.sm,
   },
   // Content section styles
@@ -58,6 +57,19 @@ export const styles = StyleSheet.create({
   },
   participantsText: {
     marginLeft: spacing.xs,
+  },
+
+  // Badge styles
+  badgeContainer: {
+    position: 'absolute',
+    top: -spacing.sm,
+    backgroundColor: colors.primary.main,
+    borderRadius: radius.round,
+    paddingHorizontal: spacing.sm,
+    zIndex: 10,
+  },
+  badgeText: {
+    fontSize: 10,
   },
 
   // Chat button styles

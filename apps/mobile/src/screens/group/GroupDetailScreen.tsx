@@ -36,7 +36,10 @@ import {loggingService} from '@services/logging.service';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {toPascalCase} from '@utils/stringUtils';
 import GroupEventBanner from '@components/GroupEventBanner/GroupEventBanner';
-import {PageIndicator} from '@components';
+import {PageIndicator, showToast} from '@components';
+import {useAuth} from '@contexts';
+import {useAddGroupMember} from '@services/group-membership.service';
+import Dialog, {DialogRef} from '@components/Dialog';
 
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
@@ -175,7 +178,7 @@ const upcomingEvents: EventItem[] = [
     month: 'JUN',
     time: '10:00',
     title: 'Sunday Breakfast Ride',
-    infoText: 'You are Going',
+    infoText: "You're Going",
     location: 'Istanbul',
     participantCount: 10,
     membersCapacity: 34,
@@ -214,6 +217,7 @@ export const GroupDetailScreen = () => {
   const membersBottomSheetRef = useRef<BottomSheetRef>(null);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const eventsListRef = useRef<FlatList>(null);
+  const leaveGroupDialogRef = useRef<DialogRef>(null);
 
   // Animation value for member right content
   const memberActionsAnim = useRef(new Animated.Value(-100)).current;
@@ -241,10 +245,13 @@ export const GroupDetailScreen = () => {
   });
 
   // Use the useGetGroup hook to fetch the group data
-  const {group, loading} = useGetGroup(groupId);
+  const {group, loading, refetch} = useGetGroup(groupId);
 
   // Fetch group members
   const members = group?.memberships || [];
+
+  const {user} = useAuth();
+  const [addGroupMember] = useAddGroupMember();
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -351,12 +358,10 @@ export const GroupDetailScreen = () => {
           icon: 'users-slash-filled',
           isHighlighted: true,
         });
-      }
-
-      if (!isAdmin || !isMember) {
+      } else {
         items.push({
-          id: group?.privacy === 'PUBLIC' ? 'join_group' : 'request_to_join',
-          label: group?.privacy === 'PUBLIC' ? 'Join Group' : 'Request to Join',
+          id: 'join_group',
+          label: 'Join Group',
           icon: 'user-plus-filled',
         });
       }
@@ -365,6 +370,108 @@ export const GroupDetailScreen = () => {
     },
     [],
   );
+
+  const handleJoinGroup = useCallback(async () => {
+    if (
+      group?.membersCapacity &&
+      group?.memberships?.length >= group?.membersCapacity
+    ) {
+      loggingService.info(`Group: ${groupId} is full. Cannot join.`);
+      showToast({
+        text1: 'Warning',
+        text2: 'Group is full. Cannot join.',
+        type: 'warning',
+      });
+      return;
+    } else {
+      try {
+        if (user && user.id) {
+          addGroupMember({
+            variables: {
+              input: {
+                groupId: groupId,
+                userId: user.id,
+              },
+            },
+            onCompleted: () => {
+              if (group?.privacy === 'PUBLIC') {
+                loggingService.info(`Successfully joined group: ${groupId}`);
+                showToast({
+                  text1: 'Success',
+                  text2: 'You have successfully joined the group!',
+                  type: 'success',
+                });
+              } else {
+                loggingService.info(
+                  `Successfully requested to join group: ${groupId}`,
+                );
+                showToast({
+                  text1: 'Success',
+                  text2: 'Request sent. Please wait for approval.',
+                  type: 'success',
+                });
+              }
+              // Refresh the group data
+              refetch && refetch();
+            },
+            onError: error => {
+              loggingService.error(`Error joining group: ${groupId}`, error);
+              showToast({
+                text1: 'Error',
+                text2: 'Failed to join the group. Please try again.',
+                type: 'error',
+              });
+            },
+          });
+        } else {
+          loggingService.error('Cannot join group: User not authenticated');
+          showToast({
+            text1: 'Error',
+            text2: 'You must be logged in to join a group.',
+            type: 'error',
+          });
+        }
+      } catch (error) {
+        loggingService.error(`Error joining group: ${groupId}`, error);
+        showToast({
+          text1: 'Error',
+          text2: 'Failed to join the group. Please try again.',
+          type: 'error',
+        });
+      }
+    }
+  }, [
+    addGroupMember,
+    groupId,
+    group?.membersCapacity,
+    group?.memberships,
+    group?.privacy,
+    refetch,
+    user?.id,
+  ]);
+
+  const confirmLeaveGroup = useCallback(async () => {
+    try {
+      loggingService.info(`Leaving group: ${groupId}`);
+      // TODO: Implement the actual API call to leave the group
+      showToast({
+        text1: 'Success',
+        text2: 'You have left the group successfully',
+        type: 'success',
+      });
+      // Refresh group data after leaving
+      refetch && refetch();
+      // Navigate back if needed
+      navigation.goBack();
+    } catch (error) {
+      loggingService.error(`Error leaving group: ${groupId}`, error);
+      showToast({
+        text1: 'Error',
+        text2: 'Failed to leave the group. Please try again.',
+        type: 'error',
+      });
+    }
+  }, [groupId, refetch, navigation]);
 
   // Handle dropdown item select
   const handleDropdownMenuItemSelect = useCallback((item: DropdownMenuItem) => {
@@ -376,8 +483,10 @@ export const GroupDetailScreen = () => {
         membersBottomSheetRef.current?.open('full');
         break;
       case 'leave_group':
+        leaveGroupDialogRef.current?.open();
         break;
       case 'join_group':
+        handleJoinGroup();
         break;
       default:
         loggingService.info(
@@ -463,7 +572,8 @@ export const GroupDetailScreen = () => {
         month={item.month}
         time={item.time}
         title={item.title}
-        infoText={item.infoText}
+        // infoText={item.infoText}
+        badgeText={item.infoText}
         infoTextStyle={styles.eventBannerInfoText}
         location={item.location}
         participantCount={item.participantCount}
@@ -524,58 +634,56 @@ export const GroupDetailScreen = () => {
               />
             </View>
           </View>
-          <Animated.View
-            style={[
-              styles.memberRightContent,
-              {
-                transform: [{translateX: memberActionsAnim}],
-                opacity: memberActionsAnim.interpolate({
-                  inputRange: [-100, 0],
-                  outputRange: [0, 1],
-                }),
-              },
-            ]}>
-            {_isAdmin && (
-              <>
-                <Button
-                  iconName="user-gear"
-                  iconSize={20}
-                  variant="secondary"
-                  shape="circle"
-                  onPress={() =>
-                    navigateToScreen(navigation, 'UserProfile', {
-                      userId: item.user.id,
-                    })
-                  }
-                />
-                <Button
-                  iconName="user-slash-filled"
-                  iconSize={20}
-                  variant="primary"
-                  shape="circle"
-                  onPress={() =>
-                    navigateToScreen(navigation, 'UserProfile', {
-                      userId: item.user.id,
-                    })
-                  }
-                />
-              </>
-            )}
-          </Animated.View>
-          <Animated.View
-            style={[
-              {
-                transform: [{translateX: viewProfileAnim}],
-                opacity: viewProfileAnim.interpolate({
-                  inputRange: [-70, 1],
-                  outputRange: [1, 0],
-                }),
-              },
-            ]}>
-            {_isMember && (
+          {_isAdmin && (
+            <Animated.View
+              style={[
+                styles.memberRightContent,
+                {
+                  transform: [{translateX: memberActionsAnim}],
+                  opacity: memberActionsAnim.interpolate({
+                    inputRange: [-100, 0],
+                    outputRange: [0, 1],
+                  }),
+                },
+              ]}>
+              <Button
+                iconName="user-gear"
+                iconSize={20}
+                variant="secondary"
+                shape="circle"
+                onPress={() =>
+                  navigateToScreen(navigation, 'UserProfile', {
+                    userId: item.user.id,
+                  })
+                }
+              />
+              <Button
+                iconName="user-slash-filled"
+                iconSize={20}
+                variant="primary"
+                shape="circle"
+                onPress={() =>
+                  navigateToScreen(navigation, 'UserProfile', {
+                    userId: item.user.id,
+                  })
+                }
+              />
+            </Animated.View>
+          )}
+          {_isMember && (
+            <Animated.View
+              style={[
+                _isAdmin && {
+                  transform: [{translateX: viewProfileAnim}],
+                  opacity: viewProfileAnim.interpolate({
+                    inputRange: [-70, 1],
+                    outputRange: [1, 0],
+                  }),
+                },
+              ]}>
               <Button title="View Profile" variant="outline" shape="round" />
-            )}
-          </Animated.View>
+            </Animated.View>
+          )}
         </TouchableOpacity>
       );
     },
@@ -654,7 +762,8 @@ export const GroupDetailScreen = () => {
                   {group?.memberships?.length || 0}
                   {group?.membersCapacity
                     ? ` / ${group?.membersCapacity}`
-                    : ' members'}
+                    : ''}{' '}
+                  members
                 </Typography>
                 <View style={styles.dot} />
                 <View style={styles.lockContainer}>
@@ -801,6 +910,21 @@ export const GroupDetailScreen = () => {
               />
             )}
           </BottomSheet>
+          <Dialog
+            ref={leaveGroupDialogRef}
+            title="Leave Group"
+            message={`Are you sure you want to leave "${group?.name}"?`}
+            variant="confirm"
+            confirmButton={{
+              text: 'Leave',
+              variant: 'primary',
+              onPress: confirmLeaveGroup,
+            }}
+            cancelButton={{
+              text: 'Cancel',
+              variant: 'outline',
+            }}
+          />
         </>
       )}
     </View>

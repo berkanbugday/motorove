@@ -18,6 +18,21 @@ export const GROUP_MEMBERSHIP_FRAGMENT = gql`
   }
 `;
 
+export const ADD_GROUP_MEMBER_FRAGMENT = gql`
+  fragment AddGroupMemberFragment on GroupMembership {
+    groupId
+    userId
+  }
+`;
+
+// GroupMembershipStatus fragment
+export const GROUP_MEMBERSHIP_STATUS_FRAGMENT = gql`
+  fragment GroupMembershipStatusFragment on GroupMembership {
+    id
+    status
+  }
+`;
+
 // Get all group memberships
 export const GET_GROUP_MEMBERSHIPS = gql`
   query GetGroupMemberships {
@@ -66,11 +81,11 @@ export const GET_GROUP_MEMBERSHIP = gql`
 // Add a member to a group
 export const ADD_GROUP_MEMBER = gql`
   mutation AddGroupMember($input: AddGroupMemberInput!) {
-    addGroupMember(input: $input) {
-      ...GroupMembershipFragment
+    addGroupMember(addGroupMemberInput: $input) {
+      ...AddGroupMemberFragment
     }
   }
-  ${GROUP_MEMBERSHIP_FRAGMENT}
+  ${ADD_GROUP_MEMBER_FRAGMENT}
 `;
 
 // Change a member's role
@@ -88,4 +103,15 @@ export const REMOVE_GROUP_MEMBER = gql`
   mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
     removeGroupMember(input: $input)
   }
+`;
+
+export const UPDATE_GROUP_MEMBERSHIP_STATUS = gql`
+  mutation UpdateGroupMembershipStatus(
+    $input: UpdateGroupMembershipStatusInput!
+  ) {
+    updateGroupMembershipStatus(input: $input) {
+      ...GroupMembershipStatusFragment
+    }
+  }
+  ${GROUP_MEMBERSHIP_STATUS_FRAGMENT}
 `;

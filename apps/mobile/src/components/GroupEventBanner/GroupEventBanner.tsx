@@ -52,6 +52,11 @@ export interface GroupEventBannerProps {
   membersCapacity?: number;
 
   /**
+   * Badge text to display on the banner (e.g., "UPCOMING", "CANCELLED")
+   */
+  badgeText?: string;
+
+  /**
    * Function called when the chat button is pressed
    */
   onChatPress?: () => void;
@@ -85,6 +90,16 @@ export interface GroupEventBannerProps {
    * Additional styles for the info text
    */
   infoTextStyle?: StyleProp<TextStyle>;
+
+  /**
+   * Additional styles for the badge container
+   */
+  badgeStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Additional styles for the badge text
+   */
+  badgeTextStyle?: StyleProp<TextStyle>;
 }
 
 /**
@@ -101,15 +116,29 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
   location,
   participantCount,
   membersCapacity,
+  badgeText,
   onChatPress,
   style,
   contentStyle,
   dateContainerStyle,
   titleStyle,
   infoTextStyle,
+  badgeStyle,
+  badgeTextStyle,
 }) => {
   return (
     <View style={[styles.container, style]}>
+      {badgeText && (
+        <View style={[styles.badgeContainer, badgeStyle]}>
+          <Caption
+            weight="bold"
+            align="center"
+            color={colors.neutral.white}
+            style={[styles.badgeText, badgeTextStyle]}>
+            {badgeText}
+          </Caption>
+        </View>
+      )}
       {/* Date and Time Container */}
       <View style={[styles.dateContainer, dateContainerStyle]}>
         <Title weight="bold">{day}</Title>
@@ -162,7 +191,7 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
           style={styles.chatButton}
           disabled={!onChatPress}
           title="Chat"
-          onPress={() => onChatPress}
+          onPress={onChatPress}
         />
       </View>
     </View>

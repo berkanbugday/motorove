@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
+import { GroupMembershipStatus } from '../enums/models/group-membership-status.enum';
 
 @Injectable()
 export class GroupMembershipsService {
@@ -69,18 +70,18 @@ export class GroupMembershipsService {
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);
     }
-    if (group.privacy === GroupPrivacy.PRIVATE) {
-      // Check if the admin user has admin rights
-      const adminMembership = group.memberships.find(
-        (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
-      );
+    // if (group.privacy === GroupPrivacy.PRIVATE) {
+    //   // Check if the admin user has admin rights
+    //   const adminMembership = group.memberships.find(
+    //     (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
+    //   );
 
-      if (!adminMembership) {
-        throw new ForbiddenException(
-          'You are not authorized to add members to this group',
-        );
-      }
-    }
+    //   if (!adminMembership) {
+    //     throw new ForbiddenException(
+    //       'You are not authorized to add members to this group',
+    //     );
+    //   }
+    // }
 
     // Check if the user is already a member
     const existingMembership = group.memberships.find(
@@ -101,6 +102,10 @@ export class GroupMembershipsService {
           connect: { id: userId },
         },
         role: GroupMemberRole.MEMBER,
+        status:
+          group.privacy === GroupPrivacy.PRIVATE
+            ? GroupMembershipStatus.PENDING
+            : GroupMembershipStatus.APPROVED,
         createdBy: {
           connect: { id: adminId },
         },
@@ -238,6 +243,67 @@ export class GroupMembershipsService {
           groupId,
           userId: memberId,
         },
+      },
+    });
+  }
+
+  async updateMembershipStatus(
+    groupId: string,
+    memberId: string,
+    newStatus: GroupMembershipStatus,
+    adminId: string,
+  ) {
+    // Check if the group exists
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId, isActive: true },
+      include: {
+        memberships: true,
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException(`Group with ID ${groupId} not found`);
+    }
+
+    // Check if the admin user has admin rights
+    const adminMembership = group.memberships.find(
+      (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
+    );
+
+    if (!adminMembership) {
+      throw new ForbiddenException(
+        'You are not authorized to update membership status in this group',
+      );
+    }
+
+    // Check if the membership exists
+    const membershipToUpdate = group.memberships.find(
+      (m) => m.userId === memberId,
+    );
+
+    if (!membershipToUpdate) {
+      throw new NotFoundException(
+        `Member with ID ${memberId} not found in this group`,
+      );
+    }
+
+    // Update the membership status
+    return this.prisma.groupMembership.update({
+      where: {
+        groupId_userId: {
+          groupId,
+          userId: memberId,
+        },
+      },
+      data: {
+        status: newStatus,
+        updatedBy: {
+          connect: { id: adminId },
+        },
+      },
+      include: {
+        group: true,
+        user: true,
       },
     });
   }

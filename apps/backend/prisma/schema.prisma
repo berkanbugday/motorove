@@ -24,6 +24,12 @@ enum GroupMemberRole {
   MEMBER
 }
 
+enum GroupMembershipStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // Models
 model User {
   id         String   @id @default(uuid())
@@ -87,13 +93,14 @@ model Group {
 }
 
 model GroupMembership {
-  id       String          @id @default(uuid())
+  id       String               @id @default(uuid())
   groupId  String
-  group    Group           @relation(fields: [groupId], references: [id])
+  group    Group                @relation(fields: [groupId], references: [id])
   userId   String
-  user     User            @relation("UserGroupMembership", fields: [userId], references: [id])
+  user     User                 @relation("UserGroupMembership", fields: [userId], references: [id])
   role     GroupMemberRole
-  joinedAt DateTime        @default(now())
+  status   GroupMembershipStatus @default(PENDING)
+  joinedAt DateTime             @default(now())
 
   // Base model fields
   createdById String
