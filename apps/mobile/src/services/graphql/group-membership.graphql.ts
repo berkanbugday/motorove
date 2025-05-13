@@ -25,6 +25,13 @@ export const ADD_GROUP_MEMBER_FRAGMENT = gql`
   }
 `;
 
+export const REMOVE_GROUP_MEMBER_FRAGMENT = gql`
+  fragment RemoveGroupMemberFragment on GroupMembership {
+    ...AddGroupMemberFragment
+  }
+  ${ADD_GROUP_MEMBER_FRAGMENT}
+`;
+
 export const CHANGE_MEMBER_ROLE_FRAGMENT = gql`
   fragment ChangeMemberRoleFragment on GroupMembership {
     groupId
@@ -109,8 +116,11 @@ export const CHANGE_MEMBER_ROLE = gql`
 // Remove a member from a group
 export const REMOVE_GROUP_MEMBER = gql`
   mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
-    removeGroupMember(input: $input)
+    removeGroupMember(removeGroupMemberInput: $input) {
+      ...RemoveGroupMemberFragment
+    }
   }
+  ${REMOVE_GROUP_MEMBER_FRAGMENT}
 `;
 
 export const UPDATE_GROUP_MEMBERSHIP_STATUS = gql`

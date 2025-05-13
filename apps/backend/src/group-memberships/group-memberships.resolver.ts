@@ -84,7 +84,7 @@ export class GroupMembershipsResolver {
     const adminId: string = context.req.user.id;
     const result = await this.groupMembershipsService.removeMember(
       removeGroupMemberInput.groupId,
-      removeGroupMemberInput.memberId,
+      removeGroupMemberInput.userId,
       adminId,
     );
     return !!result;
@@ -100,7 +100,7 @@ export class GroupMembershipsResolver {
     const adminId: string = context.req.user.id;
     return this.groupMembershipsService.updateMembershipStatus(
       updateStatusInput.groupId,
-      updateStatusInput.memberId,
+      updateStatusInput.userId,
       updateStatusInput.status,
       adminId,
     );

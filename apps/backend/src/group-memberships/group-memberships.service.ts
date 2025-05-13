@@ -181,7 +181,7 @@ export class GroupMembershipsService {
     });
   }
 
-  async removeMember(groupId: string, memberId: string, adminId: string) {
+  async removeMember(groupId: string, userId: string, adminId: string) {
     // Check if the group exists
     const group = await this.prisma.group.findUnique({
       where: { id: groupId, isActive: true },
@@ -196,9 +196,9 @@ export class GroupMembershipsService {
     }
 
     // If the user is removing themselves, allow it
-    if (memberId === adminId) {
+    if (userId === adminId) {
       // Check if the user is the creator - creators can't leave their own groups
-      if (group.createdBy.id === memberId) {
+      if (group.createdBy.id === userId) {
         throw new ForbiddenException(
           'Group creators cannot leave their own groups. Transfer ownership first or delete the group.',
         );
@@ -208,7 +208,7 @@ export class GroupMembershipsService {
         where: {
           groupId_userId: {
             groupId,
-            userId: memberId,
+            userId,
           },
         },
       });
@@ -227,12 +227,12 @@ export class GroupMembershipsService {
 
     // Check if the member exists
     const membershipToDelete = group.memberships.find(
-      (m) => m.userId === memberId,
+      (m) => m.userId === userId,
     );
 
     if (!membershipToDelete) {
       throw new NotFoundException(
-        `Member with ID ${memberId} not found in this group`,
+        `Member with ID ${userId} not found in this group`,
       );
     }
 
@@ -241,7 +241,7 @@ export class GroupMembershipsService {
       where: {
         groupId_userId: {
           groupId,
-          userId: memberId,
+          userId,
         },
       },
     });
@@ -249,7 +249,7 @@ export class GroupMembershipsService {
 
   async updateMembershipStatus(
     groupId: string,
-    memberId: string,
+    userId: string,
     newStatus: GroupMembershipStatus,
     adminId: string,
   ) {
@@ -278,12 +278,12 @@ export class GroupMembershipsService {
 
     // Check if the membership exists
     const membershipToUpdate = group.memberships.find(
-      (m) => m.userId === memberId,
+      (m) => m.userId === userId,
     );
 
     if (!membershipToUpdate) {
       throw new NotFoundException(
-        `Member with ID ${memberId} not found in this group`,
+        `Member with ID ${userId} not found in this group`,
       );
     }
 
@@ -292,7 +292,7 @@ export class GroupMembershipsService {
       where: {
         groupId_userId: {
           groupId,
-          userId: memberId,
+          userId,
         },
       },
       data: {

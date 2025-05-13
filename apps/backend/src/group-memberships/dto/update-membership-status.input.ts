@@ -7,7 +7,7 @@ export class UpdateMembershipStatusInput {
   groupId: string;
 
   @Field()
-  memberId: string;
+  userId: string;
 
   @Field(() => GroupMembershipStatus)
   status: GroupMembershipStatus;

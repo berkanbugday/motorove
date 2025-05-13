@@ -150,7 +150,7 @@ type Query {
 
 input RemoveGroupMemberInput {
   groupId: String!
-  memberId: String!
+  userId: String!
 }
 
 type Session {
@@ -185,8 +185,8 @@ input UpdateGroupInput {
 
 input UpdateMembershipStatusInput {
   groupId: String!
-  memberId: String!
   status: GroupMembershipStatus!
+  userId: String!
 }
 
 type User {

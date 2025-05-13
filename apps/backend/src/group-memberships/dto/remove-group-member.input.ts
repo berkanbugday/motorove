@@ -11,5 +11,5 @@ export class RemoveGroupMemberInput {
   @Field()
   @IsUUID()
   @IsNotEmpty()
-  memberId: string;
+  userId: string;
 }
