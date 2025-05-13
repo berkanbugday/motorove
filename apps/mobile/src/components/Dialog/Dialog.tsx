@@ -263,14 +263,16 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
           return (
             <>
               {title && (
-                <Typography variant="title" style={[styles.title, titleStyle]}>
+                <Typography
+                  variant="subtitle"
+                  style={[styles.title, titleStyle]}>
                   {title}
                 </Typography>
               )}
 
               {message && (
                 <Typography
-                  variant="body"
+                  variant="bodySmall"
                   style={[styles.message, messageStyle]}>
                   {message}
                 </Typography>
@@ -324,6 +326,7 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
                     variant={cancelButton.variant || 'outline'}
                     loading={cancelButton.loading}
                     disabled={cancelButton.disabled}
+                    shape="round"
                     style={styles.button}
                     textStyle={cancelButton.textStyle as TextStyle}
                   />
@@ -338,6 +341,7 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
                     variant={confirmButton.variant || 'primary'}
                     loading={confirmButton.loading}
                     disabled={confirmButton.disabled}
+                    shape="round"
                     style={styles.button}
                     textStyle={confirmButton.textStyle as TextStyle}
                   />

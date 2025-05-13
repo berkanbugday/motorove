@@ -220,14 +220,14 @@ const MemberItem = React.memo(
     item,
     isAdmin,
     isMember,
-    navigation,
     onChangeRole,
+    onRemoveMember,
   }: {
     item: any;
     isAdmin?: boolean;
     isMember?: boolean;
-    navigation: MainScreenNavigationProp<'GroupDetail'>;
     onChangeRole?: (member: any) => void;
+    onRemoveMember?: (member: any) => void;
   }) => {
     // Animation state and refs for this specific row
     const [isActive, setIsActive] = useState(false);
@@ -318,11 +318,7 @@ const MemberItem = React.memo(
               iconSize={20}
               variant="primary"
               shape="circle"
-              onPress={() =>
-                navigateToScreen(navigation, 'UserProfile', {
-                  userId: item.user.id,
-                })
-              }
+              onPress={() => onRemoveMember && onRemoveMember(item)}
             />
           </Animated.View>
         )}
@@ -361,9 +357,11 @@ export const GroupDetailScreen = () => {
   const eventsListRef = useRef<FlatList>(null);
   const leaveGroupDialogRef = useRef<DialogRef>(null);
   const changeRoleDialogRef = useRef<DialogRef>(null);
+  const removeMemberDialogRef = useRef<DialogRef>(null);
 
   // State for selected member and role
   const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [memberToRemove, setMemberToRemove] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<EnumDropdownItem | null>(
     null,
   );
@@ -409,6 +407,7 @@ export const GroupDetailScreen = () => {
   const {user} = useAuth();
   const [addGroupMember] = useAddGroupMember();
   const [changeMemberRole] = useChangeMemberRole();
+
   // Handle opening the change role dialog
   const handleOpenChangeRoleDialog = useCallback(
     (member: any) => {
@@ -422,6 +421,44 @@ export const GroupDetailScreen = () => {
     },
     [memberRoles],
   );
+
+  // Handle opening the remove member dialog
+  const handleOpenRemoveMemberDialog = useCallback((member: any) => {
+    setMemberToRemove(member);
+    removeMemberDialogRef.current?.open();
+  }, []);
+
+  // Handle member removal
+  const handleRemoveMember = useCallback(async () => {
+    if (!memberToRemove) {
+      return;
+    }
+
+    try {
+      // TODO: Replace with actual API call to remove member
+      loggingService.info(
+        `Removing member ${memberToRemove.user.firstName} ${memberToRemove.user.lastName} from group ${groupId}`,
+      );
+
+      // Mock success for now
+      showToast({
+        text1: 'Success',
+        text2: 'Member removed successfully',
+        type: 'success',
+      });
+
+      // Close dialog and refresh data
+      removeMemberDialogRef.current?.close();
+      refetch && refetch();
+    } catch (error) {
+      loggingService.error('Error removing member', error);
+      showToast({
+        text1: 'Error',
+        text2: 'Failed to remove member',
+        type: 'error',
+      });
+    }
+  }, [memberToRemove, groupId, refetch]);
 
   // Handle role change
   const handleChangeRole = useCallback(async () => {
@@ -468,7 +505,7 @@ export const GroupDetailScreen = () => {
         type: 'error',
       });
     }
-  }, [selectedMember, selectedRole, refetch]);
+  }, [selectedMember, selectedRole, groupId, changeMemberRole, refetch]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -852,11 +889,16 @@ export const GroupDetailScreen = () => {
         item={item}
         isAdmin={group?.isAdmin}
         isMember={group?.isMember}
-        navigation={navigation}
         onChangeRole={handleOpenChangeRoleDialog}
+        onRemoveMember={handleOpenRemoveMemberDialog}
       />
     ),
-    [group?.isAdmin, group?.isMember, navigation, handleOpenChangeRoleDialog],
+    [
+      group?.isAdmin,
+      group?.isMember,
+      handleOpenChangeRoleDialog,
+      handleOpenRemoveMemberDialog,
+    ],
   );
 
   return (
@@ -1135,6 +1177,26 @@ export const GroupDetailScreen = () => {
               </View>
             )}
           </Dialog>
+
+          <Dialog
+            ref={removeMemberDialogRef}
+            title="Remove Member"
+            message={
+              memberToRemove
+                ? `Are you sure you want to remove ${memberToRemove.user.firstName} ${memberToRemove.user.lastName} from the group?`
+                : 'Are you sure you want to remove this member?'
+            }
+            variant="confirm"
+            confirmButton={{
+              text: 'Remove',
+              variant: 'primary',
+              onPress: handleRemoveMember,
+            }}
+            cancelButton={{
+              text: 'Cancel',
+              variant: 'outline',
+            }}
+          />
         </>
       )}
     </View>
