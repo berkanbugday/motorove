@@ -205,6 +205,141 @@ const upcomingEvents: EventItem[] = [
   },
 ];
 
+// Member item component with its own animation
+const MemberItem = React.memo(
+  ({
+    item,
+    isAdmin,
+    isMember,
+    navigation,
+  }: {
+    item: any;
+    isAdmin?: boolean;
+    isMember?: boolean;
+    navigation: MainScreenNavigationProp<'GroupDetail'>;
+  }) => {
+    // Animation state and refs for this specific row
+    const [isActive, setIsActive] = useState(false);
+    const actionAnimValue = useRef(new Animated.Value(-100)).current;
+    const profileAnimValue = useRef(new Animated.Value(0)).current;
+
+    // Animation function
+    const animateActions = useCallback(
+      (show: boolean) => {
+        Animated.spring(actionAnimValue, {
+          toValue: show ? 0 : -100,
+          useNativeDriver: true,
+          friction: 8,
+          tension: 40,
+        }).start();
+
+        Animated.spring(profileAnimValue, {
+          toValue: show ? 100 : 0,
+          useNativeDriver: true,
+          friction: 8,
+          tension: 40,
+        }).start();
+      },
+      [actionAnimValue, profileAnimValue],
+    );
+
+    // Toggle animation state
+    const handlePress = useCallback(() => {
+      if (isAdmin) {
+        const newState = !isActive;
+        setIsActive(newState);
+        animateActions(newState);
+
+        // Auto-hide after 3 seconds if showing
+        if (newState) {
+          const timer = setTimeout(() => {
+            setIsActive(false);
+            animateActions(false);
+          }, 3000);
+          return () => clearTimeout(timer);
+        }
+      }
+    }, [isActive, isAdmin, animateActions]);
+
+    return (
+      <TouchableOpacity
+        style={styles.memberItem}
+        onPress={handlePress}
+        activeOpacity={0.8}>
+        <View style={styles.memberLeftContent}>
+          <Image source={{uri: item.user.avatar}} style={styles.memberAvatar} />
+          <View style={styles.memberInfo}>
+            <Typography weight="medium">
+              {item.user.firstName} {item.user.lastName}
+            </Typography>
+            <Chip
+              variant="filled"
+              color="primary"
+              size="small"
+              label={toPascalCase(item.role) || ''}
+              style={styles.memberRole}
+            />
+          </View>
+        </View>
+        {isAdmin && (
+          <Animated.View
+            style={[
+              styles.memberRightContent,
+              {
+                position: 'absolute',
+                right: 0,
+                transform: [{translateX: actionAnimValue}],
+                opacity: actionAnimValue.interpolate({
+                  inputRange: [-100, 0],
+                  outputRange: [0, 1],
+                }),
+              },
+            ]}>
+            <Button
+              iconName="user-gear"
+              iconSize={20}
+              variant="secondary"
+              shape="circle"
+              onPress={() =>
+                navigateToScreen(navigation, 'UserProfile', {
+                  userId: item.user.id,
+                })
+              }
+            />
+            <Button
+              iconName="user-slash-filled"
+              iconSize={20}
+              variant="primary"
+              shape="circle"
+              onPress={() =>
+                navigateToScreen(navigation, 'UserProfile', {
+                  userId: item.user.id,
+                })
+              }
+            />
+          </Animated.View>
+        )}
+        {isMember && (
+          <Animated.View
+            style={[
+              {
+                position: 'absolute',
+                right: 0,
+                transform: [{translateX: profileAnimValue}],
+                opacity: profileAnimValue.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: [1, 0],
+                }),
+              },
+            ]}>
+            <Button title="View Profile" variant="outline" shape="round" />
+          </Animated.View>
+        )}
+      </TouchableOpacity>
+    );
+  },
+);
+
 /**
  * GroupDetail Screen - Displays detailed information about a specific group
  */
@@ -219,9 +354,13 @@ export const GroupDetailScreen = () => {
   const eventsListRef = useRef<FlatList>(null);
   const leaveGroupDialogRef = useRef<DialogRef>(null);
 
-  // Animation value for member right content
+  // Track which member row has actions visible
+  const [activeMemberId, setActiveMemberId] = useState<string | null>(null);
+
+  // Animation values at component level
   const memberActionsAnim = useRef(new Animated.Value(-100)).current;
   const viewProfileAnim = useRef(new Animated.Value(0)).current;
+
   // Create animated scroll value to track scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -261,22 +400,42 @@ export const GroupDetailScreen = () => {
     setIsDescriptionExpanded(prev => !prev);
   };
 
-  // Animation function to show/hide member actions
-  const toggleMemberActions = (show: boolean) => {
-    Animated.spring(memberActionsAnim, {
-      toValue: show ? 0 : -100,
-      useNativeDriver: true,
-      friction: 8,
-      tension: 40,
-    }).start();
+  // Animation function for member actions but using activeMemberId
+  const toggleMemberActions = useCallback(
+    (memberId: string | null) => {
+      // Set the active member ID
+      setActiveMemberId(memberId);
 
-    Animated.spring(viewProfileAnim, {
-      toValue: show ? 100 : 0,
-      useNativeDriver: true,
-      friction: 8,
-      tension: 40,
-    }).start();
-  };
+      // Animate based on whether we're showing or hiding
+      const show = memberId !== null;
+
+      Animated.spring(memberActionsAnim, {
+        toValue: show ? 0 : -100,
+        useNativeDriver: true,
+        friction: 8,
+        tension: 40,
+      }).start();
+
+      Animated.spring(viewProfileAnim, {
+        toValue: show ? 100 : 0,
+        useNativeDriver: true,
+        friction: 8,
+        tension: 40,
+      }).start();
+    },
+    [memberActionsAnim, viewProfileAnim],
+  );
+
+  // Set up auto-hide timer when active member changes
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (activeMemberId) {
+      timer = setTimeout(() => {
+        toggleMemberActions(null);
+      }, 3000);
+    }
+    return () => timer && clearTimeout(timer);
+  }, [activeMemberId, toggleMemberActions]);
 
   const renderDescription = () => {
     const description = group?.description || 'No description available';
@@ -590,108 +749,17 @@ export const GroupDetailScreen = () => {
   // Event keyExtractor
   const eventKeyExtractor = useCallback((item: EventItem) => item.id, []);
 
-  // Initialize member actions to be hidden
-  useEffect(() => {
-    // Initialize animation to hidden state
-    memberActionsAnim.setValue(-100);
-  }, []);
-
-  // Render a member row
+  // Now just a simple render function that uses the MemberItem component
   const renderMemberItem = useCallback(
-    (item: any, _isAdmin?: boolean, _isMember?: boolean) => {
-      // Show admin actions when the row is pressed or hovered
-      const handleMemberPress = () => {
-        if (_isAdmin) {
-          toggleMemberActions(true);
-
-          // Auto-hide after 3 seconds
-          setTimeout(() => {
-            toggleMemberActions(false);
-          }, 3000);
-        }
-      };
-
-      return (
-        <TouchableOpacity
-          style={styles.memberItem}
-          onPress={handleMemberPress}
-          activeOpacity={0.8}>
-          <View style={styles.memberLeftContent}>
-            <Image
-              source={{uri: item.user.avatar}}
-              style={styles.memberAvatar}
-            />
-            <View style={styles.memberInfo}>
-              <Typography weight="medium">
-                {item.user.firstName} {item.user.lastName}
-              </Typography>
-              <Chip
-                variant="filled"
-                color="primary"
-                size="small"
-                label={toPascalCase(item.role) || ''}
-                style={styles.memberRole}
-              />
-            </View>
-          </View>
-          {_isAdmin && (
-            <Animated.View
-              style={[
-                styles.memberRightContent,
-                {
-                  position: 'absolute',
-                  right: 0,
-                  transform: [{translateX: memberActionsAnim}],
-                  opacity: memberActionsAnim.interpolate({
-                    inputRange: [-100, 0],
-                    outputRange: [0, 1],
-                  }),
-                },
-              ]}>
-              <Button
-                iconName="user-gear"
-                iconSize={20}
-                variant="secondary"
-                shape="circle"
-                onPress={() =>
-                  navigateToScreen(navigation, 'UserProfile', {
-                    userId: item.user.id,
-                  })
-                }
-              />
-              <Button
-                iconName="user-slash-filled"
-                iconSize={20}
-                variant="primary"
-                shape="circle"
-                onPress={() =>
-                  navigateToScreen(navigation, 'UserProfile', {
-                    userId: item.user.id,
-                  })
-                }
-              />
-            </Animated.View>
-          )}
-          {_isMember && (
-            <Animated.View
-              style={[
-                {
-                  position: 'absolute',
-                  right: 0,
-                  transform: [{translateX: viewProfileAnim}],
-                  opacity: viewProfileAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 0],
-                  }),
-                },
-              ]}>
-              <Button title="View Profile" variant="outline" shape="round" />
-            </Animated.View>
-          )}
-        </TouchableOpacity>
-      );
-    },
-    [navigation],
+    ({item}: {item: any}) => (
+      <MemberItem
+        item={item}
+        isAdmin={group?.isAdmin}
+        isMember={group?.isMember}
+        navigation={navigation}
+      />
+    ),
+    [group?.isAdmin, group?.isMember, navigation],
   );
 
   return (
@@ -903,9 +971,7 @@ export const GroupDetailScreen = () => {
             ) : (
               <LegendList
                 data={members}
-                renderItem={({item}) =>
-                  renderMemberItem(item, group?.isAdmin, group?.isMember)
-                }
+                renderItem={renderMemberItem}
                 keyExtractor={(item: any) => item.id}
                 contentContainerStyle={styles.membersList}
                 showsVerticalScrollIndicator={false}
