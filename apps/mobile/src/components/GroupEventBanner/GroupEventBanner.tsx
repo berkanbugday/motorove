@@ -27,9 +27,19 @@ export interface GroupEventBannerProps {
   title: string;
 
   /**
+   * Additional information text displayed under the title
+   */
+  infoText?: string;
+
+  /**
    * The organizer or club name
    */
-  organizer: string;
+  organizer?: string;
+
+  /**
+   * The location of the event
+   */
+  location?: string;
 
   /**
    * The number of participants who have joined
@@ -39,7 +49,7 @@ export interface GroupEventBannerProps {
   /**
    * The total number of members in the group/club
    */
-  memberCount: number;
+  membersCapacity?: number;
 
   /**
    * Function called when the chat button is pressed
@@ -70,6 +80,11 @@ export interface GroupEventBannerProps {
    * Additional styles for the title text
    */
   titleStyle?: StyleProp<TextStyle>;
+
+  /**
+   * Additional styles for the info text
+   */
+  infoTextStyle?: StyleProp<TextStyle>;
 }
 
 /**
@@ -81,14 +96,17 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
   month,
   time,
   title,
+  infoText,
   organizer,
+  location,
   participantCount,
-  memberCount,
+  membersCapacity,
   onChatPress,
   style,
   contentStyle,
   dateContainerStyle,
   titleStyle,
+  infoTextStyle,
 }) => {
   return (
     <View style={[styles.container, style]}>
@@ -101,16 +119,35 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
 
       {/* Event Details Container */}
       <View style={[styles.contentContainer, contentStyle]}>
-        <Body weight="bold" style={[styles.title, titleStyle]}>
-          {title}
-        </Body>
-        <Caption color={colors.neutral.grey} style={styles.organizer}>
-          {organizer}
-        </Caption>
+        {title && (
+          <Body weight="bold" style={[styles.title, titleStyle]}>
+            {title}
+          </Body>
+        )}
+        {infoText && (
+          <Caption
+            color={colors.neutral.grey}
+            style={[styles.infoText, infoTextStyle]}>
+            {infoText}
+          </Caption>
+        )}
+        {organizer && (
+          <Caption color={colors.neutral.grey} style={styles.organizer}>
+            {organizer}
+          </Caption>
+        )}
+        {location && (
+          <View style={styles.locationContainer}>
+            <Icon name="map-pin" size={14} />
+            <Caption color={colors.neutral.grey} style={styles.locationText}>
+              {location}
+            </Caption>
+          </View>
+        )}
         <View style={styles.participantsContainer}>
           <Icon name="users-filled" size={14} />
           <Caption color={colors.neutral.grey} style={styles.participantsText}>
-            {participantCount} / {memberCount} members
+            {participantCount} / {membersCapacity} members
           </Caption>
         </View>
       </View>

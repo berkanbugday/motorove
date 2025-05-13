@@ -72,7 +72,7 @@ interface EventItem {
   title: string;
   organizer: string;
   participantCount: number;
-  memberCount: number;
+  membersCapacity: number;
 }
 
 // Feed post interface
@@ -105,7 +105,7 @@ const upcomingEvents: EventItem[] = [
     title: 'Sunday Breakfast Ride',
     organizer: 'Coastal Riders Club',
     participantCount: 10,
-    memberCount: 34,
+    membersCapacity: 34,
   },
   {
     id: '2',
@@ -115,7 +115,7 @@ const upcomingEvents: EventItem[] = [
     title: 'Mountain Pass Challenge',
     organizer: 'Adventure Motorcycles',
     participantCount: 16,
-    memberCount: 40,
+    membersCapacity: 40,
   },
   {
     id: '3',
@@ -125,7 +125,7 @@ const upcomingEvents: EventItem[] = [
     title: 'Evening City Tour',
     organizer: 'Urban Moto Group',
     participantCount: 8,
-    memberCount: 25,
+    membersCapacity: 25,
   },
 ];
 
@@ -337,7 +337,7 @@ export const HomeScreen = ({navigation}: Props) => {
         title={item.title}
         organizer={item.organizer}
         participantCount={item.participantCount}
-        memberCount={item.memberCount}
+        membersCapacity={item.membersCapacity}
         onChatPress={() =>
           loggingService.info(`Chat pressed for event: ${item.title}`)
         }

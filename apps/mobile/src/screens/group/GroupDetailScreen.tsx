@@ -7,6 +7,8 @@ import {
   ImageSourcePropType,
   Animated,
   ActivityIndicator,
+  Dimensions,
+  FlatList,
 } from 'react-native';
 import {LegendList} from '@legendapp/list';
 import {colors, commonStyles, getShadow, radius, spacing} from '@theme';
@@ -33,6 +35,8 @@ import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {toPascalCase} from '@utils/stringUtils';
+import GroupEventBanner from '@components/GroupEventBanner/GroupEventBanner';
+import {PageIndicator} from '@components';
 
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
@@ -150,6 +154,54 @@ const groupFeedPosts: FeedPost[] = [
   },
 ];
 
+// Define event interface
+interface EventItem {
+  id: string;
+  day: string;
+  month: string;
+  time: string;
+  title: string;
+  infoText?: string;
+  location: string;
+  participantCount: number;
+  membersCapacity: number;
+}
+
+// Group events data
+const upcomingEvents: EventItem[] = [
+  {
+    id: '1',
+    day: '15',
+    month: 'JUN',
+    time: '10:00',
+    title: 'Sunday Breakfast Ride',
+    infoText: 'You are Going',
+    location: 'Istanbul',
+    participantCount: 10,
+    membersCapacity: 34,
+  },
+  {
+    id: '2',
+    day: '22',
+    month: 'JUN',
+    time: '09:30',
+    title: 'Mountain Pass Challenge',
+    location: 'Mountainside Trail',
+    participantCount: 16,
+    membersCapacity: 40,
+  },
+  {
+    id: '3',
+    day: '28',
+    month: 'JUN',
+    time: '14:00',
+    title: 'Evening City Tour',
+    location: 'City Park',
+    participantCount: 8,
+    membersCapacity: 25,
+  },
+];
+
 /**
  * GroupDetail Screen - Displays detailed information about a specific group
  */
@@ -160,6 +212,8 @@ export const GroupDetailScreen = () => {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [posts, setPosts] = useState<FeedPost[]>(groupFeedPosts);
   const membersBottomSheetRef = useRef<BottomSheetRef>(null);
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
+  const eventsListRef = useRef<FlatList>(null);
 
   // Animation value for member right content
   const memberActionsAnim = useRef(new Animated.Value(-100)).current;
@@ -361,6 +415,70 @@ export const GroupDetailScreen = () => {
 
   // Feed keyExtractor
   const feedKeyExtractor = useCallback((item: FeedPost) => item.id, []);
+
+  // Handle FlatList scroll event to update the current page
+  const handleEventScroll = useCallback((event: any) => {
+    const contentOffset = event.nativeEvent.contentOffset;
+    const viewSize = event.nativeEvent.layoutMeasurement;
+
+    // Calculate page number by dividing offset by width
+    const pageNum = Math.floor(contentOffset.x / (viewSize.width - spacing.xl));
+    setCurrentEventIndex(pageNum);
+  }, []);
+
+  // Handle page indicator press to scroll to that event
+  const handleEventPageChange = useCallback((pageIndex: number) => {
+    // Scroll to the selected event
+    eventsListRef.current?.scrollToIndex({
+      index: pageIndex,
+      animated: true,
+      viewPosition: 0.5,
+    });
+  }, []);
+
+  // Event scroll fail handler for cases where the index doesn't exist
+  const handleScrollToIndexFailed = useCallback(
+    (info: {
+      index: number;
+      highestMeasuredFrameIndex: number;
+      averageItemLength: number;
+    }) => {
+      // This handles situations where we might try to scroll to an item that isn't rendered yet
+      setTimeout(() => {
+        eventsListRef.current?.scrollToIndex({
+          index: info.index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      }, 100);
+    },
+    [],
+  );
+
+  // Render event banner item
+  const renderEventBanner = useCallback(
+    ({item}: {item: EventItem}) => (
+      <GroupEventBanner
+        day={item.day}
+        month={item.month}
+        time={item.time}
+        title={item.title}
+        infoText={item.infoText}
+        infoTextStyle={styles.eventBannerInfoText}
+        location={item.location}
+        participantCount={item.participantCount}
+        membersCapacity={item.membersCapacity}
+        onChatPress={() =>
+          loggingService.info(`Chat pressed for event: ${item.title}`)
+        }
+        style={styles.eventBanner}
+      />
+    ),
+    [],
+  );
+
+  // Event keyExtractor
+  const eventKeyExtractor = useCallback((item: EventItem) => item.id, []);
 
   // Initialize member actions to be hidden
   useEffect(() => {
@@ -597,19 +715,54 @@ export const GroupDetailScreen = () => {
                 />
               )}
             </View>
+
             {group?.isMember && (
-              <View style={styles.content}>
-                <Title>Recent Posts</Title>
-                <LegendList
-                  data={posts}
-                  renderItem={renderFeedPost}
-                  keyExtractor={feedKeyExtractor}
-                  scrollEnabled={false}
-                  contentContainerStyle={styles.feedList}
-                  recycleItems={true} // Enable component recycling for better performance
-                  maintainVisibleContentPosition={true} // Maintain the visible position when data changes
-                />
-              </View>
+              <>
+                {/* Upcoming Group Events Section */}
+                <View style={styles.content}>
+                  <View style={styles.sectionHeaderContainer}>
+                    <Subtitle weight="bold">Upcoming Group Events</Subtitle>
+                  </View>
+                  <FlatList
+                    ref={eventsListRef}
+                    data={upcomingEvents}
+                    renderItem={renderEventBanner}
+                    keyExtractor={eventKeyExtractor}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    snapToInterval={Dimensions.get('window').width - spacing.xl}
+                    decelerationRate="fast"
+                    onScroll={handleEventScroll}
+                    scrollEventThrottle={16}
+                    onScrollToIndexFailed={handleScrollToIndexFailed}
+                    contentContainerStyle={styles.eventsListContent}
+                  />
+                  <PageIndicator
+                    totalPages={upcomingEvents.length}
+                    currentPage={currentEventIndex}
+                    onPageChange={handleEventPageChange}
+                    containerStyle={styles.pageIndicator}
+                    type="pill"
+                    indicatorSize={8}
+                    activeIndicatorSize={10}
+                    spacing={8}
+                  />
+                </View>
+
+                {/* Recent Posts Section */}
+                <View style={styles.content}>
+                  <Subtitle weight="bold">Recent Posts</Subtitle>
+                  <LegendList
+                    data={posts}
+                    renderItem={renderFeedPost}
+                    keyExtractor={feedKeyExtractor}
+                    scrollEnabled={false}
+                    contentContainerStyle={styles.feedList}
+                    recycleItems={true} // Enable component recycling for better performance
+                    maintainVisibleContentPosition={true} // Maintain the visible position when data changes
+                  />
+                </View>
+              </>
             )}
           </Animated.ScrollView>
 
@@ -757,7 +910,26 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
-    paddingTop: spacing.lg,
+    paddingTop: spacing.md,
+  },
+  sectionHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  eventBanner: {
+    backgroundColor: colors.neutral.white,
+    marginRight: spacing.sm,
+    marginLeft: spacing.sm,
+    width: Dimensions.get('window').width - spacing.xxl,
+  },
+  eventsListContent: {
+    paddingVertical: spacing.sm,
+  },
+  pageIndicator: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
   },
   feedList: {
     paddingTop: spacing.md,
@@ -811,5 +983,10 @@ const styles = StyleSheet.create({
   memberRightContent: {
     flexDirection: 'row',
     gap: spacing.sm,
+  },
+  eventBannerInfoText: {
+    color: colors.status.successDark,
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });
