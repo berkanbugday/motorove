@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -11,7 +11,13 @@ import {
 import {LegendList} from '@legendapp/list';
 import {colors, commonStyles, getShadow, radius, spacing} from '@theme';
 import {TopHeaderBar} from '@components/TopHeaderBar';
-import {BodySmall, Title, Typography} from '@components/Typography';
+import {
+  BodySmall,
+  Caption,
+  Subtitle,
+  Title,
+  Typography,
+} from '@components/Typography';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {
   MainScreenNavigationProp,
@@ -25,6 +31,8 @@ import {FeedCard} from '@components/FeedCard';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
+import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
+import {toPascalCase} from '@utils/stringUtils';
 
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
@@ -151,7 +159,11 @@ export const GroupDetailScreen = () => {
   const {groupId} = route.params;
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [posts, setPosts] = useState<FeedPost[]>(groupFeedPosts);
+  const membersBottomSheetRef = useRef<BottomSheetRef>(null);
 
+  // Animation value for member right content
+  const memberActionsAnim = useRef(new Animated.Value(-100)).current;
+  const viewProfileAnim = useRef(new Animated.Value(-70)).current;
   // Create animated scroll value to track scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -177,12 +189,32 @@ export const GroupDetailScreen = () => {
   // Use the useGetGroup hook to fetch the group data
   const {group, loading} = useGetGroup(groupId);
 
+  // Fetch group members
+  const members = group?.memberships || [];
+
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   const toggleDescription = () => {
     setIsDescriptionExpanded(prev => !prev);
+  };
+
+  // Animation function to show/hide member actions
+  const toggleMemberActions = (show: boolean) => {
+    Animated.spring(memberActionsAnim, {
+      toValue: show ? 70 : -100,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 40,
+    }).start();
+
+    Animated.spring(viewProfileAnim, {
+      toValue: show ? 100 : -70,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 40,
+    }).start();
   };
 
   const renderDescription = () => {
@@ -287,6 +319,7 @@ export const GroupDetailScreen = () => {
         navigateToScreen(navigation, 'EditGroup', {groupId});
         break;
       case 'members':
+        membersBottomSheetRef.current?.open('full');
         break;
       case 'leave_group':
         break;
@@ -328,6 +361,106 @@ export const GroupDetailScreen = () => {
 
   // Feed keyExtractor
   const feedKeyExtractor = useCallback((item: FeedPost) => item.id, []);
+
+  // Initialize member actions to be hidden
+  useEffect(() => {
+    // Initialize animation to hidden state
+    memberActionsAnim.setValue(-100);
+  }, []);
+
+  // Render a member row
+  const renderMemberItem = useCallback(
+    (item: any, _isAdmin?: boolean, _isMember?: boolean) => {
+      // Show admin actions when the row is pressed or hovered
+      const handleMemberPress = () => {
+        if (_isAdmin) {
+          toggleMemberActions(true);
+
+          // Auto-hide after 3 seconds
+          setTimeout(() => {
+            toggleMemberActions(false);
+          }, 3000);
+        }
+      };
+
+      return (
+        <TouchableOpacity
+          style={styles.memberItem}
+          onPress={handleMemberPress}
+          activeOpacity={0.8}>
+          <View style={styles.memberLeftContent}>
+            <Image
+              source={{uri: item.user.avatar || 'https://picsum.photos/100'}}
+              style={styles.memberAvatar}
+            />
+            <View style={styles.memberInfo}>
+              <Typography weight="medium">
+                {item.user.firstName} {item.user.lastName}
+              </Typography>
+              <Chip
+                variant="filled"
+                color="primary"
+                size="small"
+                label={toPascalCase(item.role) || ''}
+                style={styles.memberRole}
+              />
+            </View>
+          </View>
+          <Animated.View
+            style={[
+              styles.memberRightContent,
+              {
+                transform: [{translateX: memberActionsAnim}],
+                opacity: memberActionsAnim.interpolate({
+                  inputRange: [-100, 0],
+                  outputRange: [0, 1],
+                }),
+              },
+            ]}>
+            {_isAdmin && (
+              <>
+                <Button
+                  iconName="user-gear"
+                  variant="secondary"
+                  shape="circle"
+                  onPress={() =>
+                    navigateToScreen(navigation, 'UserProfile', {
+                      userId: item.user.id,
+                    })
+                  }
+                />
+                <Button
+                  iconName="user-slash-filled"
+                  variant="primary"
+                  shape="circle"
+                  onPress={() =>
+                    navigateToScreen(navigation, 'UserProfile', {
+                      userId: item.user.id,
+                    })
+                  }
+                />
+              </>
+            )}
+          </Animated.View>
+          <Animated.View
+            style={[
+              {
+                transform: [{translateX: viewProfileAnim}],
+                opacity: viewProfileAnim.interpolate({
+                  inputRange: [-70, 1],
+                  outputRange: [1, 0],
+                }),
+              },
+            ]}>
+            {_isMember && (
+              <Button title="View Profile" variant="outline" shape="round" />
+            )}
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    },
+    [navigation],
+  );
 
   return (
     <View style={styles.container}>
@@ -477,6 +610,42 @@ export const GroupDetailScreen = () => {
               </View>
             )}
           </Animated.ScrollView>
+
+          <BottomSheet
+            ref={membersBottomSheetRef}
+            containerStyle={styles.membersBottomSheet}
+            closeOnBackdropPress={true}
+            initialSnap="closed">
+            <View style={styles.membersHeader}>
+              <View>
+                <Subtitle>Members</Subtitle>
+                <Caption color={colors.neutral.grey}>
+                  {members.length} people
+                </Caption>
+              </View>
+              <Button
+                iconName="user-plus-filled"
+                iconSize={22}
+                variant="dark"
+                shape="circle"
+              />
+            </View>
+            {loading ? (
+              <ActivityIndicator size="large" color={colors.primary.main} />
+            ) : (
+              <LegendList
+                data={members}
+                renderItem={({item}) =>
+                  renderMemberItem(item, group?.isAdmin, group?.isMember)
+                }
+                keyExtractor={(item: any) => item.id}
+                contentContainerStyle={styles.membersList}
+                showsVerticalScrollIndicator={false}
+                recycleItems={true}
+                maintainVisibleContentPosition={true}
+              />
+            )}
+          </BottomSheet>
         </>
       )}
     </View>
@@ -598,5 +767,47 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  membersBottomSheet: {
+    paddingHorizontal: spacing.xs,
+  },
+  membersHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+    paddingBottom: spacing.md,
+  },
+  membersList: {
+    paddingBottom: spacing.lg,
+  },
+  memberItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.light,
+  },
+  memberLeftContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  memberAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.round,
+    marginRight: spacing.sm,
+  },
+  memberInfo: {
+    justifyContent: 'center',
+  },
+  memberRole: {
+    backgroundColor: colors.primary.light,
+  },
+  memberRightContent: {
+    flexDirection: 'row',
+    gap: spacing.sm,
   },
 });

@@ -6,6 +6,7 @@ import {
   ViewStyle,
   TextStyle,
   View,
+  StyleProp,
 } from 'react-native';
 import {colors, spacing, componentRadius} from '@theme';
 import {Typography} from '../Typography';
@@ -23,7 +24,7 @@ interface ButtonProps {
   iconSize?: number;
   iconColor?: string;
   iconPosition?: 'left' | 'right' | 'top' | 'bottom';
-  style?: ViewStyle;
+  style?: ViewStyle | StyleProp<ViewStyle>;
   textStyle?: TextStyle;
   testID?: string;
 }
