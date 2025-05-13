@@ -124,35 +124,62 @@ class AuthService {
         // Clear the refresh token from storage immediately to prevent reuse
         await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
 
-        loggingService.info('Making refresh token request to server');
-        const {data, errors} = await apolloClient.mutate({
-          mutation: REFRESH_TOKEN,
-          variables: {
-            token: parsedRefreshToken,
-          },
-        });
+        try {
+          loggingService.info('Making refresh token request to server');
+          const {data, errors} = await apolloClient.mutate({
+            mutation: REFRESH_TOKEN,
+            variables: {
+              token: parsedRefreshToken,
+            },
+          });
 
-        if (errors) {
-          loggingService.error('Token refresh error from GraphQL:', errors[0]);
-          throw errors[0];
+          if (errors) {
+            loggingService.error(
+              'Token refresh error from GraphQL:',
+              errors[0],
+            );
+            throw errors[0];
+          }
+
+          if (!data || !data.refreshToken) {
+            loggingService.error('Refresh token response missing data');
+            throw new Error('Invalid refresh token response');
+          }
+
+          // Convert GraphQL response to our AuthResponse format
+          const authResponse = this.convertGraphQLAuthResponse(
+            data.refreshToken,
+          );
+
+          if (!authResponse.session || !authResponse.session.access_token) {
+            loggingService.error('Refresh token response missing token data');
+            throw new Error('Invalid token data in refresh response');
+          }
+
+          loggingService.info('Token refresh successful, saving new auth data');
+          await this.saveAuthData(authResponse);
+          return authResponse;
+        } catch (error) {
+          // Check for token reuse or token expiration errors
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+
+          if (
+            errorMessage.includes('Invalid Refresh Token: Already Used') ||
+            errorMessage.includes('Token has expired')
+          ) {
+            loggingService.error(
+              'Refresh token invalid or already used:',
+              errorMessage,
+            );
+            // Clear auth data on refresh token error
+            await this.clearAuthData();
+            throw new Error('Session expired. Please sign in again.');
+          }
+
+          // For other errors, rethrow
+          throw error;
         }
-
-        if (!data || !data.refreshToken) {
-          loggingService.error('Refresh token response missing data');
-          throw new Error('Invalid refresh token response');
-        }
-
-        // Convert GraphQL response to our AuthResponse format
-        const authResponse = this.convertGraphQLAuthResponse(data.refreshToken);
-
-        if (!authResponse.session || !authResponse.session.access_token) {
-          loggingService.error('Refresh token response missing token data');
-          throw new Error('Invalid token data in refresh response');
-        }
-
-        loggingService.info('Token refresh successful, saving new auth data');
-        await this.saveAuthData(authResponse);
-        return authResponse;
       } else {
         loggingService.error('No refresh token available');
         throw new Error('No refresh token available');
@@ -312,14 +339,31 @@ class AuthService {
     // If session exists, convert expires_in to expires_at
     let processedSession;
     if (session) {
-      const expiresIn = session.expires_in || 3600; // Default to 1 hour if not provided
-      const expiresAt = Date.now() + expiresIn * 1000;
+      // Handle expires_at if it's already provided
+      if (session.expires_at) {
+        // Ensure expires_at is a valid timestamp by ensuring it's a number in seconds, not milliseconds
+        // Convert to milliseconds if it's in seconds (Unix timestamp is typically in seconds)
+        const expiresAtMs =
+          session.expires_at * 1000 > Date.now() + 365 * 24 * 60 * 60 * 1000
+            ? session.expires_at // Already in milliseconds
+            : session.expires_at * 1000; // Convert from seconds to milliseconds
 
-      processedSession = {
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-        expires_at: expiresAt,
-      };
+        processedSession = {
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_at: expiresAtMs,
+        };
+      } else {
+        // If expires_at is not provided, use expires_in
+        const expiresIn = session.expires_in || 3600; // Default to 1 hour if not provided
+        const expiresAt = Date.now() + expiresIn * 1000;
+
+        processedSession = {
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          expires_at: expiresAt,
+        };
+      }
     }
 
     return {

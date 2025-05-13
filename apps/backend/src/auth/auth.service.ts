@@ -118,6 +118,7 @@ export class AuthService {
       if (error) {
         // Check for specific error types from Supabase
         if (error.message.includes('Token has expired or is invalid')) {
+          console.error('Token expiration error:', error.message);
           throw new UnauthorizedException('Token has expired');
         }
 
@@ -128,6 +129,12 @@ export class AuthService {
           );
         }
 
+        if (error.message.includes('JWT')) {
+          console.error('JWT validation error:', error.message);
+          throw new UnauthorizedException('Invalid JWT token');
+        }
+
+        console.error('Token refresh error:', error.message);
         throw new UnauthorizedException(
           error.message || 'Failed to refresh token',
         );
@@ -156,8 +163,22 @@ export class AuthService {
         session: data.session || undefined,
       };
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Token refresh failed';
+      let errorMessage = 'Token refresh failed';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+
+        // Check for JWT validation errors in the error message
+        if (
+          errorMessage.includes('InvalidJWTToken') ||
+          errorMessage.includes('JWT claim') ||
+          errorMessage.includes('JWT token')
+        ) {
+          console.error('JWT validation error:', errorMessage);
+          throw new UnauthorizedException('Invalid JWT token');
+        }
+      }
+
       console.error('Token refresh error:', errorMessage);
 
       // Rethrow the error with appropriate message

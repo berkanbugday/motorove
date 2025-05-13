@@ -93,8 +93,33 @@ const errorLink = onError(
               .catch(refreshError => {
                 loggingService.error('Token refresh failed:', refreshError);
 
-                // Clear auth if refresh token is invalid
-                authService.signOut();
+                // Check for specific token errors
+                const errorMessage =
+                  refreshError instanceof Error
+                    ? refreshError.message
+                    : String(refreshError);
+
+                if (
+                  errorMessage.includes(
+                    'Invalid Refresh Token: Already Used',
+                  ) ||
+                  errorMessage.includes('Token has expired') ||
+                  errorMessage.includes('InvalidJWTToken')
+                ) {
+                  // This is an expected error for expired sessions
+                  loggingService.info('Session expired, signing out user');
+                } else {
+                  // Log unexpected errors
+                  loggingService.error(
+                    'Unexpected token refresh error:',
+                    errorMessage,
+                  );
+                }
+
+                // Clear auth if refresh token is invalid or any other error
+                authService.signOut().catch(e => {
+                  loggingService.error('Error during sign out:', e);
+                });
 
                 // Forward the original error
                 observer.error(err);

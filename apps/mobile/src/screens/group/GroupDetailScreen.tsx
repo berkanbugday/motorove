@@ -221,7 +221,7 @@ export const GroupDetailScreen = () => {
 
   // Animation value for member right content
   const memberActionsAnim = useRef(new Animated.Value(-100)).current;
-  const viewProfileAnim = useRef(new Animated.Value(-70)).current;
+  const viewProfileAnim = useRef(new Animated.Value(0)).current;
   // Create animated scroll value to track scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -264,14 +264,14 @@ export const GroupDetailScreen = () => {
   // Animation function to show/hide member actions
   const toggleMemberActions = (show: boolean) => {
     Animated.spring(memberActionsAnim, {
-      toValue: show ? 70 : -100,
+      toValue: show ? 0 : -100,
       useNativeDriver: true,
       friction: 8,
       tension: 40,
     }).start();
 
     Animated.spring(viewProfileAnim, {
-      toValue: show ? 100 : -70,
+      toValue: show ? 100 : 0,
       useNativeDriver: true,
       friction: 8,
       tension: 40,
@@ -639,6 +639,8 @@ export const GroupDetailScreen = () => {
               style={[
                 styles.memberRightContent,
                 {
+                  position: 'absolute',
+                  right: 0,
                   transform: [{translateX: memberActionsAnim}],
                   opacity: memberActionsAnim.interpolate({
                     inputRange: [-100, 0],
@@ -673,10 +675,12 @@ export const GroupDetailScreen = () => {
           {_isMember && (
             <Animated.View
               style={[
-                _isAdmin && {
+                {
+                  position: 'absolute',
+                  right: 0,
                   transform: [{translateX: viewProfileAnim}],
                   opacity: viewProfileAnim.interpolate({
-                    inputRange: [-70, 1],
+                    inputRange: [0, 1],
                     outputRange: [1, 0],
                   }),
                 },
