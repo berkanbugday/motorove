@@ -661,7 +661,7 @@ export const GroupDetailScreen = () => {
                   <Icon
                     name={
                       group?.privacy === 'PUBLIC'
-                        ? 'earth-filled'
+                        ? 'lock-open-filled'
                         : 'lock-filled'
                     }
                     size={18}

@@ -61,6 +61,8 @@ import Clock from '@assets/icons/clock.svg';
 import Phone from '@assets/icons/phone.svg';
 import Lock from '@assets/icons/lock.svg';
 import LockFilled from '@assets/icons/lock-filled.svg';
+import LockOpen from '@assets/icons/lock-open.svg';
+import LockOpenFilled from '@assets/icons/lock-open-filled.svg';
 import Earth from '@assets/icons/earth.svg';
 import EarthFilled from '@assets/icons/earth-filled.svg';
 import Filter from '@assets/icons/filter.svg';
@@ -142,6 +144,8 @@ export type IconName =
   | 'phone'
   | 'lock'
   | 'lock-filled'
+  | 'lock-open'
+  | 'lock-open-filled'
   | 'earth'
   | 'earth-filled'
   | 'filter';
@@ -296,6 +300,10 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Lock {...commonProps} />;
     case 'lock-filled':
       return <LockFilled {...commonProps} />;
+    case 'lock-open':
+      return <LockOpen {...commonProps} />;
+    case 'lock-open-filled':
+      return <LockOpenFilled {...commonProps} />;
     case 'earth':
       return <Earth {...commonProps} />;
     case 'earth-filled':

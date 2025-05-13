@@ -193,7 +193,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   };
 
   const renderPrivacyBadge = () => {
-    let iconName: IconName = 'earth-filled';
+    let iconName: IconName = 'lock-open-filled';
 
     if (privacy === 'PRIVATE') {
       iconName = 'lock-filled';
