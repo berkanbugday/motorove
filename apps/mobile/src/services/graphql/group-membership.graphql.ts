@@ -25,6 +25,14 @@ export const ADD_GROUP_MEMBER_FRAGMENT = gql`
   }
 `;
 
+export const CHANGE_MEMBER_ROLE_FRAGMENT = gql`
+  fragment ChangeMemberRoleFragment on GroupMembership {
+    groupId
+    userId
+    role
+  }
+`;
+
 // GroupMembershipStatus fragment
 export const GROUP_MEMBERSHIP_STATUS_FRAGMENT = gql`
   fragment GroupMembershipStatusFragment on GroupMembership {
@@ -91,11 +99,11 @@ export const ADD_GROUP_MEMBER = gql`
 // Change a member's role
 export const CHANGE_MEMBER_ROLE = gql`
   mutation ChangeMemberRole($input: ChangeMemberRoleInput!) {
-    changeMemberRole(input: $input) {
-      ...GroupMembershipFragment
+    changeMemberRole(changeMemberRoleInput: $input) {
+      ...ChangeMemberRoleFragment
     }
   }
-  ${GROUP_MEMBERSHIP_FRAGMENT}
+  ${CHANGE_MEMBER_ROLE_FRAGMENT}
 `;
 
 // Remove a member from a group

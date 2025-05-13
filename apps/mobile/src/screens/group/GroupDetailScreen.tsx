@@ -38,8 +38,17 @@ import {toPascalCase} from '@utils/stringUtils';
 import GroupEventBanner from '@components/GroupEventBanner/GroupEventBanner';
 import {PageIndicator, showToast} from '@components';
 import {useAuth} from '@contexts';
-import {useAddGroupMember} from '@services/group-membership.service';
+import {
+  useAddGroupMember,
+  useChangeMemberRole,
+} from '@services/group-membership.service';
 import Dialog, {DialogRef} from '@components/Dialog';
+import Dropdown from '@components/Dropdown';
+import {
+  DropdownItem as EnumDropdownItem,
+  useEnumGroupMemberRoles,
+} from '@services/enum.service';
+import {DropdownItem as ComponentDropdownItem} from '@components/Dropdown/types';
 
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
@@ -212,11 +221,13 @@ const MemberItem = React.memo(
     isAdmin,
     isMember,
     navigation,
+    onChangeRole,
   }: {
     item: any;
     isAdmin?: boolean;
     isMember?: boolean;
     navigation: MainScreenNavigationProp<'GroupDetail'>;
+    onChangeRole?: (member: any) => void;
   }) => {
     // Animation state and refs for this specific row
     const [isActive, setIsActive] = useState(false);
@@ -300,11 +311,7 @@ const MemberItem = React.memo(
               iconSize={20}
               variant="secondary"
               shape="circle"
-              onPress={() =>
-                navigateToScreen(navigation, 'UserProfile', {
-                  userId: item.user.id,
-                })
-              }
+              onPress={() => onChangeRole && onChangeRole(item)}
             />
             <Button
               iconName="user-slash-filled"
@@ -353,6 +360,16 @@ export const GroupDetailScreen = () => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const eventsListRef = useRef<FlatList>(null);
   const leaveGroupDialogRef = useRef<DialogRef>(null);
+  const changeRoleDialogRef = useRef<DialogRef>(null);
+
+  // State for selected member and role
+  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [selectedRole, setSelectedRole] = useState<EnumDropdownItem | null>(
+    null,
+  );
+
+  // Get member roles from enum service
+  const {memberRoles, loading: loadingRoles} = useEnumGroupMemberRoles();
 
   // Track which member row has actions visible
   const [activeMemberId, setActiveMemberId] = useState<string | null>(null);
@@ -391,6 +408,67 @@ export const GroupDetailScreen = () => {
 
   const {user} = useAuth();
   const [addGroupMember] = useAddGroupMember();
+  const [changeMemberRole] = useChangeMemberRole();
+  // Handle opening the change role dialog
+  const handleOpenChangeRoleDialog = useCallback(
+    (member: any) => {
+      setSelectedMember(member);
+      // Find the current role in the dropdown items
+      const currentRole = memberRoles.find(
+        role => role.value.toUpperCase() === member.role.toUpperCase(),
+      );
+      setSelectedRole(currentRole || null);
+      changeRoleDialogRef.current?.open();
+    },
+    [memberRoles],
+  );
+
+  // Handle role change
+  const handleChangeRole = useCallback(async () => {
+    if (!selectedMember || !selectedRole) {
+      return;
+    }
+
+    try {
+      if (
+        selectedMember.role.toUpperCase() === selectedRole.value.toUpperCase()
+      ) {
+        changeRoleDialogRef.current?.close();
+        return;
+      } else {
+        await changeMemberRole({
+          variables: {
+            input: {
+              groupId: groupId,
+              userId: selectedMember.user.id,
+              role: selectedRole.value,
+            },
+          },
+        });
+      }
+      loggingService.info(
+        `Changing role for ${selectedMember.user.firstName} ${selectedMember.user.lastName} to ${selectedRole.value}`,
+      );
+
+      // Mock success for now
+      showToast({
+        text1: 'Success',
+        text2: 'Member role updated successfully',
+        type: 'success',
+      });
+
+      // Close dialog and refresh data
+      changeRoleDialogRef.current?.close();
+      refetch && refetch();
+    } catch (error) {
+      loggingService.error('Error changing member role', error);
+      showToast({
+        text1: 'Error',
+        text2: 'Failed to update member role',
+        type: 'error',
+      });
+    }
+  }, [selectedMember, selectedRole, refetch]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -545,7 +623,7 @@ export const GroupDetailScreen = () => {
     } else {
       try {
         if (user && user.id) {
-          addGroupMember({
+          await addGroupMember({
             variables: {
               input: {
                 groupId: groupId,
@@ -654,6 +732,24 @@ export const GroupDetailScreen = () => {
     }
   }, []);
 
+  // Handle role selection in dropdown
+  const handleRoleSelect = useCallback((item: ComponentDropdownItem | null) => {
+    // Convert the component dropdown item to our enum dropdown item type
+    if (item) {
+      const enumItem: EnumDropdownItem = {
+        id:
+          typeof item.id === 'string'
+            ? parseInt(item.id, 10)
+            : (item.id as number),
+        label: item.label,
+        value: item.value,
+      };
+      setSelectedRole(enumItem);
+    } else {
+      setSelectedRole(null);
+    }
+  }, []);
+
   // Render feed post
   const renderFeedPost = useCallback(
     ({item}: {item: FeedPost}) => {
@@ -757,9 +853,10 @@ export const GroupDetailScreen = () => {
         isAdmin={group?.isAdmin}
         isMember={group?.isMember}
         navigation={navigation}
+        onChangeRole={handleOpenChangeRoleDialog}
       />
     ),
-    [group?.isAdmin, group?.isMember, navigation],
+    [group?.isAdmin, group?.isMember, navigation, handleOpenChangeRoleDialog],
   );
 
   return (
@@ -980,6 +1077,7 @@ export const GroupDetailScreen = () => {
               />
             )}
           </BottomSheet>
+
           <Dialog
             ref={leaveGroupDialogRef}
             title="Leave Group"
@@ -995,6 +1093,48 @@ export const GroupDetailScreen = () => {
               variant: 'outline',
             }}
           />
+
+          <Dialog
+            ref={changeRoleDialogRef}
+            title="Change Member Role"
+            variant="custom">
+            {selectedMember && (
+              <View style={styles.changeRoleContent}>
+                <Subtitle weight="bold" align="center">
+                  {selectedMember.user.firstName} {selectedMember.user.lastName}
+                </Subtitle>
+
+                {loadingRoles ? (
+                  <ActivityIndicator size="small" color={colors.primary.main} />
+                ) : (
+                  <Dropdown
+                    label="Select Role"
+                    data={memberRoles as ComponentDropdownItem[]}
+                    selectedItem={selectedRole as ComponentDropdownItem}
+                    onSelect={handleRoleSelect}
+                    searchable={false}
+                  />
+                )}
+
+                <View style={styles.dialogButtonsContainer}>
+                  <Button
+                    title="Cancel"
+                    variant="outline"
+                    shape="round"
+                    onPress={() => changeRoleDialogRef.current?.close()}
+                  />
+                  <Button
+                    title="Change"
+                    variant="primary"
+                    shape="round"
+                    textStyle={{color: colors.neutral.white}}
+                    onPress={handleChangeRole}
+                    disabled={!selectedRole}
+                  />
+                </View>
+              </View>
+            )}
+          </Dialog>
         </>
       )}
     </View>
@@ -1182,5 +1322,17 @@ const styles = StyleSheet.create({
     color: colors.status.successDark,
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  changeRoleContent: {
+    gap: spacing.xl,
+  },
+  changeRoleMemberName: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  dialogButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
 });

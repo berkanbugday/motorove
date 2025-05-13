@@ -8,6 +8,7 @@ import {
   CHANGE_MEMBER_ROLE,
   REMOVE_GROUP_MEMBER,
   GROUP_MEMBERSHIP_FRAGMENT,
+  CHANGE_MEMBER_ROLE_FRAGMENT,
 } from './graphql/group-membership.graphql';
 
 // Hook to get all group memberships
@@ -69,7 +70,26 @@ export const useAddGroupMember = () => {
 
 // Hook to change a member's role
 export const useChangeMemberRole = () => {
-  return useMutation(CHANGE_MEMBER_ROLE);
+  return useMutation(CHANGE_MEMBER_ROLE, {
+    update(cache, {data: {changeMemberRole}}) {
+      // Update the cache to include the new group membership
+      cache.modify({
+        fields: {
+          groupMembers(existingMembers = [], {readField}) {
+            return existingMembers.map((memberRef: Reference) => {
+              if (readField('id', memberRef) === changeMemberRole.id) {
+                return cache.writeFragment({
+                  data: changeMemberRole,
+                  fragment: CHANGE_MEMBER_ROLE_FRAGMENT,
+                });
+              }
+              return memberRef;
+            });
+          },
+        },
+      });
+    },
+  });
 };
 
 // Hook to remove a member from a group

@@ -14,8 +14,8 @@ type AuthResponse {
 
 input ChangeMemberRoleInput {
   groupId: String!
-  memberId: String!
   role: GroupMemberRole!
+  userId: String!
 }
 
 type City {

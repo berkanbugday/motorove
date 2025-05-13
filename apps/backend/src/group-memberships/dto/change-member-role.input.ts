@@ -17,7 +17,7 @@ export class ChangeMemberRoleInput {
   @Field()
   @IsUUID()
   @IsNotEmpty()
-  memberId: string;
+  userId: string;
 
   @Field(() => GroupMemberRole)
   @IsEnum(GroupMemberRole)

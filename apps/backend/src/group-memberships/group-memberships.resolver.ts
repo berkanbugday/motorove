@@ -68,7 +68,7 @@ export class GroupMembershipsResolver {
     const adminId: string = context.req.user.id;
     return this.groupMembershipsService.changeMemberRole(
       changeMemberRoleInput.groupId,
-      changeMemberRoleInput.memberId,
+      changeMemberRoleInput.userId,
       changeMemberRoleInput.role,
       adminId,
     );

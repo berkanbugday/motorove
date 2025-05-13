@@ -122,7 +122,7 @@ export class GroupMembershipsService {
 
   async changeMemberRole(
     groupId: string,
-    memberId: string,
+    userId: string,
     newRole: GroupMemberRole,
     adminId: string,
   ) {
@@ -151,12 +151,12 @@ export class GroupMembershipsService {
 
     // Check if the member exists
     const membershipToUpdate = group.memberships.find(
-      (m) => m.userId === memberId,
+      (m) => m.userId === userId,
     );
 
     if (!membershipToUpdate) {
       throw new NotFoundException(
-        `Member with ID ${memberId} not found in this group`,
+        `Member with ID ${userId} not found in this group`,
       );
     }
 
@@ -165,7 +165,7 @@ export class GroupMembershipsService {
       where: {
         groupId_userId: {
           groupId,
-          userId: memberId,
+          userId,
         },
       },
       data: {

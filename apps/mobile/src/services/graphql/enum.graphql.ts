@@ -8,3 +8,12 @@ export const GET_GROUP_PRIVACY_OPTIONS = gql`
     }
   }
 `;
+
+export const GET_GROUP_MEMBER_ROLES = gql`
+  query GetGroupMemberRoles {
+    getGroupMemberRoles {
+      key
+      value
+    }
+  }
+`;
