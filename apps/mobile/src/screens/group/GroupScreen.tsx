@@ -21,7 +21,7 @@ import {Button} from '@components/Button';
  * Groups Screen - Displays user groups and allows discovery of new groups
  */
 export const GroupScreen = () => {
-  const [activeTab, setActiveTab] = useState('explore');
+  const [activeTab, setActiveTab] = useState('joined');
   const [refreshingJoinedGroups, setRefreshingJoinedGroups] = useState(false);
   const [refreshingAllGroups, setRefreshingAllGroups] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
@@ -230,14 +230,14 @@ export const GroupScreen = () => {
 
   const tabItems = [
     {
-      key: 'explore',
-      label: 'Explore',
-      content: <View style={styles.tabContent}>{renderAllGroups()}</View>,
-    },
-    {
       key: 'joined',
       label: 'Joined',
       content: <View style={styles.tabContent}>{renderJoinedGroups()}</View>,
+    },
+    {
+      key: 'explore',
+      label: 'Explore',
+      content: <View style={styles.tabContent}>{renderAllGroups()}</View>,
     },
   ];
 
