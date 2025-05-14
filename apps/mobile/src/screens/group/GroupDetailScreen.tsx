@@ -928,6 +928,15 @@ export const GroupDetailScreen = () => {
     ],
   );
 
+  // Show loading while fetching initial data
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color={colors.primary.main} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -943,298 +952,287 @@ export const GroupDetailScreen = () => {
           handleDropdownMenuItemSelect(item, group as Group)
         }
       />
+      <Animated.View
+        style={[
+          styles.imageContainer,
+          {
+            height: headerHeight,
+          },
+        ]}>
+        <Image
+          source={{uri: group?.cover || ''}}
+          style={styles.cover}
+          resizeMode="cover"
+        />
+        <View style={styles.overlay} />
+      </Animated.View>
 
-      {loading ? (
-        <View style={[styles.container, styles.centerContent]}>
-          <ActivityIndicator size="large" color={colors.primary.main} />
+      {/* Logo rendered outside the cover container for proper layering */}
+      <Animated.View
+        style={[
+          styles.logoWrapper,
+          {
+            transform: [{translateY: logoMarginTop}],
+          },
+        ]}>
+        <Animated.Image
+          source={{uri: group?.logo || ''}}
+          style={[
+            styles.logo,
+            {
+              width: logoSize,
+              height: logoSize,
+            },
+          ]}
+        />
+      </Animated.View>
+
+      <Animated.ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16} // Ensures smooth scrolling
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            progressViewOffset={rh(100)} // Offset to account for the header
+          />
+        }
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {useNativeDriver: false},
+        )}>
+        <View style={styles.infoContainer}>
+          <Title align="center">{group?.name}</Title>
+
+          <View style={styles.infoRow}>
+            <Icon name="users-filled" size={18} />
+            <Typography style={styles.infoText}>
+              {group?.memberships?.length || 0}
+              {group?.membersCapacity
+                ? ` / ${group?.membersCapacity}`
+                : ''}{' '}
+              members
+            </Typography>
+            <View style={styles.dot} />
+            <View style={styles.lockContainer}>
+              <Icon
+                name={
+                  group?.privacy === 'PUBLIC'
+                    ? 'lock-open-filled'
+                    : 'lock-filled'
+                }
+                size={18}
+              />
+              <Typography style={styles.infoText}>
+                {toPascalCase(group?.privacy || '')} Group
+              </Typography>
+            </View>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Icon name="map-pin" size={18} />
+            <Typography style={styles.infoText}>
+              {group?.city.value || 'No location'}
+            </Typography>
+          </View>
+
+          <View style={styles.tagsContainer}>
+            {group?.tags?.map((tag, index) => (
+              <Chip
+                variant="outlined"
+                color="dark"
+                size="small"
+                key={index}
+                label={tag.value}
+              />
+            ))}
+          </View>
+
+          <View style={styles.descriptionContainer}>{renderDescription()}</View>
         </View>
-      ) : (
-        <>
-          <Animated.View
-            style={[
-              styles.imageContainer,
-              {
-                height: headerHeight,
-              },
-            ]}>
-            <Image
-              source={{uri: group?.cover || ''}}
-              style={styles.cover}
-              resizeMode="cover"
+        <View style={styles.shortcutsContainer}>
+          {group?.isMember && (
+            <Button
+              iconPosition="top"
+              iconName="plus"
+              iconSize={24}
+              variant="outline"
+              title="Create Post"
             />
-            <View style={styles.overlay} />
-          </Animated.View>
-
-          {/* Logo rendered outside the cover container for proper layering */}
-          <Animated.View
-            style={[
-              styles.logoWrapper,
-              {
-                transform: [{translateY: logoMarginTop}],
-              },
-            ]}>
-            <Animated.Image
-              source={{uri: group?.logo || ''}}
-              style={[
-                styles.logo,
-                {
-                  width: logoSize,
-                  height: logoSize,
-                },
-              ]}
+          )}
+          {group?.isAdmin && (
+            <Button
+              iconPosition="top"
+              iconName="route"
+              iconSize={24}
+              variant="dark"
+              title="Create Event"
             />
-          </Animated.View>
+          )}
+        </View>
 
-          <Animated.ScrollView
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-            scrollEventThrottle={16} // Ensures smooth scrolling
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                progressViewOffset={rh(100)} // Offset to account for the header
+        {group?.isMember && (
+          <>
+            {/* Upcoming Group Events Section */}
+            <View style={styles.content}>
+              <View style={styles.sectionHeaderContainer}>
+                <Subtitle weight="bold">Upcoming Group Events</Subtitle>
+              </View>
+              <FlatList
+                ref={eventsListRef}
+                data={upcomingEvents}
+                renderItem={renderEventBanner}
+                keyExtractor={eventKeyExtractor}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                snapToInterval={Dimensions.get('window').width - spacing.xl}
+                decelerationRate="fast"
+                onScroll={handleEventScroll}
+                scrollEventThrottle={16}
+                onScrollToIndexFailed={handleScrollToIndexFailed}
+                contentContainerStyle={styles.eventsListContent}
               />
-            }
-            onScroll={Animated.event(
-              [{nativeEvent: {contentOffset: {y: scrollY}}}],
-              {useNativeDriver: false},
-            )}>
-            <View style={styles.infoContainer}>
-              <Title align="center">{group?.name}</Title>
-
-              <View style={styles.infoRow}>
-                <Icon name="users-filled" size={18} />
-                <Typography style={styles.infoText}>
-                  {group?.memberships?.length || 0}
-                  {group?.membersCapacity
-                    ? ` / ${group?.membersCapacity}`
-                    : ''}{' '}
-                  members
-                </Typography>
-                <View style={styles.dot} />
-                <View style={styles.lockContainer}>
-                  <Icon
-                    name={
-                      group?.privacy === 'PUBLIC'
-                        ? 'lock-open-filled'
-                        : 'lock-filled'
-                    }
-                    size={18}
-                  />
-                  <Typography style={styles.infoText}>
-                    {toPascalCase(group?.privacy || '')} Group
-                  </Typography>
-                </View>
-              </View>
-
-              <View style={styles.infoRow}>
-                <Icon name="map-pin" size={18} />
-                <Typography style={styles.infoText}>
-                  {group?.city.value || 'No location'}
-                </Typography>
-              </View>
-
-              <View style={styles.tagsContainer}>
-                {group?.tags?.map((tag, index) => (
-                  <Chip
-                    variant="outlined"
-                    color="dark"
-                    size="small"
-                    key={index}
-                    label={tag.value}
-                  />
-                ))}
-              </View>
-
-              <View style={styles.descriptionContainer}>
-                {renderDescription()}
-              </View>
-            </View>
-            <View style={styles.shortcutsContainer}>
-              {group?.isMember && (
-                <Button
-                  iconPosition="top"
-                  iconName="plus"
-                  iconSize={24}
-                  variant="outline"
-                  title="Create Post"
-                />
-              )}
-              {group?.isAdmin && (
-                <Button
-                  iconPosition="top"
-                  iconName="route"
-                  iconSize={24}
-                  variant="dark"
-                  title="Create Event"
-                />
-              )}
-            </View>
-
-            {group?.isMember && (
-              <>
-                {/* Upcoming Group Events Section */}
-                <View style={styles.content}>
-                  <View style={styles.sectionHeaderContainer}>
-                    <Subtitle weight="bold">Upcoming Group Events</Subtitle>
-                  </View>
-                  <FlatList
-                    ref={eventsListRef}
-                    data={upcomingEvents}
-                    renderItem={renderEventBanner}
-                    keyExtractor={eventKeyExtractor}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    snapToInterval={Dimensions.get('window').width - spacing.xl}
-                    decelerationRate="fast"
-                    onScroll={handleEventScroll}
-                    scrollEventThrottle={16}
-                    onScrollToIndexFailed={handleScrollToIndexFailed}
-                    contentContainerStyle={styles.eventsListContent}
-                  />
-                  <PageIndicator
-                    totalPages={upcomingEvents.length}
-                    currentPage={currentEventIndex}
-                    onPageChange={handleEventPageChange}
-                    containerStyle={styles.pageIndicator}
-                    type="pill"
-                    indicatorSize={8}
-                    activeIndicatorSize={10}
-                    spacing={8}
-                  />
-                </View>
-
-                {/* Recent Posts Section */}
-                <View style={styles.content}>
-                  <Subtitle weight="bold">Recent Posts</Subtitle>
-                  <LegendList
-                    data={posts}
-                    renderItem={renderFeedPost}
-                    keyExtractor={feedKeyExtractor}
-                    scrollEnabled={false}
-                    contentContainerStyle={styles.feedList}
-                    recycleItems={true} // Enable component recycling for better performance
-                    maintainVisibleContentPosition={true} // Maintain the visible position when data changes
-                  />
-                </View>
-              </>
-            )}
-          </Animated.ScrollView>
-
-          <BottomSheet
-            ref={membersBottomSheetRef}
-            containerStyle={styles.membersBottomSheet}
-            closeOnBackdropPress={true}
-            initialSnap="closed">
-            <View style={styles.membersHeader}>
-              <View>
-                <Subtitle>Members</Subtitle>
-                <Caption color={colors.neutral.grey}>
-                  {members.length} people
-                </Caption>
-              </View>
-              <Button
-                iconName="user-plus-filled"
-                iconSize={20}
-                variant="dark"
-                shape="circle"
+              <PageIndicator
+                totalPages={upcomingEvents.length}
+                currentPage={currentEventIndex}
+                onPageChange={handleEventPageChange}
+                containerStyle={styles.pageIndicator}
+                type="pill"
+                indicatorSize={8}
+                activeIndicatorSize={10}
+                spacing={8}
               />
             </View>
-            {loading ? (
-              <ActivityIndicator size="large" color={colors.primary.main} />
-            ) : (
+
+            {/* Recent Posts Section */}
+            <View style={styles.content}>
+              <Subtitle weight="bold">Recent Posts</Subtitle>
               <LegendList
-                data={members}
-                renderItem={renderMemberItem}
-                keyExtractor={(item: any) => item.id}
-                contentContainerStyle={styles.membersList}
-                showsVerticalScrollIndicator={false}
-                recycleItems={true}
-                maintainVisibleContentPosition={true}
+                data={posts}
+                renderItem={renderFeedPost}
+                keyExtractor={feedKeyExtractor}
+                scrollEnabled={false}
+                contentContainerStyle={styles.feedList}
+                recycleItems={true} // Enable component recycling for better performance
+                maintainVisibleContentPosition={true} // Maintain the visible position when data changes
+              />
+            </View>
+          </>
+        )}
+      </Animated.ScrollView>
+
+      <BottomSheet
+        ref={membersBottomSheetRef}
+        containerStyle={styles.membersBottomSheet}
+        closeOnBackdropPress={true}
+        initialSnap="closed">
+        <View style={styles.membersHeader}>
+          <View>
+            <Subtitle>Members</Subtitle>
+            <Caption color={colors.neutral.grey}>
+              {members.length} people
+            </Caption>
+          </View>
+          <Button
+            iconName="user-plus-filled"
+            iconSize={20}
+            variant="dark"
+            shape="circle"
+          />
+        </View>
+        {loading ? (
+          <ActivityIndicator size="large" color={colors.primary.main} />
+        ) : (
+          <LegendList
+            data={members}
+            renderItem={renderMemberItem}
+            keyExtractor={(item: any) => item.id}
+            contentContainerStyle={styles.membersList}
+            showsVerticalScrollIndicator={false}
+            recycleItems={true}
+            maintainVisibleContentPosition={true}
+          />
+        )}
+      </BottomSheet>
+
+      <Dialog
+        ref={leaveGroupDialogRef}
+        title="Leave Group"
+        message={`Are you sure you want to leave "${group?.name}"?`}
+        variant="confirm"
+        confirmButton={{
+          text: 'Leave',
+          variant: 'primary',
+          onPress: confirmLeaveGroup,
+        }}
+        cancelButton={{
+          text: 'Cancel',
+          variant: 'outline',
+        }}
+      />
+
+      <Dialog
+        ref={changeRoleDialogRef}
+        title="Change Member Role"
+        variant="custom">
+        {selectedMember && (
+          <View style={styles.changeRoleContent}>
+            <Subtitle weight="bold" align="center">
+              {selectedMember.user.firstName} {selectedMember.user.lastName}
+            </Subtitle>
+
+            {loadingRoles ? (
+              <ActivityIndicator size="small" color={colors.primary.main} />
+            ) : (
+              <Dropdown
+                label="Select Role"
+                data={memberRoles as ComponentDropdownItem[]}
+                selectedItem={selectedRole as ComponentDropdownItem}
+                onSelect={handleRoleSelect}
+                searchable={false}
               />
             )}
-          </BottomSheet>
 
-          <Dialog
-            ref={leaveGroupDialogRef}
-            title="Leave Group"
-            message={`Are you sure you want to leave "${group?.name}"?`}
-            variant="confirm"
-            confirmButton={{
-              text: 'Leave',
-              variant: 'primary',
-              onPress: confirmLeaveGroup,
-            }}
-            cancelButton={{
-              text: 'Cancel',
-              variant: 'outline',
-            }}
-          />
+            <View style={styles.dialogButtonsContainer}>
+              <Button
+                title="Cancel"
+                variant="outline"
+                shape="round"
+                onPress={() => changeRoleDialogRef.current?.close()}
+              />
+              <Button
+                title="Change"
+                variant="primary"
+                shape="round"
+                textStyle={{color: colors.neutral.white}}
+                onPress={handleChangeRole}
+                disabled={!selectedRole}
+              />
+            </View>
+          </View>
+        )}
+      </Dialog>
 
-          <Dialog
-            ref={changeRoleDialogRef}
-            title="Change Member Role"
-            variant="custom">
-            {selectedMember && (
-              <View style={styles.changeRoleContent}>
-                <Subtitle weight="bold" align="center">
-                  {selectedMember.user.firstName} {selectedMember.user.lastName}
-                </Subtitle>
-
-                {loadingRoles ? (
-                  <ActivityIndicator size="small" color={colors.primary.main} />
-                ) : (
-                  <Dropdown
-                    label="Select Role"
-                    data={memberRoles as ComponentDropdownItem[]}
-                    selectedItem={selectedRole as ComponentDropdownItem}
-                    onSelect={handleRoleSelect}
-                    searchable={false}
-                  />
-                )}
-
-                <View style={styles.dialogButtonsContainer}>
-                  <Button
-                    title="Cancel"
-                    variant="outline"
-                    shape="round"
-                    onPress={() => changeRoleDialogRef.current?.close()}
-                  />
-                  <Button
-                    title="Change"
-                    variant="primary"
-                    shape="round"
-                    textStyle={{color: colors.neutral.white}}
-                    onPress={handleChangeRole}
-                    disabled={!selectedRole}
-                  />
-                </View>
-              </View>
-            )}
-          </Dialog>
-
-          <Dialog
-            ref={removeMemberDialogRef}
-            title="Remove Member"
-            message={
-              memberToRemove
-                ? `Are you sure you want to remove ${memberToRemove.user.firstName} ${memberToRemove.user.lastName} from the group?`
-                : 'Are you sure you want to remove this member?'
-            }
-            variant="confirm"
-            confirmButton={{
-              text: 'Remove',
-              variant: 'primary',
-              onPress: handleRemoveMember,
-            }}
-            cancelButton={{
-              text: 'Cancel',
-              variant: 'outline',
-            }}
-          />
-        </>
-      )}
+      <Dialog
+        ref={removeMemberDialogRef}
+        title="Remove Member"
+        message={
+          memberToRemove
+            ? `Are you sure you want to remove ${memberToRemove.user.firstName} ${memberToRemove.user.lastName} from the group?`
+            : 'Are you sure you want to remove this member?'
+        }
+        variant="confirm"
+        confirmButton={{
+          text: 'Remove',
+          variant: 'primary',
+          onPress: handleRemoveMember,
+        }}
+        cancelButton={{
+          text: 'Cancel',
+          variant: 'outline',
+        }}
+      />
     </View>
   );
 };
