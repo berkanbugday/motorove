@@ -108,7 +108,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   onPress,
   onJoinPress,
   style,
-  isMember = false,
+  isMember = true,
 }) => {
   const handlePress = () => {
     if (onPress) {

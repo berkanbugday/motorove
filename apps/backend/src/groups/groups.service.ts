@@ -262,6 +262,7 @@ export class GroupsService {
     authToken?: string,
     limit?: number,
     skip?: number,
+    query?: string,
   ) {
     const groups = await this.prisma.group.findMany({
       where: {
@@ -269,6 +270,14 @@ export class GroupsService {
           none: { userId, status: GroupMembershipStatus.APPROVED },
         },
         isActive: true,
+        ...(query
+          ? {
+              name: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            }
+          : {}),
       },
       include: {
         createdBy: true,

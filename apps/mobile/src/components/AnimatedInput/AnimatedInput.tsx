@@ -35,7 +35,8 @@ const zIndex = {
 };
 
 interface BaseAnimatedInputProps {
-  label: string;
+  label?: string;
+  placeholder?: string;
   secureTextEntry?: boolean;
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
   icon?: React.ReactNode;
@@ -44,6 +45,9 @@ interface BaseAnimatedInputProps {
   showPassword?: boolean;
   testID?: string;
   multiline?: boolean;
+  shape?: 'default' | 'round';
+  showClearButton?: boolean;
+  onClearSearch?: () => void;
 }
 
 interface StandaloneAnimatedInputProps extends BaseAnimatedInputProps {
@@ -79,6 +83,7 @@ export function AnimatedInput<T extends FieldValues = any>(
       control,
       name,
       label,
+      placeholder,
       secureTextEntry = false,
       keyboardType = 'default',
       icon,
@@ -88,6 +93,9 @@ export function AnimatedInput<T extends FieldValues = any>(
       showPassword,
       testID,
       multiline = false,
+      shape = 'default',
+      showClearButton = true,
+      onClearSearch,
     } = props as FormAnimatedInputProps<T>;
 
     return (
@@ -97,6 +105,7 @@ export function AnimatedInput<T extends FieldValues = any>(
         render={({field: {onChange, value, onBlur: _onBlur}}) => (
           <AnimatedInputBase
             label={label}
+            placeholder={placeholder}
             value={value}
             onChangeText={onChange}
             secureTextEntry={secureTextEntry}
@@ -108,6 +117,12 @@ export function AnimatedInput<T extends FieldValues = any>(
             showPassword={showPassword}
             testID={testID}
             multiline={multiline}
+            shape={shape}
+            showClearButton={showClearButton}
+            onClearSearch={() => {
+              onChange('');
+              onClearSearch?.();
+            }}
           />
         )}
       />
@@ -117,6 +132,7 @@ export function AnimatedInput<T extends FieldValues = any>(
   // If we're in standalone mode, render directly
   const {
     label,
+    placeholder,
     value,
     onChangeText,
     secureTextEntry = false,
@@ -128,11 +144,15 @@ export function AnimatedInput<T extends FieldValues = any>(
     showPassword,
     testID,
     multiline = false,
+    shape = 'default',
+    showClearButton = true,
+    onClearSearch,
   } = props as StandaloneAnimatedInputProps;
 
   return (
     <AnimatedInputBase
       label={label}
+      placeholder={placeholder}
       value={value}
       onChangeText={onChangeText}
       secureTextEntry={secureTextEntry}
@@ -144,13 +164,20 @@ export function AnimatedInput<T extends FieldValues = any>(
       showPassword={showPassword}
       testID={testID}
       multiline={multiline}
+      shape={shape}
+      showClearButton={showClearButton}
+      onClearSearch={() => {
+        onChangeText('');
+        onClearSearch?.();
+      }}
     />
   );
 }
 
 // The base input component without form integration
 interface AnimatedInputBaseProps {
-  label: string;
+  label?: string;
+  placeholder?: string;
   value: string;
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
@@ -162,10 +189,14 @@ interface AnimatedInputBaseProps {
   showPassword?: boolean;
   testID?: string;
   multiline?: boolean;
+  shape?: 'default' | 'round';
+  showClearButton?: boolean;
+  onClearSearch?: () => void;
 }
 
 function AnimatedInputBase({
   label,
+  placeholder,
   value,
   onChangeText,
   secureTextEntry = false,
@@ -177,6 +208,9 @@ function AnimatedInputBase({
   showPassword,
   testID,
   multiline = false,
+  shape = 'default',
+  showClearButton = false,
+  onClearSearch,
 }: AnimatedInputBaseProps) {
   const [isFocused, setIsFocused] = useState(false);
   const animatedIsFocused = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -192,7 +226,7 @@ function AnimatedInputBase({
 
   const labelStyle: Animated.AnimatedProps<TextStyle> = {
     position: 'absolute',
-    left: LABEL_LEFT_POSITION,
+    left: iconPosition === 'left' ? INPUT_ICON_WIDTH : LABEL_LEFT_POSITION,
     top: animatedIsFocused.interpolate({
       inputRange: [0, 1],
       outputRange: [LABEL_TOP_POSITION, -10],
@@ -206,7 +240,6 @@ function AnimatedInputBase({
       outputRange: [colors.neutral.grey, colors.neutral.black],
     }),
     backgroundColor: colors.neutral.white,
-    paddingHorizontal: spacing.xs,
     zIndex: zIndex.elevated,
     fontWeight: '500',
   };
@@ -218,14 +251,24 @@ function AnimatedInputBase({
   const getInputStyles = () => {
     const baseStyles: any[] = [styles.input, error && styles.inputError];
 
-    if (iconPosition === 'left') {
+    if (icon && iconPosition === 'left') {
       baseStyles.push(styles.inputWithLeftIcon);
-    } else if (iconPosition === 'right') {
+    }
+    if (icon && iconPosition === 'right') {
+      baseStyles.push(styles.inputWithRightIcon);
+    }
+    if (icon && iconPosition === 'right' && showClearButton) {
+      baseStyles.push(styles.inputWithRightIconAndClearButton);
+    } else if (showClearButton) {
       baseStyles.push(styles.inputWithRightIcon);
     }
 
     if (multiline) {
       baseStyles.push(styles.multilineInput);
+    }
+
+    if (shape === 'round') {
+      baseStyles.push(styles.roundInput);
     }
 
     return baseStyles;
@@ -257,11 +300,34 @@ function AnimatedInputBase({
     );
   };
 
+  const renderClearButton = () => {
+    if (showClearButton && value) {
+      return (
+        <TouchableOpacity
+          style={[
+            styles.clearButton,
+            {
+              right:
+                icon && iconPosition === 'right'
+                  ? INPUT_ICON_WIDTH
+                  : ICON_HORIZONTAL_POSITION,
+            },
+          ]}
+          onPress={onClearSearch}
+          testID={`${testID}-clear-button`}>
+          <Icon name="close" size={18} color={colors.neutral.grey} />
+        </TouchableOpacity>
+      );
+    }
+    return null;
+  };
+
   return (
     <View style={styles.inputContainer} testID={testID}>
-      {renderLabelView()}
+      {label && renderLabelView()}
       <TextInput
         ref={inputRef}
+        placeholder={placeholder}
         style={getInputStyles()}
         value={value}
         onChangeText={onChangeText}
@@ -285,6 +351,7 @@ function AnimatedInputBase({
           icon
         )}
       </View>
+      {renderClearButton()}
       {renderError()}
     </View>
   );
@@ -308,6 +375,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.form.inputPaddingHorizontal,
     fontSize: fontSizes.md,
   },
+  roundInput: {
+    borderRadius: radius.round,
+  },
   multilineInput: {
     height: spacing.form.inputHeight * 2,
     paddingTop: spacing.sm,
@@ -320,6 +390,9 @@ const styles = StyleSheet.create({
   inputWithRightIcon: {
     paddingRight: INPUT_ICON_WIDTH,
   },
+  inputWithRightIconAndClearButton: {
+    paddingRight: INPUT_ICON_WIDTH * 1.5,
+  },
   inputError: {
     borderColor: colors.status.error,
   },
@@ -330,6 +403,12 @@ const styles = StyleSheet.create({
     zIndex: zIndex.base,
   },
   rightIcon: {
+    position: 'absolute',
+    right: ICON_HORIZONTAL_POSITION,
+    top: ICON_VERTICAL_POSITION,
+    zIndex: zIndex.base,
+  },
+  clearButton: {
     position: 'absolute',
     right: ICON_HORIZONTAL_POSITION,
     top: ICON_VERTICAL_POSITION,

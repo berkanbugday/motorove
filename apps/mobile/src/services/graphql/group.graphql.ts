@@ -109,3 +109,13 @@ export const GET_JOINED_GROUPS = gql`
   }
   ${GROUP_FRAGMENT}
 `;
+
+// Search groups by name
+export const SEARCH_GROUPS = gql`
+  query SearchGroups($query: String!, $limit: Int, $skip: Int) {
+    groups(limit: $limit, skip: $skip, query: $query) {
+      ...GroupFragment
+    }
+  }
+  ${GROUP_FRAGMENT}
+`;

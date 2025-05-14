@@ -9,6 +9,7 @@ import {
   CreateGroupScreen,
   GroupDetailScreen,
   EditGroupScreen,
+  GroupSearchScreen,
 } from '@screens/group';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -56,6 +57,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="EditGroup"
         component={EditGroupScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="GroupSearch"
+        component={GroupSearchScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

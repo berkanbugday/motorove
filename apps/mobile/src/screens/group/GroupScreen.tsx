@@ -206,7 +206,6 @@ export const GroupScreen = () => {
             currentMembers={item.memberships.length}
             membersCapacity={item.membersCapacity || undefined}
             privacy={item.privacy}
-            isMember={true}
             onPress={() =>
               navigation.navigate('GroupDetail', {groupId: item.id})
             }
@@ -252,7 +251,7 @@ export const GroupScreen = () => {
         secondRightIconName="filter"
         onSecondRightButtonPress={() => {}}
         leftIconName="search"
-        onLeftIconPress={() => {}}
+        onLeftIconPress={() => navigation.navigate('GroupSearch')}
       />
       <Tabs
         items={tabItems}

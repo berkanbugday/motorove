@@ -51,11 +51,12 @@ export class GroupsResolver {
     @Context() context: GqlContext,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+    @Args('query', { type: () => String, nullable: true }) query?: string,
   ) {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.groupsService.findAll(userId, authToken, limit, skip);
+    return this.groupsService.findAll(userId, authToken, limit, skip, query);
   }
 
   @UseGuards(JwtGuard)

@@ -5,6 +5,7 @@ import {
   GET_GROUPS,
   GET_JOINED_GROUPS,
   UPDATE_GROUP,
+  SEARCH_GROUPS,
 } from './graphql/group.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
@@ -249,12 +250,55 @@ export const useGetGroups = (limit = 20, skip = 0) => {
   };
 };
 
+// Hook for searching groups by name
+export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
+  const [hasMore, setHasMore] = useState(true);
+  const {data, loading, error, refetch, fetchMore} = useQuery(SEARCH_GROUPS, {
+    variables: {query, limit, skip},
+    skip: !query || query.trim() === '',
+    onError: errorObj => {
+      loggingService.error('Error searching groups:', errorObj);
+    },
+  });
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading || !query) return;
+
+    try {
+      const result = await fetchMore({
+        variables: {
+          query,
+          skip: data?.groups?.length || 0,
+          limit,
+        },
+      });
+
+      if (result.data.groups.length < limit) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      loggingService.error('Error loading more search results:', error);
+    }
+  }, [data?.groups?.length, fetchMore, hasMore, limit, loading, query]);
+
+  return {
+    groups: (data?.groups as Group[]) || [],
+    loading,
+    error,
+    refetch,
+    loadMore,
+    hasMore,
+  };
+};
+
 // Export as GroupService object
 export const GroupService = {
   useCreateGroup,
   useGetGroup,
   useGetJoinedGroups,
   useGetGroups,
+  useSearchGroups,
+  useUpdateGroup,
 };
 
 export default GroupService;
