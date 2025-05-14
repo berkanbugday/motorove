@@ -75,19 +75,18 @@ export class GroupMembershipsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Boolean)
-  async removeGroupMember(
+  @Mutation(() => GroupMembership)
+  removeGroupMember(
     @Args('removeGroupMemberInput')
     removeGroupMemberInput: RemoveGroupMemberInput,
     @Context() context: RequestContext,
   ) {
     const adminId: string = context.req.user.id;
-    const result = await this.groupMembershipsService.removeMember(
+    return this.groupMembershipsService.removeMember(
       removeGroupMemberInput.groupId,
       removeGroupMemberInput.userId,
       adminId,
     );
-    return !!result;
   }
 
   @UseGuards(JwtGuard)

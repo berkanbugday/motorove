@@ -41,6 +41,7 @@ import {useAuth} from '@contexts';
 import {
   useAddGroupMember,
   useChangeMemberRole,
+  useRemoveGroupMember,
 } from '@services/group-membership.service';
 import Dialog, {DialogRef} from '@components/Dialog';
 import Dropdown from '@components/Dropdown';
@@ -407,20 +408,7 @@ export const GroupDetailScreen = () => {
   const {user} = useAuth();
   const [addGroupMember] = useAddGroupMember();
   const [changeMemberRole] = useChangeMemberRole();
-
-  // Handle opening the change role dialog
-  const handleOpenChangeRoleDialog = useCallback(
-    (member: any) => {
-      setSelectedMember(member);
-      // Find the current role in the dropdown items
-      const currentRole = memberRoles.find(
-        role => role.value.toUpperCase() === member.role.toUpperCase(),
-      );
-      setSelectedRole(currentRole || null);
-      changeRoleDialogRef.current?.open();
-    },
-    [memberRoles],
-  );
+  const [removeGroupMember] = useRemoveGroupMember();
 
   // Handle opening the remove member dialog
   const handleOpenRemoveMemberDialog = useCallback((member: any) => {
@@ -435,7 +423,14 @@ export const GroupDetailScreen = () => {
     }
 
     try {
-      // TODO: Replace with actual API call to remove member
+      await removeGroupMember({
+        variables: {
+          input: {
+            groupId: groupId,
+            userId: memberToRemove.user.id,
+          },
+        },
+      });
       loggingService.info(
         `Removing member ${memberToRemove.user.firstName} ${memberToRemove.user.lastName} from group ${groupId}`,
       );
@@ -459,6 +454,20 @@ export const GroupDetailScreen = () => {
       });
     }
   }, [memberToRemove, groupId, refetch]);
+
+  // Handle opening the change role dialog
+  const handleOpenChangeRoleDialog = useCallback(
+    (member: any) => {
+      setSelectedMember(member);
+      // Find the current role in the dropdown items
+      const currentRole = memberRoles.find(
+        role => role.value.toUpperCase() === member.role.toUpperCase(),
+      );
+      setSelectedRole(currentRole || null);
+      changeRoleDialogRef.current?.open();
+    },
+    [memberRoles],
+  );
 
   // Handle role change
   const handleChangeRole = useCallback(async () => {

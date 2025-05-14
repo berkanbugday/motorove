@@ -122,7 +122,7 @@ type Mutation {
   changeMemberRole(changeMemberRoleInput: ChangeMemberRoleInput!): GroupMembership!
   createGroup(createGroupInput: CreateGroupInput!): Group!
   refreshToken(token: String!): AuthResponse!
-  removeGroupMember(removeGroupMemberInput: RemoveGroupMemberInput!): Boolean!
+  removeGroupMember(removeGroupMemberInput: RemoveGroupMemberInput!): GroupMembership!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
   updateGroup(updateGroupInput: UpdateGroupInput!): Group!

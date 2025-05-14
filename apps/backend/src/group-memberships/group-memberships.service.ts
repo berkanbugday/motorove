@@ -211,6 +211,10 @@ export class GroupMembershipsService {
             userId,
           },
         },
+        include: {
+          group: true,
+          user: true,
+        },
       });
     }
 
@@ -243,6 +247,10 @@ export class GroupMembershipsService {
           groupId,
           userId,
         },
+      },
+      include: {
+        group: true,
+        user: true,
       },
     });
   }
