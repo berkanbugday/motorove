@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screen.horizontal,
   },
   leftSection: {
-    width: '5%',
+    width: '10%',
     alignItems: 'flex-start',
   },
   backButton: {
@@ -339,9 +339,8 @@ const styles = StyleSheet.create({
   },
   titleSection: {
     flex: 1,
-    width: '85%',
+    width: '80%',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   rightSection: {
     width: '10%',
