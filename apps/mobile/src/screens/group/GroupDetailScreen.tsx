@@ -25,7 +25,7 @@ import {
   MainScreenNavigationProp,
   MainStackParamList,
 } from '@navigation/types/navigationTypes';
-import {useGetGroup} from '@services/group.service';
+import {Group, useGetGroup} from '@services/group.service';
 import {Icon, IconName} from '@components/Icon';
 import {Chip} from '@components/Chip';
 import {Button} from '@components/Button';
@@ -654,84 +654,87 @@ export const GroupDetailScreen = () => {
     [],
   );
 
-  const handleJoinGroup = useCallback(async () => {
-    if (
-      group?.membersCapacity &&
-      group?.memberships?.length >= group?.membersCapacity
-    ) {
-      loggingService.info(`Group: ${groupId} is full. Cannot join.`);
-      showToast({
-        text1: 'Warning',
-        text2: 'Group is full. Cannot join.',
-        type: 'warning',
-      });
-      return;
-    } else {
-      try {
-        if (user && user.id) {
-          await addGroupMember({
-            variables: {
-              input: {
-                groupId: groupId,
-                userId: user.id,
+  const handleJoinGroup = useCallback(
+    async (_group: Group) => {
+      if (
+        _group?.membersCapacity &&
+        _group?.memberships?.length >= _group?.membersCapacity
+      ) {
+        loggingService.info(`Group: ${groupId} is full. Cannot join.`);
+        showToast({
+          text1: 'Warning',
+          text2: 'Group is full. Cannot join.',
+          type: 'warning',
+        });
+        return;
+      } else {
+        try {
+          if (user && user.id) {
+            await addGroupMember({
+              variables: {
+                input: {
+                  groupId: groupId,
+                  userId: user.id,
+                },
               },
-            },
-            onCompleted: () => {
-              if (group?.privacy === 'PUBLIC') {
-                loggingService.info(`Successfully joined group: ${groupId}`);
+              onCompleted: () => {
+                if (_group?.privacy === 'PUBLIC') {
+                  loggingService.info(`Successfully joined group: ${groupId}`);
+                  showToast({
+                    text1: 'Success',
+                    text2: 'You have successfully joined the group!',
+                    type: 'success',
+                  });
+                } else {
+                  loggingService.info(
+                    `Successfully requested to join group: ${groupId}`,
+                  );
+                  showToast({
+                    text1: 'Success',
+                    text2: 'Request sent. Please wait for approval.',
+                    type: 'success',
+                  });
+                }
+                // Refresh the group data
+                refetch && refetch();
+              },
+              onError: error => {
+                loggingService.error(`Error joining group: ${groupId}`, error);
                 showToast({
-                  text1: 'Success',
-                  text2: 'You have successfully joined the group!',
-                  type: 'success',
+                  text1: 'Error',
+                  text2: 'Failed to join the group. Please try again.',
+                  type: 'error',
                 });
-              } else {
-                loggingService.info(
-                  `Successfully requested to join group: ${groupId}`,
-                );
-                showToast({
-                  text1: 'Success',
-                  text2: 'Request sent. Please wait for approval.',
-                  type: 'success',
-                });
-              }
-              // Refresh the group data
-              refetch && refetch();
-            },
-            onError: error => {
-              loggingService.error(`Error joining group: ${groupId}`, error);
-              showToast({
-                text1: 'Error',
-                text2: 'Failed to join the group. Please try again.',
-                type: 'error',
-              });
-            },
-          });
-        } else {
-          loggingService.error('Cannot join group: User not authenticated');
+              },
+            });
+          } else {
+            loggingService.error('Cannot join group: User not authenticated');
+            showToast({
+              text1: 'Error',
+              text2: 'You must be logged in to join a group.',
+              type: 'error',
+            });
+          }
+        } catch (error) {
+          loggingService.error(`Error joining group: ${groupId}`, error);
           showToast({
             text1: 'Error',
-            text2: 'You must be logged in to join a group.',
+            text2: 'Failed to join the group. Please try again.',
             type: 'error',
           });
         }
-      } catch (error) {
-        loggingService.error(`Error joining group: ${groupId}`, error);
-        showToast({
-          text1: 'Error',
-          text2: 'Failed to join the group. Please try again.',
-          type: 'error',
-        });
       }
-    }
-  }, [
-    addGroupMember,
-    groupId,
-    group?.membersCapacity,
-    group?.memberships,
-    group?.privacy,
-    refetch,
-    user?.id,
-  ]);
+    },
+    [
+      addGroupMember,
+      groupId,
+      group?.membersCapacity,
+      group?.memberships,
+      group?.privacy,
+      refetch,
+      user?.id,
+    ],
+  );
 
   const confirmLeaveGroup = useCallback(async () => {
     try {
@@ -757,26 +760,29 @@ export const GroupDetailScreen = () => {
   }, [groupId, refetch, navigation]);
 
   // Handle dropdown item select
-  const handleDropdownMenuItemSelect = useCallback((item: DropdownMenuItem) => {
-    switch (item.id) {
-      case 'edit_group':
-        navigateToScreen(navigation, 'EditGroup', {groupId});
-        break;
-      case 'members':
-        membersBottomSheetRef.current?.open('full');
-        break;
-      case 'leave_group':
-        leaveGroupDialogRef.current?.open();
-        break;
-      case 'join_group':
-        handleJoinGroup();
-        break;
-      default:
-        loggingService.info(
-          `Unhandled action: ${item.id} for group: ${groupId}`,
-        );
-    }
-  }, []);
+  const handleDropdownMenuItemSelect = useCallback(
+    (item: DropdownMenuItem, _group: Group) => {
+      switch (item.id) {
+        case 'edit_group':
+          navigateToScreen(navigation, 'EditGroup', {groupId});
+          break;
+        case 'members':
+          membersBottomSheetRef.current?.open('full');
+          break;
+        case 'leave_group':
+          leaveGroupDialogRef.current?.open();
+          break;
+        case 'join_group':
+          handleJoinGroup(_group);
+          break;
+        default:
+          loggingService.info(
+            `Unhandled action: ${item.id} for group: ${groupId}`,
+          );
+      }
+    },
+    [],
+  );
 
   // Handle role selection in dropdown
   const handleRoleSelect = useCallback((item: ComponentDropdownItem | null) => {
@@ -921,7 +927,9 @@ export const GroupDetailScreen = () => {
           group?.isAdmin,
           group?.isMember,
         )}
-        onDropdownItemSelect={item => handleDropdownMenuItemSelect(item)}
+        onDropdownItemSelect={item =>
+          handleDropdownMenuItemSelect(item, group as Group)
+        }
       />
 
       {loading ? (
