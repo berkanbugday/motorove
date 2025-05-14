@@ -717,11 +717,6 @@ export const GroupDetailScreen = () => {
               },
               onError: error => {
                 loggingService.error(`Error joining group: ${groupId}`, error);
-                showToast({
-                  text1: 'Error',
-                  text2: 'Failed to join the group. Please try again.',
-                  type: 'error',
-                });
               },
             });
           } else {

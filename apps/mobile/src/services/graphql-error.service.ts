@@ -23,7 +23,6 @@ class GraphQLErrorService {
     // Default error type
     let errorType = ErrorType.API;
     let handled = false;
-    console.log('error', error);
 
     // Get error code(s) from the GraphQL error
     const errorCode = error.extensions?.code;

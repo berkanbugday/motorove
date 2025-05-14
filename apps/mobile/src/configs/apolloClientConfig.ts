@@ -50,13 +50,7 @@ const errorLink = onError(
     // Handle GraphQL errors
     if (graphQLErrors) {
       for (const err of graphQLErrors) {
-        const {message, locations, path, extensions} = err;
-        // Log error details to console for debugging
-        const pathString = path ? path.join('.') : '';
-        loggingService.error(
-          `[GraphQL error]: Message: ${message}, Path: ${pathString}`,
-        );
-
+        const {locations, path, extensions} = err;
         // Use the standalone service instead of the hook
         graphQLErrorService.handleGraphQLError(err);
 
