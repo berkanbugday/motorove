@@ -309,15 +309,15 @@ const MemberItem = React.memo(
               },
             ]}>
             <Button
-              iconName="user-gear"
-              iconSize={20}
+              iconName="user-gear-filled"
+              iconSize={24}
               variant="secondary"
               shape="circle"
               onPress={() => onChangeRole && onChangeRole(item)}
             />
             <Button
               iconName="user-slash-filled"
-              iconSize={20}
+              iconSize={24}
               variant="primary"
               shape="circle"
               onPress={() => onRemoveMember && onRemoveMember(item)}
