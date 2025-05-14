@@ -51,7 +51,7 @@ import {
   useEnumGroupMemberRoles,
 } from '@services/enum.service';
 import {DropdownItem as ComponentDropdownItem} from '@components/Dropdown/types';
-
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
 // Feed post interface
@@ -366,7 +366,7 @@ export const GroupDetailScreen = () => {
   const leaveGroupDialogRef = useRef<DialogRef>(null);
   const changeRoleDialogRef = useRef<DialogRef>(null);
   const removeMemberDialogRef = useRef<DialogRef>(null);
-
+  const insets = useSafeAreaInsets();
   // State for selected member and role
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [memberToRemove, setMemberToRemove] = useState<any>(null);
@@ -389,20 +389,20 @@ export const GroupDetailScreen = () => {
 
   // Create interpolated values for animations
   const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [150, 80],
+    inputRange: [0, 100 + insets.top],
+    outputRange: [150 + insets.top, 50 + insets.top],
     extrapolate: 'clamp',
   });
 
   const logoSize = scrollY.interpolate({
-    inputRange: [0, 100],
+    inputRange: [0, 100 + insets.top],
     outputRange: [100, 60],
     extrapolate: 'clamp',
   });
 
   const logoMarginTop = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [-50, -100],
+    inputRange: [0, 100 + insets.top],
+    outputRange: [-50 + insets.top, -130 + insets.top],
     extrapolate: 'clamp',
   });
 
@@ -988,7 +988,7 @@ export const GroupDetailScreen = () => {
       </Animated.View>
 
       <Animated.ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, {paddingTop: rh(110) + insets.top}]}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16} // Ensures smooth scrolling
         refreshControl={
@@ -1289,7 +1289,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    paddingTop: rh(100),
     zIndex: 2,
   },
   infoContainer: {

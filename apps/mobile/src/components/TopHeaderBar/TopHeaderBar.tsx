@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 56,
+    height: 50,
     paddingHorizontal: spacing.screen.horizontal,
   },
   leftSection: {

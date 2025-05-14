@@ -92,19 +92,26 @@ class AuthService {
     }
   }
 
-  // Refresh token
+  // Public method to refresh token with mutex protection
   async refreshToken(): Promise<AuthResponse> {
-    // If there's already a refresh in progress, return the existing promise
+    // If already refreshing, return the existing promise
     if (isRefreshing && refreshPromise) {
-      loggingService.info('Refresh already in progress, reusing promise');
       return refreshPromise;
     }
 
     try {
+      // Set the mutex
       isRefreshing = true;
+      // Create and store the refresh promise
       refreshPromise = this._refreshToken();
+      // Wait for the refresh to complete
       return await refreshPromise;
+    } catch (error) {
+      // Log and rethrow the error
+      loggingService.error('Refresh token failed:', error);
+      throw error;
     } finally {
+      // Reset the mutex state
       isRefreshing = false;
       refreshPromise = null;
     }
@@ -118,75 +125,67 @@ class AuthService {
         STORAGE_KEYS.REFRESH_TOKEN,
       );
 
-      if (refreshToken) {
-        const parsedRefreshToken = JSON.parse(refreshToken);
-
-        // Clear the refresh token from storage immediately to prevent reuse
-        await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-
-        try {
-          loggingService.info('Making refresh token request to server');
-          const {data, errors} = await apolloClient.mutate({
-            mutation: REFRESH_TOKEN,
-            variables: {
-              token: parsedRefreshToken,
-            },
-          });
-
-          if (errors) {
-            loggingService.error(
-              'Token refresh error from GraphQL:',
-              errors[0],
-            );
-            throw errors[0];
-          }
-
-          if (!data || !data.refreshToken) {
-            loggingService.error('Refresh token response missing data');
-            throw new Error('Invalid refresh token response');
-          }
-
-          // Convert GraphQL response to our AuthResponse format
-          const authResponse = this.convertGraphQLAuthResponse(
-            data.refreshToken,
-          );
-
-          if (!authResponse.session || !authResponse.session.access_token) {
-            loggingService.error('Refresh token response missing token data');
-            throw new Error('Invalid token data in refresh response');
-          }
-
-          loggingService.info('Token refresh successful, saving new auth data');
-          await this.saveAuthData(authResponse);
-          return authResponse;
-        } catch (error) {
-          // Check for token reuse or token expiration errors
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-
-          if (
-            errorMessage.includes('Invalid Refresh Token: Already Used') ||
-            errorMessage.includes('Token has expired')
-          ) {
-            loggingService.error(
-              'Refresh token invalid or already used:',
-              errorMessage,
-            );
-            // Clear auth data on refresh token error
-            await this.clearAuthData();
-            throw new Error('Session expired. Please sign in again.');
-          }
-
-          // For other errors, rethrow
-          throw error;
-        }
-      } else {
-        loggingService.error('No refresh token available');
+      if (!refreshToken) {
+        loggingService.error('No refresh token found in storage');
         throw new Error('No refresh token available');
       }
+
+      const parsedRefreshToken = JSON.parse(refreshToken);
+
+      // Store the refresh token in a variable but don't remove it yet
+      // We'll only remove it after successful refresh to prevent token loss on network issues
+
+      try {
+        loggingService.info('Making refresh token request to server');
+        const {data, errors} = await apolloClient.mutate({
+          mutation: REFRESH_TOKEN,
+          variables: {
+            token: parsedRefreshToken,
+          },
+        });
+
+        if (errors) {
+          loggingService.error('Token refresh error from GraphQL:', errors[0]);
+          throw errors[0];
+        }
+
+        if (!data || !data.refreshToken) {
+          loggingService.error('Refresh token response missing data');
+          throw new Error('Invalid refresh token response');
+        }
+
+        // Now that we have a successful response, remove the old refresh token
+        await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+
+        // Convert GraphQL response to our AuthResponse format
+        const authResponse = this.convertGraphQLAuthResponse(data.refreshToken);
+
+        if (!authResponse.session || !authResponse.session.access_token) {
+          loggingService.error('Refresh token response missing token data');
+          throw new Error('Invalid token data in refresh response');
+        }
+
+        loggingService.info('Token refresh successful, saving new auth data');
+        await this.saveAuthData(authResponse);
+        return authResponse;
+      } catch (error) {
+        // If this is a "token already used" error, we need to remove the token
+        if (
+          error instanceof Error &&
+          (error.message.includes('Token already used') ||
+            error.message.includes('Invalid Refresh Token'))
+        ) {
+          await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        }
+
+        // Log and rethrow the error
+        loggingService.error('Token refresh request failed:', error);
+        throw error;
+      }
     } catch (error) {
-      loggingService.error('Token refresh error:', error);
-      // Clear auth data on refresh failure
+      // If we get here, there was either no token or another error
+      loggingService.error('Refresh token operation failed:', error);
+      // Force clear auth data in case of critical errors
       await this.clearAuthData();
       throw error;
     }
@@ -210,7 +209,7 @@ class AuthService {
         const willExpireSoon =
           parsedData.expiresAt &&
           parsedData.expiresAt > now &&
-          parsedData.expiresAt < now + 60000; // Will expire in less than a minute
+          parsedData.expiresAt < now + 300000; // Will expire in less than 5 minutes (increased from 1 minute)
 
         // Only try to refresh if we have both an expired/expiring token AND a refresh token
         if ((isTokenExpired || willExpireSoon) && parsedData.refreshToken) {
@@ -232,6 +231,8 @@ class AuthService {
 
             // If token is expired, return logged out state
             if (isTokenExpired) {
+              // Force sign out if token is expired and refresh failed
+              await this.signOut();
               return {
                 user: null,
                 accessToken: null,
