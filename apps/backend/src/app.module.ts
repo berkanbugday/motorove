@@ -7,7 +7,7 @@ import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { CoreModule } from './core/core.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { ConfigService } from './core/config/config.service';
 import { GroupsModule } from './groups/groups.module';
@@ -15,6 +15,8 @@ import { GroupMembershipsModule } from './group-memberships/group-memberships.mo
 import { EnumsModule } from './enums/enums.module';
 import { CitiesModule } from './cities/cities.module';
 import { GroupTagsModule } from './group-tags/group-tags.module';
+import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter';
+
 @Module({
   imports: [
     CoreModule,
@@ -64,6 +66,10 @@ import { GroupTagsModule } from './group-tags/group-tags.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GraphqlExceptionFilter,
     },
   ],
 })

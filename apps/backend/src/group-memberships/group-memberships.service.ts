@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
@@ -89,7 +90,7 @@ export class GroupMembershipsService {
     );
 
     if (existingMembership) {
-      throw new ForbiddenException('User is already a member of this group');
+      throw new ConflictException('User is already a member of this group');
     }
 
     // Add the user as a member

@@ -6,3 +6,4 @@ export * from './enum.service';
 export * from './group.service';
 export * from './city.service';
 export * from './group-tag.service';
+export * from './graphql-error.service';

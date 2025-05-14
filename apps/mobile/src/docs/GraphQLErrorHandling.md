@@ -7,9 +7,10 @@ This document explains the GraphQL error handling system implemented in the mobi
 The error handling system consists of several components working together:
 
 1. **Apollo Client Error Link**: Intercepts GraphQL errors at the network level
-2. **useGraphQLErrorHandler Hook**: Provides specialized handling for GraphQL errors in components
-3. **Error Utilities**: Converts technical error messages to user-friendly messages
-4. **Toast Notifications**: Displays user-friendly error messages to the user
+2. **graphQLErrorService**: Core service that implements GraphQL error handling logic
+3. **useGraphQLErrorHandler Hook**: Provides React component access to the graphQLErrorService
+4. **Error Utilities**: Converts technical error messages to user-friendly messages
+5. **Toast Notifications**: Displays user-friendly error messages to the user
 
 ## Key Features
 
@@ -31,15 +32,22 @@ Located in `src/configs/apolloClientConfig.ts`, the error link intercepts GraphQ
 - Retries failed operations after token refresh
 - Checks network connectivity to distinguish between offline and server errors
 
-### 2. useGraphQLErrorHandler Hook
+### 2. GraphQL Error Service
 
-Located in `src/hooks/useGraphQLErrorHandler.ts`, this hook provides specialized handling for GraphQL errors in components:
+Located in `src/services/graphql-error.service.ts`, this service provides core error handling functionality:
 
 - Handles specific GraphQL error codes with appropriate responses
-- Provides utility methods for wrapping GraphQL operations with error handling
-- Integrates with the existing error handling system
+- Provides utilities for wrapping GraphQL operations with error handling
+- Used by both Apollo client and the React hook to avoid code duplication
 
-### 3. Error Utilities
+### 3. useGraphQLErrorHandler Hook
+
+Located in `src/hooks/useGraphQLErrorHandler.ts`, this hook provides React components access to the GraphQL error service:
+
+- Wraps the graphQLErrorService for use in React components
+- Maintains the same API as the service for consistency
+
+### 4. Error Utilities
 
 Located in `src/utils/errorUtils.ts`, these utilities convert technical error messages to user-friendly messages:
 
@@ -101,6 +109,32 @@ const MyComponent = () => {
 };
 ```
 
+## Outside of React Components
+
+For handling GraphQL errors outside of React components (like in services or utilities):
+
+```typescript
+import {graphQLErrorService} from '@services/graphql-error.service';
+
+// Handle a specific GraphQL error
+graphQLErrorService.handleGraphQLError(error);
+
+// Wrap a function with error handling
+const wrappedFunction = graphQLErrorService.withGraphQLErrorHandling(
+  async params => {
+    // Some async operation that might throw a GraphQL error
+    return await someOperation(params);
+  },
+  {
+    successMessage: 'Operation successful!',
+    fallbackErrorMessage: 'Operation failed',
+  },
+);
+
+// Call the wrapped function
+const result = await wrappedFunction(params);
+```
+
 ## Complete Example
 
 See `src/examples/GraphQLErrorHandlingExample.tsx` for a complete example of how to use the GraphQL error handling system.
@@ -117,8 +151,9 @@ The system handles the following GraphQL error codes:
 
 ## Best Practices
 
-1. Always use the `useGraphQLErrorHandler` hook for handling GraphQL errors
-2. Provide fallback error messages for better user experience
-3. Add success messages for successful operations
-4. Handle network errors appropriately
-5. Consider implementing retry logic for intermittent failures
+1. In React components, use the `useGraphQLErrorHandler` hook
+2. Outside React components, use the `graphQLErrorService` directly
+3. Provide fallback error messages for better user experience
+4. Add success messages for successful operations
+5. Handle network errors appropriately
+6. Consider implementing retry logic for intermittent failures

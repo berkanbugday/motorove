@@ -17,6 +17,7 @@ import authService from '@services/auth.service';
 import {loggingService} from '@services/index';
 import {RetryLink} from '@apollo/client/link/retry';
 import {Platform} from 'react-native';
+import {graphQLErrorService} from '@services/index';
 
 // Create a retry link to automatically retry failed requests
 const retryLink = new RetryLink({
@@ -55,6 +56,9 @@ const errorLink = onError(
         loggingService.error(
           `[GraphQL error]: Message: ${message}, Path: ${pathString}`,
         );
+
+        // Use the standalone service instead of the hook
+        graphQLErrorService.handleGraphQLError(err);
 
         // Send to Sentry with relevant metadata
         captureException(err, {

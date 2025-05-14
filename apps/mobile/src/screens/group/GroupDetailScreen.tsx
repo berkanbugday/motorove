@@ -337,7 +337,12 @@ const MemberItem = React.memo(
                 }),
               },
             ]}>
-            <Button title="View Profile" variant="outline" shape="round" />
+            <Button
+              title="View Profile"
+              variant="outline"
+              shape="round"
+              size="small"
+            />
           </Animated.View>
         )}
       </TouchableOpacity>
