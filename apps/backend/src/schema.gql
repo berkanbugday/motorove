@@ -142,8 +142,8 @@ type Query {
   groupMemberships: [GroupMembership!]!
   groupTag(id: ID!): GroupTag
   groupTags: [GroupTag!]!
-  groups: [Group!]!
-  joinedGroups: [Group!]!
+  groups(limit: Int, skip: Int): [Group!]!
+  joinedGroups(limit: Int, skip: Int): [Group!]!
   me: User!
   myGroupMemberships: [GroupMembership!]!
 }

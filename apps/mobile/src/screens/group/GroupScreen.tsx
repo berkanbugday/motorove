@@ -21,25 +21,29 @@ import {Button} from '@components/Button';
  * Groups Screen - Displays user groups and allows discovery of new groups
  */
 export const GroupScreen = () => {
-  const [activeTab, setActiveTab] = useState('joined');
+  const [activeTab, setActiveTab] = useState('explore');
   const [refreshingJoinedGroups, setRefreshingJoinedGroups] = useState(false);
   const [refreshingAllGroups, setRefreshingAllGroups] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
 
-  // Fetch joined groups
+  // Fetch joined groups with pagination
   const {
     groups: joinedGroups,
     loading: joinedGroupsLoading,
     error: joinedGroupsError,
     refetch: refetchJoinedGroups,
+    loadMore: loadMoreJoinedGroups,
+    hasMore: hasMoreJoinedGroups,
   } = useGetJoinedGroups();
 
-  // Fetch all groups
+  // Fetch all groups with pagination
   const {
     groups: allGroups,
     loading: allGroupsLoading,
     error: allGroupsError,
     refetch: refetchAllGroups,
+    loadMore: loadMoreAllGroups,
+    hasMore: hasMoreAllGroups,
   } = useGetGroups();
 
   // Handle refresh joined groups
@@ -58,7 +62,7 @@ export const GroupScreen = () => {
 
   // Render joined groups list
   const renderJoinedGroups = () => {
-    if (joinedGroupsLoading && !refreshingJoinedGroups) {
+    if (joinedGroupsLoading && !refreshingJoinedGroups && hasMoreJoinedGroups) {
       return (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary.main} />
@@ -134,13 +138,15 @@ export const GroupScreen = () => {
         }
         recycleItems={true} // Enable component recycling for better performance
         maintainVisibleContentPosition={true} // Maintain the visible position when data changes
+        onEndReached={loadMoreJoinedGroups}
+        onEndReachedThreshold={0.3}
       />
     );
   };
 
   // Render all groups list
   const renderAllGroups = () => {
-    if (allGroupsLoading && !refreshingAllGroups) {
+    if (allGroupsLoading && !refreshingAllGroups && hasMoreAllGroups) {
       return (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary.main} />
@@ -216,20 +222,22 @@ export const GroupScreen = () => {
         }
         recycleItems={true} // Enable component recycling for better performance
         maintainVisibleContentPosition={true} // Maintain the visible position when data changes
+        onEndReached={loadMoreAllGroups}
+        onEndReachedThreshold={0.3}
       />
     );
   };
 
   const tabItems = [
     {
-      key: 'joined',
-      label: 'Joined',
-      content: <View style={styles.tabContent}>{renderJoinedGroups()}</View>,
-    },
-    {
       key: 'explore',
       label: 'Explore',
       content: <View style={styles.tabContent}>{renderAllGroups()}</View>,
+    },
+    {
+      key: 'joined',
+      label: 'Joined',
+      content: <View style={styles.tabContent}>{renderJoinedGroups()}</View>,
     },
   ];
 

@@ -8,6 +8,7 @@ import {
 } from './graphql/group.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
+import {useState, useCallback} from 'react';
 
 // Type definitions
 export interface CreateGroupInput {
@@ -168,34 +169,83 @@ export const useGetGroup = (id: string) => {
 };
 
 // Hook for getting user's groups
-export const useGetJoinedGroups = () => {
-  const {data, loading, error, refetch} = useQuery(GET_JOINED_GROUPS, {
-    onError: errorObj => {
-      loggingService.error('Error fetching user groups:', errorObj);
+export const useGetJoinedGroups = (limit = 20, skip = 0) => {
+  const [hasMore, setHasMore] = useState(true);
+  const {data, loading, error, refetch, fetchMore} = useQuery(
+    GET_JOINED_GROUPS,
+    {
+      variables: {limit, skip},
+      onError: errorObj => {
+        loggingService.error('Error fetching user groups:', errorObj);
+      },
     },
-  });
+  );
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) return;
+
+    try {
+      const result = await fetchMore({
+        variables: {
+          skip: data?.joinedGroups?.length || 0,
+          limit,
+        },
+      });
+
+      if (result.data.joinedGroups.length < limit) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      loggingService.error('Error loading more joined groups:', error);
+    }
+  }, [data?.joinedGroups?.length, fetchMore, hasMore, limit, loading]);
 
   return {
     groups: (data?.joinedGroups as Group[]) || [],
     loading,
     error,
     refetch,
+    loadMore,
+    hasMore,
   };
 };
 
 // Hook for getting all groups
-export const useGetGroups = () => {
-  const {data, loading, error, refetch} = useQuery(GET_GROUPS, {
+export const useGetGroups = (limit = 20, skip = 0) => {
+  const [hasMore, setHasMore] = useState(true);
+  const {data, loading, error, refetch, fetchMore} = useQuery(GET_GROUPS, {
+    variables: {limit, skip},
     onError: errorObj => {
       loggingService.error('Error fetching all groups:', errorObj);
     },
   });
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) return;
+
+    try {
+      const result = await fetchMore({
+        variables: {
+          skip: data?.groups?.length || 0,
+          limit,
+        },
+      });
+
+      if (result.data.groups.length < limit) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      loggingService.error('Error loading more groups:', error);
+    }
+  }, [data?.groups?.length, fetchMore, hasMore, limit, loading]);
 
   return {
     groups: (data?.groups as Group[]) || [],
     loading,
     error,
     refetch,
+    loadMore,
+    hasMore,
   };
 };
 

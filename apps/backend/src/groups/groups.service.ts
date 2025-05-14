@@ -257,7 +257,12 @@ export class GroupsService {
     return await this.findOne(id, userId, authToken);
   }
 
-  async findAll(userId: string, authToken?: string) {
+  async findAll(
+    userId: string,
+    authToken?: string,
+    limit?: number,
+    skip?: number,
+  ) {
     const groups = await this.prisma.group.findMany({
       where: {
         memberships: {
@@ -281,6 +286,11 @@ export class GroupsService {
             user: true,
           },
         },
+      },
+      take: limit || undefined,
+      skip: skip || undefined,
+      orderBy: {
+        createdAt: 'desc', // Show newest groups first
       },
     });
 
@@ -386,7 +396,12 @@ export class GroupsService {
     };
   }
 
-  async findJoinedGroups(userId: string, authToken?: string) {
+  async findJoinedGroups(
+    userId: string,
+    authToken?: string,
+    limit?: number,
+    skip?: number,
+  ) {
     const groups = await this.prisma.group.findMany({
       where: {
         memberships: {
@@ -413,6 +428,11 @@ export class GroupsService {
             user: true,
           },
         },
+      },
+      take: limit || undefined,
+      skip: skip || undefined,
+      orderBy: {
+        createdAt: 'desc', // Show newest groups first
       },
     });
 

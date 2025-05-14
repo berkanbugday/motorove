@@ -6,6 +6,7 @@ import { UpdateGroupInput } from './dto/update-group.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Request } from 'express';
+import { Int } from '@nestjs/graphql';
 
 interface GqlContext {
   req: Request & {
@@ -46,11 +47,15 @@ export class GroupsResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => [Group], { name: 'groups' })
-  findAll(@Context() context: GqlContext) {
+  findAll(
+    @Context() context: GqlContext,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+  ) {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.groupsService.findAll(userId, authToken);
+    return this.groupsService.findAll(userId, authToken, limit, skip);
   }
 
   @UseGuards(JwtGuard)
@@ -64,11 +69,15 @@ export class GroupsResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => [Group], { name: 'joinedGroups' })
-  findJoinedGroups(@Context() context: GqlContext) {
+  findJoinedGroups(
+    @Context() context: GqlContext,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+  ) {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.groupsService.findJoinedGroups(userId, authToken);
+    return this.groupsService.findJoinedGroups(userId, authToken, limit, skip);
   }
 
   @UseGuards(JwtGuard)
