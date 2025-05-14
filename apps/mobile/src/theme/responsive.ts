@@ -35,7 +35,7 @@ export const rs = (size: number): number => {
  * @returns Responsive horizontal size in pixels
  */
 export const rw = (size: number): number => {
-  return Math.round(size * widthScale);
+  return Math.round(size / widthScale);
 };
 
 /**
@@ -44,7 +44,7 @@ export const rw = (size: number): number => {
  * @returns Responsive vertical size in pixels
  */
 export const rh = (size: number): number => {
-  return Math.round(size * heightScale);
+  return Math.round(size / heightScale);
 };
 
 /**

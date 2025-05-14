@@ -9,9 +9,10 @@ import {
   ActivityIndicator,
   Dimensions,
   FlatList,
+  RefreshControl,
 } from 'react-native';
 import {LegendList} from '@legendapp/list';
-import {colors, commonStyles, getShadow, radius, spacing} from '@theme';
+import {colors, commonStyles, getShadow, radius, rh, spacing} from '@theme';
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {
   BodySmall,
@@ -353,6 +354,7 @@ export const GroupDetailScreen = () => {
   const {groupId} = route.params;
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [posts, setPosts] = useState<FeedPost[]>(groupFeedPosts);
+  const [refreshing, setRefreshing] = useState(false);
   const membersBottomSheetRef = useRef<BottomSheetRef>(null);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const eventsListRef = useRef<FlatList>(null);
@@ -401,6 +403,16 @@ export const GroupDetailScreen = () => {
 
   // Use the useGetGroup hook to fetch the group data
   const {group, loading, refetch} = useGetGroup(groupId);
+
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refetch?.();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
 
   // Fetch group members
   const members = group?.memberships || [];
@@ -977,6 +989,13 @@ export const GroupDetailScreen = () => {
             style={styles.scrollView}
             showsVerticalScrollIndicator={false}
             scrollEventThrottle={16} // Ensures smooth scrolling
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                progressViewOffset={rh(100)} // Offset to account for the header
+              />
+            }
             onScroll={Animated.event(
               [{nativeEvent: {contentOffset: {y: scrollY}}}],
               {useNativeDriver: false},
@@ -1272,7 +1291,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    paddingTop: 125,
+    paddingTop: rh(100),
     zIndex: 2,
   },
   infoContainer: {
