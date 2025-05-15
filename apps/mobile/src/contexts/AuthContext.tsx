@@ -63,6 +63,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     loadAuthState();
   }, []);
 
+  useEffect(() => {
+    // Initialize notification service
+    if (authState.user && authState.user.id && !authState.isLoading) {
+      // User is authenticated, initialize notification service
+      notificationService.service
+        .initialize(authState.user.id)
+        .then(() => {
+          loggingService.info('Notification service initialized');
+          const deviceToken =
+            notificationService.service.getDeviceTokenSync() || '';
+          console.log('Device token:', deviceToken);
+          // saveDeviceToken({
+          //   userId: authState.user!.id,
+          //   token: notificationService.service.getDeviceTokenSync() || '',
+          //   deviceType: notificationService.getDeviceType(),
+          // });
+          loggingService.info('Device token saved');
+        })
+        .catch(error => {
+          loggingService.error(
+            'Failed to initialize notification service:',
+            error,
+          );
+        });
+    }
+  }, [authState.user, authState.isLoading]);
+
   // Load authentication state
   const loadAuthState = async (): Promise<void> => {
     try {
@@ -107,28 +134,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       });
 
       setAuthState(newState);
-
-      // Initialize notification service
-      if (newState.user && newState.user.id && !newState.isLoading) {
-        // User is authenticated, initialize notification service
-        notificationService.service
-          .initialize(newState.user.id)
-          .then(() => {
-            loggingService.info('Notification service initialized');
-            saveDeviceToken({
-              userId: newState.user!.id,
-              token: notificationService.service.getDeviceTokenSync() || '',
-              deviceType: notificationService.getDeviceType(),
-            });
-            loggingService.info('Device token saved');
-          })
-          .catch(error => {
-            loggingService.error(
-              'Failed to initialize notification service:',
-              error,
-            );
-          });
-      }
 
       return response;
     } catch (error) {

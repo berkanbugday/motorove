@@ -27,8 +27,8 @@ export const GET_USER_NOTIFICATIONS = gql`
 
 // Mutations
 export const SAVE_DEVICE_TOKEN = gql`
-  mutation SaveDeviceToken($deviceTokenInput: DeviceTokenInput!) {
-    saveDeviceToken(deviceTokenInput: $deviceTokenInput)
+  mutation SaveDeviceToken($input: DeviceTokenInput!) {
+    saveDeviceToken(deviceTokenInput: $input)
   }
 `;
 
