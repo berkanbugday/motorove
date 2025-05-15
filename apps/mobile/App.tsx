@@ -19,6 +19,7 @@ import {AppConfig} from '@configs/appConfig';
 import ErrorBoundary from '@components/ErrorBoundary';
 import {loggingService} from '@services/logging.service';
 import {networkService} from '@services/network.service';
+import {notificationService} from '@services/notification.service';
 import ToastMessage from '@components/ToastMessage';
 import NetworkStatusBar from '@components/NetworkAware';
 // Initialize Sentry if DSN is provided
@@ -56,6 +57,7 @@ function App(): React.JSX.Element {
     // Cleanup when component unmounts
     return () => {
       networkService.cleanup();
+      notificationService.service.cleanup();
     };
   }, []);
 

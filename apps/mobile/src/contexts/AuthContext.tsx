@@ -2,6 +2,11 @@ import React, {createContext, useContext, useEffect, useState} from 'react';
 import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
+import {
+  notificationService,
+  useRemoveDeviceToken,
+  useSaveDeviceToken,
+} from '@services/notification.service';
 
 // Default auth state
 const defaultAuthState: AuthState = {
@@ -50,6 +55,8 @@ interface AuthProviderProps {
 // Auth provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
+  const {removeDeviceToken} = useRemoveDeviceToken();
+  const {saveDeviceToken} = useSaveDeviceToken();
 
   // Load authentication state on component mount
   useEffect(() => {
@@ -101,6 +108,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       setAuthState(newState);
 
+      // Initialize notification service
+      if (newState.user && newState.user.id && !newState.isLoading) {
+        // User is authenticated, initialize notification service
+        notificationService.service
+          .initialize(newState.user.id)
+          .then(() => {
+            loggingService.info('Notification service initialized');
+            saveDeviceToken({
+              userId: newState.user!.id,
+              token: notificationService.service.getDeviceTokenSync() || '',
+              deviceType: notificationService.getDeviceType(),
+            });
+            loggingService.info('Device token saved');
+          })
+          .catch(error => {
+            loggingService.error(
+              'Failed to initialize notification service:',
+              error,
+            );
+          });
+      }
+
       return response;
     } catch (error) {
       setAuthState(prevState => ({...prevState, isLoading: false}));
@@ -151,6 +180,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const signOut = async (): Promise<void> => {
     try {
       setAuthState(prevState => ({...prevState, isLoading: true}));
+
+      // Clean up notification service if user was logged in
+      if (authState.user && authState.user.id) {
+        try {
+          removeDeviceToken(
+            authState.user.id,
+            notificationService.service.getDeviceTokenSync() || '',
+          );
+          // Note: The server-side token cleanup would ideally happen via an API call
+          // but we'll rely on token expiration for now
+        } catch (tokenError) {
+          loggingService.error('Error clearing device token:', tokenError);
+        }
+      }
+
       await authService.signOut();
       setAuthState({...defaultAuthState, isLoading: false});
     } catch (error) {

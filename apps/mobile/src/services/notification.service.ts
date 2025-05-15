@@ -43,8 +43,8 @@ export const getDeviceType = (): string => {
 };
 
 // Device notification service (non-hook functions)
-class NotificationServiceClass {
-  private static instance: NotificationServiceClass | null = null;
+class NotificationService {
+  private static instance: NotificationService | null = null;
   private userId: string | null = null;
   private deviceToken: string | null = null;
   private isInitialized = false;
@@ -53,11 +53,11 @@ class NotificationServiceClass {
   // Private constructor to enforce singleton pattern
   private constructor() {}
 
-  static getInstance(): NotificationServiceClass {
-    if (!NotificationServiceClass.instance) {
-      NotificationServiceClass.instance = new NotificationServiceClass();
+  static getInstance(): NotificationService {
+    if (!NotificationService.instance) {
+      NotificationService.instance = new NotificationService();
     }
-    return NotificationServiceClass.instance;
+    return NotificationService.instance;
   }
 
   async initialize(userId: string): Promise<void> {
@@ -283,7 +283,7 @@ export const useRemoveDeviceToken = (onSuccess?: () => void) => {
       });
 
       if (result.data?.removeDeviceToken) {
-        await NotificationServiceClass.getInstance().clearDeviceToken();
+        await NotificationService.getInstance().clearDeviceToken();
       }
 
       return result.data?.removeDeviceToken;
@@ -414,8 +414,8 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
 };
 
 // Export as NotificationService object
-export const NotificationService = {
-  service: NotificationServiceClass.getInstance(),
+export const notificationService = {
+  service: NotificationService.getInstance(),
   useSaveDeviceToken,
   useRemoveDeviceToken,
   useGetUserNotifications,
@@ -423,5 +423,3 @@ export const NotificationService = {
   useMarkAllNotificationsAsRead,
   getDeviceType,
 };
-
-export default NotificationService;

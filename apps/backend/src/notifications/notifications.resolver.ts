@@ -93,6 +93,7 @@ export class NotificationsResolver {
     return true;
   }
 
+  @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
   async removeDeviceToken(
     @Args('userId') userId: string,
@@ -102,6 +103,7 @@ export class NotificationsResolver {
     return true;
   }
 
+  @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
   async sendBulkNotifications(
     @Args('sendBulkNotificationInput')
