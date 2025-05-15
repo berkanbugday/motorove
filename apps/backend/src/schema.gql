@@ -39,10 +39,24 @@ input CreateGroupInput {
   tags: [GroupTagInput!]!
 }
 
+input CreateNotificationInput {
+  body: String!
+  data: String
+  title: String!
+  type: NotificationType!
+  userId: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input DeviceTokenInput {
+  deviceType: String!
+  token: String!
+  userId: String!
+}
 
 type EnumItem {
   key: String!
@@ -121,12 +135,60 @@ type Mutation {
   addGroupMember(addGroupMemberInput: AddGroupMemberInput!): GroupMembership!
   changeMemberRole(changeMemberRoleInput: ChangeMemberRoleInput!): GroupMembership!
   createGroup(createGroupInput: CreateGroupInput!): Group!
+  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  deleteNotification(id: ID!): Notification!
+  markAllNotificationsAsRead(userId: String!): [Notification!]!
+  markNotificationAsRead(id: ID!): Notification!
   refreshToken(token: String!): AuthResponse!
+  removeDeviceToken(token: String!, userId: String!): Boolean!
   removeGroupMember(removeGroupMemberInput: RemoveGroupMemberInput!): GroupMembership!
+  saveDeviceToken(deviceTokenInput: DeviceTokenInput!): Boolean!
+  sendBulkNotifications(sendBulkNotificationInput: SendBulkNotificationInput!): Boolean!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
   updateGroup(updateGroupInput: UpdateGroupInput!): Group!
   updateMembershipStatus(updateMembershipStatusInput: UpdateMembershipStatusInput!): GroupMembership!
+}
+
+type Notification {
+  body: String!
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  data: String
+  id: ID!
+  isActive: Boolean!
+  read: Boolean!
+  status: NotificationStatus!
+  title: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+  user: User!
+  userId: String!
+}
+
+"""The status of a notification"""
+enum NotificationStatus {
+  DELIVERED
+  FAILED
+  PENDING
+  SENT
+}
+
+"""The type of notification"""
+enum NotificationType {
+  FRIEND_REQUEST
+  GROUP_INVITE
+  GROUP_JOIN
+  GROUP_LEAVE
+  MAINTENANCE_REMINDER
+  NEW_MESSAGE
+  RIDE_COMPLETED
+  RIDE_INVITATION
+  RIDE_STARTED
+  SYSTEM
 }
 
 type Query {
@@ -146,11 +208,20 @@ type Query {
   joinedGroups(limit: Int, skip: Int): [Group!]!
   me: User!
   myGroupMemberships: [GroupMembership!]!
+  notifications(limit: Int, skip: Int): [Notification!]!
 }
 
 input RemoveGroupMemberInput {
   groupId: String!
   userId: String!
+}
+
+input SendBulkNotificationInput {
+  body: String!
+  data: String
+  title: String!
+  type: NotificationType!
+  userIds: [String!]!
 }
 
 type Session {
