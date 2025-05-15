@@ -33,9 +33,11 @@ export class GroupsService {
         return base64Image; // Already a URL, just return it
       }
 
-      // Upload to Supabase storage
+      // Extract content type
       const contentType = this.getContentTypeFromBase64(base64Image);
       const filename = `${filePrefix}-${Date.now()}`;
+
+      // Upload to Supabase storage
       const imageUrl = await this.storageService.uploadFile(
         base64Image,
         path,
@@ -48,7 +50,9 @@ export class GroupsService {
 
       return imageUrl;
     } catch (error) {
-      throw new BadRequestException(`Failed to upload image: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
     }
   }
 
@@ -212,6 +216,7 @@ export class GroupsService {
       updatedBy: {
         connect: { id: userId },
       },
+      updatedAt: new Date(),
     };
 
     if (updateData.city && 'id' in updateData.city) {
@@ -325,7 +330,9 @@ export class GroupsService {
             );
           }
         } catch (error) {
-          console.error('Error getting signed URLs:', error.message);
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          console.error('Error getting signed URLs:', errorMessage);
         }
 
         return {
@@ -383,7 +390,9 @@ export class GroupsService {
         );
       }
     } catch (error) {
-      console.error('Error getting signed URLs:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error getting signed URLs:', errorMessage);
     }
 
     // Check if the user is a member of the group
@@ -467,7 +476,9 @@ export class GroupsService {
             );
           }
         } catch (error) {
-          console.error('Error getting signed URLs:', error.message);
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          console.error('Error getting signed URLs:', errorMessage);
         }
 
         return {

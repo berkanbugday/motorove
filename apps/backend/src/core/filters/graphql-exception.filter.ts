@@ -74,7 +74,7 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
     this.logger.error(
       {
         message: `GraphQL Exception: ${message}`,
-        error,
+        error: error as Record<string, unknown>,
         statusCode,
         path: request?.path,
       },
@@ -116,7 +116,8 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
           extensions.exception.originalError = '[Unstringifiable Object]';
         }
       } else {
-        extensions.exception.originalError = String(error);
+        extensions.exception.originalError =
+          typeof error === 'string' ? error : JSON.stringify(error);
       }
     }
 

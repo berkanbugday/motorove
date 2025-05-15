@@ -30,6 +30,26 @@ enum GroupMembershipStatus {
   REJECTED
 }
 
+enum NotificationType {
+  SYSTEM
+  NEW_MESSAGE
+  GROUP_INVITE
+  GROUP_JOIN
+  GROUP_LEAVE
+  RIDE_INVITATION
+  RIDE_STARTED
+  RIDE_COMPLETED
+  MAINTENANCE_REMINDER
+  FRIEND_REQUEST
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
 // Models
 model User {
   id         String   @id @default(uuid())
@@ -43,11 +63,15 @@ model User {
   isActive   Boolean  @default(true)
 
   // Relations
-  createdGroups      Group[]           @relation("GroupCreatedBy")
-  updatedGroups      Group[]           @relation("GroupUpdatedBy")
-  groupMemberships   GroupMembership[] @relation("UserGroupMembership")
-  createdMemberships GroupMembership[] @relation("MembershipCreatedBy")
-  updatedMemberships GroupMembership[] @relation("MembershipUpdatedBy")
+  createdGroups        Group[]           @relation("GroupCreatedBy")
+  updatedGroups        Group[]           @relation("GroupUpdatedBy")
+  groupMemberships     GroupMembership[] @relation("UserGroupMembership")
+  createdMemberships   GroupMembership[] @relation("MembershipCreatedBy")
+  updatedMemberships   GroupMembership[] @relation("MembershipUpdatedBy")
+  notifications        Notification[]
+  createdNotifications Notification[]    @relation("NotificationCreatedBy")
+  updatedNotifications Notification[]    @relation("NotificationUpdatedBy")
+  deviceTokens         DeviceToken[]
 }
 
 model City {
@@ -93,14 +117,14 @@ model Group {
 }
 
 model GroupMembership {
-  id       String               @id @default(uuid())
+  id       String                @id @default(uuid())
   groupId  String
-  group    Group                @relation(fields: [groupId], references: [id])
+  group    Group                 @relation(fields: [groupId], references: [id])
   userId   String
-  user     User                 @relation("UserGroupMembership", fields: [userId], references: [id])
+  user     User                  @relation("UserGroupMembership", fields: [userId], references: [id])
   role     GroupMemberRole
   status   GroupMembershipStatus @default(PENDING)
-  joinedAt DateTime             @default(now())
+  joinedAt DateTime              @default(now())
 
   // Base model fields
   createdById String
@@ -112,4 +136,44 @@ model GroupMembership {
   isActive    Boolean  @default(true)
 
   @@unique([groupId, userId])
+}
+
+model Notification {
+  id     String             @id @default(uuid())
+  title  String
+  body   String
+  type   NotificationType
+  data   Json?              @default("{}")
+  userId String
+  user   User               @relation(fields: [userId], references: [id])
+  status NotificationStatus @default(PENDING)
+  read   Boolean            @default(false)
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("NotificationCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String
+  updatedBy   User     @relation("NotificationUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([read])
+}
+
+model DeviceToken {
+  token      String
+  type       String // 'ios' or 'android'
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  isActive   Boolean  @default(true)
+
+  @@id([token, userId])
+  @@index([userId])
+  @@index([isActive])
 }

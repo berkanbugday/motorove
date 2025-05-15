@@ -174,6 +174,7 @@ export class GroupMembershipsService {
         updatedBy: {
           connect: { id: adminId },
         },
+        updatedAt: new Date(),
       },
       include: {
         group: true,
@@ -309,6 +310,7 @@ export class GroupMembershipsService {
         updatedBy: {
           connect: { id: adminId },
         },
+        updatedAt: new Date(),
       },
       include: {
         group: true,

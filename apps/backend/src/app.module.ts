@@ -16,6 +16,7 @@ import { EnumsModule } from './enums/enums.module';
 import { CitiesModule } from './cities/cities.module';
 import { GroupTagsModule } from './group-tags/group-tags.module';
 import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter'
     EnumsModule,
     CitiesModule,
     GroupTagsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
