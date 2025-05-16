@@ -53,6 +53,7 @@ enum NotificationType {
 enum NotificationStatus {
   PENDING
   SENT
+  NOT_SENT
   DELIVERED
   FAILED
 }

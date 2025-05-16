@@ -173,6 +173,7 @@ type Notification {
 enum NotificationStatus {
   DELIVERED
   FAILED
+  NOT_SENT
   PENDING
   SENT
 }

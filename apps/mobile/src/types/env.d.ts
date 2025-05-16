@@ -22,6 +22,14 @@ declare module 'react-native-config' {
     CRASH_REPORTING_ENABLED: string;
     SENTRY_DSN: string;
 
+    // Firebase
+    FIREBASE_API_KEY: string;
+    FIREBASE_AUTH_DOMAIN: string;
+    FIREBASE_PROJECT_ID: string;
+    FIREBASE_STORAGE_BUCKET: string;
+    FIREBASE_MESSAGING_SENDER_ID: string;
+    FIREBASE_APP_ID: string;
+    FIREBASE_DATABASE_URL: string;
     // Allow for additional keys
     [key: string]: string | undefined;
   }

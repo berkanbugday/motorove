@@ -45,7 +45,7 @@ export const colors = {
     successDark: '#16A34A',
     warning: '#FFCC00',
     error: '#FF3B30',
-    info: '#007AFF',
+    info: '#4682B4',
   },
 };
 

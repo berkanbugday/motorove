@@ -31,6 +31,7 @@ export class NotificationsService {
           },
         },
         update: {
+          isActive: true,
           lastUsedAt: new Date(),
         },
         create: {
@@ -54,15 +55,15 @@ export class NotificationsService {
    */
   async removeDeviceToken(userId: string, deviceToken: string): Promise<void> {
     try {
-      await this.prisma.deviceToken.delete({
+      await this.prisma.deviceToken.updateMany({
         where: {
-          token_userId: {
-            token: deviceToken,
-            userId,
-          },
+          userId,
+          token: deviceToken,
+        },
+        data: {
+          isActive: false,
         },
       });
-      this.logger.log(`Device token removed for user ${userId}`);
     } catch (error) {
       this.logger.error(
         `Failed to remove device token for user ${userId}`,
@@ -78,7 +79,7 @@ export class NotificationsService {
   async getUserDeviceTokens(userId: string): Promise<string[]> {
     try {
       const deviceTokens = await this.prisma.deviceToken.findMany({
-        where: { userId },
+        where: { userId, isActive: true },
         select: { token: true },
       });
       return deviceTokens.map((dt) => dt.token);
@@ -162,7 +163,7 @@ export class NotificationsService {
         await this.prisma.notification.update({
           where: { id: notification.id },
           data: {
-            status: NotificationStatus.FAILED,
+            status: NotificationStatus.NOT_SENT,
             updatedBy: { connect: { id: userId } },
             updatedAt: new Date(),
           },

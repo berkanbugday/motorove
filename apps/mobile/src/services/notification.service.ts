@@ -1,13 +1,13 @@
-import {Platform, PermissionsAndroid} from 'react-native';
+import {PermissionsAndroid, Platform} from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebase from '@react-native-firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
 import {useMutation, useQuery} from '@apollo/client';
-import notifee from '@notifee/react-native';
 import {showToast} from '@components';
 import {loggingService} from './logging.service';
+import {getFirebaseConfig} from '@configs';
 import {
   GET_USER_NOTIFICATIONS,
   SAVE_DEVICE_TOKEN,
@@ -70,27 +70,8 @@ class NotificationService {
     try {
       // Check if Firebase is already initialized
       if (!firebase.apps.length) {
-        await firebase.initializeApp({
-          apiKey: 'AIzaSyD0lRMahLPZGHc_iKQICgk7_dup2jdu-xg',
-          authDomain: 'motorove-75887.firebaseapp.com',
-          projectId: 'motorove-75887',
-          storageBucket: 'motorove-75887.firebasestorage.app',
-          messagingSenderId: '1016920291975',
-          appId: '1:1016920291975:ios:6787f58d4f1055c2ff9622',
-          databaseURL: '',
-        });
-      }
-
-      // Request permissions
-      const isAuthorized = await this.requestPermissions();
-
-      // Get token
-      if (isAuthorized) {
-        await messaging().registerDeviceForRemoteMessages();
-        const token = await this.getDeviceToken();
-        if (token) {
-          this.deviceToken = token;
-        }
+        // Use environment-based Firebase configuration
+        await firebase.initializeApp(getFirebaseConfig());
       }
 
       // Set up message handlers
@@ -132,6 +113,7 @@ class NotificationService {
       }
 
       // Get new token
+      await messaging().registerDeviceForRemoteMessages();
       const token = await messaging().getToken();
       if (token) {
         this.deviceToken = token;
@@ -144,11 +126,6 @@ class NotificationService {
       loggingService.error('Failed to get device token:', error);
       return null;
     }
-  }
-
-  getDeviceTokenSync(): string | null {
-    this.checkInitialization();
-    return this.deviceToken;
   }
 
   async clearDeviceToken(): Promise<void> {
@@ -164,12 +141,17 @@ class NotificationService {
   setupMessageHandlers(): void {
     // Handle background messages
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      await notifee.displayNotification(remoteMessage);
+      return Promise.resolve();
     });
 
     // Handle foreground messages
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      await notifee.displayNotification(remoteMessage);
+      showToast({
+        type: 'default',
+        text1: remoteMessage.notification?.title,
+        text2: remoteMessage.notification?.body,
+      });
+      return Promise.resolve();
     });
 
     // Store unsubscribe function

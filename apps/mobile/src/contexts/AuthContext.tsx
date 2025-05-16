@@ -63,17 +63,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     loadAuthState();
   }, []);
 
-  useEffect(() => {
-    // Initialize notification service
-    if (authState.user && authState.user.id && !authState.isLoading) {
-      saveDeviceToken({
-        userId: authState.user!.id,
-        token: notificationService.service.getDeviceTokenSync() || '',
-        deviceType: notificationService.getDeviceType(),
-      });
-    }
-  }, [authState.user, authState.isLoading]);
-
   // Load authentication state
   const loadAuthState = async (): Promise<void> => {
     try {
@@ -118,6 +107,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       });
 
       setAuthState(newState);
+
+      // Request notification permissions after successful sign-in
+      if (response.user && response.session?.access_token) {
+        try {
+          // Request notification permission
+          const permission =
+            await notificationService.service.requestPermissions();
+
+          // If permission is granted and we have a device token, save it to the server
+          if (permission) {
+            const token = await notificationService.service.getDeviceToken();
+            if (token && response.user.id) {
+              saveDeviceToken({
+                userId: response.user.id,
+                token: token,
+                deviceType: notificationService.getDeviceType(),
+              });
+            }
+          }
+        } catch (notificationError) {
+          loggingService.error(
+            'Error requesting notification permissions:',
+            notificationError,
+          );
+          // Don't throw the error - we don't want to interrupt signin flow for notification errors
+        }
+      }
 
       return response;
     } catch (error) {
@@ -173,12 +189,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       // Clean up notification service if user was logged in
       if (authState.user && authState.user.id) {
         try {
-          removeDeviceToken(
-            authState.user.id,
-            notificationService.service.getDeviceTokenSync() || '',
-          );
-          // Note: The server-side token cleanup would ideally happen via an API call
-          // but we'll rely on token expiration for now
+          const token = await notificationService.service.getDeviceToken();
+          if (token) {
+            removeDeviceToken(authState.user.id, token);
+          }
         } catch (tokenError) {
           loggingService.error('Error clearing device token:', tokenError);
         }
