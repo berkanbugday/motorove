@@ -11,6 +11,7 @@ import Facebook from '@assets/icons/brands/facebook.svg';
 // Common Icons
 import ArrowLeft from '@assets/icons/arrow-left.svg';
 import User from '@assets/icons/user.svg';
+import UserFilled from '@assets/icons/user-filled.svg';
 import Close from '@assets/icons/close.svg';
 import ChevronUp from '@assets/icons/chevron-up.svg';
 import ChevronDown from '@assets/icons/chevron-down.svg';
@@ -86,6 +87,7 @@ export type IconName =
   | 'facebook'
   | 'arrow-left'
   | 'user'
+  | 'user-filled'
   | 'close'
   | 'chevron-up'
   | 'chevron-down'
@@ -184,6 +186,8 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <ArrowLeft {...commonProps} />;
     case 'user':
       return <User {...commonProps} />;
+    case 'user-filled':
+      return <UserFilled {...commonProps} />;
     case 'close':
       return <Close {...commonProps} />;
     case 'chevron-up':

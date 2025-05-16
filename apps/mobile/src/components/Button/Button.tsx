@@ -54,6 +54,8 @@ export function Button({
     variant === 'text' && styles.textButton,
     shape === 'round' && styles.roundButton,
     shape === 'circle' && styles.circleButton,
+    shape === 'circle' && size === 'medium' && styles.mediumCircleButton,
+    shape === 'circle' && size === 'large' && styles.largeCircleButton,
     size === 'small' && styles.smallButton,
     size === 'medium' && styles.mediumButton,
     size === 'large' && styles.largeButton,
@@ -229,9 +231,17 @@ const styles = StyleSheet.create({
   },
   circleButton: {
     borderRadius: componentRadius.button.circle,
-    width: 48,
-    height: 48,
+    width: spacing.xxl,
+    height: spacing.xxl,
     paddingHorizontal: 0,
+  },
+  mediumCircleButton: {
+    width: spacing.xxxl,
+    height: spacing.xxxl,
+  },
+  largeCircleButton: {
+    width: spacing.xxxxl,
+    height: spacing.xxxxl,
   },
   smallButton: {
     paddingVertical: spacing.button.paddingVertical.small,

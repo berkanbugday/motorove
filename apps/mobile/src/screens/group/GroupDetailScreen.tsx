@@ -313,6 +313,7 @@ const MemberItem = React.memo(
               iconSize={24}
               variant="secondary"
               shape="circle"
+              size="small"
               onPress={() => onChangeRole && onChangeRole(item)}
             />
             <Button
@@ -320,6 +321,7 @@ const MemberItem = React.memo(
               iconSize={24}
               variant="primary"
               shape="circle"
+              size="small"
               onPress={() => onRemoveMember && onRemoveMember(item)}
             />
           </Animated.View>
@@ -995,7 +997,7 @@ export const GroupDetailScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            progressViewOffset={rh(100)} // Offset to account for the header
+            progressViewOffset={rh(110) + insets.top} // Offset to account for the header
           />
         }
         onScroll={Animated.event(
@@ -1053,22 +1055,26 @@ export const GroupDetailScreen = () => {
         </View>
         <View style={styles.shortcutsContainer}>
           {group?.isMember && (
-            <Button
-              iconPosition="top"
-              iconName="plus"
-              iconSize={24}
-              variant="outline"
-              title="Create Post"
-            />
+            <View style={styles.shortcutButton}>
+              <Button
+                iconName="plus"
+                iconSize={24}
+                variant="secondary"
+                shape="circle"
+              />
+              <Caption>Create Post</Caption>
+            </View>
           )}
           {group?.isAdmin && (
-            <Button
-              iconPosition="top"
-              iconName="route"
-              iconSize={24}
-              variant="dark"
-              title="Create Event"
-            />
+            <View style={styles.shortcutButton}>
+              <Button
+                iconName="route"
+                iconSize={24}
+                variant="secondary"
+                shape="circle"
+              />
+              <Caption>Create Event</Caption>
+            </View>
           )}
         </View>
 
@@ -1333,8 +1339,14 @@ const styles = StyleSheet.create({
   shortcutsContainer: {
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
     marginTop: spacing.md,
+    gap: spacing.sm,
+  },
+  shortcutButton: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.sm,
   },
   content: {
     paddingHorizontal: spacing.md,

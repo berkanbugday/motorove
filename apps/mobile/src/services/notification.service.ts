@@ -1,9 +1,11 @@
-import {Platform} from 'react-native';
+import {Platform, PermissionsAndroid} from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebase from '@react-native-firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
 import {useMutation, useQuery} from '@apollo/client';
+import notifee from '@notifee/react-native';
 import {showToast} from '@components';
 import {loggingService} from './logging.service';
 import {
@@ -102,6 +104,9 @@ class NotificationService {
 
   async requestPermissions(): Promise<boolean> {
     try {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
       const authStatus = await messaging().requestPermission();
       return (
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -159,16 +164,12 @@ class NotificationService {
   setupMessageHandlers(): void {
     // Handle background messages
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      loggingService.debug('Background message received:', remoteMessage);
-      // Process the message here
-      return Promise.resolve();
+      await notifee.displayNotification(remoteMessage);
     });
 
     // Handle foreground messages
     const unsubscribe = messaging().onMessage(async remoteMessage => {
-      loggingService.debug('Foreground message received:', remoteMessage);
-      // Process the message here, e.g., show a local notification
-      this.setInAppMessagingEnabled(true);
+      await notifee.displayNotification(remoteMessage);
     });
 
     // Store unsubscribe function
