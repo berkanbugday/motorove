@@ -8,10 +8,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 import { GroupMembershipStatus } from '../enums/models/group-membership-status.enum';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from 'src/enums/models/notification-type.enum';
 
 @Injectable()
 export class GroupMembershipsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async findAll() {
     return await this.prisma.groupMembership.findMany({
@@ -162,7 +167,7 @@ export class GroupMembershipsService {
     }
 
     // Update the member's role
-    return this.prisma.groupMembership.update({
+    const updatedMembership = await this.prisma.groupMembership.update({
       where: {
         groupId_userId: {
           groupId,
@@ -181,6 +186,26 @@ export class GroupMembershipsService {
         user: true,
       },
     });
+
+    if (updatedMembership.role === newRole) {
+      // Send notification to the user
+      await this.notificationsService.createAndSendNotification(
+        {
+          userId,
+          title: 'Membership status updated',
+          body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
+          type: NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
+          data: JSON.stringify({
+            groupId: updatedMembership.group.id,
+            groupName: updatedMembership.group.name,
+            role: newRole,
+          }),
+        },
+        userId,
+      );
+    }
+
+    return updatedMembership;
   }
 
   async removeMember(groupId: string, userId: string, adminId: string) {

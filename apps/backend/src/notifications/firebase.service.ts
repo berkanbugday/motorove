@@ -47,7 +47,7 @@ export class FirebaseService implements OnModuleInit {
             parsedServiceAccount as admin.ServiceAccount,
           ),
           // Optional database URL if you're using Firebase Database
-          databaseURL: this.configService.get<string>('FIREBASE_DATABASE_URL'),
+          // databaseURL: this.configService.get<string>('FIREBASE_DATABASE_URL'),
         });
 
         this.initialized = true;

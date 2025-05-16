@@ -66,27 +66,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   useEffect(() => {
     // Initialize notification service
     if (authState.user && authState.user.id && !authState.isLoading) {
-      // User is authenticated, initialize notification service
-      notificationService.service
-        .initialize(authState.user.id)
-        .then(() => {
-          loggingService.info('Notification service initialized');
-          const deviceToken =
-            notificationService.service.getDeviceTokenSync() || '';
-          console.log('Device token:', deviceToken);
-          // saveDeviceToken({
-          //   userId: authState.user!.id,
-          //   token: notificationService.service.getDeviceTokenSync() || '',
-          //   deviceType: notificationService.getDeviceType(),
-          // });
-          loggingService.info('Device token saved');
-        })
-        .catch(error => {
-          loggingService.error(
-            'Failed to initialize notification service:',
-            error,
-          );
-        });
+      saveDeviceToken({
+        userId: authState.user!.id,
+        token: notificationService.service.getDeviceTokenSync() || '',
+        deviceType: notificationService.getDeviceType(),
+      });
     }
   }, [authState.user, authState.isLoading]);
 

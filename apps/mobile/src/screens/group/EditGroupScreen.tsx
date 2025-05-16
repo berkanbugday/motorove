@@ -333,7 +333,6 @@ export const EditGroupScreen: React.FC = () => {
       // Call the group service updateGroup method
       await updateGroup(updateGroupInput);
     } catch (error) {
-      console.log('error', error);
       loggingService.error('Error in onSubmit:', error);
       showToast({
         type: 'error',

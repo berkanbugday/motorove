@@ -54,6 +54,9 @@ function App(): React.JSX.Element {
     // Initialize network monitoring
     networkService.initialize();
 
+    // Initialize notification service
+    notificationService.service.initialize();
+
     // Cleanup when component unmounts
     return () => {
       networkService.cleanup();

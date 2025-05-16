@@ -31,9 +31,6 @@ async function bootstrap() {
     }),
   );
 
-  const appConfig = configService.getAppConfig();
-  console.log('App Config:', appConfig);
-
   // Configure CORS based on environment
   const corsOrigin = configService.getAppConfig().corsOrigin;
   app.enableCors({

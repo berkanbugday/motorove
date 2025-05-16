@@ -1,5 +1,6 @@
 import {Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import firebase from '@react-native-firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
 import {useMutation, useQuery} from '@apollo/client';
@@ -45,7 +46,6 @@ export const getDeviceType = (): string => {
 // Device notification service (non-hook functions)
 class NotificationService {
   private static instance: NotificationService | null = null;
-  private userId: string | null = null;
   private deviceToken: string | null = null;
   private isInitialized = false;
   private messageUnsubscribe: (() => void) | null = null;
@@ -60,22 +60,35 @@ class NotificationService {
     return NotificationService.instance;
   }
 
-  async initialize(userId: string): Promise<void> {
+  async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
     }
 
-    this.userId = userId;
-
     try {
+      // Check if Firebase is already initialized
+      if (!firebase.apps.length) {
+        await firebase.initializeApp({
+          apiKey: 'AIzaSyD0lRMahLPZGHc_iKQICgk7_dup2jdu-xg',
+          authDomain: 'motorove-75887.firebaseapp.com',
+          projectId: 'motorove-75887',
+          storageBucket: 'motorove-75887.firebasestorage.app',
+          messagingSenderId: '1016920291975',
+          appId: '1:1016920291975:ios:6787f58d4f1055c2ff9622',
+          databaseURL: '',
+        });
+      }
+
       // Request permissions
-      await this.requestPermissions();
+      const isAuthorized = await this.requestPermissions();
 
       // Get token
-      const token = await this.getDeviceToken();
-      if (token) {
-        this.deviceToken = token;
-        // Token will be registered in a separate step
+      if (isAuthorized) {
+        await messaging().registerDeviceForRemoteMessages();
+        const token = await this.getDeviceToken();
+        if (token) {
+          this.deviceToken = token;
+        }
       }
 
       // Set up message handlers
@@ -128,11 +141,6 @@ class NotificationService {
     }
   }
 
-  getUserId(): string | null {
-    this.checkInitialization();
-    return this.userId;
-  }
-
   getDeviceTokenSync(): string | null {
     this.checkInitialization();
     return this.deviceToken;
@@ -160,6 +168,7 @@ class NotificationService {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       loggingService.debug('Foreground message received:', remoteMessage);
       // Process the message here, e.g., show a local notification
+      this.setInAppMessagingEnabled(true);
     });
 
     // Store unsubscribe function
@@ -227,7 +236,7 @@ export const useSaveDeviceToken = (onSuccess?: () => void) => {
     try {
       const result = await saveDeviceTokenMutation({
         variables: {
-          deviceTokenInput: input,
+          input,
         },
       });
       return result.data?.saveDeviceToken;
