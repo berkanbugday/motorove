@@ -1083,7 +1083,7 @@ export const GroupDetailScreen = () => {
             {/* Upcoming Group Events Section */}
             <View style={styles.content}>
               <View style={styles.sectionHeaderContainer}>
-                <Subtitle weight="bold">Upcoming Group Events</Subtitle>
+                <Title weight="bold">Upcoming Group Events</Title>
               </View>
               <FlatList
                 ref={eventsListRef}
@@ -1113,7 +1113,7 @@ export const GroupDetailScreen = () => {
 
             {/* Recent Posts Section */}
             <View style={styles.content}>
-              <Subtitle weight="bold">Recent Posts</Subtitle>
+              <Title weight="bold">Recent Posts</Title>
               <LegendList
                 data={posts}
                 renderItem={renderFeedPost}
