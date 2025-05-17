@@ -151,7 +151,7 @@ class NotificationService {
     // Handle foreground messages
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       showToast({
-        type: 'default',
+        type: 'info',
         text1: remoteMessage.notification?.title,
         text2: remoteMessage.notification?.body,
       });
