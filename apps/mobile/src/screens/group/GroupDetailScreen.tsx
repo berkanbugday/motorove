@@ -1087,6 +1087,7 @@ export const GroupDetailScreen = () => {
                 iconSize={24}
                 variant="secondary"
                 shape="circle"
+                onPress={() => navigateToScreen(navigation, 'CreateEvent', {})}
               />
               <Caption>Create Event</Caption>
             </View>

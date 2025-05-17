@@ -356,6 +356,7 @@ export const EditGroupScreen: React.FC = () => {
       <TopHeaderBar
         title="Edit Group"
         showBackButton
+        showShadow={false}
         onBackPress={handleGoBack}
         containerStyle={styles.topHeaderBar}
       />
@@ -530,6 +531,8 @@ const styles = StyleSheet.create({
   topHeaderBar: {
     borderBottomRightRadius: 0,
     borderBottomLeftRadius: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.light,
   },
   imageSelectionContainer: {
     alignItems: 'center',

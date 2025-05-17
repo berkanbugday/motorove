@@ -13,7 +13,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Button, Title, Body, Typography} from '@components';
 import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
-import {colors, spacing, radius} from '@theme';
+import {colors, spacing, radius, commonStyles} from '@theme';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -176,8 +176,7 @@ export function WelcomeScreen(): React.JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.background,
+    ...commonStyles.container,
   },
   contentContainer: {
     flex: 1,

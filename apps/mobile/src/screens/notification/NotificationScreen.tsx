@@ -18,6 +18,7 @@ import {
   SwipeableItem,
   SwipeAction,
   TopHeaderBar,
+  BodySmall,
 } from '@components';
 import Dialog, {DialogRef} from '@components/Dialog';
 import {
@@ -230,7 +231,7 @@ export const NotificationScreen = () => {
               style={styles.notificationTitle}>
               {item.title}
             </Subtitle>
-            <Body style={styles.notificationBody}>{item.body}</Body>
+            <BodySmall style={styles.notificationBody}>{item.body}</BodySmall>
             <View style={styles.bottomRow}>
               <View style={styles.timeContainer}>
                 <Icon name="clock" size={12} color={colors.neutral.grey} />

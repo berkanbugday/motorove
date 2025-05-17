@@ -11,6 +11,7 @@ import {
   EditGroupScreen,
   GroupSearchScreen,
 } from '@screens/group';
+import {CreateEventScreen} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -46,6 +47,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="CreateGroup"
         component={CreateGroupScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="CreateEvent"
+        component={CreateEventScreen}
         options={{headerShown: false}}
       />
 

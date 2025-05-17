@@ -174,6 +174,7 @@ export function TopHeaderBar({
       <StatusBar
         barStyle={
           backgroundColor === colors.neutral.white ||
+          backgroundColor === colors.secondary.light ||
           backgroundColor === colors.neutral.background
             ? 'dark-content'
             : 'light-content'

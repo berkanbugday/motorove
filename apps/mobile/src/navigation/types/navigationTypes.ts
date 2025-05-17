@@ -42,6 +42,7 @@ export type MainStackParamList = {
   CommentDetail: {postId: string};
   CreatePost: undefined;
   CreateGroup: undefined;
+  CreateEvent: undefined;
   GroupDetail: {groupId: string};
   EditGroup: {groupId: string};
   GroupSearch: undefined;
