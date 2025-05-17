@@ -34,6 +34,7 @@ import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts';
+import {useGetNotificationsCount} from '@services/notification.service';
 
 // Route data
 const recommendedRoutes = [
@@ -202,6 +203,7 @@ export const HomeScreen = ({navigation}: Props) => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [posts, setPosts] = useState<FeedPost[]>(feedPosts);
   const {user} = useAuth();
+  const {notificationsCount} = useGetNotificationsCount();
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -508,10 +510,10 @@ export const HomeScreen = ({navigation}: Props) => {
         subtitleStyle={styles.subtitle}
         rightIconName="plus"
         onRightButtonPress={() => navigateToScreen(navigation, 'CreatePost')}
-        secondRightIconName="bell-filled"
-        secondRightIconBadgeCount={5}
+        secondRightIconName={notificationsCount > 0 ? 'bell-filled' : 'bell'}
+        secondRightIconBadgeCount={notificationsCount || 0}
         onSecondRightButtonPress={() =>
-          loggingService.info('Notifications pressed')
+          navigateToScreen(navigation, 'Notification')
         }
       />
       <SafeAreaView

@@ -45,6 +45,7 @@ export type MainStackParamList = {
   GroupDetail: {groupId: string};
   EditGroup: {groupId: string};
   GroupSearch: undefined;
+  Notification: undefined;
   // Add more screens here as your app grows
   // Profile: {userId: string};
   // Settings: undefined;

@@ -217,6 +217,7 @@ type Query {
   me: User!
   myGroupMemberships: [GroupMembership!]!
   notifications(limit: Int, skip: Int): [Notification!]!
+  notificationsCount(onlyUnread: Boolean = true): Float!
 }
 
 input RemoveGroupMemberInput {

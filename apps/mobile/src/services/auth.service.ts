@@ -436,21 +436,21 @@ class AuthService {
   // Clear authentication data
   private async clearAuthData(): Promise<void> {
     try {
-      // Clear from encrypted storage
-      const encryptedAuthData = await EncryptedStorage.getItem(
-        STORAGE_KEYS.AUTH_DATA,
-      );
-      if (encryptedAuthData) {
-        await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
-      }
+      // Remove auth data from all storage sources
+      await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
+      await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
 
-      // Clear from AsyncStorage for backward compatibility
+      // Clear AsyncStorage items just to be thorough
       await this.clearAsyncStorageAuthData();
 
-      loggingService.info('Auth data cleared from storage');
+      // Reset Apollo client store
+      await resetApolloStore();
+
+      loggingService.info('Auth data cleared successfully');
     } catch (error) {
       loggingService.error('Error clearing auth data:', error);
-      throw error;
+      // Try the fallback method for AsyncStorage
+      await this.clearAsyncStorageAuthData();
     }
   }
 
@@ -466,6 +466,64 @@ class AuthService {
       await AsyncStorage.multiRemove(keys);
     } catch (error) {
       loggingService.error('Error clearing AsyncStorage auth data:', error);
+    }
+  }
+
+  // Debug method to check token validity and status
+  async debugTokenStatus(): Promise<void> {
+    try {
+      const encryptedAuthData = await EncryptedStorage.getItem(
+        STORAGE_KEYS.AUTH_DATA,
+      );
+
+      if (encryptedAuthData) {
+        const parsedData = JSON.parse(encryptedAuthData);
+        const now = Date.now();
+
+        // Check if we have valid tokens
+        const hasAccessToken = !!parsedData.accessToken;
+        const hasRefreshToken = !!parsedData.refreshToken;
+
+        // Check expiration
+        const expiresAt = parsedData.expiresAt;
+        const isExpired = expiresAt && expiresAt <= now;
+        const timeToExpire = expiresAt ? expiresAt - now : 0;
+
+        loggingService.info('Token Debug Information', {
+          hasAccessToken,
+          hasRefreshToken,
+          isExpired,
+          timeToExpire: isExpired
+            ? 'Already expired'
+            : `${Math.floor(timeToExpire / 1000)} seconds remaining`,
+          tokenFirstChars: hasAccessToken
+            ? parsedData.accessToken.substring(0, 10) + '...'
+            : 'No token',
+        });
+
+        // Force token refresh to get a new token
+        if (hasRefreshToken) {
+          try {
+            loggingService.info('Attempting force token refresh');
+            await this.refreshToken();
+            loggingService.info('Force token refresh successful');
+          } catch (error) {
+            loggingService.error('Force token refresh failed:', error);
+          }
+        }
+      } else {
+        loggingService.error('No auth data found in encrypted storage');
+
+        // Check AsyncStorage as fallback
+        const accessToken = await AsyncStorage.getItem(
+          STORAGE_KEYS.ACCESS_TOKEN,
+        );
+        loggingService.info('AsyncStorage fallback check:', {
+          hasToken: !!accessToken,
+        });
+      }
+    } catch (error) {
+      loggingService.error('Token debug check failed:', error);
     }
   }
 }

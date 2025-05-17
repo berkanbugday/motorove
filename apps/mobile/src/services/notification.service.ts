@@ -9,12 +9,14 @@ import {showToast} from '@components';
 import {loggingService} from './logging.service';
 import {getFirebaseConfig} from '@configs';
 import {
-  GET_USER_NOTIFICATIONS,
   SAVE_DEVICE_TOKEN,
   REMOVE_DEVICE_TOKEN,
   MARK_NOTIFICATION_AS_READ,
   MARK_ALL_NOTIFICATIONS_AS_READ,
+  GET_NOTIFICATIONS,
+  GET_NOTIFICATIONS_COUNT,
 } from './graphql/notification.graphql';
+import {useCallback, useState} from 'react';
 
 const DEVICE_TOKEN_KEY = 'fcm_token';
 
@@ -294,21 +296,65 @@ export const useRemoveDeviceToken = (onSuccess?: () => void) => {
 };
 
 // Hook for getting user notifications
-export const useGetUserNotifications = (userId: string | null) => {
-  const {data, loading, error, refetch} = useQuery(GET_USER_NOTIFICATIONS, {
-    variables: {userId},
-    skip: !userId,
-    fetchPolicy: 'network-only',
+export const useGetNotifications = (limit = 20, skip = 0) => {
+  const [hasMore, setHasMore] = useState(true);
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(GET_NOTIFICATIONS, {
+    variables: {limit, skip},
     onError: errorObj => {
       loggingService.error('Failed to get user notifications:', errorObj);
     },
   });
 
+  // Wrap the original refetch to reset hasMore state
+  const refetch = useCallback(async () => {
+    setHasMore(true);
+    return await originalRefetch();
+  }, [originalRefetch]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) {
+      return;
+    }
+
+    try {
+      const result = await fetchMore({
+        variables: {
+          skip: data?.notifications?.length || 0,
+          limit,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) return prev;
+
+          return {
+            notifications: [
+              ...prev.notifications,
+              ...fetchMoreResult.notifications,
+            ],
+          };
+        },
+      });
+
+      if (result.data.notifications.length < limit) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      loggingService.error('Error loading more notifications:', error);
+    }
+  }, [data?.notifications?.length, fetchMore, hasMore, limit, loading]);
+
   return {
-    notifications: (data?.getUserNotifications as Notification[]) || [],
+    notifications: (data?.notifications as Notification[]) || [],
     loading,
     error,
     refetch,
+    loadMore,
+    hasMore,
   };
 };
 
@@ -405,12 +451,20 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
   };
 };
 
+// Hook for getting notifications count
+export const useGetNotificationsCount = () => {
+  const {data} = useQuery(GET_NOTIFICATIONS_COUNT);
+  return {
+    notificationsCount: data?.notificationsCount,
+  };
+};
+
 // Export as NotificationService object
 export const notificationService = {
   service: NotificationService.getInstance(),
   useSaveDeviceToken,
   useRemoveDeviceToken,
-  useGetUserNotifications,
+  useGetNotifications,
   useMarkNotificationAsRead,
   useMarkAllNotificationsAsRead,
   getDeviceType,

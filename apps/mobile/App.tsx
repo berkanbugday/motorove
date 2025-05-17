@@ -22,6 +22,7 @@ import {networkService} from '@services/network.service';
 import {notificationService} from '@services/notification.service';
 import ToastMessage from '@components/ToastMessage';
 import NetworkStatusBar from '@components/NetworkAware';
+import TokenDebugger from '@components/TokenDebugger';
 // Initialize Sentry if DSN is provided
 if (
   AppConfig.ENABLE_LOGS &&
@@ -92,6 +93,7 @@ function App(): React.JSX.Element {
 
   return (
     <ErrorBoundary>
+      <TokenDebugger />
       <NetworkStatusBar />
       <ToastMessage.Provider>
         <ApolloProvider client={apolloClient}>

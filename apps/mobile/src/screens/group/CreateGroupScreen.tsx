@@ -234,6 +234,7 @@ export const CreateGroupScreen: React.FC = () => {
       <TopHeaderBar
         title="Create Group"
         showBackButton
+        showShadow={false}
         onBackPress={handleGoBack}
         containerStyle={styles.topHeaderBar}
       />

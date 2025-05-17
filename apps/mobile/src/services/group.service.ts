@@ -172,15 +172,24 @@ export const useGetGroup = (id: string) => {
 // Hook for getting user's groups
 export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
-  const {data, loading, error, refetch, fetchMore} = useQuery(
-    GET_JOINED_GROUPS,
-    {
-      variables: {limit, skip},
-      onError: errorObj => {
-        loggingService.error('Error fetching user groups:', errorObj);
-      },
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(GET_JOINED_GROUPS, {
+    variables: {limit, skip},
+    onError: errorObj => {
+      loggingService.error('Error fetching user groups:', errorObj);
     },
-  );
+  });
+
+  // Wrap the original refetch to reset hasMore state
+  const refetch = useCallback(async () => {
+    setHasMore(true);
+    return await originalRefetch();
+  }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loading) return;
@@ -190,6 +199,16 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
         variables: {
           skip: data?.joinedGroups?.length || 0,
           limit,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) return prev;
+
+          return {
+            joinedGroups: [
+              ...prev.joinedGroups,
+              ...fetchMoreResult.joinedGroups,
+            ],
+          };
         },
       });
 
@@ -214,12 +233,24 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
 // Hook for getting all groups
 export const useGetGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
-  const {data, loading, error, refetch, fetchMore} = useQuery(GET_GROUPS, {
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(GET_GROUPS, {
     variables: {limit, skip},
     onError: errorObj => {
       loggingService.error('Error fetching all groups:', errorObj);
     },
   });
+
+  // Wrap the original refetch to reset hasMore state
+  const refetch = useCallback(async () => {
+    setHasMore(true);
+    return await originalRefetch();
+  }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loading) return;
@@ -229,6 +260,13 @@ export const useGetGroups = (limit = 20, skip = 0) => {
         variables: {
           skip: data?.groups?.length || 0,
           limit,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) return prev;
+
+          return {
+            groups: [...prev.groups, ...fetchMoreResult.groups],
+          };
         },
       });
 
@@ -253,13 +291,25 @@ export const useGetGroups = (limit = 20, skip = 0) => {
 // Hook for searching groups by name
 export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
-  const {data, loading, error, refetch, fetchMore} = useQuery(SEARCH_GROUPS, {
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(SEARCH_GROUPS, {
     variables: {query, limit, skip},
     skip: !query || query.trim() === '',
     onError: errorObj => {
       loggingService.error('Error searching groups:', errorObj);
     },
   });
+
+  // Wrap the original refetch to reset hasMore state
+  const refetch = useCallback(async () => {
+    setHasMore(true);
+    return await originalRefetch();
+  }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loading || !query) return;
@@ -270,6 +320,13 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
           query,
           skip: data?.groups?.length || 0,
           limit,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) return prev;
+
+          return {
+            groups: [...prev.groups, ...fetchMoreResult.groups],
+          };
         },
       });
 

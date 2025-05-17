@@ -71,6 +71,21 @@ export class NotificationsResolver {
   }
 
   @UseGuards(JwtGuard)
+  @Query(() => Number, { name: 'notificationsCount' })
+  async getNotificationsCount(
+    @Context() context: GqlContext,
+    @Args('onlyUnread', {
+      type: () => Boolean,
+      nullable: true,
+      defaultValue: true,
+    })
+    onlyUnread?: boolean,
+  ): Promise<number> {
+    const userId = context.req.user.id;
+    return this.notificationsService.getNotificationsCount(userId, onlyUnread);
+  }
+
+  @UseGuards(JwtGuard)
   @Mutation(() => Notification)
   async deleteNotification(
     @Context() context: GqlContext,

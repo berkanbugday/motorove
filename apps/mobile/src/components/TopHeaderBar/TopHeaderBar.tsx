@@ -11,7 +11,7 @@ import {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, radius, spacing} from '@theme';
 import {Icon, IconName} from '../Icon';
-import {Typography, BodySmall, Subtitle} from '../Typography';
+import {Typography, BodySmall, Subtitle, Caption} from '../Typography';
 import DropdownMenu, {DropdownMenuItem} from '../DropdownMenu';
 
 export interface TopHeaderBarProps {
@@ -277,11 +277,14 @@ export function TopHeaderBar({
                       />
                       {secondRightIconBadgeCount > 0 && (
                         <View style={styles.badgeContainer}>
-                          <Text style={styles.badgeText}>
+                          <Caption
+                            weight="bold"
+                            color={colors.neutral.white}
+                            style={styles.badgeText}>
                             {secondRightIconBadgeCount > 99
                               ? '99+'
                               : secondRightIconBadgeCount}
-                          </Text>
+                          </Caption>
                         </View>
                       )}
                     </View>
@@ -364,17 +367,14 @@ const styles = StyleSheet.create({
     top: -15,
     right: -15,
     backgroundColor: colors.primary.main,
-    borderRadius: 10,
-    minWidth: 20,
+    borderRadius: radius.round,
+    width: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
   },
   badgeText: {
-    color: colors.neutral.white,
     fontSize: 10,
-    fontWeight: 'bold',
   },
   dropdownContainer: {
     zIndex: 20,

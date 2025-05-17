@@ -188,7 +188,7 @@ export class NotificationsService {
     try {
       const notifications = await this.prisma.notification.findMany({
         where: { userId },
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ read: 'asc' }, { createdAt: 'desc' }],
         take: limit || undefined,
         skip: skip || undefined,
       });
@@ -252,6 +252,32 @@ export class NotificationsService {
     } catch (error) {
       this.logger.error(
         `Failed to mark all notifications as read for user ${userId}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Get the count of notifications for a user
+   * @param userId The user ID
+   * @param onlyUnread If true, only count unread notifications
+   */
+  async getNotificationsCount(
+    userId: string,
+    onlyUnread?: boolean,
+  ): Promise<number> {
+    try {
+      const count = await this.prisma.notification.count({
+        where: {
+          userId,
+          ...(onlyUnread ? { read: false } : {}),
+        },
+      });
+      return count;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get notifications count for user ${userId}`,
         error,
       );
       throw error;

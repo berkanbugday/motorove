@@ -16,9 +16,9 @@ export const NOTIFICATION_FRAGMENT = gql`
 `;
 
 // Queries
-export const GET_USER_NOTIFICATIONS = gql`
-  query GetUserNotifications($userId: String!, $limit: Int, $skip: Int) {
-    getUserNotifications(userId: $userId, limit: $limit, skip: $skip) {
+export const GET_NOTIFICATIONS = gql`
+  query GetNotifications($limit: Int, $skip: Int) {
+    notifications(limit: $limit, skip: $skip) {
       ...NotificationFragment
     }
   }
@@ -50,5 +50,11 @@ export const MARK_NOTIFICATION_AS_READ = gql`
 export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
   mutation MarkAllNotificationsAsRead($userId: String!) {
     markAllNotificationsAsRead(userId: $userId)
+  }
+`;
+
+export const GET_NOTIFICATIONS_COUNT = gql`
+  query GetNotificationsCount($onlyUnread: Boolean) {
+    notificationsCount(onlyUnread: $onlyUnread)
   }
 `;

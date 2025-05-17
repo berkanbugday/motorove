@@ -32,14 +32,15 @@ export function formatDate(date: Date): string {
  * @param date - The date to get relative time for
  * @returns A relative time string
  */
-export function getRelativeTimeString(date: Date): string {
+export function relativeTime(timestamp: string): string {
   const now = new Date();
-  const diffMs = date.getTime() - now.getTime();
+  const date = new Date(timestamp);
+  const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
-  if (diffMs < 0) {
+  if (diffMs > 0) {
     // Past
     if (Math.abs(diffDays) >= 1) {
       return `${Math.abs(diffDays)} day${
