@@ -286,6 +286,9 @@ export const HomeScreen = ({navigation}: Props) => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
+
+    refetchNotificationsCount();
+
     // Change route on refresh
     rotateRecommendedRoute();
     // Simulate data fetching delay
