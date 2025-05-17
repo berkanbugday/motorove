@@ -1145,6 +1145,7 @@ export const GroupDetailScreen = () => {
             iconSize={20}
             variant="dark"
             shape="circle"
+            size="small"
           />
         </View>
         {loading ? (

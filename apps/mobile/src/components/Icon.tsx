@@ -68,6 +68,12 @@ import LockOpenFilled from '@assets/icons/lock-open-filled.svg';
 import Earth from '@assets/icons/earth.svg';
 import EarthFilled from '@assets/icons/earth-filled.svg';
 import Filter from '@assets/icons/filter.svg';
+import Crown from '@assets/icons/crown.svg';
+import CrownFilled from '@assets/icons/crown-filled.svg';
+import Gear from '@assets/icons/gear.svg';
+import GearFilled from '@assets/icons/gear-filled.svg';
+import Camera from '@assets/icons/camera.svg';
+import CameraFilled from '@assets/icons/camera-filled.svg';
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -152,7 +158,13 @@ export type IconName =
   | 'lock-open-filled'
   | 'earth'
   | 'earth-filled'
-  | 'filter';
+  | 'filter'
+  | 'crown'
+  | 'crown-filled'
+  | 'gear'
+  | 'gear-filled'
+  | 'camera'
+  | 'camera-filled';
 
 interface IconProps {
   name: IconName;
@@ -318,6 +330,18 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <EarthFilled {...commonProps} />;
     case 'filter':
       return <Filter {...commonProps} />;
+    case 'crown':
+      return <Crown {...commonProps} />;
+    case 'crown-filled':
+      return <CrownFilled {...commonProps} />;
+    case 'gear':
+      return <Gear {...commonProps} />;
+    case 'gear-filled':
+      return <GearFilled {...commonProps} />;
+    case 'camera':
+      return <Camera {...commonProps} />;
+    case 'camera-filled':
+      return <CameraFilled {...commonProps} />;
     default:
       return null;
   }

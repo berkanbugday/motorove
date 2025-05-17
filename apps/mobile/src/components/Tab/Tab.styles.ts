@@ -77,9 +77,9 @@ export const styles = StyleSheet.create({
   // Indicator styles
   indicator: {
     position: 'absolute',
-    bottom: 0,
-    height: 3,
-    borderRadius: 1.5,
+    bottom: -1,
+    height: 2,
+    borderRadius: radius.xs,
   },
   defaultIndicator: {
     backgroundColor: colors.neutral.black,
@@ -89,7 +89,6 @@ export const styles = StyleSheet.create({
   },
   minimalIndicator: {
     backgroundColor: colors.neutral.black,
-    height: 2,
   },
 
   // Size variants
