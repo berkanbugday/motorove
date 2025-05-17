@@ -285,13 +285,28 @@ const MemberItem = React.memo(
             <Typography weight="medium">
               {item.user.firstName} {item.user.lastName}
             </Typography>
-            <Chip
-              variant="filled"
-              color="primary"
-              size="small"
-              label={toPascalCase(item.role) || ''}
-              style={styles.memberRole}
-            />
+            <View style={styles.memberRoleContainer}>
+              {item.role === 'ADMIN' && (
+                <Chip
+                  variant="filled"
+                  color="primary"
+                  size="small"
+                  label={toPascalCase(item.role) || ''}
+                  style={styles.adminRole}
+                />
+              )}
+
+              {item.role === 'MEMBER' && (
+                <Chip
+                  variant="filled"
+                  color="secondary"
+                  size="small"
+                  label={toPascalCase(item.role) || ''}
+                  style={styles.memberRole}
+                />
+              )}
+              <Caption color={colors.neutral.grey}>İstanbul, Turkey</Caption>
+            </View>
           </View>
         </View>
         {isAdmin && (
@@ -1143,7 +1158,7 @@ export const GroupDetailScreen = () => {
           <Button
             iconName="user-plus-filled"
             iconSize={20}
-            variant="dark"
+            variant="secondary"
             shape="circle"
             size="small"
           />
@@ -1419,8 +1434,18 @@ const styles = StyleSheet.create({
   memberInfo: {
     justifyContent: 'center',
   },
-  memberRole: {
+  memberRoleContainer: {
+    width: 180,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  adminRole: {
     backgroundColor: colors.primary.light,
+  },
+  memberRole: {
+    backgroundColor: colors.secondary.light,
   },
   memberRightContent: {
     flexDirection: 'row',
