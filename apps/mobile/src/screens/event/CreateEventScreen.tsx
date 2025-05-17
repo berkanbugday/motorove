@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
-  Text,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -21,6 +20,7 @@ import {
   DropdownItem,
   showToast,
   Icon,
+  AnimatedDateTimePicker,
 } from '@components';
 import {colors, spacing, radius, getShadow} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -33,8 +33,14 @@ const createEventSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   location: z.string().min(3, 'Location is required'),
-  date: z.string().min(1, 'Date is required'),
-  time: z.string().min(1, 'Time is required'),
+  date: z.date({
+    required_error: 'Date is required',
+    invalid_type_error: 'Invalid date format',
+  }),
+  time: z.date({
+    required_error: 'Time is required',
+    invalid_type_error: 'Invalid time format',
+  }),
   city: z.string().min(1, 'City is required'),
   category: z.string().min(1, 'Category is required'),
   maxParticipants: z
@@ -85,8 +91,8 @@ export const CreateEventScreen: React.FC = () => {
       title: '',
       description: '',
       location: '',
-      date: '',
-      time: '',
+      date: new Date(),
+      time: new Date(),
       city: '',
       category: '',
       maxParticipants: null,
@@ -277,35 +283,27 @@ export const CreateEventScreen: React.FC = () => {
               {/* Date and Time */}
               <View style={styles.dateTimeContainer}>
                 <View style={styles.dateContainer}>
-                  <AnimatedInput
+                  <AnimatedDateTimePicker
                     control={control as any}
                     name="date"
-                    label="Date"
-                    placeholder="MM/DD/YYYY"
+                    placeholder="Select date"
+                    displayFormat="medium"
+                    mode="date"
+                    minimumDate={new Date()}
+                    style={styles.dateTimePicker}
                     error={errors.date}
-                    icon={
-                      <View style={styles.iconContainer}>
-                        <Text style={styles.emoji}>📅</Text>
-                      </View>
-                    }
-                    iconPosition="right"
-                    keyboardType="numeric"
                   />
                 </View>
                 <View style={styles.timeContainer}>
-                  <AnimatedInput
+                  <AnimatedDateTimePicker
                     control={control as any}
                     name="time"
-                    label="Time"
-                    placeholder="HH:MM AM/PM"
+                    placeholder="Select time"
+                    mode="time"
+                    is24Hour={false}
+                    minuteInterval={15}
+                    style={styles.dateTimePicker}
                     error={errors.time}
-                    icon={
-                      <View style={styles.iconContainer}>
-                        <Text style={styles.emoji}>⏰</Text>
-                      </View>
-                    }
-                    iconPosition="right"
-                    keyboardType="default"
                   />
                 </View>
               </View>
@@ -429,6 +427,17 @@ const styles = StyleSheet.create({
   emoji: {
     fontSize: 16,
   },
+  inputLabel: {
+    marginBottom: spacing.xs,
+    paddingLeft: spacing.xs,
+  },
+  dateTimePicker: {
+    marginBottom: spacing.xs,
+  },
+  errorText: {
+    paddingLeft: spacing.xs,
+    marginTop: spacing.xs,
+  },
   privacyContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -455,7 +464,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toggleActive: {
-    backgroundColor: colors.primary.main,
+    backgroundColor: colors.neutral.black,
   },
   toggleInactive: {
     backgroundColor: colors.neutral.lightGrey,

@@ -56,13 +56,13 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const getIconName = (routeName: string, isFocused: boolean): IconName => {
     switch (routeName) {
       case 'HomeTab':
-        return isFocused ? 'home-filled' : 'home';
+        return isFocused ? 'home' : 'home';
       case 'ExploreTab':
-        return isFocused ? 'map-location-filled' : 'map-location';
+        return isFocused ? 'map-location' : 'map-location';
       case 'GroupsTab':
-        return isFocused ? 'users-filled' : 'users';
+        return isFocused ? 'users' : 'users';
       case 'ProfileTab':
-        return isFocused ? 'user-filled' : 'user';
+        return isFocused ? 'user' : 'user';
       default:
         return 'home';
     }
@@ -91,7 +91,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   ),
                   outputRange: Array.from(
                     {length: state.routes.length},
-                    (_, i) => i * tabWidth + tabWidth / 2 - 36,
+                    (_, i) => i * tabWidth + tabWidth / 2 - 30,
                   ),
                 }),
               },
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   slidingIndicator: {
     position: 'absolute',
     top: 6,
-    width: 72,
+    width: 60,
     height: 32,
     borderRadius: 18,
     backgroundColor: colors.primary.light,

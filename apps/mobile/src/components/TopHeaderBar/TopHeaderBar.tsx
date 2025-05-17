@@ -6,7 +6,6 @@ import {
   ViewStyle,
   TextStyle,
   StatusBar,
-  Text,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, radius, spacing} from '@theme';

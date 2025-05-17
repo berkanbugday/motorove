@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   input: {
     height: spacing.form.inputHeight,
     borderWidth: 1,
-    borderColor: colors.neutral.veryLightGrey,
+    borderColor: colors.neutral.lightGrey,
     borderRadius: radius.sm,
     paddingHorizontal: spacing.form.inputPaddingHorizontal,
     fontSize: fontSizes.md,

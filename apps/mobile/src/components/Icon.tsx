@@ -60,6 +60,9 @@ import WrenchFilled from '@assets/icons/wrench-filled.svg';
 import Shop from '@assets/icons/shop.svg';
 import Droplet from '@assets/icons/droplet.svg';
 import Clock from '@assets/icons/clock.svg';
+import ClockFilled from '@assets/icons/clock-filled.svg';
+import Calendar from '@assets/icons/calendar.svg';
+import CalendarFilled from '@assets/icons/calendar-filled.svg';
 import Phone from '@assets/icons/phone.svg';
 import Lock from '@assets/icons/lock.svg';
 import LockFilled from '@assets/icons/lock-filled.svg';
@@ -151,6 +154,9 @@ export type IconName =
   | 'shop'
   | 'droplet'
   | 'clock'
+  | 'clock-filled'
+  | 'calendar'
+  | 'calendar-filled'
   | 'phone'
   | 'lock'
   | 'lock-filled'
@@ -314,6 +320,12 @@ export function Icon({name, size = 24, color = '#888', style}: IconProps) {
       return <Droplet {...commonProps} />;
     case 'clock':
       return <Clock {...commonProps} />;
+    case 'clock-filled':
+      return <ClockFilled {...commonProps} />;
+    case 'calendar':
+      return <Calendar {...commonProps} />;
+    case 'calendar-filled':
+      return <CalendarFilled {...commonProps} />;
     case 'phone':
       return <Phone {...commonProps} />;
     case 'lock':

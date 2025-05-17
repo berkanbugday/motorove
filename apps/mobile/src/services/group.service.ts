@@ -192,7 +192,9 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
-    if (!hasMore || loading) return;
+    if (!hasMore || loading) {
+      return;
+    }
 
     try {
       const result = await fetchMore({
@@ -201,7 +203,9 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
           limit,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) return prev;
+          if (!fetchMoreResult) {
+            return prev;
+          }
 
           return {
             joinedGroups: [
@@ -215,8 +219,8 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
       if (result.data.joinedGroups.length < limit) {
         setHasMore(false);
       }
-    } catch (error) {
-      loggingService.error('Error loading more joined groups:', error);
+    } catch (errorObj) {
+      loggingService.error('Error loading more joined groups:', errorObj);
     }
   }, [data?.joinedGroups?.length, fetchMore, hasMore, limit, loading]);
 
@@ -253,7 +257,9 @@ export const useGetGroups = (limit = 20, skip = 0) => {
   }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
-    if (!hasMore || loading) return;
+    if (!hasMore || loading) {
+      return;
+    }
 
     try {
       const result = await fetchMore({
@@ -262,7 +268,9 @@ export const useGetGroups = (limit = 20, skip = 0) => {
           limit,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) return prev;
+          if (!fetchMoreResult) {
+            return prev;
+          }
 
           return {
             groups: [...prev.groups, ...fetchMoreResult.groups],
@@ -273,8 +281,8 @@ export const useGetGroups = (limit = 20, skip = 0) => {
       if (result.data.groups.length < limit) {
         setHasMore(false);
       }
-    } catch (error) {
-      loggingService.error('Error loading more groups:', error);
+    } catch (errorObj) {
+      loggingService.error('Error loading more groups:', errorObj);
     }
   }, [data?.groups?.length, fetchMore, hasMore, limit, loading]);
 
@@ -312,7 +320,9 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
   }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
-    if (!hasMore || loading || !query) return;
+    if (!hasMore || loading || !query) {
+      return;
+    }
 
     try {
       const result = await fetchMore({
@@ -322,7 +332,9 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
           limit,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) return prev;
+          if (!fetchMoreResult) {
+            return prev;
+          }
 
           return {
             groups: [...prev.groups, ...fetchMoreResult.groups],
@@ -333,8 +345,8 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
       if (result.data.groups.length < limit) {
         setHasMore(false);
       }
-    } catch (error) {
-      loggingService.error('Error loading more search results:', error);
+    } catch (errorObj) {
+      loggingService.error('Error loading more search results:', errorObj);
     }
   }, [data?.groups?.length, fetchMore, hasMore, limit, loading, query]);
 

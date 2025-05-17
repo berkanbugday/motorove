@@ -144,7 +144,7 @@ class NotificationService {
 
   setupMessageHandlers(): void {
     // Handle background messages
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
+    messaging().setBackgroundMessageHandler(async _remoteMessage => {
       return Promise.resolve();
     });
 
@@ -418,7 +418,9 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
           limit,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) return prev;
+          if (!fetchMoreResult) {
+            return prev;
+          }
 
           return {
             notifications: [
@@ -432,8 +434,8 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
       if (result.data.notifications.length < limit) {
         setHasMore(false);
       }
-    } catch (error) {
-      loggingService.error('Error loading more notifications:', error);
+    } catch (errorObj) {
+      loggingService.error('Error loading more notifications:', errorObj);
     }
   }, [data?.notifications?.length, fetchMore, hasMore, limit, loading]);
 

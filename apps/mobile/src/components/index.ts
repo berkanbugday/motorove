@@ -30,6 +30,7 @@ export * from './MapView';
 export * from './MarkerInfoCard';
 export * from './FAB';
 export * from './SwipeableItem';
+export * from './AnimatedDateTimePicker';
 export {default as Dialog} from './Dialog';
 export type {
   DialogRef,
