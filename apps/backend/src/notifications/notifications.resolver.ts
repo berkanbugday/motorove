@@ -97,6 +97,15 @@ export class NotificationsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
+  async deleteAllNotifications(
+    @Context() context: GqlContext,
+  ): Promise<boolean> {
+    const userId = context.req.user.id;
+    return this.notificationsService.deleteAllNotifications(userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => Boolean)
   async saveDeviceToken(
     @Args('deviceTokenInput') deviceTokenInput: DeviceTokenInput,
   ): Promise<boolean> {

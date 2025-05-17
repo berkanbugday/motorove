@@ -35,6 +35,7 @@ import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts';
 import {useGetNotificationsCount} from '@services/notification.service';
+import {useFocusEffect} from '@react-navigation/native';
 
 // Route data
 const recommendedRoutes = [
@@ -203,9 +204,17 @@ export const HomeScreen = ({navigation}: Props) => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [posts, setPosts] = useState<FeedPost[]>(feedPosts);
   const {user} = useAuth();
-  const {notificationsCount} = useGetNotificationsCount();
+  const {notificationsCount, refetch: refetchNotificationsCount} =
+    useGetNotificationsCount();
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Refetch notification count when the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refetchNotificationsCount();
+    }, [refetchNotificationsCount]),
+  );
 
   // Track the previous scroll position to determine scroll direction
   const previousScrollY = useRef(0);

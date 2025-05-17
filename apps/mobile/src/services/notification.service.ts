@@ -15,6 +15,8 @@ import {
   MARK_ALL_NOTIFICATIONS_AS_READ,
   GET_NOTIFICATIONS,
   GET_NOTIFICATIONS_COUNT,
+  DELETE_NOTIFICATION,
+  DELETE_ALL_NOTIFICATIONS,
 } from './graphql/notification.graphql';
 import {useCallback, useState} from 'react';
 
@@ -189,6 +191,93 @@ class NotificationService {
     }
   }
 }
+
+// Hook for deleting notification
+export const useDeleteNotification = (onSuccess?: () => void) => {
+  // const [deleteNotificationMutation, {loading, error}] =
+  //   useMutation(DELETE_NOTIFICATION);
+  const [deleteNotificationMutation, {loading, error}] = useMutation(
+    DELETE_NOTIFICATION,
+    {
+      onCompleted: () => {
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: errorObj => {
+        loggingService.error('Failed to delete notification:', errorObj);
+        showToast({
+          type: 'error',
+          text1: 'Error',
+          text2:
+            errorObj.message ||
+            'Failed to delete notification. Please try again.',
+        });
+      },
+    },
+  );
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      const result = await deleteNotificationMutation({
+        variables: {
+          id: notificationId,
+        },
+      });
+      return result.data?.deleteNotification;
+    } catch (err) {
+      loggingService.error('Error in deleteNotification:', err);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to delete notification',
+      });
+      // Error is already handled in onError callback
+      return null;
+    }
+  };
+
+  return {
+    deleteNotification,
+    loading,
+    error,
+  };
+};
+
+// Hook for deleting all notifications
+export const useDeleteAllNotifications = (onSuccess?: () => void) => {
+  const [deleteAllNotificationsMutation, {loading, error}] = useMutation(
+    DELETE_ALL_NOTIFICATIONS,
+    {
+      onCompleted: () => {
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+    },
+  );
+
+  const deleteAllNotifications = async () => {
+    try {
+      const result = await deleteAllNotificationsMutation();
+      return result.data?.deleteAllNotifications;
+    } catch (err) {
+      loggingService.error('Error in deleteAllNotifications:', err);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to delete all notifications',
+      });
+      return null;
+    }
+  };
+
+  return {
+    deleteAllNotifications,
+    loading,
+    error,
+  };
+};
 
 // Hook for saving device token
 export const useSaveDeviceToken = (onSuccess?: () => void) => {
@@ -391,7 +480,11 @@ export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
       return result.data?.markNotificationAsRead;
     } catch (err) {
       loggingService.error('Error in markNotificationAsRead:', err);
-      // Error is already handled in onError callback
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to mark notification as read',
+      });
       return null;
     }
   };
@@ -421,9 +514,7 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
         showToast({
           type: 'error',
           text1: 'Error',
-          text2:
-            errorObj.message ||
-            'Failed to update notifications. Please try again.',
+          text2: 'Failed to mark all notifications as read',
         });
       },
     },
@@ -439,7 +530,11 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
       return result.data?.markAllNotificationsAsRead;
     } catch (err) {
       loggingService.error('Error in markAllNotificationsAsRead:', err);
-      // Error is already handled in onError callback
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to mark all notifications as read',
+      });
       return null;
     }
   };
@@ -453,9 +548,12 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
 
 // Hook for getting notifications count
 export const useGetNotificationsCount = () => {
-  const {data} = useQuery(GET_NOTIFICATIONS_COUNT);
+  const {data, refetch, loading, error} = useQuery(GET_NOTIFICATIONS_COUNT);
   return {
     notificationsCount: data?.notificationsCount,
+    refetch,
+    loading,
+    error,
   };
 };
 

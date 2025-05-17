@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect, useRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -19,12 +19,17 @@ import {
   SwipeAction,
   TopHeaderBar,
 } from '@components';
+import Dialog, {DialogRef} from '@components/Dialog';
 import {
   useGetNotifications,
   useMarkNotificationAsRead,
   useMarkAllNotificationsAsRead,
+  useDeleteNotification,
+  useDeleteAllNotifications,
 } from '@services/notification.service';
 import {relativeTime} from '@utils/dateUtils';
+import {useAuth} from '@contexts';
+
 // Define the Notification interface based on what's returned from the API
 interface Notification {
   id: string;
@@ -40,6 +45,7 @@ interface Notification {
  */
 export const NotificationScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
+  const {user} = useAuth();
   const {
     notifications: apiNotifications,
     loading,
@@ -49,10 +55,38 @@ export const NotificationScreen = () => {
   } = useGetNotifications(10, 0);
 
   const {markAsRead} = useMarkNotificationAsRead(() => {
+    showToast({
+      type: 'success',
+      text1: 'Success',
+      text2: 'Notification marked as read',
+    });
+    refetch();
+  });
+
+  const {deleteNotification} = useDeleteNotification(() => {
+    showToast({
+      type: 'success',
+      text1: 'Success',
+      text2: 'Notification deleted',
+    });
+    refetch();
+  });
+
+  const {deleteAllNotifications} = useDeleteAllNotifications(() => {
+    showToast({
+      type: 'success',
+      text1: 'Success',
+      text2: 'All notifications deleted',
+    });
     refetch();
   });
 
   const {markAllAsRead} = useMarkAllNotificationsAsRead(() => {
+    showToast({
+      type: 'success',
+      text1: 'Success',
+      text2: 'All notifications marked as read',
+    });
     refetch();
   });
 
@@ -60,6 +94,19 @@ export const NotificationScreen = () => {
   const notifications = apiNotifications as unknown as readonly Notification[];
 
   const [refreshing, setRefreshing] = useState(false);
+  const [existingUnreadNotifications, setExistingUnreadNotifications] =
+    useState(false);
+  const deleteConfirmationDialogRef = useRef<DialogRef>(null);
+  const deleteAllConfirmationDialogRef = useRef<DialogRef>(null);
+  const [notificationToDelete, setNotificationToDelete] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    setExistingUnreadNotifications(
+      notifications.find(notification => !notification.read) !== undefined,
+    );
+  }, [notifications]);
 
   // Handle refreshing notifications
   const handleRefresh = useCallback(() => {
@@ -73,31 +120,47 @@ export const NotificationScreen = () => {
   const handleMarkAsRead = useCallback(
     (id: string) => {
       markAsRead(id);
-      showToast({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Notification marked as read',
-      });
     },
     [markAsRead],
   );
 
   // Delete notification
-  const deleteNotification = useCallback((_id: string) => {
-    // Implementation would go here
-    showToast({
-      type: 'success',
-      text1: 'Success',
-      text2: 'Notification deleted',
-    });
+  const handleDeleteNotification = useCallback((id: string) => {
+    setNotificationToDelete(id);
+    deleteConfirmationDialogRef.current?.open();
   }, []);
+
+  const confirmDeleteNotification = useCallback(() => {
+    if (notificationToDelete && notifications.length > 0) {
+      deleteNotification(notificationToDelete);
+      setNotificationToDelete(null);
+    }
+  }, [deleteNotification, notificationToDelete, notifications.length]);
 
   // Mark all notifications as read
   const handleMarkAllAsRead = useCallback(() => {
-    markAllAsRead('currentUser'); // Replace with actual user ID
-  }, [markAllAsRead]);
+    if (user && existingUnreadNotifications) {
+      markAllAsRead(user.id);
+    }
+  }, [markAllAsRead, user, existingUnreadNotifications]);
 
-  // Render timestamp in a user-friendly format
+  // Delete all notifications
+  const handleDeleteAllNotifications = useCallback(() => {
+    if (notifications.length === 0) {
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'No notifications to delete',
+      });
+      return;
+    } else {
+      deleteAllConfirmationDialogRef.current?.open();
+    }
+  }, [notifications.length, existingUnreadNotifications]);
+
+  const confirmDeleteAllNotifications = useCallback(() => {
+    deleteAllNotifications();
+  }, [deleteAllNotifications]);
 
   // Handle end reached - load more notifications
   const handleEndReached = useCallback(() => {
@@ -118,7 +181,7 @@ export const NotificationScreen = () => {
         text: 'Delete',
         icon: <Icon name="trash" size={24} color={colors.neutral.white} />,
         backgroundColor: colors.status.error,
-        onPress: () => deleteNotification(item.id),
+        onPress: () => handleDeleteNotification(item.id),
         testID: `delete-notification-${item.id}`,
       },
     ];
@@ -149,9 +212,17 @@ export const NotificationScreen = () => {
           <View
             style={[
               styles.notificationIcon,
-              item.read && {backgroundColor: colors.neutral.lightGrey},
+              item.read && {backgroundColor: colors.status.success},
             ]}>
-            <Icon name="bell-filled" size={15} color={colors.neutral.white} />
+            {item.read ? (
+              <Icon
+                name="check-filled"
+                size={15}
+                color={colors.neutral.white}
+              />
+            ) : (
+              <Icon name="bell-filled" size={15} color={colors.neutral.white} />
+            )}
           </View>
           <View style={styles.notificationContent}>
             <Subtitle
@@ -182,8 +253,23 @@ export const NotificationScreen = () => {
         showShadow={false}
         showBackButton
         onBackPress={() => navigation.goBack()}
-        rightIconName="check"
-        onRightButtonPress={handleMarkAllAsRead}
+        rightIconName={
+          notifications.length === 0
+            ? undefined
+            : existingUnreadNotifications
+            ? 'check'
+            : 'trash'
+        }
+        onRightButtonPress={() => {
+          if (notifications.length === 0) {
+            return;
+          }
+          if (existingUnreadNotifications) {
+            handleMarkAllAsRead();
+          } else {
+            handleDeleteAllNotifications();
+          }
+        }}
         containerStyle={styles.topHeaderBar}
       />
 
@@ -216,6 +302,40 @@ export const NotificationScreen = () => {
         recycleItems={true} // Enable component recycling for better performance
         maintainVisibleContentPosition={true} // Maintain the visible position when data changes
       />
+
+      {/* Delete single notification confirmation dialog */}
+      <Dialog
+        ref={deleteConfirmationDialogRef}
+        title="Delete Notification"
+        message="Are you sure you want to delete this notification? This action cannot be undone."
+        variant="confirm"
+        confirmButton={{
+          text: 'Delete',
+          onPress: confirmDeleteNotification,
+          variant: 'primary',
+        }}
+        cancelButton={{
+          text: 'Cancel',
+          variant: 'outline',
+        }}
+      />
+
+      {/* Delete all notifications confirmation dialog */}
+      <Dialog
+        ref={deleteAllConfirmationDialogRef}
+        title="Delete All Notifications"
+        message="Are you sure you want to delete all notifications? This action cannot be undone."
+        variant="confirm"
+        confirmButton={{
+          text: 'Delete All',
+          onPress: confirmDeleteAllNotifications,
+          variant: 'primary',
+        }}
+        cancelButton={{
+          text: 'Cancel',
+          variant: 'outline',
+        }}
+      />
     </View>
   );
 };
@@ -242,9 +362,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: spacing.md,
     alignItems: 'center',
+    opacity: 0.7,
   },
   unreadNotification: {
-    backgroundColor: colors.neutral.background,
+    backgroundColor: colors.secondary.light,
+    opacity: 1,
   },
   notificationIcon: {
     width: 30,

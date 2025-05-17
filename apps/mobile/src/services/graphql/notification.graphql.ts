@@ -25,6 +25,20 @@ export const GET_NOTIFICATIONS = gql`
   ${NOTIFICATION_FRAGMENT}
 `;
 
+export const DELETE_NOTIFICATION = gql`
+  mutation DeleteNotification($id: ID!) {
+    deleteNotification(id: $id) {
+      id
+    }
+  }
+`;
+
+export const DELETE_ALL_NOTIFICATIONS = gql`
+  mutation DeleteAllNotifications {
+    deleteAllNotifications
+  }
+`;
+
 // Mutations
 export const SAVE_DEVICE_TOKEN = gql`
   mutation SaveDeviceToken($input: DeviceTokenInput!) {
@@ -49,7 +63,10 @@ export const MARK_NOTIFICATION_AS_READ = gql`
 
 export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
   mutation MarkAllNotificationsAsRead($userId: String!) {
-    markAllNotificationsAsRead(userId: $userId)
+    markAllNotificationsAsRead(userId: $userId) {
+      id
+      read
+    }
   }
 `;
 

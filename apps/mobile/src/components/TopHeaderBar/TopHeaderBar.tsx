@@ -48,7 +48,7 @@ export interface TopHeaderBarProps {
   /**
    * Optional icon name for the right button
    */
-  rightIconName?: IconName;
+  rightIconName?: IconName | undefined;
 
   /**
    * Optional text for the right button

@@ -93,7 +93,7 @@ function App(): React.JSX.Element {
 
   return (
     <ErrorBoundary>
-      <TokenDebugger />
+      {/* <TokenDebugger /> */}
       <NetworkStatusBar />
       <ToastMessage.Provider>
         <ApolloProvider client={apolloClient}>

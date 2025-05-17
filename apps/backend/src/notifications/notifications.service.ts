@@ -291,15 +291,20 @@ export class NotificationsService {
     try {
       const notification = await this.prisma.notification.delete({
         where: { id, userId },
-        include: {
-          user: true,
-        },
       });
       return this.mapToGraphQL(notification);
     } catch (error) {
       this.logger.error(`Failed to delete notification ${id}`, error);
       throw error;
     }
+  }
+
+  /**
+   * Delete all notifications for a user
+   */
+  async deleteAllNotifications(userId: string): Promise<boolean> {
+    await this.prisma.notification.deleteMany({ where: { userId } });
+    return true;
   }
 
   /**

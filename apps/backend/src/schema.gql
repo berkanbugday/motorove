@@ -136,6 +136,7 @@ type Mutation {
   changeMemberRole(changeMemberRoleInput: ChangeMemberRoleInput!): GroupMembership!
   createGroup(createGroupInput: CreateGroupInput!): Group!
   createNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  deleteAllNotifications: Boolean!
   deleteNotification(id: ID!): Notification!
   markAllNotificationsAsRead(userId: String!): [Notification!]!
   markNotificationAsRead(id: ID!): Notification!
