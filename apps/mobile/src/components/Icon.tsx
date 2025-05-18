@@ -86,6 +86,7 @@ import Stormy from '@assets/icons/weather/stormy.svg';
 import Snowy from '@assets/icons/weather/snowy.svg';
 import Foggy from '@assets/icons/weather/foggy.svg';
 import Windy from '@assets/icons/weather/windy.svg';
+import {colors} from '@theme/colors';
 
 // Type for icons
 export type IconName =
@@ -179,7 +180,12 @@ interface IconProps {
   style?: any;
 }
 
-export function Icon({name, size = 24, color = '#888', style}: IconProps) {
+export function Icon({
+  name,
+  size = 24,
+  color = colors.neutral.grey,
+  style,
+}: IconProps) {
   // Set specific props for the SVG components
   const commonProps = {
     width: size,

@@ -23,6 +23,21 @@ export interface BottomSheetConfig {
   enableGestureControl?: boolean;
   disableContentGestures?: boolean;
   maxContentHeight?: number;
+  header?: ReactNode;
+  headerStyle?: StyleProp<ViewStyle>;
+  footer?: ReactNode;
+  footerStyle?: StyleProp<ViewStyle>;
+  hideHandle?: boolean;
+  showCloseButton?: boolean;
+  closeButtonPosition?:
+    | 'top-left'
+    | 'top-right'
+    | 'header-left'
+    | 'header-right';
+  closeButtonOffset?: {top?: number; left?: number; right?: number};
+  title?: string;
+  subtitle?: string;
+  titlePosition?: 'left' | 'center' | 'right';
 }
 
 // Global reference to store BottomSheet functions
@@ -120,7 +135,18 @@ export const BottomSheetProvider: React.FC<{children: React.ReactNode}> = ({
           disableContentGestures={
             bottomSheetConfig.disableContentGestures ?? true
           }
-          maxContentHeight={bottomSheetConfig.maxContentHeight}>
+          maxContentHeight={bottomSheetConfig.maxContentHeight}
+          header={bottomSheetConfig.header}
+          headerStyle={bottomSheetConfig.headerStyle}
+          footer={bottomSheetConfig.footer}
+          footerStyle={bottomSheetConfig.footerStyle}
+          hideHandle={bottomSheetConfig.hideHandle}
+          showCloseButton={bottomSheetConfig.showCloseButton}
+          closeButtonPosition={bottomSheetConfig.closeButtonPosition}
+          closeButtonOffset={bottomSheetConfig.closeButtonOffset}
+          title={bottomSheetConfig.title}
+          subtitle={bottomSheetConfig.subtitle}
+          titlePosition={bottomSheetConfig.titlePosition}>
           {bottomSheetConfig.content}
         </BottomSheet>
       )}

@@ -97,13 +97,13 @@ function App(): React.JSX.Element {
       <GestureHandlerRootView style={{flex: 1}}>
         <ApolloProvider client={apolloClient}>
           <ToastMessage.Provider>
-            <BottomSheetProvider.Provider>
-              <SafeAreaProvider>
+            <SafeAreaProvider>
+              <BottomSheetProvider.Provider>
                 <AuthProvider>
                   <RootNavigator />
                 </AuthProvider>
-              </SafeAreaProvider>
-            </BottomSheetProvider.Provider>
+              </BottomSheetProvider.Provider>
+            </SafeAreaProvider>
           </ToastMessage.Provider>
         </ApolloProvider>
       </GestureHandlerRootView>

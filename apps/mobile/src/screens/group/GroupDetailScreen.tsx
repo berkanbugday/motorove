@@ -1146,24 +1146,26 @@ export const GroupDetailScreen = () => {
 
       <BottomSheet
         ref={membersBottomSheetRef}
-        containerStyle={styles.membersBottomSheet}
         closeOnBackdropPress={true}
-        initialSnap="closed">
-        <View style={styles.membersHeader}>
-          <View>
-            <Subtitle>Members</Subtitle>
-            <Caption color={colors.neutral.grey}>
-              {members.length} people
-            </Caption>
+        initialSnap="closed"
+        showCloseButton={false}
+        header={
+          <View style={styles.membersHeader}>
+            <View>
+              <Subtitle>Members</Subtitle>
+              <Caption color={colors.neutral.grey}>
+                {members.length} people
+              </Caption>
+            </View>
+            <Button
+              iconName="user-plus-filled"
+              iconSize={20}
+              variant="secondary"
+              shape="circle"
+              size="small"
+            />
           </View>
-          <Button
-            iconName="user-plus-filled"
-            iconSize={20}
-            variant="secondary"
-            shape="circle"
-            size="small"
-          />
-        </View>
+        }>
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary.main} />
         ) : (
@@ -1401,18 +1403,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  membersBottomSheet: {
-    paddingHorizontal: spacing.xs,
-  },
+  membersBottomSheet: {},
   membersHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.secondary.main,
-    paddingBottom: spacing.md,
   },
   membersList: {
+    flex: 1,
     paddingBottom: spacing.lg,
   },
   memberItem: {

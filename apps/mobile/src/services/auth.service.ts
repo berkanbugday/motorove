@@ -13,6 +13,8 @@ import {loggingService} from './logging.service';
 // Simple mutex for token refresh to avoid concurrent refresh attempts
 let isRefreshing = false;
 let refreshPromise: Promise<AuthResponse> | null = null;
+// Background refresh timer
+let tokenRefreshTimer: NodeJS.Timeout | null = null;
 
 class AuthService {
   // Sign up a new user
@@ -43,6 +45,10 @@ class AuthService {
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.signUp);
       await this.saveAuthData(authResponse);
+
+      // Start background token refresh
+      this.setupBackgroundTokenRefresh(authResponse);
+
       return authResponse;
     } catch (error) {
       loggingService.error('Signup error:', error);
@@ -71,6 +77,10 @@ class AuthService {
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.signIn);
       await this.saveAuthData(authResponse);
+
+      // Start background token refresh
+      this.setupBackgroundTokenRefresh(authResponse);
+
       return authResponse;
     } catch (error) {
       loggingService.error('Signin error:', error);
@@ -81,6 +91,9 @@ class AuthService {
   // Sign out the current user
   async signOut(): Promise<void> {
     try {
+      // Clear background refresh timer
+      this.clearBackgroundTokenRefresh();
+
       // For GraphQL, we don't need a specific signout endpoint
       // Just clear the local auth data and reset Apollo cache
       await this.clearAuthData();
@@ -89,6 +102,71 @@ class AuthService {
       loggingService.error('Signout error:', error);
       // Still clear local auth data even if something fails
       await this.clearAuthData();
+    }
+  }
+
+  // Setup background token refresh
+  private setupBackgroundTokenRefresh(authResponse: AuthResponse): void {
+    // Clear any existing timer
+    this.clearBackgroundTokenRefresh();
+
+    if (!authResponse.session?.expires_at) {
+      loggingService.error(
+        'Cannot setup token refresh: missing expiration time',
+      );
+      return;
+    }
+
+    const expiresAt = authResponse.session.expires_at;
+    const now = Date.now();
+
+    // Calculate time until next refresh (60% of total token lifetime or 5 minutes before expiry, whichever is earlier)
+    const tokenLifetime = expiresAt - now;
+    const refreshTime = Math.min(
+      tokenLifetime * 0.6, // Refresh at 60% of the token lifetime
+      tokenLifetime - 300000, // Or 5 minutes before expiration
+    );
+
+    // Only set up refresh if we have a reasonable time (at least 10 seconds)
+    if (refreshTime > 10000) {
+      loggingService.info(
+        `Setting up background token refresh in ${Math.round(
+          refreshTime / 1000,
+        )} seconds`,
+      );
+
+      tokenRefreshTimer = setTimeout(async () => {
+        try {
+          loggingService.info('Executing background token refresh');
+          await this.refreshToken();
+
+          // After successful refresh, get the new auth state and set up the next refresh
+          const state = await this.getAuthState();
+          if (state.accessToken && state.expiresAt && state.user) {
+            this.setupBackgroundTokenRefresh({
+              user: state.user,
+              session: {
+                access_token: state.accessToken,
+                refresh_token: state.refreshToken || '',
+                expires_at: state.expiresAt,
+              },
+            });
+          }
+        } catch (error) {
+          loggingService.error('Background token refresh failed:', error);
+          // Don't sign out immediately - the regular token refresh mechanism will handle this
+        }
+      }, refreshTime);
+    } else {
+      loggingService.warning('Token lifetime too short for background refresh');
+    }
+  }
+
+  // Clear background token refresh timer
+  private clearBackgroundTokenRefresh(): void {
+    if (tokenRefreshTimer) {
+      clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer = null;
     }
   }
 
@@ -142,6 +220,8 @@ class AuthService {
           variables: {
             token: parsedRefreshToken,
           },
+          // Skip the auth link to avoid circular dependency
+          context: {skipAuth: true},
         });
 
         if (errors) {
@@ -220,7 +300,38 @@ class AuthService {
               }, refreshing`,
             );
             await this.refreshToken();
-            // After refresh, get updated state recursively, but prevent infinite loops
+
+            // Get the updated auth data from storage after refresh
+            const updatedAuthData = await EncryptedStorage.getItem(
+              STORAGE_KEYS.AUTH_DATA,
+            );
+
+            if (updatedAuthData) {
+              const updatedParsedData = JSON.parse(updatedAuthData);
+
+              // Setup background refresh with the new token data
+              if (
+                updatedParsedData.accessToken &&
+                updatedParsedData.expiresAt &&
+                updatedParsedData.user
+              ) {
+                this.setupBackgroundTokenRefresh({
+                  user: updatedParsedData.user,
+                  session: {
+                    access_token: updatedParsedData.accessToken,
+                    refresh_token: updatedParsedData.refreshToken || '',
+                    expires_at: updatedParsedData.expiresAt,
+                  },
+                });
+              }
+
+              return {
+                ...updatedParsedData,
+                isLoading: false,
+              };
+            }
+
+            // If we couldn't get updated data, try again recursively
             return this.getAuthState();
           } catch (refreshError) {
             // If refresh fails, return logged out state
@@ -252,6 +363,24 @@ class AuthService {
               isLoading: false,
             };
           }
+        }
+
+        // Setup background refresh if we have a valid token but no timer
+        if (
+          !isTokenExpired &&
+          parsedData.accessToken &&
+          parsedData.expiresAt &&
+          parsedData.user &&
+          !tokenRefreshTimer
+        ) {
+          this.setupBackgroundTokenRefresh({
+            user: parsedData.user,
+            session: {
+              access_token: parsedData.accessToken,
+              refresh_token: parsedData.refreshToken || '',
+              expires_at: parsedData.expiresAt,
+            },
+          });
         }
 
         return {
@@ -290,6 +419,18 @@ class AuthService {
 
         // Clear from AsyncStorage after migration
         await this.clearAsyncStorageAuthData();
+
+        // Setup background refresh if we have a valid token
+        if (accessToken && expiresAt && expiresAt > Date.now() && parsedUser) {
+          this.setupBackgroundTokenRefresh({
+            user: parsedUser,
+            session: {
+              access_token: accessToken,
+              refresh_token: refreshToken || '',
+              expires_at: expiresAt,
+            },
+          });
+        }
 
         return migratedState;
       }
@@ -436,6 +577,9 @@ class AuthService {
   // Clear authentication data
   private async clearAuthData(): Promise<void> {
     try {
+      // Clear background refresh timer
+      this.clearBackgroundTokenRefresh();
+
       // Remove auth data from all storage sources
       await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
       await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);

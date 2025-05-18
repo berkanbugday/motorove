@@ -282,30 +282,26 @@ export const CreateEventScreen: React.FC = () => {
 
               {/* Date and Time */}
               <View style={styles.dateTimeContainer}>
-                <View style={styles.dateContainer}>
-                  <AnimatedDateTimePicker
-                    control={control as any}
-                    name="date"
-                    placeholder="Select date"
-                    displayFormat="medium"
-                    mode="date"
-                    minimumDate={new Date()}
-                    style={styles.dateTimePicker}
-                    error={errors.date}
-                  />
-                </View>
-                <View style={styles.timeContainer}>
-                  <AnimatedDateTimePicker
-                    control={control as any}
-                    name="time"
-                    placeholder="Select time"
-                    mode="time"
-                    is24Hour={false}
-                    minuteInterval={15}
-                    style={styles.dateTimePicker}
-                    error={errors.time}
-                  />
-                </View>
+                <AnimatedDateTimePicker
+                  control={control as any}
+                  name="date"
+                  placeholder="Select date"
+                  displayFormat="medium"
+                  mode="date"
+                  minimumDate={new Date()}
+                  style={styles.dateTimePicker}
+                  error={errors.date}
+                />
+                <AnimatedDateTimePicker
+                  control={control as any}
+                  name="time"
+                  placeholder="Select time"
+                  mode="time"
+                  is24Hour={false}
+                  minuteInterval={15}
+                  style={styles.dateTimePicker}
+                  error={errors.time}
+                />
               </View>
 
               {/* Max Participants */}
@@ -409,14 +405,7 @@ const styles = StyleSheet.create({
   },
   dateTimeContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: spacing.md,
-  },
-  dateContainer: {
-    flex: 1,
-  },
-  timeContainer: {
-    flex: 1,
   },
   iconContainer: {
     justifyContent: 'center',

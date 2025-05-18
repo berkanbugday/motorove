@@ -48,6 +48,9 @@ interface BaseAnimatedInputProps {
   shape?: 'default' | 'round';
   showClearButton?: boolean;
   onClearSearch?: () => void;
+  editable?: boolean;
+  onPress?: () => void;
+  onEndEditing?: () => void;
 }
 
 interface StandaloneAnimatedInputProps extends BaseAnimatedInputProps {
@@ -96,6 +99,9 @@ export function AnimatedInput<T extends FieldValues = any>(
       shape = 'default',
       showClearButton = true,
       onClearSearch,
+      editable = true,
+      onPress,
+      onEndEditing,
     } = props as FormAnimatedInputProps<T>;
 
     return (
@@ -123,6 +129,9 @@ export function AnimatedInput<T extends FieldValues = any>(
               onChange('');
               onClearSearch?.();
             }}
+            editable={editable}
+            onPress={onPress}
+            onEndEditing={onEndEditing}
           />
         )}
       />
@@ -147,6 +156,9 @@ export function AnimatedInput<T extends FieldValues = any>(
     shape = 'default',
     showClearButton = true,
     onClearSearch,
+    editable = true,
+    onPress,
+    onEndEditing,
   } = props as StandaloneAnimatedInputProps;
 
   return (
@@ -170,6 +182,9 @@ export function AnimatedInput<T extends FieldValues = any>(
         onChangeText('');
         onClearSearch?.();
       }}
+      editable={editable}
+      onPress={onPress}
+      onEndEditing={onEndEditing}
     />
   );
 }
@@ -192,6 +207,9 @@ interface AnimatedInputBaseProps {
   shape?: 'default' | 'round';
   showClearButton?: boolean;
   onClearSearch?: () => void;
+  editable?: boolean;
+  onPress?: () => void;
+  onEndEditing?: () => void;
 }
 
 function AnimatedInputBase({
@@ -211,6 +229,9 @@ function AnimatedInputBase({
   shape = 'default',
   showClearButton = false,
   onClearSearch,
+  editable = true,
+  onPress,
+  onEndEditing,
 }: AnimatedInputBaseProps) {
   const [isFocused, setIsFocused] = useState(false);
   const animatedIsFocused = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -239,9 +260,12 @@ function AnimatedInputBase({
       inputRange: [0, 1],
       outputRange: [colors.neutral.grey, colors.neutral.black],
     }),
+    fontWeight: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['500', '600'],
+    }),
     backgroundColor: colors.neutral.white,
     zIndex: zIndex.elevated,
-    fontWeight: '500',
   };
 
   const handleLabelPress = () => {
@@ -339,6 +363,9 @@ function AnimatedInputBase({
         testID={`${testID}-input`}
         multiline={multiline}
         textAlignVertical={multiline ? 'top' : 'center'}
+        editable={editable}
+        onPress={onPress}
+        onEndEditing={onEndEditing || (() => {})}
       />
       <View style={getIconContainerStyle()}>
         {onToggleSecureEntry ? (

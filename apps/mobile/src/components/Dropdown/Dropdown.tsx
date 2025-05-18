@@ -246,10 +246,13 @@ const Dropdown: React.FC<DropdownProps> = ({
           : colors.neutral.black,
       ],
     }),
+    fontWeight: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['500', '600'],
+    }),
     backgroundColor: colors.neutral.white,
     paddingHorizontal: 4,
     zIndex: 5,
-    fontWeight: '500',
   };
 
   // Handle label press to focus the input

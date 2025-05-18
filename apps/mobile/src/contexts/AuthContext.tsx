@@ -77,6 +77,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       });
 
       setAuthState({...state, isLoading: false});
+
+      // Setup token refresh if needed
+      if (state.user && state.accessToken && state.expiresAt) {
+        // We already have background refresh in the auth service, this is just a safety check
+        loggingService.info('Auth context loaded with valid auth state');
+      }
     } catch (error) {
       loggingService.error('Error loading auth state:', error);
       setAuthState({...defaultAuthState, isLoading: false});

@@ -17,7 +17,6 @@ import authService from '@services/auth.service';
 import {loggingService} from '@services/index';
 import {RetryLink} from '@apollo/client/link/retry';
 import {Platform} from 'react-native';
-import {graphQLErrorService} from '@services/index';
 
 // Create a retry link to automatically retry failed requests
 const retryLink = new RetryLink({
@@ -44,34 +43,49 @@ const httpLink = createHttpLink({
   },
 });
 
-// Enhanced error handling link
+// Error handling link
 const errorLink = onError(
   ({graphQLErrors, networkError, operation, forward}) => {
     // Handle GraphQL errors
     if (graphQLErrors) {
-      for (const err of graphQLErrors) {
-        const {locations, path, extensions} = err;
-        // Use the standalone service instead of the hook
-        graphQLErrorService.handleGraphQLError(err);
+      for (let err of graphQLErrors) {
+        const {message, locations, path, extensions} = err;
 
-        // Send to Sentry with relevant metadata
-        captureException(err, {
-          tags: {
-            graphql: true,
-            operationName: operation.operationName,
-            errorCode: extensions?.code as string,
-          },
-          extra: {
-            operationName: operation.operationName,
-            variables: operation.variables,
-            path,
-            locations,
-            extensions,
-          },
+        // Log all GraphQL errors for debugging
+        loggingService.error(`[GraphQL error]: ${message}`, {
+          locations,
+          path,
+          extensions,
+          operationName: operation.operationName,
         });
+
+        // Track critical errors
+        if (extensions?.code === 'INTERNAL_SERVER_ERROR') {
+          captureException(err, {
+            tags: {
+              graphql: true,
+              operationName: operation.operationName,
+              platform: Platform.OS,
+            },
+            extra: {
+              operationName: operation.operationName,
+              variables: operation.variables,
+              path,
+              extensions,
+            },
+          });
+        }
 
         // Handle authentication errors with automatic token refresh
         if (extensions?.code === 'UNAUTHENTICATED') {
+          // Skip token refresh for operations that are themselves refreshing tokens
+          if (operation.operationName === 'RefreshToken') {
+            loggingService.info(
+              'Skipping auth handling for refresh token operation',
+            );
+            return;
+          }
+
           // Return a new observable for the refresh token flow
           return new Observable(observer => {
             // Attempt to refresh the token

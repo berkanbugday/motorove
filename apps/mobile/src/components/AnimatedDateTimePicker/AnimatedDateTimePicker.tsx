@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
 import {
-  TouchableOpacity,
   StyleSheet,
   View,
   Platform,
@@ -19,10 +18,11 @@ import {
   FieldError,
 } from 'react-hook-form';
 import {colors, spacing, componentRadius} from '@theme';
-import {Typography, Caption} from '../Typography';
+import {Caption} from '../Typography';
 import {Icon, IconName} from '../Icon';
 import {useBottomSheet, BottomSheetConfig} from '../BottomSheet';
 import {Button} from '../Button';
+import {AnimatedInput} from '../AnimatedInput';
 
 // Define picker modes
 type DateTimePickerMode = 'date' | 'time' | 'datetime';
@@ -370,28 +370,54 @@ function DateTimePickerBase({
   // Function to render the bottom sheet content
   const renderDateTimePickerContent = useCallback(() => {
     return (
-      <View style={styles.pickerContainer}>
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={currentValue}
-          mode={currentMode}
-          display={display || (Platform.OS === 'ios' ? 'spinner' : 'default')}
-          onChange={handleDateTimeChange}
-          minimumDate={minimumDate}
-          maximumDate={maximumDate}
-          is24Hour={is24Hour}
-          minuteInterval={minuteInterval}
-          textColor={textColor}
-          accentColor={accentColor}
-          themeVariant={themeVariant}
-        />
+      <DateTimePicker
+        testID="dateTimePicker"
+        value={currentValue}
+        mode={currentMode}
+        display={display || (Platform.OS === 'ios' ? 'spinner' : 'default')}
+        onChange={handleDateTimeChange}
+        minimumDate={minimumDate}
+        maximumDate={maximumDate}
+        is24Hour={is24Hour}
+        minuteInterval={minuteInterval}
+        textColor={textColor}
+        accentColor={accentColor}
+        themeVariant={themeVariant}
+        style={textStyle}
+      />
+    );
+  }, [
+    currentValue,
+    currentMode,
+    display,
+    handleDateTimeChange,
+    minimumDate,
+    maximumDate,
+    is24Hour,
+    minuteInterval,
+    textColor,
+    accentColor,
+    themeVariant,
+    mode,
+    closeBottomSheet,
+    handleConfirm,
+  ]);
 
-        {mode === 'datetime' && (
-          <Typography style={styles.pickerLabel}>
-            {currentMode === 'date' ? 'Select Date' : 'Select Time'}
-          </Typography>
-        )}
+  // Function to show the date time picker
+  const showDateTimePicker = useCallback(() => {
+    if (disabled) {
+      return;
+    }
 
+    const config: BottomSheetConfig = {
+      hideHandle: true,
+      showCloseButton: true,
+      content: renderDateTimePickerContent(),
+      snapPoint: 'partial',
+      closeOnBackdropPress: true,
+      title: currentMode === 'date' ? 'Select Date' : 'Select Time',
+      contentStyle: styles.bottomSheetContent,
+      footer: (
         <View style={styles.bottomSheetButtonContainer}>
           <Button
             title="Cancel"
@@ -422,36 +448,7 @@ function DateTimePickerBase({
             />
           )}
         </View>
-      </View>
-    );
-  }, [
-    currentValue,
-    currentMode,
-    display,
-    handleDateTimeChange,
-    minimumDate,
-    maximumDate,
-    is24Hour,
-    minuteInterval,
-    textColor,
-    accentColor,
-    themeVariant,
-    mode,
-    closeBottomSheet,
-    handleConfirm,
-  ]);
-
-  // Function to show the date time picker
-  const showDateTimePicker = useCallback(() => {
-    if (disabled) {
-      return;
-    }
-
-    const config: BottomSheetConfig = {
-      content: renderDateTimePickerContent(),
-      snapPoint: 'partial',
-      closeOnBackdropPress: true,
-      contentStyle: styles.bottomSheetContent,
+      ),
       onClose: () => {
         // Reset to date mode if this is a datetime picker when the sheet closes
         if (mode === 'datetime') {
@@ -487,26 +484,24 @@ function DateTimePickerBase({
 
   return (
     <View style={[styles.container, style]} testID={testID}>
-      <TouchableOpacity
-        style={[
-          styles.input,
-          disabled && styles.inputDisabled,
-          error && styles.inputError,
-        ]}
+      <AnimatedInput
+        value={currentValue ? formatDateTime(currentValue) : ''}
+        onChangeText={() => {}} // Read-only input
+        placeholder={placeholder}
+        icon={
+          <Icon
+            name={getIconName()}
+            size={20}
+            color={disabled ? colors.neutral.lightGrey : colors.neutral.grey}
+          />
+        }
+        editable={false}
         onPress={handlePress}
-        disabled={disabled}
-        activeOpacity={0.7}>
-        <Typography
-          style={[styles.inputText, textStyle]}
-          color={disabled ? colors.neutral.grey : colors.neutral.black}>
-          {currentValue ? formatDateTime(currentValue) : placeholder}
-        </Typography>
-        <Icon
-          name={getIconName()}
-          size={20}
-          color={disabled ? colors.neutral.lightGrey : colors.neutral.grey}
-        />
-      </TouchableOpacity>
+        showClearButton={false}
+        error={error?.message}
+        testID={testID}
+        label={placeholder}
+      />
 
       {renderError()}
     </View>
@@ -515,6 +510,7 @@ function DateTimePickerBase({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     width: '100%',
   },
   input: {
@@ -544,20 +540,19 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
   bottomSheetContent: {
-    padding: spacing.md,
-  },
-  pickerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   pickerLabel: {
     marginTop: spacing.md,
     fontWeight: 'bold',
   },
+  bottomSheetHeaderTitle: {
+    paddingVertical: spacing.sm,
+  },
   bottomSheetButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
     gap: spacing.md,
   },
 });

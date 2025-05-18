@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   Keyboard,
   LayoutChangeEvent,
+  TextStyle,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -22,6 +23,11 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
+import {Button} from '@components/Button';
+import {colors} from '@theme/colors';
+import {Caption, Subtitle} from '@components/Typography';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {spacing} from '@theme/spacing';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 const SNAP_POINTS = {
@@ -44,6 +50,26 @@ export interface BottomSheetProps {
   enableGestureControl?: boolean;
   disableContentGestures?: boolean;
   maxContentHeight?: number; // Optional prop to override dynamic height
+  header?: React.ReactNode; // Header content to display at the top of the sheet
+  headerStyle?: StyleProp<ViewStyle>; // Custom style for the header container
+  footer?: React.ReactNode; // Footer content to display at the bottom of the sheet
+  footerStyle?: StyleProp<ViewStyle>; // Custom style for the footer container
+  hideHandle?: boolean; // Option to hide the handle at the top
+  showCloseButton?: boolean; // Option to show a close button
+  closeButtonPosition?:
+    | 'top-right'
+    | 'top-left'
+    | 'header-right'
+    | 'header-left'
+    | 'custom'; // Position for the close button
+  closeButtonOffset?: {top?: number; right?: number; left?: number}; // Custom position offsets for close button
+
+  // New properties
+  title?: string; // Title text to display in the header
+  titleStyle?: StyleProp<TextStyle>; // Custom style for the title
+  subtitle?: string; // Subtitle text to display below the title
+  subtitleStyle?: StyleProp<TextStyle>; // Custom style for the subtitle
+  titlePosition?: 'left' | 'center' | 'right'; // Horizontal alignment of title and subtitle
 }
 
 export interface BottomSheetRef {
@@ -65,6 +91,19 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
       enableGestureControl = true,
       disableContentGestures = true,
       maxContentHeight,
+      header,
+      headerStyle,
+      footer,
+      footerStyle,
+      hideHandle = false,
+      showCloseButton = true,
+      closeButtonPosition = 'header-left',
+      closeButtonOffset,
+      title,
+      titleStyle,
+      subtitle,
+      subtitleStyle,
+      titlePosition = 'center',
     },
     ref,
   ) => {
@@ -81,6 +120,7 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
     const [currentSnapPoint, setCurrentSnapPoint] = useState<
       'partial' | 'full' | 'closed'
     >(initialSnap !== 'closed' ? initialSnap : 'closed');
+    const insets = useSafeAreaInsets();
 
     // Initialize with the appropriate snap point
     useEffect(() => {
@@ -285,6 +325,217 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
       };
     });
 
+    // Render close button based on position
+    const renderCloseButton = () => {
+      if (!showCloseButton) {
+        return null;
+      }
+
+      // For custom position, let parent position it
+      if (closeButtonPosition === 'custom') {
+        return (
+          <View
+            style={[
+              styles.closeButtonWrapper,
+              {
+                top: closeButtonOffset?.top ?? 10,
+                right: closeButtonOffset?.right ?? undefined,
+                left: closeButtonOffset?.left ?? undefined,
+              },
+            ]}>
+            <Button
+              onPress={handleClose}
+              variant="text"
+              size="small"
+              iconName="close"
+              iconSize={18}
+              iconColor={colors.neutral.black}
+            />
+          </View>
+        );
+      }
+
+      // For header positions, the close button will be rendered alongside the header
+      if (
+        closeButtonPosition === 'header-right' ||
+        closeButtonPosition === 'header-left'
+      ) {
+        return null;
+      }
+
+      // For top positions
+      return (
+        <View
+          style={[
+            styles.closeButtonWrapper,
+            closeButtonPosition === 'top-left'
+              ? styles.closeButtonLeft
+              : styles.closeButtonRight,
+          ]}>
+          <Button
+            onPress={handleClose}
+            variant="text"
+            size="small"
+            iconName="close"
+            iconSize={18}
+            iconColor={colors.neutral.black}
+          />
+        </View>
+      );
+    };
+
+    // Render title and subtitle
+    const renderTitleAndSubtitle = () => {
+      if (!title && !subtitle) {
+        return null;
+      }
+
+      return (
+        <View
+          style={[styles.titleContainer, {alignItems: getTitleAlignment()}]}>
+          {title && <Subtitle style={titleStyle}>{title}</Subtitle>}
+          {subtitle && (
+            <Caption style={[styles.subtitle, subtitleStyle]}>
+              {subtitle}
+            </Caption>
+          )}
+        </View>
+      );
+    };
+
+    // Get alignment based on titlePosition
+    const getTitleAlignment = () => {
+      switch (titlePosition) {
+        case 'center':
+          return 'center';
+        case 'right':
+          return 'flex-end';
+        case 'left':
+        default:
+          return 'flex-start';
+      }
+    };
+
+    // Render header with close button if position is header-right or header-left
+    const renderHeaderWithCloseButton = () => {
+      // If no header, title or subtitle provided, return null
+      if (!header && !title && !subtitle) {
+        return null;
+      }
+
+      // If there's a title/subtitle but no custom header
+      if ((!header || header === null) && (title || subtitle)) {
+        if (
+          !showCloseButton ||
+          (closeButtonPosition !== 'header-right' &&
+            closeButtonPosition !== 'header-left')
+        ) {
+          return (
+            <View style={[styles.headerContainer, headerStyle]}>
+              {renderTitleAndSubtitle()}
+            </View>
+          );
+        }
+
+        return (
+          <View
+            style={[
+              styles.headerContainer,
+              styles.headerWithCloseButton,
+              headerStyle,
+            ]}>
+            <View style={styles.headerButtonContainer}>
+              {closeButtonPosition === 'header-left' && (
+                <Button
+                  onPress={handleClose}
+                  variant="text"
+                  size="small"
+                  iconName="close"
+                  iconSize={18}
+                  iconColor={colors.neutral.black}
+                />
+              )}
+            </View>
+            <View
+              style={[
+                styles.headerContent,
+                closeButtonPosition === 'header-left'
+                  ? {marginLeft: 8}
+                  : {marginRight: 8},
+              ]}>
+              {renderTitleAndSubtitle()}
+            </View>
+            <View style={styles.headerButtonContainer}>
+              {closeButtonPosition === 'header-right' && (
+                <Button
+                  onPress={handleClose}
+                  variant="text"
+                  size="small"
+                  iconName="close"
+                  iconSize={18}
+                  iconColor={colors.neutral.black}
+                />
+              )}
+            </View>
+          </View>
+        );
+      }
+
+      // Handle custom header
+      if (
+        !showCloseButton ||
+        (closeButtonPosition !== 'header-right' &&
+          closeButtonPosition !== 'header-left')
+      ) {
+        return (
+          <View style={[styles.headerContainer, headerStyle]}>{header}</View>
+        );
+      }
+
+      return (
+        <View
+          style={[
+            styles.headerContainer,
+            styles.headerWithCloseButton,
+            headerStyle,
+          ]}>
+          {closeButtonPosition === 'header-left' && (
+            <View style={styles.headerButtonContainer}>
+              <Button
+                onPress={handleClose}
+                variant="text"
+                size="small"
+                iconName="close"
+                iconSize={18}
+                iconColor={colors.neutral.black}
+              />
+            </View>
+          )}
+          <View
+            style={[
+              styles.headerContent,
+              closeButtonPosition === 'header-left'
+                ? {marginLeft: 8}
+                : {marginRight: 8},
+            ]}>
+            {header}
+          </View>
+          {closeButtonPosition === 'header-right' && (
+            <View style={styles.headerButtonContainer}>
+              <Button
+                onPress={handleClose}
+                variant="text"
+                size="small"
+                iconName="close"
+                iconSize={18}
+                iconColor={colors.neutral.black}
+              />
+            </View>
+          )}
+        </View>
+      );
+    };
+
     // Don't render anything if not visible
     if (!isVisible) {
       return null;
@@ -308,12 +559,21 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
             animatedBottomSheetStyle,
             containerStyle,
           ]}>
-          <GestureDetector gesture={handleGesture}>
-            <View style={styles.handleContainer}>
-              <View style={styles.handle} />
-            </View>
-          </GestureDetector>
+          {!hideHandle && (
+            <GestureDetector gesture={handleGesture}>
+              <View style={styles.handleContainer}>
+                <View style={styles.handle} />
+              </View>
+            </GestureDetector>
+          )}
 
+          {/* Close Button */}
+          {renderCloseButton()}
+
+          {/* Header Section */}
+          {renderHeaderWithCloseButton()}
+
+          {/* Content Section */}
           {disableContentGestures ? (
             <View
               onLayout={onContentLayout}
@@ -334,6 +594,18 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
               </View>
             </GestureDetector>
           )}
+
+          {/* Footer Section */}
+          {footer && (
+            <View
+              style={[
+                styles.footerContainer,
+                footerStyle,
+                {paddingBottom: SCREEN_HEIGHT * 0.3},
+              ]}>
+              {footer}
+            </View>
+          )}
         </Animated.View>
       </>
     );
@@ -344,13 +616,13 @@ const styles = StyleSheet.create({
   bottomSheetContainer: {
     height: SCREEN_HEIGHT,
     width: '100%',
-    backgroundColor: 'white',
+    backgroundColor: colors.neutral.white,
     position: 'absolute',
     top: 0,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     zIndex: 100,
-    shadowColor: '#000',
+    shadowColor: colors.neutral.black,
     shadowOffset: {
       width: 0,
       height: -2,
@@ -361,7 +633,8 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: spacing.md,
+    justifyContent: 'center',
   },
   handleContainer: {
     paddingVertical: 10,
@@ -370,18 +643,64 @@ const styles = StyleSheet.create({
   handle: {
     width: 40,
     height: 5,
-    backgroundColor: '#00000040',
+    backgroundColor: colors.neutral.lightGrey,
     alignSelf: 'center',
     borderRadius: 3,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'black',
+    backgroundColor: colors.neutral.black,
     zIndex: 99,
   },
   backdropTouchable: {
     width: '100%',
     height: '100%',
+  },
+  headerContainer: {
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+  },
+  headerWithCloseButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerContent: {
+    flex: 1,
+  },
+  footerContainer: {
+    flex: 1,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  closeButtonWrapper: {
+    position: 'absolute',
+    zIndex: 110,
+  },
+  closeButtonRight: {
+    top: 10,
+    right: 10,
+  },
+  closeButtonLeft: {
+    top: 10,
+    left: 10,
+  },
+  headerButtonContainer: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titleContainer: {
+    width: '100%',
+  },
+  subtitle: {
+    color: colors.neutral.grey,
   },
 });
 
