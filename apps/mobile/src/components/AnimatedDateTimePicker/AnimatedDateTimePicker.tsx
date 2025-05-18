@@ -542,6 +542,7 @@ const styles = StyleSheet.create({
   bottomSheetContent: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    alignSelf: 'center',
   },
   pickerLabel: {
     marginTop: spacing.md,

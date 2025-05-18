@@ -26,7 +26,6 @@ import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {Button} from '@components/Button';
 import {colors} from '@theme/colors';
 import {Caption, Subtitle} from '@components/Typography';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {spacing} from '@theme/spacing';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -120,7 +119,6 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
     const [currentSnapPoint, setCurrentSnapPoint] = useState<
       'partial' | 'full' | 'closed'
     >(initialSnap !== 'closed' ? initialSnap : 'closed');
-    const insets = useSafeAreaInsets();
 
     // Initialize with the appropriate snap point
     useEffect(() => {
