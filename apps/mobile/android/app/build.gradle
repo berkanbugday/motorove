@@ -7,6 +7,13 @@ apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.grad
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
+
+ project.ext.envConfigFiles = [
+        dev:".env.dev",
+        staging:".env.staging",
+        prod:".env.prod"
+]
+
 react {
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
@@ -97,6 +104,7 @@ android {
         applicationId "com.motorove"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        resValue "string", "build_config_package", "com.motorove"
         
         // Set the version from environment variables if dynamic versioning is enabled
         if (project.ext.config.enableDynamicVersioning) {
@@ -150,10 +158,6 @@ android {
             applicationIdSuffix ".dev"
             resValue "string", "app_name", "Motorove Dev"
             buildConfigField "String", "ENVIRONMENT", '"development"'
-            // This will load .env.dev file from project root
-            project.ext.envConfigFiles = [
-                dev: ".env.dev",
-            ]
         }
         
         staging {
@@ -161,20 +165,12 @@ android {
             applicationIdSuffix ".staging"
             resValue "string", "app_name", "Motorove Staging"
             buildConfigField "String", "ENVIRONMENT", '"staging"'
-            // This will load .env.staging file from project root
-            project.ext.envConfigFiles = [
-                staging: ".env.staging",
-            ]
         }
         
         prod {
             dimension "environment"
             resValue "string", "app_name", "Motorove"
             buildConfigField "String", "ENVIRONMENT", '"production"'
-            // This will load .env.prod file from project root
-            project.ext.envConfigFiles = [
-                prod: ".env.prod",
-            ]
         }
     }
     
