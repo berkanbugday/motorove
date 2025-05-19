@@ -1,6 +1,6 @@
 import {loggingService} from '@services/logging.service';
 import Config from 'react-native-config';
-
+import {Platform} from 'react-native';
 /**
  * Application environment configuration
  * Uses react-native-config to access environment-specific variables
@@ -9,12 +9,17 @@ export const AppConfig = {
   /**
    * API URL for backend services
    */
-  API_URL: Config.API_URL || 'http://localhost:3000',
+  API_URL:
+    Config.APP_ENV === 'development'
+      ? Platform.OS === 'ios'
+        ? Config.API_URL
+        : 'http://10.0.2.2:3000'
+      : Config.API_URL,
 
   /**
    * Current application environment (development, staging, production)
    */
-  APP_ENV: Config.APP_ENV || 'development',
+  APP_ENV: Config.APP_ENV,
 
   /**
    * Mapbox access token

@@ -352,9 +352,6 @@ export const HomeScreen = ({navigation}: Props) => {
         organizer={item.organizer}
         participantCount={item.participantCount}
         membersCapacity={item.membersCapacity}
-        onChatPress={() =>
-          loggingService.info(`Chat pressed for event: ${item.title}`)
-        }
         onPress={() =>
           loggingService.info(`Event banner pressed: ${item.title}`)
         }
@@ -521,6 +518,7 @@ export const HomeScreen = ({navigation}: Props) => {
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
         rightIconName="plus"
+        containerStyle={styles.topHeaderBar}
         onRightButtonPress={() => navigateToScreen(navigation, 'CreatePost')}
         secondRightIconName={notificationsCount > 0 ? 'bell-filled' : 'bell'}
         secondRightIconBadgeCount={notificationsCount || 0}
@@ -641,6 +639,10 @@ export const HomeScreen = ({navigation}: Props) => {
 const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
+  },
+  topHeaderBar: {
+    borderBottomStartRadius: 20,
+    borderBottomEndRadius: 20,
   },
   scrollContainer: {
     flex: 1,

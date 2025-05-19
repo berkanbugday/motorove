@@ -960,7 +960,6 @@ export const GroupDetailScreen = () => {
         showBackButton
         backgroundColor="transparent"
         onBackPress={handleGoBack}
-        containerStyle={styles.topHeaderBar}
         dropdownMenuItems={groupDropdownMenuItems(
           group?.isAdmin,
           group?.isMember,
@@ -1270,11 +1269,6 @@ const styles = StyleSheet.create({
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  topHeaderBar: {
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
-    zIndex: 5,
   },
   imageContainer: {
     position: 'absolute',

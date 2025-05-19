@@ -124,7 +124,6 @@ export const GroupSearchScreen = () => {
         showBackButton
         showShadow={false}
         onBackPress={() => navigation.goBack()}
-        containerStyle={styles.topHeaderBar}
       />
 
       <View style={styles.searchContainer}>
@@ -164,10 +163,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.white,
-  },
-  topHeaderBar: {
-    borderBottomEndRadius: 0,
-    borderBottomStartRadius: 0,
   },
   searchContainer: {
     paddingHorizontal: spacing.md,

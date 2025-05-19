@@ -203,8 +203,7 @@ export const NotificationScreen = () => {
     return (
       <SwipeableItem
         leftActions={actualLeftActions}
-        rightActions={rightActions}
-        containerStyle={styles.swipeableContainer}>
+        rightActions={rightActions}>
         <View
           style={[
             styles.notificationItem,
@@ -347,12 +346,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.white,
   },
   topHeaderBar: {
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.secondary.main,
-  },
-  swipeableContainer: {
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
   },
@@ -364,6 +357,8 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     alignItems: 'center',
     opacity: 0.7,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
   },
   unreadNotification: {
     backgroundColor: colors.secondary.light,

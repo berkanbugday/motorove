@@ -217,8 +217,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.white,
   },
   topHeaderBar: {
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.light,
   },

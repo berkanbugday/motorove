@@ -308,8 +308,6 @@ const styles = StyleSheet.create({
     width: '100%',
     zIndex: 10,
     paddingBottom: spacing.sm,
-    borderBottomEndRadius: 20,
-    borderBottomStartRadius: 20,
   },
   shadow: {
     shadowColor: colors.neutral.black,

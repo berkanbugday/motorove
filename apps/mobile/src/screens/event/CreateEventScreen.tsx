@@ -20,7 +20,7 @@ import {
   DropdownItem,
   showToast,
   Icon,
-  AnimatedDateTimePicker,
+  DateTimePicker,
 } from '@components';
 import {colors, spacing, radius, getShadow} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -282,22 +282,21 @@ export const CreateEventScreen: React.FC = () => {
 
               {/* Date and Time */}
               <View style={styles.dateTimeContainer}>
-                <AnimatedDateTimePicker
+                <DateTimePicker
                   control={control as any}
                   name="date"
-                  placeholder="Select date"
+                  placeholder="Start Date"
                   displayFormat="medium"
                   mode="date"
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
                   error={errors.date}
                 />
-                <AnimatedDateTimePicker
+                <DateTimePicker
                   control={control as any}
                   name="time"
-                  placeholder="Select time"
+                  placeholder="Start Time"
                   mode="time"
-                  is24Hour={false}
                   minuteInterval={15}
                   style={styles.dateTimePicker}
                   error={errors.time}
@@ -379,8 +378,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   topHeaderBar: {
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.light,
   },

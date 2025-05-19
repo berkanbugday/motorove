@@ -244,7 +244,6 @@ export const GroupScreen = () => {
     <View style={styles.container}>
       <TopHeaderBar
         title="Groups"
-        containerStyle={styles.topHeaderBar}
         showShadow={false}
         rightIconName="plus"
         onRightButtonPress={() => navigation.navigate('CreateGroup')}
@@ -270,10 +269,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.white,
-  },
-  topHeaderBar: {
-    borderBottomEndRadius: 0,
-    borderBottomStartRadius: 0,
   },
   tabContainer: {
     flex: 1,

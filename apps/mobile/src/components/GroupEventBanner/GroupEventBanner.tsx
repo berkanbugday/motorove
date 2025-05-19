@@ -182,18 +182,20 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
       </View>
 
       {/* Chat Button */}
-      <View style={styles.chatButtonContainer}>
-        <Button
-          testID="group-event-banner-chat-button"
-          variant="primary"
-          size="medium"
-          shape="round"
-          style={styles.chatButton}
-          disabled={!onChatPress}
-          title="Chat"
-          onPress={onChatPress}
-        />
-      </View>
+      {onChatPress && (
+        <View style={styles.chatButtonContainer}>
+          <Button
+            testID="group-event-banner-chat-button"
+            variant="primary"
+            size="medium"
+            shape="round"
+            style={styles.chatButton}
+            disabled={!onChatPress}
+            title="Chat"
+            onPress={onChatPress}
+          />
+        </View>
+      )}
     </View>
   );
 };

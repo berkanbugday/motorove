@@ -22,7 +22,7 @@ type ProfileTab = 'routes' | 'history' | 'groups';
  * Profile Screen - Shows user profile and account management
  */
 export const ProfileScreen: React.FC = () => {
-  const {user} = useAuth();
+  const {user, signOut} = useAuth();
   const [activeTab, setActiveTab] = useState<ProfileTab>('routes');
 
   // Mock profile data
@@ -240,6 +240,17 @@ export const ProfileScreen: React.FC = () => {
           variant="underlined"
           equalWidth
         />
+
+        <View style={styles.logoutContainer}>
+          <Button
+            variant="outline"
+            shape="round"
+            title="Logout"
+            onPress={() => signOut()}
+            iconName="user-slash-filled"
+            iconPosition="left"
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -424,5 +435,11 @@ const styles = StyleSheet.create({
     color: colors.neutral.grey,
     fontSize: 16,
     marginTop: spacing.xl,
+  },
+  logoutContainer: {
+    padding: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.md,
+    marginBottom: spacing.xl,
   },
 });

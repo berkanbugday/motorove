@@ -56,13 +56,13 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const getIconName = (routeName: string, isFocused: boolean): IconName => {
     switch (routeName) {
       case 'HomeTab':
-        return isFocused ? 'home' : 'home';
+        return isFocused ? 'home-filled' : 'home';
       case 'ExploreTab':
-        return isFocused ? 'map-location' : 'map-location';
+        return isFocused ? 'map-location-filled' : 'map-location';
       case 'GroupsTab':
-        return isFocused ? 'users' : 'users';
+        return isFocused ? 'users-filled' : 'users';
       case 'ProfileTab':
-        return isFocused ? 'user' : 'user';
+        return isFocused ? 'user-filled' : 'user';
       default:
         return 'home';
     }
@@ -80,7 +80,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
       {/* Animated indicator that moves between tabs */}
       <Animated.View
         style={[
-          styles.slidingIndicator,
+          // styles.slidingIndicator,
           {
             transform: [
               {

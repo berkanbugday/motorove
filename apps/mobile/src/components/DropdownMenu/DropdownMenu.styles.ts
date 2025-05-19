@@ -25,12 +25,12 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.neutral.white,
   },
   firstMenuItem: {
-    borderTopLeftRadius: radius.sm,
-    borderTopRightRadius: radius.sm,
+    borderTopEndRadius: radius.sm,
+    borderTopStartRadius: radius.sm,
   },
   lastMenuItem: {
-    borderBottomLeftRadius: radius.sm,
-    borderBottomRightRadius: radius.sm,
+    borderBottomEndRadius: radius.sm,
+    borderBottomStartRadius: radius.sm,
   },
   itemIcon: {
     marginRight: spacing.sm,

@@ -529,8 +529,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   topHeaderBar: {
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.light,
   },

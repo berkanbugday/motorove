@@ -241,7 +241,6 @@ export const CommentDetailScreen = ({navigation, route: {params}}: Props) => {
         title={`Comments (${post.commentCount})`}
         showBackButton
         onBackPress={() => navigation.goBack()}
-        containerStyle={styles.headerContainer}
       />
       <FlatList
         data={post.comments}
@@ -283,10 +282,6 @@ const styles = StyleSheet.create({
   center: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerContainer: {
-    borderBottomEndRadius: 0,
-    borderBottomStartRadius: 0,
   },
   postContainer: {
     paddingHorizontal: spacing.sm,
