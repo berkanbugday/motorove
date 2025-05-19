@@ -60,6 +60,7 @@ export const useMapSearch = ({
       } else {
         setSearchResults([]);
         setShowSearchResults(false);
+        setIsSearching(false);
       }
     },
     [debounceTime],

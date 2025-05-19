@@ -77,13 +77,12 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.neutral.white,
     borderRadius: radius.round,
-    padding: spacing.sm,
+    paddingHorizontal: spacing.sm,
     width: '85%',
     ...getShadow('small'),
   },
   filterButton: {
     backgroundColor: colors.neutral.white,
-    height: '100%',
     position: 'absolute',
     right: 0,
     top: 0,
@@ -91,7 +90,7 @@ export const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    height: 30,
+    height: 50,
     paddingHorizontal: spacing.sm,
   },
   searchIcon: {

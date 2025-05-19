@@ -108,7 +108,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       {showFilterButton && (
         <Button
           variant="primary"
-          shape="round"
+          shape="circle"
           size="small"
           iconName="sliders"
           iconSize={16}
