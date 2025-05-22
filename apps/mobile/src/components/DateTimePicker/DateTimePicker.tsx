@@ -60,6 +60,14 @@ interface BaseDateTimePickerProps {
    * Theme to use for the picker
    */
   theme?: 'light' | 'dark' | 'auto';
+  /**
+   * Text for the confirm button
+   */
+  confirmText?: string;
+  /**
+   * Text for the cancel button
+   */
+  cancelText?: string;
 }
 
 interface StandaloneDateTimePickerProps extends BaseDateTimePickerProps {
@@ -115,6 +123,8 @@ export function DateTimePicker<T extends FieldValues = any>(
       is24Hour = true,
       minuteInterval,
       theme,
+      confirmText,
+      cancelText,
     } = props as FormDateTimePickerProps<T>;
 
     return (
@@ -137,6 +147,8 @@ export function DateTimePicker<T extends FieldValues = any>(
             is24Hour={is24Hour}
             minuteInterval={minuteInterval}
             theme={theme}
+            confirmText={confirmText}
+            cancelText={cancelText}
           />
         )}
       />
@@ -159,6 +171,8 @@ export function DateTimePicker<T extends FieldValues = any>(
     is24Hour = true,
     minuteInterval,
     theme,
+    confirmText,
+    cancelText,
   } = props as StandaloneDateTimePickerProps;
 
   return (
@@ -177,6 +191,8 @@ export function DateTimePicker<T extends FieldValues = any>(
       is24Hour={is24Hour}
       minuteInterval={minuteInterval}
       theme={theme}
+      confirmText={confirmText}
+      cancelText={cancelText}
     />
   );
 }
@@ -197,6 +213,8 @@ interface DateTimePickerBaseProps {
   is24Hour?: boolean;
   minuteInterval?: 1 | 2 | 3 | 4 | 5 | 6 | 10 | 12 | 15 | 20 | 30;
   theme?: 'light' | 'dark' | 'auto';
+  confirmText?: string;
+  cancelText?: string;
 }
 
 function DateTimePickerBase({
@@ -214,6 +232,8 @@ function DateTimePickerBase({
   is24Hour = true,
   minuteInterval,
   theme = 'auto',
+  confirmText,
+  cancelText,
 }: DateTimePickerBaseProps) {
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const currentValue = value || new Date();
@@ -322,6 +342,8 @@ function DateTimePickerBase({
         minuteInterval={minuteInterval}
         theme={theme}
         is24hourSource={is24Hour ? 'device' : 'locale'}
+        confirmText={confirmText}
+        cancelText={cancelText}
       />
     </View>
   );

@@ -364,9 +364,16 @@ function AnimatedInputBase({
         multiline={multiline}
         textAlignVertical={multiline ? 'top' : 'center'}
         editable={editable}
-        onPress={onPress}
         onEndEditing={onEndEditing || (() => {})}
       />
+      {onPress && !editable && (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.touchableOverlay}
+          onPress={onPress}
+          testID={`${testID}-touchable-overlay`}
+        />
+      )}
       <View style={getIconContainerStyle()}>
         {onToggleSecureEntry ? (
           <TouchableOpacity
@@ -450,5 +457,14 @@ const styles = StyleSheet.create({
   errorContainer: {
     marginTop: spacing.xs,
     marginLeft: spacing.sm,
+  },
+  touchableOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+    zIndex: zIndex.base,
   },
 });
