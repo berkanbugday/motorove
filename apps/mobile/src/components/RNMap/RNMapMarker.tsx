@@ -98,23 +98,4 @@ const styles = StyleSheet.create({
     height: 40,
     resizeMode: 'contain',
   },
-  calloutContainer: {
-    width: 200,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  calloutTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  calloutDescription: {
-    fontSize: 14,
-  },
 });
