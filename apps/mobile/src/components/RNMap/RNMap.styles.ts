@@ -66,7 +66,6 @@ export const styles = StyleSheet.create({
   },
   loadMarkerButton: {
     position: 'absolute',
-    bottom: 100,
     alignSelf: 'center',
     ...getShadow('small'),
     zIndex: 10,

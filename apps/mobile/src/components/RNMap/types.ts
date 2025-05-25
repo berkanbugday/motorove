@@ -137,6 +137,21 @@ export interface RNMapProps {
   onMarkerSelect?: (marker: RNMapMarkerType) => void;
 
   /**
+   * Callback when marker is deselected
+   */
+  onMarkerDeselect?: () => void;
+
+  /**
+   * Callback when map is touched
+   */
+  onTouchMove?: (event: any) => void;
+
+  /**
+   * Callback when map is touched end
+   */
+  onTouchEnd?: (event: any) => void;
+
+  /**
    * Maximum zoom level
    */
   maxZoomLevel?: number;
@@ -277,6 +292,11 @@ export interface RNMapMarkerProps {
   onSelect?: () => void;
 
   /**
+   * Callback when marker is deselected
+   */
+  onDeselect?: () => void;
+
+  /**
    * Reference to the map component
    */
   mapRef?: React.RefObject<MapView | null>;
@@ -365,6 +385,11 @@ export interface RNMapClusterProps {
    * Callback when marker is pressed
    */
   onMarkerSelect?: (marker: RNMapMarkerType) => void;
+
+  /**
+   * Callback when marker is deselected
+   */
+  onMarkerDeselect?: () => void;
 
   /**
    * Maximum zoom level for clustering

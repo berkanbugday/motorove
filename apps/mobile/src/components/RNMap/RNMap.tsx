@@ -14,6 +14,7 @@ import MapView, {
   LatLng,
   Circle,
   Polyline,
+  MapMarker,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {styles} from './RNMap.styles';
@@ -35,6 +36,7 @@ import {Platform} from 'react-native';
 import {LocationPermissionOverlay} from '@components';
 import {useComponentAnimation} from '@hooks/useComponentAnimation';
 import {Button} from '@components/Button';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 // Default region (fallback if user location cannot be determined)
 const DEFAULT_REGION: Region = {
@@ -61,6 +63,9 @@ export const RNMap: React.FC<RNMapProps> = ({
   onPress,
   onLongPress,
   onMarkerSelect,
+  onMarkerDeselect,
+  onTouchMove,
+  onTouchEnd,
   maxZoomLevel = 20,
   minZoomLevel = 0,
   showCompass = false,
@@ -88,7 +93,8 @@ export const RNMap: React.FC<RNMapProps> = ({
 }) => {
   // Refs
   const mapRef = useRef<MapView>(null);
-
+  const markerRef = useRef<MapMarker[]>([]);
+  const insets = useSafeAreaInsets();
   // Map state hook
   const {
     mapCenter,
@@ -135,6 +141,8 @@ export const RNMap: React.FC<RNMapProps> = ({
     useLocationPermission();
   const [showPermissionOverlay, setShowPermissionOverlay] = useState(false);
   const prevStatus = useRef(status);
+  const [isShowLoadMarkerButton, setIsShowLoadMarkerButton] =
+    useState(showLoadMarkerButton);
 
   // Add component animation hook
   const {
@@ -316,12 +324,14 @@ export const RNMap: React.FC<RNMapProps> = ({
   };
 
   // Add map movement handlers
-  const handleMapMoveStart = useCallback(() => {
+  const handleMapMoveStart = useCallback((event: any) => {
     setIsMapMoving(true);
+    onTouchMove?.(event);
   }, []);
 
-  const handleMapMoveEnd = useCallback(() => {
+  const handleMapMoveEnd = useCallback((event: any) => {
     setIsMapMoving(false);
+    onTouchEnd?.(event);
   }, []);
 
   // Handle load marker button press
@@ -445,14 +455,29 @@ export const RNMap: React.FC<RNMapProps> = ({
               <RNMapCluster
                 markers={visibleMarkers}
                 radius={clusteringRadius}
-                onMarkerSelect={onMarkerSelect}
+                onMarkerSelect={clusterMarker => {
+                  onMarkerSelect?.(clusterMarker);
+                  setIsShowLoadMarkerButton(false);
+                }}
+                onMarkerDeselect={() => {
+                  onMarkerDeselect?.();
+                  setIsShowLoadMarkerButton(true);
+                }}
               />
             ) : (
               visibleMarkers.map(marker => (
                 <RNMapMarker
+                  ref={markerRef}
                   key={`marker-${marker.id}`}
                   marker={marker}
-                  onSelect={() => onMarkerSelect?.(marker)}
+                  onSelect={() => {
+                    onMarkerSelect?.(marker);
+                    setIsShowLoadMarkerButton(false);
+                  }}
+                  onDeselect={() => {
+                    onMarkerDeselect?.();
+                    setIsShowLoadMarkerButton(true);
+                  }}
                   mapRef={mapRef}
                 />
               ))
@@ -508,13 +533,13 @@ export const RNMap: React.FC<RNMapProps> = ({
           )}
 
           {/* Load marker button with animation */}
-          {showLoadMarkerButton && (
+          {isShowLoadMarkerButton && (
             <Animated.View
               style={{
                 transform: [{translateY: loadButtonTranslate}],
               }}>
               <Button
-                style={[styles.loadMarkerButton]}
+                style={[styles.loadMarkerButton, {bottom: insets.bottom + 70}]}
                 onPress={handleLoadMarkerPress}
                 variant="primary"
                 shape="round"
@@ -528,7 +553,7 @@ export const RNMap: React.FC<RNMapProps> = ({
           )}
 
           {/* Debug info with animation */}
-          {markers.length > 0 && (
+          {/* {markers.length > 0 && (
             <Animated.View
               style={{
                 transform: [{translateY: debugInfoTranslate}],
@@ -542,7 +567,7 @@ export const RNMap: React.FC<RNMapProps> = ({
                 </Text>
               </View>
             </Animated.View>
-          )}
+          )} */}
 
           {/* Loading overlay */}
           {!isMapLoaded && loadingIndicator && (

@@ -25,6 +25,7 @@ export const RNMapCluster: React.FC<RNMapClusterProps> = ({
   markers,
   radius = 50,
   onMarkerSelect,
+  onMarkerDeselect,
   maxZoom = 20,
   minZoom = 0,
   clusterColor = colors.primary.main,
@@ -157,6 +158,7 @@ export const RNMapCluster: React.FC<RNMapClusterProps> = ({
               key={`marker-${cluster.markers[0].id}`}
               marker={cluster.markers[0]}
               onSelect={() => onMarkerSelect?.(cluster.markers[0])}
+              onDeselect={onMarkerDeselect}
             />
           );
         }

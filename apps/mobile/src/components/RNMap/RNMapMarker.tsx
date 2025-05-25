@@ -9,6 +9,7 @@ import {RNMapMarkerProps} from './types';
 export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
   marker,
   onSelect,
+  onDeselect,
   mapRef,
 }) => {
   const {
@@ -56,6 +57,8 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
       tension: 40,
       useNativeDriver: true,
     }).start();
+
+    onDeselect?.();
   };
 
   return (
