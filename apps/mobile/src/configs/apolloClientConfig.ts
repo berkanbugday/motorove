@@ -105,35 +105,74 @@ const errorLink = onError(
               .catch(refreshError => {
                 loggingService.error('Token refresh failed:', refreshError);
 
-                // Check for specific token errors
                 const errorMessage =
                   refreshError instanceof Error
                     ? refreshError.message
                     : String(refreshError);
 
+                let isUnrecoverableRefreshTokenError = false;
+
+                // Check if the error is an ApolloError with graphQLErrors
                 if (
-                  errorMessage.includes(
-                    'Invalid Refresh Token: Already Used',
-                  ) ||
-                  errorMessage.includes('Token has expired') ||
-                  errorMessage.includes('InvalidJWTToken')
+                  refreshError.graphQLErrors &&
+                  refreshError.graphQLErrors.length > 0
                 ) {
-                  // This is an expected error for expired sessions
-                  loggingService.info('Session expired, signing out user');
-                } else {
-                  // Log unexpected errors
+                  const gqlError = refreshError.graphQLErrors[0];
+                  if (
+                    gqlError.message.includes('Token has expired') || // Refresh token itself expired
+                    gqlError.message.includes(
+                      'Invalid Refresh Token: Already Used',
+                    ) ||
+                    gqlError.message.includes('Invalid Refresh Token') || // General invalid from backend
+                    gqlError.message.includes('User not found') || // User associated with token not found
+                    (gqlError.extensions?.code === 'UNAUTHENTICATED' &&
+                      gqlError.message.includes('Invalid token'))
+                  ) {
+                    isUnrecoverableRefreshTokenError = true;
+                  }
+                } else if (
+                  // Fallback for client-side errors from _refreshToken or direct network errors
+                  errorMessage.includes('No refresh token available') || // From authService._refreshToken
+                  errorMessage.includes('Invalid refresh token response') || // From authService._refreshToken
+                  // The following client-side checks in _refreshToken might also indicate unrecoverable states
+                  // if they echo what the server would say for a permanently bad token.
+                  errorMessage.includes('Token already used') ||
+                  errorMessage.includes('Invalid Refresh Token')
+                ) {
+                  isUnrecoverableRefreshTokenError = true;
+                }
+
+                if (isUnrecoverableRefreshTokenError) {
                   loggingService.error(
-                    'Unexpected token refresh error:',
-                    errorMessage,
+                    'Unrecoverable refresh token error detected during Apollo error handling. User will not be signed out automatically, but authenticated API calls will likely fail.',
+                    {
+                      errorMessage,
+                      originalError: err,
+                      refreshErrorDetail: refreshError,
+                    },
+                  );
+                  // User requested not to sign out automatically even on unrecoverable refresh token errors.
+                  // authService.signOut().catch(e => {
+                  //   loggingService.error(
+                  //     'Error during sign out after unrecoverable refresh token error:',
+                  //     e,
+                  //   );
+                  // });
+                } else {
+                  // For other errors (e.g., temporary network issue during refresh attempt),
+                  // log the error but do not sign out immediately.
+                  // Let the original error propagate; RetryLink might handle it.
+                  loggingService.warning(
+                    'Token refresh failed due to a potentially recoverable error. Not signing out immediately.',
+                    {
+                      errorMessage,
+                      originalError: err,
+                      refreshErrorDetail: refreshError,
+                    },
                   );
                 }
 
-                // Clear auth if refresh token is invalid or any other error
-                authService.signOut().catch(e => {
-                  loggingService.error('Error during sign out:', e);
-                });
-
-                // Forward the original error
+                // Forward the original error that triggered the refresh attempt
                 observer.error(err);
                 observer.complete();
               });

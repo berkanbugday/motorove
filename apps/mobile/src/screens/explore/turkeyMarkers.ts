@@ -96,7 +96,7 @@ const generateTurkeyCoordinates = (): [number, number] => {
 };
 
 // Generate 100 random markers across Turkey mainland
-export const turkeyMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
+export const turkeyMarkers: MapMarker[] = Array.from({length: 100}, (_, i) => {
   // Generate mainland coordinates
   const [longitude, latitude] = generateTurkeyCoordinates();
 
@@ -114,12 +114,13 @@ export const turkeyMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
     coordinates: [longitude, latitude] as [number, number],
     icon,
     color,
+    image: require('@assets/images/pin.png'),
     onPress: () => loggingService.info(`Turkey marker ${i + 1} pressed`),
   };
 });
 
 // Generate 300 additional markers specifically in Istanbul
-const istanbulMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
+const istanbulMarkers: MapMarker[] = Array.from({length: 100}, (_, i) => {
   // Get coordinates within Istanbul
   const coordinates = generateIstanbulCoordinates();
 
@@ -137,6 +138,7 @@ const istanbulMarkers: MapMarker[] = Array.from({length: 1000}, (_, i) => {
     coordinates,
     icon,
     color,
+    image: require('@assets/images/pin.png'),
     onPress: () => loggingService.info(`Istanbul marker ${i + 1} pressed`),
   };
 });

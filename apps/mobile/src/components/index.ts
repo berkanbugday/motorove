@@ -26,7 +26,6 @@ export * from './Wizard';
 export * from './BottomSheet';
 export * from './Button';
 export * from './AnimatedInput';
-export * from './MapView';
 export * from './MarkerInfoCard';
 export * from './FAB';
 export * from './SwipeableItem';

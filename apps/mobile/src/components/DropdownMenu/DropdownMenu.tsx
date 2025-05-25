@@ -274,7 +274,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
               {items
                 .filter(item => item !== undefined && item !== null)
                 .map((item, index) => (
-                  <>
+                  <View key={`dropdown-menu-item-${item?.id}`}>
                     <TouchableOpacity
                       key={item?.id}
                       style={[
@@ -311,7 +311,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                       </Text>
                     </TouchableOpacity>
                     <View style={styles.divider} />
-                  </>
+                  </View>
                 ))}
             </Animated.View>
           </View>

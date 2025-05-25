@@ -1,8 +1,8 @@
 import {useEffect, useState, useMemo, useCallback} from 'react';
-import {MapMarker} from '@components/MapView';
+import {RNMapMarkerType} from '@components/RNMap';
 
 export interface MapMarkerHookProps {
-  markers: MapMarker[];
+  markers: RNMapMarkerType[];
   mapCenter: [number, number];
   dynamicRadiusKm: number;
   maxVisibleMarkers?: number;
@@ -18,7 +18,7 @@ export const useMapMarkers = ({
   dynamicRadiusKm,
   maxVisibleMarkers = 1000,
 }: MapMarkerHookProps) => {
-  const [visibleMarkers, setVisibleMarkers] = useState<MapMarker[]>([]);
+  const [visibleMarkers, setVisibleMarkers] = useState<RNMapMarkerType[]>([]);
 
   // Memoize marker IDs for change detection
   const markerIds = useMemo(
@@ -67,7 +67,11 @@ export const useMapMarkers = ({
 
       // Only process markers if we have valid inputs
       const filteredMarkers = markers.filter(
-        marker => calculateDistance(mapCenter, marker.coordinates) <= radius,
+        marker =>
+          calculateDistance(mapCenter, [
+            marker.coordinate.longitude,
+            marker.coordinate.latitude,
+          ]) <= radius,
       );
 
       // Limit markers and set state

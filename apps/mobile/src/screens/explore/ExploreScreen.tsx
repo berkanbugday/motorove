@@ -1,198 +1,182 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {StyleSheet, View} from 'react-native';
-import {MapView, Tag, MapMarker} from '@components/MapView';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {RNMap, RNMapMarkerCard, RNMapMarkerCardItem} from '@components/RNMap';
+import {RNMapMarkerType, RNMapSearchResult} from '@components/RNMap/types';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 // Import the Turkey markers
 import {allMarkers} from './turkeyMarkers';
-import {MarkerInfoCard, InfoLine} from '@components/MarkerInfoCard';
-import {colors, rs} from '@theme';
 import {loggingService} from '@services/logging.service';
-
-interface MarkerInfo {
-  id: string;
-  title: string;
-  subtitle: string;
-  coordinates: [number, number];
-  infoLines: InfoLine[];
-  tags: Array<{
-    id: string;
-    label: string;
-    color?:
-      | 'primary'
-      | 'secondary'
-      | 'success'
-      | 'warning'
-      | 'error'
-      | 'info'
-      | 'light'
-      | 'dark';
-  }>;
-  distance: string;
-}
+// Import the new hook - use correct path
+import {useMapMarkerCards} from '../../hooks';
 
 export const ExploreScreen = () => {
-  const [tags, setTags] = useState<Tag[]>([
-    {
-      id: '1',
-      label: 'Repairs',
-      color: 'light',
-      onPress: () => {
-        setTags(prevTags =>
-          prevTags.map(tag =>
-            tag.id === '1'
-              ? {...tag, color: tag.color === 'light' ? 'dark' : 'light'}
-              : tag,
-          ),
-        );
-      },
-    },
-    {
-      id: '2',
-      label: 'Dealers',
-      color: 'light',
-      onPress: () => {
-        setTags(prevTags =>
-          prevTags.map(tag =>
-            tag.id === '2'
-              ? {...tag, color: tag.color === 'light' ? 'dark' : 'light'}
-              : tag,
-          ),
-        );
-      },
-    },
-    {
-      id: '3',
-      label: 'Washing',
-      color: 'light',
-      onPress: () => {
-        setTags(prevTags =>
-          prevTags.map(tag =>
-            tag.id === '3'
-              ? {...tag, color: tag.color === 'light' ? 'dark' : 'light'}
-              : tag,
-          ),
-        );
-      },
-    },
-  ]);
+  const insets = useSafeAreaInsets();
+  // Create an enhanced version of markers with more info using useMemo
+  const enhancedMarkers = useMemo(() => {
+    return allMarkers.map(marker => {
+      // Get marker type based on icon
+      const markerType =
+        marker.icon === 'wrench-filled'
+          ? 'Repair Shop'
+          : marker.icon === 'shop'
+          ? 'Dealer'
+          : 'Washing Station';
 
-  // Create an enhanced version of markers with more info
-  const enhancedMarkers = allMarkers.map(marker => {
-    // Get marker type based on icon
-    const markerType =
-      marker.icon === 'wrench-filled'
-        ? 'Repair Shop'
-        : marker.icon === 'shop'
-        ? 'Dealer'
-        : 'Washing Station';
+      // Convert to RNMap marker format
+      return {
+        id: marker.id,
+        coordinate: {
+          latitude: marker.coordinates[1],
+          longitude: marker.coordinates[0],
+        },
+        title: `${markerType} #${marker.id.split('-').pop()}`,
+        description: `Located in ${
+          marker.coordinates[1] > 40.8 && marker.coordinates[1] < 41.2
+            ? 'Istanbul'
+            : 'Turkey Mainland'
+        }`,
+        pinColor:
+          marker.icon === 'wrench-filled'
+            ? '#FF5722'
+            : marker.icon === 'shop'
+            ? '#2196F3'
+            : '#4CAF50',
+        image: marker.image,
+        imageSelected: marker.imageSelected,
+        metadata: {
+          type: markerType,
+          originalData: marker,
+        },
+      };
+    });
+  }, []);
 
-    // Add more interactive onPress handler
-    return {
-      ...marker,
-      onPress: () =>
-        handleMarkerPress(marker.id, marker.coordinates, markerType),
-    };
-  });
+  const [markers, setMarkers] = useState<RNMapMarkerType[]>([]);
+  const [selectedMarker, setSelectedMarker] = useState<RNMapMarkerType | null>(
+    null,
+  );
 
-  const [markers] = useState<MapMarker[]>(enhancedMarkers);
-  const [selectedMarker, setSelectedMarker] = useState<MarkerInfo | null>(null);
+  // Use our custom hook instead of direct state management
+  const {
+    markerCards,
+    selectedCardIndex,
+    showCardsForMarker,
+    hideCards,
+    toggleFavorite,
+    handleCardChange,
+  } = useMapMarkerCards();
+
+  // Handler for loading markers
+  const handleLoadMarkers = useCallback(() => {
+    loggingService.info('Loading markers...');
+    setMarkers(enhancedMarkers);
+  }, [enhancedMarkers]);
 
   // Handler for when a marker is pressed
-  const handleMarkerPress = (
-    id: string,
-    coordinates: [number, number],
-    type: string,
-  ) => {
-    loggingService.info(`Marker ${id} pressed at ${coordinates}`);
+  const handleMarkerSelect = useCallback(
+    (marker: RNMapMarkerType) => {
+      loggingService.info(`Marker ${marker.id} pressed`);
 
-    // Create mock data for this marker based on its type
-    const info: MarkerInfo = {
-      id,
-      title: `${type} #${id.split('-').pop()}`,
-      subtitle: `Located in ${
-        coordinates[1] > 40.8 && coordinates[1] < 41.2
-          ? 'Istanbul'
-          : 'Turkey Mainland'
-      }`,
-      coordinates,
-      infoLines: [
-        {
-          icon: 'map-pin',
-          text: 'Atatürk Mah. Cumhuriyet Cad. No:123',
-          iconColor: colors.neutral.grey,
+      // Create info for this marker, adapted for RNMapMarkerCard
+      const info: RNMapMarkerType = {
+        id: marker.id?.toString() || '',
+        coordinate: {
+          latitude: marker.coordinate.latitude,
+          longitude: marker.coordinate.longitude,
         },
-        {
-          icon: 'clock',
-          text: '9:00 AM - 8:00 PM',
-          iconColor: colors.neutral.grey,
+        pinColor: marker.pinColor,
+        icon: marker.icon,
+        metadata: {
+          type: marker.metadata?.type,
+          originalData: marker,
         },
-        {
-          icon: 'phone',
-          text: '+90 555 123 4567',
-          iconColor: colors.neutral.grey,
-        },
-      ],
-      tags: [
-        {
-          id: '2',
-          label: 'Open Now',
-          color: 'success',
-        },
-      ],
-      distance: `${(Math.random() * 10).toFixed(1)} km`,
-    };
+      };
 
-    setSelectedMarker(info);
-  };
+      setSelectedMarker(info);
 
-  const handleMapPress = (coords: [number, number]) => {
-    loggingService.info('Map pressed at', coords);
-    // Hide the marker info card when clicking elsewhere on the map
+      // Show cards for this marker using our hook
+      showCardsForMarker(markers, marker.id || '', 50);
+    },
+    [markers, showCardsForMarker],
+  );
+
+  const handleMapPress = useCallback(
+    (event: any) => {
+      loggingService.info('Map pressed at', event.nativeEvent.coordinate);
+      // Hide the marker info card when clicking elsewhere on the map
+      setSelectedMarker(null);
+      hideCards();
+    },
+    [hideCards],
+  );
+
+  const handleSearchResultSelect = useCallback((result: RNMapSearchResult) => {
+    loggingService.info(`Search result selected: ${result.name}`);
+  }, []);
+
+  const handleCardPress = useCallback(
+    (item: RNMapMarkerCardItem) => {
+      loggingService.info(`Card pressed for marker ${item.id}`);
+      // Find the corresponding map marker
+      const mapMarker = markers.find(m => m.id?.toString() === item.id);
+
+      if (mapMarker) {
+        // Update the selected marker to center the map on it
+        handleMarkerSelect(mapMarker);
+      }
+    },
+    [markers, handleMarkerSelect],
+  );
+
+  const handleFavoritePress = useCallback(
+    (item: RNMapMarkerCardItem) => {
+      loggingService.info(`Favorite pressed for marker ${item.id}`);
+      // Toggle favorite state using our hook
+      toggleFavorite(item.id);
+    },
+    [toggleFavorite],
+  );
+
+  const handleClose = useCallback(() => {
     setSelectedMarker(null);
-  };
+    hideCards();
+  }, [hideCards]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <MapView
-        tags={tags}
-        markers={markers}
-        showSearch={true}
-        showFilterButton={true}
+    <View style={styles.container}>
+      <RNMap
+        initialRegion={{
+          latitude: 39.1667,
+          longitude: 35.6667,
+          latitudeDelta: 5,
+          longitudeDelta: 5,
+        }}
         showUserLocation={true}
-        showZoomControls={true}
-        style={styles.map}
-        onMapLoaded={() => loggingService.info('Map loaded')}
-        onMapPress={handleMapPress}
-        // Set initial coordinates to Turkey
-        initialCoordinates={{latitude: 39.1667, longitude: 35.6667}}
-        initialZoom={5}
+        markers={markers}
+        onMarkerSelect={handleMarkerSelect}
+        onPress={handleMapPress}
+        showSearchBar={true}
+        onSearchResultSelect={handleSearchResultSelect}
+        markerRadiusKm={50}
+        maxVisibleMarkers={1000}
+        loadingIndicator={true}
+        showLoadMarkerButton={true}
+        onLoadMarkerPress={handleLoadMarkers}
       />
 
-      {/* MarkerInfoCard displays when a marker is selected */}
-      {selectedMarker && (
-        <View style={styles.cardContainer}>
-          <MarkerInfoCard
-            showCloseButton={true}
-            title={selectedMarker.title}
-            subtitle={selectedMarker.subtitle}
-            infoLines={selectedMarker.infoLines}
-            tags={selectedMarker.tags}
-            distance={selectedMarker.distance}
-            primaryAction="Get Directions"
-            onPrimaryAction={() => loggingService.info('Navigate pressed')}
-            secondaryAction="Call Now"
-            onSecondaryAction={() => loggingService.info('Call Now pressed')}
-            thirdyAction="Save to Favorites"
-            onThirdyAction={() =>
-              loggingService.info('Save to Favorites pressed')
-            }
-            onClose={() => setSelectedMarker(null)}
-            variant="normal"
-            style={styles.infoCard}
-          />
-        </View>
+      {/* Use RNMapMarkerCard to display the selected marker and nearby markers */}
+      {selectedMarker && markerCards.length > 0 && (
+        <RNMapMarkerCard
+          items={markerCards}
+          selectedIndex={selectedCardIndex}
+          onCardPress={handleCardPress}
+          onFavoritePress={handleFavoritePress}
+          onClosePress={handleClose}
+          onCardChange={handleCardChange}
+          tabBarHeight={insets.bottom + 70}
+        />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -200,14 +184,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  map: {
-    height: '100%',
-  },
   cardContainer: {
     position: 'absolute',
     width: '100%',
-    bottom: rs(100),
-    alignItems: 'center',
+    bottom: 100,
+    paddingHorizontal: 10,
   },
   infoCard: {
     width: '100%',

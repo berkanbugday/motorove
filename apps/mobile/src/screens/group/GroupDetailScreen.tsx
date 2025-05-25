@@ -1264,7 +1264,6 @@ export const GroupDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
-    backgroundColor: colors.neutral.white,
   },
   centerContent: {
     justifyContent: 'center',

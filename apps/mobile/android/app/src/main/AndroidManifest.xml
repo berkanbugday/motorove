@@ -27,5 +27,10 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      
+      <!-- Google Maps API Key -->
+      <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyDjFc_GRTZx9GdVmyZ9WDXmxj1R93KjLx0"/>
     </application>
 </manifest>
