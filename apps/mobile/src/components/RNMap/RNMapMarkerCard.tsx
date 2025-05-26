@@ -7,7 +7,6 @@ import {
   StyleSheet,
   FlatList,
   Dimensions,
-  Platform,
   ViewToken,
 } from 'react-native';
 import {colors, spacing, radius, typography, getShadow} from '../../theme';
@@ -127,9 +126,6 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
           styles.card,
           {
             width: cardWidth,
-            backgroundColor: colors.neutral.white,
-            borderRadius: radius.md,
-            ...(Platform.OS === 'ios' ? getShadow('small') : {elevation: 3}),
           },
         ]}
         onPress={() => onCardPress && onCardPress(item)}
@@ -294,10 +290,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 999,
+    ...getShadow('small'),
   },
   card: {
     overflow: 'hidden',
     marginBottom: spacing.sm,
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.md,
+    ...getShadow('small'),
   },
   imageContainer: {
     height: 120,
