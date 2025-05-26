@@ -93,7 +93,6 @@ export const RNMap: React.FC<RNMapProps> = ({
 }) => {
   // Refs
   const mapRef = useRef<MapView>(null);
-  const markerRef = useRef<MapMarker[]>([]);
   const insets = useSafeAreaInsets();
   // Map state hook
   const {
@@ -150,7 +149,6 @@ export const RNMap: React.FC<RNMapProps> = ({
     tagsTranslate,
     zoomControlsTranslate,
     loadButtonTranslate,
-    debugInfoTranslate,
   } = useComponentAnimation(isMapMoving);
 
   // Handle location permission
@@ -467,7 +465,6 @@ export const RNMap: React.FC<RNMapProps> = ({
             ) : (
               visibleMarkers.map(marker => (
                 <RNMapMarker
-                  ref={markerRef}
                   key={`marker-${marker.id}`}
                   marker={marker}
                   onSelect={() => {

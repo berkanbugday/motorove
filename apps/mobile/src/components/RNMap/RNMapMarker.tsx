@@ -28,7 +28,7 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
   const handleSelect = () => {
     // First scale down
     Animated.spring(scaleAnim, {
-      toValue: 1.2,
+      toValue: 1.5,
       friction: 5,
       tension: 40,
       useNativeDriver: true,
@@ -74,15 +74,17 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
       tracksViewChanges={false}>
       {icon && <View style={styles.iconContainer}>{icon}</View>}
       {image && (
-        <Animated.Image
-          source={image}
-          style={[
-            styles.image,
-            {
-              transform: [{scale: scaleAnim}],
-            },
-          ]}
-        />
+        <View style={styles.imageContainer}>
+          <Animated.Image
+            source={image}
+            style={[
+              styles.image,
+              {
+                transform: [{scale: scaleAnim}],
+              },
+            ]}
+          />
+        </View>
       )}
     </Marker>
   );
@@ -92,6 +94,12 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  imageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 50,
+    height: 65,
   },
   image: {
     width: 40,
