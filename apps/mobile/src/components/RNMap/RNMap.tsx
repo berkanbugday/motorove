@@ -39,10 +39,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 // Default region (fallback if user location cannot be determined)
 const DEFAULT_REGION: Region = {
-  latitude: 37.78825,
-  longitude: -122.4324,
-  latitudeDelta: 0.0922,
-  longitudeDelta: 0.0421,
+  latitude: 39.9334,
+  longitude: 32.8597,
+  latitudeDelta: 10,
+  longitudeDelta: 10,
 };
 
 /**
@@ -300,10 +300,12 @@ export const RNMap: React.FC<RNMapProps> = ({
       const newRegion = {
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
-        latitudeDelta: region.latitudeDelta,
-        longitudeDelta: region.longitudeDelta,
+        latitudeDelta: 0.5,
+        longitudeDelta: 0.5,
       };
       mapRef.current.animateToRegion(newRegion, 500);
+      setRegion(newRegion);
+      refreshMapState();
     }
   };
 
@@ -412,8 +414,8 @@ export const RNMap: React.FC<RNMapProps> = ({
             scrollEnabled={scrollEnabled}
             pitchEnabled={pitchEnabled}
             toolbarEnabled={toolbarEnabled}
-            maxZoomLevel={maxZoomLevel}
-            minZoomLevel={minZoomLevel}
+            maxDelta={maxZoomLevel}
+            minDelta={minZoomLevel}
             onMapReady={handleMapReady}
             onRegionChange={onRegionChange}
             onRegionChangeComplete={handleRegionChangeComplete}

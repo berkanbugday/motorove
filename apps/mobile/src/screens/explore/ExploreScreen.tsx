@@ -146,10 +146,10 @@ export const ExploreScreen = () => {
     <View style={styles.container}>
       <RNMap
         initialRegion={{
-          latitude: 39.1667,
-          longitude: 35.6667,
-          latitudeDelta: 5,
-          longitudeDelta: 5,
+          latitude: 39.9334,
+          longitude: 32.8597,
+          latitudeDelta: 10,
+          longitudeDelta: 10,
         }}
         showUserLocation={true}
         markers={markers}

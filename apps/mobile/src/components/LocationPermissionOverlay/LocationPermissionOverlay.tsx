@@ -39,7 +39,7 @@ export function LocationPermissionOverlay({
             source={require('../../assets/lottie/location_permission.json')}
             style={styles.heroImage}
             autoPlay
-            loop
+            renderMode="SOFTWARE"
           />
         </View>
 
