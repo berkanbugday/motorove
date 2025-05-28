@@ -402,7 +402,7 @@ export const RNMap: React.FC<RNMapProps> = ({
             region={followUserLocation ? undefined : region}
             mapType={mapType}
             customMapStyle={customMapStyle}
-            showsUserLocation={showUserLocation && status === 'granted'}
+            showsUserLocation={true}
             followsUserLocation={followUserLocation && status === 'granted'}
             showsCompass={showCompass}
             showsScale={showScale}

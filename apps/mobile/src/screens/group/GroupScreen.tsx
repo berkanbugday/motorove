@@ -12,10 +12,16 @@ import {Tabs} from '@components/Tab';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {GroupCard} from '@components/GroupCard';
-import {useGetJoinedGroups, useGetGroups} from '@services/group.service';
+import {
+  useGetJoinedGroups,
+  useGetGroups,
+  GroupFilters,
+} from '@services/group.service';
 import {Icon} from '@components/Icon';
 import {Body, Subtitle} from '@components/Typography';
 import {Button} from '@components/Button';
+import {useBottomSheet} from '@components/BottomSheet/BottomSheetProvider';
+import {GroupFilter} from './components/GroupFilter';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -25,6 +31,7 @@ export const GroupScreen = () => {
   const [refreshingJoinedGroups, setRefreshingJoinedGroups] = useState(false);
   const [refreshingAllGroups, setRefreshingAllGroups] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
+  const {openBottomSheet} = useBottomSheet();
 
   // Fetch joined groups with pagination
   const {
@@ -34,6 +41,8 @@ export const GroupScreen = () => {
     refetch: refetchJoinedGroups,
     loadMore: loadMoreJoinedGroups,
     hasMore: hasMoreJoinedGroups,
+    filters: joinedGroupsFilters,
+    applyFilters: applyJoinedGroupsFilters,
   } = useGetJoinedGroups();
 
   // Fetch all groups with pagination
@@ -44,6 +53,8 @@ export const GroupScreen = () => {
     refetch: refetchAllGroups,
     loadMore: loadMoreAllGroups,
     hasMore: hasMoreAllGroups,
+    filters: allGroupsFilters,
+    applyFilters: applyAllGroupsFilters,
   } = useGetGroups();
 
   // Handle refresh joined groups
@@ -59,6 +70,36 @@ export const GroupScreen = () => {
     await refetchAllGroups();
     setRefreshingAllGroups(false);
   }, [refetchAllGroups]);
+
+  // Handle filter button press
+  const handleFilterPress = useCallback(() => {
+    const currentFilters =
+      activeTab === 'joined' ? joinedGroupsFilters : allGroupsFilters;
+
+    openBottomSheet({
+      title: 'Filter Groups',
+      content: (
+        <GroupFilter
+          initialFilters={currentFilters}
+          onApplyFilters={(filters: GroupFilters) => {
+            if (activeTab === 'joined') {
+              applyJoinedGroupsFilters(filters);
+            } else {
+              applyAllGroupsFilters(filters);
+            }
+          }}
+        />
+      ),
+      snapPoint: 'full',
+    });
+  }, [
+    activeTab,
+    joinedGroupsFilters,
+    allGroupsFilters,
+    openBottomSheet,
+    applyJoinedGroupsFilters,
+    applyAllGroupsFilters,
+  ]);
 
   // Render joined groups list
   const renderJoinedGroups = () => {
@@ -248,7 +289,7 @@ export const GroupScreen = () => {
         rightIconName="plus"
         onRightButtonPress={() => navigation.navigate('CreateGroup')}
         secondRightIconName="filter"
-        onSecondRightButtonPress={() => {}}
+        onSecondRightButtonPress={handleFilterPress}
         leftIconName="search"
         onLeftIconPress={() => navigation.navigate('GroupSearch')}
       />

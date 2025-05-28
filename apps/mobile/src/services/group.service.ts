@@ -9,7 +9,7 @@ import {
 } from './graphql/group.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect} from 'react';
 
 // Type definitions
 export interface CreateGroupInput {
@@ -49,6 +49,12 @@ export interface Group {
   }[];
   membersCapacity: number | null;
   tags: {id: string; value: string}[];
+}
+
+export interface GroupFilters {
+  city: string | null;
+  tags: string[];
+  privacy: 'ALL' | 'PUBLIC' | 'PRIVATE';
 }
 
 // Hook for creating a group
@@ -169,9 +175,38 @@ export const useGetGroup = (id: string) => {
   };
 };
 
+// Convert filters to GraphQL variables
+const getFilterVariables = (filters?: GroupFilters) => {
+  if (!filters) {
+    return {};
+  }
+
+  const variables: any = {};
+
+  if (filters.city) {
+    variables.city = filters.city;
+  }
+
+  if (filters.tags.length > 0) {
+    variables.tags = filters.tags;
+  }
+
+  if (filters.privacy !== 'ALL') {
+    variables.privacy = filters.privacy;
+  }
+
+  return variables;
+};
+
 // Hook for getting user's groups
 export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
+  const [filters, setFilters] = useState<GroupFilters>({
+    city: null,
+    tags: [],
+    privacy: 'ALL',
+  });
+
   const {
     data,
     loading,
@@ -179,7 +214,11 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     refetch: originalRefetch,
     fetchMore,
   } = useQuery(GET_JOINED_GROUPS, {
-    variables: {limit, skip},
+    variables: {
+      limit,
+      skip,
+      ...getFilterVariables(filters),
+    },
     onError: errorObj => {
       loggingService.error('Error fetching user groups:', errorObj);
     },
@@ -201,6 +240,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
         variables: {
           skip: data?.joinedGroups?.length || 0,
           limit,
+          ...getFilterVariables(filters),
         },
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
@@ -222,7 +262,22 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     } catch (errorObj) {
       loggingService.error('Error loading more joined groups:', errorObj);
     }
-  }, [data?.joinedGroups?.length, fetchMore, hasMore, limit, loading]);
+  }, [data?.joinedGroups?.length, fetchMore, hasMore, limit, loading, filters]);
+
+  // Apply filters and reset pagination
+  const applyFilters = useCallback((newFilters: GroupFilters) => {
+    setFilters(newFilters);
+    setHasMore(true);
+  }, []);
+
+  // Refetch when filters change
+  useEffect(() => {
+    originalRefetch({
+      limit,
+      skip: 0,
+      ...getFilterVariables(filters),
+    });
+  }, [filters, limit, originalRefetch]);
 
   return {
     groups: (data?.joinedGroups as Group[]) || [],
@@ -231,12 +286,20 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     refetch,
     loadMore,
     hasMore,
+    filters,
+    applyFilters,
   };
 };
 
 // Hook for getting all groups
 export const useGetGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
+  const [filters, setFilters] = useState<GroupFilters>({
+    city: null,
+    tags: [],
+    privacy: 'ALL',
+  });
+
   const {
     data,
     loading,
@@ -244,7 +307,11 @@ export const useGetGroups = (limit = 20, skip = 0) => {
     refetch: originalRefetch,
     fetchMore,
   } = useQuery(GET_GROUPS, {
-    variables: {limit, skip},
+    variables: {
+      limit,
+      skip,
+      ...getFilterVariables(filters),
+    },
     onError: errorObj => {
       loggingService.error('Error fetching all groups:', errorObj);
     },
@@ -266,6 +333,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
         variables: {
           skip: data?.groups?.length || 0,
           limit,
+          ...getFilterVariables(filters),
         },
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
@@ -284,7 +352,22 @@ export const useGetGroups = (limit = 20, skip = 0) => {
     } catch (errorObj) {
       loggingService.error('Error loading more groups:', errorObj);
     }
-  }, [data?.groups?.length, fetchMore, hasMore, limit, loading]);
+  }, [data?.groups?.length, fetchMore, hasMore, limit, loading, filters]);
+
+  // Apply filters and reset pagination
+  const applyFilters = useCallback((newFilters: GroupFilters) => {
+    setFilters(newFilters);
+    setHasMore(true);
+  }, []);
+
+  // Refetch when filters change
+  useEffect(() => {
+    originalRefetch({
+      limit,
+      skip: 0,
+      ...getFilterVariables(filters),
+    });
+  }, [filters, limit, originalRefetch]);
 
   return {
     groups: (data?.groups as Group[]) || [],
@@ -293,6 +376,8 @@ export const useGetGroups = (limit = 20, skip = 0) => {
     refetch,
     loadMore,
     hasMore,
+    filters,
+    applyFilters,
   };
 };
 

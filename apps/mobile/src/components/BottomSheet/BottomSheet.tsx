@@ -32,7 +32,7 @@ const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 const SNAP_POINTS = {
   CLOSED: 0,
   PARTIAL: SCREEN_HEIGHT * 0.5,
-  FULL: SCREEN_HEIGHT * 0.8,
+  FULL: SCREEN_HEIGHT * 0.9,
 };
 // Threshold below which the sheet will close when released
 const CLOSE_THRESHOLD = SNAP_POINTS.PARTIAL * 0.3;

@@ -25,7 +25,7 @@ interface BaseCheckboxProps {
   /**
    * Visual variant of the checkbox
    */
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'dark';
   /**
    * Size of the checkbox
    */
@@ -178,7 +178,7 @@ interface CheckboxBaseProps {
   checked: boolean;
   onToggle: () => void;
   label?: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'dark';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   labelPosition?: 'left' | 'right';
@@ -215,9 +215,11 @@ function CheckboxBase({
     variant === 'primary' && styles.primaryCheckbox,
     variant === 'secondary' && styles.secondaryCheckbox,
     variant === 'outline' && styles.outlineCheckbox,
+    variant === 'dark' && styles.darkCheckbox,
     checked && variant === 'primary' && styles.primaryChecked,
     checked && variant === 'secondary' && styles.secondaryChecked,
     checked && variant === 'outline' && styles.outlineChecked,
+    checked && variant === 'dark' && styles.darkChecked,
     size === 'small' && styles.smallCheckbox,
     size === 'large' && styles.largeCheckbox,
     disabled && styles.disabledCheckbox,
@@ -301,6 +303,9 @@ const styles = StyleSheet.create({
   primaryCheckbox: {
     borderColor: colors.primary.main,
   },
+  darkCheckbox: {
+    borderColor: colors.neutral.black,
+  },
   secondaryCheckbox: {
     borderColor: colors.secondary.main,
   },
@@ -310,6 +315,10 @@ const styles = StyleSheet.create({
   primaryChecked: {
     backgroundColor: colors.primary.main,
     borderColor: colors.primary.main,
+  },
+  darkChecked: {
+    backgroundColor: colors.neutral.black,
+    borderColor: colors.neutral.black,
   },
   secondaryChecked: {
     backgroundColor: colors.secondary.main,

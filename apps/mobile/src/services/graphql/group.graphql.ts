@@ -82,8 +82,20 @@ export const UPDATE_GROUP = gql`
 `;
 
 export const GET_GROUPS = gql`
-  query GetGroups($limit: Int, $skip: Int) {
-    groups(limit: $limit, skip: $skip) {
+  query GetGroups(
+    $limit: Int
+    $skip: Int
+    $cities: [String]
+    $tags: [String]
+    $privacy: String
+  ) {
+    groups(
+      limit: $limit
+      skip: $skip
+      cities: $cities
+      tags: $tags
+      privacy: $privacy
+    ) {
       ...GroupFragment
     }
   }
@@ -102,8 +114,20 @@ export const GET_GROUP = gql`
 
 // Get user groups query
 export const GET_JOINED_GROUPS = gql`
-  query GetJoinedGroups($limit: Int, $skip: Int) {
-    joinedGroups(limit: $limit, skip: $skip) {
+  query GetJoinedGroups(
+    $limit: Int
+    $skip: Int
+    $cities: [String]
+    $tags: [String]
+    $privacy: String
+  ) {
+    joinedGroups(
+      limit: $limit
+      skip: $skip
+      cities: $cities
+      tags: $tags
+      privacy: $privacy
+    ) {
       ...GroupFragment
     }
   }

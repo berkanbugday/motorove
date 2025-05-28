@@ -1067,7 +1067,7 @@ export const GroupDetailScreen = () => {
 
           <View style={styles.descriptionContainer}>{renderDescription()}</View>
         </View>
-        <View style={styles.shortcutsContainer}>
+        {/* <View style={styles.shortcutsContainer}>
           {group?.isMember && (
             <View style={styles.shortcutButton}>
               <Button
@@ -1091,7 +1091,7 @@ export const GroupDetailScreen = () => {
               <Caption>Create Event</Caption>
             </View>
           )}
-        </View>
+        </View> */}
 
         {group?.isMember && (
           <>
@@ -1156,13 +1156,13 @@ export const GroupDetailScreen = () => {
                 {members.length} people
               </Caption>
             </View>
-            <Button
+            {/* <Button
               iconName="user-plus-filled"
               iconSize={20}
               variant="secondary"
               shape="circle"
               size="small"
-            />
+            /> */}
           </View>
         }>
         {loading ? (
