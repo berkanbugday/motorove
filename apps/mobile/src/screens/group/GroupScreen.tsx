@@ -22,6 +22,7 @@ import {Body, Subtitle} from '@components/Typography';
 import {Button} from '@components/Button';
 import {useBottomSheet} from '@components/BottomSheet/BottomSheetProvider';
 import {GroupFilter} from './components/GroupFilter';
+import {int} from 'zod/v4';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -268,6 +269,20 @@ export const GroupScreen = () => {
     );
   };
 
+  const getFilterBadgeCount = () => {
+    let badgeCount = 0;
+    if (activeTab === 'explore') {
+      badgeCount = allGroupsFilters.city ? 1 : 0;
+      badgeCount += allGroupsFilters.tags.length > 0 ? 1 : 0;
+      badgeCount += allGroupsFilters.privacy !== 'ALL' ? 1 : 0;
+    } else {
+      badgeCount = joinedGroupsFilters.city ? 1 : 0;
+      badgeCount += joinedGroupsFilters.tags.length > 0 ? 1 : 0;
+      badgeCount += joinedGroupsFilters.privacy !== 'ALL' ? 1 : 0;
+    }
+    return badgeCount;
+  };
+
   const tabItems = [
     {
       key: 'joined',
@@ -288,7 +303,10 @@ export const GroupScreen = () => {
         showShadow={false}
         rightIconName="plus"
         onRightButtonPress={() => navigation.navigate('CreateGroup')}
-        secondRightIconName="filter"
+        secondRightIconName={
+          getFilterBadgeCount() > 0 ? 'filter-filled' : 'filter'
+        }
+        secondRightIconBadgeCount={getFilterBadgeCount()}
         onSecondRightButtonPress={handleFilterPress}
         leftIconName="search"
         onLeftIconPress={() => navigation.navigate('GroupSearch')}

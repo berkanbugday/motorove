@@ -85,6 +85,12 @@ type Group {
   updatedById: String!
 }
 
+input GroupFilterInput {
+  city: String
+  privacy: String = "ALL"
+  tags: [String!]! = []
+}
+
 """The role of a user in a group"""
 enum GroupMemberRole {
   ADMIN
@@ -213,8 +219,8 @@ type Query {
   groupMemberships: [GroupMembership!]!
   groupTag(id: ID!): GroupTag
   groupTags: [GroupTag!]!
-  groups(limit: Int, query: String, skip: Int): [Group!]!
-  joinedGroups(limit: Int, skip: Int): [Group!]!
+  groups(filters: GroupFilterInput, limit: Int, query: String, skip: Int): [Group!]!
+  joinedGroups(filters: GroupFilterInput, limit: Int, skip: Int): [Group!]!
   me: User!
   myGroupMemberships: [GroupMembership!]!
   notifications(limit: Int, skip: Int): [Notification!]!

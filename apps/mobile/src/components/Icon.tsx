@@ -73,6 +73,7 @@ import LockOpenFilled from '@assets/icons/lock-open-filled.svg';
 import Earth from '@assets/icons/earth.svg';
 import EarthFilled from '@assets/icons/earth-filled.svg';
 import Filter from '@assets/icons/filter.svg';
+import FilterFilled from '@assets/icons/filter-filled.svg';
 import Crown from '@assets/icons/crown.svg';
 import CrownFilled from '@assets/icons/crown-filled.svg';
 import Gear from '@assets/icons/gear.svg';
@@ -170,6 +171,7 @@ export type IconName =
   | 'earth'
   | 'earth-filled'
   | 'filter'
+  | 'filter-filled'
   | 'crown'
   | 'crown-filled'
   | 'gear'
@@ -356,6 +358,8 @@ export function Icon({
       return <EarthFilled {...commonProps} />;
     case 'filter':
       return <Filter {...commonProps} />;
+    case 'filter-filled':
+      return <FilterFilled {...commonProps} />;
     case 'crown':
       return <Crown {...commonProps} />;
     case 'crown-filled':

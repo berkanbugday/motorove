@@ -175,29 +175,6 @@ export const useGetGroup = (id: string) => {
   };
 };
 
-// Convert filters to GraphQL variables
-const getFilterVariables = (filters?: GroupFilters) => {
-  if (!filters) {
-    return {};
-  }
-
-  const variables: any = {};
-
-  if (filters.city) {
-    variables.city = filters.city;
-  }
-
-  if (filters.tags.length > 0) {
-    variables.tags = filters.tags;
-  }
-
-  if (filters.privacy !== 'ALL') {
-    variables.privacy = filters.privacy;
-  }
-
-  return variables;
-};
-
 // Hook for getting user's groups
 export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
@@ -217,7 +194,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     variables: {
       limit,
       skip,
-      ...getFilterVariables(filters),
+      filters,
     },
     onError: errorObj => {
       loggingService.error('Error fetching user groups:', errorObj);
@@ -240,7 +217,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
         variables: {
           skip: data?.joinedGroups?.length || 0,
           limit,
-          ...getFilterVariables(filters),
+          filters,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
@@ -275,7 +252,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     originalRefetch({
       limit,
       skip: 0,
-      ...getFilterVariables(filters),
+      filters,
     });
   }, [filters, limit, originalRefetch]);
 
@@ -310,7 +287,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
     variables: {
       limit,
       skip,
-      ...getFilterVariables(filters),
+      filters,
     },
     onError: errorObj => {
       loggingService.error('Error fetching all groups:', errorObj);
@@ -333,7 +310,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
         variables: {
           skip: data?.groups?.length || 0,
           limit,
-          ...getFilterVariables(filters),
+          filters,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
@@ -365,7 +342,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
     originalRefetch({
       limit,
       skip: 0,
-      ...getFilterVariables(filters),
+      filters,
     });
   }, [filters, limit, originalRefetch]);
 

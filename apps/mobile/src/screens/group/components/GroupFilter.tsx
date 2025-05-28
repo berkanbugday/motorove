@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect} from 'react';
-import {StyleSheet, View, ScrollView} from 'react-native';
+import {StyleSheet, View, ScrollView, ActivityIndicator} from 'react-native';
 import {Button} from '@components/Button';
 import {Checkbox} from '@components/Checkbox';
 import {Subtitle} from '@components/Typography';
@@ -20,8 +20,6 @@ export interface GroupFilters {
 interface GroupFilterProps {
   initialFilters: GroupFilters;
   onApplyFilters: (filters: GroupFilters) => void;
-  availableCities: {id: string; value: string}[];
-  availableTags: {id: string; value: string}[];
 }
 
 export const GroupFilter: React.FC<GroupFilterProps> = ({
@@ -30,14 +28,14 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
 }) => {
   const {closeBottomSheet} = useBottomSheet();
   const [filters, setFilters] = useState<GroupFilters>(initialFilters);
-  const {cities} = useGetCities();
-  const {groupTags} = useGetGroupTags();
+  const {cities, loading: isCitiesLoading} = useGetCities();
+  const {groupTags, loading: isTagsLoading} = useGetGroupTags();
 
   // Convert cities to dropdown format
   const cityDropdownItems: DropdownItem[] = cities.map(city => ({
     id: city.id,
     label: city.value,
-    value: city.value,
+    value: city.id,
   }));
 
   // Find the selected city in dropdown items
@@ -87,11 +85,14 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
   );
 
   const handleReset = useCallback(() => {
-    setFilters({
+    const resetFilters: GroupFilters = {
       city: null,
       tags: [],
       privacy: 'ALL',
-    });
+    };
+    setFilters(resetFilters);
+    onApplyFilters(resetFilters);
+    closeBottomSheet();
   }, []);
 
   const handleApply = useCallback(() => {
@@ -107,14 +108,20 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
         {/* Location filter section */}
         <View style={styles.section}>
           <Subtitle style={styles.sectionTitle}>Location</Subtitle>
-          <Dropdown
-            label="Select City"
-            data={cityDropdownItems}
-            selectedItem={selectedCityItem}
-            onSelect={handleCitySelect}
-            placeholder="Select a city"
-            searchable={true}
-          />
+          {isCitiesLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" />
+            </View>
+          ) : (
+            <Dropdown
+              label="Select City"
+              data={cityDropdownItems}
+              selectedItem={selectedCityItem}
+              onSelect={handleCitySelect}
+              placeholder="Select a city"
+              searchable={true}
+            />
+          )}
         </View>
 
         <View style={styles.divider} />
@@ -122,20 +129,26 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
         {/* Tags filter section */}
         <View style={styles.section}>
           <Subtitle style={styles.sectionTitle}>Tags</Subtitle>
-          <View style={styles.tagsContainer}>
-            {groupTags.map(tag => (
-              <Chip
-                key={tag.id}
-                variant={
-                  filters.tags.includes(tag.value) ? 'filled' : 'outlined'
-                }
-                color="dark"
-                label={tag.value}
-                onPress={() => handleTagToggle(tag.value)}
-                style={styles.tagChip}
-              />
-            ))}
-          </View>
+          {isTagsLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" />
+            </View>
+          ) : (
+            <View style={styles.tagsContainer}>
+              {groupTags.map(tag => (
+                <Chip
+                  key={tag.id}
+                  variant={
+                    filters.tags.includes(tag.id) ? 'filled' : 'outlined'
+                  }
+                  color="dark"
+                  label={tag.value}
+                  onPress={() => handleTagToggle(tag.id)}
+                  style={styles.tagChip}
+                />
+              ))}
+            </View>
+          )}
         </View>
 
         <View style={styles.divider} />
@@ -234,5 +247,10 @@ const styles = StyleSheet.create({
   },
   tagChip: {
     marginBottom: spacing.xs,
+  },
+  loadingContainer: {
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -10,6 +10,7 @@ import { UpdateGroupInput } from './dto/update-group.input';
 import { StorageService } from '../core/storage/storage.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupMembershipStatus } from 'src/enums/models/group-membership-status.enum';
+import { GroupFilterInput } from './dto/group-filter.input';
 
 @Injectable()
 export class GroupsService {
@@ -268,6 +269,7 @@ export class GroupsService {
     limit?: number,
     skip?: number,
     query?: string,
+    filters?: GroupFilterInput,
   ) {
     const groups = await this.prisma.group.findMany({
       where: {
@@ -281,6 +283,29 @@ export class GroupsService {
                 contains: query,
                 mode: 'insensitive',
               },
+            }
+          : {}),
+        ...(filters?.tags && filters.tags.length > 0
+          ? {
+              tags: {
+                some: {
+                  id: {
+                    in: filters.tags,
+                  },
+                },
+              },
+            }
+          : {}),
+        ...(filters?.city && filters.city !== null
+          ? {
+              city: {
+                id: filters.city,
+              },
+            }
+          : {}),
+        ...(filters?.privacy && filters.privacy !== 'ALL'
+          ? {
+              privacy: filters.privacy,
             }
           : {}),
       },
@@ -419,6 +444,7 @@ export class GroupsService {
     authToken?: string,
     limit?: number,
     skip?: number,
+    filters?: GroupFilterInput,
   ) {
     const groups = await this.prisma.group.findMany({
       where: {
@@ -429,6 +455,29 @@ export class GroupsService {
           },
         },
         isActive: true,
+        ...(filters?.tags && filters.tags.length > 0
+          ? {
+              tags: {
+                some: {
+                  id: {
+                    in: filters.tags,
+                  },
+                },
+              },
+            }
+          : {}),
+        ...(filters?.city && filters.city !== null
+          ? {
+              city: {
+                id: filters.city,
+              },
+            }
+          : {}),
+        ...(filters?.privacy && filters.privacy !== 'ALL'
+          ? {
+              privacy: filters.privacy,
+            }
+          : {}),
       },
       include: {
         createdBy: true,
