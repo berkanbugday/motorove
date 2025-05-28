@@ -12,7 +12,7 @@
     "build:android:dev": "cd android && ENVFILE=.env.dev ./gradlew assembleDevDebug",
     "build:android:staging": "cd android && ENVFILE=.env.staging ./gradlew assembleStagingRelease",
     "build:android:prod": "cd android && ENVFILE=.env.prod ./gradlew assembleProdRelease",
-    "ios:dev": "ENVFILE=.env.dev react-native run-ios --scheme 'motoroveDev'",
+    "ios:dev": "ENVFILE=.env.dev react-native run-ios --scheme 'motoroveDev' --simulator='iPhone 14'",
     "ios:staging": "ENVFILE=.env.staging react-native run-ios --scheme 'motoroveStaging'",
     "ios:prod": "ENVFILE=.env.prod react-native run-ios --scheme 'motorove'",
     "build:ios:dev": "ENVFILE=.env.dev react-native run-ios --scheme 'motoroveDev' --configuration Debug",

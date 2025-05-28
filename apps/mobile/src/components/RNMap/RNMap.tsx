@@ -14,7 +14,6 @@ import MapView, {
   LatLng,
   Circle,
   Polyline,
-  MapMarker,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {styles} from './RNMap.styles';

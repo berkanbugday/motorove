@@ -95,7 +95,14 @@ export function LocationPermissionOverlay({
 }
 
 interface FeatureItemProps {
-  icon: 'map-pin' | 'route' | 'comments' | 'wrench';
+  icon:
+    | 'map-pin'
+    | 'route'
+    | 'route-filled'
+    | 'comments'
+    | 'comments-filled'
+    | 'wrench'
+    | 'wrench-filled';
   text: string;
 }
 

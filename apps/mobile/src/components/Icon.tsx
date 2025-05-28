@@ -19,6 +19,7 @@ import Check from '@assets/icons/check.svg';
 import CheckFilled from '@assets/icons/check-filled.svg';
 import MapPin from '@assets/icons/map-pin.svg';
 import Route from '@assets/icons/route.svg';
+import RouteFilled from '@assets/icons/route-filled.svg';
 import Users from '@assets/icons/users.svg';
 import UsersFilled from '@assets/icons/users-filled.svg';
 import UsersSlashFilled from '@assets/icons/users-slash-filled.svg';
@@ -39,6 +40,7 @@ import Like from '@assets/icons/like.svg';
 import LikeFilled from '@assets/icons/like-filled.svg';
 import Comment from '@assets/icons/comment.svg';
 import Comments from '@assets/icons/comments.svg';
+import CommentsFilled from '@assets/icons/comments-filled.svg';
 import CommentFilled from '@assets/icons/comment-filled.svg';
 import Save from '@assets/icons/save.svg';
 import SaveFilled from '@assets/icons/save-filled.svg';
@@ -106,6 +108,7 @@ export type IconName =
   | 'check-filled'
   | 'map-pin'
   | 'route'
+  | 'route-filled'
   | 'users'
   | 'users-filled'
   | 'users-slash-filled'
@@ -126,6 +129,7 @@ export type IconName =
   | 'like-filled'
   | 'comment'
   | 'comments'
+  | 'comments-filled'
   | 'comment-filled'
   | 'save'
   | 'save-filled'
@@ -228,6 +232,8 @@ export function Icon({
       return <MapPin {...commonProps} />;
     case 'route':
       return <Route {...commonProps} />;
+    case 'route-filled':
+      return <RouteFilled {...commonProps} />;
     case 'users':
       return <Users {...commonProps} />;
     case 'users-filled':
@@ -268,6 +274,8 @@ export function Icon({
       return <Comment {...commonProps} />;
     case 'comments':
       return <Comments {...commonProps} />;
+    case 'comments-filled':
+      return <CommentsFilled {...commonProps} />;
     case 'comment-filled':
       return <CommentFilled {...commonProps} />;
     case 'save':

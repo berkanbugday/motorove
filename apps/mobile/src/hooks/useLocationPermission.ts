@@ -30,6 +30,32 @@ export const useLocationPermission = () => {
   const [highAccuracy, setHighAccuracy] = useState<boolean>(false);
   const appState = useRef(AppState.currentState);
   const [permissionRequestCount, setPermissionRequestCount] = useState(0);
+  const isMountedRef = useRef(false);
+
+  /**
+   * Open app settings if permission is blocked
+   */
+  const openSettings = useCallback(() => {
+    Alert.alert(
+      'Location Permission Required',
+      'Please enable location services for this app in your device settings.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {text: 'Open Settings', onPress: () => Linking.openSettings()},
+      ],
+    );
+  }, []);
+
+  /**
+   * Check if high accuracy location is available
+   */
+  const checkHighAccuracy = useCallback(() => {
+    Geolocation.getCurrentPosition(
+      () => setHighAccuracy(true),
+      () => setHighAccuracy(false),
+      {enableHighAccuracy: true, timeout: 5000, maximumAge: 10000},
+    );
+  }, []);
 
   /**
    * Check the current location permission status
@@ -54,7 +80,7 @@ export const useLocationPermission = () => {
               error => {
                 if (error.code === 1) {
                   // PERMISSION_DENIED
-                  // Check if this is likely a block based on request count
+                  // Use permissionRequestCount value from state directly
                   if (permissionRequestCount > 1) {
                     setStatus('blocked');
                   } else {
@@ -85,22 +111,17 @@ export const useLocationPermission = () => {
             setStatus('granted');
             checkHighAccuracy();
           } else {
-            const granted = await PermissionsAndroid.request(
+            // When checking permission status, we don't want to request permission again
+            // Just check the current status without making a request
+            const permissionStatus = await PermissionsAndroid.check(
               PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-              {
-                title: 'Location Permission',
-                message: 'Motorove needs access to your location',
-                buttonNeutral: 'Ask Me Later',
-                buttonNegative: 'Cancel',
-                buttonPositive: 'OK',
-              },
             );
 
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            if (permissionStatus) {
               setStatus('granted');
               checkHighAccuracy();
             } else {
-              // Check if this is likely a block based on request count
+              // Use permissionRequestCount value from state directly
               if (permissionRequestCount > 1) {
                 setStatus('blocked');
               } else {
@@ -120,18 +141,7 @@ export const useLocationPermission = () => {
       loggingService.error('Error checking location permission:', error);
       setStatus('unavailable');
     }
-  }, [permissionRequestCount]);
-
-  /**
-   * Check if high accuracy location is available
-   */
-  const checkHighAccuracy = useCallback(() => {
-    Geolocation.getCurrentPosition(
-      () => setHighAccuracy(true),
-      () => setHighAccuracy(false),
-      {enableHighAccuracy: true, timeout: 5000, maximumAge: 10000},
-    );
-  }, []);
+  }, [checkHighAccuracy]); // Remove permissionRequestCount from dependencies
 
   /**
    * Request location permission from the user
@@ -223,21 +233,7 @@ export const useLocationPermission = () => {
       setStatus('unavailable');
       return false;
     }
-  }, [checkHighAccuracy, permissionRequestCount, status]);
-
-  /**
-   * Open app settings if permission is blocked
-   */
-  const openSettings = useCallback(() => {
-    Alert.alert(
-      'Location Permission Required',
-      'Please enable location services for this app in your device settings.',
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {text: 'Open Settings', onPress: () => Linking.openSettings()},
-      ],
-    );
-  }, []);
+  }, [checkHighAccuracy, permissionRequestCount, status, openSettings]);
 
   // Listen for app state changes to refresh permission status
   // This handles the case where the user grants permission in settings and returns to the app
@@ -258,9 +254,12 @@ export const useLocationPermission = () => {
     };
   }, [checkPermission]);
 
-  // Check permission on mount
+  // Check permission on mount only once
   useEffect(() => {
-    checkPermission();
+    if (!isMountedRef.current) {
+      checkPermission();
+      isMountedRef.current = true;
+    }
   }, [checkPermission]);
 
   return {
