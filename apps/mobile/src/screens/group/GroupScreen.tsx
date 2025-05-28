@@ -22,7 +22,6 @@ import {Body, Subtitle} from '@components/Typography';
 import {Button} from '@components/Button';
 import {useBottomSheet} from '@components/BottomSheet/BottomSheetProvider';
 import {GroupFilter} from './components/GroupFilter';
-import {int} from 'zod/v4';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -79,6 +78,7 @@ export const GroupScreen = () => {
 
     openBottomSheet({
       title: 'Filter Groups',
+      closeButtonPosition: 'top-left',
       content: (
         <GroupFilter
           initialFilters={currentFilters}
