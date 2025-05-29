@@ -29,10 +29,10 @@ input CityInput {
 }
 
 type Comment {
-  author: User!
-  authorId: String!
   content: String!
   createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
   id: ID!
   isActive: Boolean!
   parent: Comment
@@ -41,6 +41,8 @@ type Comment {
   postId: String!
   replies: [Comment!]
   updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
 }
 
 input CreateCommentInput {
@@ -246,11 +248,12 @@ enum NotificationType {
 }
 
 type Post {
-  author: User!
-  authorId: String!
   comments: [Comment!]!
+  commentsCount: Int!
   content: String!
   createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
   group: Group
   groupId: String
   id: ID!
@@ -263,6 +266,8 @@ type Post {
   longitude: Float
   savesCount: Int!
   updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
 }
 
 type PostLike {
@@ -305,7 +310,7 @@ type Query {
   notifications(limit: Int, skip: Int): [Notification!]!
   notificationsCount(onlyUnread: Boolean = true): Float!
   post(id: ID!): Post!
-  posts(authorId: ID, groupId: ID!): [Post!]!
+  posts(createdById: ID, groupId: ID!): [Post!]!
 }
 
 input RemoveGroupMemberInput {

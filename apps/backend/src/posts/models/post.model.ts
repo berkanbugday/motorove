@@ -1,5 +1,4 @@
 import { Field, ObjectType, Int, Float } from '@nestjs/graphql';
-import { User } from '../../auth/models/user.model';
 import { Group } from '../../groups/models/group.model';
 import { Comment } from '../../comments/models/comment.model';
 import { BaseModel } from '../../core/models/base.model';
@@ -18,12 +17,6 @@ export class Post extends BaseModel {
   @Field(() => Float, { nullable: true })
   longitude?: number | null;
 
-  @Field(() => User)
-  author: Partial<User>;
-
-  @Field()
-  authorId: string;
-
   @Field(() => Group, { nullable: true })
   group?: Partial<Group>;
 
@@ -35,6 +28,9 @@ export class Post extends BaseModel {
 
   @Field(() => Int, { defaultValue: 0 })
   likesCount: number;
+
+  @Field(() => Int, { defaultValue: 0 })
+  savesCount: number;
 
   @Field(() => Int, { defaultValue: 0 })
   commentsCount: number;

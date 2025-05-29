@@ -81,9 +81,11 @@ model User {
   updatedNotifications Notification[]    @relation("NotificationUpdatedBy")
   deviceTokens         DeviceToken[]
   posts                Post[]
+  updatedPosts         Post[]            @relation("PostUpdatedBy")
   comments             Comment[]
-  postLikes            PostLike[] // Added relation
-  postSaves            PostSave[] // Added relation
+  updatedComments      Comment[]         @relation("CommentUpdatedBy")
+  postLikes            PostLike[]
+  postSaves            PostSave[]
 }
 
 model City {
@@ -197,8 +199,6 @@ model Post {
   images    String[]
   latitude  Float? // Added latitude field
   longitude Float? // Added longitude field
-  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId  String
   group     Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId   String?
   comments  Comment[]
@@ -206,21 +206,23 @@ model Post {
   saves     PostSave[] // Added relation to PostSave
 
   // Base model fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isActive  Boolean  @default(true)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("PostUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
 
-  @@index([authorId])
+  @@index([createdById])
   @@index([groupId])
 }
 
 model Comment {
-  id       String @id @default(uuid())
-  content  String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId String
-  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId   String
+  id      String @id @default(uuid())
+  content String
+  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  String
 
   // Parent-child relationship for comment replies
   parentId String?
@@ -228,11 +230,15 @@ model Comment {
   replies  Comment[] @relation("CommentReplies")
 
   // Base model fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isActive  Boolean  @default(true)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("CommentUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
 
-  @@index([authorId])
+  @@index([createdById])
   @@index([postId])
   @@index([parentId])
 }

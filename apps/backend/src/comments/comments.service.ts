@@ -18,17 +18,19 @@ export class CommentsService {
     return {
       id: prismaComment.id,
       content: prismaComment.content,
-      author: prismaComment.author,
-      authorId: prismaComment.authorId,
       post: prismaComment.post,
       postId: prismaComment.postId,
       parentId: prismaComment.parentId,
       parent: prismaComment.parent,
       replies: prismaComment.replies,
+      createdBy: prismaComment.createdBy,
+      createdById: prismaComment.createdById,
+      updatedBy: prismaComment.updatedBy,
+      updatedById: prismaComment.updatedById,
       createdAt: prismaComment.createdAt,
       updatedAt: prismaComment.updatedAt,
       isActive: prismaComment.isActive,
-    };
+    } as Comment;
   }
 
   async findAll(postId: string): Promise<Comment[]> {
@@ -40,11 +42,15 @@ export class CommentsService {
           parentId: null, // Only fetch top-level comments
         },
         include: {
-          author: true,
+          createdBy: true,
+          updatedBy: true,
           post: true,
           replies: {
             where: { isActive: true },
-            include: { author: true },
+            include: {
+              createdBy: true,
+              updatedBy: true,
+            },
             orderBy: { createdAt: 'asc' },
           },
         },
@@ -61,14 +67,21 @@ export class CommentsService {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
       include: {
-        author: true,
+        createdBy: true,
+        updatedBy: true,
         post: true,
         parent: {
-          include: { author: true },
+          include: {
+            createdBy: true,
+            updatedBy: true,
+          },
         },
         replies: {
           where: { isActive: true },
-          include: { author: true },
+          include: {
+            createdBy: true,
+            updatedBy: true,
+          },
           orderBy: { createdAt: 'asc' },
         },
       },
@@ -140,11 +153,13 @@ export class CommentsService {
       data: {
         content: createCommentInput.content,
         postId: createCommentInput.postId,
-        authorId: userId,
+        createdById: userId,
+        updatedById: userId,
         parentId: createCommentInput.parentId,
       },
       include: {
-        author: true,
+        createdBy: true,
+        updatedBy: true,
         post: true,
         parent: true,
         replies: true,
@@ -161,6 +176,7 @@ export class CommentsService {
     const comment = await this.prisma.comment.findUnique({
       where: { id: updateCommentInput.id },
       include: {
+        createdBy: true,
         post: {
           include: {
             group: {
@@ -184,14 +200,14 @@ export class CommentsService {
       );
     }
 
-    // Check if user is the author or an admin of the group (if post has a group)
-    const isAuthor = comment.authorId === userId;
+    // Check if user is the creator or an admin of the group (if post has a group)
+    const isCreator = comment.createdById === userId;
     const isGroupAdmin =
       comment.post.group?.memberships?.some(
         (membership) => membership.role === 'ADMIN',
       ) || false;
 
-    if (!isAuthor && !isGroupAdmin) {
+    if (!isCreator && !isGroupAdmin) {
       throw new ForbiddenException(
         'You do not have permission to update this comment',
       );
@@ -201,10 +217,11 @@ export class CommentsService {
       where: { id: updateCommentInput.id },
       data: {
         ...updateCommentInput,
-        updatedAt: new Date(),
+        updatedById: userId,
       },
       include: {
-        author: true,
+        createdBy: true,
+        updatedBy: true,
         post: true,
         parent: true,
         replies: true,
@@ -218,6 +235,7 @@ export class CommentsService {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
       include: {
+        createdBy: true,
         post: {
           include: {
             group: {
@@ -239,14 +257,14 @@ export class CommentsService {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }
 
-    // Check if user is the author or an admin of the group (if post has a group)
-    const isAuthor = comment.authorId === userId;
+    // Check if user is the creator or an admin of the group (if post has a group)
+    const isCreator = comment.createdById === userId;
     const isGroupAdmin =
       comment.post.group?.memberships?.some(
         (membership) => membership.role === GroupMemberRole.ADMIN,
       ) || false;
 
-    if (!isAuthor && !isGroupAdmin) {
+    if (!isCreator && !isGroupAdmin) {
       throw new ForbiddenException(
         'You do not have permission to delete this comment',
       );
@@ -254,9 +272,10 @@ export class CommentsService {
 
     const deletedComment = await this.prisma.comment.update({
       where: { id },
-      data: { isActive: false, updatedAt: new Date() },
+      data: { isActive: false, updatedById: userId },
       include: {
-        author: true,
+        createdBy: true,
+        updatedBy: true,
         post: true,
         parent: true,
         replies: true,

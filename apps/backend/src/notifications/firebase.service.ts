@@ -29,7 +29,7 @@ export class FirebaseService implements OnModuleInit {
           return;
         }
 
-        let parsedServiceAccount: object;
+        let parsedServiceAccount: Record<string, unknown>;
         try {
           parsedServiceAccount = JSON.parse(serviceAccount);
         } catch (error) {
@@ -122,7 +122,7 @@ export class FirebaseService implements OnModuleInit {
         title,
         body,
       },
-      data,
+      data: { ...data },
       tokens,
     };
 

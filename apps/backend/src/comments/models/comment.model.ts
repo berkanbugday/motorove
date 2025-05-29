@@ -1,5 +1,4 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { User } from '../../auth/models/user.model';
 import { Post } from '../../posts/models/post.model';
 import { BaseModel } from '../../core/models/base.model';
 
@@ -7,12 +6,6 @@ import { BaseModel } from '../../core/models/base.model';
 export class Comment extends BaseModel {
   @Field()
   content: string;
-
-  @Field(() => User)
-  author: Partial<User>;
-
-  @Field()
-  authorId: string;
 
   @Field(() => Post)
   post: Partial<Post>;

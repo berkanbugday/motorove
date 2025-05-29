@@ -6,19 +6,26 @@ import {
   ID,
   ResolveField,
   Parent,
+  Context,
 } from '@nestjs/graphql';
 import { PostsService } from './posts.service';
 import { Post } from './models/post.model';
 import { CreatePostInput } from './dto/create-post.input';
 import { UpdatePostInput } from './dto/update-post.input';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { User } from '../auth/models/user.model';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Comment } from '../comments/models/comment.model';
 import { CommentsService } from '../comments/comments.service';
 import { PostLike } from './models/post-like.model';
 import { PostSave } from './models/post-save.model';
+import { Request } from 'express';
+
+interface GqlContext {
+  req: Request & {
+    user: { id: string };
+    headers: { authorization?: string };
+  };
+}
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -31,82 +38,107 @@ export class PostsResolver {
   @Query(() => [Post], { name: 'posts' })
   findAll(
     @Args('groupId', { type: () => ID }) groupId: string,
-    @CurrentUser() user: User,
-    @Args('authorId', { type: () => ID, nullable: true }) authorId?: string,
+    @Context() context: GqlContext,
+    @Args('createdById', { type: () => ID, nullable: true })
+    createdById?: string,
   ) {
-    return this.postsService.findAll(groupId, authorId, user.id);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.postsService.findAll(groupId, createdById, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Query(() => Post, { name: 'post' })
   findOne(
     @Args('id', { type: () => ID }) id: string,
-    @CurrentUser() user: User,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.findOne(id, user.id);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.postsService.findOne(id, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => Post)
   createPost(
-    @CurrentUser() user: User,
     @Args('createPostInput') createPostInput: CreatePostInput,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.create(user.id, createPostInput);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.postsService.create(userId, createPostInput, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => Post)
   updatePost(
-    @CurrentUser() user: User,
     @Args('updatePostInput') updatePostInput: UpdatePostInput,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.update(user.id, updatePostInput);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.postsService.update(userId, updatePostInput, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => Post)
   removePost(
-    @CurrentUser() user: User,
     @Args('id', { type: () => ID }) id: string,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.remove(user.id, id);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return this.postsService.remove(userId, id, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => PostLike)
   likePost(
-    @CurrentUser() user: User,
     @Args('postId', { type: () => ID }) postId: string,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.likePost(user.id, postId);
+    const userId = context.req.user.id;
+    return this.postsService.likePost(userId, postId);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => ID)
   unlikePost(
-    @CurrentUser() user: User,
     @Args('postId', { type: () => ID }) postId: string,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.unlikePost(user.id, postId);
+    const userId = context.req.user.id;
+    return this.postsService.unlikePost(userId, postId);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => PostSave)
   savePost(
-    @CurrentUser() user: User,
     @Args('postId', { type: () => ID }) postId: string,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.savePost(user.id, postId);
+    const userId = context.req.user.id;
+    return this.postsService.savePost(userId, postId);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => ID)
   unsavePost(
-    @CurrentUser() user: User,
     @Args('postId', { type: () => ID }) postId: string,
+    @Context() context: GqlContext,
   ) {
-    return this.postsService.unsavePost(user.id, postId);
+    const userId = context.req.user.id;
+    return this.postsService.unsavePost(userId, postId);
   }
 
   @ResolveField('comments', () => [Comment])
