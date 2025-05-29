@@ -7,25 +7,25 @@ export class User {
   @Field(() => ID)
   id: string;
 
-  @Field()
+  @Field(() => String)
   email: string;
 
-  @Field({ nullable: true })
-  firstName?: string;
+  @Field(() => String, { nullable: true })
+  firstName: string | null;
 
-  @Field({ nullable: true })
-  lastName?: string;
+  @Field(() => String, { nullable: true })
+  lastName: string | null;
 
-  @Field({ nullable: true })
-  avatar?: string;
+  @Field(() => String, { nullable: true })
+  avatar: string | null;
 
-  @Field()
+  @Field(() => String)
   supabaseId: string;
 
-  @Field()
+  @Field(() => Date)
   createdAt: Date;
 
-  @Field()
+  @Field(() => Date)
   updatedAt: Date;
 
   @Field(() => [Group], { nullable: true })
@@ -34,6 +34,6 @@ export class User {
   @Field(() => [GroupMembership], { nullable: true })
   groupMemberships?: GroupMembership[];
 
-  @Field()
+  @Field(() => Boolean)
   isActive: boolean;
 }

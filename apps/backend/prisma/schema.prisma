@@ -80,6 +80,10 @@ model User {
   createdNotifications Notification[]    @relation("NotificationCreatedBy")
   updatedNotifications Notification[]    @relation("NotificationUpdatedBy")
   deviceTokens         DeviceToken[]
+  posts                Post[]
+  comments             Comment[]
+  postLikes            PostLike[] // Added relation
+  postSaves            PostSave[] // Added relation
 }
 
 model City {
@@ -122,6 +126,7 @@ model Group {
 
   // Relations
   memberships GroupMembership[]
+  posts       Post[]
 }
 
 model GroupMembership {
@@ -184,4 +189,78 @@ model DeviceToken {
   @@id([token, userId])
   @@index([userId])
   @@index([isActive])
+}
+
+model Post {
+  id        String     @id @default(uuid())
+  content   String
+  images    String[]
+  latitude  Float? // Added latitude field
+  longitude Float? // Added longitude field
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  group     Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String?
+  comments  Comment[]
+  likes     PostLike[] // Added relation to PostLike
+  saves     PostSave[] // Added relation to PostSave
+
+  // Base model fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  @@index([authorId])
+  @@index([groupId])
+}
+
+model Comment {
+  id       String @id @default(uuid())
+  content  String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   String
+
+  // Parent-child relationship for comment replies
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies  Comment[] @relation("CommentReplies")
+
+  // Base model fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  @@index([authorId])
+  @@index([postId])
+  @@index([parentId])
+}
+
+// New model for post likes
+model PostLike {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+// New model for post saves
+model PostSave {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }

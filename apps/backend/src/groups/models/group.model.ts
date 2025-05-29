@@ -7,17 +7,17 @@ import { GroupTag } from '../../group-tags/models/group-tag.model';
 
 @ObjectType()
 export class Group extends BaseModel {
-  @Field()
+  @Field(() => String)
   name: string;
 
-  @Field()
+  @Field(() => String)
   description: string;
 
-  @Field({ nullable: true })
-  logo?: string;
+  @Field(() => String, { nullable: true })
+  logo: string | null;
 
-  @Field({ nullable: true })
-  cover?: string;
+  @Field(() => String, { nullable: true })
+  cover: string | null;
 
   @Field(() => City)
   city: City;
@@ -29,7 +29,7 @@ export class Group extends BaseModel {
   tags: GroupTag[];
 
   @Field(() => Int, { nullable: true })
-  membersCapacity?: number;
+  membersCapacity: number | null;
 
   @Field(() => [GroupMembership])
   memberships: GroupMembership[];

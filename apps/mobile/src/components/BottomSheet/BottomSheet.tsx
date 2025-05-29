@@ -31,6 +31,7 @@ import {spacing} from '@theme/spacing';
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 const SNAP_POINTS = {
   CLOSED: 0,
+  MINIMAL: SCREEN_HEIGHT * 0.25,
   PARTIAL: SCREEN_HEIGHT * 0.5,
   FULL: SCREEN_HEIGHT * 0.9,
 };
@@ -39,7 +40,7 @@ const CLOSE_THRESHOLD = SNAP_POINTS.PARTIAL * 0.3;
 
 export interface BottomSheetProps {
   children: React.ReactNode;
-  initialSnap?: 'closed' | 'partial' | 'full';
+  initialSnap?: 'closed' | 'minimal' | 'partial' | 'full';
   onClose?: () => void;
   containerStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
@@ -72,7 +73,7 @@ export interface BottomSheetProps {
 }
 
 export interface BottomSheetRef {
-  open: (snapPoint?: 'partial' | 'full') => void;
+  open: (snapPoint?: 'minimal' | 'partial' | 'full') => void;
   close: () => void;
 }
 
@@ -117,7 +118,7 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
     const [contentHeight, setContentHeight] = useState(0);
     // State to track current sheet position (for adapting content height to available space)
     const [currentSnapPoint, setCurrentSnapPoint] = useState<
-      'partial' | 'full' | 'closed'
+      'minimal' | 'partial' | 'full' | 'closed'
     >(initialSnap !== 'closed' ? initialSnap : 'closed');
 
     // Initialize with the appropriate snap point
@@ -154,11 +155,24 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
     }, [translateY, backdropOpacity, active, onClose]);
 
     const handleOpen = useCallback(
-      (snapPoint: 'partial' | 'full' = 'partial') => {
+      (snapPoint: 'minimal' | 'partial' | 'full' = 'partial') => {
         setIsVisible(true);
         setCurrentSnapPoint(snapPoint);
-        const snapTo =
-          snapPoint === 'full' ? SNAP_POINTS.FULL : SNAP_POINTS.PARTIAL;
+        let snapTo;
+
+        switch (snapPoint) {
+          case 'minimal':
+            snapTo = SNAP_POINTS.MINIMAL;
+            break;
+          case 'full':
+            snapTo = SNAP_POINTS.FULL;
+            break;
+          case 'partial':
+          default:
+            snapTo = SNAP_POINTS.PARTIAL;
+            break;
+        }
+
         translateY.value = withSpring(SCREEN_HEIGHT - snapTo);
         backdropOpacity.value = withTiming(backDropOpacity);
         active.value = true;
@@ -192,17 +206,20 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
 
       // Calculate height based on content and current snap point
       if (contentHeight > 0) {
-        if (currentSnapPoint === 'full') {
-          // When fully open, allow more content to be visible
-          const maxHeight = Math.min(contentHeight + 20, SNAP_POINTS.FULL - 50);
-          return {maxHeight};
-        } else if (currentSnapPoint === 'partial') {
-          // When partially open, limit content height to fit in the partial view
-          const maxHeight = Math.min(
-            contentHeight + 20,
-            SNAP_POINTS.PARTIAL - 50,
-          );
-          return {maxHeight};
+        switch (currentSnapPoint) {
+          case 'full':
+            return {
+              maxHeight: Math.min(contentHeight + 20, SNAP_POINTS.FULL - 50),
+            };
+          case 'minimal':
+            return {
+              maxHeight: Math.min(contentHeight + 20, SNAP_POINTS.MINIMAL - 50),
+            };
+          case 'partial':
+          default:
+            return {
+              maxHeight: Math.min(contentHeight + 20, SNAP_POINTS.PARTIAL - 50),
+            };
         }
       }
 
@@ -211,6 +228,8 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
         maxHeight:
           currentSnapPoint === 'full'
             ? SNAP_POINTS.FULL - 50
+            : currentSnapPoint === 'minimal'
+            ? SNAP_POINTS.MINIMAL - 50
             : SNAP_POINTS.PARTIAL - 50,
       };
     }, [contentHeight, currentSnapPoint, maxContentHeight]);
@@ -291,17 +310,30 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
         }
 
         // Snap to closest point or close
-        // Close if dragged below 30% of PARTIAL height
+        // Close if dragged below 30% of MINIMAL height
         if (currentPosition < CLOSE_THRESHOLD) {
           runOnJS(handleClose)();
-        } else if (
+        }
+        // Minimal
+        else if (
+          currentPosition <
+          (SNAP_POINTS.MINIMAL + SNAP_POINTS.PARTIAL) / 2
+        ) {
+          translateY.value = withSpring(SCREEN_HEIGHT - SNAP_POINTS.MINIMAL);
+          backdropOpacity.value = withTiming(backDropOpacity);
+          runOnJS(setCurrentSnapPoint)('minimal');
+        }
+        // Partial
+        else if (
           currentPosition <
           (SNAP_POINTS.PARTIAL + SNAP_POINTS.FULL) / 2
         ) {
           translateY.value = withSpring(SCREEN_HEIGHT - SNAP_POINTS.PARTIAL);
           backdropOpacity.value = withTiming(backDropOpacity);
           runOnJS(setCurrentSnapPoint)('partial');
-        } else {
+        }
+        // Full
+        else {
           translateY.value = withSpring(SCREEN_HEIGHT - SNAP_POINTS.FULL);
           backdropOpacity.value = withTiming(backDropOpacity);
           runOnJS(setCurrentSnapPoint)('full');

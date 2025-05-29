@@ -62,11 +62,11 @@ export class AuthService {
       return {
         user: {
           ...user,
-          firstName: user.firstName || undefined,
-          lastName: user.lastName || undefined,
-          avatar: user.avatar || undefined,
+          firstName: user.firstName || null,
+          lastName: user.lastName || null,
+          avatar: user.avatar || null,
         },
-        session: data.session || undefined,
+        session: data.session || null,
       };
     } catch (error) {
       if (
@@ -102,11 +102,11 @@ export class AuthService {
     return {
       user: {
         ...user,
-        firstName: user.firstName || undefined,
-        lastName: user.lastName || undefined,
-        avatar: user.avatar || undefined,
+        firstName: user.firstName || null,
+        lastName: user.lastName || null,
+        avatar: user.avatar || null,
       },
-      session: data.session || undefined,
+      session: data.session || null,
     };
   }
 
@@ -156,11 +156,11 @@ export class AuthService {
       return {
         user: {
           ...user,
-          firstName: user.firstName || undefined,
-          lastName: user.lastName || undefined,
-          avatar: user.avatar || undefined,
+          firstName: user.firstName || null,
+          lastName: user.lastName || null,
+          avatar: user.avatar || null,
         },
-        session: data.session || undefined,
+        session: data.session || null,
       };
     } catch (error: unknown) {
       let errorMessage = 'Token refresh failed';
@@ -207,9 +207,9 @@ export class AuthService {
 
     return {
       ...user,
-      firstName: user.firstName || undefined,
-      lastName: user.lastName || undefined,
-      avatar: user.avatar || undefined,
+      firstName: user.firstName || null,
+      lastName: user.lastName || null,
+      avatar: user.avatar || null,
     };
   }
 }

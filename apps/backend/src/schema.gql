@@ -28,6 +28,27 @@ input CityInput {
   value: String!
 }
 
+type Comment {
+  author: User!
+  authorId: String!
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  isActive: Boolean!
+  parent: Comment
+  parentId: ID
+  post: Post!
+  postId: String!
+  replies: [Comment!]
+  updatedAt: DateTime!
+}
+
+input CreateCommentInput {
+  content: String!
+  parentId: ID
+  postId: String!
+}
+
 input CreateGroupInput {
   city: CityInput!
   cover: String
@@ -45,6 +66,14 @@ input CreateNotificationInput {
   title: String!
   type: NotificationType!
   userId: String!
+}
+
+input CreatePostInput {
+  content: String!
+  groupId: String
+  images: [String!]
+  latitude: Float
+  longitude: Float
 }
 
 """
@@ -140,21 +169,31 @@ input GroupTagInput {
 type Mutation {
   addGroupMember(addGroupMemberInput: AddGroupMemberInput!): GroupMembership!
   changeMemberRole(changeMemberRoleInput: ChangeMemberRoleInput!): GroupMembership!
+  createComment(createCommentInput: CreateCommentInput!): Comment!
   createGroup(createGroupInput: CreateGroupInput!): Group!
   createNotification(createNotificationInput: CreateNotificationInput!): Notification!
+  createPost(createPostInput: CreatePostInput!): Post!
   deleteAllNotifications: Boolean!
   deleteNotification(id: ID!): Notification!
+  likePost(postId: ID!): PostLike!
   markAllNotificationsAsRead(userId: String!): [Notification!]!
   markNotificationAsRead(id: ID!): Notification!
   refreshToken(token: String!): AuthResponse!
+  removeComment(id: ID!): Comment!
   removeDeviceToken(token: String!, userId: String!): Boolean!
   removeGroupMember(removeGroupMemberInput: RemoveGroupMemberInput!): GroupMembership!
+  removePost(id: ID!): Post!
   saveDeviceToken(deviceTokenInput: DeviceTokenInput!): Boolean!
+  savePost(postId: ID!): PostSave!
   sendBulkNotifications(sendBulkNotificationInput: SendBulkNotificationInput!): Boolean!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
+  unlikePost(postId: ID!): ID!
+  unsavePost(postId: ID!): ID!
+  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
   updateGroup(updateGroupInput: UpdateGroupInput!): Group!
   updateMembershipStatus(updateMembershipStatusInput: UpdateMembershipStatusInput!): GroupMembership!
+  updatePost(updatePostInput: UpdatePostInput!): Post!
 }
 
 type Notification {
@@ -206,9 +245,49 @@ enum NotificationType {
   SYSTEM
 }
 
+type Post {
+  author: User!
+  authorId: String!
+  comments: [Comment!]!
+  content: String!
+  createdAt: DateTime!
+  group: Group
+  groupId: String
+  id: ID!
+  images: [String!]
+  isActive: Boolean!
+  isLiked: Boolean!
+  isSaved: Boolean!
+  latitude: Float
+  likesCount: Int!
+  longitude: Float
+  savesCount: Int!
+  updatedAt: DateTime!
+}
+
+type PostLike {
+  createdAt: DateTime!
+  id: ID!
+  post: Post!
+  postId: String!
+  user: User!
+  userId: String!
+}
+
+type PostSave {
+  createdAt: DateTime!
+  id: ID!
+  post: Post!
+  postId: String!
+  user: User!
+  userId: String!
+}
+
 type Query {
   cities: [City!]!
   city(id: ID!): City
+  comment(id: ID!): Comment!
+  comments(postId: ID!): [Comment!]!
   createdGroups: [Group!]!
   getGroupMemberRoles: [EnumItem!]!
   getGroupMembershipStatuses: [EnumItem!]!
@@ -225,6 +304,8 @@ type Query {
   myGroupMemberships: [GroupMembership!]!
   notifications(limit: Int, skip: Int): [Notification!]!
   notificationsCount(onlyUnread: Boolean = true): Float!
+  post(id: ID!): Post!
+  posts(authorId: ID, groupId: ID!): [Post!]!
 }
 
 input RemoveGroupMemberInput {
@@ -258,6 +339,11 @@ input SignUpInput {
   password: String!
 }
 
+input UpdateCommentInput {
+  content: String
+  id: ID!
+}
+
 input UpdateGroupInput {
   city: CityInput
   cover: String
@@ -274,6 +360,15 @@ input UpdateMembershipStatusInput {
   groupId: String!
   status: GroupMembershipStatus!
   userId: String!
+}
+
+input UpdatePostInput {
+  content: String
+  groupId: String
+  id: ID!
+  images: [String!]
+  latitude: Float
+  longitude: Float
 }
 
 type User {

@@ -19,5 +19,5 @@ export class AuthResponse {
   user: User;
 
   @Field(() => Session, { nullable: true })
-  session?: Session;
+  session: Session | null;
 }

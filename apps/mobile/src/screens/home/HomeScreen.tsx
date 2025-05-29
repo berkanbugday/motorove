@@ -36,6 +36,10 @@ import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts';
 import {useGetNotificationsCount} from '@services/notification.service';
 import {useFocusEffect} from '@react-navigation/native';
+import {
+  closeBottomSheet,
+  useBottomSheet,
+} from '@components/BottomSheet/BottomSheetProvider';
 
 // Route data
 const recommendedRoutes = [
@@ -208,6 +212,7 @@ export const HomeScreen = ({navigation}: Props) => {
     useGetNotificationsCount();
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
+  const {openBottomSheet} = useBottomSheet();
 
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
@@ -510,6 +515,43 @@ export const HomeScreen = ({navigation}: Props) => {
     [],
   );
 
+  // Handle showing create options bottom sheet
+  const handleShowCreateOptions = useCallback(() => {
+    openBottomSheet({
+      title: 'Create',
+      closeButtonPosition: 'top-left',
+      enableGestureControl: false,
+      content: (
+        <View style={styles.createOptionsContainer}>
+          <Button
+            title="Create Post"
+            iconName="pen"
+            iconPosition="left"
+            variant="text"
+            onPress={() => {
+              navigateToScreen(navigation, 'CreatePost');
+              closeBottomSheet();
+            }}
+            style={styles.createOptionButton}
+          />
+          <View style={styles.divider} />
+          <Button
+            title="Create Event"
+            iconName="calendar"
+            iconPosition="left"
+            variant="text"
+            onPress={() => {
+              navigateToScreen(navigation, 'CreateEvent');
+              closeBottomSheet();
+            }}
+            style={styles.createOptionButton}
+          />
+        </View>
+      ),
+      snapPoint: 'minimal',
+    });
+  }, [navigation, openBottomSheet]);
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -519,7 +561,7 @@ export const HomeScreen = ({navigation}: Props) => {
         subtitleStyle={styles.subtitle}
         rightIconName="plus"
         containerStyle={styles.topHeaderBar}
-        onRightButtonPress={() => navigateToScreen(navigation, 'CreatePost')}
+        onRightButtonPress={handleShowCreateOptions}
         secondRightIconName={notificationsCount > 0 ? 'bell-filled' : 'bell'}
         secondRightIconBadgeCount={notificationsCount || 0}
         onSecondRightButtonPress={() =>
@@ -699,5 +741,20 @@ const styles = StyleSheet.create({
   },
   postSeparator: {
     height: spacing.md,
+  },
+  createOptionsContainer: {
+    alignItems: 'center',
+    paddingBottom: spacing.xl,
+  },
+  createOptionButton: {
+    justifyContent: 'flex-start',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.secondary.main,
+    width: '100%',
+    alignSelf: 'center',
   },
 });

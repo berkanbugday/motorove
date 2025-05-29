@@ -17,6 +17,8 @@ import { CitiesModule } from './cities/cities.module';
 import { GroupTagsModule } from './group-tags/group-tags.module';
 import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter';
 import { NotificationsModule } from './notifications/notifications.module';
+import { PostsModule } from './posts/posts.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     CitiesModule,
     GroupTagsModule,
     NotificationsModule,
+    PostsModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [
