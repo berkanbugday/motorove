@@ -13,7 +13,7 @@ export type BottomSheetContentType = ReactNode;
 
 export interface BottomSheetConfig {
   content: BottomSheetContentType;
-  snapPoint?: 'closed' | 'minimal' | 'partial' | 'full';
+  snapPoint?: 'minimal' | 'partial' | 'full';
   onClose?: () => void;
   containerStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;

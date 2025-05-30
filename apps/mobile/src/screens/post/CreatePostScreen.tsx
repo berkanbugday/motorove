@@ -10,6 +10,7 @@ import {
   ImageStyle,
   TextStyle,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {colors} from '../../theme/colors';
@@ -26,13 +27,17 @@ import {
   Dropdown,
   Subtitle,
   PostLocationMap,
+  Body,
 } from '@components';
+import {GroupCard} from '@components/GroupCard';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {postService} from '@services/post.service';
 import {CreatePostInput} from '../../types/models/post.model';
 import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
+import {useGetJoinedGroups} from '@services/group.service';
+import {LegendList} from '@legendapp/list';
 
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
@@ -49,6 +54,19 @@ export const CreatePostScreen = () => {
     longitude?: number;
     address?: string;
   }>({});
+  const [selectedGroup, setSelectedGroup] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  // Fetch joined groups using the hook
+  const {
+    groups: joinedGroups,
+    loading: loadingGroups,
+    error: groupsError,
+    refetch: refetchJoinedGroups,
+  } = useGetJoinedGroups();
+
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -56,46 +74,78 @@ export const CreatePostScreen = () => {
     navigation.goBack();
   };
 
-  const handlePost = async () => {
-    if (!postText.trim()) {
-      Alert.alert('Error', 'Please enter some content for your post');
-      return;
+  const handlePrivacyChange = (item: DropdownItem | null) => {
+    setSelectedPrivacy(item);
+
+    // If group is selected, open the group selection bottom sheet
+    if (item?.value === 'group') {
+      openGroupSelectionBottomSheet();
+    } else {
+      // If other privacy option is selected, clear the selected group
+      setSelectedGroup(null);
     }
+  };
 
-    try {
-      setIsLoading(true);
-
-      // Prepare images array - in a real app, you would upload these images to a server
-      // and get back URLs to store in the post
-      const imageUrls = selectedImages.map(img => img.uri);
-
-      // Create post input data
-      const createPostInput: CreatePostInput = {
-        content: postText.trim(),
-        images: imageUrls.length > 0 ? imageUrls : undefined,
-        ...(location.latitude && location.longitude
-          ? {
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }
-          : {}),
-        ...(selectedPrivacy?.value === 'group'
-          ? {groupId: 'your-group-id'} // In a real app, get this from the selected group
-          : {}),
-      };
-
-      // Call the post service to create the post
-      await postService.createPost(createPostInput);
-
-      // Success - go back to previous screen
-      Alert.alert('Success', 'Post created successfully');
-      navigation.goBack();
-    } catch (error) {
-      loggingService.error('Error creating post:', error);
-      Alert.alert('Error', 'Failed to create post. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+  const openGroupSelectionBottomSheet = () => {
+    openBottomSheet({
+      title: 'Select Group',
+      closeButtonPosition: 'top-left',
+      content: (
+        <>
+          {loadingGroups ? (
+            <ActivityIndicator size="large" color={colors.primary.main} />
+          ) : groupsError ? (
+            <View style={styles.errorContainer}>
+              <Icon name="error" size={24} color={colors.status.error} />
+              <Body>Failed to load groups. Please try again.</Body>
+              <Button
+                title="Retry"
+                variant="primary"
+                onPress={() => refetchJoinedGroups()}
+                size="small"
+              />
+            </View>
+          ) : joinedGroups.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Icon name="users" size={24} color={colors.neutral.grey} />
+              <Body>You haven't joined any groups yet</Body>
+            </View>
+          ) : (
+            <LegendList
+              data={joinedGroups}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => (
+                <GroupCard
+                  logoSource={item.logo ? {uri: item.logo} : null}
+                  name={item.name}
+                  location={item.city?.value}
+                  tags={item.tags?.map(tag => tag.value) || []}
+                  currentMembers={item.memberships?.length || 0}
+                  membersCapacity={item.membersCapacity || undefined}
+                  privacy={item.privacy}
+                  isMember={true}
+                  onPress={() => {
+                    setSelectedGroup({id: item.id, name: item.name});
+                    closeBottomSheet();
+                  }}
+                />
+              )}
+              contentContainerStyle={styles.groupListContainer}
+              showsVerticalScrollIndicator={false}
+              recycleItems={true}
+              maintainVisibleContentPosition={true}
+            />
+          )}
+        </>
+      ),
+      snapPoint: 'full',
+      onClose: () => {
+        // If no group was selected but privacy is set to group, reset privacy
+        if (selectedPrivacy?.value === 'group' && !selectedGroup) {
+          setSelectedPrivacy(null);
+        }
+      },
+    });
   };
 
   const handleSelectImage = async () => {
@@ -147,6 +197,48 @@ export const CreatePostScreen = () => {
     });
   };
 
+  const handlePost = async () => {
+    if (!postText.trim()) {
+      Alert.alert('Error', 'Please enter some content for your post');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Prepare images array - in a real app, you would upload these images to a server
+      // and get back URLs to store in the post
+      const imageUrls = selectedImages.map(img => img.uri);
+
+      // Create post input data
+      const createPostInput: CreatePostInput = {
+        content: postText.trim(),
+        images: imageUrls.length > 0 ? imageUrls : undefined,
+        ...(location.latitude && location.longitude
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }
+          : {}),
+        ...(selectedPrivacy?.value === 'group' && selectedGroup
+          ? {groupId: selectedGroup.id}
+          : {}),
+      };
+
+      // Call the post service to create the post
+      await postService.createPost(createPostInput);
+
+      // Success - go back to previous screen
+      Alert.alert('Success', 'Post created successfully');
+      navigation.goBack();
+    } catch (error) {
+      loggingService.error('Error creating post:', error);
+      Alert.alert('Error', 'Failed to create post. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -174,20 +266,21 @@ export const CreatePostScreen = () => {
                   {id: 2, label: 'Group', value: 'group'},
                 ]}
                 placeholder="Select privacy"
-                onSelect={item => setSelectedPrivacy(item)}
+                onSelect={handlePrivacyChange}
                 searchable={false}
                 selectedItem={selectedPrivacy}
                 containerStyle={styles.privacySelector}
                 inputStyle={styles.privacyInput}
               />
 
-              {selectedPrivacy?.value === 'group' && (
+              {selectedPrivacy?.value === 'group' && selectedGroup && (
                 <Chip
-                  label="IMG Motorcycle Group"
+                  label={selectedGroup.name}
                   leadingIcon="users-filled"
                   size="small"
                   variant="filled"
                   color="secondary"
+                  onPress={openGroupSelectionBottomSheet}
                 />
               )}
             </View>
@@ -274,7 +367,11 @@ export const CreatePostScreen = () => {
             onPress={handlePost}
             title="Post"
             loading={isLoading}
-            disabled={isLoading || !postText.trim()}
+            disabled={
+              isLoading ||
+              !postText.trim() ||
+              (selectedPrivacy?.value === 'group' && !selectedGroup)
+            }
           />
         </View>
       </SafeAreaView>
@@ -375,5 +472,20 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.light,
+  },
+  groupListContainer: {
+    paddingBottom: spacing.lg,
+  },
+  errorContainer: {
+    padding: spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+  },
+  emptyContainer: {
+    padding: spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
   },
 });
