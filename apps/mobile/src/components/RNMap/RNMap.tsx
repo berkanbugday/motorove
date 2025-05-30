@@ -531,7 +531,7 @@ export const RNMap: React.FC<RNMapProps> = ({
           )}
 
           {/* Load marker button with animation */}
-          {isShowLoadMarkerButton && (
+          {isShowLoadMarkerButton && showLoadMarkerButton && (
             <Animated.View
               style={{
                 transform: [{translateY: loadButtonTranslate}],

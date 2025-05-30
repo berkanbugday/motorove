@@ -12,15 +12,75 @@ export type PostContentType = 'text' | 'image' | 'video' | 'poll' | 'link';
  */
 export interface Post {
   id: string;
-  userId: string;
-  title?: string;
   content: string;
-  contentType: PostContentType;
-  likes: number;
-  comments: number;
+  images?: string[];
+  latitude?: number | null;
+  longitude?: number | null;
+  groupId?: string;
+  group?: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+  comments?: Comment[];
+  likesCount: number;
+  savesCount: number;
+  commentsCount: number;
+  isLiked: boolean;
+  isSaved: boolean;
   createdAt: string;
   updatedAt: string;
-  isPublished: boolean;
+  createdById: string;
+}
+
+/**
+ * Comment interface
+ */
+export interface Comment {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+}
+
+/**
+ * Post like interface
+ */
+export interface PostLike {
+  id: string;
+  postId: string;
+}
+
+/**
+ * Post save interface
+ */
+export interface PostSave {
+  id: string;
+  postId: string;
+}
+
+/**
+ * Create post input
+ */
+export interface CreatePostInput {
+  content: string;
+  images?: string[];
+  latitude?: number;
+  longitude?: number;
+  groupId?: string;
+}
+
+/**
+ * Update post input
+ */
+export interface UpdatePostInput {
+  id: string;
+  content?: string;
+  images?: string[];
+  latitude?: number;
+  longitude?: number;
+  groupId?: string;
 }
 
 /**

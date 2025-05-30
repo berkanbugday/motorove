@@ -21,7 +21,7 @@ import {
 } from '@components';
 import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
-import {colors, commonStyles, fontSizes, spacing} from '@theme';
+import {colors, commonStyles, fontSizes, rh, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import type {WeatherData} from '@components/WeatherWidget/weather';
 import type {IconName} from '@components/Icon';
@@ -532,7 +532,6 @@ export const HomeScreen = ({navigation}: Props) => {
               navigateToScreen(navigation, 'CreatePost');
               closeBottomSheet();
             }}
-            style={styles.createOptionButton}
           />
           <View style={styles.divider} />
           <Button
@@ -544,7 +543,6 @@ export const HomeScreen = ({navigation}: Props) => {
               navigateToScreen(navigation, 'CreateEvent');
               closeBottomSheet();
             }}
-            style={styles.createOptionButton}
           />
         </View>
       ),
@@ -743,13 +741,10 @@ const styles = StyleSheet.create({
     height: spacing.md,
   },
   createOptionsContainer: {
-    alignItems: 'center',
-    paddingBottom: spacing.xl,
-  },
-  createOptionButton: {
-    justifyContent: 'flex-start',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
+    flex: 1,
+    flexDirection: 'column',
+    gap: spacing.xs,
+    marginTop: spacing.md,
   },
   divider: {
     height: 1,

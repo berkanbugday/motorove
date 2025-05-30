@@ -31,7 +31,7 @@ import {spacing} from '@theme/spacing';
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 const SNAP_POINTS = {
   CLOSED: 0,
-  MINIMAL: SCREEN_HEIGHT * 0.25,
+  MINIMAL: SCREEN_HEIGHT * 0.3,
   PARTIAL: SCREEN_HEIGHT * 0.5,
   FULL: SCREEN_HEIGHT * 0.9,
 };
@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     width: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.md,
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,

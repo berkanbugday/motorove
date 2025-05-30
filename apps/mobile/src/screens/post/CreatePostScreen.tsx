@@ -19,10 +19,21 @@ import {typography} from '../../theme/typography';
 import {Icon} from '../../components/Icon';
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {useAuth} from '@contexts/AuthContext';
-import {Button, Chip, DropdownItem, Dropdown, Subtitle} from '@components';
+import {
+  Button,
+  Chip,
+  DropdownItem,
+  Dropdown,
+  Subtitle,
+  PostLocationMap,
+} from '@components';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
+import {postService} from '@services/post.service';
+import {CreatePostInput} from '../../types/models/post.model';
+import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
+
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
   const [postText, setPostText] = useState('');
@@ -32,6 +43,12 @@ export const CreatePostScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string}[]
   >([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [location, setLocation] = useState<{
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+  }>({});
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
 
@@ -39,10 +56,46 @@ export const CreatePostScreen = () => {
     navigation.goBack();
   };
 
-  const handlePost = () => {
-    // Implement post functionality
-    loggingService.info('Posting:', {text: postText, images: selectedImages});
-    navigation.goBack();
+  const handlePost = async () => {
+    if (!postText.trim()) {
+      Alert.alert('Error', 'Please enter some content for your post');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Prepare images array - in a real app, you would upload these images to a server
+      // and get back URLs to store in the post
+      const imageUrls = selectedImages.map(img => img.uri);
+
+      // Create post input data
+      const createPostInput: CreatePostInput = {
+        content: postText.trim(),
+        images: imageUrls.length > 0 ? imageUrls : undefined,
+        ...(location.latitude && location.longitude
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+            }
+          : {}),
+        ...(selectedPrivacy?.value === 'group'
+          ? {groupId: 'your-group-id'} // In a real app, get this from the selected group
+          : {}),
+      };
+
+      // Call the post service to create the post
+      await postService.createPost(createPostInput);
+
+      // Success - go back to previous screen
+      Alert.alert('Success', 'Post created successfully');
+      navigation.goBack();
+    } catch (error) {
+      loggingService.error('Error creating post:', error);
+      Alert.alert('Error', 'Failed to create post. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSelectImage = async () => {
@@ -72,6 +125,26 @@ export const CreatePostScreen = () => {
 
   const handleRemoveImage = (id: number) => {
     setSelectedImages(selectedImages.filter(image => image.id !== id));
+  };
+
+  const handleAddLocation = () => {
+    // Open bottom sheet with map
+    openBottomSheet({
+      title: 'Select Location',
+      content: (
+        <PostLocationMap
+          initialLocation={location}
+          onLocationSelect={selectedLocation => {
+            setLocation(selectedLocation);
+            closeBottomSheet();
+          }}
+          onClose={() => closeBottomSheet()}
+        />
+      ),
+      snapPoint: 'full',
+      enableGestureControl: false,
+      closeButtonPosition: 'top-right',
+    });
   };
 
   return (
@@ -161,20 +234,16 @@ export const CreatePostScreen = () => {
 
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
-            {/* <TouchableOpacity style={styles.actionButton}>
-              <Icon name="map-pin" size={20} color={colors.neutral.black} />
-              <Text style={styles.actionButtonText}>Add location</Text>
-            </TouchableOpacity> */}
             <Button
               variant="text"
               iconName="map-pin"
               iconColor={colors.neutral.black}
               iconSize={18}
-              onPress={() => {}}
+              onPress={handleAddLocation}
               textStyle={styles.actionButtonText}
-              title="Add location"
+              title={location.address ? location.address : 'Add location'}
             />
-            <Button
+            {/* <Button
               variant="text"
               iconName="route"
               iconColor={colors.neutral.black}
@@ -192,7 +261,7 @@ export const CreatePostScreen = () => {
               onPress={() => {}}
               textStyle={styles.actionButtonText}
               title="Tag people"
-            />
+            /> */}
           </View>
         </ScrollView>
 
@@ -204,6 +273,8 @@ export const CreatePostScreen = () => {
             shape="round"
             onPress={handlePost}
             title="Post"
+            loading={isLoading}
+            disabled={isLoading || !postText.trim()}
           />
         </View>
       </SafeAreaView>
@@ -248,8 +319,12 @@ const styles = StyleSheet.create({
     ...(typography.body as TextStyle),
     color: colors.neutral.black,
     padding: spacing.md,
-    height: 200,
+    height: 150,
     textAlignVertical: 'top',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors.secondary.light,
+    borderRadius: radius.sm,
   },
   imagesContainer: {
     paddingVertical: spacing.md,
@@ -279,7 +354,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -10,
     right: -10,
-    backgroundColor: colors.primary.main,
+    backgroundColor: colors.primary.light,
     borderRadius: radius.round,
     width: 24,
     height: 24,
