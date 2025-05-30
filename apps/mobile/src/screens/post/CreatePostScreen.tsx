@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   TextInput,
@@ -86,6 +86,16 @@ export const CreatePostScreen = () => {
     }
   };
 
+  useEffect(() => {
+    if (
+      !loadingGroups &&
+      selectedPrivacy?.value === 'group' &&
+      !selectedGroup
+    ) {
+      openGroupSelectionBottomSheet();
+    }
+  }, [loadingGroups, selectedPrivacy, selectedGroup]);
+
   const openGroupSelectionBottomSheet = () => {
     openBottomSheet({
       title: 'Select Group',
@@ -141,9 +151,9 @@ export const CreatePostScreen = () => {
       snapPoint: 'full',
       onClose: () => {
         // If no group was selected but privacy is set to group, reset privacy
-        if (selectedPrivacy?.value === 'group' && !selectedGroup) {
-          setSelectedPrivacy(null);
-        }
+        // if (selectedPrivacy?.value === 'group' && !selectedGroup) {
+        //   setSelectedPrivacy(null);
+        // }
       },
     });
   };
