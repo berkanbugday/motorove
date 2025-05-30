@@ -1,5 +1,4 @@
-import {ApolloError} from '@apollo/client';
-import {apolloClient} from '../configs/apolloClientConfig';
+import {useMutation, useQuery} from '@apollo/client';
 import {
   CREATE_POST,
   GET_POST,
@@ -15,177 +14,383 @@ import {
   Post,
   CreatePostInput,
   UpdatePostInput,
-  PostLike,
-  PostSave,
 } from '../types/models/post.model';
 import {loggingService} from './logging.service';
-import {graphQLErrorService} from './graphql-error.service';
+import {showToast} from '@components';
+import {useState, useCallback} from 'react';
 
-class PostService {
-  /**
-   * Get all posts for a specific group
-   * @param groupId Group ID
-   * @param createdById Optional user ID to filter posts by creator
-   * @returns List of posts
-   */
-  async getPosts(groupId: string, createdById?: string): Promise<Post[]> {
-    try {
-      const {data} = await apolloClient.query({
-        query: GET_POSTS,
-        variables: {groupId, createdById},
-        fetchPolicy: 'network-only',
+// Hook for creating a post
+export const useCreatePost = (onSuccess?: () => void) => {
+  const [createPostMutation, {loading, error}] = useMutation(CREATE_POST, {
+    onCompleted: _data => {
+      showToast({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Post created successfully!',
       });
-      return data.posts;
-    } catch (error) {
-      loggingService.error('Error getting posts:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
-    }
-  }
 
-  /**
-   * Get a single post by ID
-   * @param id Post ID
-   * @returns Post details
-   */
-  async getPost(id: string): Promise<Post> {
-    try {
-      const {data} = await apolloClient.query({
-        query: GET_POST,
-        variables: {id},
-        fetchPolicy: 'network-only',
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error creating post:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to create post. Please try again.',
       });
-      return data.post;
-    } catch (error) {
-      loggingService.error('Error getting post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
-    }
-  }
+    },
+  });
 
-  /**
-   * Create a new post
-   * @param createPostInput Post data
-   * @returns Created post
-   */
-  async createPost(createPostInput: CreatePostInput): Promise<Post> {
+  const createPost = async (input: CreatePostInput) => {
     try {
-      const {data} = await apolloClient.mutate({
-        mutation: CREATE_POST,
-        variables: {createPostInput},
+      const result = await createPostMutation({
+        variables: {input: {...input, images: input.images ?? []}},
       });
-      return data.createPost;
-    } catch (error) {
-      loggingService.error('Error creating post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
+      return result.data?.createPost;
+    } catch (err) {
+      loggingService.error('Error in createPost:', err);
+      // Error is already handled in onError callback
+      return null;
     }
-  }
+  };
 
-  /**
-   * Update an existing post
-   * @param updatePostInput Updated post data
-   * @returns Updated post
-   */
-  async updatePost(updatePostInput: UpdatePostInput): Promise<Post> {
+  return {
+    createPost,
+    loading,
+    error,
+  };
+};
+
+// Hook for updating a post
+export const useUpdatePost = (onSuccess?: () => void) => {
+  const [updatePostMutation, {loading, error}] = useMutation(UPDATE_POST, {
+    onCompleted: _data => {
+      showToast({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Post updated successfully!',
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error updating post:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to update post. Please try again.',
+      });
+    },
+  });
+
+  const updatePost = async (updatePostInput: UpdatePostInput) => {
     try {
-      const {data} = await apolloClient.mutate({
-        mutation: UPDATE_POST,
+      const result = await updatePostMutation({
         variables: {updatePostInput},
       });
-      return data.updatePost;
-    } catch (error) {
-      loggingService.error('Error updating post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
+      return result.data?.updatePost;
+    } catch (err) {
+      loggingService.error('Error in updatePost:', err);
+      // Error is already handled in onError callback
+      return null;
     }
-  }
+  };
 
-  /**
-   * Delete a post
-   * @param id Post ID
-   * @returns Deleted post
-   */
-  async removePost(id: string): Promise<Post> {
+  return {
+    updatePost,
+    loading,
+    error,
+  };
+};
+
+// Hook for removing a post
+export const useRemovePost = (onSuccess?: () => void) => {
+  const [removePostMutation, {loading, error}] = useMutation(REMOVE_POST, {
+    onCompleted: _data => {
+      showToast({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Post removed successfully!',
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error removing post:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to remove post. Please try again.',
+      });
+    },
+  });
+
+  const removePost = async (id: string) => {
     try {
-      const {data} = await apolloClient.mutate({
-        mutation: REMOVE_POST,
+      const result = await removePostMutation({
         variables: {id},
       });
-      return data.removePost;
-    } catch (error) {
-      loggingService.error('Error removing post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
+      return result.data?.removePost;
+    } catch (err) {
+      loggingService.error('Error in removePost:', err);
+      // Error is already handled in onError callback
+      return null;
     }
-  }
+  };
 
-  /**
-   * Like a post
-   * @param postId Post ID
-   * @returns Like details
-   */
-  async likePost(postId: string): Promise<PostLike> {
+  return {
+    removePost,
+    loading,
+    error,
+  };
+};
+
+// Hook for getting a single post
+export const useGetPost = (id: string) => {
+  const {data, loading, error, refetch} = useQuery(GET_POST, {
+    variables: {id},
+    skip: !id,
+    onError: errorObj => {
+      loggingService.error('Error fetching post:', errorObj);
+    },
+  });
+
+  return {
+    post: data?.post as Post | undefined,
+    loading,
+    error,
+    refetch,
+  };
+};
+
+// Hook for getting posts
+export const useGetPosts = (
+  groupId: string,
+  createdById?: string,
+  limit = 20,
+  skip = 0,
+) => {
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(GET_POSTS, {
+    variables: {groupId, createdById, limit, skip},
+    skip: !groupId,
+    onError: errorObj => {
+      loggingService.error('Error fetching posts:', errorObj);
+    },
+  });
+
+  // Wrap the original refetch to reset hasMore state
+  const refetch = useCallback(async () => {
+    setHasMore(true);
+    return await originalRefetch();
+  }, [originalRefetch]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) {
+      return;
+    }
+
     try {
-      const {data} = await apolloClient.mutate({
-        mutation: LIKE_POST,
+      const result = await fetchMore({
+        variables: {
+          groupId,
+          createdById,
+          skip: data?.posts?.length || 0,
+          limit,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) {
+            return prev;
+          }
+
+          return {
+            posts: [...prev.posts, ...fetchMoreResult.posts],
+          };
+        },
+      });
+
+      if (result.data.posts.length < limit) {
+        setHasMore(false);
+      }
+    } catch (errorObj) {
+      loggingService.error('Error loading more posts:', errorObj);
+    }
+  }, [
+    data?.posts?.length,
+    fetchMore,
+    hasMore,
+    limit,
+    loading,
+    groupId,
+    createdById,
+  ]);
+
+  return {
+    posts: (data?.posts as Post[]) || [],
+    loading,
+    error,
+    refetch,
+    loadMore,
+    hasMore,
+  };
+};
+
+// Hook for liking a post
+export const useLikePost = () => {
+  const [likePostMutation, {loading, error}] = useMutation(LIKE_POST, {
+    onError: errorObj => {
+      loggingService.error('Error liking post:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to like post. Please try again.',
+      });
+    },
+  });
+
+  const likePost = async (postId: string) => {
+    try {
+      const result = await likePostMutation({
         variables: {postId},
       });
-      return data.likePost;
-    } catch (error) {
-      loggingService.error('Error liking post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
+      return result.data?.likePost;
+    } catch (err) {
+      loggingService.error('Error in likePost:', err);
+      // Error is already handled in onError callback
+      return null;
     }
-  }
+  };
 
-  /**
-   * Unlike a post
-   * @param postId Post ID
-   * @returns ID of the unliked post
-   */
-  async unlikePost(postId: string): Promise<string> {
+  return {
+    likePost,
+    loading,
+    error,
+  };
+};
+
+// Hook for unliking a post
+export const useUnlikePost = () => {
+  const [unlikePostMutation, {loading, error}] = useMutation(UNLIKE_POST, {
+    onError: errorObj => {
+      loggingService.error('Error unliking post:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to unlike post. Please try again.',
+      });
+    },
+  });
+
+  const unlikePost = async (postId: string) => {
     try {
-      const {data} = await apolloClient.mutate({
-        mutation: UNLIKE_POST,
+      const result = await unlikePostMutation({
         variables: {postId},
       });
-      return data.unlikePost;
-    } catch (error) {
-      loggingService.error('Error unliking post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
+      return result.data?.unlikePost;
+    } catch (err) {
+      loggingService.error('Error in unlikePost:', err);
+      // Error is already handled in onError callback
+      return null;
     }
-  }
+  };
 
-  /**
-   * Save a post
-   * @param postId Post ID
-   * @returns Save details
-   */
-  async savePost(postId: string): Promise<PostSave> {
+  return {
+    unlikePost,
+    loading,
+    error,
+  };
+};
+
+// Hook for saving a post
+export const useSavePost = () => {
+  const [savePostMutation, {loading, error}] = useMutation(SAVE_POST, {
+    onError: errorObj => {
+      loggingService.error('Error saving post:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to save post. Please try again.',
+      });
+    },
+  });
+
+  const savePost = async (postId: string) => {
     try {
-      const {data} = await apolloClient.mutate({
-        mutation: SAVE_POST,
+      const result = await savePostMutation({
         variables: {postId},
       });
-      return data.savePost;
-    } catch (error) {
-      loggingService.error('Error saving post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
+      return result.data?.savePost;
+    } catch (err) {
+      loggingService.error('Error in savePost:', err);
+      // Error is already handled in onError callback
+      return null;
     }
-  }
+  };
 
-  /**
-   * Unsave a post
-   * @param postId Post ID
-   * @returns ID of the unsaved post
-   */
-  async unsavePost(postId: string): Promise<string> {
+  return {
+    savePost,
+    loading,
+    error,
+  };
+};
+
+// Hook for unsaving a post
+export const useUnsavePost = () => {
+  const [unsavePostMutation, {loading, error}] = useMutation(UNSAVE_POST, {
+    onError: errorObj => {
+      loggingService.error('Error unsaving post:', errorObj);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: errorObj.message || 'Failed to unsave post. Please try again.',
+      });
+    },
+  });
+
+  const unsavePost = async (postId: string) => {
     try {
-      const {data} = await apolloClient.mutate({
-        mutation: UNSAVE_POST,
+      const result = await unsavePostMutation({
         variables: {postId},
       });
-      return data.unsavePost;
-    } catch (error) {
-      loggingService.error('Error unsaving post:', error);
-      throw graphQLErrorService.handleGraphQLError(error as ApolloError);
+      return result.data?.unsavePost;
+    } catch (err) {
+      loggingService.error('Error in unsavePost:', err);
+      // Error is already handled in onError callback
+      return null;
     }
-  }
-}
+  };
 
-export const postService = new PostService();
+  return {
+    unsavePost,
+    loading,
+    error,
+  };
+};
+
+// Export as PostService object
+export const PostService = {
+  useCreatePost,
+  useUpdatePost,
+  useRemovePost,
+  useGetPost,
+  useGetPosts,
+  useLikePost,
+  useUnlikePost,
+  useSavePost,
+  useUnsavePost,
+};
+
+export default PostService;

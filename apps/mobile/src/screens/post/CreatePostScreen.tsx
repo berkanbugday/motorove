@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   ImageStyle,
   TextStyle,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -28,12 +27,13 @@ import {
   Subtitle,
   PostLocationMap,
   Body,
+  showToast,
 } from '@components';
 import {GroupCard} from '@components/GroupCard';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
-import {postService} from '@services/post.service';
+import {useCreatePost} from '@services/post.service';
 import {CreatePostInput} from '../../types/models/post.model';
 import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
@@ -42,11 +42,13 @@ import {LegendList} from '@legendapp/list';
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
   const [postText, setPostText] = useState('');
-  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
-    null,
-  );
+  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>({
+    id: 1,
+    label: 'Public',
+    value: 'public',
+  });
   const [selectedImages, setSelectedImages] = useState<
-    {id: number; uri: string}[]
+    {id: number; uri: string; base64?: string}[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [location, setLocation] = useState<{
@@ -69,6 +71,11 @@ export const CreatePostScreen = () => {
 
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
+
+  // Use the createPost hook from PostService
+  const {createPost} = useCreatePost(() => {
+    navigation.goBack();
+  });
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -149,18 +156,25 @@ export const CreatePostScreen = () => {
         </>
       ),
       snapPoint: 'full',
-      onClose: () => {
-        // If no group was selected but privacy is set to group, reset privacy
-        // if (selectedPrivacy?.value === 'group' && !selectedGroup) {
-        //   setSelectedPrivacy(null);
-        // }
-      },
+      // onClose: () => {
+      //   if (selectedPrivacy?.value === 'group' && !selectedGroup?.id) {
+      //     setSelectedPrivacy({
+      //       id: 1,
+      //       label: 'Public',
+      //       value: 'public',
+      //     });
+      //   }
+      // },
     });
   };
 
   const handleSelectImage = async () => {
     if (selectedImages.length >= 3) {
-      Alert.alert('Limit Reached', 'You can select a maximum of 3 images');
+      showToast({
+        type: 'error',
+        text1: 'Limit Reached',
+        text2: 'You can select a maximum of 3 images',
+      });
       return;
     }
 
@@ -169,17 +183,38 @@ export const CreatePostScreen = () => {
         mediaType: 'photo',
         quality: 0.8,
         selectionLimit: 1,
+        includeBase64: true,
       });
 
       if (result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+
+        // Check file size - 10MB limit
+        if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
+          showToast({
+            type: 'error',
+            text1: 'File too large',
+            text2: 'Please select an image smaller than 10MB',
+          });
+          return;
+        }
+
         const newImage = {
           id: Date.now(),
-          uri: result.assets[0].uri || '',
+          uri: asset.uri || '',
+          base64: asset.base64
+            ? `data:image/jpeg;base64,${asset.base64}`
+            : undefined,
         };
         setSelectedImages([...selectedImages, newImage]);
       }
     } catch (error) {
       loggingService.error('Error selecting image:', error);
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to select image. Please try again.',
+      });
     }
   };
 
@@ -203,27 +238,30 @@ export const CreatePostScreen = () => {
       ),
       snapPoint: 'full',
       enableGestureControl: false,
-      closeButtonPosition: 'top-right',
+      closeButtonPosition: 'top-left',
     });
   };
 
   const handlePost = async () => {
     if (!postText.trim()) {
-      Alert.alert('Error', 'Please enter some content for your post');
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please enter some content for your post',
+      });
       return;
     }
 
     try {
       setIsLoading(true);
 
-      // Prepare images array - in a real app, you would upload these images to a server
-      // and get back URLs to store in the post
-      const imageUrls = selectedImages.map(img => img.uri);
+      // Use base64 encoded images if available, otherwise fall back to URIs
+      const imageData = selectedImages.map(img => img.base64 || img.uri);
 
       // Create post input data
       const createPostInput: CreatePostInput = {
         content: postText.trim(),
-        images: imageUrls.length > 0 ? imageUrls : undefined,
+        images: imageData.length > 0 ? imageData : undefined,
         ...(location.latitude && location.longitude
           ? {
               latitude: location.latitude,
@@ -235,15 +273,13 @@ export const CreatePostScreen = () => {
           : {}),
       };
 
-      // Call the post service to create the post
-      await postService.createPost(createPostInput);
+      // Call the createPost function from the hook
+      await createPost(createPostInput);
 
-      // Success - go back to previous screen
-      Alert.alert('Success', 'Post created successfully');
-      navigation.goBack();
+      // Toast is handled by the hook's onSuccess callback
     } catch (error) {
       loggingService.error('Error creating post:', error);
-      Alert.alert('Error', 'Failed to create post. Please try again.');
+      // Error toast is already handled by the hook
     } finally {
       setIsLoading(false);
     }

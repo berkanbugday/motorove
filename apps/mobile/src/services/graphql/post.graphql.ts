@@ -24,6 +24,16 @@ export const POSTS_FRAGMENT = gql`
   }
 `;
 
+export const CREATE_POST_FRAGMENT = gql`
+  fragment CreatePostFragment on Post {
+    content
+    images
+    latitude
+    longitude
+    groupId
+  }
+`;
+
 export const GET_POSTS = gql`
   query GetPosts($groupId: ID!, $createdById: ID) {
     posts(groupId: $groupId, createdById: $createdById) {
@@ -49,13 +59,14 @@ export const GET_POST = gql`
   ${POSTS_FRAGMENT}
 `;
 
+// Create post mutation
 export const CREATE_POST = gql`
-  mutation CreatePost($createPostInput: CreatePostInput!) {
-    createPost(createPostInput: $createPostInput) {
-      ...PostFields
+  mutation CreatePost($input: CreatePostInput!) {
+    createPost(createPostInput: $input) {
+      ...CreatePostFragment
     }
   }
-  ${POSTS_FRAGMENT}
+  ${CREATE_POST_FRAGMENT}
 `;
 
 export const UPDATE_POST = gql`
