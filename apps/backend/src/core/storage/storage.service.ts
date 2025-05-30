@@ -66,6 +66,7 @@ export class StorageService {
       .upload(fullPath, Buffer.from(base64Data, 'base64'), {
         contentType: fileOptions?.contentType || 'image/jpeg',
         upsert: true,
+        cacheControl: '3600',
       });
 
     if (error) {

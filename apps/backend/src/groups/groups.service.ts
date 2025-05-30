@@ -212,8 +212,8 @@ export class GroupsService {
     // Handle enum conversions
     const processedUpdateData: Record<string, unknown> = {
       ...updateData,
-      logo: logoUrl,
-      cover: coverUrl,
+      logo: logoUrl?.startsWith('groups/logos') ? logoUrl : group.logo,
+      cover: coverUrl?.startsWith('groups/covers') ? coverUrl : group.cover,
       updatedBy: {
         connect: { id: userId },
       },
