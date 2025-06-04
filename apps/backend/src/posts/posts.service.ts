@@ -82,14 +82,6 @@ export class PostsService {
       where: { postId: prismaPost.id },
     });
 
-    const savesCount = await this.prisma.postSave.count({
-      where: { postId: prismaPost.id },
-    });
-
-    const commentsCount = await this.prisma.comment.count({
-      where: { postId: prismaPost.id, isActive: true },
-    });
-
     let isLiked = false;
     let isSaved = false;
 
@@ -151,17 +143,12 @@ export class PostsService {
       latitude: prismaPost.latitude,
       longitude: prismaPost.longitude,
       group: prismaPost.group,
-      groupId: prismaPost.groupId,
       comments: prismaPost.comments,
       likesCount,
-      savesCount,
-      commentsCount,
       isLiked,
       isSaved,
       createdBy: prismaPost.createdBy,
-      createdById: prismaPost.createdById,
       updatedBy: prismaPost.updatedBy,
-      updatedById: prismaPost.updatedById,
       createdAt: prismaPost.createdAt,
       updatedAt: prismaPost.updatedAt,
       isActive: prismaPost.isActive,
@@ -169,14 +156,14 @@ export class PostsService {
   }
 
   async findAll(
-    groupId: string,
+    groupId?: string,
     createdById?: string,
     currentUserId?: string,
     authToken?: string,
   ): Promise<Post[]> {
     const posts = await this.prisma.post.findMany({
       where: {
-        groupId,
+        ...(groupId && { groupId }),
         ...(createdById && { createdById }),
         isActive: true,
       },

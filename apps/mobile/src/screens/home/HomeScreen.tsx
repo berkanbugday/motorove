@@ -21,7 +21,7 @@ import {
 } from '@components';
 import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
-import {colors, commonStyles, fontSizes, rh, spacing} from '@theme';
+import {colors, commonStyles, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import type {WeatherData} from '@components/WeatherWidget/weather';
 import type {IconName} from '@components/Icon';
@@ -40,29 +40,37 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
+import {Post} from '../../types/models/post.model';
+import {
+  useGetPosts,
+  useLikePost,
+  useUnlikePost,
+  useSavePost,
+  useUnsavePost,
+} from '@services/post.service';
 
 // Route data
 const recommendedRoutes = [
   {
-    id: 1,
+    id: '1',
     title: 'Coastal Highway Ride',
     subtitle: '80km - 2h 15m',
     image: 'https://picsum.photos/id/88/500/300', // Coast/ocean image
   },
   {
-    id: 2,
+    id: '2',
     title: 'Mountain Trail Adventure',
     subtitle: '65km - 3h 30m',
     image: 'https://picsum.photos/id/29/500/300', // Mountain image
   },
   {
-    id: 3,
+    id: '3',
     title: 'City Loop Tour',
     subtitle: '35km - 1h 45m',
     image: 'https://picsum.photos/id/43/500/300', // Urban image
   },
   {
-    id: 4,
+    id: '4',
     title: 'Forest Exploration Route',
     subtitle: '50km - 2h 10m',
     image: 'https://picsum.photos/id/11/500/300', // Forest image
@@ -79,26 +87,6 @@ interface EventItem {
   organizer: string;
   participantCount: number;
   membersCapacity: number;
-}
-
-// Feed post interface
-interface FeedPost {
-  id: string;
-  userName: string;
-  avatarSource: any;
-  timeAgo: string;
-  content: string;
-  images?: any[];
-  routeTitle?: string;
-  likeCount: number;
-  commentCount: number;
-  isSaved: boolean;
-  isLiked: boolean;
-  isCommented: boolean;
-  labels: Array<{
-    icon?: IconName;
-    text: string;
-  }>;
 }
 
 // Group events data
@@ -135,66 +123,6 @@ const upcomingEvents: EventItem[] = [
   },
 ];
 
-// Sample feed posts data
-const feedPosts: FeedPost[] = [
-  {
-    id: '1',
-    userName: 'Alex Johnson',
-    avatarSource: {uri: 'https://picsum.photos/id/1005/100/100'},
-    timeAgo: '2h ago',
-    content:
-      'Just completed an amazing coastal ride with perfect weather! The views were breathtaking.',
-    routeTitle: 'Pacific Coast Highway',
-    likeCount: 24,
-    commentCount: 5,
-    isSaved: false,
-    isLiked: true,
-    isCommented: false,
-    labels: [
-      {icon: 'users', text: 'Coastal Riders Club'},
-      {icon: 'map-pin', text: 'San Francisco, CA'},
-    ],
-  },
-  {
-    id: '2',
-    userName: 'Sarah Miller',
-    avatarSource: {uri: 'https://picsum.photos/id/1027/100/100'},
-    timeAgo: '5h ago',
-    content:
-      'First time taking my new bike out on the mountain trails. The handling was superb!',
-    images: [{uri: 'https://picsum.photos/id/16/500/300'}],
-    likeCount: 18,
-    commentCount: 3,
-    isSaved: true,
-    isLiked: false,
-    isCommented: true,
-    labels: [{icon: 'map-pin', text: 'Big Bear Mountain, CA'}],
-  },
-  {
-    id: '3',
-    userName: 'David Wilson',
-    avatarSource: {uri: 'https://picsum.photos/id/1012/100/100'},
-    timeAgo: 'Yesterday',
-    content:
-      "Group night ride through downtown was epic! Can't wait for the next one.",
-    images: [
-      {uri: 'https://picsum.photos/id/10/500/300'},
-      {uri: 'https://picsum.photos/id/11/500/300'}, // Adding duplicate for demo purposes
-      {uri: 'https://picsum.photos/id/32/500/300'}, // Another image for carousel demo
-    ],
-    routeTitle: 'City Lights Tour',
-    likeCount: 32,
-    commentCount: 7,
-    isSaved: false,
-    isLiked: true,
-    isCommented: false,
-    labels: [
-      {icon: 'users', text: 'Urban Moto Group'},
-      {icon: 'map-pin', text: 'Los Angeles, CA'},
-    ],
-  },
-];
-
 // Change from MainStackParamList to accepting both TabParamList and MainStackParamList
 type Props =
   | NativeStackScreenProps<MainStackParamList, 'Home'>
@@ -206,7 +134,6 @@ export const HomeScreen = ({navigation}: Props) => {
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const [posts, setPosts] = useState<FeedPost[]>(feedPosts);
   const {user} = useAuth();
   const {notificationsCount, refetch: refetchNotificationsCount} =
     useGetNotificationsCount();
@@ -214,11 +141,26 @@ export const HomeScreen = ({navigation}: Props) => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const {openBottomSheet} = useBottomSheet();
 
+  // Use the real API hook for posts"
+  const {
+    posts,
+    loading: postsLoading,
+    refetch: refetchPosts,
+    loadMore,
+  } = useGetPosts();
+
+  // Add hooks for post interactions
+  const {likePost} = useLikePost();
+  const {unlikePost} = useUnlikePost();
+  const {savePost} = useSavePost();
+  const {unsavePost} = useUnsavePost();
+
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       refetchNotificationsCount();
-    }, [refetchNotificationsCount]),
+      refetchPosts();
+    }, [refetchNotificationsCount, refetchPosts]),
   );
 
   // Track the previous scroll position to determine scroll direction
@@ -293,6 +235,7 @@ export const HomeScreen = ({navigation}: Props) => {
     setRefreshing(true);
 
     refetchNotificationsCount();
+    refetchPosts();
 
     // Change route on refresh
     rotateRecommendedRoute();
@@ -300,7 +243,7 @@ export const HomeScreen = ({navigation}: Props) => {
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
-  }, [rotateRecommendedRoute]);
+  }, [rotateRecommendedRoute, refetchNotificationsCount, refetchPosts]);
 
   // Set initial route
   useEffect(() => {
@@ -367,7 +310,7 @@ export const HomeScreen = ({navigation}: Props) => {
   );
 
   // Event keyExtractor
-  const keyExtractor = useCallback((item: EventItem) => item.id, []);
+  const keyExtractor = useCallback((item: EventItem) => String(item.id), []);
 
   // Handle navigation to comment details
   const handleCommentPress = (postId: string) => {
@@ -375,29 +318,33 @@ export const HomeScreen = ({navigation}: Props) => {
     navigateToScreen(navigation, 'CommentDetail', {postId});
   };
 
-  // Handle like press with state update
-  const handleLikePress = useCallback((postId: string) => {
-    setPosts(currentPosts =>
-      currentPosts.map(post =>
-        post.id === postId
-          ? {
-              ...post,
-              isLiked: !post.isLiked,
-              likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
-            }
-          : post,
-      ),
-    );
-  }, []);
+  // Handle like press with API call
+  const handleLikePress = useCallback(
+    async (postId: string, isLiked: boolean) => {
+      if (isLiked) {
+        await unlikePost(postId);
+      } else {
+        await likePost(postId);
+      }
+      // Refetch to update UI
+      refetchPosts();
+    },
+    [likePost, unlikePost, refetchPosts],
+  );
 
-  // Handle save press with state update
-  const handleSavePress = useCallback((postId: string) => {
-    setPosts(currentPosts =>
-      currentPosts.map(post =>
-        post.id === postId ? {...post, isSaved: !post.isSaved} : post,
-      ),
-    );
-  }, []);
+  // Handle save press with API call
+  const handleSavePress = useCallback(
+    async (postId: string, isSaved: boolean) => {
+      if (isSaved) {
+        await unsavePost(postId);
+      } else {
+        await savePost(postId);
+      }
+      // Refetch to update UI
+      refetchPosts();
+    },
+    [savePost, unsavePost, refetchPosts],
+  );
 
   // Create dropdown menu items for the feed posts
   const createPostDropdownItems = useCallback(
@@ -450,11 +397,11 @@ export const HomeScreen = ({navigation}: Props) => {
           break;
         case 'edit':
           loggingService.info(`Edit post: ${postId}`);
+          navigateToScreen(navigation, 'EditPost', {postId});
           break;
         case 'delete':
           loggingService.info(`Delete post: ${postId}`);
-          // You could also update the posts state to remove the deleted post
-          // setPosts(currentPosts => currentPosts.filter(post => post.id !== postId));
+          // You could also open a confirmation dialog before deleting
           break;
         default:
           loggingService.info(
@@ -462,52 +409,118 @@ export const HomeScreen = ({navigation}: Props) => {
           );
       }
     },
-    [],
+    [navigation],
+  );
+
+  // Helper function to format avatar URL from API data
+  const formatAvatarSource = useCallback((imageUrl?: string) => {
+    return imageUrl
+      ? {uri: imageUrl}
+      : require('@assets/images/default-avatar.png');
+  }, []);
+
+  // Transform Post model to FeedCard props
+  const transformPostToFeedCard = useCallback(
+    (post: Post) => {
+      // Parse the timestamp to get a readable timeAgo string
+      const getTimeAgo = (timestamp: string) => {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString();
+      };
+
+      // Create labels from post data
+      const labels = [];
+
+      if (post.group) {
+        labels.push({
+          icon: 'users' as IconName,
+          text: post.group.name,
+        });
+      }
+
+      if (post.latitude && post.longitude) {
+        labels.push({
+          icon: 'map-pin' as IconName,
+          text: 'Location available', // Replace with actual location name if available
+        });
+      }
+
+      // Transform images from string URLs to objects with URI
+      const images =
+        post.images && post.images.length > 0
+          ? post.images.map((img: string) => ({uri: img}))
+          : undefined;
+
+      return {
+        id: post.id,
+        userName: 'User', // Replace with actual user name if available
+        avatarSource: formatAvatarSource(post.group?.image), // Use group image or default
+        timeAgo: getTimeAgo(post.createdAt),
+        content: post.content,
+        images,
+        likeCount: post.likesCount,
+        commentCount: post.commentsCount,
+        isSaved: post.isSaved,
+        isLiked: post.isLiked,
+        isCommented: false, // This might not be available in the API
+        labels,
+      };
+    },
+    [formatAvatarSource],
   );
 
   // Render feed post with comment navigation and dropdown menu
   const renderFeedPost = useCallback(
-    ({item}: {item: FeedPost}) => {
-      // Determine if this is the user's own post (for this example, let's assume the first post is the user's)
-      const isOwnPost = item.id === '1';
+    ({item}: {item: Post}) => {
+      // Determine if this is the user's own post
+      const isOwnPost = item.createdById === user?.id;
+
+      // Transform Post model to FeedCard props
+      const feedCardProps = transformPostToFeedCard(item);
 
       return (
         <FeedCard
-          avatarSource={item.avatarSource}
-          userName={item.userName}
-          timeAgo={item.timeAgo}
-          labels={item.labels}
-          content={item.content}
-          images={item.images}
-          routeTitle={item.routeTitle}
-          likeCount={item.likeCount}
-          commentCount={item.commentCount}
-          isSaved={item.isSaved}
-          isLiked={item.isLiked}
-          isCommented={item.isCommented}
+          avatarSource={feedCardProps.avatarSource}
+          userName={feedCardProps.userName}
+          timeAgo={feedCardProps.timeAgo}
+          labels={feedCardProps.labels}
+          content={feedCardProps.content}
+          images={feedCardProps.images}
+          likeCount={feedCardProps.likeCount}
+          commentCount={feedCardProps.commentCount}
+          isSaved={feedCardProps.isSaved}
+          isLiked={feedCardProps.isLiked}
+          isCommented={feedCardProps.isCommented}
           dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
           onDropdownSelect={menuItem => handleDropdownSelect(menuItem, item.id)}
-          onRoutePress={() =>
-            loggingService.info(`Route pressed: ${item.routeTitle}`)
-          }
-          onLikePress={() => handleLikePress(item.id)}
+          onLikePress={() => handleLikePress(item.id, item.isLiked)}
           onCommentPress={() => handleCommentPress(item.id)}
-          onSavePress={() => handleSavePress(item.id)}
+          onSavePress={() => handleSavePress(item.id, item.isSaved)}
           style={styles.feedCard}
         />
       );
     },
     [
-      navigation,
+      user,
       handleLikePress,
       handleSavePress,
       createPostDropdownItems,
       handleDropdownSelect,
+      transformPostToFeedCard,
     ],
   );
 
   // Feed keyExtractor
-  const feedKeyExtractor = useCallback((item: FeedPost) => item.id, []);
+  const feedKeyExtractor = useCallback((item: Post) => String(item.id), []);
 
   // Post separator component
   const PostSeparator = useCallback(
@@ -661,14 +674,27 @@ export const HomeScreen = ({navigation}: Props) => {
             <Subtitle weight="bold" style={styles.sectionTitle}>
               Shared Posts
             </Subtitle>
-            <FlatList
-              data={posts}
-              renderItem={renderFeedPost}
-              keyExtractor={feedKeyExtractor}
-              scrollEnabled={false} // Disable scrolling to prevent nested scroll issues
-              showsVerticalScrollIndicator={false}
-              ItemSeparatorComponent={PostSeparator}
-            />
+            {postsLoading ? (
+              <View style={styles.loadingContainer}>
+                {/* You could add a loading indicator here */}
+              </View>
+            ) : (
+              <FlatList
+                data={posts}
+                renderItem={renderFeedPost}
+                keyExtractor={feedKeyExtractor}
+                scrollEnabled={false} // Disable scrolling to prevent nested scroll issues
+                showsVerticalScrollIndicator={false}
+                ItemSeparatorComponent={PostSeparator}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    {/* You could add an empty state component here */}
+                  </View>
+                }
+                onEndReached={loadMore}
+                onEndReachedThreshold={0.5}
+              />
+            )}
           </View>
         </Animated.ScrollView>
       </SafeAreaView>
@@ -751,5 +777,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary.main,
     width: '100%',
     alignSelf: 'center',
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

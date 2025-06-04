@@ -1,26 +1,28 @@
-import gql from 'graphql-tag';
+import {gql} from '@apollo/client';
 
-export const POSTS_FRAGMENT = gql`
-  fragment PostFields on Post {
+export const POST_FRAGMENT = gql`
+  fragment PostFragment on Post {
     id
     content
     images
     latitude
     longitude
-    groupId
     group {
       id
       name
-      image
     }
     likesCount
-    savesCount
     commentsCount
     isLiked
     isSaved
     createdAt
     updatedAt
-    createdById
+    createdBy {
+      id
+      firstName
+      lastName
+      avatar
+    }
   }
 `;
 
@@ -35,18 +37,18 @@ export const CREATE_POST_FRAGMENT = gql`
 `;
 
 export const GET_POSTS = gql`
-  query GetPosts($groupId: ID!, $createdById: ID) {
+  query GetPosts($groupId: ID, $createdById: ID) {
     posts(groupId: $groupId, createdById: $createdById) {
-      ...PostFields
+      ...PostFragment
     }
   }
-  ${POSTS_FRAGMENT}
+  ${POST_FRAGMENT}
 `;
 
 export const GET_POST = gql`
   query GetPost($id: ID!) {
     post(id: $id) {
-      ...PostFields
+      ...PostFragment
       comments {
         id
         content
@@ -56,7 +58,7 @@ export const GET_POST = gql`
       }
     }
   }
-  ${POSTS_FRAGMENT}
+  ${POST_FRAGMENT}
 `;
 
 // Create post mutation
@@ -72,10 +74,10 @@ export const CREATE_POST = gql`
 export const UPDATE_POST = gql`
   mutation UpdatePost($updatePostInput: UpdatePostInput!) {
     updatePost(updatePostInput: $updatePostInput) {
-      ...PostFields
+      ...PostFragment
     }
   }
-  ${POSTS_FRAGMENT}
+  ${POST_FRAGMENT}
 `;
 
 export const REMOVE_POST = gql`

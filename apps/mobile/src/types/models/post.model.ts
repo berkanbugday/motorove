@@ -2,6 +2,8 @@
  * Post domain model
  */
 
+import {UserProfile} from './user.model';
+
 /**
  * Post content types
  */
@@ -28,9 +30,13 @@ export interface Post {
   commentsCount: number;
   isLiked: boolean;
   isSaved: boolean;
+  createdBy: UserProfile;
+  createdById: string;
+  updatedBy: UserProfile;
+  updatedById: string;
   createdAt: string;
   updatedAt: string;
-  createdById: string;
+  isActive: boolean;
 }
 
 /**

@@ -37,8 +37,8 @@ export class PostsResolver {
   @UseGuards(JwtGuard)
   @Query(() => [Post], { name: 'posts' })
   findAll(
-    @Args('groupId', { type: () => ID }) groupId: string,
     @Context() context: GqlContext,
+    @Args('groupId', { type: () => ID, nullable: true }) groupId?: string,
     @Args('createdById', { type: () => ID, nullable: true })
     createdById?: string,
   ) {

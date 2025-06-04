@@ -171,7 +171,7 @@ export const useGetPost = (id: string) => {
 
 // Hook for getting posts
 export const useGetPosts = (
-  groupId: string,
+  groupId?: string,
   createdById?: string,
   limit = 20,
   skip = 0,
@@ -185,8 +185,12 @@ export const useGetPosts = (
     refetch: originalRefetch,
     fetchMore,
   } = useQuery(GET_POSTS, {
-    variables: {groupId, createdById, limit, skip},
-    skip: !groupId,
+    variables: {
+      ...(groupId && {groupId}),
+      ...(createdById && {createdById}),
+      limit,
+      skip,
+    },
     onError: errorObj => {
       loggingService.error('Error fetching posts:', errorObj);
     },
@@ -206,8 +210,8 @@ export const useGetPosts = (
     try {
       const result = await fetchMore({
         variables: {
-          groupId,
-          createdById,
+          ...(groupId && {groupId}),
+          ...(createdById && {createdById}),
           skip: data?.posts?.length || 0,
           limit,
         },
