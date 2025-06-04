@@ -48,6 +48,7 @@ import {
   useSavePost,
   useUnsavePost,
 } from '@services/post.service';
+import {relativeTime} from '@utils/dateUtils';
 
 // Route data
 const recommendedRoutes = [
@@ -416,27 +417,13 @@ export const HomeScreen = ({navigation}: Props) => {
   const formatAvatarSource = useCallback((imageUrl?: string) => {
     return imageUrl
       ? {uri: imageUrl}
-      : require('@assets/images/default-avatar.png');
+      : // : require('@assets/images/default-avatar.png');
+        {uri: 'https://picsum.photos/id/1005/200/200'};
   }, []);
 
   // Transform Post model to FeedCard props
   const transformPostToFeedCard = useCallback(
     (post: Post) => {
-      // Parse the timestamp to get a readable timeAgo string
-      const getTimeAgo = (timestamp: string) => {
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / (1000 * 60));
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
-        return date.toLocaleDateString();
-      };
-
       // Create labels from post data
       const labels = [];
 
@@ -464,7 +451,7 @@ export const HomeScreen = ({navigation}: Props) => {
         id: post.id,
         userName: 'User', // Replace with actual user name if available
         avatarSource: formatAvatarSource(post.group?.image), // Use group image or default
-        timeAgo: getTimeAgo(post.createdAt),
+        timeAgo: relativeTime(post.createdAt),
         content: post.content,
         images,
         likeCount: post.likesCount,
