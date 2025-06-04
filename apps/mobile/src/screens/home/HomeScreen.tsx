@@ -18,6 +18,7 @@ import {
   PageIndicator,
   Button,
   FeedCard,
+  Body,
 } from '@components';
 import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
@@ -49,6 +50,7 @@ import {
   useUnsavePost,
 } from '@services/post.service';
 import {relativeTime} from '@utils/dateUtils';
+import {LegendList} from '@legendapp/list';
 
 // Route data
 const recommendedRoutes = [
@@ -310,9 +312,6 @@ export const HomeScreen = ({navigation}: Props) => {
     [],
   );
 
-  // Event keyExtractor
-  const keyExtractor = useCallback((item: EventItem) => String(item.id), []);
-
   // Handle navigation to comment details
   const handleCommentPress = (postId: string) => {
     // Use our utility function that handles cross-stack navigation
@@ -506,15 +505,6 @@ export const HomeScreen = ({navigation}: Props) => {
     ],
   );
 
-  // Feed keyExtractor
-  const feedKeyExtractor = useCallback((item: Post) => String(item.id), []);
-
-  // Post separator component
-  const PostSeparator = useCallback(
-    () => <View style={styles.postSeparator} />,
-    [],
-  );
-
   // Handle showing create options bottom sheet
   const handleShowCreateOptions = useCallback(() => {
     openBottomSheet({
@@ -637,7 +627,7 @@ export const HomeScreen = ({navigation}: Props) => {
               ref={eventsListRef}
               data={upcomingEvents}
               renderItem={renderEventBanner}
-              keyExtractor={keyExtractor}
+              keyExtractor={item => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
               snapToInterval={Dimensions.get('window').width - spacing.xl} // Adjust based on item width
@@ -666,20 +656,21 @@ export const HomeScreen = ({navigation}: Props) => {
                 {/* You could add a loading indicator here */}
               </View>
             ) : (
-              <FlatList
+              <LegendList
                 data={posts}
+                keyExtractor={item => item.id}
                 renderItem={renderFeedPost}
-                keyExtractor={feedKeyExtractor}
-                scrollEnabled={false} // Disable scrolling to prevent nested scroll issues
                 showsVerticalScrollIndicator={false}
-                ItemSeparatorComponent={PostSeparator}
+                contentContainerStyle={{flex: 1, paddingBottom: spacing.sm}}
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
-                    {/* You could add an empty state component here */}
+                    <Body>No posts found</Body>
                   </View>
                 }
+                recycleItems={true}
+                maintainVisibleContentPosition={true}
                 onEndReached={loadMore}
-                onEndReachedThreshold={0.5}
+                onEndReachedThreshold={0.3}
               />
             )}
           </View>
