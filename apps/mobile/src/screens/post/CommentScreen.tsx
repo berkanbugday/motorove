@@ -100,9 +100,9 @@ const currentUser = {
   avatarSource: {uri: 'https://picsum.photos/id/1018/100/100'},
 };
 
-type Props = NativeStackScreenProps<MainStackParamList, 'CommentDetail'>;
+type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
-export const CommentDetailScreen = ({navigation, route: {params}}: Props) => {
+export const CommentScreen = ({navigation, route: {params}}: Props) => {
   const [post, setPost] = useState<PostWithComments | null>(null);
   const [loading, setLoading] = useState(true);
   const [replyingTo, setReplyingTo] = useState<{

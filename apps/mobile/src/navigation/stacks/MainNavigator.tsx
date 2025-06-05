@@ -1,10 +1,9 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import {CommentDetailScreen} from '@screens/comment';
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
-import {CreatePostScreen} from '@screens/post';
+import {CreatePostScreen, CommentScreen} from '@screens/post';
 import {
   CreateGroupScreen,
   GroupDetailScreen,
@@ -31,8 +30,8 @@ export function MainNavigator() {
 
       {/* Individual screens that can be navigated to from tabs */}
       <Stack.Screen
-        name="CommentDetail"
-        component={CommentDetailScreen}
+        name="Comment"
+        component={CommentScreen}
         options={{
           headerShown: false,
         }}

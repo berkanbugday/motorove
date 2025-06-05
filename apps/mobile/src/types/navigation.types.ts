@@ -45,7 +45,7 @@ export type TabScreenRouteProp<T extends keyof TabParamList> = RouteProp<
 export type MainStackParamList = {
   Tabs: undefined;
   Home: undefined;
-  CommentDetail: {postId: string};
+  Comment: {postId: string};
   // Add more screens here as your app grows
   // Profile: {userId: string};
   // Settings: undefined;
