@@ -9,182 +9,157 @@ import {
   CommentItem,
   CommentInput,
   TopHeaderBar,
+  showToast,
 } from '@components';
-import {Comment, PostWithComments} from '../../components/Comment/comments';
-
-// Mock data for a post with comments
-// In a real app, this would come from an API
-const mockPost: PostWithComments = {
-  id: '1',
-  userName: 'Alex Johnson',
-  avatarSource: {uri: 'https://picsum.photos/id/1005/100/100'},
-  timeAgo: '2h ago',
-  content:
-    'Just completed an amazing coastal ride with perfect weather! The views were breathtaking.',
-  images: [{uri: 'https://picsum.photos/id/16/500/300'}],
-  routeTitle: 'Pacific Coast Highway',
-  likeCount: 24,
-  commentCount: 12,
-  isSaved: false,
-  isLiked: true,
-  isCommented: false,
-  labels: [
-    {icon: 'users', text: 'Coastal Riders Club'},
-    {icon: 'map-pin', text: 'San Francisco, CA'},
-  ],
-  comments: [
-    {
-      id: '1',
-      userId: '2',
-      userName: 'Sarah Miller',
-      avatarSource: {uri: 'https://picsum.photos/id/1027/100/100'},
-      content: 'That view is incredible! Was this a group ride?',
-      timeAgo: '1h ago',
-      likeCount: 5,
-      replyCount: 2,
-      isLiked: false,
-    },
-    {
-      id: '2',
-      userId: '3',
-      userName: 'David Wilson',
-      avatarSource: {uri: 'https://picsum.photos/id/1012/100/100'},
-      content: 'I did that route last weekend. The weather was perfect!',
-      timeAgo: '1h ago',
-      likeCount: 2,
-      replyCount: 0,
-      isLiked: true,
-    },
-    {
-      id: '3',
-      parentId: '1',
-      userId: '1',
-      userName: 'Alex Johnson',
-      avatarSource: {uri: 'https://picsum.photos/id/1005/100/100'},
-      content:
-        'Yes! It was with the Coastal Riders Club. We had about 8 people.',
-      timeAgo: '45m ago',
-      likeCount: 3,
-      replyCount: 0,
-      isLiked: false,
-    },
-    {
-      id: '4',
-      parentId: '1',
-      userId: '4',
-      userName: 'Emma Brown',
-      avatarSource: {uri: 'https://picsum.photos/id/1014/100/100'},
-      content: 'I missed this one! Will you be doing it again soon?',
-      timeAgo: '30m ago',
-      likeCount: 1,
-      replyCount: 0,
-      isLiked: false,
-    },
-    {
-      id: '5',
-      userId: '5',
-      userName: 'Michael Davis',
-      avatarSource: {uri: 'https://picsum.photos/id/1025/100/100'},
-      content: 'What bike were you riding? Looks like a fun trip!',
-      timeAgo: '25m ago',
-      likeCount: 0,
-      replyCount: 0,
-      isLiked: false,
-    },
-  ],
-};
-
-// Current user for comment input avatar
-const currentUser = {
-  id: 'current',
-  avatarSource: {uri: 'https://picsum.photos/id/1018/100/100'},
-};
+import {Comment} from '../../types/models/post.model';
+import {useGetComments, useCreateComment, useGetPost} from '@services';
+import {IconName} from '@components/Icon';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
+// Comment interface for UI components
+interface CommentUI {
+  id: string;
+  userId: string;
+  userName: string;
+  avatarSource: any;
+  content: string;
+  timeAgo: string;
+  likeCount: number;
+  replyCount: number;
+  isLiked: boolean;
+  parentId?: string;
+}
+
 export const CommentScreen = ({navigation, route: {params}}: Props) => {
-  const [post, setPost] = useState<PostWithComments | null>(null);
-  const [loading, setLoading] = useState(true);
   const [replyingTo, setReplyingTo] = useState<{
     id: string;
     userName: string;
   } | null>(null);
 
+  // Get post data
+  const {
+    post,
+    loading: postLoading,
+    error: postError,
+  } = useGetPost(params.postId);
+
+  // Get comments for the post
+  const {
+    comments,
+    loading: commentsLoading,
+    error: commentsError,
+    refetch: refetchComments,
+  } = useGetComments(params.postId);
+
+  // Mutations for comments
+  const {createComment, loading: createLoading} = useCreateComment(() => {
+    // Refetch comments after creating a new one
+    refetchComments();
+  });
+
   useEffect(() => {
-    // In a real app, you would fetch the post and comments from an API based on params.postId
-    // For this example, we'll use the mock data
-    const fetchPost = async () => {
-      // Simulate API call
-      setTimeout(() => {
-        setPost(mockPost);
-        setLoading(false);
-      }, 500);
-    };
-
-    fetchPost();
-  }, [params.postId]);
-
-  const handleLikeComment = (commentId: string) => {
-    if (!post) {
-      return;
+    // Check for errors
+    if (postError) {
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load post. Please try again.',
+      });
     }
 
-    // Update the like status for the comment
-    const updatedComments = post.comments.map(comment => {
-      if (comment.id === commentId) {
-        return {
-          ...comment,
-          isLiked: !comment.isLiked,
-          likeCount: comment.isLiked
-            ? comment.likeCount - 1
-            : comment.likeCount + 1,
-        };
-      }
-      return comment;
-    });
+    if (commentsError) {
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to load comments. Please try again.',
+      });
+    }
+  }, [postError, commentsError]);
 
-    setPost({...post, comments: updatedComments});
+  const handleLikeComment = async () => {
+    // In a real implementation, you would call a like/unlike API
+    // For now, we'll just show a toast
+    showToast({
+      type: 'info',
+      text1: 'Info',
+      text2: 'Like functionality not implemented yet',
+    });
   };
 
-  const handleReplyToComment = (comment: Comment) => {
-    setReplyingTo({id: comment.id, userName: comment.userName});
+  const handleReplyToComment = (comment: CommentUI) => {
+    setReplyingTo({
+      id: comment.id,
+      userName: comment.userName,
+    });
   };
 
   const handleCancelReply = () => {
     setReplyingTo(null);
   };
 
-  const handleSubmitComment = (text: string) => {
-    if (!post) {
+  const handleSubmitComment = async (text: string) => {
+    if (!text.trim()) {
       return;
     }
 
-    // Create a new comment
-    const newComment: Comment = {
-      id: `comment-${Date.now()}`,
-      userId: currentUser.id,
-      userName: 'You',
-      avatarSource: currentUser.avatarSource,
-      content: text,
-      timeAgo: 'Just now',
-      likeCount: 0,
-      replyCount: 0,
-      isLiked: false,
-      parentId: replyingTo ? replyingTo.id : undefined,
+    try {
+      await createComment({
+        content: text,
+        postId: params.postId,
+        parentId: replyingTo?.id,
+      });
+
+      // Reset the reply state
+      setReplyingTo(null);
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds}s ago`;
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}m ago`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}d ago`;
+  };
+
+  const mapCommentForUI = (comment: Comment): CommentUI => {
+    const userName = comment.createdBy?.firstName
+      ? `${comment.createdBy.firstName} ${comment.createdBy.lastName || ''}`
+      : 'Unknown User';
+
+    return {
+      id: comment.id,
+      userId: comment.createdById,
+      userName: userName.trim(),
+      avatarSource: comment.createdBy?.avatar
+        ? {uri: comment.createdBy.avatar}
+        : {uri: 'https://picsum.photos/id/1005/100/100'},
+      content: comment.content,
+      timeAgo: formatTimeAgo(comment.createdAt),
+      likeCount: 0, // This would come from the API in a real implementation
+      replyCount: comment.replies?.length || 0,
+      isLiked: false, // This would come from the API in a real implementation
+      parentId: comment.parentId,
     };
-
-    // Add the new comment to the list
-    const updatedComments = [...post.comments, newComment];
-
-    // Update the post with the new comment
-    setPost({
-      ...post,
-      comments: updatedComments,
-      commentCount: post.commentCount + 1,
-    });
-
-    // Reset the reply state
-    setReplyingTo(null);
   };
 
   const renderItem = ({item}: {item: Comment}) => {
@@ -194,14 +169,14 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     }
 
     // Find any replies to this comment
-    const replies = post?.comments.filter(
-      comment => comment.parentId === item.id,
-    );
+    const replies = comments?.filter(comment => comment.parentId === item.id);
+
+    const mappedComment = mapCommentForUI(item);
 
     return (
       <View>
         <CommentItem
-          comment={item}
+          comment={mappedComment}
           onLikePress={handleLikeComment}
           onReplyPress={handleReplyToComment}
         />
@@ -209,7 +184,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           replies.map(reply => (
             <CommentItem
               key={reply.id}
-              comment={reply}
+              comment={mapCommentForUI(reply)}
               onLikePress={handleLikeComment}
               onReplyPress={handleReplyToComment}
               isReply
@@ -218,6 +193,8 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       </View>
     );
   };
+
+  const loading = postLoading || commentsLoading;
 
   if (loading) {
     return (
@@ -235,32 +212,54 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     );
   }
 
+  // Map the post data to the format expected by FeedCard
+  const mappedPost = {
+    userName: post.createdBy
+      ? `${post.createdBy.firstName} ${post.createdBy.lastName || ''}`.trim()
+      : 'Unknown User',
+    avatarSource: post.createdBy?.avatar
+      ? {uri: post.createdBy.avatar}
+      : {uri: 'https://picsum.photos/id/1005/100/100'},
+    timeAgo: formatTimeAgo(post.createdAt),
+    content: post.content,
+    images: post.images ? post.images.map(img => ({uri: img})) : [],
+    routeTitle: post.group?.name || '',
+    likeCount: post.likesCount || 0,
+    commentCount: post.commentsCount || 0,
+    isLiked: post.isLiked || false,
+    isSaved: post.isSaved || false,
+    isCommented: false,
+    labels: post.group
+      ? [{icon: 'users' as IconName, text: post.group.name}]
+      : [],
+  };
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={`Comments (${post.commentCount})`}
+        title={`Comments (${post.commentsCount || 0})`}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
       <FlatList
-        data={post.comments}
+        data={comments || []}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         ListHeaderComponent={
           <View style={styles.postContainer}>
             <FeedCard
-              userName={post.userName}
-              avatarSource={post.avatarSource}
-              timeAgo={post.timeAgo}
-              content={post.content}
-              images={post.images}
-              routeTitle={post.routeTitle}
-              likeCount={post.likeCount}
-              commentCount={post.commentCount}
-              isLiked={post.isLiked}
-              isSaved={post.isSaved}
-              isCommented={post.isCommented}
-              labels={post.labels}
+              userName={mappedPost.userName}
+              avatarSource={mappedPost.avatarSource}
+              timeAgo={mappedPost.timeAgo}
+              content={mappedPost.content}
+              images={mappedPost.images}
+              routeTitle={mappedPost.routeTitle}
+              likeCount={mappedPost.likeCount}
+              commentCount={mappedPost.commentCount}
+              isLiked={mappedPost.isLiked}
+              isSaved={mappedPost.isSaved}
+              isCommented={mappedPost.isCommented}
+              labels={mappedPost.labels}
             />
           </View>
         }
@@ -270,6 +269,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         onSubmit={handleSubmitComment}
         replyingTo={replyingTo?.userName}
         onCancelReply={handleCancelReply}
+        isLoading={createLoading}
       />
     </View>
   );

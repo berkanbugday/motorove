@@ -82,6 +82,10 @@ export class PostsService {
       where: { postId: prismaPost.id },
     });
 
+    const commentsCount = await this.prisma.comment.count({
+      where: { postId: prismaPost.id, parentId: null },
+    });
+
     let isLiked = false;
     let isSaved = false;
 
@@ -143,8 +147,9 @@ export class PostsService {
       latitude: prismaPost.latitude,
       longitude: prismaPost.longitude,
       group: prismaPost.group,
-      comments: prismaPost.comments,
+      comments: prismaPost.comments || [],
       likesCount,
+      commentsCount,
       isLiked,
       isSaved,
       createdBy: prismaPost.createdBy,

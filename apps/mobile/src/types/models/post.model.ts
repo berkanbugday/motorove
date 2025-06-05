@@ -45,9 +45,34 @@ export interface Post {
 export interface Comment {
   id: string;
   content: string;
+  postId: string;
+  parentId?: string;
+  parent?: Comment;
+  replies?: Comment[];
+  createdBy?: UserProfile;
+  createdById: string;
+  updatedBy?: UserProfile;
+  updatedById?: string;
   createdAt: string;
   updatedAt: string;
-  createdById: string;
+  isActive?: boolean;
+}
+
+/**
+ * Create comment input
+ */
+export interface CreateCommentInput {
+  content: string;
+  postId: string;
+  parentId?: string;
+}
+
+/**
+ * Update comment input
+ */
+export interface UpdateCommentInput {
+  id: string;
+  content?: string;
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, spacing, radius} from '@theme';
@@ -20,6 +21,7 @@ interface CommentInputProps {
   style?: StyleProp<ViewStyle>;
   replyingTo?: string;
   onCancelReply?: () => void;
+  isLoading?: boolean;
 }
 
 const CommentInput: React.FC<CommentInputProps> = ({
@@ -28,6 +30,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
   style,
   replyingTo,
   onCancelReply,
+  isLoading = false,
 }) => {
   const [text, setText] = useState('');
   const insets = useSafeAreaInsets();
@@ -67,23 +70,28 @@ const CommentInput: React.FC<CommentInputProps> = ({
             placeholder={placeholder}
             multiline
             maxLength={500}
+            editable={!isLoading}
           />
           <TouchableOpacity
             onPress={handleSubmit}
-            disabled={text.trim().length === 0}
+            disabled={text.trim().length === 0 || isLoading}
             style={[
               styles.sendButton,
-              text.trim().length === 0 && styles.disabledButton,
+              (text.trim().length === 0 || isLoading) && styles.disabledButton,
             ]}>
-            <Icon
-              name="paper-plane"
-              size={20}
-              color={
-                text.trim().length === 0
-                  ? colors.neutral.lightGrey
-                  : colors.neutral.white
-              }
-            />
+            {isLoading ? (
+              <ActivityIndicator size="small" color={colors.neutral.white} />
+            ) : (
+              <Icon
+                name="paper-plane"
+                size={20}
+                color={
+                  text.trim().length === 0
+                    ? colors.neutral.lightGrey
+                    : colors.neutral.white
+                }
+              />
+            )}
           </TouchableOpacity>
         </View>
       </SafeAreaView>
