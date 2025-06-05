@@ -247,14 +247,29 @@ const authLink = setContext(async (_, {headers}) => {
 // Create the Apollo Client instance
 export const apolloClient = new ApolloClient({
   link: from([retryLink, errorLink, authLink, httpLink]),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Post: {
+        // Properly identify Post objects in the cache
+        keyFields: ['id'],
+        fields: {
+          // Merge functions to handle counters like likesCount
+          likesCount: {
+            merge(_, incoming) {
+              return incoming;
+            },
+          },
+        },
+      },
+    },
+  }),
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'cache-and-network',
       errorPolicy: 'all',
     },
     query: {
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'cache-first',
       errorPolicy: 'all',
     },
     mutate: {

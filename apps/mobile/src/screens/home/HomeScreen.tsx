@@ -234,11 +234,11 @@ export const HomeScreen = ({navigation}: Props) => {
     setShowLocationPermission(false);
   };
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
 
-    refetchNotificationsCount();
-    refetchPosts();
+    await refetchNotificationsCount();
+    await refetchPosts();
 
     // Change route on refresh
     rotateRecommendedRoute();
@@ -318,32 +318,34 @@ export const HomeScreen = ({navigation}: Props) => {
     navigateToScreen(navigation, 'CommentDetail', {postId});
   };
 
-  // Handle like press with API call
+  // Handle like press with API call - using optimistic updates
   const handleLikePress = useCallback(
     async (postId: string, isLiked: boolean) => {
       if (isLiked) {
-        await unlikePost(postId);
+        // Fire and forget - optimistic update will handle UI
+        unlikePost(postId);
       } else {
-        await likePost(postId);
+        // Fire and forget - optimistic update will handle UI
+        likePost(postId);
       }
-      // Refetch to update UI
-      refetchPosts();
+      // No need to refetch as cache is updated optimistically
     },
-    [likePost, unlikePost, refetchPosts],
+    [likePost, unlikePost],
   );
 
-  // Handle save press with API call
+  // Handle save press with API call - using optimistic updates
   const handleSavePress = useCallback(
     async (postId: string, isSaved: boolean) => {
       if (isSaved) {
-        await unsavePost(postId);
+        // Fire and forget - optimistic update will handle UI
+        unsavePost(postId);
       } else {
-        await savePost(postId);
+        // Fire and forget - optimistic update will handle UI
+        savePost(postId);
       }
-      // Refetch to update UI
-      refetchPosts();
+      // No need to refetch as cache is updated optimistically
     },
-    [savePost, unsavePost, refetchPosts],
+    [savePost, unsavePost],
   );
 
   // Create dropdown menu items for the feed posts
@@ -648,30 +650,32 @@ export const HomeScreen = ({navigation}: Props) => {
             />
           </View>
           <View>
-            <Subtitle weight="bold" style={styles.sectionTitle}>
-              Shared Posts
-            </Subtitle>
             {postsLoading ? (
               <View style={styles.loadingContainer}>
                 {/* You could add a loading indicator here */}
               </View>
             ) : (
-              <LegendList
-                data={posts}
-                keyExtractor={item => item.id}
-                renderItem={renderFeedPost}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{flex: 1, paddingBottom: spacing.sm}}
-                ListEmptyComponent={
-                  <View style={styles.emptyContainer}>
-                    <Body>No posts found</Body>
-                  </View>
-                }
-                recycleItems={true}
-                maintainVisibleContentPosition={true}
-                onEndReached={loadMore}
-                onEndReachedThreshold={0.3}
-              />
+              <View>
+                <Subtitle weight="bold" style={styles.sectionTitle}>
+                  Shared Posts
+                </Subtitle>
+                <LegendList
+                  data={posts}
+                  keyExtractor={item => item.id}
+                  renderItem={renderFeedPost}
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{flex: 1, paddingBottom: spacing.sm}}
+                  ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                      <Body>No posts found</Body>
+                    </View>
+                  }
+                  recycleItems={true}
+                  maintainVisibleContentPosition={true}
+                  onEndReached={loadMore}
+                  onEndReachedThreshold={0.3}
+                />
+              </View>
             )}
           </View>
         </Animated.ScrollView>
@@ -739,10 +743,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   feedCard: {
-    marginVertical: spacing.xs,
-  },
-  postSeparator: {
-    height: spacing.md,
+    marginVertical: spacing.sm,
   },
   createOptionsContainer: {
     flex: 1,

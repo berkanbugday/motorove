@@ -220,8 +220,18 @@ export const useGetPosts = (
             return prev;
           }
 
+          // Create a map of existing post IDs to avoid duplicates
+          const existingPostIds = new Set(
+            prev.posts.map((post: Post) => post.id),
+          );
+
+          // Filter out any posts that already exist in the previous results
+          const newUniquePostsOnly = fetchMoreResult.posts.filter(
+            (post: Post) => !existingPostIds.has(post.id),
+          );
+
           return {
-            posts: [...prev.posts, ...fetchMoreResult.posts],
+            posts: [...prev.posts, ...newUniquePostsOnly],
           };
         },
       });
@@ -269,6 +279,31 @@ export const useLikePost = () => {
     try {
       const result = await likePostMutation({
         variables: {postId},
+        optimisticResponse: {
+          likePost: {
+            __typename: 'Post',
+            id: postId,
+            postId: postId,
+            isLiked: true,
+            likesCount: +1,
+          },
+        },
+        update: cache => {
+          // Find all normalized Post objects that match this id
+          const cacheId = cache.identify({__typename: 'Post', id: postId});
+
+          if (cacheId) {
+            // Update the cache directly with the optimistic values
+            cache.modify({
+              id: cacheId,
+              fields: {
+                isLiked: () => true,
+                likesCount: (existingCount = 0) =>
+                  (existingCount as number) + 1,
+              },
+            });
+          }
+        },
       });
       return result.data?.likePost;
     } catch (err) {
@@ -302,6 +337,33 @@ export const useUnlikePost = () => {
     try {
       const result = await unlikePostMutation({
         variables: {postId},
+        optimisticResponse: {
+          unlikePost: {
+            __typename: 'Post',
+            id: postId,
+            postId: postId,
+            isLiked: false,
+            likesCount: -1,
+          },
+        },
+        update: cache => {
+          // Find all normalized Post objects that match this id
+          const cacheId = cache.identify({__typename: 'Post', id: postId});
+
+          if (cacheId) {
+            // Update the cache directly with the optimistic values
+            cache.modify({
+              id: cacheId,
+              fields: {
+                isLiked: () => false,
+                likesCount: (existingCount = 0) => {
+                  const currentCount = existingCount as number;
+                  return Math.max(0, currentCount - 1); // Avoid negative counts
+                },
+              },
+            });
+          }
+        },
       });
       return result.data?.unlikePost;
     } catch (err) {
@@ -335,6 +397,28 @@ export const useSavePost = () => {
     try {
       const result = await savePostMutation({
         variables: {postId},
+        optimisticResponse: {
+          savePost: {
+            __typename: 'Post',
+            id: postId,
+            postId: postId,
+            isSaved: true,
+          },
+        },
+        update: cache => {
+          // Find all normalized Post objects that match this id
+          const cacheId = cache.identify({__typename: 'Post', id: postId});
+
+          if (cacheId) {
+            // Update the cache directly with the optimistic values
+            cache.modify({
+              id: cacheId,
+              fields: {
+                isSaved: () => true,
+              },
+            });
+          }
+        },
       });
       return result.data?.savePost;
     } catch (err) {
@@ -368,6 +452,28 @@ export const useUnsavePost = () => {
     try {
       const result = await unsavePostMutation({
         variables: {postId},
+        optimisticResponse: {
+          unsavePost: {
+            __typename: 'Post',
+            id: postId,
+            postId: postId,
+            isSaved: false,
+          },
+        },
+        update: cache => {
+          // Find all normalized Post objects that match this id
+          const cacheId = cache.identify({__typename: 'Post', id: postId});
+
+          if (cacheId) {
+            // Update the cache directly with the optimistic values
+            cache.modify({
+              id: cacheId,
+              fields: {
+                isSaved: () => false,
+              },
+            });
+          }
+        },
       });
       return result.data?.unsavePost;
     } catch (err) {
