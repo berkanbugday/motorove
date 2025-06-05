@@ -250,22 +250,20 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         ListHeaderComponent={
-          <View style={styles.postContainer}>
-            <FeedCard
-              userName={mappedPost.userName}
-              avatarSource={mappedPost.avatarSource}
-              timeAgo={mappedPost.timeAgo}
-              content={mappedPost.content}
-              images={mappedPost.images}
-              routeTitle={mappedPost.routeTitle}
-              likeCount={mappedPost.likeCount}
-              commentCount={mappedPost.commentCount}
-              isLiked={mappedPost.isLiked}
-              isSaved={mappedPost.isSaved}
-              isCommented={mappedPost.isCommented}
-              labels={mappedPost.labels}
-            />
-          </View>
+          <FeedCard
+            userName={mappedPost.userName}
+            avatarSource={mappedPost.avatarSource}
+            timeAgo={mappedPost.timeAgo}
+            content={mappedPost.content}
+            images={mappedPost.images}
+            routeTitle={mappedPost.routeTitle}
+            likeCount={mappedPost.likeCount}
+            commentCount={mappedPost.commentCount}
+            isLiked={mappedPost.isLiked}
+            isSaved={mappedPost.isSaved}
+            isCommented={mappedPost.isCommented}
+            labels={mappedPost.labels}
+          />
         }
         contentContainerStyle={styles.listContent}
         recycleItems={true}
@@ -293,11 +291,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  postContainer: {
-    paddingHorizontal: spacing.sm,
-    paddingTop: spacing.sm,
-  },
   listContent: {
+    paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
   },
 });
