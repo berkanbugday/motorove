@@ -310,7 +310,7 @@ type Query {
   notifications(limit: Int, skip: Int): [Notification!]!
   notificationsCount(onlyUnread: Boolean = true): Float!
   post(id: ID!): Post!
-  posts(createdById: ID, groupId: ID): [Post!]!
+  posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [Post!]!
 }
 
 input RemoveGroupMemberInput {

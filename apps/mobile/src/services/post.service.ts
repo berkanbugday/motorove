@@ -173,7 +173,7 @@ export const useGetPost = (id: string) => {
 export const useGetPosts = (
   groupId?: string,
   createdById?: string,
-  limit = 20,
+  limit = 2,
   skip = 0,
 ) => {
   const [hasMore, setHasMore] = useState(true);

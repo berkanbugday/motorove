@@ -7,6 +7,7 @@ import {
   ResolveField,
   Parent,
   Context,
+  Int,
 } from '@nestjs/graphql';
 import { PostsService } from './posts.service';
 import { Post } from './models/post.model';
@@ -41,12 +42,21 @@ export class PostsResolver {
     @Args('groupId', { type: () => ID, nullable: true }) groupId?: string,
     @Args('createdById', { type: () => ID, nullable: true })
     createdById?: string,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ) {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return this.postsService.findAll(groupId, createdById, userId, authToken);
+    return this.postsService.findAll(
+      groupId,
+      createdById,
+      userId,
+      authToken,
+      limit,
+      skip,
+    );
   }
 
   @UseGuards(JwtGuard)

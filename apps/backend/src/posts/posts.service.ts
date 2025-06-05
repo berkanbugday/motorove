@@ -165,6 +165,8 @@ export class PostsService {
     createdById?: string,
     currentUserId?: string,
     authToken?: string,
+    limit?: number,
+    skip?: number,
   ): Promise<Post[]> {
     const posts = await this.prisma.post.findMany({
       where: {
@@ -193,6 +195,8 @@ export class PostsService {
           orderBy: { createdAt: 'desc' },
         },
       },
+      take: limit || undefined,
+      skip: skip || undefined,
       orderBy: { createdAt: 'desc' },
     });
 

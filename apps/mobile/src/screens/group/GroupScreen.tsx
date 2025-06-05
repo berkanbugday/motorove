@@ -181,7 +181,7 @@ export const GroupScreen = () => {
         recycleItems={true} // Enable component recycling for better performance
         maintainVisibleContentPosition={true} // Maintain the visible position when data changes
         onEndReached={loadMoreJoinedGroups}
-        onEndReachedThreshold={0.3}
+        onEndReachedThreshold={0.5}
       />
     );
   };
@@ -264,7 +264,7 @@ export const GroupScreen = () => {
         recycleItems={true} // Enable component recycling for better performance
         maintainVisibleContentPosition={true} // Maintain the visible position when data changes
         onEndReached={loadMoreAllGroups}
-        onEndReachedThreshold={0.3}
+        onEndReachedThreshold={0.5}
       />
     );
   };

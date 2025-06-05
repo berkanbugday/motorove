@@ -283,7 +283,7 @@ export const NotificationScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         onEndReached={handleEndReached}
-        onEndReachedThreshold={0.3}
+        onEndReachedThreshold={0.5}
         ListEmptyComponent={
           loading ? (
             <View style={styles.emptyContainer}>

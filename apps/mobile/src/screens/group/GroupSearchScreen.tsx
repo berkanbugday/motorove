@@ -151,7 +151,7 @@ export const GroupSearchScreen = () => {
         onRefresh={refetch}
         refreshing={loading}
         onEndReached={handleEndReached}
-        onEndReachedThreshold={0.3}
+        onEndReachedThreshold={0.5}
         recycleItems={true}
         maintainVisibleContentPosition={true}
       />

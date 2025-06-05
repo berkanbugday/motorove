@@ -8,6 +8,12 @@ import {colors} from './colors';
 export const shadows = {
   // For iOS
   ios: {
+    none: {
+      shadowColor: colors.neutral.black,
+      shadowOffset: {width: 0, height: 0},
+      shadowOpacity: 0,
+      shadowRadius: 0,
+    },
     small: {
       shadowColor: colors.neutral.black,
       shadowOffset: {width: 0, height: 2},
@@ -30,6 +36,9 @@ export const shadows = {
 
   // For Android
   android: {
+    none: {
+      elevation: 0,
+    },
     small: {
       elevation: 2,
     },
@@ -43,10 +52,10 @@ export const shadows = {
 };
 
 // Helper function to get the appropriate shadow based on platform
-export const getShadow = (size: 'small' | 'medium' | 'large') => {
+export const getShadow = (size: 'none' | 'small' | 'medium' | 'large') => {
   return Platform.OS === 'ios' ? shadows.ios[size] : shadows.android[size];
 };
 
 // Type for accessing shadow values with type safety
 export type ShadowType = typeof shadows;
-export type ShadowSizeType = 'small' | 'medium' | 'large';
+export type ShadowSizeType = 'none' | 'small' | 'medium' | 'large';

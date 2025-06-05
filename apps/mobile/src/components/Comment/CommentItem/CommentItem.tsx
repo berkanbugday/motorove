@@ -44,7 +44,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
       <Image source={comment.avatarSource} style={styles.avatar} />
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <Typography variant="bodySmall" weight="medium">
+          <Typography variant="bodySmall" weight="semiBold">
             {comment.userName}
           </Typography>
           <Typography
@@ -102,6 +102,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral.veryLightGrey,
   },
   replyContainer: {
     marginLeft: spacing.xl,
@@ -110,15 +112,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    marginRight: spacing.sm,
+    marginRight: spacing.xs,
+    marginTop: spacing.sm,
   },
   contentContainer: {
     flex: 1,
-    ...getShadow('small'),
-    backgroundColor: colors.neutral.white,
-    borderRadius: radius.lg,
-    borderTopLeftRadius: 0,
-    padding: spacing.md,
+    padding: spacing.sm,
   },
   header: {
     flexDirection: 'row',

@@ -14,6 +14,7 @@ import {
 import {Comment} from '../../types/models/post.model';
 import {useGetComments, useCreateComment, useGetPost} from '@services';
 import {IconName} from '@components/Icon';
+import {LegendList} from '@legendapp/list';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
@@ -171,6 +172,8 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     // Find any replies to this comment
     const replies = comments?.filter(comment => comment.parentId === item.id);
 
+    const isLastComment = item.id === comments?.[comments.length - 1]?.id;
+
     const mappedComment = mapCommentForUI(item);
 
     return (
@@ -179,6 +182,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           comment={mappedComment}
           onLikePress={handleLikeComment}
           onReplyPress={handleReplyToComment}
+          style={isLastComment ? {borderBottomWidth: 0} : {}}
         />
         {replies &&
           replies.map(reply => (
@@ -241,7 +245,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
-      <FlatList
+      <LegendList
         data={comments || []}
         renderItem={renderItem}
         keyExtractor={item => item.id}
@@ -264,6 +268,12 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           </View>
         }
         contentContainerStyle={styles.listContent}
+        recycleItems={true}
+        maintainVisibleContentPosition={true}
+        onEndReached={() => {
+          console.log('onEndReached');
+        }}
+        onEndReachedThreshold={0.5}
       />
       <CommentInput
         onSubmit={handleSubmitComment}
