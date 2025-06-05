@@ -29,6 +29,7 @@ export const styles = StyleSheet.create({
     marginTop: -spacing.xs,
     marginBottom: spacing.sm,
     flexWrap: 'wrap',
+    gap: spacing.xs,
   },
   label: {
     flexDirection: 'row',

@@ -430,7 +430,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
       if (post.group) {
         labels.push({
-          icon: 'users' as IconName,
+          icon: 'users-filled' as IconName,
           text: post.group.name,
         });
       }
@@ -450,7 +450,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
       return {
         id: post.id,
-        userName: 'User', // Replace with actual user name if available
+        userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.group?.image), // Use group image or default
         timeAgo: relativeTime(post.createdAt),
         content: post.content,

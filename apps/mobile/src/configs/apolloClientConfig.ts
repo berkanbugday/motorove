@@ -250,8 +250,14 @@ export const apolloClient = new ApolloClient({
   cache: new InMemoryCache({
     typePolicies: {
       Post: {
-        // Properly identify Post objects in the cache
-        keyFields: ['id'],
+        // Handle nullable ids with a custom key field function
+        keyFields: (object: any) => {
+          // If id exists, use it as the key
+          if (object.id) {
+            return ['id'];
+          }
+          return false;
+        },
         fields: {
           // Merge functions to handle counters like likesCount
           likesCount: {
