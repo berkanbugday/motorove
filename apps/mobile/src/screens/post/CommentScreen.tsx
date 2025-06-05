@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, FlatList, ActivityIndicator} from 'react-native';
+import {View, StyleSheet, ActivityIndicator} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
 import {colors, commonStyles, spacing} from '@theme';
@@ -169,11 +169,8 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       return null;
     }
 
-    // Find any replies to this comment
-    const replies = comments?.filter(comment => comment.parentId === item.id);
-
     const isLastComment = item.id === comments?.[comments.length - 1]?.id;
-
+    const lastReplyId = item.replies?.[item.replies.length - 1]?.id;
     const mappedComment = mapCommentForUI(item);
 
     return (
@@ -182,16 +179,26 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           comment={mappedComment}
           onLikePress={handleLikeComment}
           onReplyPress={handleReplyToComment}
-          style={isLastComment ? {borderBottomWidth: 0} : {}}
+          style={
+            isLastComment && item.replies?.length === 0
+              ? {borderBottomWidth: 0}
+              : {}
+          }
         />
-        {replies &&
-          replies.map(reply => (
+        {item.replies &&
+          item.replies.length > 0 &&
+          item.replies.map(reply => (
             <CommentItem
               key={reply.id}
               comment={mapCommentForUI(reply)}
               onLikePress={handleLikeComment}
               onReplyPress={handleReplyToComment}
               isReply
+              style={
+                isLastComment && lastReplyId === reply.id
+                  ? {borderBottomWidth: 0}
+                  : {}
+              }
             />
           ))}
       </View>
