@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import {Typography} from '../../Typography/Typography';
-import {colors, getShadow, radius, spacing} from '@theme';
+import {colors, spacing} from '@theme';
 import {Comment} from '../comments';
 import {Icon} from '@components';
 

@@ -15,6 +15,7 @@ import {Comment} from '../../types/models/post.model';
 import {useGetComments, useCreateComment, useGetPost} from '@services';
 import {IconName} from '@components/Icon';
 import {LegendList} from '@legendapp/list';
+import {relativeTime} from '@utils/dateUtils';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
@@ -118,30 +119,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     }
   };
 
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds}s ago`;
-    }
-
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    }
-
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    }
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
-  };
-
   const mapCommentForUI = (comment: Comment): CommentUI => {
     const userName = comment.createdBy?.firstName
       ? `${comment.createdBy.firstName} ${comment.createdBy.lastName || ''}`
@@ -155,7 +132,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         ? {uri: comment.createdBy.avatar}
         : {uri: 'https://picsum.photos/id/1005/100/100'},
       content: comment.content,
-      timeAgo: formatTimeAgo(comment.createdAt),
+      timeAgo: relativeTime(comment.createdAt),
       likeCount: 0, // This would come from the API in a real implementation
       replyCount: comment.replies?.length || 0,
       isLiked: false, // This would come from the API in a real implementation
@@ -231,10 +208,9 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     avatarSource: post.createdBy?.avatar
       ? {uri: post.createdBy.avatar}
       : {uri: 'https://picsum.photos/id/1005/100/100'},
-    timeAgo: formatTimeAgo(post.createdAt),
+    timeAgo: relativeTime(post.createdAt),
     content: post.content,
     images: post.images ? post.images.map(img => ({uri: img})) : [],
-    routeTitle: post.group?.name || '',
     likeCount: post.likesCount || 0,
     commentCount: post.commentsCount || 0,
     isLiked: post.isLiked || false,
@@ -263,7 +239,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
             timeAgo={mappedPost.timeAgo}
             content={mappedPost.content}
             images={mappedPost.images}
-            routeTitle={mappedPost.routeTitle}
             likeCount={mappedPost.likeCount}
             commentCount={mappedPost.commentCount}
             isLiked={mappedPost.isLiked}
