@@ -248,6 +248,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           />
         }
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         recycleItems={true}
         maintainVisibleContentPosition={true}
         onEndReached={() => {
