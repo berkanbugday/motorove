@@ -173,7 +173,7 @@ export const useGetPost = (id: string) => {
 export const useGetPosts = (
   groupId?: string,
   createdById?: string,
-  limit = 2,
+  limit = 20,
   skip = 0,
 ) => {
   const [hasMore, setHasMore] = useState(true);
@@ -220,18 +220,8 @@ export const useGetPosts = (
             return prev;
           }
 
-          // Create a map of existing post IDs to avoid duplicates
-          const existingPostIds = new Set(
-            prev.posts.map((post: Post) => post.id),
-          );
-
-          // Filter out any posts that already exist in the previous results
-          const newUniquePostsOnly = fetchMoreResult.posts.filter(
-            (post: Post) => !existingPostIds.has(post.id),
-          );
-
           return {
-            posts: [...prev.posts, ...newUniquePostsOnly],
+            posts: [...prev.posts, ...fetchMoreResult.posts],
           };
         },
       });

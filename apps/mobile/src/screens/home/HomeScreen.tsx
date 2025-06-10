@@ -7,8 +7,6 @@ import {
   FlatList,
   Dimensions,
   Animated,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
 } from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
 import {
@@ -191,22 +189,6 @@ export const HomeScreen = ({navigation}: Props) => {
     condition: 'sunny',
     location: 'Current Location',
   };
-
-  // Create a separate handler for scroll events to handle both refresh and animation
-  const handleScroll = Animated.event(
-    [{nativeEvent: {contentOffset: {y: scrollY}}}],
-    {
-      useNativeDriver: true,
-      listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-        // Extract scroll position from the event
-        const offsetY = event.nativeEvent.contentOffset.y;
-
-        // Determine scroll direction
-        isScrollingUp.current = offsetY < previousScrollY.current;
-        previousScrollY.current = offsetY;
-      },
-    },
-  );
 
   // Update hidden state based on scroll position
   useEffect(() => {
@@ -585,100 +567,104 @@ export const HomeScreen = ({navigation}: Props) => {
           </Animated.View>
         </View>
 
-        <Animated.ScrollView
+        <LegendList
           style={styles.scrollContainer}
           contentContainerStyle={styles.scrollContentContainer}
+          data={posts}
+          keyExtractor={item => item.id}
+          renderItem={renderFeedPost}
           showsVerticalScrollIndicator={false}
-          scrollEventThrottle={16}
-          onScroll={handleScroll}
+          recycleItems={true}
+          maintainVisibleContentPosition={true}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          onScroll={event => {
+            const offsetY = event.nativeEvent.contentOffset.y;
+
+            // Update animation value manually
+            scrollY.setValue(offsetY);
+
+            // Determine scroll direction
+            isScrollingUp.current = offsetY < previousScrollY.current;
+            previousScrollY.current = offsetY;
+          }}
           refreshControl={
             <RefreshControl
-              progressViewOffset={95} // Add this to make refresh control visible above the banner
+              progressViewOffset={95}
               refreshing={refreshing}
               onRefresh={onRefresh}
               colors={[colors.neutral.black]}
               tintColor={colors.neutral.black}
             />
-          }>
-          <View>
-            <Subtitle weight="bold" style={styles.sectionTitle}>
-              Recommended Route of the Week
-            </Subtitle>
-            <FullImageCard
-              title={currentRoute.title}
-              subtitle={currentRoute.subtitle}
-              image={{uri: currentRoute.image}}
-              variant="elevated"
-              size="small"
-              onPress={() => loggingService.info('Card pressed')}
-            />
-          </View>
+          }
+          ListHeaderComponent={
+            <View>
+              <View>
+                <Subtitle weight="bold" style={styles.sectionTitle}>
+                  Recommended Route of the Week
+                </Subtitle>
+                <FullImageCard
+                  title={currentRoute.title}
+                  subtitle={currentRoute.subtitle}
+                  image={{uri: currentRoute.image}}
+                  variant="elevated"
+                  size="small"
+                  onPress={() => loggingService.info('Card pressed')}
+                />
+              </View>
 
-          <View>
-            <View style={styles.sectionHeaderContainer}>
+              <View>
+                <View style={styles.sectionHeaderContainer}>
+                  <Subtitle weight="bold" style={styles.sectionTitle}>
+                    Upcoming Group Events
+                  </Subtitle>
+                  <Button
+                    variant="text"
+                    onPress={() => loggingService.info('View all')}
+                    title="View all"
+                  />
+                </View>
+                <FlatList
+                  ref={eventsListRef}
+                  data={upcomingEvents}
+                  renderItem={renderEventBanner}
+                  keyExtractor={item => item.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={Dimensions.get('window').width - spacing.xl}
+                  decelerationRate="fast"
+                  onScroll={handleEventScroll}
+                  onScrollToIndexFailed={handleScrollToIndexFailed}
+                />
+                <PageIndicator
+                  totalPages={upcomingEvents.length}
+                  currentPage={currentEventIndex}
+                  onPageChange={handleEventPageChange}
+                  containerStyle={styles.pageIndicator}
+                  type="pill"
+                  indicatorSize={8}
+                  activeIndicatorSize={10}
+                  spacing={8}
+                />
+              </View>
+
               <Subtitle weight="bold" style={styles.sectionTitle}>
-                Upcoming Group Events
+                Shared Posts
               </Subtitle>
-              <Button
-                variant="text"
-                onPress={() => loggingService.info('View all')}
-                title="View all"
-              />
             </View>
-            <FlatList
-              ref={eventsListRef}
-              data={upcomingEvents}
-              renderItem={renderEventBanner}
-              keyExtractor={item => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              snapToInterval={Dimensions.get('window').width - spacing.xl} // Adjust based on item width
-              decelerationRate="fast"
-              onScroll={handleEventScroll}
-              scrollEventThrottle={16} // For smooth scrolling performance
-              onScrollToIndexFailed={handleScrollToIndexFailed}
-            />
-            <PageIndicator
-              totalPages={upcomingEvents.length}
-              currentPage={currentEventIndex}
-              onPageChange={handleEventPageChange}
-              containerStyle={styles.pageIndicator}
-              type="pill"
-              indicatorSize={8}
-              activeIndicatorSize={10}
-              spacing={8}
-            />
-          </View>
-          <View>
-            {postsLoading ? (
+          }
+          ListEmptyComponent={
+            postsLoading ? (
               <View style={styles.loadingContainer}>
                 {/* You could add a loading indicator here */}
               </View>
             ) : (
-              <View>
-                <Subtitle weight="bold" style={styles.sectionTitle}>
-                  Shared Posts
-                </Subtitle>
-                <LegendList
-                  data={posts}
-                  keyExtractor={item => item.id}
-                  renderItem={renderFeedPost}
-                  showsVerticalScrollIndicator={false}
-                  contentContainerStyle={{flex: 1, paddingBottom: spacing.sm}}
-                  ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                      <Body>No posts found</Body>
-                    </View>
-                  }
-                  recycleItems={true}
-                  maintainVisibleContentPosition={true}
-                  onEndReached={loadMore}
-                  onEndReachedThreshold={0.3}
-                />
+              <View style={styles.emptyContainer}>
+                <Body>No posts found</Body>
               </View>
-            )}
-          </View>
-        </Animated.ScrollView>
+            )
+          }
+        />
       </SafeAreaView>
     </View>
   );
