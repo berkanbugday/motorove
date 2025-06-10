@@ -22,11 +22,6 @@ export const AppConfig = {
   APP_ENV: Config.APP_ENV,
 
   /**
-   * Mapbox access token
-   */
-  MAPBOX_ACCESS_TOKEN: Config.MAPBOX_ACCESS_TOKEN || '',
-
-  /**
    * Whether detailed logging is enabled
    */
   ENABLE_LOGS: Config.ENABLE_LOGS === 'true',

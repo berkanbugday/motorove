@@ -3,7 +3,6 @@ declare module 'react-native-config' {
     // API and environment
     API_URL: string;
     APP_ENV: string;
-    MAPBOX_ACCESS_TOKEN: string;
     ENABLE_LOGS: string;
     API_TIMEOUT: string;
 
