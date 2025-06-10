@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -17,9 +17,19 @@ import {
   TopHeaderBar,
   showToast,
   Body,
+  SwipeableItem,
+  Icon,
+  Dialog,
 } from '@components';
 import {Comment} from '../../types/models/post.model';
-import {useGetComments, useCreateComment, useGetPost} from '@services';
+import {
+  useGetComments,
+  useCreateComment,
+  useGetPost,
+  useUpdateComment,
+  useRemoveComment,
+} from '@services';
+import {useAuth} from '@contexts/AuthContext';
 import {IconName} from '@components/Icon';
 import {LegendList} from '@legendapp/list';
 import {relativeTime} from '@utils/dateUtils';
@@ -46,6 +56,15 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     userName: string;
   } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [editingComment, setEditingComment] = useState<{
+    id: string;
+    content: string;
+  } | null>(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const commentToDelete = useRef<{id: string; postId: string} | null>(null);
+
+  // Get current user
+  const {user} = useAuth();
 
   // Get post data
   const {
@@ -65,6 +84,18 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   // Mutations for comments
   const {createComment, loading: createLoading} = useCreateComment(() => {
     // Refetch comments after creating a new one
+    refetchComments();
+  });
+
+  const {updateComment, loading: updateLoading} = useUpdateComment(() => {
+    // Refetch comments after updating
+    refetchComments();
+    // Reset editing state
+    setEditingComment(null);
+  });
+
+  const {removeComment, loading: removeLoading} = useRemoveComment(() => {
+    // Refetch comments after removing
     refetchComments();
   });
 
@@ -117,11 +148,54 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     setReplyingTo(null);
   };
 
+  const handleEditComment = (comment: CommentUI) => {
+    setEditingComment({
+      id: comment.id,
+      content: comment.content,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+  };
+
+  const handleDeleteComment = (commentId: string, postId: string) => {
+    commentToDelete.current = {id: commentId, postId};
+    setDeleteDialogVisible(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete.current) return;
+
+    try {
+      await removeComment(
+        commentToDelete.current.id,
+        commentToDelete.current.postId,
+      );
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
+
   const handleSubmitComment = async (text: string) => {
     if (!text.trim()) {
       return;
     }
 
+    // If editing a comment
+    if (editingComment) {
+      try {
+        await updateComment({
+          id: editingComment.id,
+          content: text,
+        });
+      } catch (error) {
+        console.error('Error updating comment:', error);
+      }
+      return;
+    }
+
+    // Creating a new comment
     try {
       await createComment({
         content: text,
@@ -143,7 +217,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 
     return {
       id: comment.id,
-      userId: comment.createdById,
+      userId: comment.createdBy?.id || comment.updatedBy?.id || '',
       userName: userName.trim(),
       avatarSource: comment.createdBy?.avatar
         ? {uri: comment.createdBy.avatar}
@@ -155,6 +229,61 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       isLiked: false, // This would come from the API in a real implementation
       parentId: comment.parentId,
     };
+  };
+
+  const isCommentOwner = (comment: CommentUI): boolean => {
+    console.log('comment', comment);
+    console.log('user', user);
+    return user?.id === comment.userId;
+  };
+
+  const renderCommentWithSwipeable = (
+    commentItem: CommentUI,
+    isReply: boolean = false,
+    style: any = {},
+  ) => {
+    const isOwner = isCommentOwner(commentItem);
+
+    // If user is not the owner, render regular comment without swipeable
+    if (!isOwner) {
+      return (
+        <CommentItem
+          comment={commentItem}
+          onLikePress={handleLikeComment}
+          onReplyPress={handleReplyToComment}
+          isReply={isReply}
+          style={style}
+        />
+      );
+    }
+
+    // For comment owners, render with swipeable actions
+    return (
+      <SwipeableItem
+        rightActions={[
+          {
+            text: 'Edit',
+            icon: <Icon name="pen" color={colors.neutral.white} size={20} />,
+            backgroundColor: colors.status.success,
+            onPress: () => handleEditComment(commentItem),
+          },
+          {
+            text: 'Delete',
+            icon: <Icon name="trash" color={colors.neutral.white} size={20} />,
+            backgroundColor: colors.status.error,
+            onPress: () => handleDeleteComment(commentItem.id, params.postId),
+          },
+        ]}
+        contentContainerStyle={styles.swipeableContainer}>
+        <CommentItem
+          comment={commentItem}
+          onLikePress={handleLikeComment}
+          onReplyPress={handleReplyToComment}
+          isReply={isReply}
+          style={style}
+        />
+      </SwipeableItem>
+    );
   };
 
   const renderItem = ({item}: {item: Comment}) => {
@@ -169,32 +298,29 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 
     return (
       <View>
-        <CommentItem
-          comment={mappedComment}
-          onLikePress={handleLikeComment}
-          onReplyPress={handleReplyToComment}
-          style={
-            isLastComment && item.replies?.length === 0
-              ? {borderBottomWidth: 0}
-              : {}
-          }
-        />
+        {renderCommentWithSwipeable(
+          mappedComment,
+          false,
+          isLastComment && item.replies?.length === 0
+            ? {borderBottomWidth: 0}
+            : {},
+        )}
         {item.replies &&
           item.replies.length > 0 &&
-          item.replies.map(reply => (
-            <CommentItem
-              key={reply.id}
-              comment={mapCommentForUI(reply)}
-              onLikePress={handleLikeComment}
-              onReplyPress={handleReplyToComment}
-              isReply
-              style={
-                isLastComment && lastReplyId === reply.id
-                  ? {borderBottomWidth: 0}
-                  : {}
-              }
-            />
-          ))}
+          item.replies.map(reply => {
+            const mappedReply = mapCommentForUI(reply);
+            return (
+              <View key={reply.id}>
+                {renderCommentWithSwipeable(
+                  mappedReply,
+                  true,
+                  isLastComment && lastReplyId === reply.id
+                    ? {borderBottomWidth: 0}
+                    : {},
+                )}
+              </View>
+            );
+          })}
       </View>
     );
   };
@@ -306,7 +432,27 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         onSubmit={handleSubmitComment}
         replyingTo={replyingTo?.userName}
         onCancelReply={handleCancelReply}
-        isLoading={createLoading}
+        isLoading={createLoading || updateLoading || removeLoading}
+        initialValue={editingComment?.content || ''}
+        editing={Boolean(editingComment)}
+        onCancelEdit={handleCancelEdit}
+      />
+
+      <Dialog
+        variant="confirm"
+        visible={deleteDialogVisible}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment?"
+        confirmButton={{
+          text: 'Delete',
+          variant: 'primary',
+          onPress: confirmDeleteComment,
+        }}
+        cancelButton={{
+          text: 'Cancel',
+          variant: 'outline',
+        }}
+        onClose={() => setDeleteDialogVisible(false)}
       />
     </View>
   );
@@ -323,5 +469,8 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
+  },
+  swipeableContainer: {
+    backgroundColor: colors.secondary.light,
   },
 });

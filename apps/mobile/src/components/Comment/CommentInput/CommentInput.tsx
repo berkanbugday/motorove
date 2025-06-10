@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   TextInput,
@@ -22,6 +22,9 @@ interface CommentInputProps {
   replyingTo?: string;
   onCancelReply?: () => void;
   isLoading?: boolean;
+  initialValue?: string;
+  editing?: boolean;
+  onCancelEdit?: () => void;
 }
 
 const CommentInput: React.FC<CommentInputProps> = ({
@@ -31,9 +34,19 @@ const CommentInput: React.FC<CommentInputProps> = ({
   replyingTo,
   onCancelReply,
   isLoading = false,
+  initialValue = '',
+  editing = false,
+  onCancelEdit,
 }) => {
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialValue);
   const insets = useSafeAreaInsets();
+
+  // Update text when initialValue changes (for editing mode)
+  useEffect(() => {
+    if (initialValue) {
+      setText(initialValue);
+    }
+  }, [initialValue]);
 
   const handleSubmit = () => {
     if (text.trim().length > 0) {
@@ -42,21 +55,36 @@ const CommentInput: React.FC<CommentInputProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    if (editing && onCancelEdit) {
+      onCancelEdit();
+      setText('');
+    } else if (replyingTo && onCancelReply) {
+      onCancelReply();
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={style}>
       <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
-        {replyingTo && (
+        {(replyingTo || editing) && (
           <View style={styles.replyingContainer}>
             <Typography variant="caption" color={colors.neutral.grey}>
-              Replying to{' '}
-              <Typography variant="caption" weight="bold">
-                {replyingTo}
-              </Typography>
+              {editing ? (
+                'Editing comment'
+              ) : (
+                <>
+                  Replying to{' '}
+                  <Typography variant="caption" weight="bold">
+                    {replyingTo}
+                  </Typography>
+                </>
+              )}
             </Typography>
             <TouchableOpacity
-              onPress={onCancelReply}
+              onPress={handleCancel}
               hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
               <Icon name="close" size={16} color={colors.neutral.grey} />
             </TouchableOpacity>
@@ -67,7 +95,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
             value={text}
             onChangeText={setText}
             style={styles.input}
-            placeholder={placeholder}
+            placeholder={editing ? 'Edit your comment...' : placeholder}
             multiline
             maxLength={500}
             editable={!isLoading}
@@ -83,7 +111,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
               <ActivityIndicator size="small" color={colors.neutral.white} />
             ) : (
               <Icon
-                name="paper-plane"
+                name={editing ? 'pen' : 'paper-plane'}
                 size={20}
                 color={
                   text.trim().length === 0

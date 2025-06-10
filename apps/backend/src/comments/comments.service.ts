@@ -34,32 +34,30 @@ export class CommentsService {
   }
 
   async findAll(postId: string): Promise<Comment[]> {
-    const comments = await this.prisma.$transaction(async (tx) => {
-      return tx.comment.findMany({
-        where: {
-          postId,
-          isActive: true,
-          parentId: null, // Only fetch top-level comments
-        },
-        include: {
-          createdBy: true,
-          updatedBy: true,
-          post: true,
-          replies: {
-            where: { isActive: true },
-            include: {
-              createdBy: true,
-              updatedBy: true,
-            },
-            orderBy: { createdAt: 'asc' },
+    const comments = await this.prisma.comment.findMany({
+      where: {
+        postId,
+        isActive: true,
+        parentId: null, // Only fetch top-level comments
+      },
+      include: {
+        createdBy: true,
+        updatedBy: true,
+        post: true,
+        replies: {
+          where: { isActive: true },
+          include: {
+            createdBy: true,
+            updatedBy: true,
           },
+          orderBy: { createdAt: 'asc' },
         },
-        orderBy: { createdAt: 'desc' },
-      });
+      },
+      orderBy: { createdAt: 'desc' },
     });
 
-    return comments.map((comment) =>
-      this.mapPrismaCommentToGraphQLComment(comment),
+    return Promise.all(
+      comments.map((comment) => this.mapPrismaCommentToGraphQLComment(comment)),
     );
   }
 
