@@ -236,16 +236,16 @@ export const HomeScreen = ({navigation}: Props) => {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-
-    await refetchNotificationsCount();
-    await refetchPosts();
-
-    // Change route on refresh
-    rotateRecommendedRoute();
-    // Simulate data fetching delay
-    setTimeout(() => {
+    try {
+      // Change route on refresh
+      rotateRecommendedRoute();
+      await refetchNotificationsCount();
+      await refetchPosts();
+    } finally {
       setRefreshing(false);
-    }, 1000);
+    }
+
+    setRefreshing(false);
   }, [rotateRecommendedRoute, refetchNotificationsCount, refetchPosts]);
 
   // Set initial route
