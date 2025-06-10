@@ -1,5 +1,11 @@
-import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, ActivityIndicator} from 'react-native';
+import React, {useState, useEffect, useCallback} from 'react';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
 import {colors, commonStyles, spacing} from '@theme';
@@ -10,6 +16,7 @@ import {
   CommentInput,
   TopHeaderBar,
   showToast,
+  Body,
 } from '@components';
 import {Comment} from '../../types/models/post.model';
 import {useGetComments, useCreateComment, useGetPost} from '@services';
@@ -38,6 +45,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     id: string;
     userName: string;
   } | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Get post data
   const {
@@ -78,6 +86,15 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       });
     }
   }, [postError, commentsError]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refetchComments();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetchComments]);
 
   const handleLikeComment = async () => {
     // In a real implementation, you would call a like/unlike API
@@ -224,15 +241,16 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={`Comments (${post.commentsCount || 0})`}
+        title={`Comments (${comments?.length || 0})`}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
-      <LegendList
-        data={comments || []}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        ListHeaderComponent={
+      {!comments || comments.length === 0 ? (
+        <ScrollView
+          style={[styles.listContent, {flex: 1}]}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
           <FeedCard
             userName={mappedPost.userName}
             avatarSource={mappedPost.avatarSource}
@@ -245,17 +263,45 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
             isSaved={mappedPost.isSaved}
             isCommented={mappedPost.isCommented}
             labels={mappedPost.labels}
+            actionBarDisabled={true}
           />
-        }
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        recycleItems={true}
-        maintainVisibleContentPosition={true}
-        onEndReached={() => {
-          console.log('onEndReached');
-        }}
-        onEndReachedThreshold={0.5}
-      />
+          <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
+            No comments yet. Be the first to comment!
+          </Body>
+        </ScrollView>
+      ) : (
+        <LegendList
+          data={comments}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={
+            <FeedCard
+              userName={mappedPost.userName}
+              avatarSource={mappedPost.avatarSource}
+              timeAgo={mappedPost.timeAgo}
+              content={mappedPost.content}
+              images={mappedPost.images}
+              likeCount={mappedPost.likeCount}
+              commentCount={mappedPost.commentCount}
+              isLiked={mappedPost.isLiked}
+              isSaved={mappedPost.isSaved}
+              isCommented={mappedPost.isCommented}
+              labels={mappedPost.labels}
+              actionBarDisabled={true}
+            />
+          }
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          recycleItems={true}
+          maintainVisibleContentPosition={true}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onEndReached={() => {
+            console.log('onEndReached');
+          }}
+          onEndReachedThreshold={0.3}
+        />
+      )}
       <CommentInput
         onSubmit={handleSubmitComment}
         replyingTo={replyingTo?.userName}

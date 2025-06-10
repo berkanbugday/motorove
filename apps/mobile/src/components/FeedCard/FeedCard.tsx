@@ -157,6 +157,11 @@ export interface FeedCardProps {
      */
     style?: StyleProp<ViewStyle>;
   };
+
+  /**
+   * Whether the action bar buttons are disabled
+   */
+  actionBarDisabled?: boolean;
 }
 
 const {width: screenWidth} = Dimensions.get('window');
@@ -192,6 +197,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
     color: colors.neutral.black,
     opacity: 0.3,
   },
+  actionBarDisabled = false,
 }) => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
@@ -220,6 +226,8 @@ const FeedCard: React.FC<FeedCardProps> = ({
   };
 
   const handleLikePress = () => {
+    if (actionBarDisabled) return;
+
     // Animate the like button
     Animated.sequence([
       Animated.timing(likeAnimatedValue, {
@@ -241,6 +249,8 @@ const FeedCard: React.FC<FeedCardProps> = ({
   };
 
   const handleSavePress = () => {
+    if (actionBarDisabled) return;
+
     // Simple pop animation for save button
     Animated.sequence([
       Animated.timing(saveAnimatedValue, {
@@ -435,7 +445,10 @@ const FeedCard: React.FC<FeedCardProps> = ({
       {/* Action Bar */}
       <View style={styles.actionBar}>
         {/* Like Button */}
-        <TouchableOpacity onPress={handleLikePress} style={styles.actionButton}>
+        <TouchableOpacity
+          onPress={handleLikePress}
+          style={[styles.actionButton, actionBarDisabled && {opacity: 0.5}]}
+          disabled={actionBarDisabled}>
           <Animated.View style={{transform: [{scale: likeAnimatedValue}]}}>
             <Icon
               name={isLiked ? 'like-filled' : 'like'}
@@ -452,7 +465,10 @@ const FeedCard: React.FC<FeedCardProps> = ({
         </TouchableOpacity>
 
         {/* Comment Button */}
-        <TouchableOpacity onPress={onCommentPress} style={styles.actionButton}>
+        <TouchableOpacity
+          onPress={onCommentPress}
+          style={[styles.actionButton, actionBarDisabled && {opacity: 0.5}]}
+          disabled={actionBarDisabled}>
           <Icon
             name={isCommented ? 'comment-filled' : 'comment'}
             size={20}
@@ -469,7 +485,12 @@ const FeedCard: React.FC<FeedCardProps> = ({
         {/* Save Button */}
         <TouchableOpacity
           onPress={handleSavePress}
-          style={[styles.actionButton, styles.saveButton]}>
+          style={[
+            styles.actionButton,
+            styles.saveButton,
+            actionBarDisabled && {opacity: 0.5},
+          ]}
+          disabled={actionBarDisabled}>
           <Animated.View
             style={{
               transform: [{scale: saveAnimatedValue}],

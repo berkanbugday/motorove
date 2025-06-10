@@ -226,8 +226,6 @@ export const HomeScreen = ({navigation}: Props) => {
     } finally {
       setRefreshing(false);
     }
-
-    setRefreshing(false);
   }, [rotateRecommendedRoute, refetchNotificationsCount, refetchPosts]);
 
   // Set initial route
