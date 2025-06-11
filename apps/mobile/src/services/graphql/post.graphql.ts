@@ -36,6 +36,14 @@ export const CREATE_POST_FRAGMENT = gql`
   }
 `;
 
+export const UPDATE_POST_FRAGMENT = gql`
+  fragment UpdatePostFragment on Post {
+    id
+    ...CreatePostFragment
+  }
+  ${CREATE_POST_FRAGMENT}
+`;
+
 export const GET_POSTS = gql`
   query GetPosts($groupId: ID, $createdById: ID, $limit: Int, $skip: Int) {
     posts(
@@ -77,12 +85,12 @@ export const CREATE_POST = gql`
 `;
 
 export const UPDATE_POST = gql`
-  mutation UpdatePost($updatePostInput: UpdatePostInput!) {
-    updatePost(updatePostInput: $updatePostInput) {
-      ...PostFragment
+  mutation UpdatePost($input: UpdatePostInput!) {
+    updatePost(updatePostInput: $input) {
+      ...UpdatePostFragment
     }
   }
-  ${POST_FRAGMENT}
+  ${UPDATE_POST_FRAGMENT}
 `;
 
 export const REMOVE_POST = gql`

@@ -32,7 +32,7 @@ import {
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
-import {useAuth} from '@contexts';
+import {useAuth} from '@contexts/AuthContext';
 import {useGetNotificationsCount} from '@services/notification.service';
 import {useFocusEffect} from '@react-navigation/native';
 import {
@@ -46,6 +46,7 @@ import {
   useUnlikePost,
   useSavePost,
   useUnsavePost,
+  useRemovePost,
 } from '@services/post.service';
 import {relativeTime} from '@utils/dateUtils';
 import {LegendList} from '@legendapp/list';
@@ -155,6 +156,9 @@ export const HomeScreen = ({navigation}: Props) => {
   const {unlikePost} = useUnlikePost();
   const {savePost} = useSavePost();
   const {unsavePost} = useUnsavePost();
+
+  // Add hook for post deletion
+  const {removePost} = useRemovePost();
 
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
@@ -332,17 +336,11 @@ export const HomeScreen = ({navigation}: Props) => {
   const createPostDropdownItems = useCallback(
     (postId: string, isOwnPost: boolean): DropdownMenuItem[] => {
       const items: DropdownMenuItem[] = [
-        {
-          id: 'share',
-          label: 'Share',
-          icon: 'share',
-        },
-        {
-          id: 'report',
-          label: 'Report',
-          icon: 'error',
-          isHighlighted: true,
-        },
+        // {
+        //   id: 'share',
+        //   label: 'Share',
+        //   icon: 'share',
+        // },
       ];
 
       // Add edit and delete options if it's the user's own post
@@ -360,6 +358,13 @@ export const HomeScreen = ({navigation}: Props) => {
             isHighlighted: true,
           },
         );
+      } else {
+        items.push({
+          id: 'report',
+          label: 'Report',
+          icon: 'error',
+          isHighlighted: true,
+        });
       }
 
       return items;
@@ -383,7 +388,46 @@ export const HomeScreen = ({navigation}: Props) => {
           break;
         case 'delete':
           loggingService.info(`Delete post: ${postId}`);
-          // You could also open a confirmation dialog before deleting
+          // Show confirmation dialog before deleting
+          openBottomSheet({
+            title: 'Delete Post',
+            closeButtonPosition: 'top-left',
+            enableGestureControl: false,
+            content: (
+              <View>
+                <Body>
+                  Are you sure you want to delete this post? This action cannot
+                  be undone.
+                </Body>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    gap: spacing.md,
+                    paddingTop: spacing.lg,
+                    paddingBottom: spacing.lg,
+                  }}>
+                  <Button
+                    title="Cancel"
+                    variant="outline"
+                    onPress={() => closeBottomSheet()}
+                    style={{width: '50%'}}
+                  />
+                  <Button
+                    title="Delete"
+                    variant="primary"
+                    onPress={() => {
+                      removePost(postId);
+                      closeBottomSheet();
+                      refetchPosts();
+                    }}
+                    style={{width: '50%'}}
+                  />
+                </View>
+              </View>
+            ),
+            snapPoint: 'minimal',
+          });
           break;
         default:
           loggingService.info(
@@ -391,7 +435,7 @@ export const HomeScreen = ({navigation}: Props) => {
           );
       }
     },
-    [navigation],
+    [navigation, removePost, refetchPosts],
   );
 
   // Helper function to format avatar URL from API data
@@ -450,8 +494,7 @@ export const HomeScreen = ({navigation}: Props) => {
   const renderFeedPost = useCallback(
     ({item}: {item: Post}) => {
       // Determine if this is the user's own post
-      const isOwnPost = item.createdById === user?.id;
-
+      const isOwnPost = item.createdBy.id === user?.id;
       // Transform Post model to FeedCard props
       const feedCardProps = transformPostToFeedCard(item);
 
@@ -750,5 +793,14 @@ const styles = StyleSheet.create({
     height: 200,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  deleteButtonsContainer: {
+    // flexDirection: 'row',
+    // justifyContent: 'space-between',
+    // marginTop: spacing.md,
+  },
+  deleteButton: {
+    flex: 1,
+    marginHorizontal: spacing.xs,
   },
 });

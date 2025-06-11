@@ -111,7 +111,7 @@ export interface UpdatePostInput {
   images?: string[];
   latitude?: number;
   longitude?: number;
-  groupId?: string;
+  groupId?: string | null;
 }
 
 /**

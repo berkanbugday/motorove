@@ -87,10 +87,10 @@ export const useUpdatePost = (onSuccess?: () => void) => {
     },
   });
 
-  const updatePost = async (updatePostInput: UpdatePostInput) => {
+  const updatePost = async (input: UpdatePostInput) => {
     try {
       const result = await updatePostMutation({
-        variables: {updatePostInput},
+        variables: {input: {...input, images: input.images ?? []}},
       });
       return result.data?.updatePost;
     } catch (err) {

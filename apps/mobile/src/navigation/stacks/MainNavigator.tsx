@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
-import {CreatePostScreen, CommentScreen} from '@screens/post';
+import {CreatePostScreen, CommentScreen, EditPostScreen} from '@screens/post';
 import {
   CreateGroupScreen,
   GroupDetailScreen,
@@ -40,6 +40,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="CreatePost"
         component={CreatePostScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="EditPost"
+        component={EditPostScreen}
         options={{headerShown: false}}
       />
 

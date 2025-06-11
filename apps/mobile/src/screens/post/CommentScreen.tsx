@@ -232,8 +232,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   };
 
   const isCommentOwner = (comment: CommentUI): boolean => {
-    console.log('comment', comment);
-    console.log('user', user);
     return user?.id === comment.userId;
   };
 
