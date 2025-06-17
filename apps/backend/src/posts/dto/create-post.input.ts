@@ -6,7 +6,22 @@ import {
   IsOptional,
   IsUUID,
   IsNumber,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+@InputType()
+export class PostAddressInput {
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  address: string;
+
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  language: string;
+}
 
 @InputType()
 export class CreatePostInput {
@@ -35,4 +50,11 @@ export class CreatePostInput {
   @IsOptional()
   @IsUUID()
   groupId?: string;
+
+  @Field(() => [PostAddressInput], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PostAddressInput)
+  addresses?: PostAddressInput[];
 }

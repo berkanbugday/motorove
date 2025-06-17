@@ -406,7 +406,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
               content={mappedPost.content}
               images={mappedPost.images}
               likeCount={mappedPost.likeCount}
-              commentCount={mappedPost.commentCount}
+              commentCount={comments.length}
               isLiked={mappedPost.isLiked}
               isSaved={mappedPost.isSaved}
               isCommented={mappedPost.isCommented}

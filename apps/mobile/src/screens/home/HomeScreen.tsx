@@ -459,10 +459,11 @@ export const HomeScreen = ({navigation}: Props) => {
         });
       }
 
-      if (post.latitude && post.longitude) {
+      if (post.addresses && post.addresses.length > 0) {
         labels.push({
           icon: 'map-pin' as IconName,
-          text: 'Location available', // Replace with actual location name if available
+          text: post.addresses?.find(address => address.language === 'en')
+            ?.address,
         });
       }
 

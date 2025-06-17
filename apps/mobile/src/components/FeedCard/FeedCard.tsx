@@ -447,7 +447,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
         {/* Like Button */}
         <TouchableOpacity
           onPress={handleLikePress}
-          style={[styles.actionButton, actionBarDisabled && {opacity: 0.5}]}
+          style={[styles.actionButton, actionBarDisabled && {opacity: 0.8}]}
           disabled={actionBarDisabled}>
           <Animated.View style={{transform: [{scale: likeAnimatedValue}]}}>
             <Icon
@@ -467,7 +467,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
         {/* Comment Button */}
         <TouchableOpacity
           onPress={onCommentPress}
-          style={[styles.actionButton, actionBarDisabled && {opacity: 0.5}]}
+          style={[styles.actionButton, actionBarDisabled && {opacity: 0.8}]}
           disabled={actionBarDisabled}>
           <Icon
             name={isCommented ? 'comment-filled' : 'comment'}
@@ -488,7 +488,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
           style={[
             styles.actionButton,
             styles.saveButton,
-            actionBarDisabled && {opacity: 0.5},
+            actionBarDisabled && {opacity: 0.8},
           ]}
           disabled={actionBarDisabled}>
           <Animated.View

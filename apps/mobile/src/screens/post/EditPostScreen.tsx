@@ -31,7 +31,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useUpdatePost, useGetPost} from '@services/post.service';
-import {UpdatePostInput} from '../../types/models/post.model';
+import {PostAddressInput, UpdatePostInput} from '../../types/models/post.model';
 import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
 import {LegendList} from '@legendapp/list';
@@ -53,8 +53,8 @@ export const EditPostScreen = () => {
   const [location, setLocation] = useState<{
     latitude?: number;
     longitude?: number;
-    address?: string;
-  }>({});
+    addresses: PostAddressInput[];
+  }>({addresses: []});
   const [selectedGroup, setSelectedGroup] = useState<{
     id: string;
     name: string;
@@ -89,6 +89,7 @@ export const EditPostScreen = () => {
         setLocation({
           latitude: post.latitude,
           longitude: post.longitude,
+          addresses: post.addresses || [],
         });
       }
 
@@ -256,7 +257,10 @@ export const EditPostScreen = () => {
         <PostLocationMap
           initialLocation={location}
           onLocationSelect={selectedLocation => {
-            setLocation(selectedLocation);
+            setLocation({
+              ...selectedLocation,
+              addresses: selectedLocation.addresses || [],
+            });
             closeBottomSheet();
           }}
           onClose={() => closeBottomSheet()}
@@ -298,6 +302,7 @@ export const EditPostScreen = () => {
         ...(selectedPrivacy?.value === 'group' && selectedGroup
           ? {groupId: selectedGroup.id}
           : {groupId: null}),
+        addresses: location.addresses,
       };
 
       // Call the updatePost function from the hook
@@ -415,7 +420,13 @@ export const EditPostScreen = () => {
               iconSize={18}
               onPress={handleAddLocation}
               textStyle={styles.actionButtonText}
-              title={location.address ? location.address : 'Add location'}
+              title={
+                location.addresses.length > 0
+                  ? location.addresses.find(
+                      address => address.language === 'en',
+                    )?.address
+                  : 'Add location'
+              }
             />
           </View>
         </ScrollView>

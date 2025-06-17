@@ -4,6 +4,21 @@ import { Comment } from '../../comments/models/comment.model';
 import { BaseModel } from '../../core/models/base.model';
 
 @ObjectType()
+export class PostAddress {
+  @Field()
+  id: string;
+
+  @Field()
+  postId: string;
+
+  @Field()
+  address: string;
+
+  @Field()
+  language: string;
+}
+
+@ObjectType()
 export class Post extends BaseModel {
   @Field()
   content: string;
@@ -25,6 +40,9 @@ export class Post extends BaseModel {
 
   @Field(() => [Comment], { nullable: true })
   comments?: Comment[];
+
+  @Field(() => [PostAddress], { nullable: true })
+  addresses?: PostAddress[];
 
   @Field(() => Int, { defaultValue: 0 })
   likesCount: number;

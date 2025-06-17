@@ -10,13 +10,14 @@ import Geolocation from '@react-native-community/geolocation';
 import {RNMapMarkerType} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
+import {PostAddressInput} from '../../types/models/post.model';
 
 interface PostLocationMapProps {
   onLocationSelect: (location: {
     latitude?: number;
     longitude?: number;
     name?: string;
-    address?: string;
+    addresses?: PostAddressInput[];
   }) => void;
   onClose: () => void;
   initialLocation?: {
@@ -41,7 +42,9 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [locationAddress, setLocationAddress] = useState<string>('');
+  const [locationAddresses, setLocationAddresses] = useState<
+    PostAddressInput[]
+  >([]);
 
   // Get user location on mount
   useEffect(() => {
@@ -87,48 +90,62 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
     }
   }, [initialLocation]);
 
-  // Fetch location name using reverse geocoding
+  // Fetch location name using reverse geocoding for both Turkish and English
   const fetchLocationDetails = async (latitude: number, longitude: number) => {
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=en`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'User-Agent': 'Motorove Mobile App', // Nominatim requires a user agent
+      const languages = ['en', 'tr'];
+      const addressPromises = languages.map(async language => {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${language}`,
+          {
+            headers: {
+              Accept: 'application/json',
+              'User-Agent': 'Motorove Mobile App', // Nominatim requires a user agent
+            },
           },
-        },
-      );
+        );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error(`Expected JSON response but got ${contentType}`);
-      }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error(`Expected JSON response but got ${contentType}`);
+        }
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data && data.display_name) {
-        // Extract place address
-        let hamlet = data.address.hamlet ? `${data.address.hamlet}, ` : '';
-        let village = data.address.village ? `${data.address.village}, ` : '';
-        let suburb = data.address.suburb ? `${data.address.suburb}, ` : '';
-        let town = data.address.town ? `${data.address.town}, ` : '';
-        let borough = data.address.borough ? `${data.address.borough}, ` : '';
-        let province = data.address.province
-          ? `${data.address.province}, `
-          : '';
-        let country = data.address.country ? `${data.address.country}` : '';
-        const address = `${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
+        if (data && data.display_name) {
+          // Extract place address
+          let hamlet = data.address.hamlet ? `${data.address.hamlet}, ` : '';
+          let village = data.address.village ? `${data.address.village}, ` : '';
+          let suburb = data.address.suburb ? `${data.address.suburb}, ` : '';
+          let town = data.address.town ? `${data.address.town}, ` : '';
+          let borough = data.address.borough ? `${data.address.borough}, ` : '';
+          let province = data.address.province
+            ? `${data.address.province}, `
+            : '';
+          let country = data.address.country ? `${data.address.country}` : '';
+          const address = `${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
 
-        setLocationAddress(address);
-      }
+          return {
+            address: address || data.display_name,
+            language,
+          } as PostAddressInput;
+        }
+
+        return null;
+      });
+
+      const addresses = await Promise.all(addressPromises);
+      const validAddresses = addresses.filter(
+        addr => addr !== null,
+      ) as PostAddressInput[];
+      setLocationAddresses(validAddresses);
     } catch (error) {
       console.error('Error fetching location details:', error);
-      setLocationAddress('');
+      setLocationAddresses([]);
     }
   };
 
@@ -143,18 +160,18 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
       onLocationSelect({
         latitude: selectedLocation.latitude,
         longitude: selectedLocation.longitude,
-        address: locationAddress,
+        addresses: locationAddresses,
       });
     }
   };
 
   const handleRemoveLocation = () => {
     setSelectedLocation(null);
-    setLocationAddress('');
+    setLocationAddresses([]);
     onLocationSelect({
       latitude: undefined,
       longitude: undefined,
-      address: '',
+      addresses: [],
     });
   };
 
@@ -172,6 +189,27 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
         zIndex: 1,
       },
     ];
+  };
+
+  // Get the display address (prefer English, fallback to Turkish or first available)
+  const getDisplayAddress = () => {
+    if (locationAddresses.length === 0) {
+      return 'Address not available';
+    }
+
+    const englishAddress = locationAddresses.find(
+      addr => addr.language === 'en',
+    );
+    const turkishAddress = locationAddresses.find(
+      addr => addr.language === 'tr',
+    );
+
+    return (
+      englishAddress?.address ||
+      turkishAddress?.address ||
+      locationAddresses[0]?.address ||
+      'Address not available'
+    );
   };
 
   return (
@@ -211,7 +249,7 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
                 {'Selected Location'}
               </Body>
               <BodySmall style={styles.locationAddress} numberOfLines={2}>
-                {locationAddress || 'Address not available'}
+                {getDisplayAddress()}
               </BodySmall>
             </View>
             <View style={styles.buttonContainerWrapper}>

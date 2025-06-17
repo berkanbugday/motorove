@@ -10,7 +10,25 @@ import {UserProfile} from './user.model';
 export type PostContentType = 'text' | 'image' | 'video' | 'poll' | 'link';
 
 /**
- * Base post interface
+ * Post Address model for multi-language support
+ */
+export interface PostAddress {
+  id: string;
+  postId: string;
+  address: string;
+  language: string;
+}
+
+/**
+ * Post Address Input
+ */
+export interface PostAddressInput {
+  address: string;
+  language: string;
+}
+
+/**
+ * Post model
  */
 export interface Post {
   id: string;
@@ -25,37 +43,32 @@ export interface Post {
     image?: string;
   };
   comments?: Comment[];
+  addresses?: PostAddress[];
   likesCount: number;
   savesCount: number;
   commentsCount: number;
   isLiked: boolean;
   isSaved: boolean;
   createdBy: UserProfile;
-  createdById: string;
-  updatedBy: UserProfile;
-  updatedById: string;
+  updatedBy?: UserProfile;
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
 }
 
 /**
- * Comment interface
+ * Comment model (simplified to avoid circular dependency)
  */
 export interface Comment {
   id: string;
   content: string;
   postId: string;
   parentId?: string;
-  parent?: Comment;
   replies?: Comment[];
-  createdBy?: UserProfile;
-  createdById: string;
-  updatedBy?: UserProfile;
-  updatedById?: string;
+  createdBy: UserProfile;
   createdAt: string;
   updatedAt: string;
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 /**
@@ -99,7 +112,8 @@ export interface CreatePostInput {
   images?: string[];
   latitude?: number;
   longitude?: number;
-  groupId?: string;
+  groupId?: string | null;
+  addresses?: PostAddressInput[];
 }
 
 /**
@@ -112,6 +126,7 @@ export interface UpdatePostInput {
   latitude?: number;
   longitude?: number;
   groupId?: string | null;
+  addresses?: PostAddressInput[];
 }
 
 /**

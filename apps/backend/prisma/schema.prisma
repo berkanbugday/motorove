@@ -194,16 +194,17 @@ model DeviceToken {
 }
 
 model Post {
-  id        String     @id @default(uuid())
+  id        String        @id @default(uuid())
   content   String
   images    String[]
   latitude  Float? // Added latitude field
   longitude Float? // Added longitude field
-  group     Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  group     Group?        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId   String?
   comments  Comment[]
   likes     PostLike[] // Added relation to PostLike
   saves     PostSave[] // Added relation to PostSave
+  addresses PostAddress[] // Added relation to PostAddress
 
   // Base model fields
   createdById String
@@ -269,4 +270,17 @@ model PostSave {
   @@unique([postId, userId])
   @@index([postId])
   @@index([userId])
+}
+
+// New model for post addresses with multi-language support
+model PostAddress {
+  id       String @id @default(uuid())
+  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   String
+  address  String
+  language String // Language code (e.g., 'en', 'tr', 'es', etc.)
+
+  @@unique([postId, language])
+  @@index([postId])
+  @@index([language])
 }

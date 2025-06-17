@@ -148,6 +148,7 @@ export class PostsService {
       longitude: prismaPost.longitude,
       group: prismaPost.group,
       comments: prismaPost.comments || [],
+      addresses: prismaPost.addresses || [],
       likesCount,
       commentsCount,
       isLiked,
@@ -178,6 +179,7 @@ export class PostsService {
         createdBy: true,
         updatedBy: true,
         group: true,
+        addresses: true,
         comments: {
           where: { isActive: true, parentId: null },
           include: {
@@ -238,6 +240,7 @@ export class PostsService {
         createdBy: true,
         updatedBy: true,
         group: true,
+        addresses: true,
         comments: {
           where: { isActive: true, parentId: null },
           include: {
@@ -323,9 +326,39 @@ export class PostsService {
         createdBy: true,
         updatedBy: true,
         group: true,
+        addresses: true,
         comments: true,
       },
     });
+
+    // Create addresses if provided
+    if (createPostInput.addresses && createPostInput.addresses.length > 0) {
+      await this.prisma.postAddress.createMany({
+        data: createPostInput.addresses.map((address) => ({
+          postId: post.id,
+          address: address.address,
+          language: address.language,
+        })),
+      });
+
+      // Fetch the post again with addresses included
+      const postWithAddresses = await this.prisma.post.findUnique({
+        where: { id: post.id },
+        include: {
+          createdBy: true,
+          updatedBy: true,
+          group: true,
+          addresses: true,
+          comments: true,
+        },
+      });
+
+      return this.mapPrismaPostToGraphQLPost(
+        postWithAddresses!,
+        userId,
+        authToken,
+      );
+    }
 
     return this.mapPrismaPostToGraphQLPost(post, userId, authToken);
   }
@@ -396,6 +429,9 @@ export class PostsService {
       updatedAt: new Date(),
     };
 
+    // Remove addresses from updateData since they're handled separately
+    delete updateData.addresses;
+
     // Process and upload images if they're being updated
     if (updatePostInput.images && updatePostInput.images.length > 0) {
       const processedImages = await Promise.all(
@@ -426,9 +462,47 @@ export class PostsService {
         createdBy: true,
         updatedBy: true,
         group: true,
+        addresses: true,
         comments: true,
       },
     });
+
+    // Update addresses if provided
+    if (updatePostInput.addresses && updatePostInput.addresses.length > 0) {
+      // Delete existing addresses
+      await this.prisma.postAddress.deleteMany({
+        where: { postId: updatePostInput.id },
+      });
+
+      // Create new addresses if any
+      if (updatePostInput.addresses.length > 0) {
+        await this.prisma.postAddress.createMany({
+          data: updatePostInput.addresses.map((address) => ({
+            postId: updatePostInput.id,
+            address: address.address,
+            language: address.language,
+          })),
+        });
+      }
+
+      // Fetch the post again with addresses included
+      const postWithAddresses = await this.prisma.post.findUnique({
+        where: { id: updatePostInput.id },
+        include: {
+          createdBy: true,
+          updatedBy: true,
+          group: true,
+          addresses: true,
+          comments: true,
+        },
+      });
+
+      return this.mapPrismaPostToGraphQLPost(
+        postWithAddresses!,
+        userId,
+        authToken,
+      );
+    }
 
     return this.mapPrismaPostToGraphQLPost(updatedPost, userId, authToken);
   }

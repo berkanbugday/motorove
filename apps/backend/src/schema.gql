@@ -71,6 +71,7 @@ input CreateNotificationInput {
 }
 
 input CreatePostInput {
+  addresses: [PostAddressInput!]
   content: String!
   groupId: String
   images: [String!]
@@ -253,6 +254,7 @@ enum NotificationType {
 }
 
 type Post {
+  addresses: [PostAddress!]
   comments: [Comment!]!
   commentsCount: Int!
   content: String!
@@ -273,6 +275,18 @@ type Post {
   updatedAt: DateTime!
   updatedBy: User!
   updatedById: String!
+}
+
+type PostAddress {
+  address: String!
+  id: String!
+  language: String!
+  postId: String!
+}
+
+input PostAddressInput {
+  address: String!
+  language: String!
 }
 
 type PostLike {
@@ -373,6 +387,7 @@ input UpdateMembershipStatusInput {
 }
 
 input UpdatePostInput {
+  addresses: [PostAddressInput!]
   content: String
   groupId: String
   id: ID!

@@ -34,7 +34,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useCreatePost} from '@services/post.service';
-import {CreatePostInput} from '../../types/models/post.model';
+import {CreatePostInput, PostAddressInput} from '../../types/models/post.model';
 import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
 import {LegendList} from '@legendapp/list';
@@ -54,8 +54,8 @@ export const CreatePostScreen = () => {
   const [location, setLocation] = useState<{
     latitude?: number;
     longitude?: number;
-    address?: string;
-  }>({});
+    addresses: PostAddressInput[];
+  }>({addresses: []});
   const [selectedGroup, setSelectedGroup] = useState<{
     id: string;
     name: string;
@@ -230,7 +230,10 @@ export const CreatePostScreen = () => {
         <PostLocationMap
           initialLocation={location}
           onLocationSelect={selectedLocation => {
-            setLocation(selectedLocation);
+            setLocation({
+              ...selectedLocation,
+              addresses: selectedLocation.addresses || [],
+            });
             closeBottomSheet();
           }}
           onClose={() => closeBottomSheet()}
@@ -271,6 +274,7 @@ export const CreatePostScreen = () => {
         ...(selectedPrivacy?.value === 'group' && selectedGroup
           ? {groupId: selectedGroup.id}
           : {}),
+        addresses: location.addresses,
       };
 
       // Call the createPost function from the hook
@@ -380,7 +384,13 @@ export const CreatePostScreen = () => {
               iconSize={18}
               onPress={handleAddLocation}
               textStyle={styles.actionButtonText}
-              title={location.address ? location.address : 'Add location'}
+              title={
+                location.addresses.length > 0
+                  ? location.addresses.find(
+                      address => address.language === 'en',
+                    )?.address
+                  : 'Add location'
+              }
             />
             {/* <Button
               variant="text"

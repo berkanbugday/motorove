@@ -1,5 +1,14 @@
 import {gql} from '@apollo/client';
 
+export const POST_ADDRESS_FRAGMENT = gql`
+  fragment PostAddressFragment on PostAddress {
+    id
+    postId
+    address
+    language
+  }
+`;
+
 export const POST_FRAGMENT = gql`
   fragment PostFragment on Post {
     id
@@ -10,6 +19,9 @@ export const POST_FRAGMENT = gql`
     group {
       id
       name
+    }
+    addresses {
+      ...PostAddressFragment
     }
     likesCount
     commentsCount
@@ -24,6 +36,7 @@ export const POST_FRAGMENT = gql`
       avatar
     }
   }
+  ${POST_ADDRESS_FRAGMENT}
 `;
 
 export const CREATE_POST_FRAGMENT = gql`
@@ -33,7 +46,11 @@ export const CREATE_POST_FRAGMENT = gql`
     latitude
     longitude
     groupId
+    addresses {
+      ...PostAddressFragment
+    }
   }
+  ${POST_ADDRESS_FRAGMENT}
 `;
 
 export const UPDATE_POST_FRAGMENT = gql`
