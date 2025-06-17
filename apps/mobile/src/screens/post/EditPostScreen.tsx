@@ -298,7 +298,7 @@ export const EditPostScreen = () => {
               latitude: location.latitude,
               longitude: location.longitude,
             }
-          : {}),
+          : {latitude: null, longitude: null}),
         ...(selectedPrivacy?.value === 'group' && selectedGroup
           ? {groupId: selectedGroup.id}
           : {groupId: null}),

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {View, StyleSheet, ActivityIndicator} from 'react-native';
 import {RNMap} from '@components/RNMap';
 import {Region, LatLng} from 'react-native-maps';
@@ -29,6 +29,9 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
   onLocationSelect,
   initialLocation,
 }) => {
+  // Add map ref for animation
+  const mapRef = useRef<any>(null);
+
   // Default region (Turkey)
   const DEFAULT_REGION: Region = {
     latitude: 39.9334,
@@ -44,6 +47,24 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
     PostAddressInput[]
   >([]);
 
+  // Function to animate to a specific location
+  const animateToLocation = (latitude: number, longitude: number) => {
+    const newRegion: Region = {
+      latitude,
+      longitude,
+      latitudeDelta: 0.01, // Zoom in closer when selecting a location
+      longitudeDelta: 0.01,
+    };
+
+    // Animate to the new region
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(newRegion, 800); // 800ms animation duration
+    }
+
+    // Update the region state
+    setRegion(newRegion);
+  };
+
   // Get user location on mount
   useEffect(() => {
     if (initialLocation?.latitude && initialLocation?.longitude) {
@@ -52,12 +73,25 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
         ...DEFAULT_REGION,
         latitude: initialLocation.latitude,
         longitude: initialLocation.longitude,
+        latitudeDelta: 0.01, // Zoom in closer for initial location
+        longitudeDelta: 0.01,
       };
       setRegion(newRegion);
       setSelectedLocation({
         latitude: initialLocation.latitude,
         longitude: initialLocation.longitude,
       });
+
+      // Animate to initial location after a short delay to ensure map is ready
+      setTimeout(() => {
+        if (initialLocation.latitude && initialLocation.longitude) {
+          animateToLocation(
+            initialLocation.latitude,
+            initialLocation.longitude,
+          );
+        }
+      }, 500);
+
       fetchLocationDetails(initialLocation.latitude, initialLocation.longitude);
     } else {
       // Otherwise, get the user's current location
@@ -72,6 +106,12 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
           };
           setRegion(newRegion);
           setSelectedLocation({latitude, longitude});
+
+          // Animate to user's current location
+          setTimeout(() => {
+            animateToLocation(latitude, longitude);
+          }, 500);
+
           fetchLocationDetails(latitude, longitude);
           setIsLoading(false);
         },
@@ -150,6 +190,10 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
   const handleMapPress = (event: {nativeEvent: {coordinate: LatLng}}) => {
     const {coordinate} = event.nativeEvent;
     setSelectedLocation(coordinate);
+
+    // Animate to the selected location
+    animateToLocation(coordinate.latitude, coordinate.longitude);
+
     fetchLocationDetails(coordinate.latitude, coordinate.longitude);
   };
 
@@ -166,6 +210,20 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
   const handleResetLocation = () => {
     setSelectedLocation(null);
     setLocationAddresses([]);
+
+    // Animate back to default region
+    const defaultRegion = {
+      ...DEFAULT_REGION,
+      latitudeDelta: 0.1,
+      longitudeDelta: 0.1,
+    };
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(defaultRegion, 800);
+    }
+
+    setRegion(defaultRegion);
+
     onLocationSelect({
       latitude: undefined,
       longitude: undefined,
@@ -229,6 +287,7 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
             onPress={handleMapPress}
             style={styles.map}
             markers={getMarkers()}
+            mapRef={mapRef}
           />
         )}
         {/* Center indicator */}

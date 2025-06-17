@@ -89,9 +89,11 @@ export const RNMap: React.FC<RNMapProps> = ({
   showLoadMarkerButton = false,
   onLoadMarkerPress,
   children,
+  mapRef: externalMapRef,
 }) => {
-  // Refs
-  const mapRef = useRef<MapView>(null);
+  // Refs - use external ref if provided, otherwise create internal ref
+  const internalMapRef = useRef<MapView>(null);
+  const mapRef = externalMapRef || internalMapRef;
   const insets = useSafeAreaInsets();
   // Map state hook
   const {

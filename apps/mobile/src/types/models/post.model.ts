@@ -123,8 +123,8 @@ export interface UpdatePostInput {
   id: string;
   content?: string;
   images?: string[];
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   groupId?: string | null;
   addresses?: PostAddressInput[];
 }

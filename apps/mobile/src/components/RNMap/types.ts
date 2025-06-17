@@ -275,6 +275,11 @@ export interface RNMapProps {
    * Children components to render on top of the map
    */
   children?: React.ReactNode;
+
+  /**
+   * Reference to the map component for external access
+   */
+  mapRef?: React.RefObject<MapView | null>;
 }
 
 /**

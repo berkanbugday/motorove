@@ -468,12 +468,12 @@ export class PostsService {
     });
 
     // Update addresses if provided
-    if (updatePostInput.addresses && updatePostInput.addresses.length > 0) {
-      // Delete existing addresses
-      await this.prisma.postAddress.deleteMany({
-        where: { postId: updatePostInput.id },
-      });
+    // Delete existing addresses
+    await this.prisma.postAddress.deleteMany({
+      where: { postId: updatePostInput.id },
+    });
 
+    if (updatePostInput.addresses && updatePostInput.addresses.length > 0) {
       // Create new addresses if any
       if (updatePostInput.addresses.length > 0) {
         await this.prisma.postAddress.createMany({
