@@ -82,7 +82,7 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return this.postsService.create(userId, createPostInput, authToken);
+    return this.postsService.createPost(userId, createPostInput, authToken);
   }
 
   @UseGuards(JwtGuard)
@@ -95,7 +95,7 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return this.postsService.update(userId, updatePostInput, authToken);
+    return this.postsService.updatePost(userId, updatePostInput, authToken);
   }
 
   @UseGuards(JwtGuard)

@@ -244,7 +244,7 @@ export class PostsService {
     return this.mapPrismaPostToGraphQLPost(post, currentUserId, authToken);
   }
 
-  async create(
+  async createPost(
     userId: string,
     createPostInput: CreatePostInput,
     authToken?: string,
@@ -310,7 +310,7 @@ export class PostsService {
     return this.mapPrismaPostToGraphQLPost(post, userId, authToken);
   }
 
-  async update(
+  async updatePost(
     userId: string,
     updatePostInput: UpdatePostInput,
     authToken?: string,
@@ -379,17 +379,24 @@ export class PostsService {
     // Process and upload images if they're being updated
     if (updatePostInput.images && updatePostInput.images.length > 0) {
       const processedImages = await Promise.all(
-        updatePostInput.images.map((image, index) =>
-          this.processImageUpload(
+        updatePostInput.images.map(async (image, index) => {
+          const imageUrl = await this.processImageUpload(
             image,
             'posts/images',
             `post-${userId}-${index}`,
             authToken,
-          ),
-        ),
+          );
+
+          if (imageUrl && imageUrl.startsWith('posts/images')) {
+            return imageUrl;
+          }
+
+          const imageUrlWithoutQuery = imageUrl?.split('?')[0];
+          return `posts/images/${imageUrlWithoutQuery?.split('/').pop()}`;
+        }),
       );
 
-      updateData.images = processedImages.filter(Boolean) as string[];
+      updateData.images = processedImages.filter(Boolean);
     }
 
     const updatedPost = await this.prisma.post.update({
