@@ -18,6 +18,7 @@ interface CommentItemProps {
   onReplyPress?: (comment: Comment) => void;
   style?: StyleProp<ViewStyle>;
   isReply?: boolean;
+  actionBarActive?: boolean;
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({
@@ -26,6 +27,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   onReplyPress,
   style,
   isReply = false,
+  actionBarActive = true,
 }) => {
   const handleLikePress = () => {
     if (onLikePress) {
@@ -59,39 +61,41 @@ const CommentItem: React.FC<CommentItemProps> = ({
           {comment.content}
         </Typography>
 
-        <View style={styles.actionBar}>
-          <TouchableOpacity
-            onPress={handleLikePress}
-            style={styles.actionButton}>
-            <Icon
-              name={comment.isLiked ? 'like-filled' : 'like'}
-              size={16}
-              color={
-                comment.isLiked ? colors.primary.main : colors.neutral.grey
-              }
-            />
-            <Typography
-              variant="caption"
-              color={
-                comment.isLiked ? colors.primary.main : colors.neutral.grey
-              }
-              style={styles.actionText}>
-              {comment.likeCount}
-            </Typography>
-          </TouchableOpacity>
+        {actionBarActive && (
+          <View style={styles.actionBar}>
+            <TouchableOpacity
+              onPress={handleLikePress}
+              style={styles.actionButton}>
+              <Icon
+                name={comment.isLiked ? 'like-filled' : 'like'}
+                size={16}
+                color={
+                  comment.isLiked ? colors.primary.main : colors.neutral.grey
+                }
+              />
+              <Typography
+                variant="caption"
+                color={
+                  comment.isLiked ? colors.primary.main : colors.neutral.grey
+                }
+                style={styles.actionText}>
+                {comment.likeCount}
+              </Typography>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={handleReplyPress}
-            style={styles.actionButton}>
-            <Icon name="comment" size={16} color={colors.neutral.grey} />
-            <Typography
-              variant="caption"
-              color={colors.neutral.grey}
-              style={styles.actionText}>
-              Reply
-            </Typography>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={handleReplyPress}
+              style={styles.actionButton}>
+              <Icon name="comment" size={16} color={colors.neutral.grey} />
+              <Typography
+                variant="caption"
+                color={colors.neutral.grey}
+                style={styles.actionText}>
+                Reply
+              </Typography>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );

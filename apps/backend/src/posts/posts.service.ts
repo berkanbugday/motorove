@@ -185,14 +185,14 @@ export class PostsService {
           include: {
             createdBy: true,
             updatedBy: true,
-            replies: {
-              where: { isActive: true },
-              include: {
-                createdBy: true,
-                updatedBy: true,
-              },
-              orderBy: { createdAt: 'asc' },
-            },
+            // replies: {
+            //   where: { isActive: true },
+            //   include: {
+            //     createdBy: true,
+            //     updatedBy: true,
+            //   },
+            //   orderBy: { createdAt: 'asc' },
+            // },
           },
           orderBy: { createdAt: 'desc' },
         },
@@ -246,14 +246,14 @@ export class PostsService {
           include: {
             createdBy: true,
             updatedBy: true,
-            replies: {
-              where: { isActive: true },
-              include: {
-                createdBy: true,
-                updatedBy: true,
-              },
-              orderBy: { createdAt: 'asc' },
-            },
+            // replies: {
+            //   where: { isActive: true },
+            //   include: {
+            //     createdBy: true,
+            //     updatedBy: true,
+            //   },
+            //   orderBy: { createdAt: 'asc' },
+            // },
           },
           orderBy: { createdAt: 'desc' },
         },

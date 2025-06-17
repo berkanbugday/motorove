@@ -165,7 +165,9 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   };
 
   const confirmDeleteComment = async () => {
-    if (!commentToDelete.current) {return;}
+    if (!commentToDelete.current) {
+      return;
+    }
 
     try {
       await removeComment(
@@ -251,6 +253,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           onReplyPress={handleReplyToComment}
           isReply={isReply}
           style={style}
+          actionBarActive={false}
         />
       );
     }
@@ -279,6 +282,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           onReplyPress={handleReplyToComment}
           isReply={isReply}
           style={style}
+          actionBarActive={false}
         />
       </SwipeableItem>
     );
