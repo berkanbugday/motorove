@@ -32,6 +32,12 @@ export const REMOVE_GROUP_MEMBER_FRAGMENT = gql`
   ${ADD_GROUP_MEMBER_FRAGMENT}
 `;
 
+export const LEAVE_GROUP_FRAGMENT = gql`
+  fragment LeaveGroupFragment on GroupMembership {
+    groupId
+  }
+`;
+
 export const CHANGE_MEMBER_ROLE_FRAGMENT = gql`
   fragment ChangeMemberRoleFragment on GroupMembership {
     groupId
@@ -121,6 +127,16 @@ export const REMOVE_GROUP_MEMBER = gql`
     }
   }
   ${REMOVE_GROUP_MEMBER_FRAGMENT}
+`;
+
+// Leave a group
+export const LEAVE_GROUP = gql`
+  mutation LeaveGroup($input: LeaveGroupInput!) {
+    leaveGroup(leaveGroupInput: $input) {
+      ...LeaveGroupFragment
+    }
+  }
+  ${LEAVE_GROUP_FRAGMENT}
 `;
 
 export const UPDATE_GROUP_MEMBERSHIP_STATUS = gql`

@@ -1,4 +1,5 @@
 import {useMutation, useQuery, Reference} from '@apollo/client';
+import {useCallback} from 'react';
 import {
   GET_GROUP_MEMBERSHIPS,
   GET_GROUP_MEMBERS,
@@ -7,9 +8,12 @@ import {
   ADD_GROUP_MEMBER,
   CHANGE_MEMBER_ROLE,
   REMOVE_GROUP_MEMBER,
+  LEAVE_GROUP,
   GROUP_MEMBERSHIP_FRAGMENT,
   CHANGE_MEMBER_ROLE_FRAGMENT,
 } from './graphql/group-membership.graphql';
+import {loggingService} from './logging.service';
+import {showToast} from '@components';
 
 // Hook to get all group memberships
 export const useGroupMemberships = () => {
@@ -111,6 +115,90 @@ export const useRemoveGroupMember = () => {
   });
 };
 
+// Hook to leave a group
+export const useLeaveGroup = () => {
+  const [leaveGroupMutation, {loading, error}] = useMutation(LEAVE_GROUP, {
+    update(cache, {data: {leaveGroup}}) {
+      // Update the cache to remove the user's membership from the group
+      cache.modify({
+        fields: {
+          groupMembers(existingMembers = [], {readField}) {
+            return existingMembers.filter(
+              (memberRef: Reference) =>
+                !(
+                  readField('groupId', memberRef) === leaveGroup.groupId &&
+                  readField('userId', memberRef) === leaveGroup.userId
+                ),
+            );
+          },
+          myGroupMemberships(existingMemberships = [], {readField}) {
+            return existingMemberships.filter(
+              (membershipRef: Reference) =>
+                readField('groupId', membershipRef) !== leaveGroup.groupId,
+            );
+          },
+        },
+      });
+
+      // Also update the specific group cache to reflect the user is no longer a member
+      cache.modify({
+        id: cache.identify({__typename: 'Group', id: leaveGroup.groupId}),
+        fields: {
+          isMember() {
+            return false;
+          },
+          isAdmin() {
+            return false;
+          },
+          memberships(existingMemberships = [], {readField}) {
+            return existingMemberships.filter(
+              (membershipRef: Reference) =>
+                readField('userId', membershipRef) !== leaveGroup.userId,
+            );
+          },
+        },
+      });
+    },
+  });
+
+  const leaveGroup = useCallback(
+    async (groupId: string) => {
+      try {
+        const result = await leaveGroupMutation({
+          variables: {
+            input: {
+              groupId,
+            },
+          },
+        });
+
+        showToast({
+          type: 'success',
+          text1: 'Success',
+          text2: 'You have left the group successfully!',
+        });
+
+        return result.data?.leaveGroup;
+      } catch (err) {
+        loggingService.error('Error leaving group:', err);
+        showToast({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to leave the group. Please try again.',
+        });
+        throw err;
+      }
+    },
+    [leaveGroupMutation],
+  );
+
+  return {
+    leaveGroup,
+    loading,
+    error,
+  };
+};
+
 // Types for inputs
 export interface AddGroupMemberInput {
   groupId: string;
@@ -129,4 +217,8 @@ export interface RemoveGroupMemberInput {
 export interface UpdateGroupMembershipStatusInput {
   membershipId: string;
   status: string;
+}
+
+export interface LeaveGroupInput {
+  groupId: string;
 }

@@ -43,6 +43,7 @@ import {
   useAddGroupMember,
   useChangeMemberRole,
   useRemoveGroupMember,
+  useLeaveGroup,
 } from '@services/group-membership.service';
 import Dialog, {DialogRef} from '@components/Dialog';
 import Dropdown from '@components/Dropdown';
@@ -52,6 +53,7 @@ import {
 } from '@services/enum.service';
 import {DropdownItem as ComponentDropdownItem} from '@components/Dropdown/types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {AuthUser} from '@app-types/auth.types';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
 // Feed post interface
@@ -222,12 +224,14 @@ const MemberItem = React.memo(
     item,
     isAdmin,
     isMember,
+    user,
     onChangeRole,
     onRemoveMember,
   }: {
     item: any;
     isAdmin?: boolean;
     isMember?: boolean;
+    user: AuthUser;
     onChangeRole?: (member: any) => void;
     onRemoveMember?: (member: any) => void;
   }) => {
@@ -309,7 +313,7 @@ const MemberItem = React.memo(
             </View>
           </View>
         </View>
-        {isAdmin && (
+        {isAdmin && item.user.id !== user.id && (
           <Animated.View
             style={[
               styles.memberRightContent,
@@ -321,6 +325,7 @@ const MemberItem = React.memo(
                   inputRange: [-100, 0],
                   outputRange: [0, 1],
                 }),
+                display: isActive ? 'flex' : 'none',
               },
             ]}>
             <Button
@@ -341,7 +346,7 @@ const MemberItem = React.memo(
             />
           </Animated.View>
         )}
-        {isMember && (
+        {isMember && item.user.id !== user.id && (
           <Animated.View
             style={[
               {
@@ -352,6 +357,7 @@ const MemberItem = React.memo(
                   inputRange: [0, 100],
                   outputRange: [1, 0],
                 }),
+                display: isActive ? 'none' : 'flex',
               },
             ]}>
             <Button
@@ -378,9 +384,9 @@ export const GroupDetailScreen = () => {
   const [posts, setPosts] = useState<FeedPost[]>(groupFeedPosts);
   const [refreshing, setRefreshing] = useState(false);
   const membersBottomSheetRef = useRef<BottomSheetRef>(null);
+  const leaveGroupBottomSheetRef = useRef<BottomSheetRef>(null);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const eventsListRef = useRef<FlatList>(null);
-  const leaveGroupDialogRef = useRef<DialogRef>(null);
   const changeRoleDialogRef = useRef<DialogRef>(null);
   const removeMemberDialogRef = useRef<DialogRef>(null);
   const insets = useSafeAreaInsets();
@@ -443,6 +449,7 @@ export const GroupDetailScreen = () => {
   const [addGroupMember] = useAddGroupMember();
   const [changeMemberRole] = useChangeMemberRole();
   const [removeGroupMember] = useRemoveGroupMember();
+  const {leaveGroup} = useLeaveGroup();
 
   // Handle opening the remove member dialog
   const handleOpenRemoveMemberDialog = useCallback((member: any) => {
@@ -768,25 +775,19 @@ export const GroupDetailScreen = () => {
   const confirmLeaveGroup = useCallback(async () => {
     try {
       loggingService.info(`Leaving group: ${groupId}`);
-      // TODO: Implement the actual API call to leave the group
-      showToast({
-        text1: 'Success',
-        text2: 'You have left the group successfully',
-        type: 'success',
-      });
-      // Refresh group data after leaving
-      refetch && refetch();
-      // Navigate back if needed
+
+      await leaveGroup(groupId);
+
+      // Close the bottom sheet
+      leaveGroupBottomSheetRef.current?.close();
+
+      // Navigate back since user is no longer a member
       navigation.goBack();
     } catch (error) {
       loggingService.error(`Error leaving group: ${groupId}`, error);
-      showToast({
-        text1: 'Error',
-        text2: 'Failed to leave the group. Please try again.',
-        type: 'error',
-      });
+      // Error handling is already done in the service hook
     }
-  }, [groupId, refetch, navigation]);
+  }, [groupId, leaveGroup, navigation]);
 
   // Handle dropdown item select
   const handleDropdownMenuItemSelect = useCallback(
@@ -799,7 +800,7 @@ export const GroupDetailScreen = () => {
           membersBottomSheetRef.current?.open('full');
           break;
         case 'leave_group':
-          leaveGroupDialogRef.current?.open();
+          leaveGroupBottomSheetRef.current?.open('minimal');
           break;
         case 'join_group':
           handleJoinGroup(_group);
@@ -928,18 +929,26 @@ export const GroupDetailScreen = () => {
 
   // Now just a simple render function that uses the MemberItem component
   const renderMemberItem = useCallback(
-    ({item}: {item: any}) => (
-      <MemberItem
-        item={item}
-        isAdmin={group?.isAdmin}
-        isMember={group?.isMember}
-        onChangeRole={handleOpenChangeRoleDialog}
-        onRemoveMember={handleOpenRemoveMemberDialog}
-      />
-    ),
+    ({item}: {item: any}) => {
+      if (!user) {
+        return null;
+      }
+
+      return (
+        <MemberItem
+          item={item}
+          isAdmin={group?.isAdmin}
+          isMember={group?.isMember}
+          user={user}
+          onChangeRole={handleOpenChangeRoleDialog}
+          onRemoveMember={handleOpenRemoveMemberDialog}
+        />
+      );
+    },
     [
       group?.isAdmin,
       group?.isMember,
+      user,
       handleOpenChangeRoleDialog,
       handleOpenRemoveMemberDialog,
     ],
@@ -1180,21 +1189,35 @@ export const GroupDetailScreen = () => {
         )}
       </BottomSheet>
 
-      <Dialog
-        ref={leaveGroupDialogRef}
-        title="Leave Group"
-        message={`Are you sure you want to leave "${group?.name}"?`}
-        variant="confirm"
-        confirmButton={{
-          text: 'Leave',
-          variant: 'primary',
-          onPress: confirmLeaveGroup,
-        }}
-        cancelButton={{
-          text: 'Cancel',
-          variant: 'outline',
-        }}
-      />
+      <BottomSheet
+        ref={leaveGroupBottomSheetRef}
+        closeOnBackdropPress={false}
+        initialSnap="closed"
+        showCloseButton={true}
+        enableGestureControl={false}
+        closeButtonPosition="top-left"
+        header={<Subtitle align="center">Leave Group</Subtitle>}>
+        <View style={styles.leaveGroupContent}>
+          <BodySmall align="center">
+            Are you sure you want to leave "{group?.name}"?
+          </BodySmall>
+          <View style={styles.leaveGroupButtonsContainer}>
+            <Button
+              title="Cancel"
+              variant="outline"
+              onPress={() => leaveGroupBottomSheetRef.current?.close()}
+              style={styles.leaveGroupButton}
+            />
+            <Button
+              title="Leave"
+              variant="primary"
+              textStyle={{color: colors.neutral.white}}
+              onPress={confirmLeaveGroup}
+              style={styles.leaveGroupButton}
+            />
+          </View>
+        </View>
+      </BottomSheet>
 
       <Dialog
         ref={changeRoleDialogRef}
@@ -1459,5 +1482,17 @@ const styles = StyleSheet.create({
   dialogButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+  },
+  leaveGroupContent: {
+    gap: spacing.xl,
+    paddingHorizontal: spacing.md,
+  },
+  leaveGroupButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  leaveGroupButton: {
+    flex: 1,
   },
 });

@@ -343,4 +343,72 @@ export class GroupMembershipsService {
       },
     });
   }
+
+  async leaveGroup(groupId: string, userId: string) {
+    // Check if the group exists
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId, isActive: true },
+      include: {
+        memberships: true,
+        createdBy: true,
+      },
+    });
+
+    if (!group) {
+      throw new NotFoundException(`Group with ID ${groupId} not found`);
+    }
+
+    // Check if the user is the creator - creators can't leave their own groups
+    if (group.createdBy.id === userId) {
+      throw new ForbiddenException(
+        'Group creators cannot leave their own groups. Transfer ownership first or delete the group.',
+      );
+    }
+
+    // Check if the user is actually a member of the group
+    const membership = group.memberships.find((m) => m.userId === userId);
+
+    if (!membership) {
+      throw new NotFoundException(`You are not a member of this group`);
+    }
+
+    // Delete the membership (leave the group)
+    const deletedMembership = await this.prisma.groupMembership.delete({
+      where: {
+        groupId_userId: {
+          groupId,
+          userId,
+        },
+      },
+      include: {
+        group: true,
+        user: true,
+      },
+    });
+
+    // Send notification to group admins about the member leaving
+    const adminMemberships = group.memberships.filter(
+      (m) => m.role === GroupMemberRole.ADMIN && m.userId !== userId,
+    );
+
+    for (const adminMembership of adminMemberships) {
+      await this.notificationsService.createAndSendNotification(
+        {
+          userId: adminMembership.userId,
+          title: 'Member left group',
+          body: `${deletedMembership.user.firstName} ${deletedMembership.user.lastName} has left ${deletedMembership.group.name}`,
+          type: NotificationType.GROUP_LEAVE,
+          data: JSON.stringify({
+            groupId: deletedMembership.group.id,
+            groupName: deletedMembership.group.name,
+            userId: deletedMembership.user.id,
+            userName: `${deletedMembership.user.firstName} ${deletedMembership.user.lastName}`,
+          }),
+        },
+        adminMembership.userId,
+      );
+    }
+
+    return deletedMembership;
+  }
 }

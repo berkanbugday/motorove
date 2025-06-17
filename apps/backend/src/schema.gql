@@ -168,6 +168,10 @@ input GroupTagInput {
   value: String!
 }
 
+input LeaveGroupInput {
+  groupId: String!
+}
+
 type Mutation {
   addGroupMember(addGroupMemberInput: AddGroupMemberInput!): GroupMembership!
   changeMemberRole(changeMemberRoleInput: ChangeMemberRoleInput!): GroupMembership!
@@ -177,6 +181,7 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): Post!
   deleteAllNotifications: Boolean!
   deleteNotification(id: ID!): Notification!
+  leaveGroup(leaveGroupInput: LeaveGroupInput!): GroupMembership!
   likePost(postId: ID!): PostLike!
   markAllNotificationsAsRead(userId: String!): [Notification!]!
   markNotificationAsRead(id: ID!): Notification!

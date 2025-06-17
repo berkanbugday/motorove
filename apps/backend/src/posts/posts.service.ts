@@ -200,11 +200,31 @@ export class PostsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return Promise.all(
-      posts.map((post) =>
-        this.mapPrismaPostToGraphQLPost(post, currentUserId, authToken),
-      ),
+    const postsWithGroupMembership = await Promise.all(
+      posts.map(async (post) => {
+        if (post.group && currentUserId) {
+          const isGroupMember = await this.prisma.groupMembership.findUnique({
+            where: {
+              groupId_userId: {
+                groupId: post.group.id,
+                userId: currentUserId,
+              },
+            },
+          });
+
+          if (
+            (!isGroupMember ||
+              isGroupMember.status !== GroupMembershipStatus.APPROVED) &&
+            post.createdById !== currentUserId
+          ) {
+            return null;
+          }
+        }
+        return this.mapPrismaPostToGraphQLPost(post, currentUserId, authToken);
+      }),
     );
+
+    return (postsWithGroupMembership.filter(Boolean) as Post[]) || [];
   }
 
   async findOne(
@@ -352,7 +372,7 @@ export class PostsService {
     }
 
     // If trying to change the group, verify membership in the new group
-    if (updatePostInput.groupId && updatePostInput.groupId !== post.groupId) {
+    if (updatePostInput.groupId) {
       const membership = await this.prisma.groupMembership.findUnique({
         where: {
           groupId_userId: {

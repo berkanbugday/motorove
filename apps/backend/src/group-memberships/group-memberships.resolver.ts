@@ -5,6 +5,7 @@ import { AddGroupMemberInput } from './dto/add-group-member.input';
 import { ChangeMemberRoleInput } from './dto/change-member-role.input';
 import { RemoveGroupMemberInput } from './dto/remove-group-member.input';
 import { UpdateMembershipStatusInput } from './dto/update-membership-status.input';
+import { LeaveGroupInput } from './dto/leave-group.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
@@ -102,6 +103,19 @@ export class GroupMembershipsResolver {
       updateStatusInput.userId,
       updateStatusInput.status,
       adminId,
+    );
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => GroupMembership)
+  leaveGroup(
+    @Args('leaveGroupInput') leaveGroupInput: LeaveGroupInput,
+    @Context() context: RequestContext,
+  ) {
+    const userId: string = context.req.user.id;
+    return this.groupMembershipsService.leaveGroup(
+      leaveGroupInput.groupId,
+      userId,
     );
   }
 }
