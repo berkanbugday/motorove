@@ -226,7 +226,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
   };
 
   const handleLikePress = () => {
-    if (actionBarDisabled) return;
+    if (actionBarDisabled) {return;}
 
     // Animate the like button
     Animated.sequence([
@@ -249,7 +249,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
   };
 
   const handleSavePress = () => {
-    if (actionBarDisabled) return;
+    if (actionBarDisabled) {return;}
 
     // Simple pop animation for save button
     Animated.sequence([

@@ -165,7 +165,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   };
 
   const confirmDeleteComment = async () => {
-    if (!commentToDelete.current) return;
+    if (!commentToDelete.current) {return;}
 
     try {
       await removeComment(
