@@ -348,12 +348,12 @@ export const HomeScreen = ({navigation}: Props) => {
         items.unshift(
           {
             id: 'edit',
-            label: 'Edit Post',
+            label: 'Edit',
             icon: 'pen',
           },
           {
             id: 'delete',
-            label: 'Delete Post',
+            label: 'Delete',
             icon: 'trash',
             isHighlighted: true,
           },
