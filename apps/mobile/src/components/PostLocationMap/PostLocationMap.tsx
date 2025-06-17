@@ -19,7 +19,6 @@ interface PostLocationMapProps {
     name?: string;
     addresses?: PostAddressInput[];
   }) => void;
-  onClose: () => void;
   initialLocation?: {
     latitude?: number;
     longitude?: number;
@@ -28,7 +27,6 @@ interface PostLocationMapProps {
 
 export const PostLocationMap: React.FC<PostLocationMapProps> = ({
   onLocationSelect,
-  onClose,
   initialLocation,
 }) => {
   // Default region (Turkey)
@@ -165,7 +163,7 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
     }
   };
 
-  const handleRemoveLocation = () => {
+  const handleResetLocation = () => {
     setSelectedLocation(null);
     setLocationAddresses([]);
     onLocationSelect({
@@ -255,10 +253,10 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
             <View style={styles.buttonContainerWrapper}>
               <View style={styles.buttonContainer}>
                 <Button
-                  title="Cancel"
+                  title="Reset"
                   variant="outline"
                   shape="round"
-                  onPress={onClose}
+                  onPress={handleResetLocation}
                   style={styles.cancelButton}
                 />
                 <Button
@@ -269,16 +267,6 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
                   style={styles.confirmButton}
                 />
               </View>
-              {selectedLocation && (
-                <Button
-                  title="Remove"
-                  variant="secondary"
-                  shape="round"
-                  style={styles.removeButton}
-                  textStyle={{color: colors.neutral.white}}
-                  onPress={handleRemoveLocation}
-                />
-              )}
             </View>
           </>
         ) : (
@@ -335,6 +323,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingBottom: spacing.sm,
   },
   cancelButton: {
     flex: 1,
@@ -345,7 +334,6 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
   removeButton: {
-    // flex: 1,
     backgroundColor: colors.primary.light,
   },
   tapInstructions: {
