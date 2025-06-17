@@ -272,9 +272,10 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
               {selectedLocation && (
                 <Button
                   title="Remove"
-                  variant="text"
-                  textStyle={{color: colors.primary.main, fontWeight: 'bold'}}
+                  variant="secondary"
                   shape="round"
+                  style={styles.removeButton}
+                  textStyle={{color: colors.neutral.white}}
                   onPress={handleRemoveLocation}
                 />
               )}
@@ -342,6 +343,10 @@ const styles = StyleSheet.create({
   confirmButton: {
     flex: 1,
     marginLeft: spacing.sm,
+  },
+  removeButton: {
+    // flex: 1,
+    backgroundColor: colors.primary.light,
   },
   tapInstructions: {
     marginVertical: spacing.sm,
