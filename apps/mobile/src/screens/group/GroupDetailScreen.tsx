@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  ImageSourcePropType,
   Animated,
   ActivityIndicator,
   Dimensions,
@@ -21,7 +20,12 @@ import {
   Title,
   Typography,
 } from '@components/Typography';
-import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  RouteProp,
+  useFocusEffect,
+} from '@react-navigation/native';
 import {
   MainScreenNavigationProp,
   MainStackParamList,
@@ -34,6 +38,16 @@ import {FeedCard} from '@components/FeedCard';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
+import {
+  useGetPosts,
+  useLikePost,
+  useUnlikePost,
+  useSavePost,
+  useUnsavePost,
+  useRemovePost,
+} from '@services/post.service';
+import {Post} from '@app-types/models/post.model';
+import {relativeTime} from '@utils/dateUtils';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {toPascalCase} from '@utils/stringUtils';
 import GroupEventBanner from '@components/GroupEventBanner/GroupEventBanner';
@@ -56,119 +70,51 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {AuthUser} from '@app-types/auth.types';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
-// Feed post interface
-interface FeedPost {
-  id: string;
-  userName: string;
-  avatarSource: ImageSourcePropType;
-  timeAgo: string;
-  content: string;
-  images?: ImageSourcePropType[];
-  routeTitle?: string;
-  likeCount: number;
-  commentCount: number;
-  isSaved: boolean;
-  isLiked: boolean;
-  isCommented: boolean;
-  labels: Array<{
-    icon?: IconName;
-    text: string;
-  }>;
-}
+// Helper function to format avatar URL from API data
+const formatAvatarSource = (imageUrl?: string) => {
+  return imageUrl
+    ? {uri: imageUrl}
+    : {uri: 'https://picsum.photos/id/1005/200/200'};
+};
 
-// Sample feed posts data for this group
-const groupFeedPosts: FeedPost[] = [
-  {
-    id: '1',
-    userName: 'Alex Johnson',
-    avatarSource: {uri: 'https://picsum.photos/id/1005/100/100'},
-    timeAgo: '2h ago',
-    content:
-      'Just completed an amazing group ride with the team! The roads were perfect today.',
-    routeTitle: 'Mountain Pass Loop',
-    likeCount: 24,
-    commentCount: 5,
-    isSaved: false,
-    isLiked: true,
-    isCommented: false,
-    labels: [
-      {icon: 'users', text: 'Group Ride'},
-      {icon: 'map-pin', text: 'Blue Ridge Mountains'},
-    ],
-  },
-  {
-    id: '2',
-    userName: 'Sarah Miller',
-    avatarSource: {uri: 'https://picsum.photos/id/1027/100/100'},
-    timeAgo: '5h ago',
-    content:
-      'Great meetup yesterday! Thanks to everyone who showed up for the maintenance workshop.',
-    images: [{uri: 'https://picsum.photos/id/16/500/300'}],
-    likeCount: 18,
-    commentCount: 3,
-    isSaved: true,
-    isLiked: false,
-    isCommented: true,
-    labels: [{icon: 'users', text: 'Workshop'}],
-  },
-  {
-    id: '3',
-    userName: 'David Wilson',
-    avatarSource: {uri: 'https://picsum.photos/id/1012/100/100'},
-    timeAgo: 'Yesterday',
-    content:
-      "Who's joining the weekend ride? We'll be taking the coastal route!",
-    images: [
-      {uri: 'https://picsum.photos/id/10/500/300'},
-      {uri: 'https://picsum.photos/id/11/500/300'},
-    ],
-    routeTitle: 'Coastal Weekend Ride',
-    likeCount: 32,
-    commentCount: 7,
-    isSaved: false,
-    isLiked: true,
-    isCommented: false,
-    labels: [
-      {icon: 'clock', text: 'Upcoming Event'},
-      {icon: 'map-pin', text: 'Pacific Coast'},
-    ],
-  },
-  {
-    id: '4',
-    userName: 'Emma Roberts',
-    avatarSource: {uri: 'https://picsum.photos/id/1014/100/100'},
-    timeAgo: '2 days ago',
-    content: "New bike day! Can't wait to ride with the group next weekend.",
-    images: [{uri: 'https://picsum.photos/id/21/500/300'}],
-    likeCount: 45,
-    commentCount: 12,
-    isSaved: true,
-    isLiked: true,
-    isCommented: false,
-    labels: [{icon: 'wrench', text: 'New Bike'}],
-  },
-  {
-    id: '5',
-    userName: 'Michael Chen',
-    avatarSource: {uri: 'https://picsum.photos/id/1025/100/100'},
-    timeAgo: '3 days ago',
-    content: 'Photos from our last group adventure. What an amazing day!',
-    images: [
-      {uri: 'https://picsum.photos/id/27/500/300'},
-      {uri: 'https://picsum.photos/id/28/500/300'},
-      {uri: 'https://picsum.photos/id/29/500/300'},
-    ],
-    likeCount: 37,
-    commentCount: 8,
-    isSaved: false,
-    isLiked: false,
-    isCommented: true,
-    labels: [
-      {icon: 'users', text: 'Group Adventure'},
-      {icon: 'map-pin', text: 'Mountain Trails'},
-    ],
-  },
-];
+// Transform Post model to FeedCard props - matching HomeScreen implementation
+const transformPostToFeedCard = (post: Post) => {
+  // Create labels from post data
+  const labels = [];
+
+  if (post.addresses && post.addresses.length > 0) {
+    const addressText = post.addresses?.find(
+      address => address.language === 'en',
+    )?.address;
+    if (addressText) {
+      labels.push({
+        icon: 'map-pin' as IconName,
+        text: addressText,
+      });
+    }
+  }
+
+  // Transform images from string URLs to objects with URI
+  const images =
+    post.images && post.images.length > 0
+      ? post.images.map((img: string) => ({uri: img}))
+      : undefined;
+
+  return {
+    id: post.id,
+    userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
+    avatarSource: formatAvatarSource(post.createdBy.avatar), // Use user avatar
+    timeAgo: relativeTime(post.createdAt),
+    content: post.content,
+    images,
+    likeCount: post.likesCount,
+    commentCount: post.commentsCount,
+    isSaved: post.isSaved,
+    isLiked: post.isLiked,
+    isCommented: false, // This might not be available in the API
+    labels,
+  };
+};
 
 // Define event interface
 interface EventItem {
@@ -381,7 +327,6 @@ export const GroupDetailScreen = () => {
   const route = useRoute<GroupDetailScreenRouteProp>();
   const {groupId} = route.params;
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [posts, setPosts] = useState<FeedPost[]>(groupFeedPosts);
   const [refreshing, setRefreshing] = useState(false);
   const membersBottomSheetRef = useRef<BottomSheetRef>(null);
   const leaveGroupBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -430,17 +375,25 @@ export const GroupDetailScreen = () => {
   });
 
   // Use the useGetGroup hook to fetch the group data
-  const {group, loading, refetch} = useGetGroup(groupId);
+  const {group, loading, refetch: refetchGroup} = useGetGroup(groupId);
+
+  // Use the useGetPosts hook to fetch posts for this group
+  const {
+    posts,
+    loading: postsLoading,
+    refetch: refetchPosts,
+  } = useGetPosts(groupId);
 
   // Handle pull-to-refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refetch?.();
+      await refetchGroup?.();
+      await refetchPosts?.();
     } finally {
       setRefreshing(false);
     }
-  }, [refetch]);
+  }, [refetchGroup, refetchPosts]);
 
   // Fetch group members
   const members = group?.memberships || [];
@@ -450,6 +403,13 @@ export const GroupDetailScreen = () => {
   const [changeMemberRole] = useChangeMemberRole();
   const [removeGroupMember] = useRemoveGroupMember();
   const {leaveGroup} = useLeaveGroup();
+
+  // Post interaction hooks
+  const {likePost} = useLikePost();
+  const {unlikePost} = useUnlikePost();
+  const {savePost} = useSavePost();
+  const {unsavePost} = useUnsavePost();
+  const {removePost} = useRemovePost();
 
   // Handle opening the remove member dialog
   const handleOpenRemoveMemberDialog = useCallback((member: any) => {
@@ -485,7 +445,7 @@ export const GroupDetailScreen = () => {
 
       // Close dialog and refresh data
       removeMemberDialogRef.current?.close();
-      refetch && refetch();
+      refetchGroup && refetchGroup();
     } catch (error) {
       loggingService.error('Error removing member', error);
       showToast({
@@ -494,7 +454,7 @@ export const GroupDetailScreen = () => {
         type: 'error',
       });
     }
-  }, [memberToRemove, groupId, refetch]);
+  }, [memberToRemove, groupId, refetchGroup]);
 
   // Handle opening the change role dialog
   const handleOpenChangeRoleDialog = useCallback(
@@ -546,7 +506,7 @@ export const GroupDetailScreen = () => {
 
       // Close dialog and refresh data
       changeRoleDialogRef.current?.close();
-      refetch && refetch();
+      refetchGroup && refetchGroup();
     } catch (error) {
       loggingService.error('Error changing member role', error);
       showToast({
@@ -555,7 +515,7 @@ export const GroupDetailScreen = () => {
         type: 'error',
       });
     }
-  }, [selectedMember, selectedRole, groupId, changeMemberRole, refetch]);
+  }, [selectedMember, selectedRole, groupId, changeMemberRole, refetchGroup]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -602,6 +562,17 @@ export const GroupDetailScreen = () => {
     return () => timer && clearTimeout(timer);
   }, [activeMemberId, toggleMemberActions]);
 
+  // Refetch posts when screen gains focus (when coming back from other screens)
+  useFocusEffect(
+    useCallback(() => {
+      // Always refetch group if refetch function is available
+      if (refetchGroup) {
+        loggingService.info('GroupDetailScreen: Refetching group on focus');
+        refetchGroup();
+      }
+    }, [refetchGroup]),
+  );
+
   const renderDescription = () => {
     const description = group?.description || 'No description available';
 
@@ -638,28 +609,102 @@ export const GroupDetailScreen = () => {
     );
   };
 
-  // Handle like press with state update
-  const handleLikePress = useCallback((postId: string) => {
-    setPosts(currentPosts =>
-      currentPosts.map(post =>
-        post.id === postId ? {...post, isLiked: !post.isLiked} : post,
-      ),
-    );
-  }, []);
+  // Handle like press with API call - using optimistic updates (matching HomeScreen)
+  const handleLikePress = useCallback(
+    async (postId: string, isLiked: boolean) => {
+      if (isLiked) {
+        // Fire and forget - optimistic update will handle UI
+        unlikePost(postId);
+      } else {
+        // Fire and forget - optimistic update will handle UI
+        likePost(postId);
+      }
+      // No need to refetch as cache is updated optimistically
+    },
+    [likePost, unlikePost],
+  );
 
-  // Handle comment press
-  const handleCommentPress = useCallback((postId: string) => {
-    console.log(`Comment pressed for post: ${postId}`);
-  }, []);
+  // Handle comment press - navigate to comment screen
+  const handleCommentPress = useCallback(
+    (postId: string) => {
+      navigateToScreen(navigation, 'Comment', {postId});
+    },
+    [navigation],
+  );
 
-  // Handle save press with state update
-  const handleSavePress = useCallback((postId: string) => {
-    setPosts(currentPosts =>
-      currentPosts.map(post =>
-        post.id === postId ? {...post, isSaved: !post.isSaved} : post,
-      ),
-    );
-  }, []);
+  // Handle save press with API call - using optimistic updates (matching HomeScreen)
+  const handleSavePress = useCallback(
+    async (postId: string, isSaved: boolean) => {
+      if (isSaved) {
+        // Fire and forget - optimistic update will handle UI
+        unsavePost(postId);
+      } else {
+        // Fire and forget - optimistic update will handle UI
+        savePost(postId);
+      }
+      // No need to refetch as cache is updated optimistically
+    },
+    [savePost, unsavePost],
+  );
+
+  // Create dropdown menu items for the feed posts (matching HomeScreen)
+  const createPostDropdownItems = useCallback(
+    (postId: string, isOwnPost: boolean): DropdownMenuItem[] => {
+      const items: DropdownMenuItem[] = [];
+
+      // Add edit and delete options if it's the user's own post
+      if (isOwnPost) {
+        items.unshift(
+          {
+            id: 'edit',
+            label: 'Edit',
+            icon: 'pen',
+          },
+          {
+            id: 'delete',
+            label: 'Delete',
+            icon: 'trash',
+            isHighlighted: true,
+          },
+        );
+      } else {
+        items.push({
+          id: 'report',
+          label: 'Report',
+          icon: 'error',
+          isHighlighted: true,
+        });
+      }
+
+      return items;
+    },
+    [],
+  );
+
+  // Handle dropdown menu item selection for posts
+  const handlePostDropdownSelect = useCallback(
+    (item: DropdownMenuItem, postId: string) => {
+      switch (item.id) {
+        case 'report':
+          loggingService.info(`Report post: ${postId}`);
+          break;
+        case 'edit':
+          loggingService.info(`Edit post: ${postId}`);
+          navigateToScreen(navigation, 'EditPost', {postId});
+          break;
+        case 'delete':
+          loggingService.info(`Delete post: ${postId}`);
+          // For now, just call the remove function directly
+          removePost(postId);
+          break;
+        default:
+          loggingService.info(
+            `Unhandled action: ${item.id} for post: ${postId}`,
+          );
+      }
+    },
+    [navigation, removePost],
+  );
 
   // Create dropdown menu items for the group detail screen
   const groupDropdownMenuItems = useCallback(
@@ -737,7 +782,7 @@ export const GroupDetailScreen = () => {
                   });
                 }
                 // Refresh the group data
-                refetch && refetch();
+                refetchGroup && refetchGroup();
               },
               onError: error => {
                 loggingService.error(`Error joining group: ${groupId}`, error);
@@ -767,7 +812,7 @@ export const GroupDetailScreen = () => {
       group?.membersCapacity,
       group?.memberships,
       group?.privacy,
-      refetch,
+      refetchGroup,
       user?.id,
     ],
   );
@@ -832,35 +877,51 @@ export const GroupDetailScreen = () => {
     }
   }, []);
 
-  // Render feed post
+  // Render feed post with comment navigation and dropdown menu (matching HomeScreen)
   const renderFeedPost = useCallback(
-    ({item}: {item: FeedPost}) => {
+    ({item}: {item: Post}) => {
+      // Determine if this is the user's own post
+      const isOwnPost = item.createdBy.id === user?.id;
+      // Transform Post model to FeedCard props
+      const feedCardProps = transformPostToFeedCard(item);
+
       return (
         <FeedCard
-          avatarSource={item.avatarSource}
-          userName={item.userName}
-          timeAgo={item.timeAgo}
-          labels={item.labels}
-          content={item.content}
-          images={item.images}
-          routeTitle={item.routeTitle}
-          likeCount={item.likeCount}
-          commentCount={item.commentCount}
-          isSaved={item.isSaved}
-          isLiked={item.isLiked}
-          isCommented={item.isCommented}
-          onLikePress={() => handleLikePress(item.id)}
+          avatarSource={feedCardProps.avatarSource}
+          userName={feedCardProps.userName}
+          timeAgo={feedCardProps.timeAgo}
+          labels={feedCardProps.labels}
+          content={feedCardProps.content}
+          images={feedCardProps.images}
+          likeCount={feedCardProps.likeCount}
+          commentCount={feedCardProps.commentCount}
+          isSaved={feedCardProps.isSaved}
+          isLiked={feedCardProps.isLiked}
+          isCommented={feedCardProps.isCommented}
+          dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
+          onDropdownSelect={menuItem =>
+            handlePostDropdownSelect(menuItem, item.id)
+          }
+          onLikePress={() => handleLikePress(item.id, item.isLiked)}
           onCommentPress={() => handleCommentPress(item.id)}
-          onSavePress={() => handleSavePress(item.id)}
+          onSavePress={() => handleSavePress(item.id, item.isSaved)}
           style={styles.feedCard}
         />
       );
     },
-    [handleLikePress, handleCommentPress, handleSavePress],
+    [
+      user,
+      transformPostToFeedCard,
+      createPostDropdownItems,
+      handlePostDropdownSelect,
+      handleLikePress,
+      handleCommentPress,
+      handleSavePress,
+    ],
   );
 
   // Feed keyExtractor
-  const feedKeyExtractor = useCallback((item: FeedPost) => item.id, []);
+  const feedKeyExtractor = useCallback((item: Post) => item.id, []);
 
   // Handle FlatList scroll event to update the current page
   const handleEventScroll = useCallback((event: any) => {
@@ -1138,15 +1199,27 @@ export const GroupDetailScreen = () => {
             {/* Recent Posts Section */}
             <View style={styles.content}>
               <Title weight="bold">Recent Posts</Title>
-              <LegendList
-                data={posts}
-                renderItem={renderFeedPost}
-                keyExtractor={feedKeyExtractor}
-                scrollEnabled={false}
-                contentContainerStyle={styles.feedList}
-                recycleItems={true} // Enable component recycling for better performance
-                maintainVisibleContentPosition={true} // Maintain the visible position when data changes
-              />
+              {postsLoading ? (
+                <View style={styles.postsLoadingContainer}>
+                  <ActivityIndicator size="large" color={colors.primary.main} />
+                </View>
+              ) : posts.length > 0 ? (
+                <LegendList
+                  data={posts}
+                  renderItem={renderFeedPost}
+                  keyExtractor={feedKeyExtractor}
+                  scrollEnabled={false}
+                  contentContainerStyle={styles.feedList}
+                  recycleItems={true} // Enable component recycling for better performance
+                  maintainVisibleContentPosition={true} // Maintain the visible position when data changes
+                />
+              ) : (
+                <View style={styles.noPostsContainer}>
+                  <Typography color={colors.neutral.grey}>
+                    No posts yet. Be the first to share something!
+                  </Typography>
+                </View>
+              )}
             </View>
           </>
         )}
@@ -1494,5 +1567,15 @@ const styles = StyleSheet.create({
   },
   leaveGroupButton: {
     flex: 1,
+  },
+  postsLoadingContainer: {
+    paddingVertical: spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noPostsContainer: {
+    paddingVertical: spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
