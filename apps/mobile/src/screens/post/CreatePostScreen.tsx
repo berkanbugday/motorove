@@ -236,7 +236,10 @@ export const CreatePostScreen = () => {
             });
             closeBottomSheet();
           }}
-          onClose={() => closeBottomSheet()}
+          onClose={() => {
+            setLocation({addresses: []});
+            closeBottomSheet();
+          }}
         />
       ),
       snapPoint: 'full',

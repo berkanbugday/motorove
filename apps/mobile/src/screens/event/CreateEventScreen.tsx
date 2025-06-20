@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -21,39 +21,14 @@ import {
   showToast,
   Icon,
   DateTimePicker,
+  Switch,
+  GroupSelector,
 } from '@components';
-import {colors, spacing, radius, getShadow} from '@theme';
+import {colors, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {z} from 'zod';
 import {loggingService} from '@services/logging.service';
 import {useGetCities} from '@services/city.service';
-
-// Define the form validation schema
-const createEventSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  location: z.string().min(3, 'Location is required'),
-  date: z.date({
-    required_error: 'Date is required',
-    invalid_type_error: 'Invalid date format',
-  }),
-  time: z.date({
-    required_error: 'Time is required',
-    invalid_type_error: 'Invalid time format',
-  }),
-  city: z.string().min(1, 'City is required'),
-  category: z.string().min(1, 'Category is required'),
-  maxParticipants: z
-    .number()
-    .min(2, 'At least 2 participants required')
-    .nullable()
-    .or(z.string().transform(val => (val ? parseInt(val, 10) : null))),
-  cover: z.string().nullable(),
-  isPrivate: z.boolean().default(false),
-});
-
-// Type for the form values
-type CreateEventFormValues = z.infer<typeof createEventSchema>;
+import {createEventSchema, CreateEventFormValues} from '@utils/validation';
 
 // Event categories
 const EVENT_CATEGORIES: DropdownItem[] = [
@@ -74,6 +49,7 @@ export const CreateEventScreen: React.FC = () => {
   );
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Use city service hook
@@ -98,6 +74,7 @@ export const CreateEventScreen: React.FC = () => {
       maxParticipants: null,
       cover: null,
       isPrivate: false,
+      invitedGroups: [],
     },
     mode: 'onChange',
   });
@@ -153,11 +130,24 @@ export const CreateEventScreen: React.FC = () => {
     setValue('category', item?.value || '', {shouldValidate: true});
   }
 
-  const togglePrivacy = () => {
-    const newValue = !isPrivate;
+  const togglePrivacy = (newValue: boolean) => {
     setIsPrivate(newValue);
     setValue('isPrivate', newValue, {shouldValidate: true});
+
+    // Reset selected groups when switching to public
+    if (!newValue) {
+      setSelectedGroups([]);
+      setValue('invitedGroups', [], {shouldValidate: true});
+    }
   };
+
+  const handleGroupsChange = useCallback(
+    (groupIds: string[]) => {
+      setSelectedGroups(groupIds);
+      setValue('invitedGroups', groupIds, {shouldValidate: true});
+    },
+    [setValue],
+  );
 
   const onSubmit = async (data: CreateEventFormValues) => {
     try {
@@ -312,36 +302,24 @@ export const CreateEventScreen: React.FC = () => {
                 keyboardType="numeric"
               />
 
-              {/* Privacy Toggle */}
-              <View style={styles.privacyContainer}>
-                <View style={styles.privacyTextContainer}>
-                  <Typography variant="body" style={styles.privacyTitle}>
-                    Private Event
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color={colors.neutral.grey}
-                    style={styles.privacyDescription}>
-                    Only invited riders can join this event
-                  </Typography>
-                </View>
-                <TouchableOpacity
-                  style={[
-                    styles.toggleContainer,
-                    isPrivate ? styles.toggleActive : styles.toggleInactive,
-                  ]}
-                  onPress={togglePrivacy}
-                  activeOpacity={0.8}>
-                  <View
-                    style={[
-                      styles.toggleIndicator,
-                      isPrivate
-                        ? styles.toggleIndicatorRight
-                        : styles.toggleIndicatorLeft,
-                    ]}
+              {/* Privacy Switch */}
+              <Switch
+                value={isPrivate}
+                onValueChange={togglePrivacy}
+                label="Private Event"
+                description="Only invited groups can join this event"
+              />
+
+              {/* Group Selector for Private Events */}
+              {isPrivate && (
+                <View style={styles.privateEventSection}>
+                  <GroupSelector
+                    selectedGroups={selectedGroups}
+                    onGroupsChange={handleGroupsChange}
+                    maxGroups={3}
                   />
-                </TouchableOpacity>
-              </View>
+                </View>
+              )}
             </View>
           </View>
         </ScrollView>
@@ -404,69 +382,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
   },
-  iconContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 24,
-    height: 24,
-  },
-  emoji: {
-    fontSize: 16,
-  },
-  inputLabel: {
-    marginBottom: spacing.xs,
-    paddingLeft: spacing.xs,
-  },
   dateTimePicker: {
     marginBottom: spacing.xs,
   },
-  errorText: {
-    paddingLeft: spacing.xs,
-    marginTop: spacing.xs,
-  },
-  privacyContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.secondary.light,
-    borderRadius: radius.md,
-  },
-  privacyTextContainer: {
-    flex: 1,
-  },
-  privacyTitle: {
-    fontWeight: '600',
-  },
-  privacyDescription: {
-    marginTop: spacing.xs,
-  },
-  toggleContainer: {
-    width: 50,
-    height: 30,
-    borderRadius: 15,
-    padding: 2,
-    justifyContent: 'center',
-  },
-  toggleActive: {
-    backgroundColor: colors.neutral.black,
-  },
-  toggleInactive: {
-    backgroundColor: colors.neutral.lightGrey,
-  },
-  toggleIndicator: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: colors.neutral.white,
-    ...getShadow('small'),
-  },
-  toggleIndicatorLeft: {
-    alignSelf: 'flex-start',
-  },
-  toggleIndicatorRight: {
-    alignSelf: 'flex-end',
+  privateEventSection: {
+    padding: spacing.md,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
   buttonContainer: {
     paddingHorizontal: spacing.xl,

@@ -269,7 +269,7 @@ export const Chip: React.FC<ChipProps> = ({
 
   return (
     <TouchableOpacity
-      activeOpacity={1}
+      activeOpacity={disabled ? 1 : 0.7}
       style={containerStyles}
       onPress={handlePress}
       disabled={disabled}
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: radius.round,
     paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.xs,
     alignSelf: 'flex-start',
   },
   smallContainer: {
@@ -347,8 +347,9 @@ const styles = StyleSheet.create({
   },
   labelWithTrailingIcon: {
     marginRight: spacing.xs / 2,
+    marginLeft: spacing.xs / 2,
   },
   removeIconContainer: {
-    marginLeft: spacing.xs / 2,
+    marginLeft: spacing.xs,
   },
 });

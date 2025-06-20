@@ -777,7 +777,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     gap: spacing.xs,
-    marginTop: spacing.md,
   },
   divider: {
     height: 1,

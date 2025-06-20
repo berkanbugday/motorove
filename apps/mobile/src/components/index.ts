@@ -31,6 +31,9 @@ export * from './FAB';
 export * from './SwipeableItem';
 export * from './DateTimePicker';
 export * from './PostLocationMap';
+export * from './Switch';
+export * from './GroupSelector';
+
 export {default as Dialog} from './Dialog';
 export type {
   DialogRef,

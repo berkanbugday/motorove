@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: spacing.md,
-    justifyContent: 'center',
+    paddingVertical: spacing.md,
   },
   handleContainer: {
     paddingVertical: 10,

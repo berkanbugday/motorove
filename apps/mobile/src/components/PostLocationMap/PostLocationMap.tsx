@@ -19,6 +19,7 @@ interface PostLocationMapProps {
     name?: string;
     addresses?: PostAddressInput[];
   }) => void;
+  onClose: () => void;
   initialLocation?: {
     latitude?: number;
     longitude?: number;
@@ -28,6 +29,7 @@ interface PostLocationMapProps {
 export const PostLocationMap: React.FC<PostLocationMapProps> = ({
   onLocationSelect,
   initialLocation,
+  onClose,
 }) => {
   // Add map ref for animation
   const mapRef = useRef<any>(null);
@@ -229,6 +231,7 @@ export const PostLocationMap: React.FC<PostLocationMapProps> = ({
       longitude: undefined,
       addresses: [],
     });
+    onClose();
   };
 
   // Create a marker when a location is selected
