@@ -397,8 +397,7 @@ const styles = StyleSheet.create({
   privateEventSection: {
     padding: spacing.md,
     borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.black,
+    backgroundColor: colors.secondary.light,
   },
   buttonContainer: {
     flexDirection: 'row',

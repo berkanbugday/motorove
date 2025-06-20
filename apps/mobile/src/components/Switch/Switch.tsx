@@ -185,8 +185,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: colors.secondary.light,
     borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.lightGrey,
   },
   textContent: {
     flex: 1,
