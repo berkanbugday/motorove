@@ -12,7 +12,7 @@ import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
 import {PostAddressInput} from '../../types/models/post.model';
 
-interface PostLocationMapProps {
+interface SelectLocationMapProps {
   onLocationSelect: (location: {
     latitude?: number;
     longitude?: number;
@@ -26,7 +26,7 @@ interface PostLocationMapProps {
   };
 }
 
-export const PostLocationMap: React.FC<PostLocationMapProps> = ({
+export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   onLocationSelect,
   initialLocation,
   onClose,

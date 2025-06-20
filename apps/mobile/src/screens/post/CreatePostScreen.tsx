@@ -25,9 +25,9 @@ import {
   DropdownItem,
   Dropdown,
   Subtitle,
-  PostLocationMap,
   Body,
   showToast,
+  SelectLocationMap,
 } from '@components';
 import {GroupCard} from '@components/GroupCard';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -227,7 +227,7 @@ export const CreatePostScreen = () => {
     openBottomSheet({
       title: 'Select Location',
       content: (
-        <PostLocationMap
+        <SelectLocationMap
           initialLocation={location}
           onLocationSelect={selectedLocation => {
             setLocation({

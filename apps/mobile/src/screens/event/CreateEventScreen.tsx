@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useRef} from 'react';
 import {
   View,
   StyleSheet,
@@ -23,6 +23,8 @@ import {
   DateTimePicker,
   Switch,
   GroupSelector,
+  BottomSheet,
+  SelectLocationMap,
 } from '@components';
 import {colors, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -30,6 +32,7 @@ import {loggingService} from '@services/logging.service';
 import {useGetCities} from '@services/city.service';
 import {createEventSchema, CreateEventFormValues} from '@utils/validation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 
 // Event categories
 const EVENT_CATEGORIES: DropdownItem[] = [
@@ -53,6 +56,16 @@ export const CreateEventScreen: React.FC = () => {
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
+  // Reference for bottom sheet
+  const locationMapBottomSheetRef = useRef<BottomSheetRef>(null);
+  // State for selected location
+  const [selectedLocation, setSelectedLocation] = useState<{
+    latitude?: number;
+    longitude?: number;
+    name?: string;
+    addresses?: any[];
+  }>({});
+
   // Use city service hook
   const {cities, loading: citiesLoading} = useGetCities();
 
@@ -82,6 +95,37 @@ export const CreateEventScreen: React.FC = () => {
 
   const handleGoBack = () => {
     navigation.goBack();
+  };
+
+  // Open location map bottom sheet
+  const handleOpenLocationMap = () => {
+    locationMapBottomSheetRef.current?.open('full');
+  };
+
+  // Handle location selection from the map
+  const handleLocationSelect = (location: {
+    latitude?: number;
+    longitude?: number;
+    name?: string;
+    addresses?: any[];
+  }) => {
+    setSelectedLocation(location);
+
+    // Get display address (prefer English)
+    const englishAddress = location.addresses?.find(
+      addr => addr.language === 'en',
+    );
+    const turkishAddress = location.addresses?.find(
+      addr => addr.language === 'tr',
+    );
+    const displayAddress =
+      englishAddress?.address || turkishAddress?.address || '';
+
+    // Set the location field value
+    setValue('location', displayAddress, {shouldValidate: true});
+
+    // Close the bottom sheet
+    locationMapBottomSheetRef.current?.close();
   };
 
   const handleSelectCover = async () => {
@@ -256,6 +300,8 @@ export const CreateEventScreen: React.FC = () => {
                   <Icon name="map-pin" size={20} color={colors.neutral.grey} />
                 }
                 iconPosition="right"
+                onPress={handleOpenLocationMap}
+                editable={false}
               />
 
               {/* City Dropdown */}
@@ -345,6 +391,25 @@ export const CreateEventScreen: React.FC = () => {
           />
         </View>
       </SafeAreaView>
+
+      {/* Location Map Bottom Sheet */}
+      <BottomSheet
+        ref={locationMapBottomSheetRef}
+        title="Select Location"
+        showBackdrop={true}>
+        <SelectLocationMap
+          onLocationSelect={handleLocationSelect}
+          onClose={() => locationMapBottomSheetRef.current?.close()}
+          initialLocation={
+            selectedLocation.latitude && selectedLocation.longitude
+              ? {
+                  latitude: selectedLocation.latitude,
+                  longitude: selectedLocation.longitude,
+                }
+              : undefined
+          }
+        />
+      </BottomSheet>
     </View>
   );
 };

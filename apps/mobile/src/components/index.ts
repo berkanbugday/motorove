@@ -30,7 +30,7 @@ export * from './MarkerInfoCard';
 export * from './FAB';
 export * from './SwipeableItem';
 export * from './DateTimePicker';
-export * from './PostLocationMap';
+export * from './SelectLocationMap';
 export * from './Switch';
 export * from './GroupSelector';
 

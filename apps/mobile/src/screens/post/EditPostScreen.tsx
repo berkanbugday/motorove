@@ -22,7 +22,7 @@ import {
   DropdownItem,
   Dropdown,
   Subtitle,
-  PostLocationMap,
+  SelectLocationMap,
   Body,
   showToast,
 } from '@components';
@@ -254,7 +254,7 @@ export const EditPostScreen = () => {
     openBottomSheet({
       title: 'Select Location',
       content: (
-        <PostLocationMap
+        <SelectLocationMap
           initialLocation={location}
           onLocationSelect={selectedLocation => {
             setLocation({
