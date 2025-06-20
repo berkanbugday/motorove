@@ -29,6 +29,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
 import {useGetCities} from '@services/city.service';
 import {createEventSchema, CreateEventFormValues} from '@utils/validation';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 // Event categories
 const EVENT_CATEGORIES: DropdownItem[] = [
@@ -51,7 +52,7 @@ export const CreateEventScreen: React.FC = () => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const insets = useSafeAreaInsets();
   // Use city service hook
   const {cities, loading: citiesLoading} = useGetCities();
 
@@ -193,7 +194,7 @@ export const CreateEventScreen: React.FC = () => {
         onBackPress={handleGoBack}
         containerStyle={styles.topHeaderBar}
       />
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}>
@@ -327,12 +328,20 @@ export const CreateEventScreen: React.FC = () => {
         {/* Create Button */}
         <View style={styles.buttonContainer}>
           <Button
+            title={loading ? 'Saving...' : 'Save Draft'}
+            variant="secondary"
+            shape="round"
+            onPress={() => {}}
+            loading={false}
+            style={{flex: 1}}
+          />
+          <Button
             title={loading ? 'Creating...' : 'Create Event'}
             variant="dark"
-            size="medium"
             shape="round"
             onPress={handleSubmit(onSubmit as any)}
             loading={loading}
+            style={{flex: 1}}
           />
         </View>
       </SafeAreaView>
@@ -392,6 +401,9 @@ const styles = StyleSheet.create({
     borderColor: colors.neutral.black,
   },
   buttonContainer: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    justifyContent: 'center',
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
