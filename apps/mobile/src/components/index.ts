@@ -33,6 +33,7 @@ export * from './DateTimePicker';
 export * from './SelectLocationMap';
 export * from './Switch';
 export * from './GroupSelector';
+export * from './UserSelector';
 
 export {default as Dialog} from './Dialog';
 export type {

@@ -11,5 +11,13 @@ export * from './navigation.types';
 // Domain models
 export * from './models';
 
-// API types
-export * from './api.types';
+// User type
+export type User = {
+  id: string;
+  email?: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  avatar?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};

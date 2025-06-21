@@ -95,6 +95,17 @@ type EnumItem {
   value: String!
 }
 
+input FollowUserInput {
+  userId: String!
+}
+
+type Follower {
+  createdAt: DateTime!
+  follower: User!
+  following: User!
+  id: ID!
+}
+
 type Group {
   city: City!
   cover: String
@@ -182,6 +193,7 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): Post!
   deleteAllNotifications: Boolean!
   deleteNotification(id: ID!): Notification!
+  followUser(input: FollowUserInput!): Follower!
   leaveGroup(leaveGroupInput: LeaveGroupInput!): GroupMembership!
   likePost(postId: ID!): PostLike!
   markAllNotificationsAsRead(userId: String!): [Notification!]!
@@ -196,6 +208,7 @@ type Mutation {
   sendBulkNotifications(sendBulkNotificationInput: SendBulkNotificationInput!): Boolean!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
+  unfollowUser(input: FollowUserInput!): Boolean!
   unlikePost(postId: ID!): ID!
   unsavePost(postId: ID!): ID!
   updateComment(updateCommentInput: UpdateCommentInput!): Comment!
@@ -324,13 +337,18 @@ type Query {
   groupTag(id: ID!): GroupTag
   groupTags: [GroupTag!]!
   groups(filters: GroupFilterInput, limit: Int, query: String, skip: Int): [Group!]!
+  isFollowing(userId: String!): Boolean!
   joinedGroups(filters: GroupFilterInput, limit: Int, skip: Int): [Group!]!
   me: User!
+  myFollowers: [User!]!
+  myFollowing: [User!]!
   myGroupMemberships: [GroupMembership!]!
   notifications(limit: Int, skip: Int): [Notification!]!
   notificationsCount(onlyUnread: Boolean = true): Float!
   post(id: ID!): Post!
   posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [Post!]!
+  userFollowers(userId: String!): [User!]!
+  userFollowing(userId: String!): [User!]!
 }
 
 input RemoveGroupMemberInput {

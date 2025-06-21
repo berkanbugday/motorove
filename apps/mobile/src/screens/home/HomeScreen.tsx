@@ -794,13 +794,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  deleteButtonsContainer: {
-    // flexDirection: 'row',
-    // justifyContent: 'space-between',
-    // marginTop: spacing.md,
-  },
-  deleteButton: {
-    flex: 1,
-    marginHorizontal: spacing.xs,
-  },
 });

@@ -95,6 +95,14 @@ model User {
   updatedComments      Comment[]         @relation("CommentUpdatedBy")
   postLikes            PostLike[]
   postSaves            PostSave[]
+  
+  // Following system relations
+  followers       UserFollowing[] @relation("UserFollowers")
+  following       UserFollowing[] @relation("UserFollowing")
+  
+  // Event invitations
+  sentInvitations     EventInvitation[] @relation("SentInvitations")
+  receivedInvitations EventInvitation[] @relation("ReceivedInvitations")
 }
 
 model City {
@@ -292,4 +300,37 @@ model PostAddress {
   @@unique([postId, language])
   @@index([postId])
   @@index([language])
+}
+
+// User following relationships
+model UserFollowing {
+  id          String   @id @default(uuid())
+  followerId  String
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+// Event invitation for users (used for private solo rides)
+model EventInvitation {
+  id        String   @id @default(uuid())
+  eventId   String   // Will add relation when implementing events
+  inviterId String
+  inviter   User     @relation("SentInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
+  inviteeId String
+  invitee   User     @relation("ReceivedInvitations", fields: [inviteeId], references: [id], onDelete: Cascade)
+  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, inviteeId])
+  @@index([eventId])
+  @@index([inviterId])
+  @@index([inviteeId])
+  @@index([status])
 }

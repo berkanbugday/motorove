@@ -52,6 +52,7 @@ export const createEventSchema = z.object({
   cover: z.string().nullable().optional(),
   isPrivate: z.boolean().default(false),
   invitedGroups: z.array(z.string()).optional().default([]),
+  invitedUsers: z.array(z.string()).optional().default([]),
 
   // Ride/camping specific fields
   routeDescription: z.string().optional(),

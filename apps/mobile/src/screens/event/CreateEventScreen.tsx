@@ -25,10 +25,12 @@ import {
   GroupSelector,
   BottomSheet,
   SelectLocationMap,
+  UserSelector,
 } from '@components';
 import {colors, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
+import {eventService} from '@services/event.service';
 import {createEventSchema, CreateEventFormValues} from '@utils/validation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
@@ -71,6 +73,7 @@ export const CreateEventScreen: React.FC = () => {
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
   // Reference for bottom sheet
@@ -108,6 +111,7 @@ export const CreateEventScreen: React.FC = () => {
       cover: null,
       isPrivate: false,
       invitedGroups: [],
+      invitedUsers: [], // Added for inviting followers to solo rides
       // Ride/camping specific fields
       routeDescription: '',
       roadType: '',
@@ -126,6 +130,9 @@ export const CreateEventScreen: React.FC = () => {
 
   // Watch the event type to conditionally render fields
   const eventType = watch('eventType');
+
+  // Check if event type is solo ride
+  const isSoloRide = eventType === 'SOLO_RIDE';
 
   // Effect to clear conditional fields when event type changes
   useEffect(() => {
@@ -149,6 +156,12 @@ export const CreateEventScreen: React.FC = () => {
       setSelectedRoadType(null);
       setSelectedDifficulty(null);
       setSelectedExperienceLevel(null);
+
+      // Reset selected users and groups since they depend on event type
+      setSelectedUsers([]);
+      setSelectedGroups([]);
+      resetField('invitedUsers');
+      resetField('invitedGroups');
     }
   }, [eventType, resetField]);
 
@@ -257,11 +270,20 @@ export const CreateEventScreen: React.FC = () => {
     [setValue],
   );
 
+  const handleUsersChange = useCallback(
+    (userIds: string[]) => {
+      setSelectedUsers(userIds);
+      setValue('invitedUsers', userIds, {shouldValidate: true});
+    },
+    [setValue],
+  );
+
   const onSubmit = async (data: CreateEventFormValues) => {
     try {
       setLoading(true);
-      // TODO: Implement API call to create event
-      console.log('Event data:', data);
+
+      // Use event service to create the event
+      await eventService.createEvent(data);
 
       showToast({
         type: 'success',
@@ -277,7 +299,8 @@ export const CreateEventScreen: React.FC = () => {
       showToast({
         type: 'error',
         text1: 'Error',
-        text2: 'Failed to create event',
+        text2:
+          error instanceof Error ? error.message : 'Failed to create event',
       });
       loggingService.error('Error creating event:', error);
     } finally {
@@ -432,17 +455,43 @@ export const CreateEventScreen: React.FC = () => {
                 value={isPrivate}
                 onValueChange={togglePrivacy}
                 label="Private Event"
-                description="Only invited groups can join this event"
+                description="Only invited groups or users can join this event"
               />
 
-              {/* Group Selector for Private Events */}
+              {/* Group/User Selectors for Private Events */}
               {isPrivate && (
                 <View style={styles.privateEventSection}>
-                  <GroupSelector
-                    selectedGroups={selectedGroups}
-                    onGroupsChange={handleGroupsChange}
-                    maxGroups={3}
-                  />
+                  {/* For solo rides, show user selector */}
+                  {isSoloRide ? (
+                    <View>
+                      <Typography
+                        variant="bodySmall"
+                        weight="semibold"
+                        style={styles.privateEventTitle}>
+                        Invite Users from Followers
+                      </Typography>
+                      <UserSelector
+                        selectedUsers={selectedUsers}
+                        onUsersChange={handleUsersChange}
+                        maxUsers={10}
+                      />
+                    </View>
+                  ) : (
+                    /* For other event types, show group selector */
+                    <View>
+                      <Typography
+                        variant="bodySmall"
+                        weight="semibold"
+                        style={styles.privateEventTitle}>
+                        Invite Groups
+                      </Typography>
+                      <GroupSelector
+                        selectedGroups={selectedGroups}
+                        onGroupsChange={handleGroupsChange}
+                        maxGroups={3}
+                      />
+                    </View>
+                  )}
                 </View>
               )}
 
@@ -650,6 +699,10 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.sm,
     backgroundColor: colors.secondary.light,
+  },
+  privateEventTitle: {
+    marginBottom: spacing.sm,
+    color: colors.neutral.darkGrey,
   },
   buttonContainer: {
     flexDirection: 'row',
