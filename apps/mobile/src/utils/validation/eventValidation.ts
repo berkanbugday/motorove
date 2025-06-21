@@ -22,17 +22,19 @@ export const createEventSchema = z.object({
     required_error: 'Time is required',
     invalid_type_error: 'Invalid time format',
   }),
-  endTime: z.date({
-    required_error: 'End time is required',
-    invalid_type_error: 'Invalid end time format',
-  }),
-  city: z
-    .string({required_error: 'City is required'})
-    .min(1, 'Please select a city'),
+  endDate: z
+    .date({
+      invalid_type_error: 'Invalid date format',
+    })
+    .optional(),
+  endTime: z
+    .date({
+      invalid_type_error: 'Invalid end time format',
+    })
+    .optional(),
   eventType: z
     .string({required_error: 'Event type is required'})
     .min(1, 'Please select an event type'),
-  whoCanJoin: z.string().default('Everyone').optional(),
   maxParticipants: z
     .string()
     .transform(val => (val === '' ? null : val))

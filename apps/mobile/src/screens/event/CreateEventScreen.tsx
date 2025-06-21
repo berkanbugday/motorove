@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback} from 'react';
+import React, {useState, useRef, useCallback, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -29,19 +29,11 @@ import {
 import {colors, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
-import {useGetCities} from '@services/city.service';
 import {createEventSchema, CreateEventFormValues} from '@utils/validation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useEnumEventTypes} from '@services/enum.service';
-
-// Who Can Join options
-const WHO_CAN_JOIN: DropdownItem[] = [
-  {id: '1', value: 'Everyone', label: 'Everyone'},
-  {id: '2', value: 'Group Only', label: 'Group Only'},
-  {id: '3', value: 'Women Only', label: 'Women Only'},
-  {id: '4', value: 'Invitation Only', label: 'Invitation Only'},
-];
+import {toPascalCase} from '@utils/stringUtils';
 
 // Road type options
 const ROAD_TYPES: DropdownItem[] = [
@@ -67,15 +59,12 @@ const EXPERIENCE_LEVELS: DropdownItem[] = [
 
 export const CreateEventScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
-  const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
   const [selectedEventType, setSelectedEventType] =
     useState<DropdownItem | null>(null);
   const [selectedRoadType, setSelectedRoadType] = useState<DropdownItem | null>(
     null,
   );
   const [selectedDifficulty, setSelectedDifficulty] =
-    useState<DropdownItem | null>(null);
-  const [selectedWhoCanJoin, setSelectedWhoCanJoin] =
     useState<DropdownItem | null>(null);
   const [selectedExperienceLevel, setSelectedExperienceLevel] =
     useState<DropdownItem | null>(null);
@@ -95,9 +84,6 @@ export const CreateEventScreen: React.FC = () => {
     addresses?: any[];
   }>({});
 
-  // Use city service hook
-  const {cities, loading: citiesLoading} = useGetCities();
-
   // Use event types service hook - ignore loading state for now
   const {eventTypes} = useEnumEventTypes();
 
@@ -108,6 +94,7 @@ export const CreateEventScreen: React.FC = () => {
     formState: {errors},
     setValue,
     watch,
+    resetField,
   } = useForm<CreateEventFormValues>({
     resolver: zodResolver(createEventSchema) as any,
     defaultValues: {
@@ -116,10 +103,8 @@ export const CreateEventScreen: React.FC = () => {
       location: '',
       date: new Date(),
       time: new Date(),
+      endDate: new Date(),
       endTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000), // Default 2 hours later
-      city: '',
-      eventType: '',
-      whoCanJoin: 'Everyone',
       maxParticipants: null,
       cover: null,
       isPrivate: false,
@@ -147,6 +132,38 @@ export const CreateEventScreen: React.FC = () => {
 
   // Watch the event type to conditionally render fields
   const eventType = watch('eventType');
+
+  // Effect to clear conditional fields when event type changes
+  useEffect(() => {
+    if (eventType) {
+      // Clear all event-type specific fields
+      // Ride/camping specific fields
+      resetField('routeDescription');
+      resetField('roadType');
+      resetField('difficulty');
+      resetField('restStops');
+      resetField('overnightInfo');
+      resetField('equipmentChecklist');
+
+      // Workshop specific fields
+      resetField('instructorInfo');
+      resetField('topicsCovered');
+      resetField('experienceLevel');
+      resetField('price');
+
+      // Track day/race specific fields
+      resetField('trackLocation');
+      resetField('licenseRequired');
+      resetField('timeSlots');
+      resetField('safetyRequirements');
+
+      // Reset UI state for dropdowns
+      setSelectedRoadType(null);
+      setSelectedDifficulty(null);
+      setSelectedExperienceLevel(null);
+      setLicenseRequired(false);
+    }
+  }, [eventType, resetField]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -220,19 +237,9 @@ export const CreateEventScreen: React.FC = () => {
     }
   };
 
-  function handleCitySelect(item: DropdownItem | null) {
-    setSelectedCity(item);
-    setValue('city', item?.value || '', {shouldValidate: true});
-  }
-
   function handleEventTypeSelect(item: DropdownItem | null) {
     setSelectedEventType(item);
     setValue('eventType', item?.value || '', {shouldValidate: true});
-  }
-
-  function handleWhoCanJoinSelect(item: DropdownItem | null) {
-    setSelectedWhoCanJoin(item);
-    setValue('whoCanJoin', item?.value || '', {shouldValidate: true});
   }
 
   function handleRoadTypeSelect(item: DropdownItem | null) {
@@ -314,13 +321,6 @@ export const CreateEventScreen: React.FC = () => {
   // Check if event type is track day or race
   const isTrackDayOrRace = eventType === 'TRACK_DAY_RACE';
 
-  // Convert cities data for dropdown
-  const cityItems: DropdownItem[] = cities.map(city => ({
-    id: city.id || '',
-    value: city.value || '',
-    label: city.value || '',
-  }));
-
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -384,7 +384,7 @@ export const CreateEventScreen: React.FC = () => {
                 error={errors.description}
               />
 
-              {/* Date and Time */}
+              {/* Start Date and Time */}
               <View style={styles.dateTimeContainer}>
                 <DateTimePicker
                   control={control as any}
@@ -407,16 +407,28 @@ export const CreateEventScreen: React.FC = () => {
                 />
               </View>
 
-              {/* End Time */}
-              <DateTimePicker
-                control={control as any}
-                name="endTime"
-                placeholder="Estimated End Time (optional)"
-                mode="time"
-                minuteInterval={15}
-                style={styles.dateTimePicker}
-                error={errors.endTime}
-              />
+              {/* End Date and Time */}
+              <View style={styles.dateTimeContainer}>
+                <DateTimePicker
+                  control={control as any}
+                  name="endDate"
+                  placeholder="End Date (optional)"
+                  displayFormat="medium"
+                  mode="date"
+                  minimumDate={new Date()}
+                  style={styles.dateTimePicker}
+                  error={errors.endDate}
+                />
+                <DateTimePicker
+                  control={control as any}
+                  name="endTime"
+                  placeholder="End Time (optional)"
+                  mode="time"
+                  minuteInterval={15}
+                  style={styles.dateTimePicker}
+                  error={errors.endTime}
+                />
+              </View>
 
               {/* Location */}
               <AnimatedInput
@@ -432,19 +444,6 @@ export const CreateEventScreen: React.FC = () => {
                 editable={false}
               />
 
-              {/* City Dropdown */}
-              <Dropdown
-                data={cityItems}
-                label="City"
-                onSelect={item => {
-                  handleCitySelect(item);
-                }}
-                searchable={true}
-                selectedItem={selectedCity}
-                error={errors.city?.message}
-                loading={citiesLoading}
-              />
-
               {/* Max Participants */}
               <AnimatedInput
                 control={control as any}
@@ -452,18 +451,6 @@ export const CreateEventScreen: React.FC = () => {
                 label="Maximum Participants (optional)"
                 error={errors.maxParticipants}
                 keyboardType="numeric"
-              />
-
-              {/* Who Can Join */}
-              <Dropdown
-                data={WHO_CAN_JOIN}
-                label="Who Can Join?"
-                onSelect={item => {
-                  handleWhoCanJoinSelect(item);
-                }}
-                searchable={false}
-                selectedItem={selectedWhoCanJoin}
-                error={errors.whoCanJoin?.message}
               />
 
               {/* Privacy Switch */}
@@ -488,8 +475,11 @@ export const CreateEventScreen: React.FC = () => {
               {/* Conditional Fields based on Event Type */}
               {eventType && (
                 <View style={styles.conditionalFieldsContainer}>
-                  <Typography variant="subtitle" style={styles.sectionTitle}>
-                    {eventType} Details
+                  <Typography
+                    variant="subtitle"
+                    weight="bold"
+                    style={styles.sectionTitle}>
+                    {toPascalCase(eventType)} Details
                   </Typography>
 
                   {/* Ride & Camping Specific Fields */}
@@ -546,7 +536,6 @@ export const CreateEventScreen: React.FC = () => {
                         label="Equipment Checklist"
                         multiline
                         error={errors.equipmentChecklist}
-                        placeholder="List required equipment, one per line"
                       />
                     </>
                   )}
@@ -734,10 +723,7 @@ const styles = StyleSheet.create({
   },
   conditionalFieldsContainer: {
     marginTop: spacing.md,
-    padding: spacing.md,
-    backgroundColor: colors.secondary.light,
-    borderRadius: radius.sm,
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   sectionTitle: {
     marginBottom: spacing.xs,
