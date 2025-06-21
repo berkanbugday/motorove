@@ -66,12 +66,6 @@ export const createEventSchema = z.object({
   topicsCovered: z.string().optional(),
   experienceLevel: z.string().optional(),
   price: z.string().optional(),
-
-  // Track day/race specific fields
-  trackLocation: z.string().optional(),
-  licenseRequired: z.boolean().optional().default(false),
-  timeSlots: z.string().optional(),
-  safetyRequirements: z.string().optional(),
 });
 
 export const updateEventSchema = createEventSchema.extend({

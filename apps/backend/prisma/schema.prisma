@@ -59,12 +59,12 @@ enum NotificationStatus {
 }
 
 enum EventType {
+  SOLO_RIDE
   GROUP_RIDE
   CAMPING_RIDE
   SOCIAL_MEET_UP
   WORKSHOP_TRAINING
   CHARITY_RIDE
-  TRACK_DAY_RACE
 }
 
 // Models

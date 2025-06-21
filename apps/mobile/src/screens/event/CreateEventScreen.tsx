@@ -70,7 +70,6 @@ export const CreateEventScreen: React.FC = () => {
     useState<DropdownItem | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isPrivate, setIsPrivate] = useState(false);
-  const [licenseRequired, setLicenseRequired] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
@@ -121,11 +120,6 @@ export const CreateEventScreen: React.FC = () => {
       topicsCovered: '',
       experienceLevel: '',
       price: '',
-      // Track day/race specific fields
-      trackLocation: '',
-      licenseRequired: false,
-      timeSlots: '',
-      safetyRequirements: '',
     },
     mode: 'onChange',
   });
@@ -151,17 +145,10 @@ export const CreateEventScreen: React.FC = () => {
       resetField('experienceLevel');
       resetField('price');
 
-      // Track day/race specific fields
-      resetField('trackLocation');
-      resetField('licenseRequired');
-      resetField('timeSlots');
-      resetField('safetyRequirements');
-
       // Reset UI state for dropdowns
       setSelectedRoadType(null);
       setSelectedDifficulty(null);
       setSelectedExperienceLevel(null);
-      setLicenseRequired(false);
     }
   }, [eventType, resetField]);
 
@@ -260,17 +247,6 @@ export const CreateEventScreen: React.FC = () => {
   const togglePrivacy = (newValue: boolean) => {
     setIsPrivate(newValue);
     setValue('isPrivate', newValue, {shouldValidate: true});
-
-    // Reset selected groups when switching to public
-    if (!newValue) {
-      setSelectedGroups([]);
-      setValue('invitedGroups', [], {shouldValidate: true});
-    }
-  };
-
-  const toggleLicenseRequired = (newValue: boolean) => {
-    setLicenseRequired(newValue);
-    setValue('licenseRequired', newValue, {shouldValidate: true});
   };
 
   const handleGroupsChange = useCallback(
@@ -311,15 +287,13 @@ export const CreateEventScreen: React.FC = () => {
 
   // Check if event type is related to rides or camping
   const isRideOrCamping =
+    eventType === 'SOLO_RIDE' ||
     eventType === 'GROUP_RIDE' ||
     eventType === 'CAMPING_RIDE' ||
     eventType === 'CHARITY_RIDE';
 
   // Check if event type is workshop
   const isWorkshop = eventType === 'WORKSHOP_TRAINING';
-
-  // Check if event type is track day or race
-  const isTrackDayOrRace = eventType === 'TRACK_DAY_RACE';
 
   return (
     <View style={styles.container}>
@@ -575,40 +549,6 @@ export const CreateEventScreen: React.FC = () => {
                         keyboardType="numeric"
                         error={errors.price}
                         placeholder="Leave empty if free"
-                      />
-                    </>
-                  )}
-
-                  {/* Track Day / Race Specific Fields */}
-                  {isTrackDayOrRace && (
-                    <>
-                      <AnimatedInput
-                        control={control as any}
-                        name="trackLocation"
-                        label="Track Location"
-                        error={errors.trackLocation}
-                      />
-
-                      <Switch
-                        value={licenseRequired}
-                        onValueChange={toggleLicenseRequired}
-                        label="License Required"
-                      />
-
-                      <AnimatedInput
-                        control={control as any}
-                        name="timeSlots"
-                        label="Time Slots / Agenda"
-                        multiline
-                        error={errors.timeSlots}
-                      />
-
-                      <AnimatedInput
-                        control={control as any}
-                        name="safetyRequirements"
-                        label="Safety Gear Requirements"
-                        multiline
-                        error={errors.safetyRequirements}
                       />
                     </>
                   )}
