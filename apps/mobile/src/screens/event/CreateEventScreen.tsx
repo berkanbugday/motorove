@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef} from 'react';
+import React, {useState, useRef, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -33,16 +33,36 @@ import {useGetCities} from '@services/city.service';
 import {createEventSchema, CreateEventFormValues} from '@utils/validation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
+import {useEnumEventTypes} from '@services/enum.service';
 
-// Event categories
-const EVENT_CATEGORIES: DropdownItem[] = [
-  {id: '1', value: 'Group Ride', label: 'Group Ride'},
-  {id: '2', value: 'Night Ride', label: 'Night Ride'},
-  {id: '3', value: 'Off-Road', label: 'Off-Road'},
-  {id: '4', value: 'Meet Up', label: 'Meet Up'},
-  {id: '5', value: 'Race', label: 'Race'},
-  {id: '6', value: 'Touring', label: 'Touring'},
-  {id: '7', value: 'Workshop', label: 'Workshop'},
+// Who Can Join options
+const WHO_CAN_JOIN: DropdownItem[] = [
+  {id: '1', value: 'Everyone', label: 'Everyone'},
+  {id: '2', value: 'Group Only', label: 'Group Only'},
+  {id: '3', value: 'Women Only', label: 'Women Only'},
+  {id: '4', value: 'Invitation Only', label: 'Invitation Only'},
+];
+
+// Road type options
+const ROAD_TYPES: DropdownItem[] = [
+  {id: '1', value: 'Paved', label: 'Paved'},
+  {id: '2', value: 'Off-road', label: 'Off-road'},
+  {id: '3', value: 'Mixed', label: 'Mixed'},
+];
+
+// Difficulty levels
+const DIFFICULTY_LEVELS: DropdownItem[] = [
+  {id: '1', value: 'Easy', label: 'Easy'},
+  {id: '2', value: 'Moderate', label: 'Moderate'},
+  {id: '3', value: 'Hard', label: 'Hard'},
+];
+
+// Experience levels for workshops
+const EXPERIENCE_LEVELS: DropdownItem[] = [
+  {id: '1', value: 'Beginner', label: 'Beginner'},
+  {id: '2', value: 'Intermediate', label: 'Intermediate'},
+  {id: '3', value: 'Advanced', label: 'Advanced'},
+  {id: '4', value: 'All Levels', label: 'All Levels'},
 ];
 
 export const CreateEventScreen: React.FC = () => {
@@ -50,8 +70,18 @@ export const CreateEventScreen: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
   const [selectedEventType, setSelectedEventType] =
     useState<DropdownItem | null>(null);
+  const [selectedRoadType, setSelectedRoadType] = useState<DropdownItem | null>(
+    null,
+  );
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState<DropdownItem | null>(null);
+  const [selectedWhoCanJoin, setSelectedWhoCanJoin] =
+    useState<DropdownItem | null>(null);
+  const [selectedExperienceLevel, setSelectedExperienceLevel] =
+    useState<DropdownItem | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isPrivate, setIsPrivate] = useState(false);
+  const [licenseRequired, setLicenseRequired] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const insets = useSafeAreaInsets();
@@ -68,12 +98,16 @@ export const CreateEventScreen: React.FC = () => {
   // Use city service hook
   const {cities, loading: citiesLoading} = useGetCities();
 
+  // Use event types service hook - ignore loading state for now
+  const {eventTypes} = useEnumEventTypes();
+
   // Setup form with Zod validation
   const {
     control,
     handleSubmit,
     formState: {errors},
     setValue,
+    watch,
   } = useForm<CreateEventFormValues>({
     resolver: zodResolver(createEventSchema) as any,
     defaultValues: {
@@ -82,15 +116,37 @@ export const CreateEventScreen: React.FC = () => {
       location: '',
       date: new Date(),
       time: new Date(),
+      endTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000), // Default 2 hours later
       city: '',
       eventType: '',
+      whoCanJoin: 'Everyone',
       maxParticipants: null,
       cover: null,
       isPrivate: false,
       invitedGroups: [],
+      // Ride/camping specific fields
+      routeDescription: '',
+      roadType: '',
+      difficulty: '',
+      restStops: '',
+      overnightInfo: '',
+      equipmentChecklist: '',
+      // Workshop specific fields
+      instructorInfo: '',
+      topicsCovered: '',
+      experienceLevel: '',
+      price: '',
+      // Track day/race specific fields
+      trackLocation: '',
+      licenseRequired: false,
+      timeSlots: '',
+      safetyRequirements: '',
     },
     mode: 'onChange',
   });
+
+  // Watch the event type to conditionally render fields
+  const eventType = watch('eventType');
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -174,6 +230,26 @@ export const CreateEventScreen: React.FC = () => {
     setValue('eventType', item?.value || '', {shouldValidate: true});
   }
 
+  function handleWhoCanJoinSelect(item: DropdownItem | null) {
+    setSelectedWhoCanJoin(item);
+    setValue('whoCanJoin', item?.value || '', {shouldValidate: true});
+  }
+
+  function handleRoadTypeSelect(item: DropdownItem | null) {
+    setSelectedRoadType(item);
+    setValue('roadType', item?.value || '', {shouldValidate: true});
+  }
+
+  function handleDifficultySelect(item: DropdownItem | null) {
+    setSelectedDifficulty(item);
+    setValue('difficulty', item?.value || '', {shouldValidate: true});
+  }
+
+  function handleExperienceLevelSelect(item: DropdownItem | null) {
+    setSelectedExperienceLevel(item);
+    setValue('experienceLevel', item?.value || '', {shouldValidate: true});
+  }
+
   const togglePrivacy = (newValue: boolean) => {
     setIsPrivate(newValue);
     setValue('isPrivate', newValue, {shouldValidate: true});
@@ -183,6 +259,11 @@ export const CreateEventScreen: React.FC = () => {
       setSelectedGroups([]);
       setValue('invitedGroups', [], {shouldValidate: true});
     }
+  };
+
+  const toggleLicenseRequired = (newValue: boolean) => {
+    setLicenseRequired(newValue);
+    setValue('licenseRequired', newValue, {shouldValidate: true});
   };
 
   const handleGroupsChange = useCallback(
@@ -220,6 +301,18 @@ export const CreateEventScreen: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Check if event type is related to rides or camping
+  const isRideOrCamping =
+    eventType === 'GROUP_RIDE' ||
+    eventType === 'CAMPING_RIDE' ||
+    eventType === 'CHARITY_RIDE';
+
+  // Check if event type is workshop
+  const isWorkshop = eventType === 'WORKSHOP_TRAINING';
+
+  // Check if event type is track day or race
+  const isTrackDayOrRace = eventType === 'TRACK_DAY_RACE';
 
   // Convert cities data for dropdown
   const cityItems: DropdownItem[] = cities.map(city => ({
@@ -268,6 +361,20 @@ export const CreateEventScreen: React.FC = () => {
                 error={errors.title}
               />
 
+              {/* Event Type Dropdown */}
+              <Dropdown
+                data={eventTypes}
+                label="Event Type"
+                onSelect={item => {
+                  handleEventTypeSelect(item);
+                }}
+                searchable={false}
+                placeholder=""
+                selectedItem={selectedEventType}
+                error={errors.eventType?.message}
+                disabled={loading}
+              />
+
               {/* Event Description */}
               <AnimatedInput
                 control={control as any}
@@ -275,45 +382,6 @@ export const CreateEventScreen: React.FC = () => {
                 label="Description"
                 multiline
                 error={errors.description}
-              />
-
-              {/* Event Type Dropdown */}
-              <Dropdown
-                data={EVENT_CATEGORIES}
-                label="Event Type"
-                onSelect={item => {
-                  handleEventTypeSelect(item);
-                }}
-                searchable={false}
-                selectedItem={selectedEventType}
-                error={errors.eventType?.message}
-              />
-
-              {/* Location */}
-              <AnimatedInput
-                control={control as any}
-                name="location"
-                label="Location"
-                error={errors.location}
-                icon={
-                  <Icon name="map-pin" size={20} color={colors.neutral.grey} />
-                }
-                iconPosition="right"
-                onPress={handleOpenLocationMap}
-                editable={false}
-              />
-
-              {/* City Dropdown */}
-              <Dropdown
-                data={cityItems}
-                label="City"
-                onSelect={item => {
-                  handleCitySelect(item);
-                }}
-                searchable={true}
-                selectedItem={selectedCity}
-                error={errors.city?.message}
-                loading={citiesLoading}
               />
 
               {/* Date and Time */}
@@ -339,6 +407,44 @@ export const CreateEventScreen: React.FC = () => {
                 />
               </View>
 
+              {/* End Time */}
+              <DateTimePicker
+                control={control as any}
+                name="endTime"
+                placeholder="Estimated End Time (optional)"
+                mode="time"
+                minuteInterval={15}
+                style={styles.dateTimePicker}
+                error={errors.endTime}
+              />
+
+              {/* Location */}
+              <AnimatedInput
+                control={control as any}
+                name="location"
+                label="Meeting Point"
+                error={errors.location}
+                icon={
+                  <Icon name="map-pin" size={20} color={colors.neutral.grey} />
+                }
+                iconPosition="right"
+                onPress={handleOpenLocationMap}
+                editable={false}
+              />
+
+              {/* City Dropdown */}
+              <Dropdown
+                data={cityItems}
+                label="City"
+                onSelect={item => {
+                  handleCitySelect(item);
+                }}
+                searchable={true}
+                selectedItem={selectedCity}
+                error={errors.city?.message}
+                loading={citiesLoading}
+              />
+
               {/* Max Participants */}
               <AnimatedInput
                 control={control as any}
@@ -346,6 +452,18 @@ export const CreateEventScreen: React.FC = () => {
                 label="Maximum Participants (optional)"
                 error={errors.maxParticipants}
                 keyboardType="numeric"
+              />
+
+              {/* Who Can Join */}
+              <Dropdown
+                data={WHO_CAN_JOIN}
+                label="Who Can Join?"
+                onSelect={item => {
+                  handleWhoCanJoinSelect(item);
+                }}
+                searchable={false}
+                selectedItem={selectedWhoCanJoin}
+                error={errors.whoCanJoin?.message}
               />
 
               {/* Privacy Switch */}
@@ -364,6 +482,147 @@ export const CreateEventScreen: React.FC = () => {
                     onGroupsChange={handleGroupsChange}
                     maxGroups={3}
                   />
+                </View>
+              )}
+
+              {/* Conditional Fields based on Event Type */}
+              {eventType && (
+                <View style={styles.conditionalFieldsContainer}>
+                  <Typography variant="subtitle" style={styles.sectionTitle}>
+                    {eventType} Details
+                  </Typography>
+
+                  {/* Ride & Camping Specific Fields */}
+                  {isRideOrCamping && (
+                    <>
+                      <AnimatedInput
+                        control={control as any}
+                        name="routeDescription"
+                        label="Route Description"
+                        multiline
+                        error={errors.routeDescription}
+                      />
+
+                      <Dropdown
+                        data={ROAD_TYPES}
+                        label="Road Type"
+                        onSelect={handleRoadTypeSelect}
+                        searchable={false}
+                        selectedItem={selectedRoadType}
+                        error={errors.roadType?.message}
+                      />
+
+                      <Dropdown
+                        data={DIFFICULTY_LEVELS}
+                        label="Difficulty Level"
+                        onSelect={handleDifficultySelect}
+                        searchable={false}
+                        selectedItem={selectedDifficulty}
+                        error={errors.difficulty?.message}
+                      />
+
+                      <AnimatedInput
+                        control={control as any}
+                        name="restStops"
+                        label="Fuel / Rest Stop Suggestions"
+                        multiline
+                        error={errors.restStops}
+                      />
+
+                      {/* Camping specific */}
+                      {eventType === 'CAMPING_RIDE' && (
+                        <AnimatedInput
+                          control={control as any}
+                          name="overnightInfo"
+                          label="Overnight Information"
+                          multiline
+                          error={errors.overnightInfo}
+                        />
+                      )}
+
+                      <AnimatedInput
+                        control={control as any}
+                        name="equipmentChecklist"
+                        label="Equipment Checklist"
+                        multiline
+                        error={errors.equipmentChecklist}
+                        placeholder="List required equipment, one per line"
+                      />
+                    </>
+                  )}
+
+                  {/* Workshop Specific Fields */}
+                  {isWorkshop && (
+                    <>
+                      <AnimatedInput
+                        control={control as any}
+                        name="instructorInfo"
+                        label="Instructor Information"
+                        multiline
+                        error={errors.instructorInfo}
+                      />
+
+                      <AnimatedInput
+                        control={control as any}
+                        name="topicsCovered"
+                        label="Topics Covered"
+                        multiline
+                        error={errors.topicsCovered}
+                      />
+
+                      <Dropdown
+                        data={EXPERIENCE_LEVELS}
+                        label="Required Experience Level"
+                        onSelect={handleExperienceLevelSelect}
+                        searchable={false}
+                        selectedItem={selectedExperienceLevel}
+                        error={errors.experienceLevel?.message}
+                      />
+
+                      <AnimatedInput
+                        control={control as any}
+                        name="price"
+                        label="Price (optional)"
+                        keyboardType="numeric"
+                        error={errors.price}
+                        placeholder="Leave empty if free"
+                      />
+                    </>
+                  )}
+
+                  {/* Track Day / Race Specific Fields */}
+                  {isTrackDayOrRace && (
+                    <>
+                      <AnimatedInput
+                        control={control as any}
+                        name="trackLocation"
+                        label="Track Location"
+                        error={errors.trackLocation}
+                      />
+
+                      <Switch
+                        value={licenseRequired}
+                        onValueChange={toggleLicenseRequired}
+                        label="License Required"
+                      />
+
+                      <AnimatedInput
+                        control={control as any}
+                        name="timeSlots"
+                        label="Time Slots / Agenda"
+                        multiline
+                        error={errors.timeSlots}
+                      />
+
+                      <AnimatedInput
+                        control={control as any}
+                        name="safetyRequirements"
+                        label="Safety Gear Requirements"
+                        multiline
+                        error={errors.safetyRequirements}
+                      />
+                    </>
+                  )}
                 </View>
               )}
             </View>
@@ -472,6 +731,29 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.light,
+  },
+  conditionalFieldsContainer: {
+    marginTop: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors.secondary.light,
+    borderRadius: radius.sm,
+    gap: spacing.md,
+  },
+  sectionTitle: {
+    marginBottom: spacing.xs,
+    color: colors.neutral.darkGrey,
+  },
+  saveButton: {
+    width: '100%',
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    backgroundColor: colors.primary.main,
+    marginTop: spacing.lg,
+  },
+  saveButtonText: {
+    color: colors.neutral.white,
+    fontWeight: '600',
   },
 });
 

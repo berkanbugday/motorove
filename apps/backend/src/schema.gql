@@ -313,6 +313,7 @@ type Query {
   comment(id: ID!): Comment!
   comments(postId: ID!): [Comment!]!
   createdGroups: [Group!]!
+  getEventTypes: [EnumItem!]!
   getGroupMemberRoles: [EnumItem!]!
   getGroupMembershipStatuses: [EnumItem!]!
   getGroupPrivacyOptions: [EnumItem!]!

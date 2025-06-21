@@ -17,3 +17,12 @@ export const GET_GROUP_MEMBER_ROLES = gql`
     }
   }
 `;
+
+export const GET_EVENT_TYPES = gql`
+  query GetEventTypes {
+    getEventTypes {
+      key
+      value
+    }
+  }
+`;

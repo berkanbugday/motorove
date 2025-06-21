@@ -2,6 +2,7 @@ import { Resolver, Query, ObjectType, Field } from '@nestjs/graphql';
 import { GroupPrivacy } from './models/group-privacy.enum';
 import { GroupMemberRole } from './models/group-member-role.enum';
 import { GroupMembershipStatus } from './models/group-membership-status.enum';
+import { EventType } from './models/event-type.enum';
 
 @ObjectType()
 class EnumItem {
@@ -30,6 +31,14 @@ export class EnumsResolver {
   @Query(() => [EnumItem])
   getGroupMembershipStatuses() {
     return Object.entries(GroupMembershipStatus).map(([key, value]) => ({
+      key,
+      value,
+    }));
+  }
+
+  @Query(() => [EnumItem])
+  getEventTypes() {
+    return Object.entries(EventType).map(([key, value]) => ({
       key,
       value,
     }));

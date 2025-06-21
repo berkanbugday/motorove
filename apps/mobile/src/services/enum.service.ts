@@ -2,6 +2,7 @@ import {useQuery} from '@apollo/client';
 import {
   GET_GROUP_PRIVACY_OPTIONS,
   GET_GROUP_MEMBER_ROLES,
+  GET_EVENT_TYPES,
 } from './graphql/enum.graphql';
 import {toPascalCase} from '@utils/stringUtils';
 
@@ -45,10 +46,25 @@ export const useEnumGroupMemberRoles = () => {
   return {memberRoles, loading, error};
 };
 
+export const useEnumEventTypes = () => {
+  const {data, loading, error} = useQuery(GET_EVENT_TYPES);
+
+  const eventTypes: DropdownItem[] = data?.getEventTypes
+    ? data.getEventTypes.map((type: EnumItem, index: number) => ({
+        id: index + 1,
+        label: toPascalCase(type.value),
+        value: type.value,
+      }))
+    : [];
+
+  return {eventTypes, loading, error};
+};
+
 // Export all as EnumService object
 export const EnumService = {
   useEnumPrivacyOptions,
   useEnumGroupMemberRoles,
+  useEnumEventTypes,
 };
 
 export default EnumService;

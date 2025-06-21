@@ -22,12 +22,17 @@ export const createEventSchema = z.object({
     required_error: 'Time is required',
     invalid_type_error: 'Invalid time format',
   }),
+  endTime: z.date({
+    required_error: 'End time is required',
+    invalid_type_error: 'Invalid end time format',
+  }),
   city: z
     .string({required_error: 'City is required'})
     .min(1, 'Please select a city'),
   eventType: z
     .string({required_error: 'Event type is required'})
     .min(1, 'Please select an event type'),
+  whoCanJoin: z.string().default('Everyone').optional(),
   maxParticipants: z
     .string()
     .transform(val => (val === '' ? null : val))
@@ -45,6 +50,26 @@ export const createEventSchema = z.object({
   cover: z.string().nullable().optional(),
   isPrivate: z.boolean().default(false),
   invitedGroups: z.array(z.string()).optional().default([]),
+
+  // Ride/camping specific fields
+  routeDescription: z.string().optional(),
+  roadType: z.string().optional(),
+  difficulty: z.string().optional(),
+  restStops: z.string().optional(),
+  overnightInfo: z.string().optional(),
+  equipmentChecklist: z.string().optional(),
+
+  // Workshop specific fields
+  instructorInfo: z.string().optional(),
+  topicsCovered: z.string().optional(),
+  experienceLevel: z.string().optional(),
+  price: z.string().optional(),
+
+  // Track day/race specific fields
+  trackLocation: z.string().optional(),
+  licenseRequired: z.boolean().optional().default(false),
+  timeSlots: z.string().optional(),
+  safetyRequirements: z.string().optional(),
 });
 
 export const updateEventSchema = createEventSchema.extend({
