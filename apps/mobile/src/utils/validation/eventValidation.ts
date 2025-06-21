@@ -25,9 +25,9 @@ export const createEventSchema = z.object({
   city: z
     .string({required_error: 'City is required'})
     .min(1, 'Please select a city'),
-  category: z
-    .string({required_error: 'Category is required'})
-    .min(1, 'Please select a category'),
+  eventType: z
+    .string({required_error: 'Event type is required'})
+    .min(1, 'Please select an event type'),
   maxParticipants: z
     .string()
     .transform(val => (val === '' ? null : val))

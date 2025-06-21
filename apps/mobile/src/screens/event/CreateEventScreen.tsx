@@ -48,9 +48,8 @@ const EVENT_CATEGORIES: DropdownItem[] = [
 export const CreateEventScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
   const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<DropdownItem | null>(
-    null,
-  );
+  const [selectedEventType, setSelectedEventType] =
+    useState<DropdownItem | null>(null);
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
@@ -84,7 +83,7 @@ export const CreateEventScreen: React.FC = () => {
       date: new Date(),
       time: new Date(),
       city: '',
-      category: '',
+      eventType: '',
       maxParticipants: null,
       cover: null,
       isPrivate: false,
@@ -170,9 +169,9 @@ export const CreateEventScreen: React.FC = () => {
     setValue('city', item?.value || '', {shouldValidate: true});
   }
 
-  function handleCategorySelect(item: DropdownItem | null) {
-    setSelectedCategory(item);
-    setValue('category', item?.value || '', {shouldValidate: true});
+  function handleEventTypeSelect(item: DropdownItem | null) {
+    setSelectedEventType(item);
+    setValue('eventType', item?.value || '', {shouldValidate: true});
   }
 
   const togglePrivacy = (newValue: boolean) => {
@@ -278,16 +277,16 @@ export const CreateEventScreen: React.FC = () => {
                 error={errors.description}
               />
 
-              {/* Category Dropdown */}
+              {/* Event Type Dropdown */}
               <Dropdown
                 data={EVENT_CATEGORIES}
-                label="Category"
+                label="Event Type"
                 onSelect={item => {
-                  handleCategorySelect(item);
+                  handleEventTypeSelect(item);
                 }}
                 searchable={false}
-                selectedItem={selectedCategory}
-                error={errors.category?.message}
+                selectedItem={selectedEventType}
+                error={errors.eventType?.message}
               />
 
               {/* Location */}
