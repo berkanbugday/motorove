@@ -56,13 +56,15 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const getIconName = (routeName: string, isFocused: boolean): IconName => {
     switch (routeName) {
       case 'HomeTab':
-        return isFocused ? 'home-filled' : 'home';
-      case 'ExploreTab':
-        return isFocused ? 'map-location-filled' : 'map-location';
+        return isFocused ? 'home' : 'home';
+      case 'SearchTab':
+        return isFocused ? 'search' : 'search';
+      case 'MapTab':
+        return isFocused ? 'map-location' : 'map-location';
       case 'GroupsTab':
-        return isFocused ? 'users-filled' : 'users';
+        return isFocused ? 'users' : 'users';
       case 'ProfileTab':
-        return isFocused ? 'user-filled' : 'user';
+        return isFocused ? 'user' : 'user';
       default:
         return 'home';
     }

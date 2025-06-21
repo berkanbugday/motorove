@@ -16,7 +16,7 @@ export const useTabBadge = () => {
    */
   const setTabBadge = useCallback(
     (
-      tabName: 'HomeTab' | 'ExploreTab' | 'GroupsTab' | 'ProfileTab',
+      tabName: 'HomeTab' | 'SearchTab' | 'MapTab' | 'GroupsTab' | 'ProfileTab',
       count: number | undefined,
     ) => {
       navigation.setOptions({
@@ -38,12 +38,23 @@ export const useTabBadge = () => {
   );
 
   /**
-   * Set a badge for the explore tab
+   * Set a badge for the search tab
    * @param count Badge count value (set to undefined to hide badge)
    */
-  const setExploreBadge = useCallback(
+  const setSearchBadge = useCallback(
     (count: number | undefined) => {
-      setTabBadge('ExploreTab', count);
+      setTabBadge('SearchTab', count);
+    },
+    [setTabBadge],
+  );
+
+  /**
+   * Set a badge for the map tab
+   * @param count Badge count value (set to undefined to hide badge)
+   */
+  const setMapBadge = useCallback(
+    (count: number | undefined) => {
+      setTabBadge('MapTab', count);
     },
     [setTabBadge],
   );
@@ -73,7 +84,8 @@ export const useTabBadge = () => {
   return {
     setTabBadge,
     setHomeBadge,
-    setExploreBadge,
+    setSearchBadge,
+    setMapBadge,
     setProfileBadge,
     setGroupBadge,
   };

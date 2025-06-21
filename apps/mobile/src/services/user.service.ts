@@ -2,6 +2,7 @@ import {gql} from '@apollo/client';
 import {apolloClient} from '../configs/apolloClientConfig';
 import {User} from '../types';
 import {loggingService} from './logging.service';
+import {useState, useCallback, useEffect} from 'react';
 
 // GraphQL Fragments
 const USER_FRAGMENT = gql`
@@ -56,6 +57,15 @@ const CHECK_IS_FOLLOWING = gql`
   }
 `;
 
+const SEARCH_USERS = gql`
+  query SearchUsers($query: String!, $limit: Int, $skip: Int) {
+    searchUsers(query: $query, limit: $limit, skip: $skip) {
+      ...UserFields
+    }
+  }
+  ${USER_FRAGMENT}
+`;
+
 // GraphQL Mutations
 const FOLLOW_USER = gql`
   mutation FollowUser($input: FollowUserInput!) {
@@ -70,6 +80,87 @@ const UNFOLLOW_USER = gql`
     unfollowUser(input: $input)
   }
 `;
+
+// Custom hook for searching users
+export const useSearchUsers = (initialQuery = '') => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [skip, setSkip] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
+
+  const fetchUsers = useCallback(
+    async (query: string, skipValue = 0, append = false) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Only search if there's a query
+        if (query.trim() === '') {
+          setUsers([]);
+          setHasMore(false);
+          setLoading(false);
+          return;
+        }
+
+        const {data} = await apolloClient.query({
+          query: SEARCH_USERS,
+          variables: {
+            query,
+            limit: 20,
+            skip: skipValue,
+          },
+          fetchPolicy: 'network-only',
+        });
+
+        if (data.searchUsers) {
+          if (append) {
+            setUsers(prevUsers => [...prevUsers, ...data.searchUsers]);
+          } else {
+            setUsers(data.searchUsers);
+          }
+          setHasMore(data.searchUsers.length === 20);
+          setSkip(skipValue + data.searchUsers.length);
+        }
+      } catch (e) {
+        loggingService.error('Error searching users:', e);
+        setError(e as Error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (searchQuery) {
+      fetchUsers(searchQuery);
+    }
+  }, [searchQuery, fetchUsers]);
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !loading && searchQuery) {
+      fetchUsers(searchQuery, skip, true);
+    }
+  }, [fetchUsers, hasMore, loading, searchQuery, skip]);
+
+  const refetch = useCallback(() => {
+    setSkip(0);
+    return fetchUsers(searchQuery);
+  }, [fetchUsers, searchQuery]);
+
+  return {
+    users,
+    loading,
+    error,
+    searchQuery,
+    setSearchQuery,
+    refetch,
+    loadMore,
+    hasMore,
+  };
+};
 
 export const userService = {
   // Get current user's followers
@@ -142,6 +233,21 @@ export const userService = {
     } catch (error) {
       loggingService.error('Error checking if following:', error);
       return false;
+    }
+  },
+
+  // Search for users
+  async searchUsers(query: string, limit = 20, skip = 0): Promise<User[]> {
+    try {
+      const {data} = await apolloClient.query({
+        query: SEARCH_USERS,
+        variables: {query, limit, skip},
+        fetchPolicy: 'network-only',
+      });
+      return data.searchUsers;
+    } catch (error) {
+      loggingService.error('Error searching users:', error);
+      return [];
     }
   },
 

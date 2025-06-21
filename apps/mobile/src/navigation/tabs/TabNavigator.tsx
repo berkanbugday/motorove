@@ -2,9 +2,10 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {HomeScreen} from '@screens/home';
-import {ExploreScreen} from '@screens/explore';
+import {MapScreen} from '@screens/map';
 import {ProfileScreen} from '@screens/profile';
 import {GroupScreen} from '@screens/group';
+import {UserSearchScreen} from '@screens/userSearch';
 import {TabParamList} from '../types/navigationTypes';
 import {CustomTabBar} from './CustomTabBar';
 
@@ -31,12 +32,9 @@ export const TabNavigator: React.FC<TabNavigatorProps> = ({
       })}
       tabBar={useCustomTabBar ? renderCustomTabBar : undefined}>
       <Tab.Screen name="HomeTab" component={HomeScreen} />
-      <Tab.Screen name="ExploreTab" component={ExploreScreen} />
-      <Tab.Screen
-        name="GroupsTab"
-        options={{title: 'Groups'}}
-        component={GroupScreen}
-      />
+      <Tab.Screen name="SearchTab" component={UserSearchScreen} />
+      <Tab.Screen name="MapTab" component={MapScreen} />
+      <Tab.Screen name="GroupsTab" component={GroupScreen} />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} />
     </Tab.Navigator>
   );

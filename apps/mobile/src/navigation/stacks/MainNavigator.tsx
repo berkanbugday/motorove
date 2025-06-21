@@ -10,6 +10,7 @@ import {
   EditGroupScreen,
   GroupSearchScreen,
 } from '@screens/group';
+import {UserSearchScreen} from '@screens/userSearch';
 import {CreateEventScreen} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 
@@ -76,6 +77,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="GroupSearch"
         component={GroupSearchScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="UserSearch"
+        component={UserSearchScreen}
         options={{headerShown: false}}
       />
 

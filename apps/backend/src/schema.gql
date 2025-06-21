@@ -330,6 +330,7 @@ type Query {
   getGroupMemberRoles: [EnumItem!]!
   getGroupMembershipStatuses: [EnumItem!]!
   getGroupPrivacyOptions: [EnumItem!]!
+  getUsersByIds(ids: [String!]!): [User!]!
   group(id: String!): Group!
   groupMembers(groupId: String!): [GroupMembership!]!
   groupMembership(id: String!): GroupMembership!
@@ -339,7 +340,6 @@ type Query {
   groups(filters: GroupFilterInput, limit: Int, query: String, skip: Int): [Group!]!
   isFollowing(userId: String!): Boolean!
   joinedGroups(filters: GroupFilterInput, limit: Int, skip: Int): [Group!]!
-  me: User!
   myFollowers: [User!]!
   myFollowing: [User!]!
   myGroupMemberships: [GroupMembership!]!
@@ -347,13 +347,22 @@ type Query {
   notificationsCount(onlyUnread: Boolean = true): Float!
   post(id: ID!): Post!
   posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [Post!]!
+  searchUsers(input: SearchUsersInput!): [User!]!
+  user(id: String!): User
   userFollowers(userId: String!): [User!]!
   userFollowing(userId: String!): [User!]!
+  userProfile(id: String!): UserProfile
 }
 
 input RemoveGroupMemberInput {
   groupId: String!
   userId: String!
+}
+
+input SearchUsersInput {
+  limit: Int
+  query: String!
+  skip: Int
 }
 
 input SendBulkNotificationInput {
@@ -424,6 +433,23 @@ type User {
   groupMemberships: [GroupMembership!]
   id: ID!
   isActive: Boolean!
+  lastName: String
+  supabaseId: String!
+  updatedAt: DateTime!
+}
+
+type UserProfile {
+  avatar: String
+  createdAt: DateTime!
+  createdGroups: [Group!]
+  email: String!
+  firstName: String
+  followerCount: Int!
+  followingCount: Int!
+  groupMemberships: [GroupMembership!]
+  id: ID!
+  isActive: Boolean!
+  isFollowing: Boolean!
   lastName: String
   supabaseId: String!
   updatedAt: DateTime!

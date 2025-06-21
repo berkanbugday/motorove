@@ -22,7 +22,8 @@ export type AuthScreenRouteProp<T extends keyof AuthStackParamList> = RouteProp<
 // TAB NAVIGATION
 export type TabParamList = {
   HomeTab: undefined;
-  ExploreTab: undefined;
+  SearchTab: undefined;
+  MapTab: undefined;
   GroupsTab: undefined;
   ProfileTab: undefined;
 };
@@ -47,6 +48,7 @@ export type MainStackParamList = {
   GroupDetail: {groupId: string};
   EditGroup: {groupId: string};
   GroupSearch: undefined;
+  UserSearch: undefined;
   Notification: undefined;
   // Add more screens here as your app grows
   // Profile: {userId: string};

@@ -9,7 +9,7 @@ import {loggingService} from '@services/logging.service';
 // Import the new hook - use correct path
 import {useMapMarkerCards} from '../../hooks';
 
-export const ExploreScreen = () => {
+export const MapScreen = () => {
   const insets = useSafeAreaInsets();
   // Create an enhanced version of markers with more info using useMemo
   const enhancedMarkers = useMemo(() => {

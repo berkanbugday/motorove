@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { FollowersModule } from './followers/followers.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { FollowersModule } from './followers/followers.module';
     PostsModule,
     CommentsModule,
     FollowersModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [

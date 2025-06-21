@@ -34,6 +34,7 @@ export * from './SelectLocationMap';
 export * from './Switch';
 export * from './GroupSelector';
 export * from './UserSelector';
+export * from './UserCard';
 
 export {default as Dialog} from './Dialog';
 export type {
@@ -47,4 +48,4 @@ export type {
 export * from './withErrorHandling';
 
 // Export the Icon component
-export {Icon} from './Icon';
+export {Icon, type IconName} from './Icon';

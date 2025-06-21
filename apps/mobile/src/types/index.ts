@@ -20,4 +20,7 @@ export type User = {
   avatar?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  location?: string;
+  bio?: string;
+  interests?: string[];
 };

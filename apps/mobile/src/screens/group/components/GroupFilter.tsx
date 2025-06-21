@@ -179,16 +179,18 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
         </View>
       </ScrollView>
 
-      <View style={[styles.footer, {marginBottom: 30}]}>
+      <View style={[styles.footer, {marginBottom: 10}]}>
         <Button
           title="Reset"
           variant="outline"
+          shape="round"
           onPress={handleReset}
           style={styles.resetButton}
         />
         <Button
           title="Apply Filters"
           variant="dark"
+          shape="round"
           onPress={handleApply}
           style={styles.applyButton}
         />
@@ -227,7 +229,7 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     borderTopWidth: 1,
     borderTopColor: colors.neutral.lightGrey,
     backgroundColor: colors.neutral.white,
