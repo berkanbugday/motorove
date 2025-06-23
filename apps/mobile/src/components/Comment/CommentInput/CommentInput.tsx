@@ -112,7 +112,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
             ) : (
               <Icon
                 name={editing ? 'pen' : 'paper-plane'}
-                size={20}
+                size={18}
                 color={
                   text.trim().length === 0
                     ? colors.neutral.lightGrey
@@ -130,7 +130,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 const styles = StyleSheet.create({
   container: {
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.veryLightGrey,
+    borderTopColor: colors.secondary.main,
     backgroundColor: colors.neutral.white,
   },
   replyingContainer: {
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     minHeight: 36,
     maxHeight: 100,
     borderWidth: 1,
-    borderColor: colors.neutral.veryLightGrey,
+    borderColor: colors.secondary.main,
     borderRadius: radius.round,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,

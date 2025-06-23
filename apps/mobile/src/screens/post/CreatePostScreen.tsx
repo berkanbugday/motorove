@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   },
   topHeaderBar: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.secondary.light,
+    borderBottomColor: colors.secondary.main,
   },
   profileSection: {
     flexDirection: 'row',
@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
   },
   actionButtonsContainer: {
     borderTopWidth: 1,
-    borderTopColor: colors.secondary.light,
+    borderTopColor: colors.secondary.main,
     alignItems: 'flex-start',
   },
   actionButtonText: {
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.secondary.light,
+    borderTopColor: colors.secondary.main,
   },
   groupListContainer: {
     paddingBottom: spacing.lg,

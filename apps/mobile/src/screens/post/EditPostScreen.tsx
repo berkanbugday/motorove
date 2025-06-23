@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
   },
   actionButtonsContainer: {
     borderTopWidth: 1,
-    borderTopColor: colors.secondary.light,
+    borderTopColor: colors.secondary.main,
     alignItems: 'flex-start',
   },
   actionButtonText: {
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.secondary.light,
+    borderTopColor: colors.secondary.main,
   },
   groupListContainer: {
     paddingBottom: spacing.lg,

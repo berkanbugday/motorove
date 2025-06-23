@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   },
   topHeaderBar: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.secondary.light,
+    borderBottomColor: colors.secondary.main,
   },
   imageSelectionContainer: {
     alignItems: 'center',
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.secondary.light,
+    borderTopColor: colors.secondary.main,
   },
   errorText: {
     marginBottom: spacing.xs,

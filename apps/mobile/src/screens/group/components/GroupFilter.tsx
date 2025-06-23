@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: colors.neutral.lightGrey,
+    backgroundColor: colors.secondary.main,
     marginVertical: spacing.sm,
   },
   footer: {
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.lightGrey,
+    borderTopColor: colors.secondary.main,
     backgroundColor: colors.neutral.white,
   },
   resetButton: {
