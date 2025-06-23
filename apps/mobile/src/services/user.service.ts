@@ -1,87 +1,15 @@
-import {gql} from '@apollo/client';
-import {apolloClient} from '../configs/apolloClientConfig';
+import {useLazyQuery} from '@apollo/client';
 import {User} from '../types';
 import {loggingService} from './logging.service';
-import {useState, useCallback, useEffect} from 'react';
+import {SEARCH_USERS} from './graphql/user.graphql';
+import {useCallback, useEffect, useState} from 'react';
+import {apolloClient} from '../configs/apolloClientConfig';
 
-// GraphQL Fragments
-const USER_FRAGMENT = gql`
-  fragment UserFields on User {
-    id
-    firstName
-    lastName
-    avatar
-  }
-`;
-
-// GraphQL Queries
-const GET_MY_FOLLOWERS = gql`
-  query GetMyFollowers {
-    myFollowers {
-      ...UserFields
-    }
-  }
-  ${USER_FRAGMENT}
-`;
-
-const GET_MY_FOLLOWING = gql`
-  query GetMyFollowing {
-    myFollowing {
-      ...UserFields
-    }
-  }
-  ${USER_FRAGMENT}
-`;
-
-const GET_USER_FOLLOWERS = gql`
-  query GetUserFollowers($userId: String!) {
-    userFollowers(userId: $userId) {
-      ...UserFields
-    }
-  }
-  ${USER_FRAGMENT}
-`;
-
-const GET_USER_FOLLOWING = gql`
-  query GetUserFollowing($userId: String!) {
-    userFollowing(userId: $userId) {
-      ...UserFields
-    }
-  }
-  ${USER_FRAGMENT}
-`;
-
-const CHECK_IS_FOLLOWING = gql`
-  query CheckIsFollowing($userId: String!) {
-    isFollowing(userId: $userId)
-  }
-`;
-
-const SEARCH_USERS = gql`
-  query SearchUsers($query: String!, $limit: Int, $skip: Int) {
-    searchUsers(query: $query, limit: $limit, skip: $skip) {
-      ...UserFields
-    }
-  }
-  ${USER_FRAGMENT}
-`;
-
-// GraphQL Mutations
-const FOLLOW_USER = gql`
-  mutation FollowUser($input: FollowUserInput!) {
-    followUser(input: $input) {
-      id
-    }
-  }
-`;
-
-const UNFOLLOW_USER = gql`
-  mutation UnfollowUser($input: FollowUserInput!) {
-    unfollowUser(input: $input)
-  }
-`;
-
-// Custom hook for searching users
+/**
+ * Hook for searching users by name or email with pagination
+ * @param initialQuery Optional initial search query
+ * @returns Users data, loading state, error state and functions for search operations
+ */
 export const useSearchUsers = (initialQuery = '') => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -89,6 +17,15 @@ export const useSearchUsers = (initialQuery = '') => {
   const [skip, setSkip] = useState<number>(0);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
+
+  const [searchUsersQuery] = useLazyQuery(SEARCH_USERS, {
+    fetchPolicy: 'network-only',
+    onError: errorObj => {
+      loggingService.error('Error searching users:', errorObj);
+      setError(errorObj);
+      setLoading(false);
+    },
+  });
 
   const fetchUsers = useCallback(
     async (query: string, skipValue = 0, append = false) => {
@@ -104,17 +41,15 @@ export const useSearchUsers = (initialQuery = '') => {
           return;
         }
 
-        const {data} = await apolloClient.query({
-          query: SEARCH_USERS,
+        const {data} = await searchUsersQuery({
           variables: {
             query,
             limit: 20,
             skip: skipValue,
           },
-          fetchPolicy: 'network-only',
         });
 
-        if (data.searchUsers) {
+        if (data?.searchUsers) {
           if (append) {
             setUsers(prevUsers => [...prevUsers, ...data.searchUsers]);
           } else {
@@ -130,113 +65,61 @@ export const useSearchUsers = (initialQuery = '') => {
         setLoading(false);
       }
     },
-    [],
+    [searchUsersQuery],
   );
 
+  // Effect to handle initial query if provided
   useEffect(() => {
-    if (searchQuery) {
-      fetchUsers(searchQuery);
+    if (initialQuery) {
+      fetchUsers(initialQuery);
     }
-  }, [searchQuery, fetchUsers]);
+  }, [initialQuery, fetchUsers]);
+
+  const search = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      setSkip(0); // Reset pagination
+      fetchUsers(query, 0, false);
+    },
+    [fetchUsers],
+  );
 
   const loadMore = useCallback(() => {
-    if (hasMore && !loading && searchQuery) {
+    if (!loading && hasMore) {
       fetchUsers(searchQuery, skip, true);
     }
-  }, [fetchUsers, hasMore, loading, searchQuery, skip]);
+  }, [loading, hasMore, fetchUsers, searchQuery, skip]);
 
-  const refetch = useCallback(() => {
+  const clearSearch = useCallback(() => {
+    setUsers([]);
+    setSearchQuery('');
     setSkip(0);
-    return fetchUsers(searchQuery);
-  }, [fetchUsers, searchQuery]);
+    setHasMore(true);
+  }, []);
 
   return {
     users,
     loading,
     error,
-    searchQuery,
-    setSearchQuery,
-    refetch,
-    loadMore,
     hasMore,
+    search,
+    loadMore,
+    clearSearch,
+    searchQuery,
   };
 };
 
+/**
+ * User service for handling user-related operations
+ */
 export const userService = {
-  // Get current user's followers
-  async getMyFollowers(): Promise<User[]> {
-    try {
-      const {data} = await apolloClient.query({
-        query: GET_MY_FOLLOWERS,
-        fetchPolicy: 'network-only',
-      });
-      return data.myFollowers;
-    } catch (error) {
-      loggingService.error('Error getting my followers:', error);
-      return [];
-    }
-  },
-
-  // Get users the current user follows
-  async getMyFollowing(): Promise<User[]> {
-    try {
-      const {data} = await apolloClient.query({
-        query: GET_MY_FOLLOWING,
-        fetchPolicy: 'network-only',
-      });
-      return data.myFollowing;
-    } catch (error) {
-      loggingService.error('Error getting my following:', error);
-      return [];
-    }
-  },
-
-  // Get a specific user's followers
-  async getUserFollowers(userId: string): Promise<User[]> {
-    try {
-      const {data} = await apolloClient.query({
-        query: GET_USER_FOLLOWERS,
-        variables: {userId},
-        fetchPolicy: 'network-only',
-      });
-      return data.userFollowers;
-    } catch (error) {
-      loggingService.error('Error getting user followers:', error);
-      return [];
-    }
-  },
-
-  // Get users that a specific user follows
-  async getUserFollowing(userId: string): Promise<User[]> {
-    try {
-      const {data} = await apolloClient.query({
-        query: GET_USER_FOLLOWING,
-        variables: {userId},
-        fetchPolicy: 'network-only',
-      });
-      return data.userFollowing;
-    } catch (error) {
-      loggingService.error('Error getting user following:', error);
-      return [];
-    }
-  },
-
-  // Check if current user is following another user
-  async isFollowing(userId: string): Promise<boolean> {
-    try {
-      const {data} = await apolloClient.query({
-        query: CHECK_IS_FOLLOWING,
-        variables: {userId},
-        fetchPolicy: 'network-only',
-      });
-      return data.isFollowing;
-    } catch (error) {
-      loggingService.error('Error checking if following:', error);
-      return false;
-    }
-  },
-
-  // Search for users
+  /**
+   * Search for users by name or email
+   * @param query Search query
+   * @param limit Maximum number of results to return
+   * @param skip Number of results to skip (for pagination)
+   * @returns Array of matching users
+   */
   async searchUsers(query: string, limit = 20, skip = 0): Promise<User[]> {
     try {
       const {data} = await apolloClient.query({
@@ -244,52 +127,19 @@ export const userService = {
         variables: {query, limit, skip},
         fetchPolicy: 'network-only',
       });
-      return data.searchUsers;
+      return data.searchUsers || [];
     } catch (error) {
-      loggingService.error('Error searching users:', error);
-      return [];
-    }
-  },
-
-  // Follow a user
-  async followUser(userId: string): Promise<void> {
-    try {
-      await apolloClient.mutate({
-        mutation: FOLLOW_USER,
-        variables: {
-          input: {userId},
-        },
-        refetchQueries: [
-          {query: GET_MY_FOLLOWING},
-          {
-            query: CHECK_IS_FOLLOWING,
-            variables: {userId},
-          },
-        ],
-      });
-    } catch (error) {
-      loggingService.error('Error following user:', error);
-    }
-  },
-
-  // Unfollow a user
-  async unfollowUser(userId: string): Promise<void> {
-    try {
-      await apolloClient.mutate({
-        mutation: UNFOLLOW_USER,
-        variables: {
-          input: {userId},
-        },
-        refetchQueries: [
-          {query: GET_MY_FOLLOWING},
-          {
-            query: CHECK_IS_FOLLOWING,
-            variables: {userId},
-          },
-        ],
-      });
-    } catch (error) {
-      loggingService.error('Error unfollowing user:', error);
+      loggingService.error('Error in searchUsers:', error);
+      throw error;
     }
   },
 };
+
+/**
+ * Export as UserService object
+ */
+export const UserService = {
+  useSearchUsers,
+};
+
+export default UserService;

@@ -95,15 +95,15 @@ type EnumItem {
   value: String!
 }
 
-input FollowUserInput {
-  userId: String!
-}
-
-type Follower {
+type Follow {
   createdAt: DateTime!
   follower: User!
   following: User!
   id: ID!
+}
+
+input FollowUserInput {
+  userId: String!
 }
 
 type Group {
@@ -193,7 +193,7 @@ type Mutation {
   createPost(createPostInput: CreatePostInput!): Post!
   deleteAllNotifications: Boolean!
   deleteNotification(id: ID!): Notification!
-  followUser(input: FollowUserInput!): Follower!
+  followUser(followUserInput: FollowUserInput!): Follow!
   leaveGroup(leaveGroupInput: LeaveGroupInput!): GroupMembership!
   likePost(postId: ID!): PostLike!
   markAllNotificationsAsRead(userId: String!): [Notification!]!
@@ -208,7 +208,7 @@ type Mutation {
   sendBulkNotifications(sendBulkNotificationInput: SendBulkNotificationInput!): Boolean!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
-  unfollowUser(input: FollowUserInput!): Boolean!
+  unfollowUser(unFollowUserInput: FollowUserInput!): Follow!
   unlikePost(postId: ID!): ID!
   unsavePost(postId: ID!): ID!
   updateComment(updateCommentInput: UpdateCommentInput!): Comment!
@@ -340,8 +340,8 @@ type Query {
   groups(filters: GroupFilterInput, limit: Int, query: String, skip: Int): [Group!]!
   isFollowing(userId: String!): Boolean!
   joinedGroups(filters: GroupFilterInput, limit: Int, skip: Int): [Group!]!
-  myFollowers: [User!]!
-  myFollowing: [User!]!
+  myFollowers(limit: Int, skip: Int): [User!]!
+  myFollowing(limit: Int, skip: Int): [User!]!
   myGroupMemberships: [GroupMembership!]!
   notifications(limit: Int, skip: Int): [Notification!]!
   notificationsCount(onlyUnread: Boolean = true): Float!
@@ -349,8 +349,8 @@ type Query {
   posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [Post!]!
   searchUsers(input: SearchUsersInput!): [User!]!
   user(id: String!): User
-  userFollowers(userId: String!): [User!]!
-  userFollowing(userId: String!): [User!]!
+  userFollowers(limit: Int, skip: Int, userId: String!): [User!]!
+  userFollowing(limit: Int, skip: Int, userId: String!): [User!]!
   userProfile(id: String!): UserProfile
 }
 

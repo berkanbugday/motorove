@@ -6,3 +6,6 @@ export * from './city.graphql';
 export * from './enum.graphql';
 export * from './post.graphql';
 export * from './comment.graphql';
+export * from './notification.graphql';
+export * from './user.graphql';
+export * from './follow.graphql';

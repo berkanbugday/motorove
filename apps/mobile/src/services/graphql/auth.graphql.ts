@@ -1,16 +1,5 @@
 import {gql} from '@apollo/client';
-
-// User fragment to reuse in queries
-export const USER_FRAGMENT = gql`
-  fragment UserFragment on User {
-    id
-    email
-    firstName
-    lastName
-    avatar
-    supabaseId
-  }
-`;
+import {USER_FRAGMENT} from './user.graphql';
 
 // Session fragment
 export const SESSION_FRAGMENT = gql`

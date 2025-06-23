@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class FollowersService {
+export class FollowsService {
   constructor(private prisma: PrismaService) {}
 
   async followUser(currentUserId: string, userIdToFollow: string) {
@@ -72,11 +72,15 @@ export class FollowersService {
       where: {
         id: followingRelation.id,
       },
+      include: {
+        follower: true,
+        following: true,
+      },
     });
   }
 
-  // Get users that follow the given userId
-  async getFollowers(userId: string) {
+  // Get users that follow the given userId with pagination
+  async getFollowers(userId: string, limit?: number, skip?: number) {
     const followers = await this.prisma.userFollowing.findMany({
       where: {
         followingId: userId,
@@ -84,13 +88,15 @@ export class FollowersService {
       include: {
         follower: true,
       },
+      take: limit,
+      skip: skip,
     });
 
     return followers;
   }
 
-  // Get users that the given userId is following
-  async getFollowing(userId: string) {
+  // Get users that the given userId is following with pagination
+  async getFollowing(userId: string, limit?: number, skip?: number) {
     const following = await this.prisma.userFollowing.findMany({
       where: {
         followerId: userId,
@@ -98,12 +104,15 @@ export class FollowersService {
       include: {
         following: true,
       },
+      take: limit,
+      skip: skip,
     });
 
     return following;
   }
 
-  async getUserFollowers(userId: string) {
+  // Get users that follow the given userId
+  async getUserFollowers(userId: string, limit?: number, skip?: number) {
     const followers = await this.prisma.userFollowing.findMany({
       where: {
         followingId: userId,
@@ -111,12 +120,15 @@ export class FollowersService {
       include: {
         follower: true,
       },
+      take: limit,
+      skip: skip,
     });
 
     return followers.map((f) => f.follower);
   }
 
-  async getUserFollowing(userId: string) {
+  // Get users that the given userId is following
+  async getUserFollowing(userId: string, limit?: number, skip?: number) {
     const following = await this.prisma.userFollowing.findMany({
       where: {
         followerId: userId,
@@ -124,6 +136,8 @@ export class FollowersService {
       include: {
         following: true,
       },
+      take: limit,
+      skip: skip,
     });
 
     return following.map((f) => f.following);

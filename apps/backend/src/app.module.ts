@@ -19,7 +19,7 @@ import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter'
 import { NotificationsModule } from './notifications/notifications.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
-import { FollowersModule } from './followers/followers.module';
+import { FollowsModule } from './follows/follows.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -67,7 +67,7 @@ import { UsersModule } from './users/users.module';
     NotificationsModule,
     PostsModule,
     CommentsModule,
-    FollowersModule,
+    FollowsModule,
     UsersModule,
   ],
   controllers: [AppController],
