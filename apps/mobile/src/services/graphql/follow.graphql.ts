@@ -44,7 +44,7 @@ export const GET_MY_FOLLOWING = gql`
 `;
 
 export const GET_USER_FOLLOWERS = gql`
-  query GetUserFollowers($userId: ID!, $limit: Int, $skip: Int) {
+  query GetUserFollowers($userId: String!, $limit: Int, $skip: Int) {
     userFollowers(userId: $userId, limit: $limit, skip: $skip) {
       ...UserFragment
     }
@@ -53,7 +53,7 @@ export const GET_USER_FOLLOWERS = gql`
 `;
 
 export const GET_USER_FOLLOWING = gql`
-  query GetUserFollowing($userId: ID!, $limit: Int, $skip: Int) {
+  query GetUserFollowing($userId: String!, $limit: Int, $skip: Int) {
     userFollowing(userId: $userId, limit: $limit, skip: $skip) {
       ...UserFragment
     }
@@ -62,7 +62,7 @@ export const GET_USER_FOLLOWING = gql`
 `;
 
 export const CHECK_IS_FOLLOWING = gql`
-  query CheckIsFollowing($userId: ID!) {
+  query CheckIsFollowing($userId: String!) {
     isFollowing(userId: $userId)
   }
 `;
