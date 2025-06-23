@@ -458,6 +458,11 @@ export const HomeScreen = ({navigation}: Props) => {
         labels.push({
           icon: 'users-filled' as IconName,
           text: post.group.name,
+          onPress: () => {
+            navigateToScreen(navigation, 'GroupDetail', {
+              groupId: post.group?.id,
+            });
+          },
         });
       }
 
@@ -491,7 +496,7 @@ export const HomeScreen = ({navigation}: Props) => {
         labels,
       };
     },
-    [formatAvatarSource],
+    [formatAvatarSource, navigation],
   );
 
   // Render feed post with comment navigation and dropdown menu
