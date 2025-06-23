@@ -242,17 +242,11 @@ export const useCheckIsFollowing = () => {
  * @param onSuccess Optional callback function to execute on successful follow
  * @returns A function to follow a user and loading state
  */
-export const useFollowUser = (onSuccess?: () => void) => {
+export const useFollowUser = (onSuccess?: (isFollowing: boolean) => void) => {
   const [followUserMutation, {loading}] = useMutation(FOLLOW_USER, {
     onCompleted: _data => {
-      showToast({
-        type: 'success',
-        text1: 'Success',
-        text2: 'User followed successfully!',
-      });
-
       if (onSuccess) {
-        onSuccess();
+        onSuccess(true);
       }
     },
     onError: errorObj => {
@@ -265,7 +259,7 @@ export const useFollowUser = (onSuccess?: () => void) => {
     },
     refetchQueries: [
       {query: GET_MY_FOLLOWING},
-      {query: GET_USER_FOLLOWERS, variables: {userId: ''}}, // Will be updated in the call
+      {query: GET_USER_FOLLOWERS, variables: {userId: ''}},
     ],
   });
 
@@ -298,17 +292,11 @@ export const useFollowUser = (onSuccess?: () => void) => {
  * @param onSuccess Optional callback function to execute on successful unfollow
  * @returns A function to unfollow a user and loading state
  */
-export const useUnfollowUser = (onSuccess?: () => void) => {
+export const useUnfollowUser = (onSuccess?: (isFollowing: boolean) => void) => {
   const [unfollowUserMutation, {loading}] = useMutation(UNFOLLOW_USER, {
     onCompleted: _data => {
-      showToast({
-        type: 'success',
-        text1: 'Success',
-        text2: 'User unfollowed successfully!',
-      });
-
       if (onSuccess) {
-        onSuccess();
+        onSuccess(false);
       }
     },
     onError: errorObj => {

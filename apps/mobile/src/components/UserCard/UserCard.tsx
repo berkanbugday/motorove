@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {View, Image, TouchableOpacity} from 'react-native';
 import {colors} from '@theme';
 import {Typography} from '@components/Typography';
@@ -24,12 +24,33 @@ export const UserCard: React.FC<UserCardProps> = ({
   onFollowStatusChange,
   style,
 }) => {
-  // Use local state for immediate UI feedback
+  // Use local state for immediate UI feedback and follow status
   const [loading, setLoading] = useState<boolean>(false);
+  const [isFollowing, setIsFollowing] = useState<boolean>(
+    user.isFollowing || false,
+  );
 
-  // Follow and unfollow mutations
-  const {followUser} = useFollowUser();
-  const {unfollowUser} = useUnfollowUser();
+  // Update local state when user prop changes
+  useEffect(() => {
+    setIsFollowing(user.isFollowing || false);
+  }, [user.isFollowing]);
+
+  // Follow and unfollow mutations with callbacks to update local state
+  const {followUser} = useFollowUser((newStatus: boolean) => {
+    setIsFollowing(newStatus);
+    if (onFollowStatusChange) {
+      onFollowStatusChange(newStatus);
+    }
+    setLoading(false);
+  });
+
+  const {unfollowUser} = useUnfollowUser((newStatus: boolean) => {
+    setIsFollowing(newStatus);
+    if (onFollowStatusChange) {
+      onFollowStatusChange(newStatus);
+    }
+    setLoading(false);
+  });
 
   const handleFollowPress = useCallback(async () => {
     if (loading) {
@@ -39,23 +60,18 @@ export const UserCard: React.FC<UserCardProps> = ({
     try {
       setLoading(true);
 
-      // Immediately update UI for optimistic response
-      // Call parent's callback with the NEW state (after toggle)
-      onFollowStatusChange?.(!user.isFollowing);
-
-      // Actually perform the follow/unfollow operation
-      if (user.isFollowing) {
+      // Perform the follow/unfollow operation
+      // The callbacks will handle updating the UI after the server responds
+      if (isFollowing) {
         await unfollowUser(user.id);
       } else {
         await followUser(user.id);
       }
     } catch (error) {
-      // If there's an error, revert the optimistic update
       console.error('Error toggling follow status:', error);
-    } finally {
       setLoading(false);
     }
-  }, [loading, user.id, onFollowStatusChange, followUser, unfollowUser]);
+  }, [loading, isFollowing, user.id, followUser, unfollowUser]);
 
   return (
     <TouchableOpacity
@@ -118,7 +134,7 @@ export const UserCard: React.FC<UserCardProps> = ({
           )}
         </View>
         <View style={styles.buttonContainer}>
-          {!user.isFollowing ? (
+          {!isFollowing ? (
             <Button
               title="Follow"
               variant="dark"
