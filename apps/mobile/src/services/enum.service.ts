@@ -3,6 +3,9 @@ import {
   GET_GROUP_PRIVACY_OPTIONS,
   GET_GROUP_MEMBER_ROLES,
   GET_EVENT_TYPES,
+  GET_ROAD_TYPES,
+  GET_DIFFICULTY_LEVELS,
+  GET_EXPERIENCE_LEVELS,
 } from './graphql/enum.graphql';
 import {toPascalCase} from '@utils/stringUtils';
 
@@ -35,7 +38,7 @@ export const useEnumPrivacyOptions = () => {
 export const useEnumGroupMemberRoles = () => {
   const {data, loading, error} = useQuery(GET_GROUP_MEMBER_ROLES);
 
-  const memberRoles: DropdownItem[] = data?.getGroupMemberRoles
+  const groupMemberRoles: DropdownItem[] = data?.getGroupMemberRoles
     ? data.getGroupMemberRoles.map((role: EnumItem, index: number) => ({
         id: index + 1,
         label: toPascalCase(role.value),
@@ -43,7 +46,7 @@ export const useEnumGroupMemberRoles = () => {
       }))
     : [];
 
-  return {memberRoles, loading, error};
+  return {groupMemberRoles, loading, error};
 };
 
 export const useEnumEventTypes = () => {
@@ -60,11 +63,56 @@ export const useEnumEventTypes = () => {
   return {eventTypes, loading, error};
 };
 
+export const useEnumRoadTypes = () => {
+  const {data, loading, error} = useQuery(GET_ROAD_TYPES);
+
+  const roadTypes: DropdownItem[] = data?.getRoadTypes
+    ? data.getRoadTypes.map((type: EnumItem, index: number) => ({
+        id: index + 1,
+        label: toPascalCase(type.value),
+        value: type.value,
+      }))
+    : [];
+
+  return {roadTypes, loading, error};
+};
+
+export const useEnumDifficultyLevels = () => {
+  const {data, loading, error} = useQuery(GET_DIFFICULTY_LEVELS);
+
+  const difficultyLevels: DropdownItem[] = data?.getDifficultyLevels
+    ? data.getDifficultyLevels.map((level: EnumItem, index: number) => ({
+        id: index + 1,
+        label: toPascalCase(level.value),
+        value: level.value,
+      }))
+    : [];
+
+  return {difficultyLevels, loading, error};
+};
+
+export const useEnumExperienceLevels = () => {
+  const {data, loading, error} = useQuery(GET_EXPERIENCE_LEVELS);
+
+  const experienceLevels: DropdownItem[] = data?.getExperienceLevels
+    ? data.getExperienceLevels.map((level: EnumItem, index: number) => ({
+        id: index + 1,
+        label: toPascalCase(level.value),
+        value: level.value,
+      }))
+    : [];
+
+  return {experienceLevels, loading, error};
+};
+
 // Export all as EnumService object
 export const EnumService = {
   useEnumPrivacyOptions,
   useEnumGroupMemberRoles,
   useEnumEventTypes,
+  useEnumRoadTypes,
+  useEnumDifficultyLevels,
+  useEnumExperienceLevels,
 };
 
 export default EnumService;

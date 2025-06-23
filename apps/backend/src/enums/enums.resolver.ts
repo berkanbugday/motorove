@@ -3,6 +3,9 @@ import { GroupPrivacy } from './models/group-privacy.enum';
 import { GroupMemberRole } from './models/group-member-role.enum';
 import { GroupMembershipStatus } from './models/group-membership-status.enum';
 import { EventType } from './models/event-type.enum';
+import { RoadType } from './models/road-type.enum';
+import { DifficultyLevel } from './models/difficulty-level.enum';
+import { ExperienceLevel } from './models/experience-level.enum';
 
 @ObjectType()
 class EnumItem {
@@ -39,6 +42,30 @@ export class EnumsResolver {
   @Query(() => [EnumItem])
   getEventTypes() {
     return Object.entries(EventType).map(([key, value]) => ({
+      key,
+      value,
+    }));
+  }
+
+  @Query(() => [EnumItem])
+  getRoadTypes() {
+    return Object.entries(RoadType).map(([key, value]) => ({
+      key,
+      value,
+    }));
+  }
+
+  @Query(() => [EnumItem])
+  getDifficultyLevels() {
+    return Object.entries(DifficultyLevel).map(([key, value]) => ({
+      key,
+      value,
+    }));
+  }
+
+  @Query(() => [EnumItem])
+  getExperienceLevels() {
+    return Object.entries(ExperienceLevel).map(([key, value]) => ({
       key,
       value,
     }));

@@ -326,10 +326,13 @@ type Query {
   comment(id: ID!): Comment!
   comments(postId: ID!): [Comment!]!
   createdGroups: [Group!]!
+  getDifficultyLevels: [EnumItem!]!
   getEventTypes: [EnumItem!]!
+  getExperienceLevels: [EnumItem!]!
   getGroupMemberRoles: [EnumItem!]!
   getGroupMembershipStatuses: [EnumItem!]!
   getGroupPrivacyOptions: [EnumItem!]!
+  getRoadTypes: [EnumItem!]!
   getUsersByIds(ids: [String!]!): [User!]!
   group(id: String!): Group!
   groupMembers(groupId: String!): [GroupMembership!]!

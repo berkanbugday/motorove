@@ -67,6 +67,25 @@ enum EventType {
   CHARITY_RIDE
 }
 
+enum RoadType {
+  ASPHALT
+  OFF_ROAD
+  MIXED
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  ALL_LEVELS
+}
+
 // Models
 model User {
   id         String   @id @default(uuid())
@@ -95,11 +114,11 @@ model User {
   updatedComments      Comment[]         @relation("CommentUpdatedBy")
   postLikes            PostLike[]
   postSaves            PostSave[]
-  
+
   // Following system relations
-  followers       UserFollowing[] @relation("UserFollowers")
-  following       UserFollowing[] @relation("UserFollowing")
-  
+  followers UserFollowing[] @relation("UserFollowers")
+  following UserFollowing[] @relation("UserFollowing")
+
   // Event invitations
   sentInvitations     EventInvitation[] @relation("SentInvitations")
   receivedInvitations EventInvitation[] @relation("ReceivedInvitations")
@@ -319,7 +338,7 @@ model UserFollowing {
 // Event invitation for users (used for private solo rides)
 model EventInvitation {
   id        String   @id @default(uuid())
-  eventId   String   // Will add relation when implementing events
+  eventId   String // Will add relation when implementing events
   inviterId String
   inviter   User     @relation("SentInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
   inviteeId String

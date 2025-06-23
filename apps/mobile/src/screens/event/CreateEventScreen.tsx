@@ -34,30 +34,15 @@ import {eventService} from '@services/event.service';
 import {createEventSchema, CreateEventFormValues} from '@utils/validation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
-import {useEnumEventTypes} from '@services/enum.service';
+import {
+  useEnumEventTypes,
+  useEnumRoadTypes,
+  useEnumDifficultyLevels,
+  useEnumExperienceLevels,
+} from '@services/enum.service';
 import {toPascalCase} from '@utils/stringUtils';
 
-// Road type options
-const ROAD_TYPES: DropdownItem[] = [
-  {id: '1', value: 'Paved', label: 'Paved'},
-  {id: '2', value: 'Off-road', label: 'Off-road'},
-  {id: '3', value: 'Mixed', label: 'Mixed'},
-];
-
-// Difficulty levels
-const DIFFICULTY_LEVELS: DropdownItem[] = [
-  {id: '1', value: 'Easy', label: 'Easy'},
-  {id: '2', value: 'Moderate', label: 'Moderate'},
-  {id: '3', value: 'Hard', label: 'Hard'},
-];
-
-// Experience levels for workshops
-const EXPERIENCE_LEVELS: DropdownItem[] = [
-  {id: '1', value: 'Beginner', label: 'Beginner'},
-  {id: '2', value: 'Intermediate', label: 'Intermediate'},
-  {id: '3', value: 'Advanced', label: 'Advanced'},
-  {id: '4', value: 'All Levels', label: 'All Levels'},
-];
+// Note: These are now fetched from backend through enum service hooks
 
 export const CreateEventScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
@@ -86,8 +71,11 @@ export const CreateEventScreen: React.FC = () => {
     addresses?: any[];
   }>({});
 
-  // Use event types service hook - ignore loading state for now
+  // Use enum service hooks
   const {eventTypes} = useEnumEventTypes();
+  const {roadTypes} = useEnumRoadTypes();
+  const {difficultyLevels} = useEnumDifficultyLevels();
+  const {experienceLevels} = useEnumExperienceLevels();
 
   // Setup form with Zod validation
   const {
@@ -466,7 +454,7 @@ export const CreateEventScreen: React.FC = () => {
                     <View>
                       <Typography
                         variant="bodySmall"
-                        weight="semibold"
+                        weight="semiBold"
                         style={styles.privateEventTitle}>
                         Invite Users from Followers
                       </Typography>
@@ -481,7 +469,7 @@ export const CreateEventScreen: React.FC = () => {
                     <View>
                       <Typography
                         variant="bodySmall"
-                        weight="semibold"
+                        weight="semiBold"
                         style={styles.privateEventTitle}>
                         Invite Groups
                       </Typography>
@@ -517,7 +505,7 @@ export const CreateEventScreen: React.FC = () => {
                       />
 
                       <Dropdown
-                        data={ROAD_TYPES}
+                        data={roadTypes}
                         label="Road Type"
                         onSelect={handleRoadTypeSelect}
                         searchable={false}
@@ -526,7 +514,7 @@ export const CreateEventScreen: React.FC = () => {
                       />
 
                       <Dropdown
-                        data={DIFFICULTY_LEVELS}
+                        data={difficultyLevels}
                         label="Difficulty Level"
                         onSelect={handleDifficultySelect}
                         searchable={false}
@@ -583,7 +571,7 @@ export const CreateEventScreen: React.FC = () => {
                       />
 
                       <Dropdown
-                        data={EXPERIENCE_LEVELS}
+                        data={experienceLevels}
                         label="Required Experience Level"
                         onSelect={handleExperienceLevelSelect}
                         searchable={false}
