@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { User } from '../../auth/models/user.model';
+import { User } from '../../users/models/user.model';
 
 @ObjectType({ isAbstract: true })
 export abstract class BaseModel {

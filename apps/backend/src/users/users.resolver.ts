@@ -1,11 +1,10 @@
 import { Resolver, Query, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { User } from '../auth/models/user.model';
+import { User } from './models/user.model';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { UsersService } from './users.service';
 import { Request } from 'express';
 import { SearchUsersInput } from './dto/search-users.input';
-import { UserProfile } from './models/user-profile.model';
 
 interface GqlContext {
   req: Request & {
@@ -24,12 +23,12 @@ export class UsersResolver {
     return this.usersService.findOne(id);
   }
 
-  @Query(() => UserProfile, { nullable: true })
+  @Query(() => User, { nullable: true })
   @UseGuards(JwtGuard)
   async userProfile(
     @Context() context: GqlContext,
     @Args('id') id: string,
-  ): Promise<UserProfile | null> {
+  ): Promise<User | null> {
     const userId = context.req.user.id;
     return this.usersService.getUserProfile(id, userId);
   }
@@ -38,7 +37,7 @@ export class UsersResolver {
   @UseGuards(JwtGuard)
   async searchUsers(
     @Context() context: GqlContext,
-    @Args('input') input: SearchUsersInput,
+    @Args('searchUsersInput') input: SearchUsersInput,
   ): Promise<User[]> {
     const userId = context.req.user.id;
     return this.usersService.searchUsers(

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '../auth/models/user.model';
-import { UserProfile } from './models/user-profile.model';
+import { User } from './models/user.model';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +24,7 @@ export class UsersService {
   async getUserProfile(
     userId: string,
     currentUserId: string,
-  ): Promise<UserProfile | null> {
+  ): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -98,11 +97,25 @@ export class UsersService {
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
     });
 
+    // Get all users that the current user is following
+    const userFollowings = await this.prisma.userFollowing.findMany({
+      where: {
+        followerId: currentUserId,
+        followingId: {
+          in: users.map((user) => user.id),
+        },
+      },
+    });
+
+    // Create a set of following IDs for efficient lookup
+    const followingIdsSet = new Set(userFollowings.map((uf) => uf.followingId));
+
     return users.map((user) => ({
       ...user,
       firstName: user.firstName || null,
       lastName: user.lastName || null,
       avatar: user.avatar || null,
+      isFollowing: followingIdsSet.has(user.id),
     }));
   }
 

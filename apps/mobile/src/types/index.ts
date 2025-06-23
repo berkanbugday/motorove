@@ -23,4 +23,5 @@ export type User = {
   location?: string;
   bio?: string;
   interests?: string[];
+  isFollowing?: boolean;
 };

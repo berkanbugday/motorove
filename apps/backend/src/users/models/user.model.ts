@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { GroupMembership } from '../../group-memberships/models/group-membership.model';
 import { Group } from '../../groups/models/group.model';
 
@@ -36,4 +36,13 @@ export class User {
 
   @Field(() => Boolean)
   isActive: boolean;
+
+  @Field(() => Int, { nullable: true })
+  followerCount?: number;
+
+  @Field(() => Int, { nullable: true })
+  followingCount?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  isFollowing?: boolean;
 }

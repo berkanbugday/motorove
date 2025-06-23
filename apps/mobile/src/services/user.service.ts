@@ -43,9 +43,11 @@ export const useSearchUsers = (initialQuery = '') => {
 
         const {data} = await searchUsersQuery({
           variables: {
-            query,
-            limit: 20,
-            skip: skipValue,
+            input: {
+              query,
+              limit: 20,
+              skip: skipValue,
+            },
           },
         });
 
@@ -124,7 +126,13 @@ export const userService = {
     try {
       const {data} = await apolloClient.query({
         query: SEARCH_USERS,
-        variables: {query, limit, skip},
+        variables: {
+          input: {
+            query,
+            limit,
+            skip,
+          },
+        },
         fetchPolicy: 'network-only',
       });
       return data.searchUsers || [];

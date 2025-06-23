@@ -8,13 +8,14 @@ export const USER_FRAGMENT = gql`
     firstName
     lastName
     avatar
+    isFollowing
   }
 `;
 
 // Queries
 export const SEARCH_USERS = gql`
-  query SearchUsers($query: String!, $limit: Int, $skip: Int) {
-    searchUsers(query: $query, limit: $limit, skip: $skip) {
+  query SearchUsers($input: SearchUsersInput!) {
+    searchUsers(searchUsersInput: $input) {
       ...UserFragment
     }
   }

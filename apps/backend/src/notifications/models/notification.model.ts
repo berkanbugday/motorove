@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { NotificationType } from '../../enums/models/notification-type.enum';
 import { NotificationStatus } from '../../enums/models/notification-status.enum';
 import { BaseModel } from '../../core/models';
-import { User } from '../../auth/models/user.model';
+import { User } from '../../users/models/user.model';
 
 @ObjectType()
 export class Notification extends BaseModel {

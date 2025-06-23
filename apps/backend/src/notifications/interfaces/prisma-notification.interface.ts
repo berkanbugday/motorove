@@ -1,4 +1,4 @@
-import { User } from '../../auth/models/user.model';
+import { User } from '../../users/models/user.model';
 import { NotificationType } from '../../enums/models/notification-type.enum';
 import { NotificationStatus } from '../../enums/models/notification-status.enum';
 

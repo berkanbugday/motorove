@@ -1,6 +1,29 @@
 import {gql} from '@apollo/client';
 import {USER_FRAGMENT} from './user.graphql';
 
+// Fragment
+export const FOLLOW_USER_FRAGMENT = gql`
+  fragment FollowUserFragment on Follow {
+    following {
+      ...UserFragment
+    }
+    follower {
+      ...UserFragment
+    }
+  }
+  ${USER_FRAGMENT}
+`;
+
+export const UNFOLLOW_USER_FRAGMENT = gql`
+  fragment UnfollowUserFragment on Unfollow {
+    id
+    following {
+      ...UserFragment
+    }
+  }
+  ${USER_FRAGMENT}
+`;
+
 // Queries
 export const GET_MY_FOLLOWERS = gql`
   query GetMyFollowers($limit: Int, $skip: Int) {
@@ -48,17 +71,17 @@ export const CHECK_IS_FOLLOWING = gql`
 export const FOLLOW_USER = gql`
   mutation FollowUser($input: FollowUserInput!) {
     followUser(followUserInput: $input) {
-      success
-      message
+      ...FollowUserFragment
     }
   }
+  ${FOLLOW_USER_FRAGMENT}
 `;
 
 export const UNFOLLOW_USER = gql`
   mutation UnfollowUser($input: UnfollowUserInput!) {
     unfollowUser(unFollowUserInput: $input) {
-      success
-      message
+      ...UnfollowUserFragment
     }
   }
+  ${UNFOLLOW_USER_FRAGMENT}
 `;

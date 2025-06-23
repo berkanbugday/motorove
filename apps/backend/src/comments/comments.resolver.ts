@@ -4,7 +4,7 @@ import { Comment } from './models/comment.model';
 import { CreateCommentInput } from './dto/create-comment.input';
 import { UpdateCommentInput } from './dto/update-comment.input';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { User } from '../auth/models/user.model';
+import { User } from '../users/models/user.model';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 

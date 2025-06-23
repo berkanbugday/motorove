@@ -1,7 +1,7 @@
 import { Resolver, Mutation, Query, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { User } from '../auth/models/user.model';
+import { User } from '../users/models/user.model';
 import { FollowsService } from './follows.service';
 import { Follow } from './models/follow.model';
 import { FollowUserInput } from './dto/follow-user.dto';

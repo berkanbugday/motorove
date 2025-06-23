@@ -11,7 +11,6 @@ import {
 import {User} from '../types';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
-import {apolloClient} from '../configs/apolloClientConfig';
 
 /**
  * Hook for getting current user's followers
@@ -38,7 +37,9 @@ export const useMyFollowers = (limit?: number, skip?: number) => {
         limit: newLimit || limit,
       },
       updateQuery: (prev, {fetchMoreResult}) => {
-        if (!fetchMoreResult) return prev;
+        if (!fetchMoreResult) {
+          return prev;
+        }
         return {
           myFollowers: [...prev.myFollowers, ...fetchMoreResult.myFollowers],
         };
@@ -80,7 +81,9 @@ export const useMyFollowing = (limit?: number, skip?: number) => {
         limit: newLimit || limit,
       },
       updateQuery: (prev, {fetchMoreResult}) => {
-        if (!fetchMoreResult) return prev;
+        if (!fetchMoreResult) {
+          return prev;
+        }
         return {
           myFollowing: [...prev.myFollowing, ...fetchMoreResult.myFollowing],
         };
@@ -129,7 +132,9 @@ export const useUserFollowers = (
         limit: newLimit || limit,
       },
       updateQuery: (prev, {fetchMoreResult}) => {
-        if (!fetchMoreResult) return prev;
+        if (!fetchMoreResult) {
+          return prev;
+        }
         return {
           userFollowers: [
             ...prev.userFollowers,
@@ -181,7 +186,9 @@ export const useUserFollowing = (
         limit: newLimit || limit,
       },
       updateQuery: (prev, {fetchMoreResult}) => {
-        if (!fetchMoreResult) return prev;
+        if (!fetchMoreResult) {
+          return prev;
+        }
         return {
           userFollowing: [
             ...prev.userFollowing,

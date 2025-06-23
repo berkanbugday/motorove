@@ -1,4 +1,4 @@
-import { User } from '../../auth/models/user.model';
+import { User } from '../../users/models/user.model';
 
 // This interface describes the shape of the comment data returned by Prisma
 export interface PrismaComment {

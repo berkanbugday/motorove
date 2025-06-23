@@ -5,12 +5,11 @@ import {Typography} from '@components/Typography';
 import {Button} from '@components/Button';
 import {Icon} from '@components/Icon';
 import {User} from '../../types';
-import {userService} from '@services/user.service';
+import {useFollowUser, useUnfollowUser} from '@services/follow.service';
 import {styles} from './UserCard.styles';
 
 interface UserCardProps {
   user: User;
-  isFollowing: boolean;
   onPress?: () => void;
   onFollowStatusChange?: (isFollowing: boolean) => void;
   style?: any;
@@ -21,33 +20,42 @@ interface UserCardProps {
  */
 export const UserCard: React.FC<UserCardProps> = ({
   user,
-  isFollowing,
   onPress,
   onFollowStatusChange,
   style,
 }) => {
-  const [following, setFollowing] = useState<boolean>(isFollowing);
+  // Use local state for immediate UI feedback
   const [loading, setLoading] = useState<boolean>(false);
 
+  // Follow and unfollow mutations
+  const {followUser} = useFollowUser();
+  const {unfollowUser} = useUnfollowUser();
+
   const handleFollowPress = useCallback(async () => {
+    if (loading) {
+      return;
+    }
+
     try {
       setLoading(true);
 
-      if (following) {
-        await userService.unfollowUser(user.id);
-        setFollowing(false);
-      } else {
-        await userService.followUser(user.id);
-        setFollowing(true);
-      }
+      // Immediately update UI for optimistic response
+      // Call parent's callback with the NEW state (after toggle)
+      onFollowStatusChange?.(!user.isFollowing);
 
-      onFollowStatusChange?.(!following);
+      // Actually perform the follow/unfollow operation
+      if (user.isFollowing) {
+        await unfollowUser(user.id);
+      } else {
+        await followUser(user.id);
+      }
     } catch (error) {
+      // If there's an error, revert the optimistic update
       console.error('Error toggling follow status:', error);
     } finally {
       setLoading(false);
     }
-  }, [following, user.id, onFollowStatusChange]);
+  }, [loading, user.id, onFollowStatusChange, followUser, unfollowUser]);
 
   return (
     <TouchableOpacity
@@ -110,10 +118,10 @@ export const UserCard: React.FC<UserCardProps> = ({
           )}
         </View>
         <View style={styles.buttonContainer}>
-          {!following ? (
+          {!user.isFollowing ? (
             <Button
-              title={following ? 'Unfollow' : 'Follow'}
-              variant={following ? 'outline' : 'dark'}
+              title="Follow"
+              variant="dark"
               size="small"
               onPress={handleFollowPress}
               disabled={loading}

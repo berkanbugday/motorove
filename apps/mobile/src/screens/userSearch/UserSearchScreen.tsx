@@ -4,7 +4,7 @@ import {LegendList} from '@legendapp/list';
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {colors, spacing} from '@theme';
 import {Icon} from '@components/Icon';
-import {useSearchUsers, userService} from '@services/user.service';
+import {useSearchUsers} from '@services/user.service';
 import {UserCard} from '@components/UserCard';
 import {Body} from '@components/Typography';
 import {AnimatedInput} from '@components/AnimatedInput';
@@ -16,60 +16,31 @@ import {User} from '../../types';
 export const UserSearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [followStatusMap, setFollowStatusMap] = useState<
-    Record<string, boolean>
-  >({});
 
   // Fetch users based on search query
   const {
     users: searchResults,
     loading: searchLoading,
-    refetch: refetchSearch,
-    loadMore,
     hasMore,
-    setSearchQuery: setSearchUsersQuery,
+    loadMore,
+    search,
+    clearSearch,
   } = useSearchUsers(debouncedQuery);
-
-  // Fetch follow status for users in search results
-  useEffect(() => {
-    const fetchFollowStatus = async () => {
-      if (searchResults && searchResults.length > 0) {
-        const statusMap: Record<string, boolean> = {};
-
-        // Create an array of promises to check follow status for each user
-        const promises = searchResults.map(async user => {
-          try {
-            const isFollowing = await userService.isFollowing(user.id);
-            statusMap[user.id] = isFollowing;
-          } catch (error) {
-            console.error('Error checking follow status:', error);
-            statusMap[user.id] = false;
-          }
-        });
-
-        // Wait for all promises to resolve
-        await Promise.all(promises);
-        setFollowStatusMap(statusMap);
-      }
-    };
-
-    fetchFollowStatus();
-  }, [searchResults]);
 
   // Debounce search query to avoid too many API calls
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchQuery.trim() !== '') {
         setDebouncedQuery(searchQuery);
-        setSearchUsersQuery(searchQuery);
+        search(searchQuery);
       } else {
         setDebouncedQuery('');
-        setSearchUsersQuery('');
+        clearSearch();
       }
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, setSearchUsersQuery]);
+  }, [searchQuery, search, clearSearch]);
 
   // Handle search query changes
   const handleSearchQueryChange = useCallback((text: string) => {
@@ -80,41 +51,22 @@ export const UserSearchScreen = () => {
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     setDebouncedQuery('');
+    clearSearch();
     Keyboard.dismiss();
-  }, []);
-
-  // Handle follow status change
-  const handleFollowStatusChange = useCallback(
-    (userId: string, isFollowing: boolean) => {
-      setFollowStatusMap(prev => ({
-        ...prev,
-        [userId]: !isFollowing, // Toggle the follow status since the action has already been performed
-      }));
-    },
-    [],
-  );
+  }, [clearSearch]);
 
   // Render each user item
-  const renderUserItem = useCallback(
-    ({item}: {item: User}) => {
-      const isFollowing = followStatusMap[item.id] ?? false;
-
-      return (
-        <UserCard
-          user={item}
-          isFollowing={isFollowing}
-          onFollowStatusChange={status =>
-            handleFollowStatusChange(item.id, status)
-          }
-          onPress={() => {
-            // Navigate to user profile when implemented
-            // navigation.navigate('UserProfile', {userId: item.id});
-          }}
-        />
-      );
-    },
-    [followStatusMap, handleFollowStatusChange],
-  );
+  const renderUserItem = useCallback(({item}: {item: User}) => {
+    return (
+      <UserCard
+        user={item}
+        onPress={() => {
+          // Navigate to user profile when implemented
+          // navigation.navigate('UserProfile', {userId: item.id});
+        }}
+      />
+    );
+  }, []);
 
   // Render empty state when no users match search query
   const renderEmptyList = useCallback(() => {
@@ -140,6 +92,13 @@ export const UserSearchScreen = () => {
       loadMore();
     }
   }, [debouncedQuery, hasMore, loadMore]);
+
+  // Function to refetch search results
+  const refetchSearch = useCallback(() => {
+    if (debouncedQuery) {
+      search(debouncedQuery);
+    }
+  }, [debouncedQuery, search]);
 
   return (
     <View style={styles.container}>

@@ -347,11 +347,11 @@ type Query {
   notificationsCount(onlyUnread: Boolean = true): Float!
   post(id: ID!): Post!
   posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [Post!]!
-  searchUsers(input: SearchUsersInput!): [User!]!
+  searchUsers(searchUsersInput: SearchUsersInput!): [User!]!
   user(id: String!): User
   userFollowers(limit: Int, skip: Int, userId: String!): [User!]!
   userFollowing(limit: Int, skip: Int, userId: String!): [User!]!
-  userProfile(id: String!): UserProfile
+  userProfile(id: String!): User
 }
 
 input RemoveGroupMemberInput {
@@ -430,26 +430,12 @@ type User {
   createdGroups: [Group!]
   email: String!
   firstName: String
+  followerCount: Int
+  followingCount: Int
   groupMemberships: [GroupMembership!]
   id: ID!
   isActive: Boolean!
-  lastName: String
-  supabaseId: String!
-  updatedAt: DateTime!
-}
-
-type UserProfile {
-  avatar: String
-  createdAt: DateTime!
-  createdGroups: [Group!]
-  email: String!
-  firstName: String
-  followerCount: Int!
-  followingCount: Int!
-  groupMemberships: [GroupMembership!]
-  id: ID!
-  isActive: Boolean!
-  isFollowing: Boolean!
+  isFollowing: Boolean
   lastName: String
   supabaseId: String!
   updatedAt: DateTime!
