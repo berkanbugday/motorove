@@ -1,12 +1,7 @@
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {colors, spacing} from '@theme';
 import React, {useState, useCallback} from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import {View, StyleSheet, RefreshControl} from 'react-native';
 import {LegendList} from '@legendapp/list';
 import {Tabs} from '@components/Tab';
 import {useNavigation} from '@react-navigation/native';
@@ -22,6 +17,7 @@ import {Body, Subtitle} from '@components/Typography';
 import {Button} from '@components/Button';
 import {useBottomSheet} from '@components/BottomSheet/BottomSheetProvider';
 import {GroupFilter} from './components/GroupFilter';
+import {SkeletonGroup} from '@components/Skeleton';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -102,13 +98,23 @@ export const GroupScreen = () => {
     applyAllGroupsFilters,
   ]);
 
+  // Render skeleton loaders for groups
+  const renderGroupSkeletons = (count = 3) => {
+    return Array.from({length: count}).map((_, index) => (
+      <SkeletonGroup
+        key={`skeleton-${index}`}
+        preset="groupCard"
+        showShadow={false}
+        style={styles.skeletonItem}
+      />
+    ));
+  };
+
   // Render joined groups list
   const renderJoinedGroups = () => {
     if (joinedGroupsLoading && !refreshingJoinedGroups && hasMoreJoinedGroups) {
       return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary.main} />
-        </View>
+        <View style={styles.loadingContainer}>{renderGroupSkeletons()}</View>
       );
     }
 
@@ -182,17 +188,22 @@ export const GroupScreen = () => {
         maintainVisibleContentPosition={true} // Maintain the visible position when data changes
         onEndReached={loadMoreJoinedGroups}
         onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          joinedGroupsLoading && hasMoreJoinedGroups ? (
+            <View style={styles.footerLoader}>
+              <SkeletonGroup preset="groupCard" style={styles.skeletonItem} />
+            </View>
+          ) : null
+        }
       />
     );
   };
 
   // Render all groups list
   const renderAllGroups = () => {
-    if (allGroupsLoading && !refreshingAllGroups && hasMoreAllGroups) {
+    if (allGroupsLoading && !refreshingAllGroups && !allGroups?.length) {
       return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary.main} />
-        </View>
+        <View style={styles.loadingContainer}>{renderGroupSkeletons()}</View>
       );
     }
 
@@ -265,6 +276,13 @@ export const GroupScreen = () => {
         maintainVisibleContentPosition={true} // Maintain the visible position when data changes
         onEndReached={loadMoreAllGroups}
         onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          allGroupsLoading && hasMoreAllGroups ? (
+            <View style={styles.footerLoader}>
+              <SkeletonGroup preset="groupCard" style={styles.skeletonItem} />
+            </View>
+          ) : null
+        }
       />
     );
   };
@@ -366,7 +384,16 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+  },
+  skeletonItem: {
+    marginBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderColor: colors.neutral.veryLightGrey,
+  },
+  footerLoader: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
 });

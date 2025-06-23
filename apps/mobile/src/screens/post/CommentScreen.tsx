@@ -1,11 +1,5 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-  RefreshControl,
-} from 'react-native';
+import {View, StyleSheet, ScrollView, RefreshControl} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
 import {colors, commonStyles, spacing} from '@theme';
@@ -20,6 +14,7 @@ import {
   SwipeableItem,
   Icon,
   Dialog,
+  SkeletonGroup,
 } from '@components';
 import {Comment} from '../../types/models/post.model';
 import {
@@ -219,7 +214,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 
     return {
       id: comment.id,
-      userId: comment.createdBy?.id || comment.updatedBy?.id || '',
+      userId: comment.createdBy?.id || '',
       userName: userName.trim(),
       avatarSource: comment.createdBy?.avatar
         ? {uri: comment.createdBy.avatar}
@@ -329,10 +324,41 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 
   const loading = postLoading || commentsLoading;
 
+  // Render skeleton loaders when loading
   if (loading) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.neutral.black} />
+      <View style={styles.container}>
+        <TopHeaderBar
+          title="Comments"
+          showBackButton
+          onBackPress={() => navigation.goBack()}
+        />
+        <ScrollView
+          style={styles.listContent}
+          showsVerticalScrollIndicator={false}>
+          {/* Post skeleton */}
+          <SkeletonGroup
+            preset="post"
+            lines={2}
+            showAvatar
+            showImage
+            showFooter
+            style={styles.skeletonPost}
+          />
+
+          {/* Comment skeletons */}
+          {[...Array(3)].map((_, i) => (
+            <SkeletonGroup
+              key={`comment-skeleton-${i}`}
+              preset="comment"
+              backgroundColor={colors.secondary.light}
+              lines={1}
+              showAvatar
+              showShadow={false}
+              style={styles.skeletonComment}
+            />
+          ))}
+        </ScrollView>
       </View>
     );
   }
@@ -427,7 +453,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           onEndReached={() => {
             console.log('onEndReached');
           }}
-          onEndReachedThreshold={0.3}
+          onEndReachedThreshold={0.5}
         />
       )}
       <CommentInput
@@ -474,5 +500,11 @@ const styles = StyleSheet.create({
   },
   swipeableContainer: {
     backgroundColor: colors.secondary.light,
+  },
+  skeletonPost: {
+    marginBottom: spacing.lg,
+  },
+  skeletonComment: {
+    marginBottom: spacing.md,
   },
 });

@@ -35,6 +35,9 @@ export * from './Switch';
 export * from './GroupSelector';
 export * from './UserSelector';
 export * from './UserCard';
+// Skeleton components
+export * from './Skeleton';
+export * from './Skeleton/SkeletonGroup';
 
 export {default as Dialog} from './Dialog';
 export type {
