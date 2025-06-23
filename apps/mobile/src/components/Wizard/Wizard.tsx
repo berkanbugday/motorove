@@ -7,7 +7,7 @@ import React, {
 import {View, StyleSheet} from 'react-native';
 import {spacing} from '@theme';
 import {ProgressIndicator, ProgressIndicatorType} from '../ProgressIndicator';
-import {Subtitle} from '../Typography';
+import {Body} from '../Typography';
 import {loggingService} from '@services/logging.service';
 
 export type WizardStep = {
@@ -142,10 +142,10 @@ export const Wizard = forwardRef<WizardHandle, WizardProps>(
           type={progressIndicatorType}
         />
 
-        <Subtitle align="center" weight="semiBold" style={styles.stepTitle}>
+        <Body align="center" weight="semiBold" style={styles.stepTitle}>
           {currentStep.title}
           {currentStep.optional ? ' (Optional)' : ''}
-        </Subtitle>
+        </Body>
 
         <View style={styles.content}>{currentStep.content}</View>
       </View>
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   stepTitle: {
-    marginBottom: spacing.xl,
+    marginBottom: spacing.sm,
   },
   content: {
     flex: 1,

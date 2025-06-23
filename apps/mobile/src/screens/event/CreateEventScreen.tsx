@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React, {useState, useRef, useCallback, useEffect, useMemo} from 'react';
 import {
   View,
   StyleSheet,
@@ -42,12 +42,16 @@ import {
   useEnumDifficultyLevels,
   useEnumExperienceLevels,
 } from '@services/enum.service';
-import {toPascalCase} from '@utils/stringUtils';
-
-// Note: These are now fetched from backend through enum service hooks
 
 export const CreateEventScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
+  const insets = useSafeAreaInsets();
+
+  // Refs
+  const locationMapBottomSheetRef = useRef<BottomSheetRef>(null);
+  const wizardRef = useRef<WizardHandle>(null);
+
+  // State hooks
   const [selectedEventType, setSelectedEventType] =
     useState<DropdownItem | null>(null);
   const [selectedRoadType, setSelectedRoadType] = useState<DropdownItem | null>(
@@ -57,7 +61,6 @@ export const CreateEventScreen: React.FC = () => {
     useState<DropdownItem | null>(null);
   const [selectedExperienceLevel, setSelectedExperienceLevel] =
     useState<DropdownItem | null>(null);
-  // Replace single coverImage with array of images
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
@@ -65,12 +68,9 @@ export const CreateEventScreen: React.FC = () => {
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const insets = useSafeAreaInsets();
-  // Reference for bottom sheet
-  const locationMapBottomSheetRef = useRef<BottomSheetRef>(null);
-  // Reference for wizard
-  const wizardRef = useRef<WizardHandle>(null);
-  // State for selected location
+  const [isFirstStep, setIsFirstStep] = useState(true);
+  const [isLastStep, setIsLastStep] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [selectedLocation, setSelectedLocation] = useState<{
     latitude?: number;
     longitude?: number;
@@ -78,13 +78,13 @@ export const CreateEventScreen: React.FC = () => {
     addresses?: any[];
   }>({});
 
-  // Use enum service hooks
+  // Enum hooks
   const {eventTypes} = useEnumEventTypes();
   const {roadTypes} = useEnumRoadTypes();
   const {difficultyLevels} = useEnumDifficultyLevels();
   const {experienceLevels} = useEnumExperienceLevels();
 
-  // Setup form with Zod validation
+  // Form setup with Zod validation
   const methods = useForm<CreateEventFormValues>({
     resolver: zodResolver(createEventSchema) as any,
     defaultValues: {
@@ -96,11 +96,10 @@ export const CreateEventScreen: React.FC = () => {
       endDate: new Date(),
       endTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000), // Default 2 hours later
       maxParticipants: null,
-      cover: null,
-      images: [], // Add an array for multiple images
+      images: [],
       isPrivate: false,
       invitedGroups: [],
-      invitedUsers: [], // Added for inviting followers to solo rides
+      invitedUsers: [],
       // Ride/camping specific fields
       routeDescription: '',
       roadType: '',
@@ -127,80 +126,75 @@ export const CreateEventScreen: React.FC = () => {
     trigger,
   } = methods;
 
-  // Watch the event type to conditionally render fields
+  // Watch key form values
   const eventType = watch('eventType');
 
-  // Check if event type is solo ride
-  const isSoloRide = eventType === 'SOLO_RIDE';
+  // Memoized derived values
+  const isSoloRide = useMemo(() => eventType === 'SOLO_RIDE', [eventType]);
+  const isRideOrCamping = useMemo(
+    () =>
+      ['SOLO_RIDE', 'GROUP_RIDE', 'CAMPING_RIDE', 'CHARITY_RIDE'].includes(
+        eventType || '',
+      ),
+    [eventType],
+  );
+  const isWorkshop = useMemo(
+    () => eventType === 'WORKSHOP_TRAINING',
+    [eventType],
+  );
+  const shouldShowEventDetails = useMemo(
+    () => isRideOrCamping || isWorkshop,
+    [isRideOrCamping, isWorkshop],
+  );
 
-  // Effect to clear conditional fields when event type changes
-  useEffect(() => {
-    if (eventType) {
-      // Clear all event-type specific fields
-      // Ride/camping specific fields
-      resetField('routeDescription');
-      resetField('roadType');
-      resetField('difficulty');
-      resetField('restStops');
-      resetField('overnightInfo');
-      resetField('equipmentChecklist');
-
-      // Workshop specific fields
-      resetField('instructorInfo');
-      resetField('topicsCovered');
-      resetField('experienceLevel');
-      resetField('price');
-
-      // Reset UI state for dropdowns
-      setSelectedRoadType(null);
-      setSelectedDifficulty(null);
-      setSelectedExperienceLevel(null);
-
-      // Reset selected users and groups since they depend on event type
-      setSelectedUsers([]);
-      setSelectedGroups([]);
-      resetField('invitedUsers');
-      resetField('invitedGroups');
-    }
-  }, [eventType, resetField]);
-
-  const handleGoBack = () => {
+  // Navigation handlers
+  const handleGoBack = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
-  // Open location map bottom sheet
-  const handleOpenLocationMap = () => {
+  const handleNextStep = useCallback(async () => {
+    wizardRef.current?.nextStep();
+  }, []);
+
+  const handlePreviousStep = useCallback(() => {
+    wizardRef.current?.previousStep();
+  }, []);
+
+  // Location selection handlers
+  const handleOpenLocationMap = useCallback(() => {
     locationMapBottomSheetRef.current?.open('full');
-  };
+  }, []);
 
-  // Handle location selection from the map
-  const handleLocationSelect = (location: {
-    latitude?: number;
-    longitude?: number;
-    name?: string;
-    addresses?: any[];
-  }) => {
-    setSelectedLocation(location);
+  const handleLocationSelect = useCallback(
+    (location: {
+      latitude?: number;
+      longitude?: number;
+      name?: string;
+      addresses?: any[];
+    }) => {
+      setSelectedLocation(location);
 
-    // Get display address (prefer English)
-    const englishAddress = location.addresses?.find(
-      addr => addr.language === 'en',
-    );
-    const turkishAddress = location.addresses?.find(
-      addr => addr.language === 'tr',
-    );
-    const displayAddress =
-      englishAddress?.address || turkishAddress?.address || '';
+      // Get display address (prefer English)
+      const englishAddress = location.addresses?.find(
+        addr => addr.language === 'en',
+      );
+      const turkishAddress = location.addresses?.find(
+        addr => addr.language === 'tr',
+      );
+      const displayAddress =
+        englishAddress?.address || turkishAddress?.address || '';
 
-    // Set the location field value
-    setValue('location', displayAddress, {shouldValidate: true});
+      // Set the location field value
+      setValue('location', displayAddress, {shouldValidate: true});
 
-    // Close the bottom sheet
-    locationMapBottomSheetRef.current?.close();
-  };
+      // Close the bottom sheet
+      locationMapBottomSheetRef.current?.close();
+    },
+    [setValue],
+  );
 
-  // Update handleSelectCover to handle multiple images
-  const handleSelectCover = async () => {
+  // Image selection handlers
+  const handleSelectImages = useCallback(async () => {
     try {
       // Check if image limit is reached
       if (selectedImages.length >= 3) {
@@ -243,66 +237,75 @@ export const CreateEventScreen: React.FC = () => {
         const updatedImages = [...selectedImages, newImage];
         setSelectedImages(updatedImages);
 
-        // Set the first image as the cover
-        if (updatedImages.length === 1) {
-          setValue('cover', newImage.base64 || null, {
-            shouldValidate: true,
-          });
-        }
-
         // Update the images array in the form
         const imageData = updatedImages.map(img => img.base64 || img.uri);
         setValue('images', imageData, {shouldValidate: true});
       }
     } catch (error) {
       loggingService.error('Error selecting cover image:', error);
-    }
-  };
-
-  // Add function to remove an image
-  const handleRemoveImage = (id: number) => {
-    const updatedImages = selectedImages.filter(image => image.id !== id);
-    setSelectedImages(updatedImages);
-
-    // Update the cover image if the first image was removed
-    if (updatedImages.length > 0) {
-      setValue('cover', updatedImages[0].base64 || null, {
-        shouldValidate: true,
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to select image',
       });
-    } else {
-      setValue('cover', null, {shouldValidate: true});
     }
+  }, [selectedImages, setValue]);
 
-    // Update the images array in the form
-    const imageData = updatedImages.map(img => img.base64 || img.uri);
-    setValue('images', imageData, {shouldValidate: true});
-  };
+  const handleRemoveImage = useCallback(
+    (id: number) => {
+      const updatedImages = selectedImages.filter(image => image.id !== id);
+      setSelectedImages(updatedImages);
 
-  function handleEventTypeSelect(item: DropdownItem | null) {
-    setSelectedEventType(item);
-    setValue('eventType', item?.value || '', {shouldValidate: true});
-  }
+      // Update the images array in the form
+      const imageData = updatedImages.map(img => img.base64 || img.uri);
+      setValue('images', imageData, {shouldValidate: true});
+    },
+    [selectedImages, setValue],
+  );
 
-  function handleRoadTypeSelect(item: DropdownItem | null) {
-    setSelectedRoadType(item);
-    setValue('roadType', item?.value || '', {shouldValidate: true});
-  }
+  // Dropdown selection handlers
+  const handleEventTypeSelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedEventType(item);
+      setValue('eventType', item?.value || '', {shouldValidate: true});
+    },
+    [setValue],
+  );
 
-  function handleDifficultySelect(item: DropdownItem | null) {
-    setSelectedDifficulty(item);
-    setValue('difficulty', item?.value || '', {shouldValidate: true});
-  }
+  const handleRoadTypeSelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedRoadType(item);
+      setValue('roadType', item?.value || '', {shouldValidate: true});
+    },
+    [setValue],
+  );
 
-  function handleExperienceLevelSelect(item: DropdownItem | null) {
-    setSelectedExperienceLevel(item);
-    setValue('experienceLevel', item?.value || '', {shouldValidate: true});
-  }
+  const handleDifficultySelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedDifficulty(item);
+      setValue('difficulty', item?.value || '', {shouldValidate: true});
+    },
+    [setValue],
+  );
 
-  const togglePrivacy = (newValue: boolean) => {
-    setIsPrivate(newValue);
-    setValue('isPrivate', newValue, {shouldValidate: true});
-  };
+  const handleExperienceLevelSelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedExperienceLevel(item);
+      setValue('experienceLevel', item?.value || '', {shouldValidate: true});
+    },
+    [setValue],
+  );
 
+  // Toggle handlers
+  const togglePrivacy = useCallback(
+    (newValue: boolean) => {
+      setIsPrivate(newValue);
+      setValue('isPrivate', newValue, {shouldValidate: true});
+    },
+    [setValue],
+  );
+
+  // Group and user selection handlers
   const handleGroupsChange = useCallback(
     (groupIds: string[]) => {
       setSelectedGroups(groupIds);
@@ -319,63 +322,44 @@ export const CreateEventScreen: React.FC = () => {
     [setValue],
   );
 
-  const onSubmit = async (data: CreateEventFormValues) => {
-    try {
-      setLoading(true);
+  // Step change handler
+  const handleStepChange = useCallback((index: number) => {
+    setCurrentStepIndex(index);
+  }, []);
 
-      // Use event service to create the event
-      await eventService.createEvent(data);
+  // Form validation functions
+  const validateBasicInfo = useCallback(async () => {
+    return await trigger([
+      'title',
+      'eventType',
+      'maxParticipants',
+      'description',
+    ]);
+  }, [trigger]);
 
-      showToast({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Event created successfully',
-      });
+  const validateDateTime = useCallback(async () => {
+    const fieldsToValidate = [
+      'date',
+      'time',
+      'endDate',
+      'endTime',
+      'location',
+      'isPrivate',
+    ];
 
-      // Navigate back after successful creation
-      setTimeout(() => {
-        navigation.goBack();
-      }, 1000);
-    } catch (error) {
-      showToast({
-        type: 'error',
-        text1: 'Error',
-        text2:
-          error instanceof Error ? error.message : 'Failed to create event',
-      });
-      loggingService.error('Error creating event:', error);
-    } finally {
-      setLoading(false);
+    // Add conditional fields based on privacy settings
+    if (isPrivate) {
+      if (isSoloRide) {
+        fieldsToValidate.push('invitedUsers');
+      } else {
+        fieldsToValidate.push('invitedGroups');
+      }
     }
-  };
 
-  // Check if event type is related to rides or camping
-  const isRideOrCamping =
-    eventType === 'SOLO_RIDE' ||
-    eventType === 'GROUP_RIDE' ||
-    eventType === 'CAMPING_RIDE' ||
-    eventType === 'CHARITY_RIDE';
+    return await trigger(fieldsToValidate as (keyof CreateEventFormValues)[]);
+  }, [trigger, isPrivate, isSoloRide]);
 
-  // Check if event type is workshop
-  const isWorkshop = eventType === 'WORKSHOP_TRAINING';
-
-  // Wizard step validation functions
-  const validateBasicInfo = async () => {
-    const result = await trigger(['title', 'eventType', 'description']);
-    return result;
-  };
-
-  const validateDateTime = async () => {
-    const result = await trigger(['date', 'time', 'endDate', 'endTime']);
-    return result;
-  };
-
-  const validateLocation = async () => {
-    const result = await trigger(['location', 'maxParticipants']);
-    return result;
-  };
-
-  const validateEventSpecificDetails = async () => {
+  const validateEventSpecificDetails = useCallback(async () => {
     if (isRideOrCamping) {
       const fieldsToValidate: (keyof CreateEventFormValues)[] = [
         'routeDescription',
@@ -400,382 +384,468 @@ export const CreateEventScreen: React.FC = () => {
       ] as const);
     }
     return true;
-  };
+  }, [isRideOrCamping, isWorkshop, eventType, trigger]);
+
+  // Form submission handler
+  const onSubmit = useCallback(
+    async (data: CreateEventFormValues) => {
+      try {
+        setLoading(true);
+
+        await eventService.createEvent(data);
+
+        showToast({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Event created successfully',
+        });
+
+        // Navigate back after successful creation
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
+      } catch (error) {
+        showToast({
+          type: 'error',
+          text1: 'Error',
+          text2:
+            error instanceof Error ? error.message : 'Failed to create event',
+        });
+        loggingService.error('Error creating event:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigation],
+  );
+
+  const handleWizardComplete = useCallback(() => {
+    handleSubmit(onSubmit)();
+  }, [handleSubmit, onSubmit]);
 
   // Define wizard steps
-  const wizardSteps: WizardStep[] = [
-    {
-      id: 'basic-info',
-      title: 'Basic Information',
-      validate: validateBasicInfo,
-      content: (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.formFields}>
-            {/* Event Title */}
-            <AnimatedInput
-              control={control as any}
-              name="title"
-              label="Event Title"
-              error={errors.title}
-            />
-
-            {/* Event Type Dropdown */}
-            <Dropdown
-              data={eventTypes}
-              label="Event Type"
-              onSelect={item => {
-                handleEventTypeSelect(item);
-              }}
-              searchable={false}
-              placeholder=""
-              selectedItem={selectedEventType}
-              error={errors.eventType?.message}
-              disabled={loading}
-            />
-
-            {/* Event Description */}
-            <AnimatedInput
-              control={control as any}
-              name="description"
-              label="Description"
-              multiline
-              error={errors.description}
-            />
-          </View>
-
-          {/* Event Cover Images Section - Updated for multiple images */}
-          <View style={styles.imagesSection}>
-            <Typography
-              variant="body"
-              weight="semiBold"
-              style={styles.subSectionTitle}>
-              Event Images (Max 3)
-            </Typography>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.imageScrollContainer}>
-              {selectedImages.map(image => (
-                <View key={image.id} style={styles.imageContainer}>
-                  <Image source={{uri: image.uri}} style={styles.image} />
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleRemoveImage(image.id)}>
-                    <Icon name="close" size={14} color={colors.neutral.white} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-              {selectedImages.length < 3 && (
-                <TouchableOpacity
-                  style={styles.addImageButton}
-                  onPress={handleSelectCover}
-                  activeOpacity={0.8}>
-                  <Icon name="plus" size={24} color={colors.neutral.grey} />
-                </TouchableOpacity>
-              )}
-            </ScrollView>
-          </View>
-        </ScrollView>
-      ),
-    },
-    {
-      id: 'date-time',
-      title: 'Date & Time',
-      validate: validateDateTime,
-      content: (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.formFields}>
-            {/* Start Date and Time */}
-            <Typography
-              variant="body"
-              weight="medium"
-              style={styles.subSectionTitle}>
-              Start Date & Time
-            </Typography>
-            <View style={styles.dateTimeContainer}>
-              <DateTimePicker
-                control={control as any}
-                name="date"
-                placeholder="Start Date"
-                displayFormat="medium"
-                mode="date"
-                minimumDate={new Date()}
-                style={styles.dateTimePicker}
-                error={errors.date}
-              />
-              <DateTimePicker
-                control={control as any}
-                name="time"
-                placeholder="Start Time"
-                mode="time"
-                minuteInterval={15}
-                style={styles.dateTimePicker}
-                error={errors.time}
-              />
-            </View>
-
-            {/* End Date and Time */}
-            <Typography
-              variant="body"
-              weight="medium"
-              style={styles.subSectionTitle}>
-              End Date & Time
-            </Typography>
-            <View style={styles.dateTimeContainer}>
-              <DateTimePicker
-                control={control as any}
-                name="endDate"
-                placeholder="End Date"
-                displayFormat="medium"
-                mode="date"
-                minimumDate={new Date()}
-                style={styles.dateTimePicker}
-                error={errors.endDate}
-              />
-              <DateTimePicker
-                control={control as any}
-                name="endTime"
-                placeholder="End Time"
-                mode="time"
-                minuteInterval={15}
-                style={styles.dateTimePicker}
-                error={errors.endTime}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      ),
-    },
-    {
-      id: 'location',
-      title: 'Location',
-      validate: validateLocation,
-      content: (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.formFields}>
-            {/* Location */}
-            <AnimatedInput
-              control={control as any}
-              name="location"
-              label="Meeting Point"
-              error={errors.location}
-              icon={
-                <Icon name="map-pin" size={20} color={colors.neutral.grey} />
-              }
-              iconPosition="right"
-              onPress={handleOpenLocationMap}
-              editable={false}
-            />
-
-            {/* Max Participants */}
-            <AnimatedInput
-              control={control as any}
-              name="maxParticipants"
-              label="Maximum Participants (optional)"
-              error={errors.maxParticipants}
-              keyboardType="numeric"
-            />
-          </View>
-        </ScrollView>
-      ),
-    },
-    {
-      id: 'event-details',
-      title: 'Event Details',
-      validate: validateEventSpecificDetails,
-      content: (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {eventType ? (
+  const baseWizardSteps = useMemo<WizardStep[]>(
+    () => [
+      {
+        id: 'basic-info',
+        title: 'Basic Information',
+        validate: validateBasicInfo,
+        content: (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.scrollView}>
             <View style={styles.formFields}>
+              {/* Event Title */}
+              <AnimatedInput
+                control={control as any}
+                name="title"
+                label="Event Title"
+                error={errors.title}
+              />
+
+              {/* Event Type Dropdown */}
+              <Dropdown
+                data={eventTypes}
+                label="Event Type"
+                onSelect={handleEventTypeSelect}
+                searchable={false}
+                placeholder=""
+                selectedItem={selectedEventType}
+                error={errors.eventType?.message}
+                disabled={loading}
+              />
+
+              {/* Max Participants */}
+              <AnimatedInput
+                control={control as any}
+                name="maxParticipants"
+                label="Maximum Participants (optional)"
+                error={errors.maxParticipants}
+                keyboardType="numeric"
+              />
+
+              {/* Event Description */}
+              <AnimatedInput
+                control={control as any}
+                name="description"
+                label="Description"
+                multiline
+                error={errors.description}
+              />
+            </View>
+
+            {/* Event Cover Images Section */}
+            <View style={styles.imagesSection}>
               <Typography
-                variant="subtitle"
-                weight="bold"
-                style={styles.sectionTitle}>
-                {toPascalCase(eventType)} Details
+                variant="body"
+                weight="semiBold"
+                style={styles.subSectionTitle}>
+                Event Images (Max 3)
               </Typography>
-
-              {/* Ride & Camping Specific Fields */}
-              {isRideOrCamping && (
-                <>
-                  <AnimatedInput
-                    control={control as any}
-                    name="routeDescription"
-                    label="Route Description"
-                    multiline
-                    error={errors.routeDescription}
-                  />
-
-                  <Dropdown
-                    data={roadTypes}
-                    label="Road Type"
-                    onSelect={handleRoadTypeSelect}
-                    searchable={false}
-                    selectedItem={selectedRoadType}
-                    error={errors.roadType?.message}
-                  />
-
-                  <Dropdown
-                    data={difficultyLevels}
-                    label="Difficulty Level"
-                    onSelect={handleDifficultySelect}
-                    searchable={false}
-                    selectedItem={selectedDifficulty}
-                    error={errors.difficulty?.message}
-                  />
-
-                  <AnimatedInput
-                    control={control as any}
-                    name="restStops"
-                    label="Fuel / Rest Stop Suggestions"
-                    multiline
-                    error={errors.restStops}
-                  />
-
-                  {/* Camping specific */}
-                  {eventType === 'CAMPING_RIDE' && (
-                    <AnimatedInput
-                      control={control as any}
-                      name="overnightInfo"
-                      label="Overnight Information"
-                      multiline
-                      error={errors.overnightInfo}
-                    />
-                  )}
-
-                  <AnimatedInput
-                    control={control as any}
-                    name="equipmentChecklist"
-                    label="Equipment Checklist"
-                    multiline
-                    error={errors.equipmentChecklist}
-                  />
-                </>
-              )}
-
-              {/* Workshop Specific Fields */}
-              {isWorkshop && (
-                <>
-                  <AnimatedInput
-                    control={control as any}
-                    name="instructorInfo"
-                    label="Instructor Information"
-                    multiline
-                    error={errors.instructorInfo}
-                  />
-
-                  <AnimatedInput
-                    control={control as any}
-                    name="topicsCovered"
-                    label="Topics Covered"
-                    multiline
-                    error={errors.topicsCovered}
-                  />
-
-                  <Dropdown
-                    data={experienceLevels}
-                    label="Required Experience Level"
-                    onSelect={handleExperienceLevelSelect}
-                    searchable={false}
-                    selectedItem={selectedExperienceLevel}
-                    error={errors.experienceLevel?.message}
-                  />
-
-                  <AnimatedInput
-                    control={control as any}
-                    name="price"
-                    label="Price (optional)"
-                    keyboardType="numeric"
-                    error={errors.price}
-                    placeholder="Leave empty if free"
-                  />
-                </>
-              )}
-            </View>
-          ) : (
-            <View style={styles.eventTypeWarning}>
-              <Typography variant="body" color={colors.neutral.darkGrey}>
-                Please select an event type in the first step
-              </Typography>
-            </View>
-          )}
-        </ScrollView>
-      ),
-    },
-    {
-      id: 'privacy',
-      title: 'Privacy Settings',
-      content: (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.formFields}>
-            {/* Privacy Switch */}
-            <Switch
-              value={isPrivate}
-              onValueChange={togglePrivacy}
-              label="Private Event"
-              description="Only invited groups or users can join this event"
-            />
-
-            {/* Group/User Selectors for Private Events */}
-            {isPrivate && (
-              <View style={styles.privateEventSection}>
-                {/* For solo rides, show user selector */}
-                {isSoloRide ? (
-                  <View>
-                    <Typography
-                      variant="bodySmall"
-                      weight="semiBold"
-                      style={styles.privateEventTitle}>
-                      Invite Users from Followers
-                    </Typography>
-                    <UserSelector
-                      selectedUsers={selectedUsers}
-                      onUsersChange={handleUsersChange}
-                      maxUsers={10}
-                    />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.imageScrollContainer}>
+                {selectedImages.map(image => (
+                  <View key={image.id} style={styles.imageContainer}>
+                    <Image source={{uri: image.uri}} style={styles.image} />
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleRemoveImage(image.id)}>
+                      <Icon
+                        name="close"
+                        size={14}
+                        color={colors.neutral.white}
+                      />
+                    </TouchableOpacity>
                   </View>
-                ) : (
-                  /* For other event types, show group selector */
-                  <View>
-                    <Typography
-                      variant="bodySmall"
-                      weight="semiBold"
-                      style={styles.privateEventTitle}>
-                      Invite Groups
-                    </Typography>
-                    <GroupSelector
-                      selectedGroups={selectedGroups}
-                      onGroupsChange={handleGroupsChange}
-                      maxGroups={3}
-                    />
+                ))}
+                {selectedImages.length < 3 && (
+                  <TouchableOpacity
+                    style={styles.addImageButton}
+                    onPress={handleSelectImages}
+                    activeOpacity={0.8}>
+                    <Icon name="plus" size={24} color={colors.neutral.grey} />
+                  </TouchableOpacity>
+                )}
+              </ScrollView>
+            </View>
+          </ScrollView>
+        ),
+      },
+      {
+        id: 'date-time',
+        title: 'Date, Time & Location',
+        validate: validateDateTime,
+        content: (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.scrollView}>
+            <View style={styles.formFields}>
+              <View style={styles.dateTimeContainer}>
+                <DateTimePicker
+                  control={control as any}
+                  name="date"
+                  placeholder="Start Date"
+                  displayFormat="medium"
+                  mode="date"
+                  minimumDate={new Date()}
+                  style={styles.dateTimePicker}
+                  error={errors.date}
+                />
+                <DateTimePicker
+                  control={control as any}
+                  name="time"
+                  placeholder="Start Time"
+                  mode="time"
+                  minuteInterval={15}
+                  style={styles.dateTimePicker}
+                  error={errors.time}
+                />
+              </View>
+
+              {/* End Date and Time */}
+              <View style={styles.dateTimeContainer}>
+                <DateTimePicker
+                  control={control as any}
+                  name="endDate"
+                  placeholder="End Date"
+                  displayFormat="medium"
+                  mode="date"
+                  minimumDate={new Date()}
+                  style={styles.dateTimePicker}
+                  error={errors.endDate}
+                />
+                <DateTimePicker
+                  control={control as any}
+                  name="endTime"
+                  placeholder="End Time"
+                  mode="time"
+                  minuteInterval={15}
+                  style={styles.dateTimePicker}
+                  error={errors.endTime}
+                />
+              </View>
+
+              {/* Location */}
+              <AnimatedInput
+                control={control as any}
+                name="location"
+                label="Meeting Point"
+                error={errors.location}
+                icon={
+                  <Icon name="map-pin" size={20} color={colors.neutral.grey} />
+                }
+                iconPosition="right"
+                onPress={handleOpenLocationMap}
+                editable={false}
+              />
+
+              {/* Privacy Settings */}
+              <View style={styles.privacySection}>
+                <Typography
+                  variant="body"
+                  weight="semiBold"
+                  style={styles.subSectionTitle}>
+                  Privacy Settings
+                </Typography>
+
+                {/* Privacy Switch */}
+                <Switch
+                  value={isPrivate}
+                  onValueChange={togglePrivacy}
+                  label="Private Event"
+                  description="Only invited groups or users can join this event"
+                />
+
+                {/* Group/User Selectors for Private Events */}
+                {isPrivate && (
+                  <View style={styles.privateEventSection}>
+                    {/* For solo rides, show user selector */}
+                    {isSoloRide ? (
+                      <View>
+                        <Typography
+                          variant="bodySmall"
+                          weight="semiBold"
+                          style={styles.privateEventTitle}>
+                          Invite Users from Followers
+                        </Typography>
+                        <UserSelector
+                          selectedUsers={selectedUsers}
+                          onUsersChange={handleUsersChange}
+                          maxUsers={10}
+                        />
+                      </View>
+                    ) : (
+                      /* For other event types, show group selector */
+                      <View>
+                        <Typography
+                          variant="bodySmall"
+                          weight="semiBold"
+                          style={styles.privateEventTitle}>
+                          Invite Groups
+                        </Typography>
+                        <GroupSelector
+                          selectedGroups={selectedGroups}
+                          onGroupsChange={handleGroupsChange}
+                          maxGroups={3}
+                        />
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
+            </View>
+          </ScrollView>
+        ),
+      },
+
+      {
+        id: 'event-details',
+        title: 'Event Details',
+        validate: validateEventSpecificDetails,
+        content: (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.scrollView}>
+            {eventType ? (
+              <View style={styles.formFields}>
+                {/* Ride & Camping Specific Fields */}
+                {isRideOrCamping && (
+                  <>
+                    <AnimatedInput
+                      control={control as any}
+                      name="routeDescription"
+                      label="Route Description"
+                      multiline
+                      error={errors.routeDescription}
+                    />
+
+                    <Dropdown
+                      data={roadTypes}
+                      label="Road Type"
+                      onSelect={handleRoadTypeSelect}
+                      searchable={false}
+                      selectedItem={selectedRoadType}
+                      error={errors.roadType?.message}
+                    />
+
+                    <Dropdown
+                      data={difficultyLevels}
+                      label="Difficulty Level"
+                      onSelect={handleDifficultySelect}
+                      searchable={false}
+                      selectedItem={selectedDifficulty}
+                      error={errors.difficulty?.message}
+                    />
+
+                    <AnimatedInput
+                      control={control as any}
+                      name="restStops"
+                      label="Fuel / Rest Stop Suggestions"
+                      multiline
+                      error={errors.restStops}
+                    />
+
+                    {/* Camping specific */}
+                    {eventType === 'CAMPING_RIDE' && (
+                      <AnimatedInput
+                        control={control as any}
+                        name="overnightInfo"
+                        label="Overnight Information"
+                        multiline
+                        error={errors.overnightInfo}
+                      />
+                    )}
+
+                    <AnimatedInput
+                      control={control as any}
+                      name="equipmentChecklist"
+                      label="Equipment Checklist"
+                      multiline
+                      error={errors.equipmentChecklist}
+                    />
+                  </>
+                )}
+
+                {/* Workshop Specific Fields */}
+                {isWorkshop && (
+                  <>
+                    <AnimatedInput
+                      control={control as any}
+                      name="instructorInfo"
+                      label="Instructor Information"
+                      multiline
+                      error={errors.instructorInfo}
+                    />
+
+                    <AnimatedInput
+                      control={control as any}
+                      name="topicsCovered"
+                      label="Topics Covered"
+                      multiline
+                      error={errors.topicsCovered}
+                    />
+
+                    <Dropdown
+                      data={experienceLevels}
+                      label="Required Experience Level"
+                      onSelect={handleExperienceLevelSelect}
+                      searchable={false}
+                      selectedItem={selectedExperienceLevel}
+                      error={errors.experienceLevel?.message}
+                    />
+
+                    <AnimatedInput
+                      control={control as any}
+                      name="price"
+                      label="Price (optional)"
+                      keyboardType="numeric"
+                      error={errors.price}
+                      placeholder="Leave empty if free"
+                    />
+                  </>
+                )}
+              </View>
+            ) : (
+              <View style={styles.eventTypeWarning}>
+                <Typography variant="body" color={colors.neutral.darkGrey}>
+                  Please select an event type in the first step
+                </Typography>
+              </View>
             )}
-          </View>
-        </ScrollView>
-      ),
-    },
-  ];
+          </ScrollView>
+        ),
+      },
+    ],
+    [
+      validateBasicInfo,
+      validateDateTime,
+      validateEventSpecificDetails,
+      control,
+      errors,
+      eventTypes,
+      selectedEventType,
+      loading,
+      selectedImages,
+      handleRemoveImage,
+      handleSelectImages,
+      handleEventTypeSelect,
+      roadTypes,
+      difficultyLevels,
+      experienceLevels,
+      selectedRoadType,
+      selectedDifficulty,
+      selectedExperienceLevel,
+      handleRoadTypeSelect,
+      handleDifficultySelect,
+      handleExperienceLevelSelect,
+      isPrivate,
+      togglePrivacy,
+      isSoloRide,
+      selectedUsers,
+      selectedGroups,
+      handleUsersChange,
+      handleGroupsChange,
+      eventType,
+      isRideOrCamping,
+      isWorkshop,
+      handleOpenLocationMap,
+    ],
+  );
 
-  const handleWizardComplete = (_data: any) => {
-    handleSubmit(onSubmit)();
-  };
+  // Filter steps based on event type
+  const wizardSteps = useMemo(
+    () =>
+      shouldShowEventDetails
+        ? baseWizardSteps
+        : baseWizardSteps.filter(step => step.id !== 'event-details'),
+    [shouldShowEventDetails, baseWizardSteps],
+  );
 
-  const handleNextStep = () => {
-    wizardRef.current?.nextStep();
-  };
+  // Reset fields when event type changes
+  useEffect(() => {
+    if (eventType) {
+      // Clear all event-type specific fields
+      // Ride/camping specific fields
+      resetField('routeDescription');
+      resetField('roadType');
+      resetField('difficulty');
+      resetField('restStops');
+      resetField('overnightInfo');
+      resetField('equipmentChecklist');
 
-  const handlePreviousStep = () => {
-    wizardRef.current?.previousStep();
-  };
+      // Workshop specific fields
+      resetField('instructorInfo');
+      resetField('topicsCovered');
+      resetField('experienceLevel');
+      resetField('price');
 
-  const handleValidationError = () => {
-    showToast({
-      type: 'error',
-      text1: 'Validation Error',
-      text2: 'Please check form fields and try again',
-    });
-  };
+      // Reset UI state for dropdowns
+      setSelectedRoadType(null);
+      setSelectedDifficulty(null);
+      setSelectedExperienceLevel(null);
+
+      // Reset selected users and groups since they depend on event type
+      setSelectedUsers([]);
+      setSelectedGroups([]);
+      resetField('invitedUsers');
+      resetField('invitedGroups');
+
+      // If we're past the first step, jump back to first step
+      if (currentStepIndex > 0) {
+        setTimeout(() => {
+          wizardRef.current?.jumpToStep(0);
+        }, 0);
+      }
+    }
+  }, [eventType, resetField]);
+
+  // Update step status when wizard step changes
+  useEffect(() => {
+    setIsFirstStep(currentStepIndex === 0);
+    setIsLastStep(currentStepIndex === wizardSteps.length - 1);
+  }, [currentStepIndex, wizardSteps.length]);
 
   return (
     <View style={styles.container}>
@@ -784,7 +854,6 @@ export const CreateEventScreen: React.FC = () => {
         showBackButton
         showShadow={false}
         onBackPress={handleGoBack}
-        containerStyle={styles.topHeaderBar}
       />
       <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
         <FormProvider {...methods}>
@@ -793,18 +862,18 @@ export const CreateEventScreen: React.FC = () => {
               ref={wizardRef}
               steps={wizardSteps}
               onComplete={handleWizardComplete}
-              onValidationError={handleValidationError}
               progressIndicatorType="line"
+              onStepChange={handleStepChange}
             />
           </View>
 
           {/* Navigation Buttons */}
           <View style={styles.buttonContainer}>
-            {wizardRef.current?.isLastStep ? (
+            {isLastStep ? (
               <>
                 <Button
                   title="Previous"
-                  variant="secondary"
+                  variant="outline"
                   shape="round"
                   onPress={handlePreviousStep}
                   style={{flex: 1}}
@@ -813,12 +882,12 @@ export const CreateEventScreen: React.FC = () => {
                   title={loading ? 'Creating...' : 'Create Event'}
                   variant="dark"
                   shape="round"
-                  onPress={handleNextStep}
+                  onPress={handleSubmit(onSubmit)}
                   loading={loading}
                   style={{flex: 1}}
                 />
               </>
-            ) : wizardRef.current?.isFirstStep ? (
+            ) : isFirstStep ? (
               <Button
                 title="Next"
                 variant="dark"
@@ -830,7 +899,7 @@ export const CreateEventScreen: React.FC = () => {
               <>
                 <Button
                   title="Previous"
-                  variant="secondary"
+                  variant="outline"
                   shape="round"
                   onPress={handlePreviousStep}
                   style={{flex: 1}}
@@ -886,6 +955,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
   },
+  privacySection: {
+    marginTop: spacing.md,
+  },
   topHeaderBar: {
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
@@ -907,7 +979,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  scrollView: {
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
+  },
   formFields: {
+    marginTop: spacing.lg,
     gap: spacing.lg,
   },
   dateTimeContainer: {
@@ -930,7 +1007,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     justifyContent: 'center',
-    paddingHorizontal: spacing.xl,
+    paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
     borderTopWidth: 1,
@@ -952,7 +1029,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // New styles for multiple image selection
+  // Styles for multiple image selection
   imagesSection: {
     marginTop: spacing.md,
   },

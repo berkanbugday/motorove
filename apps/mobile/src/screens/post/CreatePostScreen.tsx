@@ -519,7 +519,7 @@ const styles = StyleSheet.create({
   },
   actionButtonsContainer: {
     borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
+    borderTopColor: colors.secondary.light,
     alignItems: 'flex-start',
   },
   actionButtonText: {

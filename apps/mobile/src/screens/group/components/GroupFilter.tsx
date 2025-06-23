@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: colors.secondary.main,
+    backgroundColor: colors.secondary.light,
     marginVertical: spacing.sm,
   },
   footer: {

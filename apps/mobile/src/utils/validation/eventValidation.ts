@@ -7,8 +7,7 @@ export const createEventSchema = z.object({
     .min(3, 'Title must be at least 3 characters')
     .max(100, 'Title must be at most 100 characters'),
   description: z
-    .string({required_error: 'Description is required'})
-    .min(10, 'Description must be at least 10 characters')
+    .string()
     .max(1000, 'Description cannot exceed 1000 characters'),
   location: z
     .string({required_error: 'Location is required'})
@@ -49,7 +48,7 @@ export const createEventSchema = z.object({
     })
     .nullable()
     .optional(),
-  cover: z.string().nullable().optional(),
+  images: z.array(z.string()).nullable().optional(),
   isPrivate: z.boolean().default(false),
   invitedGroups: z.array(z.string()).optional().default([]),
   invitedUsers: z.array(z.string()).optional().default([]),
