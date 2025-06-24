@@ -16,6 +16,7 @@ import {radius} from '@theme/radius';
 import {useAuth} from '@contexts';
 import {commonStyles} from '@theme/commonStyles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {TopHeaderBar} from '@components/TopHeaderBar';
 
 type MenuSection = {
   title: string;
@@ -179,8 +180,11 @@ export const MoreScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}>
+        style={styles.container}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {paddingBottom: insets.bottom + 100},
+        ]}>
         {menuSections.map(renderSection)}
       </ScrollView>
     </SafeAreaView>
@@ -191,15 +195,12 @@ const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
   },
-  scrollView: {
-    flex: 1,
-  },
+
   scrollContent: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
   },
-  section: {
-    width: '100%',
-  },
+
   sectionMargin: {
     marginTop: spacing.xl,
   },
