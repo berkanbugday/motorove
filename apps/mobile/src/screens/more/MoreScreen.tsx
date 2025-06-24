@@ -14,6 +14,7 @@ import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
 import {radius} from '@theme/radius';
 import {useAuth} from '@contexts';
+import {commonStyles} from '@theme/commonStyles';
 
 type MenuSection = {
   title: string;
@@ -174,35 +175,21 @@ export const MoreScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Typography variant="title" style={styles.headerTitle}>
-          More
-        </Typography>
-      </View>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}>
-        {menuSections.map(renderSection)}
-      </ScrollView>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}>
+          {menuSections.map(renderSection)}
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.background,
-  },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.neutral.background,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.veryLightGrey,
-  },
-  headerTitle: {
-    color: colors.neutral.black,
+    ...commonStyles.container,
   },
   scrollView: {
     flex: 1,
