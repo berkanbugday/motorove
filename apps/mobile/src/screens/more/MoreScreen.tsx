@@ -12,11 +12,8 @@ import {Icon} from '@components/Icon';
 import {Typography} from '@components/Typography';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
-import {radius} from '@theme/radius';
 import {useAuth} from '@contexts';
-import {commonStyles} from '@theme/commonStyles';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {TopHeaderBar} from '@components/TopHeaderBar';
 
 type MenuSection = {
   title: string;
@@ -59,14 +56,14 @@ export const MoreScreen: React.FC = () => {
       items: [
         {
           icon: (
-            <Icon name="user-filled" size={20} color={colors.neutral.black} />
+            <Icon name="user-filled" size={18} color={colors.neutral.black} />
           ),
           title: 'My Profile',
           onPress: handleProfilePress,
         },
         {
           icon: (
-            <Icon name="bell-filled" size={20} color={colors.neutral.black} />
+            <Icon name="bell-filled" size={18} color={colors.neutral.black} />
           ),
           title: 'Notifications',
           onPress: handleNotificationsPress,
@@ -74,7 +71,7 @@ export const MoreScreen: React.FC = () => {
         },
         {
           icon: (
-            <Icon name="gear-filled" size={20} color={colors.neutral.black} />
+            <Icon name="gear-filled" size={18} color={colors.neutral.black} />
           ),
           title: 'Settings',
           onPress: handleSettingsPress,
@@ -88,7 +85,7 @@ export const MoreScreen: React.FC = () => {
           icon: (
             <Icon
               name="calendar-filled"
-              size={20}
+              size={18}
               color={colors.neutral.black}
             />
           ),
@@ -97,7 +94,7 @@ export const MoreScreen: React.FC = () => {
         },
         {
           icon: (
-            <Icon name="clock-filled" size={20} color={colors.neutral.black} />
+            <Icon name="clock-filled" size={18} color={colors.neutral.black} />
           ),
           title: 'My Events',
           onPress: () => {
@@ -112,7 +109,7 @@ export const MoreScreen: React.FC = () => {
       items: [
         {
           icon: (
-            <Icon name="lock-filled" size={20} color={colors.neutral.black} />
+            <Icon name="lock-filled" size={18} color={colors.neutral.black} />
           ),
           title: 'Privacy Policy',
           onPress: () => {
@@ -122,7 +119,7 @@ export const MoreScreen: React.FC = () => {
         },
         {
           icon: (
-            <Icon name="earth-filled" size={20} color={colors.neutral.black} />
+            <Icon name="earth-filled" size={18} color={colors.neutral.black} />
           ),
           title: 'Terms of Service',
           onPress: () => {
@@ -132,7 +129,7 @@ export const MoreScreen: React.FC = () => {
         },
         {
           icon: (
-            <Icon name="error-filled" size={20} color={colors.status.error} />
+            <Icon name="error-filled" size={18} color={colors.status.error} />
           ),
           title: 'Sign Out',
           onPress: signOut,
@@ -156,7 +153,7 @@ export const MoreScreen: React.FC = () => {
         {item.showBadge && <View style={styles.badge} />}
         <Icon
           name="chevron-down"
-          size={20}
+          size={18}
           color={colors.neutral.grey}
           style={styles.chevron}
         />
@@ -165,15 +162,11 @@ export const MoreScreen: React.FC = () => {
   );
 
   const renderSection = (section: MenuSection, index: number) => (
-    <View
-      key={section.title}
-      style={[styles.section, index > 0 && styles.sectionMargin]}>
-      <Typography variant="subtitle" style={styles.sectionTitle}>
+    <View key={section.title} style={[index > 0 && styles.sectionMargin]}>
+      <Typography variant="subtitle" weight="semiBold">
         {section.title}
       </Typography>
-      <View style={styles.sectionContent}>
-        {section.items.map(renderMenuItem)}
-      </View>
+      {section.items.map(renderMenuItem)}
     </View>
   );
 
@@ -181,6 +174,7 @@ export const MoreScreen: React.FC = () => {
     <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
       <ScrollView
         style={styles.container}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
           {paddingBottom: insets.bottom + 100},
@@ -193,7 +187,8 @@ export const MoreScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    ...commonStyles.container,
+    flex: 1,
+    backgroundColor: colors.neutral.white,
   },
 
   scrollContent: {
@@ -204,22 +199,14 @@ const styles = StyleSheet.create({
   sectionMargin: {
     marginTop: spacing.xl,
   },
-  sectionTitle: {
-    color: colors.neutral.black,
-    marginBottom: spacing.sm,
-  },
-  sectionContent: {
-    backgroundColor: colors.neutral.white,
-    borderRadius: radius.md,
-    overflow: 'hidden',
-  },
+
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.veryLightGrey,
+    borderBottomColor: colors.secondary.main,
   },
   menuItemContent: {
     flexDirection: 'row',
@@ -227,7 +214,6 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     marginLeft: spacing.md,
-    color: colors.neutral.black,
   },
   menuItemRight: {
     flexDirection: 'row',
