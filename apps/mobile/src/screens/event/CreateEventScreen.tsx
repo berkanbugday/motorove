@@ -666,6 +666,7 @@ export const CreateEventScreen: React.FC = () => {
                       label="Road Type"
                       onSelect={handleRoadTypeSelect}
                       searchable={false}
+                      placeholder=""
                       selectedItem={selectedRoadType}
                       error={errors.roadType?.message}
                     />
@@ -673,6 +674,7 @@ export const CreateEventScreen: React.FC = () => {
                     <Dropdown
                       data={difficultyLevels}
                       label="Difficulty Level"
+                      placeholder=""
                       onSelect={handleDifficultySelect}
                       searchable={false}
                       selectedItem={selectedDifficulty}

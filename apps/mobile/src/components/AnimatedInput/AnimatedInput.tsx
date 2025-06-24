@@ -258,14 +258,18 @@ function AnimatedInputBase({
     }),
     color: animatedIsFocused.interpolate({
       inputRange: [0, 1],
-      outputRange: [colors.neutral.grey, colors.neutral.black],
+      outputRange: [
+        colors.neutral.grey,
+        error ? colors.status.error : colors.neutral.black,
+      ],
     }),
     fontWeight: animatedIsFocused.interpolate({
       inputRange: [0, 1],
       outputRange: ['500', '600'],
     }),
     backgroundColor: colors.neutral.white,
-    zIndex: zIndex.elevated,
+    paddingHorizontal: 4,
+    zIndex: 5,
   };
 
   const handleLabelPress = () => {
