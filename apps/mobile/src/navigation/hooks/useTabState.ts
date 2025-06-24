@@ -14,7 +14,7 @@ export const useTabState = () => {
   const isSearchTab = route.name === 'SearchTab';
   const isMapTab = route.name === 'MapTab';
   const isGroupsTab = route.name === 'GroupsTab';
-  const isProfileTab = route.name === 'ProfileTab';
+  const isMoreTab = route.name === 'MoreTab';
 
   // Get current tab name
   const currentTab = route.name;
@@ -26,6 +26,6 @@ export const useTabState = () => {
     isSearchTab,
     isMapTab,
     isGroupsTab,
-    isProfileTab,
+    isMoreTab,
   };
 };

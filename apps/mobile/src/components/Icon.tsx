@@ -45,6 +45,7 @@ import CommentFilled from '@assets/icons/comment-filled.svg';
 import Save from '@assets/icons/save.svg';
 import SaveFilled from '@assets/icons/save-filled.svg';
 import MoreVertical from '@assets/icons/more-vertical.svg';
+import MoreHorizontal from '@assets/icons/more-horizontal.svg';
 import PaperPlane from '@assets/icons/paper-plane.svg';
 import PaperPlaneFilled from '@assets/icons/paper-plane-filled.svg';
 import Trash from '@assets/icons/trash.svg';
@@ -143,6 +144,7 @@ export type IconName =
   | 'foggy'
   | 'windy'
   | 'more-vertical'
+  | 'more-horizontal'
   | 'paper-plane'
   | 'paper-plane-filled'
   | 'trash'
@@ -302,6 +304,8 @@ export function Icon({
       return <Windy {...commonProps} />;
     case 'more-vertical':
       return <MoreVertical {...commonProps} />;
+    case 'more-horizontal':
+      return <MoreHorizontal {...commonProps} />;
     case 'paper-plane':
       return <PaperPlane {...commonProps} />;
     case 'paper-plane-filled':

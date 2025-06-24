@@ -14,7 +14,7 @@ export const useTabNavigation = () => {
    * @param tabName Name of the tab to navigate to
    */
   const navigateToTab = (
-    tabName: 'HomeTab' | 'SearchTab' | 'MapTab' | 'GroupsTab' | 'ProfileTab',
+    tabName: 'HomeTab' | 'SearchTab' | 'MapTab' | 'GroupsTab' | 'MoreTab',
   ) => {
     navigation.navigate(tabName);
   };
@@ -24,7 +24,7 @@ export const useTabNavigation = () => {
    * @param tabName Name of the tab to navigate to
    */
   const resetToTab = (
-    tabName: 'HomeTab' | 'SearchTab' | 'MapTab' | 'GroupsTab' | 'ProfileTab',
+    tabName: 'HomeTab' | 'SearchTab' | 'MapTab' | 'GroupsTab' | 'MoreTab',
   ) => {
     navigation.reset({
       index: 0,
@@ -55,7 +55,7 @@ export const useTabNavigation = () => {
   /**
    * Navigate to the profile tab
    */
-  const goToProfile = () => navigateToTab('ProfileTab');
+  const goToMore = () => navigateToTab('MoreTab');
 
   return {
     navigation,
@@ -64,7 +64,7 @@ export const useTabNavigation = () => {
     goToHome,
     goToSearch,
     goToMap,
-    goToProfile,
+    goToMore,
     goToGroup,
   };
 };

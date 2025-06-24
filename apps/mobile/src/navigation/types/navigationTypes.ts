@@ -25,7 +25,7 @@ export type TabParamList = {
   SearchTab: undefined;
   MapTab: undefined;
   GroupsTab: undefined;
-  ProfileTab: undefined;
+  MoreTab: undefined;
 };
 
 export type TabScreenNavigationProp<T extends keyof TabParamList> =
