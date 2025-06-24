@@ -11,6 +11,7 @@ const EVENT_FRAGMENT = gql`
     description
     location
     startLocation
+    finishLocation
     startDate
     endDate
     maxParticipants
@@ -67,6 +68,7 @@ export const eventService = {
         description: eventData.description,
         location: eventData.meetingPoint,
         startLocation: eventData.startLocation,
+        finishLocation: eventData.finishLocation,
         startDate: new Date(
           `${eventData.startDate.toISOString().split('T')[0]}T${
             eventData.startTime.toISOString().split('T')[1]
@@ -93,10 +95,12 @@ export const eventService = {
             routeDescription: eventData.routeDescription,
           }),
           ...(eventData.roadType && {roadType: eventData.roadType}),
-          ...(eventData.difficulty && {difficulty: eventData.difficulty}),
+          ...(eventData.difficultyLevel && {
+            difficultyLevel: eventData.difficultyLevel,
+          }),
           ...(eventData.restStops && {restStops: eventData.restStops}),
-          ...(eventData.overnightInfo && {
-            overnightInfo: eventData.overnightInfo,
+          ...(eventData.campingInfo && {
+            campingInfo: eventData.campingInfo,
           }),
           ...(eventData.equipmentChecklist && {
             equipmentChecklist: eventData.equipmentChecklist,

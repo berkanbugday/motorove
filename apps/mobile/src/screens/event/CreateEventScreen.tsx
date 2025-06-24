@@ -1,4 +1,11 @@
-import React, {useState, useRef, useCallback, useEffect, useMemo} from 'react';
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useLayoutEffect,
+} from 'react';
 import {
   View,
   StyleSheet,
@@ -6,6 +13,8 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
+  BackHandler,
+  Platform,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
@@ -52,6 +61,7 @@ export const CreateEventScreen: React.FC = () => {
   // Refs
   const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const startLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
+  const finishLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const wizardRef = useRef<WizardHandle>(null);
   const exitDialogRef = useRef<any>(null);
   const draftDialogRef = useRef<any>(null);
@@ -62,7 +72,7 @@ export const CreateEventScreen: React.FC = () => {
   const [selectedRoadType, setSelectedRoadType] = useState<DropdownItem | null>(
     null,
   );
-  const [selectedDifficulty, setSelectedDifficulty] =
+  const [selectedDifficultyLevel, setSelectedDifficultyLevel] =
     useState<DropdownItem | null>(null);
   const [selectedExperienceLevel, setSelectedExperienceLevel] =
     useState<DropdownItem | null>(null);
@@ -88,6 +98,12 @@ export const CreateEventScreen: React.FC = () => {
     name?: string;
     addresses?: any[];
   }>({});
+  const [selectedFinishLocation, setSelectedFinishLocation] = useState<{
+    latitude?: number;
+    longitude?: number;
+    name?: string;
+    addresses?: any[];
+  }>({});
 
   // Enum hooks
   const {eventTypes} = useEnumEventTypes();
@@ -103,6 +119,7 @@ export const CreateEventScreen: React.FC = () => {
       description: '',
       meetingPoint: '',
       startLocation: '',
+      finishLocation: '',
       startDate: new Date(),
       startTime: new Date(),
       endDate: new Date(),
@@ -115,9 +132,9 @@ export const CreateEventScreen: React.FC = () => {
       // Ride/camping specific fields
       routeDescription: '',
       roadType: '',
-      difficulty: '',
+      difficultyLevel: '',
       restStops: '',
-      overnightInfo: '',
+      campingInfo: '',
       equipmentChecklist: '',
       // Workshop specific fields
       instructorInfo: '',
@@ -159,6 +176,29 @@ export const CreateEventScreen: React.FC = () => {
     () => isRideOrCamping || isWorkshop,
     [isRideOrCamping, isWorkshop],
   );
+
+  // Set navigation options to disable iOS swipe back gesture when dirty
+  useLayoutEffect(() => {
+    if (Platform.OS === 'ios') {
+      navigation.setOptions({
+        gestureEnabled: !isDirty, // Disable swipe back when form is dirty
+      });
+    }
+
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          if (isDirty) {
+            exitDialogRef.current?.open();
+            return true; // Prevent default behavior
+          }
+          return false; // Allow default behavior
+        },
+      );
+      return () => backHandler.remove();
+    }
+  }, [navigation, isDirty]);
 
   // Navigation handlers
   const handleGoBack = useCallback(() => {
@@ -215,6 +255,10 @@ export const CreateEventScreen: React.FC = () => {
     startLocationMapBottomSheetRef.current?.open('full');
   }, []);
 
+  const handleOpenFinishLocationMap = useCallback(() => {
+    finishLocationMapBottomSheetRef.current?.open('full');
+  }, []);
+
   const handleLocationSelect = useCallback(
     (location: {
       latitude?: number;
@@ -267,6 +311,34 @@ export const CreateEventScreen: React.FC = () => {
 
       // Close the bottom sheet
       startLocationMapBottomSheetRef.current?.close();
+    },
+    [setValue],
+  );
+
+  const handleFinishLocationSelect = useCallback(
+    (location: {
+      latitude?: number;
+      longitude?: number;
+      name?: string;
+      addresses?: any[];
+    }) => {
+      setSelectedFinishLocation(location);
+
+      // Get display address (prefer English)
+      const englishAddress = location.addresses?.find(
+        addr => addr.language === 'en',
+      );
+      const turkishAddress = location.addresses?.find(
+        addr => addr.language === 'tr',
+      );
+      const displayAddress =
+        englishAddress?.address || turkishAddress?.address || '';
+
+      // Set the finishLocation field value
+      setValue('finishLocation', displayAddress, {shouldValidate: true});
+
+      // Close the bottom sheet
+      finishLocationMapBottomSheetRef.current?.close();
     },
     [setValue],
   );
@@ -360,8 +432,8 @@ export const CreateEventScreen: React.FC = () => {
 
   const handleDifficultySelect = useCallback(
     (item: DropdownItem | null) => {
-      setSelectedDifficulty(item);
-      setValue('difficulty', item?.value || '', {shouldValidate: true});
+      setSelectedDifficultyLevel(item);
+      setValue('difficultyLevel', item?.value || '', {shouldValidate: true});
     },
     [setValue],
   );
@@ -412,6 +484,7 @@ export const CreateEventScreen: React.FC = () => {
       'eventType',
       'maxParticipants',
       'description',
+      'meetingPoint',
     ]);
   }, [trigger]);
 
@@ -421,7 +494,6 @@ export const CreateEventScreen: React.FC = () => {
       'startTime',
       'endDate',
       'endTime',
-      'meetingPoint',
       'isPrivate',
     ];
 
@@ -442,13 +514,13 @@ export const CreateEventScreen: React.FC = () => {
       const fieldsToValidate: (keyof CreateEventFormValues)[] = [
         'routeDescription',
         'roadType',
-        'difficulty',
+        'difficultyLevel',
         'startLocation',
         'restStops',
       ];
 
       if (eventType === 'CAMPING_RIDE') {
-        fieldsToValidate.push('overnightInfo');
+        fieldsToValidate.push('campingInfo');
       }
 
       fieldsToValidate.push('equipmentChecklist');
@@ -539,6 +611,22 @@ export const CreateEventScreen: React.FC = () => {
                 key="eventType-dropdown"
               />
 
+              {/* Meeting Point */}
+              <AnimatedInput
+                control={control}
+                name="meetingPoint"
+                label="Meeting Point (optional)"
+                error={errors.meetingPoint}
+                icon={
+                  <Icon name="map-pin" size={20} color={colors.neutral.grey} />
+                }
+                iconPosition="right"
+                onPress={handleOpenLocationMap}
+                editable={false}
+                key="meetingPoint-input"
+                testID="meetingPoint-input"
+              />
+
               {/* Max Participants */}
               <AnimatedInput
                 control={control}
@@ -554,7 +642,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="description"
-                label="Description (optional)"
+                label="Description"
                 multiline
                 showClearButton={false}
                 error={errors.description}
@@ -603,7 +691,7 @@ export const CreateEventScreen: React.FC = () => {
       },
       {
         id: 'date-time',
-        title: 'Date, Time & Location',
+        title: 'Date, Time & Privacy',
         validate: validateDateTime,
         content: (
           <KeyboardAwareScrollView
@@ -662,23 +750,8 @@ export const CreateEventScreen: React.FC = () => {
                 />
               </View>
 
-              <AnimatedInput
-                control={control}
-                name="meetingPoint"
-                label="Meeting Point (optional)"
-                error={errors.meetingPoint}
-                icon={
-                  <Icon name="map-pin" size={20} color={colors.neutral.grey} />
-                }
-                iconPosition="right"
-                onPress={handleOpenLocationMap}
-                editable={false}
-                key="meetingPoint-input"
-                testID="meetingPoint-input"
-              />
-
               {/* Privacy Settings */}
-              <View style={styles.privacySection}>
+              <View>
                 <Typography
                   variant="body"
                   weight="semiBold"
@@ -756,7 +829,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="startLocation"
-                      label="Start Point"
+                      label="Start Location"
                       error={errors.startLocation}
                       icon={
                         <Icon
@@ -770,6 +843,25 @@ export const CreateEventScreen: React.FC = () => {
                       editable={false}
                       key="startLocation-input"
                       testID="startLocation-input"
+                    />
+
+                    <AnimatedInput
+                      control={control}
+                      name="finishLocation"
+                      label="Finish Location (optional)"
+                      error={errors.finishLocation}
+                      icon={
+                        <Icon
+                          name="map-pin"
+                          size={20}
+                          color={colors.neutral.grey}
+                        />
+                      }
+                      iconPosition="right"
+                      onPress={handleOpenFinishLocationMap}
+                      editable={false}
+                      key="finishLocation-input"
+                      testID="finishLocation-input"
                     />
 
                     <Dropdown
@@ -786,18 +878,31 @@ export const CreateEventScreen: React.FC = () => {
                     <Dropdown
                       data={difficultyLevels}
                       label="Difficulty Level"
-                      placeholder=""
                       onSelect={handleDifficultySelect}
                       searchable={false}
-                      selectedItem={selectedDifficulty}
-                      error={errors.difficulty?.message}
-                      key="difficulty-dropdown"
+                      placeholder=""
+                      selectedItem={selectedDifficultyLevel}
+                      error={errors.difficultyLevel?.message}
+                      key="difficultyLevel-dropdown"
                     />
+
+                    {/* Camping specific */}
+                    {eventType === 'CAMPING_RIDE' && (
+                      <AnimatedInput
+                        control={control}
+                        name="campingInfo"
+                        label="Camping Information"
+                        multiline
+                        showClearButton={false}
+                        error={errors.campingInfo}
+                        key="campingInfo-input"
+                      />
+                    )}
 
                     <AnimatedInput
                       control={control}
                       name="routeDescription"
-                      label="Route Description"
+                      label="Route Description (optional)"
                       multiline
                       showClearButton={false}
                       error={errors.routeDescription}
@@ -807,30 +912,17 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="restStops"
-                      label="Fuel / Rest Stop Suggestions"
+                      label="Fuel / Rest Stop Suggestions (optional)"
                       multiline
                       showClearButton={false}
                       error={errors.restStops}
                       key="restStops-input"
                     />
 
-                    {/* Camping specific */}
-                    {eventType === 'CAMPING_RIDE' && (
-                      <AnimatedInput
-                        control={control}
-                        name="overnightInfo"
-                        label="Overnight Information"
-                        multiline
-                        showClearButton={false}
-                        error={errors.overnightInfo}
-                        key="overnightInfo-input"
-                      />
-                    )}
-
                     <AnimatedInput
                       control={control}
                       name="equipmentChecklist"
-                      label="Equipment Checklist"
+                      label="Equipment Checklist (optional)"
                       multiline
                       showClearButton={false}
                       error={errors.equipmentChecklist}
@@ -864,9 +956,10 @@ export const CreateEventScreen: React.FC = () => {
 
                     <Dropdown
                       data={experienceLevels}
-                      label="Required Experience Level"
+                      label="Experience Level"
                       onSelect={handleExperienceLevelSelect}
                       searchable={false}
+                      placeholder=""
                       selectedItem={selectedExperienceLevel}
                       error={errors.experienceLevel?.message}
                       key="experienceLevel-dropdown"
@@ -912,7 +1005,7 @@ export const CreateEventScreen: React.FC = () => {
       difficultyLevels,
       experienceLevels,
       selectedRoadType,
-      selectedDifficulty,
+      selectedDifficultyLevel,
       selectedExperienceLevel,
       handleRoadTypeSelect,
       handleDifficultySelect,
@@ -929,6 +1022,8 @@ export const CreateEventScreen: React.FC = () => {
       isWorkshop,
       handleOpenLocationMap,
       handleOpenStartLocationMap,
+      handleOpenFinishLocationMap,
+      selectedFinishLocation,
     ],
   );
 
@@ -948,10 +1043,12 @@ export const CreateEventScreen: React.FC = () => {
       // Ride/camping specific fields
       resetField('routeDescription');
       resetField('roadType');
-      resetField('difficulty');
+      resetField('difficultyLevel');
       resetField('restStops');
-      resetField('overnightInfo');
+      resetField('campingInfo');
       resetField('equipmentChecklist');
+      resetField('startLocation');
+      resetField('finishLocation');
 
       // Workshop specific fields
       resetField('instructorInfo');
@@ -959,10 +1056,12 @@ export const CreateEventScreen: React.FC = () => {
       resetField('experienceLevel');
       resetField('price');
 
-      // Reset UI state for dropdowns
+      // Reset UI state for dropdowns and locations
       setSelectedRoadType(null);
-      setSelectedDifficulty(null);
+      setSelectedDifficultyLevel(null);
       setSelectedExperienceLevel(null);
+      setSelectedStartLocation({});
+      setSelectedFinishLocation({});
 
       // Reset selected users and groups since they depend on event type
       setSelectedUsers([]);
@@ -1078,7 +1177,7 @@ export const CreateEventScreen: React.FC = () => {
 
       <BottomSheet
         ref={startLocationMapBottomSheetRef}
-        title="Select Start Point"
+        title="Select Start Location"
         showBackdrop={true}>
         <SelectLocationMap
           onLocationSelect={handleStartLocationSelect}
@@ -1088,6 +1187,24 @@ export const CreateEventScreen: React.FC = () => {
               ? {
                   latitude: selectedStartLocation.latitude,
                   longitude: selectedStartLocation.longitude,
+                }
+              : undefined
+          }
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={finishLocationMapBottomSheetRef}
+        title="Select Finish Location"
+        showBackdrop={true}>
+        <SelectLocationMap
+          onLocationSelect={handleFinishLocationSelect}
+          onClose={() => finishLocationMapBottomSheetRef.current?.close()}
+          initialLocation={
+            selectedFinishLocation.latitude && selectedFinishLocation.longitude
+              ? {
+                  latitude: selectedFinishLocation.latitude,
+                  longitude: selectedFinishLocation.longitude,
                 }
               : undefined
           }
@@ -1143,9 +1260,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
-  },
-  privacySection: {
-    marginTop: spacing.md,
   },
   topHeaderBar: {
     borderBottomWidth: 1,
