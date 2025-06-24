@@ -1160,7 +1160,8 @@ export const CreateEventScreen: React.FC = () => {
       <BottomSheet
         ref={meetingPointMapBottomSheetRef}
         title="Select Meeting Point"
-        showBackdrop={true}>
+        closeButtonPosition="top-left"
+        enableGestureControl={false}>
         <SelectLocationMap
           onLocationSelect={handleLocationSelect}
           onClose={() => meetingPointMapBottomSheetRef.current?.close()}
@@ -1178,7 +1179,8 @@ export const CreateEventScreen: React.FC = () => {
       <BottomSheet
         ref={startLocationMapBottomSheetRef}
         title="Select Start Location"
-        showBackdrop={true}>
+        closeButtonPosition="top-left"
+        enableGestureControl={false}>
         <SelectLocationMap
           onLocationSelect={handleStartLocationSelect}
           onClose={() => startLocationMapBottomSheetRef.current?.close()}
@@ -1196,7 +1198,8 @@ export const CreateEventScreen: React.FC = () => {
       <BottomSheet
         ref={finishLocationMapBottomSheetRef}
         title="Select Finish Location"
-        showBackdrop={true}>
+        closeButtonPosition="top-left"
+        enableGestureControl={false}>
         <SelectLocationMap
           onLocationSelect={handleFinishLocationSelect}
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
