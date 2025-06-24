@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useForm, FormProvider} from 'react-hook-form';
@@ -509,8 +510,11 @@ export const CreateEventScreen: React.FC = () => {
         title: 'Basic Information',
         validate: validateBasicInfo,
         content: (
-          <ScrollView
+          <KeyboardAwareScrollView
             showsVerticalScrollIndicator={false}
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             <View style={styles.formFields}>
               {/* Event Title */}
@@ -552,6 +556,7 @@ export const CreateEventScreen: React.FC = () => {
                 name="description"
                 label="Description (optional)"
                 multiline
+                showClearButton={false}
                 error={errors.description}
                 key="description-input"
               />
@@ -593,7 +598,7 @@ export const CreateEventScreen: React.FC = () => {
                 )}
               </ScrollView>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         ),
       },
       {
@@ -601,8 +606,11 @@ export const CreateEventScreen: React.FC = () => {
         title: 'Date, Time & Location',
         validate: validateDateTime,
         content: (
-          <ScrollView
+          <KeyboardAwareScrollView
             showsVerticalScrollIndicator={false}
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             <View style={styles.formFields}>
               <View style={styles.dateTimeContainer}>
@@ -684,7 +692,7 @@ export const CreateEventScreen: React.FC = () => {
                   onValueChange={togglePrivacy}
                   label="Private Event"
                   description="Only invited groups or users can join this event"
-                  style={{paddingVertical: spacing.xs}}
+                  style={{paddingVertical: spacing.md}}
                 />
 
                 {/* Group/User Selectors for Private Events */}
@@ -725,7 +733,7 @@ export const CreateEventScreen: React.FC = () => {
                 )}
               </View>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         ),
       },
 
@@ -734,8 +742,11 @@ export const CreateEventScreen: React.FC = () => {
         title: 'Event Details',
         validate: validateEventSpecificDetails,
         content: (
-          <ScrollView
+          <KeyboardAwareScrollView
             showsVerticalScrollIndicator={false}
+            enableOnAndroid={true}
+            enableAutomaticScroll={true}
+            keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             {eventType ? (
               <View style={styles.formFields}>
@@ -788,6 +799,7 @@ export const CreateEventScreen: React.FC = () => {
                       name="routeDescription"
                       label="Route Description"
                       multiline
+                      showClearButton={false}
                       error={errors.routeDescription}
                       key="routeDescription-input"
                     />
@@ -797,6 +809,7 @@ export const CreateEventScreen: React.FC = () => {
                       name="restStops"
                       label="Fuel / Rest Stop Suggestions"
                       multiline
+                      showClearButton={false}
                       error={errors.restStops}
                       key="restStops-input"
                     />
@@ -808,6 +821,7 @@ export const CreateEventScreen: React.FC = () => {
                         name="overnightInfo"
                         label="Overnight Information"
                         multiline
+                        showClearButton={false}
                         error={errors.overnightInfo}
                         key="overnightInfo-input"
                       />
@@ -818,6 +832,7 @@ export const CreateEventScreen: React.FC = () => {
                       name="equipmentChecklist"
                       label="Equipment Checklist"
                       multiline
+                      showClearButton={false}
                       error={errors.equipmentChecklist}
                       key="equipmentChecklist-input"
                     />
@@ -832,6 +847,7 @@ export const CreateEventScreen: React.FC = () => {
                       name="instructorInfo"
                       label="Instructor Information"
                       multiline
+                      showClearButton={false}
                       error={errors.instructorInfo}
                       key="instructorInfo-input"
                     />
@@ -841,6 +857,7 @@ export const CreateEventScreen: React.FC = () => {
                       name="topicsCovered"
                       label="Topics Covered"
                       multiline
+                      showClearButton={false}
                       error={errors.topicsCovered}
                       key="topicsCovered-input"
                     />
@@ -874,7 +891,7 @@ export const CreateEventScreen: React.FC = () => {
                 </Typography>
               </View>
             )}
-          </ScrollView>
+          </KeyboardAwareScrollView>
         ),
       },
     ],
@@ -1119,9 +1136,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.neutral.white,
   },
-  safeArea: {
-    flex: 1,
-  },
   wizardContainer: {
     flex: 1,
     paddingHorizontal: spacing.md,
@@ -1192,7 +1206,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   imageScrollContainer: {
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.md,
     gap: spacing.md,
   },
   imageContainer: {
