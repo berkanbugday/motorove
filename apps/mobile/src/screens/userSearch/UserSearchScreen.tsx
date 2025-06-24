@@ -1,5 +1,6 @@
 import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, Keyboard, FlatList} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {colors, spacing} from '@theme';
 import {Icon} from '@components/Icon';
@@ -25,6 +26,18 @@ export const UserSearchScreen = () => {
     search,
     clearSearch,
   } = useSearchUsers(debouncedQuery);
+
+  // Clear search when screen loses focus
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        // This runs when the screen is unfocused (exited)
+        setSearchQuery('');
+        setDebouncedQuery('');
+        clearSearch();
+      };
+    }, [clearSearch]),
+  );
 
   // Debounce search query to avoid too many API calls
   useEffect(() => {
