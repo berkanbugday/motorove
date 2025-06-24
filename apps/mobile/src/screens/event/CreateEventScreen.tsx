@@ -28,6 +28,7 @@ import {
   UserSelector,
   Wizard,
 } from '@components';
+import Dialog from '@components/Dialog';
 import {colors, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
@@ -50,6 +51,8 @@ export const CreateEventScreen: React.FC = () => {
   // Refs
   const locationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const wizardRef = useRef<WizardHandle>(null);
+  const exitDialogRef = useRef<any>(null);
+  const draftDialogRef = useRef<any>(null);
 
   // State hooks
   const [selectedEventType, setSelectedEventType] =
@@ -119,11 +122,12 @@ export const CreateEventScreen: React.FC = () => {
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: {errors, isDirty},
     setValue,
     watch,
     resetField,
     trigger,
+    getValues,
   } = methods;
 
   // Watch key form values
@@ -149,8 +153,41 @@ export const CreateEventScreen: React.FC = () => {
 
   // Navigation handlers
   const handleGoBack = useCallback(() => {
+    if (isDirty) {
+      exitDialogRef.current?.open();
+    } else {
+      navigation.goBack();
+    }
+  }, [navigation, isDirty]);
+
+  const confirmExit = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
+
+  const handleSaveDraft = useCallback(() => {
+    draftDialogRef.current?.open();
+  }, []);
+
+  const confirmSaveDraft = useCallback(() => {
+    const formData = getValues();
+
+    try {
+      // Save draft logic would go here
+      console.log('Saving draft:', formData);
+      showToast({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Event draft saved successfully',
+      });
+    } catch (error) {
+      showToast({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to save draft',
+      });
+      loggingService.error('Error saving draft:', error);
+    }
+  }, [getValues]);
 
   const handleNextStep = useCallback(async () => {
     wizardRef.current?.nextStep();
@@ -437,10 +474,11 @@ export const CreateEventScreen: React.FC = () => {
             <View style={styles.formFields}>
               {/* Event Title */}
               <AnimatedInput
-                control={control as any}
+                control={control}
                 name="title"
                 label="Event Title"
                 error={errors.title}
+                key="title-input"
               />
 
               {/* Event Type Dropdown */}
@@ -453,24 +491,28 @@ export const CreateEventScreen: React.FC = () => {
                 selectedItem={selectedEventType}
                 error={errors.eventType?.message}
                 disabled={loading}
+                key="eventType-dropdown"
               />
 
               {/* Max Participants */}
               <AnimatedInput
-                control={control as any}
+                control={control}
                 name="maxParticipants"
                 label="Maximum Participants (optional)"
                 error={errors.maxParticipants}
                 keyboardType="numeric"
+                key="maxParticipants-input"
+                testID="maxParticipants-input"
               />
 
               {/* Event Description */}
               <AnimatedInput
-                control={control as any}
+                control={control}
                 name="description"
-                label="Description"
+                label="Description (optional)"
                 multiline
                 error={errors.description}
+                key="description-input"
               />
             </View>
 
@@ -524,7 +566,7 @@ export const CreateEventScreen: React.FC = () => {
             <View style={styles.formFields}>
               <View style={styles.dateTimeContainer}>
                 <DateTimePicker
-                  control={control as any}
+                  control={control}
                   name="date"
                   placeholder="Start Date"
                   displayFormat="medium"
@@ -532,22 +574,24 @@ export const CreateEventScreen: React.FC = () => {
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
                   error={errors.date}
+                  key="date-picker"
                 />
                 <DateTimePicker
-                  control={control as any}
+                  control={control}
                   name="time"
                   placeholder="Start Time"
                   mode="time"
                   minuteInterval={15}
                   style={styles.dateTimePicker}
                   error={errors.time}
+                  key="time-picker"
                 />
               </View>
 
               {/* End Date and Time */}
               <View style={styles.dateTimeContainer}>
                 <DateTimePicker
-                  control={control as any}
+                  control={control}
                   name="endDate"
                   placeholder="End Date"
                   displayFormat="medium"
@@ -555,21 +599,23 @@ export const CreateEventScreen: React.FC = () => {
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
                   error={errors.endDate}
+                  key="endDate-picker"
                 />
                 <DateTimePicker
-                  control={control as any}
+                  control={control}
                   name="endTime"
                   placeholder="End Time"
                   mode="time"
                   minuteInterval={15}
                   style={styles.dateTimePicker}
                   error={errors.endTime}
+                  key="endTime-picker"
                 />
               </View>
 
               {/* Location */}
               <AnimatedInput
-                control={control as any}
+                control={control}
                 name="location"
                 label="Meeting Point"
                 error={errors.location}
@@ -579,6 +625,8 @@ export const CreateEventScreen: React.FC = () => {
                 iconPosition="right"
                 onPress={handleOpenLocationMap}
                 editable={false}
+                key="location-input"
+                testID="location-input"
               />
 
               {/* Privacy Settings */}
@@ -654,11 +702,12 @@ export const CreateEventScreen: React.FC = () => {
                 {isRideOrCamping && (
                   <>
                     <AnimatedInput
-                      control={control as any}
+                      control={control}
                       name="routeDescription"
                       label="Route Description"
                       multiline
                       error={errors.routeDescription}
+                      key="routeDescription-input"
                     />
 
                     <Dropdown
@@ -669,6 +718,7 @@ export const CreateEventScreen: React.FC = () => {
                       placeholder=""
                       selectedItem={selectedRoadType}
                       error={errors.roadType?.message}
+                      key="roadType-dropdown"
                     />
 
                     <Dropdown
@@ -679,33 +729,37 @@ export const CreateEventScreen: React.FC = () => {
                       searchable={false}
                       selectedItem={selectedDifficulty}
                       error={errors.difficulty?.message}
+                      key="difficulty-dropdown"
                     />
 
                     <AnimatedInput
-                      control={control as any}
+                      control={control}
                       name="restStops"
                       label="Fuel / Rest Stop Suggestions"
                       multiline
                       error={errors.restStops}
+                      key="restStops-input"
                     />
 
                     {/* Camping specific */}
                     {eventType === 'CAMPING_RIDE' && (
                       <AnimatedInput
-                        control={control as any}
+                        control={control}
                         name="overnightInfo"
                         label="Overnight Information"
                         multiline
                         error={errors.overnightInfo}
+                        key="overnightInfo-input"
                       />
                     )}
 
                     <AnimatedInput
-                      control={control as any}
+                      control={control}
                       name="equipmentChecklist"
                       label="Equipment Checklist"
                       multiline
                       error={errors.equipmentChecklist}
+                      key="equipmentChecklist-input"
                     />
                   </>
                 )}
@@ -714,19 +768,21 @@ export const CreateEventScreen: React.FC = () => {
                 {isWorkshop && (
                   <>
                     <AnimatedInput
-                      control={control as any}
+                      control={control}
                       name="instructorInfo"
                       label="Instructor Information"
                       multiline
                       error={errors.instructorInfo}
+                      key="instructorInfo-input"
                     />
 
                     <AnimatedInput
-                      control={control as any}
+                      control={control}
                       name="topicsCovered"
                       label="Topics Covered"
                       multiline
                       error={errors.topicsCovered}
+                      key="topicsCovered-input"
                     />
 
                     <Dropdown
@@ -736,15 +792,17 @@ export const CreateEventScreen: React.FC = () => {
                       searchable={false}
                       selectedItem={selectedExperienceLevel}
                       error={errors.experienceLevel?.message}
+                      key="experienceLevel-dropdown"
                     />
 
                     <AnimatedInput
-                      control={control as any}
+                      control={control}
                       name="price"
                       label="Price (optional)"
                       keyboardType="numeric"
                       error={errors.price}
                       placeholder="Leave empty if free"
+                      key="price-input"
                     />
                   </>
                 )}
@@ -856,6 +914,8 @@ export const CreateEventScreen: React.FC = () => {
         showBackButton
         showShadow={false}
         onBackPress={handleGoBack}
+        rightIconName={isDirty ? 'check' : undefined}
+        onRightButtonPress={isDirty ? handleSaveDraft : undefined}
       />
       <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
         <FormProvider {...methods}>
@@ -937,6 +997,40 @@ export const CreateEventScreen: React.FC = () => {
           }
         />
       </BottomSheet>
+
+      {/* Exit Confirmation Dialog */}
+      <Dialog
+        ref={exitDialogRef}
+        title="Exit Without Saving"
+        message="Are you sure you want to exit? All unsaved changes will be lost."
+        variant="confirm"
+        confirmButton={{
+          text: 'Exit',
+          variant: 'primary',
+          onPress: confirmExit,
+        }}
+        cancelButton={{
+          text: 'Cancel',
+          variant: 'outline',
+        }}
+      />
+
+      {/* Save Draft Confirmation Dialog */}
+      <Dialog
+        ref={draftDialogRef}
+        title="Save Draft"
+        message="Do you want to save your event as a draft? You can continue editing it later."
+        variant="confirm"
+        confirmButton={{
+          text: 'Save Draft',
+          variant: 'primary',
+          onPress: confirmSaveDraft,
+        }}
+        cancelButton={{
+          text: 'Cancel',
+          variant: 'outline',
+        }}
+      />
     </View>
   );
 };

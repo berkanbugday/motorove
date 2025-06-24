@@ -9,12 +9,14 @@ export const createEventSchema = z.object({
     .max(100, 'Title must be at most 100 characters'),
   description: z
     .string()
-    .max(1000, 'Description cannot exceed 1000 characters'),
+    .max(1000, 'Description cannot exceed 1000 characters')
+    .optional()
+    .nullable(),
   location: z
-    .string({required_error: 'Location is required'})
-    .nonempty('Location is required')
-    .min(3, 'Location must be at least 3 characters')
-    .max(200, 'Location cannot exceed 200 characters'),
+    .string()
+    .max(200, 'Location cannot exceed 200 characters')
+    .optional()
+    .nullable(),
   date: z.date({
     required_error: 'Date is required',
     invalid_type_error: 'Invalid date format',

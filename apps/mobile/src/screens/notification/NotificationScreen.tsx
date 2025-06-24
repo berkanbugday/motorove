@@ -19,6 +19,7 @@ import {
   SwipeAction,
   TopHeaderBar,
   BodySmall,
+  SkeletonGroup,
 } from '@components';
 import Dialog, {DialogRef} from '@components/Dialog';
 import {
@@ -40,6 +41,23 @@ interface Notification {
   createdAt: string;
   type: string;
 }
+
+/**
+ * NotificationSkeleton - Skeleton component for notification items
+ */
+const NotificationSkeleton = () => {
+  return (
+    <View style={styles.notificationSkeletonContainer}>
+      <SkeletonGroup
+        preset="messageRow"
+        lines={2}
+        showShadow={false}
+        showAvatar={false}
+        style={styles.notificationSkeleton}
+      />
+    </View>
+  );
+};
 
 /**
  * NotificationScreen - Displays user notifications
@@ -246,6 +264,17 @@ export const NotificationScreen = () => {
     );
   };
 
+  // Render loading skeletons
+  const renderLoadingSkeletons = () => {
+    return (
+      <View style={styles.skeletonsContainer}>
+        {Array.from({length: 5}).map((_, index) => (
+          <NotificationSkeleton key={`skeleton-${index}`} />
+        ))}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -286,9 +315,7 @@ export const NotificationScreen = () => {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           loading ? (
-            <View style={styles.emptyContainer}>
-              <ActivityIndicator size="large" color={colors.primary.main} />
-            </View>
+            renderLoadingSkeletons()
           ) : (
             <View style={styles.emptyContainer}>
               <Icon name="bell" size={48} color={colors.neutral.lightGrey} />
@@ -298,6 +325,13 @@ export const NotificationScreen = () => {
               </Body>
             </View>
           )
+        }
+        ListFooterComponent={
+          hasMore && loading && !refreshing ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="small" color={colors.neutral.black} />
+            </View>
+          ) : null
         }
       />
 
@@ -421,5 +455,17 @@ const styles = StyleSheet.create({
   footerLoader: {
     paddingVertical: spacing.md,
     alignItems: 'center',
+  },
+  skeletonsContainer: {
+    paddingTop: spacing.md,
+  },
+  notificationSkeletonContainer: {
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
+  },
+  notificationSkeleton: {
+    borderRadius: radius.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
   },
 });
