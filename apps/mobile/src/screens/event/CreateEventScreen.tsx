@@ -49,7 +49,8 @@ export const CreateEventScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
 
   // Refs
-  const locationMapBottomSheetRef = useRef<BottomSheetRef>(null);
+  const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
+  const startLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const wizardRef = useRef<WizardHandle>(null);
   const exitDialogRef = useRef<any>(null);
   const draftDialogRef = useRef<any>(null);
@@ -74,7 +75,13 @@ export const CreateEventScreen: React.FC = () => {
   const [isFirstStep, setIsFirstStep] = useState(true);
   const [isLastStep, setIsLastStep] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [selectedLocation, setSelectedLocation] = useState<{
+  const [selectedMeetingPoint, setSelectedMeetingPoint] = useState<{
+    latitude?: number;
+    longitude?: number;
+    name?: string;
+    addresses?: any[];
+  }>({});
+  const [selectedStartLocation, setSelectedStartLocation] = useState<{
     latitude?: number;
     longitude?: number;
     name?: string;
@@ -93,9 +100,10 @@ export const CreateEventScreen: React.FC = () => {
     defaultValues: {
       title: '',
       description: '',
-      location: '',
-      date: new Date(),
-      time: new Date(),
+      meetingPoint: '',
+      startLocation: '',
+      startDate: new Date(),
+      startTime: new Date(),
       endDate: new Date(),
       endTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000), // Default 2 hours later
       maxParticipants: null,
@@ -199,7 +207,11 @@ export const CreateEventScreen: React.FC = () => {
 
   // Location selection handlers
   const handleOpenLocationMap = useCallback(() => {
-    locationMapBottomSheetRef.current?.open('full');
+    meetingPointMapBottomSheetRef.current?.open('full');
+  }, []);
+
+  const handleOpenStartLocationMap = useCallback(() => {
+    startLocationMapBottomSheetRef.current?.open('full');
   }, []);
 
   const handleLocationSelect = useCallback(
@@ -209,7 +221,7 @@ export const CreateEventScreen: React.FC = () => {
       name?: string;
       addresses?: any[];
     }) => {
-      setSelectedLocation(location);
+      setSelectedMeetingPoint(location);
 
       // Get display address (prefer English)
       const englishAddress = location.addresses?.find(
@@ -221,11 +233,39 @@ export const CreateEventScreen: React.FC = () => {
       const displayAddress =
         englishAddress?.address || turkishAddress?.address || '';
 
-      // Set the location field value
-      setValue('location', displayAddress, {shouldValidate: true});
+      // Set the meetingPoint field value
+      setValue('meetingPoint', displayAddress, {shouldValidate: true});
 
       // Close the bottom sheet
-      locationMapBottomSheetRef.current?.close();
+      meetingPointMapBottomSheetRef.current?.close();
+    },
+    [setValue],
+  );
+
+  const handleStartLocationSelect = useCallback(
+    (location: {
+      latitude?: number;
+      longitude?: number;
+      name?: string;
+      addresses?: any[];
+    }) => {
+      setSelectedStartLocation(location);
+
+      // Get display address (prefer English)
+      const englishAddress = location.addresses?.find(
+        addr => addr.language === 'en',
+      );
+      const turkishAddress = location.addresses?.find(
+        addr => addr.language === 'tr',
+      );
+      const displayAddress =
+        englishAddress?.address || turkishAddress?.address || '';
+
+      // Set the startLocation field value
+      setValue('startLocation', displayAddress, {shouldValidate: true});
+
+      // Close the bottom sheet
+      startLocationMapBottomSheetRef.current?.close();
     },
     [setValue],
   );
@@ -279,7 +319,7 @@ export const CreateEventScreen: React.FC = () => {
         setValue('images', imageData, {shouldValidate: true});
       }
     } catch (error) {
-      loggingService.error('Error selecting cover image:', error);
+      loggingService.error('Error selecting event image:', error);
       showToast({
         type: 'error',
         text1: 'Error',
@@ -376,11 +416,11 @@ export const CreateEventScreen: React.FC = () => {
 
   const validateDateTime = useCallback(async () => {
     const fieldsToValidate = [
-      'date',
-      'time',
+      'startDate',
+      'startTime',
       'endDate',
       'endTime',
-      'location',
+      'meetingPoint',
       'isPrivate',
     ];
 
@@ -402,6 +442,7 @@ export const CreateEventScreen: React.FC = () => {
         'routeDescription',
         'roadType',
         'difficulty',
+        'startLocation',
         'restStops',
       ];
 
@@ -516,7 +557,7 @@ export const CreateEventScreen: React.FC = () => {
               />
             </View>
 
-            {/* Event Cover Images Section */}
+            {/* Event Images Section */}
             <View style={styles.imagesSection}>
               <Typography
                 variant="body"
@@ -567,24 +608,24 @@ export const CreateEventScreen: React.FC = () => {
               <View style={styles.dateTimeContainer}>
                 <DateTimePicker
                   control={control}
-                  name="date"
+                  name="startDate"
                   placeholder="Start Date"
                   displayFormat="medium"
                   mode="date"
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
-                  error={errors.date}
-                  key="date-picker"
+                  error={errors.startDate}
+                  key="startDate-picker"
                 />
                 <DateTimePicker
                   control={control}
-                  name="time"
+                  name="startTime"
                   placeholder="Start Time"
                   mode="time"
                   minuteInterval={15}
                   style={styles.dateTimePicker}
-                  error={errors.time}
-                  key="time-picker"
+                  error={errors.startTime}
+                  key="startTime-picker"
                 />
               </View>
 
@@ -613,20 +654,19 @@ export const CreateEventScreen: React.FC = () => {
                 />
               </View>
 
-              {/* Location */}
               <AnimatedInput
                 control={control}
-                name="location"
-                label="Meeting Point"
-                error={errors.location}
+                name="meetingPoint"
+                label="Meeting Point (optional)"
+                error={errors.meetingPoint}
                 icon={
                   <Icon name="map-pin" size={20} color={colors.neutral.grey} />
                 }
                 iconPosition="right"
                 onPress={handleOpenLocationMap}
                 editable={false}
-                key="location-input"
-                testID="location-input"
+                key="meetingPoint-input"
+                testID="meetingPoint-input"
               />
 
               {/* Privacy Settings */}
@@ -644,6 +684,7 @@ export const CreateEventScreen: React.FC = () => {
                   onValueChange={togglePrivacy}
                   label="Private Event"
                   description="Only invited groups or users can join this event"
+                  style={{paddingVertical: spacing.xs}}
                 />
 
                 {/* Group/User Selectors for Private Events */}
@@ -703,11 +744,21 @@ export const CreateEventScreen: React.FC = () => {
                   <>
                     <AnimatedInput
                       control={control}
-                      name="routeDescription"
-                      label="Route Description"
-                      multiline
-                      error={errors.routeDescription}
-                      key="routeDescription-input"
+                      name="startLocation"
+                      label="Start Point"
+                      error={errors.startLocation}
+                      icon={
+                        <Icon
+                          name="map-pin"
+                          size={20}
+                          color={colors.neutral.grey}
+                        />
+                      }
+                      iconPosition="right"
+                      onPress={handleOpenStartLocationMap}
+                      editable={false}
+                      key="startLocation-input"
+                      testID="startLocation-input"
                     />
 
                     <Dropdown
@@ -730,6 +781,15 @@ export const CreateEventScreen: React.FC = () => {
                       selectedItem={selectedDifficulty}
                       error={errors.difficulty?.message}
                       key="difficulty-dropdown"
+                    />
+
+                    <AnimatedInput
+                      control={control}
+                      name="routeDescription"
+                      label="Route Description"
+                      multiline
+                      error={errors.routeDescription}
+                      key="routeDescription-input"
                     />
 
                     <AnimatedInput
@@ -851,6 +911,7 @@ export const CreateEventScreen: React.FC = () => {
       isRideOrCamping,
       isWorkshop,
       handleOpenLocationMap,
+      handleOpenStartLocationMap,
     ],
   );
 
@@ -979,19 +1040,37 @@ export const CreateEventScreen: React.FC = () => {
         </FormProvider>
       </SafeAreaView>
 
-      {/* Location Map Bottom Sheet */}
+      {/* Location Map Bottom Sheets */}
       <BottomSheet
-        ref={locationMapBottomSheetRef}
-        title="Select Location"
+        ref={meetingPointMapBottomSheetRef}
+        title="Select Meeting Point"
         showBackdrop={true}>
         <SelectLocationMap
           onLocationSelect={handleLocationSelect}
-          onClose={() => locationMapBottomSheetRef.current?.close()}
+          onClose={() => meetingPointMapBottomSheetRef.current?.close()}
           initialLocation={
-            selectedLocation.latitude && selectedLocation.longitude
+            selectedMeetingPoint.latitude && selectedMeetingPoint.longitude
               ? {
-                  latitude: selectedLocation.latitude,
-                  longitude: selectedLocation.longitude,
+                  latitude: selectedMeetingPoint.latitude,
+                  longitude: selectedMeetingPoint.longitude,
+                }
+              : undefined
+          }
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        ref={startLocationMapBottomSheetRef}
+        title="Select Start Point"
+        showBackdrop={true}>
+        <SelectLocationMap
+          onLocationSelect={handleStartLocationSelect}
+          onClose={() => startLocationMapBottomSheetRef.current?.close()}
+          initialLocation={
+            selectedStartLocation.latitude && selectedStartLocation.longitude
+              ? {
+                  latitude: selectedStartLocation.latitude,
+                  longitude: selectedStartLocation.longitude,
                 }
               : undefined
           }
@@ -1058,23 +1137,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
   },
-  coverContainer: {
-    height: 150,
-    overflow: 'hidden',
-    backgroundColor: colors.secondary.light,
-    borderRadius: radius.sm,
-    marginBottom: spacing.md,
-  },
-  cover: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  coverPlaceholder: {
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   scrollView: {
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
@@ -1130,7 +1192,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   imageScrollContainer: {
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.xs,
     gap: spacing.md,
   },
   imageContainer: {

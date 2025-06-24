@@ -10,6 +10,7 @@ const EVENT_FRAGMENT = gql`
     title
     description
     location
+    startLocation
     startDate
     endDate
     maxParticipants
@@ -64,10 +65,11 @@ export const eventService = {
       const formattedData = {
         title: eventData.title,
         description: eventData.description,
-        location: eventData.location,
+        location: eventData.meetingPoint,
+        startLocation: eventData.startLocation,
         startDate: new Date(
-          `${eventData.date.toISOString().split('T')[0]}T${
-            eventData.time.toISOString().split('T')[1]
+          `${eventData.startDate.toISOString().split('T')[0]}T${
+            eventData.startTime.toISOString().split('T')[1]
           }`,
         ).toISOString(),
         endDate:
@@ -81,7 +83,7 @@ export const eventService = {
         maxParticipants: eventData.maxParticipants
           ? parseInt(eventData.maxParticipants as string, 10)
           : null,
-        coverImage: eventData.cover,
+        coverImage: eventData.images?.[0] || null,
         isPrivate: eventData.isPrivate,
         eventType: eventData.eventType,
 

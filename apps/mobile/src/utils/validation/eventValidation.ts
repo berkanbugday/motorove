@@ -1,7 +1,7 @@
 import {z} from 'zod';
 
-// Event creation form schema
-export const createEventSchema = z.object({
+// Base schema definition
+const eventBaseSchema = z.object({
   title: z
     .string({required_error: 'Title is required'})
     .nonempty('Title is required')
@@ -12,16 +12,21 @@ export const createEventSchema = z.object({
     .max(1000, 'Description cannot exceed 1000 characters')
     .optional()
     .nullable(),
-  location: z
+  meetingPoint: z
     .string()
-    .max(200, 'Location cannot exceed 200 characters')
+    .max(200, 'Meeting point cannot exceed 200 characters')
     .optional()
     .nullable(),
-  date: z.date({
+  startLocation: z
+    .string()
+    .max(200, 'Start point cannot exceed 200 characters')
+    .optional()
+    .nullable(),
+  startDate: z.date({
     required_error: 'Date is required',
     invalid_type_error: 'Invalid date format',
   }),
-  time: z.date({
+  startTime: z.date({
     required_error: 'Time is required',
     invalid_type_error: 'Invalid time format',
   }),
@@ -72,9 +77,114 @@ export const createEventSchema = z.object({
   price: z.string().optional(),
 });
 
-export const updateEventSchema = createEventSchema.extend({
-  id: z.string(),
+// Event creation form schema with dynamic validation
+export const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
+  // Validate end date is not before start date
+  if (data.endDate && data.startDate) {
+    const startDateOnly = new Date(
+      data.startDate.getFullYear(),
+      data.startDate.getMonth(),
+      data.startDate.getDate(),
+    );
+
+    const endDateOnly = new Date(
+      data.endDate.getFullYear(),
+      data.endDate.getMonth(),
+      data.endDate.getDate(),
+    );
+
+    if (endDateOnly < startDateOnly) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'End date cannot be before start date',
+        path: ['endDate'],
+      });
+    }
+  }
+
+  // Validate end time is not before start time when on same day
+  if (data.endTime && data.startTime && data.endDate && data.startDate) {
+    const startDateOnly = new Date(
+      data.startDate.getFullYear(),
+      data.startDate.getMonth(),
+      data.startDate.getDate(),
+    );
+
+    const endDateOnly = new Date(
+      data.endDate.getFullYear(),
+      data.endDate.getMonth(),
+      data.endDate.getDate(),
+    );
+
+    // If on the same day, check if end time is before start time
+    if (
+      startDateOnly.getTime() === endDateOnly.getTime() &&
+      data.endTime < data.startTime
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'End time cannot be before start time',
+        path: ['endTime'],
+      });
+    }
+  }
 });
+
+export const updateEventSchema = eventBaseSchema
+  .extend({
+    id: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    // Validate end date is not before start date
+    if (data.endDate && data.startDate) {
+      const startDateOnly = new Date(
+        data.startDate.getFullYear(),
+        data.startDate.getMonth(),
+        data.startDate.getDate(),
+      );
+
+      const endDateOnly = new Date(
+        data.endDate.getFullYear(),
+        data.endDate.getMonth(),
+        data.endDate.getDate(),
+      );
+
+      if (endDateOnly < startDateOnly) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'End date cannot be before start date',
+          path: ['endDate'],
+        });
+      }
+    }
+
+    // Validate end time is not before start time when on same day
+    if (data.endTime && data.startTime && data.endDate && data.startDate) {
+      const startDateOnly = new Date(
+        data.startDate.getFullYear(),
+        data.startDate.getMonth(),
+        data.startDate.getDate(),
+      );
+
+      const endDateOnly = new Date(
+        data.endDate.getFullYear(),
+        data.endDate.getMonth(),
+        data.endDate.getDate(),
+      );
+
+      // If on the same day, check if end time is before start time
+      if (
+        startDateOnly.getTime() === endDateOnly.getTime() &&
+        data.endTime < data.startTime
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'End time cannot be before start time',
+          path: ['endTime'],
+        });
+      }
+    }
+  });
 
 export type CreateEventFormValues = z.infer<typeof createEventSchema>;
 export type UpdateEventFormValues = z.infer<typeof updateEventSchema>;

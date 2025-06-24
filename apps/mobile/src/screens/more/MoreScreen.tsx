@@ -15,6 +15,7 @@ import {spacing} from '@theme/spacing';
 import {radius} from '@theme/radius';
 import {useAuth} from '@contexts';
 import {commonStyles} from '@theme/commonStyles';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 type MenuSection = {
   title: string;
@@ -31,6 +32,7 @@ type MenuItem = {
 export const MoreScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Notification'>>();
   const {signOut} = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleProfilePress = () => {
     // Navigate to profile screen when implemented
@@ -175,15 +177,13 @@ export const MoreScreen: React.FC = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.container}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}>
-          {menuSections.map(renderSection)}
-        </ScrollView>
-      </SafeAreaView>
-    </View>
+    <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}>
+        {menuSections.map(renderSection)}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
