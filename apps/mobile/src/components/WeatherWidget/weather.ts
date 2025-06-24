@@ -31,7 +31,7 @@ export interface WeatherData {
   /**
    * Location name
    */
-  location: string;
+  location?: string;
 
   /**
    * Current humidity percentage

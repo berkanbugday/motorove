@@ -192,7 +192,6 @@ export const HomeScreen = ({navigation}: Props) => {
     temperature: 25,
     unit: 'C',
     condition: 'sunny',
-    location: 'Current Location',
   };
 
   // Update hidden state based on scroll position
@@ -609,6 +608,7 @@ export const HomeScreen = ({navigation}: Props) => {
               },
             ]}>
             <WeatherWidget
+              title="Today's Weather"
               data={weatherData}
               showDetails={false}
               style={styles.weatherWidget}

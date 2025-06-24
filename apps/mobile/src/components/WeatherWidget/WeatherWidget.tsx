@@ -27,6 +27,10 @@ export interface WeatherWidgetProps {
    * Additional styles for the text
    */
   textStyle?: TextStyle;
+  /**
+   * Optional title to display above the location
+   */
+  title?: string;
 }
 
 /**
@@ -38,6 +42,7 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   showDetails = true,
   style,
   textStyle,
+  title,
 }) => {
   const {
     temperature,
@@ -121,17 +126,23 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
       <View style={styles.contentContainer}>
         <View style={styles.weatherInfo}>
           <View style={styles.weatherInfoHeader}>
-            <View style={styles.locationContainer}>
-              <Icon
-                name="map-pin"
-                size={14}
-                color={conditionStyle.text}
-                style={styles.locationIcon}
-              />
-              <Text style={[styles.locationText, textColorStyle, textStyle]}>
-                {location}
+            {title ? (
+              <Text style={[styles.titleText, textColorStyle, textStyle]}>
+                {title}
               </Text>
-            </View>
+            ) : (
+              <View style={styles.locationContainer}>
+                <Icon
+                  name="map-pin"
+                  size={14}
+                  color={conditionStyle.text}
+                  style={styles.locationIcon}
+                />
+                <Text style={[styles.locationText, textColorStyle, textStyle]}>
+                  {location}
+                </Text>
+              </View>
+            )}
             <Text style={[styles.condition, textColorStyle, textStyle]}>
               {getConditionText(condition)}
             </Text>

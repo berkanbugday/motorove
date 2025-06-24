@@ -17,6 +17,10 @@ export const styles = StyleSheet.create({
   weatherInfo: {
     flex: 1,
   },
+  titleText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -36,7 +40,7 @@ export const styles = StyleSheet.create({
   },
   temperature: {
     fontSize: 36,
-    fontWeight: 'bold',
+    fontWeight: '800',
     marginBottom: spacing.sm,
   },
   condition: {
@@ -69,9 +73,8 @@ export const styles = StyleSheet.create({
     height: 80,
   },
   unit: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginLeft: spacing.xs,
+    fontSize: 16,
+    fontWeight: '500',
     alignSelf: 'flex-start',
   },
   tempContainer: {
