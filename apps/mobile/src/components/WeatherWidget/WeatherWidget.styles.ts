@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
   },
   unit: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     alignSelf: 'flex-start',
   },
   tempContainer: {
