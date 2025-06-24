@@ -4,9 +4,11 @@ import {z} from 'zod';
 export const signinSchema = z.object({
   email: z
     .string({required_error: 'Email is required'})
+    .nonempty('Email is required')
     .email('Email is invalid'),
   password: z
     .string({required_error: 'Password is required'})
+    .nonempty('Password is required')
     .min(6, 'Password must be at least 6 characters'),
 });
 
@@ -16,6 +18,7 @@ export type SigninFormValues = z.infer<typeof signinSchema>;
 export const forgotPasswordSchema = z.object({
   email: z
     .string({required_error: 'Email is required'})
+    .nonempty('Email is required')
     .email('Email is invalid'),
 });
 
@@ -26,15 +29,19 @@ export const signupSchema = z
   .object({
     fullName: z
       .string({required_error: 'Full name is required'})
+      .nonempty('Full name is required')
       .min(2, 'Full name must be at least 2 characters'),
     email: z
       .string({required_error: 'Email is required'})
+      .nonempty('Email is required')
       .email('Email is invalid'),
     password: z
       .string({required_error: 'Password is required'})
+      .nonempty('Password is required')
       .min(6, 'Password must be at least 6 characters'),
     confirmPassword: z
       .string({required_error: 'Confirm password is required'})
+      .nonempty('Confirm password is required')
       .min(6, 'Confirm password must be at least 6 characters'),
     agreeToTerms: z.boolean().refine(val => val === true, {
       message: 'You must agree to the Terms of Service and Privacy Policy',
@@ -51,6 +58,7 @@ export type SignupFormValues = z.infer<typeof signupSchema>;
 export const accountSetupSchema = z.object({
   username: z
     .string({required_error: 'Username is required'})
+    .nonempty('Username is required')
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username must be at most 30 characters')
     .regex(
@@ -59,6 +67,7 @@ export const accountSetupSchema = z.object({
     ),
   userType: z
     .string({required_error: 'User type is required'})
+    .nonempty('User type is required')
     .min(1, 'Please select a user type'),
   bio: z.string().max(150, 'Bio cannot exceed 150 characters').optional(),
   phoneNumber: z

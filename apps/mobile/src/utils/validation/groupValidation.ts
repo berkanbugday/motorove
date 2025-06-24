@@ -4,6 +4,7 @@ import {z} from 'zod';
 export const createGroupSchema = z.object({
   name: z
     .string({required_error: 'Group name is required'})
+    .nonempty('Group name is required')
     .min(3, 'Group name must be at least 3 characters')
     .max(100, 'Group name must be at most 100 characters'),
   description: z
@@ -12,9 +13,11 @@ export const createGroupSchema = z.object({
     .max(500, 'Description cannot exceed 500 characters'),
   city: z
     .string({required_error: 'City is required'})
+    .nonempty('City is required')
     .min(1, 'Please select a city'),
   privacy: z
     .string({required_error: 'Privacy setting is required'})
+    .nonempty('Privacy setting is required')
     .min(1, 'Please select a privacy setting'),
   membersCapacity: z
     .string()

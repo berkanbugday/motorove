@@ -4,6 +4,7 @@ import {z} from 'zod';
 export const createEventSchema = z.object({
   title: z
     .string({required_error: 'Title is required'})
+    .nonempty('Title is required')
     .min(3, 'Title must be at least 3 characters')
     .max(100, 'Title must be at most 100 characters'),
   description: z
@@ -11,6 +12,7 @@ export const createEventSchema = z.object({
     .max(1000, 'Description cannot exceed 1000 characters'),
   location: z
     .string({required_error: 'Location is required'})
+    .nonempty('Location is required')
     .min(3, 'Location must be at least 3 characters')
     .max(200, 'Location cannot exceed 200 characters'),
   date: z.date({
