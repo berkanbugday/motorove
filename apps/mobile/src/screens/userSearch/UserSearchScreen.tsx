@@ -1,6 +1,5 @@
 import React, {useState, useCallback, useEffect} from 'react';
-import {View, StyleSheet, Keyboard} from 'react-native';
-import {LegendList} from '@legendapp/list';
+import {View, StyleSheet, Keyboard, FlatList} from 'react-native';
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {colors, spacing} from '@theme';
 import {Icon} from '@components/Icon';
@@ -119,7 +118,7 @@ export const UserSearchScreen = () => {
         />
       </View>
 
-      <LegendList
+      <FlatList
         data={searchResults}
         renderItem={renderUserItem}
         keyExtractor={item => item.id}
@@ -130,8 +129,6 @@ export const UserSearchScreen = () => {
         refreshing={searchLoading}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        recycleItems={true}
-        maintainVisibleContentPosition={true}
       />
     </View>
   );

@@ -10,6 +10,7 @@ import {
   ImageStyle,
   TextStyle,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {colors} from '../../theme/colors';
@@ -37,7 +38,6 @@ import {useCreatePost} from '@services/post.service';
 import {CreatePostInput, PostAddressInput} from '../../types/models/post.model';
 import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
-import {LegendList} from '@legendapp/list';
 
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
@@ -128,7 +128,7 @@ export const CreatePostScreen = () => {
               <Body>You haven't joined any groups yet</Body>
             </View>
           ) : (
-            <LegendList
+            <FlatList
               data={joinedGroups}
               keyExtractor={item => item.id}
               renderItem={({item}) => (
@@ -149,8 +149,6 @@ export const CreatePostScreen = () => {
               )}
               contentContainerStyle={styles.groupListContainer}
               showsVerticalScrollIndicator={false}
-              recycleItems={true}
-              maintainVisibleContentPosition={true}
             />
           )}
         </>

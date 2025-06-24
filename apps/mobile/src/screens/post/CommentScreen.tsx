@@ -1,5 +1,11 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
-import {View, StyleSheet, ScrollView, RefreshControl} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  FlatList,
+} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
 import {colors, commonStyles, spacing} from '@theme';
@@ -26,7 +32,6 @@ import {
 } from '@services';
 import {useAuth} from '@contexts/AuthContext';
 import {IconName} from '@components/Icon';
-import {LegendList} from '@legendapp/list';
 import {relativeTime} from '@utils/dateUtils';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
@@ -424,7 +429,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           </Body>
         </ScrollView>
       ) : (
-        <LegendList
+        <FlatList
           data={comments}
           renderItem={renderItem}
           keyExtractor={item => item.id}
@@ -446,8 +451,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           }
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          recycleItems={true}
-          maintainVisibleContentPosition={true}
           refreshing={refreshing}
           onRefresh={onRefresh}
           onEndReached={() => {

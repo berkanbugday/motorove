@@ -1,8 +1,7 @@
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {colors, spacing} from '@theme';
 import React, {useState, useCallback} from 'react';
-import {View, StyleSheet, RefreshControl} from 'react-native';
-import {LegendList} from '@legendapp/list';
+import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
 import {Tabs} from '@components/Tab';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -158,7 +157,7 @@ export const GroupScreen = () => {
     }
 
     return (
-      <LegendList
+      <FlatList
         data={joinedGroups}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
@@ -184,8 +183,6 @@ export const GroupScreen = () => {
             onRefresh={handleRefreshJoinedGroups}
           />
         }
-        recycleItems={true} // Enable component recycling for better performance
-        maintainVisibleContentPosition={true} // Maintain the visible position when data changes
         onEndReached={loadMoreJoinedGroups}
         onEndReachedThreshold={0.5}
         ListFooterComponent={
@@ -247,7 +244,7 @@ export const GroupScreen = () => {
     }
 
     return (
-      <LegendList
+      <FlatList
         data={allGroups}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
@@ -272,8 +269,6 @@ export const GroupScreen = () => {
             onRefresh={handleRefreshAllGroups}
           />
         }
-        recycleItems={true} // Enable component recycling for better performance
-        maintainVisibleContentPosition={true} // Maintain the visible position when data changes
         onEndReached={loadMoreAllGroups}
         onEndReachedThreshold={0.5}
         ListFooterComponent={

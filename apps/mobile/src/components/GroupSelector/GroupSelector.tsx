@@ -6,13 +6,13 @@ import {
   Image,
   ViewStyle,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import {colors, spacing, radius, getShadow} from '@theme';
 import {Typography, Icon, Chip, Button} from '@components';
 import {openBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
 import type {Group} from '@services/group.service';
-import {LegendList} from '@legendapp/list';
 
 export interface GroupSelectorProps {
   selectedGroups: string[];
@@ -131,7 +131,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         )}
       </View>
     ) : (
-      <LegendList
+      <FlatList
         data={groups}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
@@ -149,8 +149,6 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         )}
         extraData={selectedGroups}
         showsVerticalScrollIndicator={false}
-        maintainVisibleContentPosition={true}
-        recycleItems={true}
       />
     )}
   </View>

@@ -51,7 +51,6 @@ import {
   useRemovePost,
 } from '@services/post.service';
 import {relativeTime} from '@utils/dateUtils';
-import {LegendList} from '@legendapp/list';
 
 // Route data
 const recommendedRoutes = [
@@ -695,22 +694,20 @@ export const HomeScreen = ({navigation}: Props) => {
               />
             </View>
 
-            {/* Posts Section with LegendList */}
+            {/* Posts Section with FlatList */}
             <View style={[styles.sectionContainer]}>
               <Subtitle weight="bold" style={styles.sectionTitle}>
                 Shared Posts
               </Subtitle>
 
               <View style={styles.postsContainer}>
-                <LegendList
+                <FlatList
                   style={styles.postsList}
                   data={posts}
                   keyExtractor={item => item.id}
                   renderItem={renderFeedPost}
                   showsVerticalScrollIndicator={false}
                   scrollEnabled={false} // Important: disable scrolling since we're in a ScrollView
-                  recycleItems={true}
-                  maintainVisibleContentPosition={true}
                   onEndReached={loadMore}
                   onEndReachedThreshold={0.5}
                   ListEmptyComponent={

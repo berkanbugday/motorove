@@ -4,8 +4,8 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
-import {LegendList} from '@legendapp/list';
 import {colors, spacing, radius} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -273,7 +273,7 @@ export const NotificationScreen = () => {
         containerStyle={styles.topHeaderBar}
       />
 
-      <LegendList
+      <FlatList
         data={notifications}
         keyExtractor={item => item.id}
         renderItem={renderNotificationItem}
@@ -299,8 +299,6 @@ export const NotificationScreen = () => {
             </View>
           )
         }
-        recycleItems={true} // Enable component recycling for better performance
-        maintainVisibleContentPosition={true} // Maintain the visible position when data changes
       />
 
       {/* Delete single notification confirmation dialog */}

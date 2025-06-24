@@ -10,7 +10,6 @@ import {
   FlatList,
   RefreshControl,
 } from 'react-native';
-import {LegendList} from '@legendapp/list';
 import {colors, commonStyles, getShadow, radius, rh, spacing} from '@theme';
 import {TopHeaderBar} from '@components/TopHeaderBar';
 import {
@@ -1204,14 +1203,12 @@ export const GroupDetailScreen = () => {
                   <ActivityIndicator size="large" color={colors.primary.main} />
                 </View>
               ) : posts.length > 0 ? (
-                <LegendList
+                <FlatList
                   data={posts}
                   renderItem={renderFeedPost}
                   keyExtractor={feedKeyExtractor}
                   scrollEnabled={false}
                   contentContainerStyle={styles.feedList}
-                  recycleItems={true} // Enable component recycling for better performance
-                  maintainVisibleContentPosition={true} // Maintain the visible position when data changes
                 />
               ) : (
                 <View style={styles.noPostsContainer}>
@@ -1250,14 +1247,12 @@ export const GroupDetailScreen = () => {
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary.main} />
         ) : (
-          <LegendList
+          <FlatList
             data={members}
             renderItem={renderMemberItem}
             keyExtractor={(item: any) => item.id}
             contentContainerStyle={styles.membersList}
             showsVerticalScrollIndicator={false}
-            recycleItems={true}
-            maintainVisibleContentPosition={true}
           />
         )}
       </BottomSheet>
