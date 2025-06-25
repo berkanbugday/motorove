@@ -36,6 +36,7 @@ interface BottomSheetContentProps {
   loading: boolean;
   error: any;
   refetch: () => void;
+  loadMore: () => void;
   onSelectionChange: (selectedIds: string[]) => void;
   disabled: boolean;
   maxGroups: number;
@@ -123,6 +124,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   loading,
   error,
   refetch,
+  loadMore,
   onSelectionChange,
   disabled,
   maxGroups,
@@ -243,6 +245,8 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                 }
               />
             )}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
             extraData={localSelectedGroups}
             showsVerticalScrollIndicator={false}
           />
@@ -260,7 +264,8 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
   maxGroups = 10,
 }) => {
   // Initialize with role 'ADMIN' filter to only fetch admin groups
-  const {groups, loading, error, refetch, applyFilters} = useGetJoinedGroups();
+  const {groups, loading, error, refetch, applyFilters, loadMore} =
+    useGetJoinedGroups();
 
   // Apply admin role filter on component mount
   useEffect(() => {
@@ -314,6 +319,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
           loading={loading}
           error={error}
           refetch={refetch}
+          loadMore={loadMore}
           onSelectionChange={handleSelectionChange}
           disabled={disabled}
           maxGroups={maxGroups}
@@ -332,6 +338,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
     loading,
     error,
     refetch,
+    loadMore,
     disabled,
     maxGroups,
   ]);

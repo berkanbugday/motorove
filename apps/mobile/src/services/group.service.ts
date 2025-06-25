@@ -198,6 +198,8 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
       skip,
       filters,
     },
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'network-only',
     onError: errorObj => {
       loggingService.error('Error fetching user groups:', errorObj);
     },
@@ -215,6 +217,9 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     }
 
     try {
+      // First refetch current data to ensure we have the latest
+      await originalRefetch();
+
       const result = await fetchMore({
         variables: {
           skip: data?.joinedGroups?.length || 0,
@@ -241,7 +246,15 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     } catch (errorObj) {
       loggingService.error('Error loading more joined groups:', errorObj);
     }
-  }, [data?.joinedGroups?.length, fetchMore, hasMore, limit, loading, filters]);
+  }, [
+    data?.joinedGroups?.length,
+    fetchMore,
+    hasMore,
+    limit,
+    loading,
+    filters,
+    originalRefetch,
+  ]);
 
   // Apply filters and reset pagination
   const applyFilters = useCallback((newFilters: GroupFilters) => {

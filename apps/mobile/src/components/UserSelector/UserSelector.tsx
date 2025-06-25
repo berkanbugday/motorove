@@ -1,228 +1,526 @@
-import React, {useState, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   StyleSheet,
-  FlatList,
-  ActivityIndicator,
   TouchableOpacity,
   Image,
+  ViewStyle,
+  ActivityIndicator,
+  FlatList,
+  Animated,
 } from 'react-native';
-import {Typography, Chip, Icon} from '@components';
-import {colors, radius, spacing} from '@theme';
-import {userService} from '@services/user.service';
+import {colors, spacing, radius} from '@theme';
+import {Typography, Icon, Chip, Button} from '@components';
+import {openBottomSheet} from '@components/BottomSheet';
+import {UserService} from '@services/user.service';
+import type {User} from '../../../src/types';
 
-type User = {
-  id: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  avatar?: string | null;
-};
-
-interface UserSelectorProps {
+export interface UserSelectorProps {
   selectedUsers: string[];
   onUsersChange: (userIds: string[]) => void;
+  style?: ViewStyle;
+  disabled?: boolean;
   maxUsers?: number;
-  showSelectedCount?: boolean;
 }
+
+interface UserItemProps {
+  user: User;
+  isSelected: boolean;
+  onToggle: (userId: string) => void;
+  disabled?: boolean;
+}
+
+interface BottomSheetContentProps {
+  users: User[];
+  selectedUsers: string[];
+  loading: boolean;
+  error: any;
+  refetch: () => void;
+  loadMore: () => void;
+  onSelectionChange: (selectedIds: string[]) => void;
+  disabled: boolean;
+  maxUsers: number;
+}
+
+// Utility function to get user's display name
+const getUserName = (user: User): string => {
+  if (user.firstName && user.lastName) {
+    return `${user.firstName} ${user.lastName}`;
+  }
+  if (user.firstName) {
+    return user.firstName;
+  }
+  return 'Unknown User';
+};
+
+const UserItem: React.FC<UserItemProps> = ({
+  user,
+  isSelected,
+  onToggle,
+  disabled,
+}) => {
+  // Add animation value for selection indicator
+  const [scaleAnim] = useState(new Animated.Value(1));
+
+  const handlePress = () => {
+    if (!disabled) {
+      // Animate the selection indicator
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.8,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      onToggle(user.id);
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.userItem,
+        isSelected && styles.userItemSelected,
+        disabled && styles.userItemDisabled,
+      ]}
+      onPress={handlePress}
+      disabled={disabled}
+      activeOpacity={0.7}>
+      <View style={styles.userContent}>
+        <View style={styles.userImageContainer}>
+          {user.avatar ? (
+            <Image source={{uri: user.avatar}} style={styles.userImage} />
+          ) : (
+            <View style={[styles.userImage, styles.userImagePlaceholder]}>
+              <Icon name="user" size={16} color={colors.neutral.grey} />
+            </View>
+          )}
+        </View>
+        <View style={styles.userInfo}>
+          <Typography variant="body" style={styles.userName} numberOfLines={1}>
+            {getUserName(user)}
+          </Typography>
+        </View>
+      </View>
+      <Animated.View
+        style={[styles.selectionIndicator, {transform: [{scale: scaleAnim}]}]}>
+        {isSelected ? (
+          <View style={styles.checkmarkContainer}>
+            <Icon name="check" size={16} color={colors.neutral.white} />
+          </View>
+        ) : (
+          <View style={styles.uncheckedContainer} />
+        )}
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
+
+const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
+  users,
+  selectedUsers,
+  loading,
+  error,
+  refetch,
+  loadMore,
+  onSelectionChange,
+  disabled,
+  maxUsers,
+}) => {
+  // Use state derived from props with useEffect to ensure it stays in sync
+  const [localSelectedUsers, setLocalSelectedUsers] =
+    useState<string[]>(selectedUsers);
+
+  // Update local state whenever props change
+  useEffect(() => {
+    setLocalSelectedUsers(selectedUsers);
+  }, [selectedUsers]);
+
+  // Toggle a single user selection
+  const handleLocalUserToggle = useCallback(
+    (userId: string) => {
+      let updatedSelection;
+
+      if (localSelectedUsers.includes(userId)) {
+        // Remove user
+        updatedSelection = localSelectedUsers.filter(id => id !== userId);
+      } else if (localSelectedUsers.length < maxUsers) {
+        // Add user if under max limit
+        updatedSelection = [...localSelectedUsers, userId];
+      } else {
+        return; // Don't update if max users reached
+      }
+
+      setLocalSelectedUsers(updatedSelection);
+      onSelectionChange(updatedSelection);
+    },
+    [localSelectedUsers, onSelectionChange, maxUsers],
+  );
+
+  // Select all users up to max limit
+  const handleSelectAll = useCallback(() => {
+    // Only select up to maxUsers
+    const usersToSelect = users.slice(0, maxUsers).map(u => u.id);
+    setLocalSelectedUsers(usersToSelect);
+    onSelectionChange(usersToSelect);
+  }, [users, maxUsers, onSelectionChange]);
+
+  // Clear all selections
+  const handleClearAll = useCallback(() => {
+    setLocalSelectedUsers([]);
+    onSelectionChange([]);
+  }, [onSelectionChange]);
+
+  // Determine if we can select all (if we're under the max limit)
+  const canSelectMore = localSelectedUsers.length < maxUsers;
+  const allSelected =
+    localSelectedUsers.length === Math.min(users.length, maxUsers);
+
+  return (
+    <View style={styles.bottomSheetContainer}>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Typography variant="body" color={colors.neutral.grey}>
+            Loading users...
+          </Typography>
+        </View>
+      ) : error || users.length === 0 ? (
+        <View style={styles.errorContainer}>
+          <Typography variant="body" color={colors.neutral.grey}>
+            {error ? 'Failed to load users' : "You don't follow any users yet"}
+          </Typography>
+          {error && (
+            <TouchableOpacity onPress={refetch} style={styles.retryButton}>
+              <Typography variant="caption" color={colors.primary.main}>
+                Try again
+              </Typography>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <>
+          {/* Add bulk selection controls */}
+          <View style={styles.bulkSelectionControls}>
+            <Typography variant="caption" color={colors.neutral.grey}>
+              Selected: {localSelectedUsers.length}/{maxUsers}
+            </Typography>
+            <View style={styles.bulkActionButtons}>
+              {allSelected ? (
+                <Button
+                  title="Clear All"
+                  variant="text"
+                  size="small"
+                  onPress={handleClearAll}
+                  disabled={localSelectedUsers.length === 0 || disabled}
+                />
+              ) : (
+                <Button
+                  title="Select All"
+                  variant="text"
+                  size="small"
+                  onPress={handleSelectAll}
+                  disabled={!canSelectMore || disabled || users.length === 0}
+                />
+              )}
+            </View>
+          </View>
+
+          <FlatList
+            data={users}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <UserItem
+                key={item.id}
+                user={item}
+                isSelected={localSelectedUsers.includes(item.id)}
+                onToggle={handleLocalUserToggle}
+                disabled={
+                  disabled ||
+                  (!localSelectedUsers.includes(item.id) &&
+                    localSelectedUsers.length >= maxUsers)
+                }
+              />
+            )}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            extraData={localSelectedUsers}
+            showsVerticalScrollIndicator={false}
+          />
+        </>
+      )}
+    </View>
+  );
+};
 
 export const UserSelector: React.FC<UserSelectorProps> = ({
   selectedUsers,
   onUsersChange,
+  style,
+  disabled = false,
   maxUsers = 10,
-  showSelectedCount = true,
 }) => {
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserDetails, setSelectedUserDetails] = useState<User[]>([]);
+  const {users, loading, error, refresh, loadMore} =
+    UserService.useMyFollowing();
 
+  // Update selected user details when the list of users or selected IDs changes
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        // Fetch followed users - we're inviting people we follow
-        const followingUsers = await userService.getMyFollowing();
-        setUsers(followingUsers);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  const toggleUserSelection = (userId: string) => {
-    if (selectedUsers.includes(userId)) {
-      // Remove user from selection
-      onUsersChange(selectedUsers.filter(id => id !== userId));
-    } else if (selectedUsers.length < maxUsers) {
-      // Add user to selection if under max
-      onUsersChange([...selectedUsers, userId]);
+    if (users) {
+      const selectedDetails = users.filter(user =>
+        selectedUsers.includes(user.id),
+      );
+      setSelectedUserDetails(selectedDetails);
     }
-  };
+  }, [users, selectedUsers]);
 
-  const getUserName = (user: User): string => {
-    if (user.firstName && user.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    if (user.firstName) {
-      return user.firstName;
-    }
-    return 'Unknown User';
-  };
+  // Handle the bottom sheet selection logic
+  const handleShowSelector = useCallback(() => {
+    openBottomSheet({
+      title: 'Select Users',
+      content: (
+        <BottomSheetContent
+          users={users}
+          selectedUsers={selectedUsers}
+          loading={loading}
+          error={error}
+          refetch={refresh}
+          loadMore={loadMore}
+          onSelectionChange={onUsersChange}
+          disabled={disabled}
+          maxUsers={maxUsers}
+        />
+      ),
+      snapPoint: 'full',
+      showCloseButton: true,
+      closeButtonPosition: 'top-left',
+      closeOnBackdropPress: true,
+    });
+  }, [
+    users,
+    selectedUsers,
+    loading,
+    error,
+    refresh,
+    loadMore,
+    onUsersChange,
+    disabled,
+    maxUsers,
+  ]);
 
   if (loading) {
-    return <ActivityIndicator size="small" color={colors.primary.main} />;
+    return (
+      <View style={[styles.container, style]}>
+        <ActivityIndicator color={colors.neutral.black} />
+      </View>
+    );
   }
 
-  if (users.length === 0) {
+  if (error || users.length === 0) {
     return (
-      <View style={styles.emptyState}>
+      <View style={[styles.container, style]}>
         <Typography variant="body" color={colors.neutral.grey}>
-          You don't follow any users yet.
+          {error ? 'Failed to load users' : "You don't follow any users yet"}
         </Typography>
+        {error && (
+          <TouchableOpacity onPress={refresh} style={styles.retryButton}>
+            <Typography variant="caption">Try again</Typography>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {showSelectedCount && (
-        <View style={styles.header}>
-          <Typography variant="body" color={colors.neutral.darkGrey}>
-            Selected Users: {selectedUsers.length}/{maxUsers}
+    <View style={[styles.container, style]}>
+      <View style={styles.headerContainer}>
+        <View style={styles.headerContent}>
+          <Typography variant="body" weight="semiBold" style={styles.title}>
+            Invite Users
           </Typography>
+          {selectedUsers.length < maxUsers && (
+            <Button
+              title="Add User"
+              variant="text"
+              size="small"
+              iconName="plus"
+              onPress={handleShowSelector}
+            />
+          )}
         </View>
-      )}
+        <Typography variant="caption" color={colors.neutral.grey}>
+          {selectedUsers.length >= maxUsers
+            ? `Maximum number of users (${maxUsers}) selected`
+            : `Select users to invite to your private event (max ${maxUsers})`}
+        </Typography>
+      </View>
 
-      <FlatList
-        data={users}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <TouchableOpacity
-            style={styles.userItem}
-            onPress={() => toggleUserSelection(item.id)}
-            activeOpacity={0.7}>
-            <View style={styles.userInfo}>
-              {item.avatar ? (
-                <Image source={{uri: item.avatar}} style={styles.userAvatar} />
-              ) : (
-                <View
-                  style={[
-                    styles.userAvatar,
-                    {backgroundColor: colors.secondary.light},
-                  ]}>
-                  <Icon name="user" size={16} color={colors.neutral.grey} />
-                </View>
-              )}
-              <Typography variant="body">{getUserName(item)}</Typography>
-            </View>
-
-            <View style={styles.chipContainer}>
-              {selectedUsers.includes(item.id) ? (
-                <View
-                  style={[
-                    styles.checkbox,
-                    {backgroundColor: colors.primary.main},
-                  ]}>
-                  <Icon name="check" size={14} color={colors.neutral.white} />
-                </View>
-              ) : (
-                <View style={styles.checkbox} />
-              )}
-            </View>
-          </TouchableOpacity>
-        )}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      />
-
-      {selectedUsers.length > 0 && (
-        <View style={styles.selectedUsersContainer}>
-          <Typography variant="bodySmall" color={colors.neutral.darkGrey}>
-            Selected Users:
-          </Typography>
-          <View style={styles.chipsContainer}>
-            {selectedUsers.map(userId => {
-              const user = users.find(u => u.id === userId);
-              if (!user) {
-                return null;
+      {/* Selected Users with Plus Icon Chips */}
+      <View style={styles.selectedSection}>
+        <View style={styles.selectedChips}>
+          {selectedUserDetails.map(user => (
+            <Chip
+              key={user.id}
+              label={getUserName(user)}
+              variant="filled"
+              color="dark"
+              removable={true}
+              onRemove={
+                !disabled
+                  ? () =>
+                      onUsersChange(selectedUsers.filter(id => id !== user.id))
+                  : undefined
               }
-              return (
-                <Chip
-                  key={userId}
-                  label={getUserName(user)}
-                  onRemove={() => toggleUserSelection(userId)}
-                  style={styles.chip}
-                />
-              );
-            })}
-          </View>
+              style={styles.selectedChip}
+            />
+          ))}
+
+          {/* Add User Chip - only show if under max limit */}
+          {selectedUsers.length === 0 && selectedUsers.length < maxUsers && (
+            <Chip
+              label="Add User"
+              variant="outlined"
+              color="dark"
+              leadingIcon="plus"
+              onPress={handleShowSelector}
+            />
+          )}
         </View>
-      )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
+  },
+  headerContainer: {
     marginBottom: spacing.md,
   },
-  header: {
-    marginBottom: spacing.sm,
-    paddingHorizontal: spacing.xs,
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
+  title: {
+    marginBottom: spacing.xs,
+  },
+  selectedSection: {
+    marginBottom: spacing.md,
+  },
+
+  selectedChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  selectedChip: {
+    marginBottom: spacing.xs,
+  },
+
+  // Bottom Sheet Styles
+  bottomSheetContainer: {
+    maxHeight: '100%',
+  },
+  loadingContainer: {
+    paddingVertical: spacing.xl,
+    alignItems: 'center',
+  },
+  errorContainer: {
+    paddingVertical: spacing.xl,
+    alignItems: 'center',
+  },
+
+  bottomSheetFooterText: {
+    paddingVertical: spacing.sm,
+  },
+
+  // Bulk selection controls
+  bulkSelectionControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+    marginBottom: spacing.md,
+  },
+  bulkActionButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+
+  // User Item Styles
   userItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.light,
+    marginBottom: spacing.sm,
+    borderRadius: radius.md,
+  },
+  userItemSelected: {
+    backgroundColor: colors.secondary.light,
+  },
+  userItemDisabled: {
+    opacity: 0.5,
+  },
+  userContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userImageContainer: {
+    marginRight: spacing.sm,
+  },
+  userImage: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.round,
+  },
+  userImagePlaceholder: {
+    backgroundColor: colors.secondary.light,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: 1,
   },
-  userAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    marginRight: spacing.sm,
+  userName: {
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  selectionIndicator: {
+    marginLeft: spacing.sm,
+  },
+  checkmarkContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.primary.main,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  chipContainer: {
-    flexDirection: 'row',
+  uncheckedContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.neutral.lightGrey,
+    backgroundColor: colors.neutral.white,
   },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: radius.xs,
-    borderWidth: 1,
-    borderColor: colors.neutral.grey,
-    justifyContent: 'center',
+  retryButton: {
+    marginTop: spacing.sm,
     alignItems: 'center',
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl,
-  },
-  listContent: {
-    paddingBottom: spacing.sm,
-  },
-  selectedUsersContainer: {
-    marginTop: spacing.md,
-  },
-  chipsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: spacing.xs,
-  },
-  chip: {
-    marginRight: spacing.xs,
-    marginBottom: spacing.xs,
   },
 });
 

@@ -4,6 +4,7 @@ import {loggingService} from './logging.service';
 import {SEARCH_USERS} from './graphql/user.graphql';
 import {useCallback, useEffect, useState} from 'react';
 import {apolloClient} from '../configs/apolloClientConfig';
+import {GET_MY_FOLLOWING} from './graphql/follow.graphql';
 
 /**
  * Hook for searching users by name or email with pagination
@@ -49,6 +50,7 @@ export const useSearchUsers = (initialQuery = '') => {
               skip: skipValue,
             },
           },
+          fetchPolicy: 'network-only',
         });
 
         if (data?.searchUsers) {
@@ -112,6 +114,86 @@ export const useSearchUsers = (initialQuery = '') => {
 };
 
 /**
+ * Hook for getting users that the current user is following with pagination
+ * @returns Following users data, loading state, error state and functions for pagination
+ */
+export const useMyFollowing = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [skip, setSkip] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+
+  const [getFollowingQuery] = useLazyQuery(GET_MY_FOLLOWING, {
+    fetchPolicy: 'network-only',
+    onError: errorObj => {
+      loggingService.error('Error fetching following:', errorObj);
+      setError(errorObj);
+      setLoading(false);
+    },
+  });
+
+  const fetchFollowing = useCallback(
+    async (skipValue = 0, append = false) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const {data} = await getFollowingQuery({
+          variables: {
+            limit: 20,
+            skip: skipValue,
+          },
+          fetchPolicy: 'network-only',
+        });
+
+        if (data?.myFollowing) {
+          if (append) {
+            setUsers(prevUsers => [...prevUsers, ...data.myFollowing]);
+          } else {
+            setUsers(data.myFollowing);
+          }
+          setHasMore(data.myFollowing.length === 20);
+          setSkip(skipValue + data.myFollowing.length);
+        }
+      } catch (e) {
+        loggingService.error('Error fetching following users:', e);
+        setError(e as Error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getFollowingQuery],
+  );
+
+  // Effect to fetch data on mount
+  useEffect(() => {
+    fetchFollowing(0, false);
+  }, [fetchFollowing]);
+
+  const refresh = useCallback(() => {
+    setSkip(0); // Reset pagination
+    fetchFollowing(0, false);
+  }, [fetchFollowing]);
+
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      // Load additional users with real-time data
+      fetchFollowing(skip, true);
+    }
+  }, [loading, hasMore, fetchFollowing, skip]);
+
+  return {
+    users,
+    loading,
+    error,
+    hasMore,
+    refresh,
+    loadMore,
+  };
+};
+
+/**
  * User service for handling user-related operations
  */
 export const userService = {
@@ -141,6 +223,29 @@ export const userService = {
       throw error;
     }
   },
+
+  /**
+   * Get users that the current user is following
+   * @param limit Maximum number of results to return
+   * @param skip Number of results to skip (for pagination)
+   * @returns Array of users the current user follows
+   */
+  async getMyFollowing(limit = 20, skip = 0): Promise<User[]> {
+    try {
+      const {data} = await apolloClient.query({
+        query: GET_MY_FOLLOWING,
+        variables: {
+          limit,
+          skip,
+        },
+        fetchPolicy: 'network-only',
+      });
+      return data.myFollowing || [];
+    } catch (error) {
+      loggingService.error('Error in getMyFollowing:', error);
+      throw error;
+    }
+  },
 };
 
 /**
@@ -148,6 +253,7 @@ export const userService = {
  */
 export const UserService = {
   useSearchUsers,
+  useMyFollowing,
 };
 
 export default UserService;
