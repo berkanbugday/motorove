@@ -48,6 +48,8 @@ enum NotificationType {
   GROUP_MEMBERSHIP_REQUEST
   GROUP_MEMBERSHIP_REQUEST_ACCEPTED
   GROUP_MEMBERSHIP_REQUEST_REJECTED
+  EVENT_INVITATION
+  EVENT_REMINDER
 }
 
 enum NotificationStatus {
@@ -86,6 +88,19 @@ enum ExperienceLevel {
   ALL_LEVELS
 }
 
+enum EventParticipantStatus {
+  INVITED
+  JOINED
+  LEFT
+  DECLINED
+}
+
+enum EventInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 // Models
 model User {
   id         String   @id @default(uuid())
@@ -119,9 +134,12 @@ model User {
   followers UserFollowing[] @relation("UserFollowers")
   following UserFollowing[] @relation("UserFollowing")
 
-  // Event invitations
-  sentInvitations     EventInvitation[] @relation("SentInvitations")
-  receivedInvitations EventInvitation[] @relation("ReceivedInvitations")
+  // Event relations
+  createdEvents       Event[]            @relation("EventCreatedBy")
+  updatedEvents       Event[]            @relation("EventUpdatedBy")
+  eventParticipations EventParticipant[]
+  sentInvitations     EventInvitation[]  @relation("SentInvitations")
+  receivedInvitations EventInvitation[]  @relation("ReceivedInvitations")
 }
 
 model City {
@@ -165,6 +183,7 @@ model Group {
   // Relations
   memberships GroupMembership[]
   posts       Post[]
+  events      Event[]
 }
 
 model GroupMembership {
@@ -335,17 +354,96 @@ model UserFollowing {
   @@index([followingId])
 }
 
-// Event invitation for users (used for private solo rides)
+// Event model
+model Event {
+  id              String    @id @default(uuid())
+  title           String    @db.VarChar(100)
+  description     String    @db.Text
+  eventType       EventType
+  startDateTime   DateTime
+  endDateTime     DateTime?
+  meetingPoint    String?   @db.VarChar(200)
+  startLocation   String?   @db.VarChar(200)
+  finishLocation  String?   @db.VarChar(200)
+  maxParticipants Int?
+  isPrivate       Boolean   @default(false)
+  images          String[]
+
+  // Ride-specific fields
+  roadType           RoadType?
+  difficultyLevel    DifficultyLevel?
+  routeDescription   String?          @db.Text
+  restStops          String?          @db.Text
+  campingInfo        String?          @db.Text
+  equipmentChecklist String?          @db.Text
+
+  // Workshop-specific fields
+  instructorInfo  String?          @db.Text
+  topicsCovered   String?          @db.Text
+  experienceLevel ExperienceLevel?
+  price           Float?
+
+  // Coordinates for locations
+  meetingPointLat   Float?
+  meetingPointLng   Float?
+  startLocationLat  Float?
+  startLocationLng  Float?
+  finishLocationLat Float?
+  finishLocationLng Float?
+
+  // Relations
+  group   Group?  @relation(fields: [groupId], references: [id])
+  groupId String?
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("EventCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("EventUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  // Relationships
+  participants EventParticipant[]
+  invitations  EventInvitation[]
+
+  @@index([eventType])
+  @@index([startDateTime])
+  @@index([createdById])
+  @@index([groupId])
+  @@index([isActive])
+}
+
+// Event participant model
+model EventParticipant {
+  id        String                 @id @default(uuid())
+  event     Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   String
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  status    EventParticipantStatus @default(JOINED)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+  @@index([status])
+}
+
+// Event invitation model (updated)
 model EventInvitation {
-  id        String   @id @default(uuid())
-  eventId   String // Will add relation when implementing events
+  id        String                @id @default(uuid())
+  eventId   String
+  event     Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
   inviterId String
-  inviter   User     @relation("SentInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
+  inviter   User                  @relation("SentInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
   inviteeId String
-  invitee   User     @relation("ReceivedInvitations", fields: [inviteeId], references: [id], onDelete: Cascade)
-  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  invitee   User                  @relation("ReceivedInvitations", fields: [inviteeId], references: [id], onDelete: Cascade)
+  status    EventInvitationStatus @default(PENDING)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
 
   @@unique([eventId, inviteeId])
   @@index([eventId])
