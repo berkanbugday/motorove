@@ -10,12 +10,7 @@ import {useGetGroupTags} from '@services/group-tag.service';
 import Dropdown from '@components/Dropdown';
 import {DropdownItem} from '@components/Dropdown/types';
 import {Chip} from '@components/Chip';
-
-export interface GroupFilters {
-  city: string | null;
-  tags: string[];
-  privacy: 'ALL' | 'PUBLIC' | 'PRIVATE';
-}
+import {GroupFilters} from '@services/group.service';
 
 interface GroupFilterProps {
   initialFilters: GroupFilters;
@@ -89,6 +84,7 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
       city: null,
       tags: [],
       privacy: 'ALL',
+      role: 'ALL',
     };
     setFilters(resetFilters);
     onApplyFilters(resetFilters);

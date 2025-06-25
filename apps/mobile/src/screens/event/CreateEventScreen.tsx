@@ -37,6 +37,7 @@ import {
   SelectLocationMap,
   UserSelector,
   Wizard,
+  Tabs,
 } from '@components';
 import Dialog from '@components/Dialog';
 import {colors, radius, spacing} from '@theme';
@@ -104,6 +105,7 @@ export const CreateEventScreen: React.FC = () => {
     name?: string;
     addresses?: any[];
   }>({});
+  const [activeInviteTab, setActiveInviteTab] = useState<string>('users');
 
   // Enum hooks
   const {eventTypes} = useEnumEventTypes();
@@ -477,6 +479,11 @@ export const CreateEventScreen: React.FC = () => {
     setCurrentStepIndex(index);
   }, []);
 
+  // Tab change handler for invite tabs
+  const handleTabChange = useCallback((key: string) => {
+    setActiveInviteTab(key);
+  }, []);
+
   // Form validation functions
   const validateBasicInfo = useCallback(async () => {
     return await trigger([
@@ -499,15 +506,11 @@ export const CreateEventScreen: React.FC = () => {
 
     // Add conditional fields based on privacy settings
     if (isPrivate) {
-      if (isSoloRide) {
-        fieldsToValidate.push('invitedUsers');
-      } else {
-        fieldsToValidate.push('invitedGroups');
-      }
+      fieldsToValidate.push('invitedUsers', 'invitedGroups');
     }
 
     return await trigger(fieldsToValidate as (keyof CreateEventFormValues)[]);
-  }, [trigger, isPrivate, isSoloRide]);
+  }, [trigger, isPrivate]);
 
   const validateEventSpecificDetails = useCallback(async () => {
     if (isRideOrCamping) {
@@ -771,30 +774,29 @@ export const CreateEventScreen: React.FC = () => {
                 {/* Group/User Selectors for Private Events */}
                 {isPrivate && (
                   <View style={styles.privateEventSection}>
-                    {/* For solo rides, show user selector */}
-                    {isSoloRide ? (
-                      <View>
-                        <Typography
-                          variant="bodySmall"
-                          weight="semiBold"
-                          style={styles.privateEventTitle}>
-                          Invite Users from Followers
-                        </Typography>
+                    <Tabs
+                      items={[
+                        {key: 'users', label: 'Users'},
+                        {key: 'groups', label: 'Groups'},
+                      ]}
+                      selectedKey={activeInviteTab}
+                      onTabChange={handleTabChange}
+                      variant="pill"
+                      equalWidth={true}
+                    />
+
+                    {activeInviteTab === 'users' && (
+                      <View style={styles.tabContent}>
                         <UserSelector
                           selectedUsers={selectedUsers}
                           onUsersChange={handleUsersChange}
                           maxUsers={10}
                         />
                       </View>
-                    ) : (
-                      /* For other event types, show group selector */
-                      <View>
-                        <Typography
-                          variant="bodySmall"
-                          weight="semiBold"
-                          style={styles.privateEventTitle}>
-                          Invite Groups
-                        </Typography>
+                    )}
+
+                    {activeInviteTab === 'groups' && (
+                      <View style={styles.tabContent}>
                         <GroupSelector
                           selectedGroups={selectedGroups}
                           onGroupsChange={handleGroupsChange}
@@ -1024,6 +1026,8 @@ export const CreateEventScreen: React.FC = () => {
       handleOpenStartLocationMap,
       handleOpenFinishLocationMap,
       selectedFinishLocation,
+      activeInviteTab,
+      handleTabChange,
     ],
   );
 
@@ -1352,6 +1356,9 @@ const styles = StyleSheet.create({
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  tabContent: {
+    marginTop: spacing.md,
   },
 });
 

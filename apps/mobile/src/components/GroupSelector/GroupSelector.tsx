@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,8 +7,9 @@ import {
   ViewStyle,
   ActivityIndicator,
   FlatList,
+  Animated,
 } from 'react-native';
-import {colors, spacing, radius, getShadow} from '@theme';
+import {colors, spacing, radius} from '@theme';
 import {Typography, Icon, Chip, Button} from '@components';
 import {openBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
@@ -35,7 +36,7 @@ interface BottomSheetContentProps {
   loading: boolean;
   error: any;
   refetch: () => void;
-  handleGroupToggle: (groupId: string) => void;
+  onSelectionChange: (selectedIds: string[]) => void;
   disabled: boolean;
   maxGroups: number;
 }
@@ -46,8 +47,25 @@ const GroupItem: React.FC<GroupItemProps> = ({
   onToggle,
   disabled,
 }) => {
+  // Add animation value for selection indicator
+  const [scaleAnim] = useState(new Animated.Value(1));
+
   const handlePress = () => {
     if (!disabled) {
+      // Animate the selection indicator
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.8,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
       onToggle(group.id);
     }
   };
@@ -85,7 +103,8 @@ const GroupItem: React.FC<GroupItemProps> = ({
           </Typography>
         </View>
       </View>
-      <View style={styles.selectionIndicator}>
+      <Animated.View
+        style={[styles.selectionIndicator, {transform: [{scale: scaleAnim}]}]}>
         {isSelected ? (
           <View style={styles.checkmarkContainer}>
             <Icon name="check" size={16} color={colors.neutral.white} />
@@ -93,7 +112,7 @@ const GroupItem: React.FC<GroupItemProps> = ({
         ) : (
           <View style={styles.uncheckedContainer} />
         )}
-      </View>
+      </Animated.View>
     </TouchableOpacity>
   );
 };
@@ -104,55 +123,134 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   loading,
   error,
   refetch,
-  handleGroupToggle,
+  onSelectionChange,
   disabled,
   maxGroups,
-}) => (
-  <View>
-    {loading ? (
-      <View style={styles.loadingContainer}>
-        <Typography variant="body" color={colors.neutral.grey}>
-          Loading your groups...
-        </Typography>
-      </View>
-    ) : error || groups.length === 0 ? (
-      <View style={styles.errorContainer}>
-        <Typography variant="body" color={colors.neutral.grey}>
-          {error
-            ? 'Failed to load groups'
-            : "You haven't joined any groups yet"}
-        </Typography>
-        {error && (
-          <TouchableOpacity onPress={refetch} style={styles.retryButton}>
-            <Typography variant="caption" color={colors.primary.main}>
-              Try again
+}) => {
+  // Use state derived from props with useEffect to ensure it stays in sync
+  const [localSelectedGroups, setLocalSelectedGroups] =
+    useState<string[]>(selectedGroups);
+
+  // Update local state whenever props change
+  useEffect(() => {
+    setLocalSelectedGroups(selectedGroups);
+  }, [selectedGroups]);
+
+  // Toggle a single group selection
+  const handleLocalGroupToggle = useCallback(
+    (groupId: string) => {
+      let updatedSelection;
+
+      if (localSelectedGroups.includes(groupId)) {
+        // Remove group
+        updatedSelection = localSelectedGroups.filter(id => id !== groupId);
+      } else if (localSelectedGroups.length < maxGroups) {
+        // Add group if under max limit
+        updatedSelection = [...localSelectedGroups, groupId];
+      } else {
+        return; // Don't update if max groups reached
+      }
+
+      setLocalSelectedGroups(updatedSelection);
+      onSelectionChange(updatedSelection);
+    },
+    [localSelectedGroups, onSelectionChange, maxGroups],
+  );
+
+  // Select all groups up to max limit
+  const handleSelectAll = useCallback(() => {
+    // Only select up to maxGroups
+    const groupsToSelect = groups.slice(0, maxGroups).map(g => g.id);
+    setLocalSelectedGroups(groupsToSelect);
+    onSelectionChange(groupsToSelect);
+  }, [groups, maxGroups, onSelectionChange]);
+
+  // Clear all selections
+  const handleClearAll = useCallback(() => {
+    setLocalSelectedGroups([]);
+    onSelectionChange([]);
+  }, [onSelectionChange]);
+
+  // Determine if we can select all (if we're under the max limit)
+  const canSelectMore = localSelectedGroups.length < maxGroups;
+  const allSelected =
+    localSelectedGroups.length === Math.min(groups.length, maxGroups);
+
+  return (
+    <View style={styles.bottomSheetContainer}>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <Typography variant="body" color={colors.neutral.grey}>
+            Loading your groups...
+          </Typography>
+        </View>
+      ) : error || groups.length === 0 ? (
+        <View style={styles.errorContainer}>
+          <Typography variant="body" color={colors.neutral.grey}>
+            {error
+              ? 'Failed to load groups'
+              : "You haven't joined any groups yet"}
+          </Typography>
+          {error && (
+            <TouchableOpacity onPress={refetch} style={styles.retryButton}>
+              <Typography variant="caption" color={colors.primary.main}>
+                Try again
+              </Typography>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <>
+          {/* Add bulk selection controls */}
+          <View style={styles.bulkSelectionControls}>
+            <Typography variant="caption" color={colors.neutral.grey}>
+              Selected: {localSelectedGroups.length}/{maxGroups}
             </Typography>
-          </TouchableOpacity>
-        )}
-      </View>
-    ) : (
-      <FlatList
-        data={groups}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <GroupItem
-            key={item.id}
-            group={item}
-            isSelected={selectedGroups.includes(item.id)}
-            onToggle={handleGroupToggle}
-            disabled={
-              disabled ||
-              (!selectedGroups.includes(item.id) &&
-                selectedGroups.length >= maxGroups)
-            }
+            <View style={styles.bulkActionButtons}>
+              {allSelected ? (
+                <Button
+                  title="Clear All"
+                  variant="text"
+                  size="small"
+                  onPress={handleClearAll}
+                  disabled={localSelectedGroups.length === 0 || disabled}
+                />
+              ) : (
+                <Button
+                  title="Select All"
+                  variant="text"
+                  size="small"
+                  onPress={handleSelectAll}
+                  disabled={!canSelectMore || disabled || groups.length === 0}
+                />
+              )}
+            </View>
+          </View>
+
+          <FlatList
+            data={groups}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+              <GroupItem
+                key={item.id}
+                group={item}
+                isSelected={localSelectedGroups.includes(item.id)}
+                onToggle={handleLocalGroupToggle}
+                disabled={
+                  disabled ||
+                  (!localSelectedGroups.includes(item.id) &&
+                    localSelectedGroups.length >= maxGroups)
+                }
+              />
+            )}
+            extraData={localSelectedGroups}
+            showsVerticalScrollIndicator={false}
           />
-        )}
-        extraData={selectedGroups}
-        showsVerticalScrollIndicator={false}
-      />
-    )}
-  </View>
-);
+        </>
+      )}
+    </View>
+  );
+};
 
 export const GroupSelector: React.FC<GroupSelectorProps> = ({
   selectedGroups,
@@ -161,33 +259,50 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
   disabled = false,
   maxGroups = 10,
 }) => {
-  const {groups, loading, error, refetch} = useGetJoinedGroups();
+  // Initialize with role 'ADMIN' filter to only fetch admin groups
+  const {groups, loading, error, refetch, applyFilters} = useGetJoinedGroups();
 
-  const handleGroupToggle = useCallback(
-    (groupId: string) => {
-      if (selectedGroups.includes(groupId)) {
-        // Remove group
-        onGroupsChange(selectedGroups.filter(id => id !== groupId));
-      } else {
-        // Add group (check max limit)
-        if (selectedGroups.length < maxGroups) {
-          onGroupsChange([...selectedGroups, groupId]);
-        }
-      }
+  // Apply admin role filter on component mount
+  useEffect(() => {
+    // Set the filter to only show groups where the user is an admin
+    applyFilters({
+      city: null,
+      tags: [],
+      privacy: 'ALL',
+      role: 'ADMIN',
+    });
+  }, [applyFilters]);
+
+  // Local state to handle selection
+  const [localSelectedGroups, setLocalSelectedGroups] =
+    useState<string[]>(selectedGroups);
+
+  // Keep local state in sync with props
+  useEffect(() => {
+    setLocalSelectedGroups(selectedGroups);
+  }, [selectedGroups]);
+
+  // Handle group selection changes (from main component or bottom sheet)
+  const handleSelectionChange = useCallback(
+    (newSelection: string[]) => {
+      setLocalSelectedGroups(newSelection);
+      onGroupsChange(newSelection);
     },
-    [selectedGroups, onGroupsChange, maxGroups],
+    [onGroupsChange],
   );
 
+  // Handle removing a single group
   const removeGroup = useCallback(
     (groupId: string) => {
-      onGroupsChange(selectedGroups.filter(id => id !== groupId));
+      const updatedGroups = selectedGroups.filter(id => id !== groupId);
+      handleSelectionChange(updatedGroups);
     },
-    [selectedGroups, onGroupsChange],
+    [selectedGroups, handleSelectionChange],
   );
 
   const selectedGroupsData = useMemo(
-    () => groups.filter(group => selectedGroups.includes(group.id)),
-    [groups, selectedGroups],
+    () => groups.filter(group => localSelectedGroups.includes(group.id)),
+    [groups, localSelectedGroups],
   );
 
   const openGroupSelectionSheet = useCallback(() => {
@@ -195,35 +310,25 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
       content: (
         <BottomSheetContent
           groups={groups}
-          selectedGroups={selectedGroups}
+          selectedGroups={localSelectedGroups}
           loading={loading}
           error={error}
           refetch={refetch}
-          handleGroupToggle={handleGroupToggle}
+          onSelectionChange={handleSelectionChange}
           disabled={disabled}
           maxGroups={maxGroups}
         />
       ),
-      footer: (
-        <Typography
-          variant="caption"
-          align="center"
-          color={colors.neutral.grey}
-          style={styles.bottomSheetFooterText}>
-          Selected: {selectedGroups.length}/{maxGroups} groups
-        </Typography>
-      ),
-      snapPoint: 'partial',
-      title: 'Invite Groups',
+      snapPoint: 'full',
+      title: 'Select Groups',
       showCloseButton: true,
       closeOnBackdropPress: true,
       closeButtonPosition: 'top-left',
-      enableGestureControl: false,
     });
   }, [
     groups,
-    selectedGroups,
-    handleGroupToggle,
+    localSelectedGroups,
+    handleSelectionChange,
     loading,
     error,
     refetch,
@@ -263,16 +368,20 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
           <Typography variant="body" weight="semiBold" style={styles.title}>
             Invite Groups
           </Typography>
-          <Button
-            title="Add Group"
-            variant="text"
-            size="small"
-            iconName="plus"
-            onPress={openGroupSelectionSheet}
-          />
+          {localSelectedGroups.length < maxGroups && (
+            <Button
+              title="Add Group"
+              variant="text"
+              size="small"
+              iconName="plus"
+              onPress={openGroupSelectionSheet}
+            />
+          )}
         </View>
         <Typography variant="caption" color={colors.neutral.grey}>
-          Select groups to invite to your private event (max {maxGroups})
+          {localSelectedGroups.length >= maxGroups
+            ? `Maximum number of groups (${maxGroups}) selected`
+            : `Select groups to invite to your private event (max ${maxGroups})`}
         </Typography>
       </View>
 
@@ -291,16 +400,17 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
             />
           ))}
 
-          {/* Add Group Chip */}
-          {selectedGroups.length === 0 && (
-            <Chip
-              label="Add Group"
-              variant="outlined"
-              color="dark"
-              leadingIcon="plus"
-              onPress={openGroupSelectionSheet}
-            />
-          )}
+          {/* Add Group Chip - only show if under max limit */}
+          {localSelectedGroups.length === 0 &&
+            localSelectedGroups.length < maxGroups && (
+              <Chip
+                label="Add Group"
+                variant="outlined"
+                color="dark"
+                leadingIcon="plus"
+                onPress={openGroupSelectionSheet}
+              />
+            )}
         </View>
       </View>
     </View>
@@ -336,6 +446,9 @@ const styles = StyleSheet.create({
   },
 
   // Bottom Sheet Styles
+  bottomSheetContainer: {
+    maxHeight: '100%',
+  },
   loadingContainer: {
     paddingVertical: spacing.xl,
     alignItems: 'center',
@@ -348,6 +461,23 @@ const styles = StyleSheet.create({
   bottomSheetFooterText: {
     paddingVertical: spacing.sm,
   },
+
+  // Bulk selection controls
+  bulkSelectionControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+    marginBottom: spacing.md,
+  },
+  bulkActionButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+
   // Existing Group Item Styles
   groupItem: {
     flexDirection: 'row',
@@ -357,9 +487,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.light,
     marginBottom: spacing.sm,
+    borderRadius: radius.md,
   },
   groupItemSelected: {
-    borderColor: colors.primary.light,
+    backgroundColor: colors.secondary.light,
   },
   groupItemDisabled: {
     opacity: 0.5,
@@ -399,7 +530,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.main,
     justifyContent: 'center',
     alignItems: 'center',
-    ...getShadow('small'),
   },
   uncheckedContainer: {
     width: 24,

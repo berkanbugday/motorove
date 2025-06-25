@@ -131,6 +131,7 @@ type Group {
 input GroupFilterInput {
   city: String
   privacy: String = "ALL"
+  role: String = "ALL"
   tags: [String!]! = []
 }
 

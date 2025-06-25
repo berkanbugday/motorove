@@ -452,6 +452,11 @@ export class GroupsService {
           some: {
             userId,
             status: GroupMembershipStatus.APPROVED,
+            ...(filters?.role && filters.role !== 'ALL'
+              ? {
+                  role: filters.role,
+                }
+              : {}),
           },
         },
         isActive: true,

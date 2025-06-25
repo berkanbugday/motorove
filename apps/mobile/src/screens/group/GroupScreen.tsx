@@ -74,6 +74,7 @@ export const GroupScreen = () => {
     openBottomSheet({
       title: 'Filter Groups',
       closeButtonPosition: 'top-left',
+      enableGestureControl: false,
       content: (
         <GroupFilter
           initialFilters={currentFilters}

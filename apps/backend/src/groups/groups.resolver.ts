@@ -90,7 +90,6 @@ export class GroupsResolver {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    console.log('filters', filters);
     return this.groupsService.findJoinedGroups(
       userId,
       authToken,

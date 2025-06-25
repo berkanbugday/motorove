@@ -55,6 +55,7 @@ export interface GroupFilters {
   city: string | null;
   tags: string[];
   privacy: 'ALL' | 'PUBLIC' | 'PRIVATE';
+  role: 'ALL' | 'ADMIN' | 'MEMBER';
 }
 
 // Hook for creating a group
@@ -182,6 +183,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     city: null,
     tags: [],
     privacy: 'ALL',
+    role: 'ALL',
   });
 
   const {
@@ -275,6 +277,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
     city: null,
     tags: [],
     privacy: 'ALL',
+    role: 'ALL',
   });
 
   const {

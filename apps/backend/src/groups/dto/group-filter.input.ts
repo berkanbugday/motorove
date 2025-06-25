@@ -15,4 +15,9 @@ export class GroupFilterInput {
   @Field(() => [String], { defaultValue: [] })
   @IsOptional()
   tags: string[] = [];
+
+  @Field(() => String, { nullable: true, defaultValue: 'ALL' })
+  @IsOptional()
+  @IsEnum(['ADMIN', 'MEMBER', 'ALL'])
+  role?: 'ADMIN' | 'MEMBER' | 'ALL';
 }
