@@ -515,11 +515,10 @@ export const CreateEventScreen: React.FC = () => {
   const validateEventSpecificDetails = useCallback(async () => {
     if (isRideOrCamping) {
       const fieldsToValidate: (keyof CreateEventFormValues)[] = [
-        'routeDescription',
         'roadType',
         'difficultyLevel',
         'startLocation',
-        'restStops',
+        'finishLocation',
       ];
 
       if (eventType === 'CAMPING_RIDE') {
@@ -534,7 +533,6 @@ export const CreateEventScreen: React.FC = () => {
         'instructorInfo',
         'topicsCovered',
         'experienceLevel',
-        'price',
       ] as const);
     }
     return true;
@@ -850,7 +848,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="finishLocation"
-                      label="Finish Location (optional)"
+                      label="Finish Location"
                       error={errors.finishLocation}
                       icon={
                         <Icon

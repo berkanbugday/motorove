@@ -99,6 +99,14 @@ export const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
       });
     }
 
+    if (!data.finishLocation || data.finishLocation.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Finish location is required',
+        path: ['finishLocation'],
+      });
+    }
+
     if (!data.roadType || data.roadType.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
