@@ -22,6 +22,7 @@ import { CommentsModule } from './comments/comments.module';
 import { FollowsModule } from './follows/follows.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { EventsModule } from './events/events.module';
     FollowsModule,
     UsersModule,
     EventsModule,
+    AddressesModule,
   ],
   controllers: [AppController],
   providers: [

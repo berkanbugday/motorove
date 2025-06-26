@@ -3,6 +3,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { EventFilterInput } from './dto/event-filter.input';
+import { RoadType } from '../enums/models/road-type.enum';
+import { DifficultyLevel } from '../enums/models/difficulty-level.enum';
+import { ExperienceLevel } from '../enums/models/experience-level.enum';
+import { InvitationStatus } from '../enums/models/invitation-status.enum';
 
 @Injectable()
 export class EventsService {
@@ -15,13 +19,11 @@ export class EventsService {
       eventType,
       startDateTime,
       endDateTime,
-      meetingPoint,
-      startLocation,
-      finishLocation,
       maxParticipants,
       isPrivate,
       images,
-      groupId,
+      addresses,
+      invitedGroupIds,
       roadType,
       difficultyLevel,
       routeDescription,
@@ -32,52 +34,57 @@ export class EventsService {
       topicsCovered,
       experienceLevel,
       price,
-      meetingPointLat,
-      meetingPointLng,
-      startLocationLat,
-      startLocationLng,
-      finishLocationLat,
-      finishLocationLng,
     } = createEventInput;
 
-    return this.prisma.event.create({
+    const event = await this.prisma.event.create({
       data: {
         title,
         description,
         eventType,
         startDateTime,
         endDateTime,
-        meetingPoint,
-        startLocation,
-        finishLocation,
         maxParticipants,
         isPrivate,
         images,
-        roadType,
-        difficultyLevel,
+        roadType: roadType as RoadType,
+        difficultyLevel: difficultyLevel as DifficultyLevel,
         routeDescription,
         restStops,
         campingInfo,
         equipmentChecklist,
         instructorInfo,
         topicsCovered,
-        experienceLevel,
+        experienceLevel: experienceLevel as ExperienceLevel,
         price: price ? parseFloat(price) : null,
-        meetingPointLat,
-        meetingPointLng,
-        startLocationLat,
-        startLocationLng,
-        finishLocationLat,
-        finishLocationLng,
         createdBy: { connect: { id: userId } },
         updatedBy: { connect: { id: userId } },
-        group: groupId ? { connect: { id: groupId } } : undefined,
+        // Handle addresses
+        addresses: addresses?.length
+          ? {
+              createMany: {
+                data: addresses.map((addr) => ({
+                  address: addr.address,
+                  language: addr.language,
+                  type: addr.type,
+                  latitude: addr.latitude,
+                  longitude: addr.longitude,
+                })),
+              },
+            }
+          : undefined,
+        // Handle invited groups if provided
+        group: invitedGroupIds?.[0]
+          ? { connect: { id: invitedGroupIds[0] } }
+          : undefined,
       },
       include: {
         createdBy: true,
         group: true,
+        addresses: true,
       },
     });
+
+    return event;
   }
 
   async findAll(filters?: EventFilterInput) {
@@ -119,13 +126,11 @@ export class EventsService {
       eventType,
       startDateTime,
       endDateTime,
-      meetingPoint,
-      startLocation,
-      finishLocation,
       maxParticipants,
       isPrivate,
       images,
-      groupId,
+      addresses,
+      invitedGroupIds,
       roadType,
       difficultyLevel,
       routeDescription,
@@ -136,12 +141,6 @@ export class EventsService {
       topicsCovered,
       experienceLevel,
       price,
-      meetingPointLat,
-      meetingPointLng,
-      startLocationLat,
-      startLocationLng,
-      finishLocationLat,
-      finishLocationLng,
     } = updateEventInput;
 
     return this.prisma.event.update({
@@ -152,35 +151,45 @@ export class EventsService {
         eventType,
         startDateTime,
         endDateTime,
-        meetingPoint,
-        startLocation,
-        finishLocation,
         maxParticipants,
         isPrivate,
         images,
-        roadType,
-        difficultyLevel,
+        roadType: roadType as RoadType,
+        difficultyLevel: difficultyLevel as DifficultyLevel,
         routeDescription,
         restStops,
         campingInfo,
         equipmentChecklist,
         instructorInfo,
         topicsCovered,
-        experienceLevel,
+        experienceLevel: experienceLevel as ExperienceLevel,
         price: price ? parseFloat(price) : null,
-        meetingPointLat,
-        meetingPointLng,
-        startLocationLat,
-        startLocationLng,
-        finishLocationLat,
-        finishLocationLng,
         updatedBy: { connect: { id: userId } },
         updatedAt: new Date(),
-        group: groupId ? { connect: { id: groupId } } : { disconnect: true },
+        // Handle addresses update - delete old ones if new ones provided
+        addresses: addresses?.length
+          ? {
+              deleteMany: {}, // Delete old addresses
+              createMany: {
+                data: addresses.map((addr) => ({
+                  address: addr.address,
+                  language: addr.language,
+                  type: addr.type,
+                  latitude: addr.latitude,
+                  longitude: addr.longitude,
+                })),
+              },
+            }
+          : undefined,
+        // Handle group update if invitedGroupIds provided
+        group: invitedGroupIds?.[0]
+          ? { connect: { id: invitedGroupIds[0] } }
+          : undefined,
       },
       include: {
         createdBy: true,
         group: true,
+        addresses: true,
       },
     });
   }
@@ -269,7 +278,7 @@ export class EventsService {
               memberships: {
                 some: {
                   userId,
-                  status: 'APPROVED',
+                  status: InvitationStatus.ACCEPTED,
                 },
               },
             },
@@ -307,6 +316,7 @@ export class EventsService {
       groupId,
       createdById,
       isPrivate,
+      language,
     } = filters;
 
     const where: any = { isActive: true };
@@ -354,6 +364,14 @@ export class EventsService {
 
     if (isPrivate !== undefined) {
       where.isPrivate = isPrivate;
+    }
+
+    if (language) {
+      where.addresses = {
+        some: {
+          language,
+        },
+      };
     }
 
     return where;

@@ -1,5 +1,8 @@
-import { InputType, Field, Int, Float } from '@nestjs/graphql';
-import { EventType } from '@prisma/client';
+import { InputType, Field, Int } from '@nestjs/graphql';
+import { EventType } from '../../enums/models/event-type.enum';
+import { RoadType } from '../../enums/models/road-type.enum';
+import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
+import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import {
   IsEnum,
   IsOptional,
@@ -7,13 +10,15 @@ import {
   IsNumber,
   IsBoolean,
   IsDate,
-  IsUUID,
   IsArray,
   Min,
   Max,
   MaxLength,
   ValidateIf,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateAddressInput } from 'src/addresses/dto/create-address.input';
 
 @InputType()
 export class CreateEventInput {
@@ -29,7 +34,7 @@ export class CreateEventInput {
 
   @Field(() => String)
   @IsEnum(EventType)
-  eventType: string;
+  eventType: EventType;
 
   @Field(() => Date)
   @IsDate()
@@ -39,24 +44,6 @@ export class CreateEventInput {
   @IsDate()
   @IsOptional()
   endDateTime?: Date;
-
-  @Field(() => String, { nullable: true })
-  @IsString()
-  @IsOptional()
-  @MaxLength(200)
-  meetingPoint?: string;
-
-  @Field(() => String, { nullable: true })
-  @IsString()
-  @IsOptional()
-  @MaxLength(200)
-  startLocation?: string;
-
-  @Field(() => String, { nullable: true })
-  @IsString()
-  @IsOptional()
-  @MaxLength(200)
-  finishLocation?: string;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
@@ -76,31 +63,51 @@ export class CreateEventInput {
   @IsOptional()
   images?: string[];
 
-  @Field(() => String, { nullable: true })
-  @IsUUID()
+  @Field(() => [CreateAddressInput], { nullable: true })
   @IsOptional()
-  groupId?: string;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateAddressInput)
+  addresses?: CreateAddressInput[];
+
+  @Field(() => [String], { nullable: true })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  invitedGroupIds?: string[];
+
+  @Field(() => [String], { nullable: true })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  invitedUserIds?: string[];
 
   // Ride-specific fields
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
-  @ValidateIf((o) =>
-    ['SOLO_RIDE', 'GROUP_RIDE', 'CAMPING_RIDE', 'CHARITY_RIDE'].includes(
-      o.eventType,
-    ),
+  @IsEnum(RoadType)
+  @ValidateIf((o: CreateEventInput) =>
+    [
+      EventType.SOLO_RIDE,
+      EventType.GROUP_RIDE,
+      EventType.CAMPING_RIDE,
+      EventType.SOCIAL_RESPONSIBILITY,
+    ].includes(o.eventType),
   )
-  roadType?: string;
+  roadType?: RoadType;
 
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
-  @ValidateIf((o) =>
-    ['SOLO_RIDE', 'GROUP_RIDE', 'CAMPING_RIDE', 'CHARITY_RIDE'].includes(
-      o.eventType,
-    ),
+  @IsEnum(DifficultyLevel)
+  @ValidateIf((o: CreateEventInput) =>
+    [
+      EventType.SOLO_RIDE,
+      EventType.GROUP_RIDE,
+      EventType.CAMPING_RIDE,
+      EventType.SOCIAL_RESPONSIBILITY,
+    ].includes(o.eventType),
   )
-  difficultyLevel?: string;
+  difficultyLevel?: DifficultyLevel;
 
   @Field(() => String, { nullable: true })
   @IsString()
@@ -115,7 +122,7 @@ export class CreateEventInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  @ValidateIf((o) => o.eventType === 'CAMPING_RIDE')
+  @ValidateIf((o: CreateEventInput) => o.eventType === EventType.CAMPING_RIDE)
   campingInfo?: string;
 
   @Field(() => String, { nullable: true })
@@ -127,54 +134,24 @@ export class CreateEventInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  @ValidateIf((o) => o.eventType === 'WORKSHOP_TRAINING')
+  @ValidateIf((o: CreateEventInput) => o.eventType === EventType.TRAINING)
   instructorInfo?: string;
 
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  @ValidateIf((o) => o.eventType === 'WORKSHOP_TRAINING')
+  @ValidateIf((o: CreateEventInput) => o.eventType === EventType.TRAINING)
   topicsCovered?: string;
 
   @Field(() => String, { nullable: true })
-  @IsString()
   @IsOptional()
-  @ValidateIf((o) => o.eventType === 'WORKSHOP_TRAINING')
-  experienceLevel?: string;
+  @IsEnum(ExperienceLevel)
+  @ValidateIf((o: CreateEventInput) => o.eventType === EventType.TRAINING)
+  experienceLevel?: ExperienceLevel;
 
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
+  @ValidateIf((o: CreateEventInput) => o.eventType === EventType.TRAINING)
   price?: string;
-
-  // Coordinates for locations
-  @Field(() => Float, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  meetingPointLat?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  meetingPointLng?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  startLocationLat?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  startLocationLng?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  finishLocationLat?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsNumber()
-  @IsOptional()
-  finishLocationLng?: number;
 }

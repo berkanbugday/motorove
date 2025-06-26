@@ -5,66 +5,99 @@ import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { EventFilterInput } from './dto/event-filter.input';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { EventParticipant } from './models/event-participant.model';
+import { Request } from 'express';
+
+interface GqlContext {
+  req: Request & {
+    user: { id: string };
+    headers: { authorization?: string };
+  };
+}
 
 @Resolver(() => Event)
 export class EventsResolver {
   constructor(private readonly eventsService: EventsService) {}
 
+  @UseGuards(JwtGuard)
   @Mutation(() => Event)
-  @UseGuards(JwtAuthGuard)
   async createEvent(
     @Args('createEventInput') createEventInput: CreateEventInput,
-    @CurrentUser() user: any,
+    @Context() context: GqlContext,
   ) {
-    return this.eventsService.create(createEventInput, user.id);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.create(createEventInput, userId, authToken);
   }
 
   @Query(() => [Event], { name: 'events' })
   async findAll(
     @Args('filters', { nullable: true }) filters?: EventFilterInput,
+    @Context() context: GqlContext,
   ) {
-    return this.eventsService.findAll(filters);
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.findAll(filters, authToken);
   }
 
   @Query(() => Event, { name: 'event' })
-  async findOne(@Args('id', { type: () => String }) id: string) {
-    return this.eventsService.findOne(id);
+  async findOne(
+    @Args('id', { type: () => String }) id: string,
+    @Context() context: GqlContext,
+  ) {
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.findOne(id, authToken);
   }
 
+  @UseGuards(JwtGuard)
   @Mutation(() => Event)
-  @UseGuards(JwtAuthGuard)
   async updateEvent(
     @Args('id') id: string,
     @Args('updateEventInput') updateEventInput: UpdateEventInput,
-    @CurrentUser() user: any,
+    @Context() context: GqlContext,
   ) {
-    return this.eventsService.update(id, updateEventInput, user.id);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.update(id, updateEventInput, userId, authToken);
   }
 
+  @UseGuards(JwtGuard)
   @Mutation(() => Event)
-  @UseGuards(JwtAuthGuard)
-  async removeEvent(@Args('id') id: string) {
-    return this.eventsService.remove(id);
+  async removeEvent(@Args('id') id: string, @Context() context: GqlContext) {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.remove(id, userId, authToken);
   }
 
+  @UseGuards(JwtGuard)
   @Mutation(() => EventParticipant)
-  @UseGuards(JwtAuthGuard)
-  async joinEvent(@Args('eventId') eventId: string, @CurrentUser() user: any) {
-    return this.eventsService.joinEvent(eventId, user.id);
+  async joinEvent(
+    @Args('eventId') eventId: string,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    return this.eventsService.joinEvent(eventId, userId);
   }
 
+  @UseGuards(JwtGuard)
   @Mutation(() => EventParticipant)
-  @UseGuards(JwtAuthGuard)
-  async leaveEvent(@Args('eventId') eventId: string, @CurrentUser() user: any) {
-    return this.eventsService.leaveEvent(eventId, user.id);
+  async leaveEvent(
+    @Args('eventId') eventId: string,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    return this.eventsService.leaveEvent(eventId, userId);
   }
 
+  @UseGuards(JwtGuard)
   @Query(() => [Event], { name: 'upcomingEvents' })
-  @UseGuards(JwtAuthGuard)
-  async getUpcomingEvents(@CurrentUser() user: any) {
-    return this.eventsService.getUpcomingEvents(user.id);
+  async getUpcomingEvents(@Context() context: GqlContext) {
+    const userId = context.req.user.id;
+    return this.eventsService.getUpcomingEvents(userId);
   }
 }

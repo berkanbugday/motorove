@@ -3,6 +3,11 @@ import { Group } from '../../groups/models/group.model';
 import { EventParticipant } from './event-participant.model';
 import { EventInvitation } from './event-invitation.model';
 import { BaseModel } from '../../core/models/base.model';
+import { EventType } from '../../enums/models/event-type.enum';
+import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
+import { RoadType } from '../../enums/models/road-type.enum';
+import { ExperienceLevel } from '../../enums/models/experience-level.enum';
+import { User } from 'src/users/models/user.model';
 
 @ObjectType()
 export class Event extends BaseModel {
@@ -12,23 +17,14 @@ export class Event extends BaseModel {
   @Field(() => String)
   description: string;
 
-  @Field(() => String)
-  eventType: string;
+  @Field(() => EventType)
+  eventType: EventType;
 
   @Field(() => Date)
   startDateTime: Date;
 
   @Field(() => Date, { nullable: true })
   endDateTime?: Date;
-
-  @Field(() => String, { nullable: true })
-  meetingPoint?: string;
-
-  @Field(() => String, { nullable: true })
-  startLocation?: string;
-
-  @Field(() => String, { nullable: true })
-  finishLocation?: string;
 
   @Field(() => Int, { nullable: true })
   maxParticipants?: number;
@@ -39,18 +35,20 @@ export class Event extends BaseModel {
   @Field(() => [String], { nullable: true })
   images?: string[];
 
-  @Field(() => String, { nullable: true })
-  groupId?: string;
+  @Field(() => [String], { nullable: true })
+  invitedUserIds?: string[];
 
-  @Field(() => Group, { nullable: true })
-  group?: Group;
+  @Field(() => [String], { nullable: true })
+  invitedGroupIds?: string[];
 
-  // Ride-specific fields
-  @Field(() => String, { nullable: true })
-  roadType?: string;
+  @Field(() => [Address], { nullable: true })
+  addresses?: Address[];
 
-  @Field(() => String, { nullable: true })
-  difficultyLevel?: string;
+  @Field(() => RoadType, { nullable: true })
+  roadType?: RoadType;
+
+  @Field(() => DifficultyLevel, { nullable: true })
+  difficultyLevel?: DifficultyLevel;
 
   @Field(() => String, { nullable: true })
   routeDescription?: string;
@@ -64,37 +62,17 @@ export class Event extends BaseModel {
   @Field(() => String, { nullable: true })
   equipmentChecklist?: string;
 
-  // Workshop-specific fields
   @Field(() => String, { nullable: true })
   instructorInfo?: string;
 
   @Field(() => String, { nullable: true })
   topicsCovered?: string;
 
-  @Field(() => String, { nullable: true })
-  experienceLevel?: string;
+  @Field(() => ExperienceLevel, { nullable: true })
+  experienceLevel?: ExperienceLevel;
 
   @Field(() => Float, { nullable: true })
   price?: number;
-
-  // Coordinates for locations
-  @Field(() => Float, { nullable: true })
-  meetingPointLat?: number;
-
-  @Field(() => Float, { nullable: true })
-  meetingPointLng?: number;
-
-  @Field(() => Float, { nullable: true })
-  startLocationLat?: number;
-
-  @Field(() => Float, { nullable: true })
-  startLocationLng?: number;
-
-  @Field(() => Float, { nullable: true })
-  finishLocationLat?: number;
-
-  @Field(() => Float, { nullable: true })
-  finishLocationLng?: number;
 
   @Field(() => [EventParticipant], { nullable: true })
   participants?: EventParticipant[];
@@ -102,7 +80,9 @@ export class Event extends BaseModel {
   @Field(() => [EventInvitation], { nullable: true })
   invitations?: EventInvitation[];
 
-  // Computed fields
-  @Field(() => Int)
-  participantCount?: number;
+  @Field(() => [Group], { nullable: true })
+  invitedGroups?: Group[];
+
+  @Field(() => [User], { nullable: true })
+  invitedUsers?: User[];
 }

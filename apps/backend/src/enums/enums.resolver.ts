@@ -1,11 +1,13 @@
 import { Resolver, Query, ObjectType, Field } from '@nestjs/graphql';
 import { GroupPrivacy } from './models/group-privacy.enum';
 import { GroupMemberRole } from './models/group-member-role.enum';
-import { GroupMembershipStatus } from './models/group-membership-status.enum';
+import { InvitationStatus } from './models/invitation-status.enum';
 import { EventType } from './models/event-type.enum';
 import { RoadType } from './models/road-type.enum';
 import { DifficultyLevel } from './models/difficulty-level.enum';
 import { ExperienceLevel } from './models/experience-level.enum';
+import { AddressType } from './models/address-type.enum';
+import { Language } from './models/language.enum';
 
 @ObjectType()
 class EnumItem {
@@ -32,8 +34,8 @@ export class EnumsResolver {
   }
 
   @Query(() => [EnumItem])
-  getGroupMembershipStatuses() {
-    return Object.entries(GroupMembershipStatus).map(([key, value]) => ({
+  getInvitationStatuses() {
+    return Object.entries(InvitationStatus).map(([key, value]) => ({
       key,
       value,
     }));
@@ -66,6 +68,22 @@ export class EnumsResolver {
   @Query(() => [EnumItem])
   getExperienceLevels() {
     return Object.entries(ExperienceLevel).map(([key, value]) => ({
+      key,
+      value,
+    }));
+  }
+
+  @Query(() => [EnumItem])
+  getAddressTypes() {
+    return Object.entries(AddressType).map(([key, value]) => ({
+      key,
+      value,
+    }));
+  }
+
+  @Query(() => [EnumItem])
+  getLanguages() {
+    return Object.entries(Language).map(([key, value]) => ({
       key,
       value,
     }));

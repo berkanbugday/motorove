@@ -5,15 +5,20 @@ import {
   IsBoolean,
   IsDate,
   IsUUID,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { EventType } from '../../enums/models/event-type.enum';
+import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
+import { ExperienceLevel } from '../../enums/models/experience-level.enum';
+import { RoadType } from '../../enums/models/road-type.enum';
 
 @InputType()
 export class EventFilterInput {
-  @Field(() => String, { nullable: true })
-  @IsString()
+  @Field(() => EventType, { nullable: true })
+  @IsEnum(EventType)
   @IsOptional()
-  eventType?: string;
+  eventType?: EventType;
 
   @Field(() => Date, { nullable: true })
   @IsDate()
@@ -32,20 +37,20 @@ export class EventFilterInput {
   @IsOptional()
   searchTerm?: string;
 
-  @Field(() => String, { nullable: true })
-  @IsString()
+  @Field(() => DifficultyLevel, { nullable: true })
+  @IsEnum(DifficultyLevel)
   @IsOptional()
-  difficultyLevel?: string;
+  difficultyLevel?: DifficultyLevel;
 
-  @Field(() => String, { nullable: true })
-  @IsString()
+  @Field(() => ExperienceLevel, { nullable: true })
+  @IsEnum(ExperienceLevel)
   @IsOptional()
-  experienceLevel?: string;
+  experienceLevel?: ExperienceLevel;
 
-  @Field(() => String, { nullable: true })
-  @IsString()
+  @Field(() => RoadType, { nullable: true })
+  @IsEnum(RoadType)
   @IsOptional()
-  roadType?: string;
+  roadType?: RoadType;
 
   @Field(() => String, { nullable: true })
   @IsUUID()
