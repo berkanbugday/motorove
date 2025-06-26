@@ -1,22 +1,10 @@
-import { Field, ObjectType, Int, Float } from '@nestjs/graphql';
+import { Field, ObjectType, Float } from '@nestjs/graphql';
 import { Group } from '../../groups/models/group.model';
 import { Comment } from '../../comments/models/comment.model';
 import { BaseModel } from '../../core/models/base.model';
-
-@ObjectType()
-export class PostAddress {
-  @Field()
-  id: string;
-
-  @Field()
-  postId: string;
-
-  @Field()
-  address: string;
-
-  @Field()
-  language: string;
-}
+import { Address } from '../../addresses/models/address.model';
+import { PostLike } from './post-like.model';
+import { PostSave } from './post-save.model';
 
 @ObjectType()
 export class Post extends BaseModel {
@@ -41,21 +29,12 @@ export class Post extends BaseModel {
   @Field(() => [Comment], { nullable: true })
   comments?: Comment[];
 
-  @Field(() => [PostAddress], { nullable: true })
-  addresses?: PostAddress[];
+  @Field(() => [PostLike], { nullable: true })
+  likes?: PostLike[];
 
-  @Field(() => Int, { defaultValue: 0 })
-  likesCount: number;
+  @Field(() => [PostSave], { nullable: true })
+  saves?: PostSave[];
 
-  @Field(() => Int, { defaultValue: 0 })
-  savesCount: number;
-
-  @Field(() => Int, { defaultValue: 0 })
-  commentsCount: number;
-
-  @Field(() => Boolean, { defaultValue: false })
-  isLiked: boolean;
-
-  @Field(() => Boolean, { defaultValue: false })
-  isSaved: boolean;
+  @Field(() => [Address], { nullable: true })
+  addresses?: Address[];
 }

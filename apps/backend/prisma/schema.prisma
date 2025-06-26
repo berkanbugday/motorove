@@ -144,6 +144,10 @@ model User {
   eventParticipations EventParticipant[]
   sentInvitations     EventInvitation[]  @relation("SentInvitations")
   receivedInvitations EventInvitation[]  @relation("ReceivedInvitations")
+
+  @@index([email])
+  @@index([supabaseId])
+  @@index([isActive])
 }
 
 model City {
@@ -188,6 +192,9 @@ model Group {
   memberships GroupMembership[]
   posts       Post[]
   events      Event[]
+
+  @@index([cityId])
+  @@index([privacy])
 }
 
 model GroupMembership {
@@ -210,6 +217,11 @@ model GroupMembership {
   isActive    Boolean  @default(true)
 
   @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@index([status])
+  @@index([role])
+  @@index([isActive])
 }
 
 model Notification {
@@ -236,6 +248,8 @@ model Notification {
   @@index([type])
   @@index([status])
   @@index([read])
+  @@index([createdAt]) // Added index for filtering by creation date
+  @@index([isActive])
 }
 
 model DeviceToken {
@@ -250,6 +264,7 @@ model DeviceToken {
   @@id([token, userId])
   @@index([userId])
   @@index([isActive])
+  @@index([type])
 }
 
 model Post {
@@ -274,6 +289,8 @@ model Post {
 
   @@index([createdById])
   @@index([groupId])
+  @@index([createdAt]) // Added for feed sorting
+  @@index([isActive])
 }
 
 model Comment {
@@ -299,6 +316,8 @@ model Comment {
   @@index([createdById])
   @@index([postId])
   @@index([parentId])
+  @@index([createdAt]) // Added for sorting
+  @@index([isActive])
 }
 
 // New model for post likes
@@ -313,6 +332,7 @@ model PostLike {
   @@unique([postId, userId])
   @@index([postId])
   @@index([userId])
+  @@index([createdAt])
 }
 
 // New model for post saves
@@ -327,16 +347,17 @@ model PostSave {
   @@unique([postId, userId])
   @@index([postId])
   @@index([userId])
+  @@index([createdAt])
 }
 
 // New model for addresses with support for both posts and events
 model Address {
   id        String      @id @default(uuid())
   address   String
-  language  Language    // Change from String to Language enum
+  language  Language // Change from String to Language enum
   type      AddressType
-  latitude  Float?
-  longitude Float?
+  latitude  Float
+  longitude Float
 
   // Relations - one address belongs to either a post or an event
   post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -351,6 +372,7 @@ model Address {
   @@index([eventId])
   @@index([language])
   @@index([type])
+  @@index([latitude, longitude]) // Added for geospatial queries
 }
 
 // User following relationships
@@ -365,6 +387,7 @@ model UserFollowing {
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
+  @@index([createdAt])
 }
 
 // Event model
@@ -378,6 +401,8 @@ model Event {
   maxParticipants Int?
   isPrivate       Boolean   @default(false)
   images          String[]
+  invitedUserIds  String[]  @default([]) // Added field from Event model
+  invitedGroupIds String[]  @default([]) // Added field from Event model
 
   // Ride-specific fields
   roadType           RoadType?
@@ -387,16 +412,11 @@ model Event {
   campingInfo        String?          @db.Text
   equipmentChecklist String?          @db.Text
 
-  // training-specific fields
+  // Training-specific fields
   instructorInfo  String?          @db.Text
   topicsCovered   String?          @db.Text
   experienceLevel ExperienceLevel?
   price           Float?
-
-  // Relations
-  group     Group?    @relation(fields: [groupId], references: [id])
-  groupId   String?
-  addresses Address[] // Added relation to Address model
 
   // Base model fields
   createdById String
@@ -410,12 +430,14 @@ model Event {
   // Relationships
   participants EventParticipant[]
   invitations  EventInvitation[]
+  addresses    Address[]
+  groups       Group[]
 
   @@index([eventType])
   @@index([startDateTime])
   @@index([createdById])
-  @@index([groupId])
   @@index([isActive])
+  @@index([isPrivate])
 }
 
 // Event participant model
@@ -433,9 +455,10 @@ model EventParticipant {
   @@index([eventId])
   @@index([userId])
   @@index([status])
+  @@index([createdAt])
 }
 
-// Event invitation model (updated)
+// Event invitation model
 model EventInvitation {
   id        String           @id @default(uuid())
   eventId   String
@@ -453,4 +476,5 @@ model EventInvitation {
   @@index([inviterId])
   @@index([inviteeId])
   @@index([status])
+  @@index([createdAt])
 }

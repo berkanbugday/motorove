@@ -7,4 +7,7 @@ export class GroupTag {
 
   @Field()
   value: string;
+
+  @Field(() => Boolean)
+  isActive: boolean;
 }

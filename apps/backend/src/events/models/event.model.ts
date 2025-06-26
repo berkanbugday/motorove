@@ -8,6 +8,8 @@ import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { User } from 'src/users/models/user.model';
+import { Address } from 'src/addresses/models/address.model';
+import { EventParticipantStatus } from 'src/enums/models/event-participant-status.enum';
 
 @ObjectType()
 export class Event extends BaseModel {
@@ -85,4 +87,14 @@ export class Event extends BaseModel {
 
   @Field(() => [User], { nullable: true })
   invitedUsers?: User[];
+
+  // Additional calculated fields
+  @Field(() => Boolean)
+  isParticipating: boolean;
+
+  @Field(() => EventParticipantStatus, { nullable: true })
+  participationStatus?: EventParticipantStatus;
+
+  @Field(() => Int)
+  participantsCount: number;
 }

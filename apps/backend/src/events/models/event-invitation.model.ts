@@ -1,19 +1,12 @@
-import { Field, ObjectType, ID } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from '../../users/models/user.model';
+import { InvitationStatus } from '../../enums/models/invitation-status.enum';
+import { BaseModel } from '../../core/models/base.model';
 
 @ObjectType()
-export class EventInvitation {
-  @Field(() => ID)
-  id: string;
-
+export class EventInvitation extends BaseModel {
   @Field(() => String)
   eventId: string;
-
-  @Field(() => String)
-  inviterId: string;
-
-  @Field(() => User)
-  inviter: User;
 
   @Field(() => String)
   inviteeId: string;
@@ -21,12 +14,6 @@ export class EventInvitation {
   @Field(() => User)
   invitee: User;
 
-  @Field(() => String)
-  status: string; // PENDING, ACCEPTED, REJECTED
-
-  @Field(() => Date)
-  createdAt: Date;
-
-  @Field(() => Date)
-  updatedAt: Date;
+  @Field(() => InvitationStatus)
+  status: InvitationStatus;
 }

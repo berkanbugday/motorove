@@ -32,24 +32,23 @@ export class EventsResolver {
     return this.eventsService.create(createEventInput, userId, authToken);
   }
 
-  @Query(() => [Event], { name: 'events' })
-  async findAll(
-    @Args('filters', { nullable: true }) filters?: EventFilterInput,
+  @Query(() => [Event])
+  async events(
     @Context() context: GqlContext,
+    @Args('filters', { nullable: true }) filters?: EventFilterInput,
   ) {
     const authHeader = context.req.headers.authorization;
+    const userId = context.req.user?.id;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.findAll(filters, authToken);
+    return this.eventsService.findAll(filters, userId, authToken);
   }
 
-  @Query(() => Event, { name: 'event' })
-  async findOne(
-    @Args('id', { type: () => String }) id: string,
-    @Context() context: GqlContext,
-  ) {
+  @Query(() => Event, { nullable: true })
+  async event(@Args('id') id: string, @Context() context: GqlContext) {
     const authHeader = context.req.headers.authorization;
+    const userId = context.req.user?.id;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.findOne(id, authToken);
+    return this.eventsService.findOne(id, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
@@ -67,11 +66,8 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => Event)
-  async removeEvent(@Args('id') id: string, @Context() context: GqlContext) {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.remove(id, userId, authToken);
+  async removeEvent(@Args('id') id: string) {
+    return this.eventsService.remove(id);
   }
 
   @UseGuards(JwtGuard)
@@ -95,9 +91,11 @@ export class EventsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => [Event], { name: 'upcomingEvents' })
-  async getUpcomingEvents(@Context() context: GqlContext) {
+  @Query(() => [Event])
+  async upcomingEvents(@Context() context: GqlContext): Promise<Event[]> {
     const userId = context.req.user.id;
-    return this.eventsService.getUpcomingEvents(userId);
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.getUpcomingEvents(userId, authToken);
   }
 }

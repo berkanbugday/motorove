@@ -1,6 +1,7 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { User } from '../../users/models/user.model';
 import { Event } from './event.model';
+import { EventParticipantStatus } from '../../enums/models/event-participant-status.enum';
 
 @ObjectType()
 export class EventParticipant {
@@ -19,8 +20,8 @@ export class EventParticipant {
   @Field(() => User)
   user: User;
 
-  @Field(() => String)
-  status: string; // INVITED, JOINED, LEFT, DECLINED
+  @Field(() => EventParticipantStatus)
+  status: EventParticipantStatus;
 
   @Field(() => Date)
   createdAt: Date;
