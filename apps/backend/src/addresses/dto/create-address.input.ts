@@ -25,15 +25,15 @@ export class CreateAddressInput {
   @IsNotEmpty()
   type: AddressType;
 
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
+  @Field(() => Float)
+  @IsNotEmpty()
   @IsNumber()
-  latitude?: number;
+  latitude: number;
 
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
+  @Field(() => Float)
+  @IsNotEmpty()
   @IsNumber()
-  longitude?: number;
+  longitude: number;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

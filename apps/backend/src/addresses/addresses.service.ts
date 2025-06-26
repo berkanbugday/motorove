@@ -7,6 +7,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressInput } from './dto/create-address.input';
 import { UpdateAddressInput } from './dto/update-address.input';
 import { AddressFilterInput } from './dto/address-filter.input';
+import { AddressType } from '../enums/models/address-type.enum';
+import { Language } from '../enums/models/language.enum';
 
 @Injectable()
 export class AddressesService {
@@ -64,7 +66,7 @@ export class AddressesService {
       }
     }
 
-    // Create the address
+    // Create the address with type-safe handling of latitude and longitude
     return this.prisma.address.create({
       data: {
         address: createAddressInput.address,
@@ -118,16 +120,40 @@ export class AddressesService {
       );
     }
 
-    // Update the address
+    // Create update data object with type safety
+    const updateData: {
+      address?: string;
+      language?: Language;
+      type?: AddressType;
+      latitude?: number;
+      longitude?: number;
+    } = {};
+
+    // Add only defined fields to update data
+    if (updateAddressInput.address !== undefined) {
+      updateData.address = updateAddressInput.address;
+    }
+
+    if (updateAddressInput.language !== undefined) {
+      updateData.language = updateAddressInput.language;
+    }
+
+    if (updateAddressInput.type !== undefined) {
+      updateData.type = updateAddressInput.type;
+    }
+
+    if (updateAddressInput.latitude !== undefined) {
+      updateData.latitude = updateAddressInput.latitude;
+    }
+
+    if (updateAddressInput.longitude !== undefined) {
+      updateData.longitude = updateAddressInput.longitude;
+    }
+
+    // Update the address with the constructed data object
     return this.prisma.address.update({
       where: { id: updateAddressInput.id },
-      data: {
-        address: updateAddressInput.address,
-        language: updateAddressInput.language,
-        type: updateAddressInput.type,
-        latitude: updateAddressInput.latitude,
-        longitude: updateAddressInput.longitude,
-      },
+      data: updateData,
     });
   }
 
