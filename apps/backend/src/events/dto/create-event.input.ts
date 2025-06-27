@@ -91,6 +91,7 @@ export class CreateEventInput {
       EventType.SOLO_RIDE,
       EventType.GROUP_RIDE,
       EventType.CAMPING_RIDE,
+      EventType.TRAINING,
       EventType.SOCIAL_RESPONSIBILITY,
     ].includes(o.eventType),
   )
@@ -104,6 +105,7 @@ export class CreateEventInput {
       EventType.SOLO_RIDE,
       EventType.GROUP_RIDE,
       EventType.CAMPING_RIDE,
+      EventType.TRAINING,
       EventType.SOCIAL_RESPONSIBILITY,
     ].includes(o.eventType),
   )
@@ -112,11 +114,29 @@ export class CreateEventInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
+  @ValidateIf((o: CreateEventInput) =>
+    [
+      EventType.SOLO_RIDE,
+      EventType.GROUP_RIDE,
+      EventType.CAMPING_RIDE,
+      EventType.TRAINING,
+      EventType.SOCIAL_RESPONSIBILITY,
+    ].includes(o.eventType),
+  )
   routeDescription?: string;
 
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
+  @ValidateIf((o: CreateEventInput) =>
+    [
+      EventType.SOLO_RIDE,
+      EventType.GROUP_RIDE,
+      EventType.CAMPING_RIDE,
+      EventType.TRAINING,
+      EventType.SOCIAL_RESPONSIBILITY,
+    ].includes(o.eventType),
+  )
   restStops?: string;
 
   @Field(() => String, { nullable: true })
@@ -128,6 +148,15 @@ export class CreateEventInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
+  @ValidateIf((o: CreateEventInput) =>
+    [
+      EventType.SOLO_RIDE,
+      EventType.GROUP_RIDE,
+      EventType.CAMPING_RIDE,
+      EventType.TRAINING,
+      EventType.SOCIAL_RESPONSIBILITY,
+    ].includes(o.eventType),
+  )
   equipmentChecklist?: string;
 
   // Workshop-specific fields
@@ -146,7 +175,15 @@ export class CreateEventInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsEnum(ExperienceLevel)
-  @ValidateIf((o: CreateEventInput) => o.eventType === EventType.TRAINING)
+  @ValidateIf((o: CreateEventInput) =>
+    [
+      EventType.SOLO_RIDE,
+      EventType.GROUP_RIDE,
+      EventType.CAMPING_RIDE,
+      EventType.TRAINING,
+      EventType.SOCIAL_RESPONSIBILITY,
+    ].includes(o.eventType),
+  )
   experienceLevel?: ExperienceLevel;
 
   @Field(() => String, { nullable: true })

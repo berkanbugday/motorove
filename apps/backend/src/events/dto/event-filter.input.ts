@@ -12,7 +12,6 @@ import { EventType } from '../../enums/models/event-type.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
-import { Language } from '../../enums/models/language.enum';
 
 @InputType()
 export class EventFilterInput {
@@ -36,7 +35,7 @@ export class EventFilterInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
-  searchTerm?: string;
+  query?: string;
 
   @Field(() => DifficultyLevel, { nullable: true })
   @IsEnum(DifficultyLevel)
@@ -68,8 +67,8 @@ export class EventFilterInput {
   @IsOptional()
   isPrivate?: boolean;
 
-  @Field(() => Language, { nullable: true })
-  @IsEnum(Language)
+  @Field(() => Boolean, { nullable: true })
+  @IsBoolean()
   @IsOptional()
-  language?: Language;
+  isActive?: boolean;
 }

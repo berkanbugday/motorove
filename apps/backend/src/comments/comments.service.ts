@@ -7,39 +7,30 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentInput } from './dto/create-comment.input';
 import { UpdateCommentInput } from './dto/update-comment.input';
 import { Comment } from './models/comment.model';
-import { GroupMembershipStatus } from '../enums/models/group-membership-status.enum';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
+import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { CommentFilterInput } from './dto/comment-filter.input';
+import { GroupMembership } from '../group-memberships/models/group-membership.model';
 
 @Injectable()
 export class CommentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  private mapPrismaCommentToGraphQLComment(prismaComment: any): Comment {
-    return {
-      id: prismaComment.id,
-      content: prismaComment.content,
-      post: prismaComment.post,
-      postId: prismaComment.postId,
-      parentId: prismaComment.parentId,
-      parent: prismaComment.parent,
-      replies: prismaComment.replies,
-      createdBy: prismaComment.createdBy,
-      createdById: prismaComment.createdById,
-      updatedBy: prismaComment.updatedBy,
-      updatedById: prismaComment.updatedById,
-      createdAt: prismaComment.createdAt,
-      updatedAt: prismaComment.updatedAt,
-      isActive: prismaComment.isActive,
-    } as Comment;
-  }
+  async findAll(
+    postId: string,
+    limit?: number,
+    skip?: number,
+    filters?: CommentFilterInput,
+  ): Promise<Comment[]> {
+    const where = {
+      postId,
+      isActive: filters?.isActive || true,
+      parentId: filters?.parentId || null,
+      ...(filters?.createdById && { createdById: filters.createdById }),
+    };
 
-  async findAll(postId: string): Promise<Comment[]> {
-    const comments = await this.prisma.comment.findMany({
-      where: {
-        postId,
-        isActive: true,
-        parentId: null, // Only fetch top-level comments
-      },
+    const comments = (await this.prisma.comment.findMany({
+      where,
       include: {
         createdBy: true,
         updatedBy: true,
@@ -54,15 +45,15 @@ export class CommentsService {
         },
       },
       orderBy: { createdAt: 'desc' },
-    });
+      skip: skip || undefined,
+      take: limit || undefined,
+    })) as unknown as Comment[];
 
-    return Promise.all(
-      comments.map((comment) => this.mapPrismaCommentToGraphQLComment(comment)),
-    );
+    return comments;
   }
 
   async findOne(id: string): Promise<Comment> {
-    const comment = await this.prisma.comment.findUnique({
+    const comment = (await this.prisma.comment.findUnique({
       where: { id },
       include: {
         createdBy: true,
@@ -83,31 +74,26 @@ export class CommentsService {
           orderBy: { createdAt: 'asc' },
         },
       },
-    });
+    })) as unknown as Comment;
 
     if (!comment || !comment.isActive) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }
 
-    return this.mapPrismaCommentToGraphQLComment(comment);
+    return comment;
   }
 
-  async create(
-    userId: string,
-    createCommentInput: CreateCommentInput,
-  ): Promise<Comment> {
+  async create(input: CreateCommentInput, userId: string): Promise<Comment> {
     // Check if the post exists and is active
     const post = await this.prisma.post.findUnique({
-      where: { id: createCommentInput.postId },
+      where: { id: input.postId },
       include: {
         group: true,
       },
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(
-        `Post with ID ${createCommentInput.postId} not found`,
-      );
+      throw new NotFoundException(`Post with ID ${input.postId} not found`);
     }
 
     if (post.groupId) {
@@ -121,7 +107,7 @@ export class CommentsService {
         },
       });
 
-      if (!membership || membership.status !== GroupMembershipStatus.APPROVED) {
+      if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
         throw new ForbiddenException(
           'You must be an approved member of the group to comment on a post',
         );
@@ -129,31 +115,31 @@ export class CommentsService {
     }
 
     // If parentId is provided, check if the parent comment exists and belongs to the same post
-    if (createCommentInput.parentId) {
+    if (input.parentId) {
       const parentComment = await this.prisma.comment.findUnique({
-        where: { id: createCommentInput.parentId },
+        where: { id: input.parentId },
       });
 
       if (!parentComment || !parentComment.isActive) {
         throw new NotFoundException(
-          `Parent comment with ID ${createCommentInput.parentId} not found`,
+          `Parent comment with ID ${input.parentId} not found`,
         );
       }
 
-      if (parentComment.postId !== createCommentInput.postId) {
+      if (parentComment.postId !== input.postId) {
         throw new ForbiddenException(
           'Parent comment must belong to the same post',
         );
       }
     }
 
-    const comment = await this.prisma.comment.create({
+    const comment = (await this.prisma.comment.create({
       data: {
-        content: createCommentInput.content,
-        postId: createCommentInput.postId,
+        content: input.content,
+        postId: input.postId,
         createdById: userId,
         updatedById: userId,
-        parentId: createCommentInput.parentId,
+        parentId: input.parentId,
       },
       include: {
         createdBy: true,
@@ -162,17 +148,14 @@ export class CommentsService {
         parent: true,
         replies: true,
       },
-    });
+    })) as unknown as Comment;
 
-    return this.mapPrismaCommentToGraphQLComment(comment);
+    return comment;
   }
 
-  async update(
-    userId: string,
-    updateCommentInput: UpdateCommentInput,
-  ): Promise<Comment> {
-    const comment = await this.prisma.comment.findUnique({
-      where: { id: updateCommentInput.id },
+  async update(input: UpdateCommentInput, userId: string): Promise<Comment> {
+    const comment = (await this.prisma.comment.findUnique({
+      where: { id: input.id },
       include: {
         createdBy: true,
         post: {
@@ -182,7 +165,7 @@ export class CommentsService {
                 memberships: {
                   where: {
                     userId,
-                    status: GroupMembershipStatus.APPROVED,
+                    status: InvitationStatus.ACCEPTED,
                   },
                 },
               },
@@ -190,19 +173,18 @@ export class CommentsService {
           },
         },
       },
-    });
+    })) as unknown as Comment;
 
     if (!comment || !comment.isActive) {
-      throw new NotFoundException(
-        `Comment with ID ${updateCommentInput.id} not found`,
-      );
+      throw new NotFoundException(`Comment with ID ${input.id} not found`);
     }
 
     // Check if user is the creator or an admin of the group (if post has a group)
     const isCreator = comment.createdById === userId;
     const isGroupAdmin =
       comment.post.group?.memberships?.some(
-        (membership) => membership.role === 'ADMIN',
+        (membership: GroupMembership) =>
+          membership.role === GroupMemberRole.ADMIN,
       ) || false;
 
     if (!isCreator && !isGroupAdmin) {
@@ -211,10 +193,10 @@ export class CommentsService {
       );
     }
 
-    const updatedComment = await this.prisma.comment.update({
-      where: { id: updateCommentInput.id },
+    const updatedComment = (await this.prisma.comment.update({
+      where: { id: input.id },
       data: {
-        ...updateCommentInput,
+        ...input,
         updatedById: userId,
       },
       include: {
@@ -224,13 +206,13 @@ export class CommentsService {
         parent: true,
         replies: true,
       },
-    });
+    })) as unknown as Comment;
 
-    return this.mapPrismaCommentToGraphQLComment(updatedComment);
+    return updatedComment;
   }
 
-  async remove(userId: string, id: string): Promise<Comment> {
-    const comment = await this.prisma.comment.findUnique({
+  async remove(id: string, userId: string): Promise<Comment> {
+    const comment = (await this.prisma.comment.findUnique({
       where: { id },
       include: {
         createdBy: true,
@@ -241,7 +223,7 @@ export class CommentsService {
                 memberships: {
                   where: {
                     userId,
-                    status: GroupMembershipStatus.APPROVED,
+                    status: InvitationStatus.ACCEPTED,
                   },
                 },
               },
@@ -249,7 +231,7 @@ export class CommentsService {
           },
         },
       },
-    });
+    })) as unknown as Comment;
 
     if (!comment || !comment.isActive) {
       throw new NotFoundException(`Comment with ID ${id} not found`);
@@ -259,7 +241,8 @@ export class CommentsService {
     const isCreator = comment.createdById === userId;
     const isGroupAdmin =
       comment.post.group?.memberships?.some(
-        (membership) => membership.role === GroupMemberRole.ADMIN,
+        (membership: GroupMembership) =>
+          membership.role === GroupMemberRole.ADMIN,
       ) || false;
 
     if (!isCreator && !isGroupAdmin) {
@@ -268,7 +251,7 @@ export class CommentsService {
       );
     }
 
-    const deletedComment = await this.prisma.comment.update({
+    const deletedComment = (await this.prisma.comment.update({
       where: { id },
       data: { isActive: false, updatedById: userId },
       include: {
@@ -278,8 +261,8 @@ export class CommentsService {
         parent: true,
         replies: true,
       },
-    });
+    })) as unknown as Comment;
 
-    return this.mapPrismaCommentToGraphQLComment(deletedComment);
+    return deletedComment;
   }
 }

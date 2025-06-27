@@ -8,6 +8,9 @@ export class EventInvitation extends BaseModel {
   @Field(() => String)
   eventId: string;
 
+  @Field(() => Event)
+  event: Event;
+
   @Field(() => String)
   inviteeId: string;
 

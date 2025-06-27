@@ -17,6 +17,63 @@ export class EventsService {
     private storageService: StorageService,
   ) {}
 
+  async findAll(
+    limit?: number,
+    skip?: number,
+    filters?: EventFilterInput,
+    currentUserId?: string,
+    authToken?: string,
+  ): Promise<Event[]> {
+    const where = this.buildFilterQuery(filters);
+
+    const events = (await this.prisma.event.findMany({
+      where,
+      include: {
+        createdBy: true,
+        participants: true,
+        addresses: true,
+      },
+      orderBy: {
+        startDateTime: 'asc',
+      },
+      take: limit || undefined,
+      skip: skip || undefined,
+    })) as unknown as Event[];
+
+    // Map events to GraphQL format with additional fields
+    const mappedEvents = await Promise.all(
+      events.map((event) =>
+        this.mapPrismaEventToGraphQLEvent(event, currentUserId, authToken),
+      ),
+    );
+
+    return mappedEvents;
+  }
+
+  async findOne(id: string, currentUserId?: string, authToken?: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        createdBy: true,
+        group: true,
+        participants: true,
+        addresses: true,
+        invitations: {
+          include: {
+            invitee: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      return null;
+    }
+
+    // Map event to GraphQL format with additional fields
+    return this.mapPrismaEventToGraphQLEvent(event, currentUserId, authToken);
+  }
+
   // Process base64 image and upload to Supabase storage
   private async processImageUpload(
     base64Image: string | null | undefined,
@@ -164,40 +221,6 @@ export class EventsService {
     return event;
   }
 
-  // Process image URLs to get signed URLs if needed
-  private async processImageUrls(
-    imageUrls: string[] | null | undefined,
-    authToken?: string,
-  ): Promise<string[]> {
-    if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) {
-      return [];
-    }
-
-    if (!authToken) {
-      return imageUrls;
-    }
-
-    try {
-      return await Promise.all(
-        imageUrls.map(async (imageUrl) => {
-          if (imageUrl && typeof imageUrl === 'string') {
-            return await this.storageService.getSignedUrl(
-              imageUrl,
-              60, // 60 seconds expiry
-              authToken,
-            );
-          }
-          return imageUrl;
-        }),
-      );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      console.error('Error getting signed URLs:', errorMessage);
-      return imageUrls;
-    }
-  }
-
   // Map Prisma event to GraphQL event with additional calculated fields
   private async mapPrismaEventToGraphQLEvent(
     prismaEvent: any,
@@ -213,14 +236,22 @@ export class EventsService {
       authToken
     ) {
       try {
-        processedImages = await this.processImageUrls(
-          processedImages,
-          authToken,
+        processedImages = await Promise.all(
+          processedImages.map(async (imageUrl) => {
+            if (imageUrl && typeof imageUrl === 'string') {
+              return await this.storageService.getSignedUrl(
+                imageUrl,
+                60,
+                authToken,
+              );
+            }
+            return imageUrl;
+          }),
         );
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
-        console.error('Error processing event images:', errorMessage);
+        console.error('Error getting signed URLs:', errorMessage);
       }
     }
 
@@ -250,60 +281,6 @@ export class EventsService {
       participationStatus,
       participantsCount,
     };
-  }
-
-  async findAll(
-    filters?: EventFilterInput,
-    currentUserId?: string,
-    authToken?: string,
-  ) {
-    const where = this.buildFilterQuery(filters);
-
-    const events = await this.prisma.event.findMany({
-      where,
-      include: {
-        createdBy: true,
-        group: true,
-        participants: true,
-        addresses: true,
-      },
-      orderBy: {
-        startDateTime: 'asc',
-      },
-    });
-
-    // Map events to GraphQL format with additional fields
-    const mappedEvents = await Promise.all(
-      events.map((event) =>
-        this.mapPrismaEventToGraphQLEvent(event, currentUserId, authToken),
-      ),
-    );
-
-    return mappedEvents;
-  }
-
-  async findOne(id: string, currentUserId?: string, authToken?: string) {
-    const event = await this.prisma.event.findUnique({
-      where: { id },
-      include: {
-        createdBy: true,
-        group: true,
-        participants: true,
-        addresses: true,
-        invitations: {
-          include: {
-            invitee: true,
-          },
-        },
-      },
-    });
-
-    if (!event) {
-      return null;
-    }
-
-    // Map event to GraphQL format with additional fields
-    return this.mapPrismaEventToGraphQLEvent(event, currentUserId, authToken);
   }
 
   async update(
@@ -536,14 +513,13 @@ export class EventsService {
       eventType,
       startDateFrom,
       startDateTo,
-      searchTerm,
+      query,
       difficultyLevel,
       experienceLevel,
       roadType,
       groupId,
       createdById,
       isPrivate,
-      language,
     } = filters;
 
     const where: any = { isActive: true };
@@ -562,10 +538,10 @@ export class EventsService {
       }
     }
 
-    if (searchTerm) {
+    if (query) {
       where.OR = [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { description: { contains: searchTerm, mode: 'insensitive' } },
+        { title: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
       ];
     }
 
@@ -591,14 +567,6 @@ export class EventsService {
 
     if (isPrivate !== undefined) {
       where.isPrivate = isPrivate;
-    }
-
-    if (language) {
-      where.addresses = {
-        some: {
-          language,
-        },
-      };
     }
 
     return where;

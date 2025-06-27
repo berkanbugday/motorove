@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Context,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 import { EventsService } from './events.service';
 import { Event } from './models/event.model';
 import { CreateEventInput } from './dto/create-event.input';
@@ -21,30 +29,26 @@ export class EventsResolver {
   constructor(private readonly eventsService: EventsService) {}
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Event)
-  async createEvent(
-    @Args('createEventInput') createEventInput: CreateEventInput,
+  @Query(() => [Event], { name: 'events' })
+  async findAll(
     @Context() context: GqlContext,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+    @Args('filters', { type: () => EventFilterInput, nullable: true })
+    filters?: EventFilterInput,
   ) {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.create(createEventInput, userId, authToken);
-  }
-
-  @Query(() => [Event])
-  async events(
-    @Context() context: GqlContext,
-    @Args('filters', { nullable: true }) filters?: EventFilterInput,
-  ) {
-    const authHeader = context.req.headers.authorization;
     const userId = context.req.user?.id;
+    const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.findAll(filters, userId, authToken);
+    return this.eventsService.findAll(limit, skip, filters, userId, authToken);
   }
 
-  @Query(() => Event, { nullable: true })
-  async event(@Args('id') id: string, @Context() context: GqlContext) {
+  @UseGuards(JwtGuard)
+  @Query(() => Event, { name: 'event' })
+  async findOne(
+    @Args('id', { type: () => ID }) id: string,
+    @Context() context: GqlContext,
+  ) {
     const authHeader = context.req.headers.authorization;
     const userId = context.req.user?.id;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
@@ -53,49 +57,66 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => Event)
-  async updateEvent(
-    @Args('id') id: string,
-    @Args('updateEventInput') updateEventInput: UpdateEventInput,
+  async create(
+    @Args('input') input: CreateEventInput,
     @Context() context: GqlContext,
   ) {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.update(id, updateEventInput, userId, authToken);
+    return this.eventsService.create(input, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => Event)
-  async removeEvent(@Args('id') id: string) {
-    return this.eventsService.remove(id);
-  }
-
-  @UseGuards(JwtGuard)
-  @Mutation(() => EventParticipant)
-  async joinEvent(
-    @Args('eventId') eventId: string,
+  async update(
+    @Args('input') input: UpdateEventInput,
     @Context() context: GqlContext,
   ) {
-    const userId = context.req.user.id;
-    return this.eventsService.joinEvent(eventId, userId);
-  }
-
-  @UseGuards(JwtGuard)
-  @Mutation(() => EventParticipant)
-  async leaveEvent(
-    @Args('eventId') eventId: string,
-    @Context() context: GqlContext,
-  ) {
-    const userId = context.req.user.id;
-    return this.eventsService.leaveEvent(eventId, userId);
-  }
-
-  @UseGuards(JwtGuard)
-  @Query(() => [Event])
-  async upcomingEvents(@Context() context: GqlContext): Promise<Event[]> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.getUpcomingEvents(userId, authToken);
+    return this.eventsService.update(input, userId, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => Event)
+  async remove(
+    @Args('id', { type: () => ID }) id: string,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.remove(id, userId, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => EventParticipant)
+  async join(
+    @Args('id', { type: () => ID }) id: string,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    return this.eventsService.join(id, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => EventParticipant)
+  async leave(
+    @Args('id', { type: () => ID }) id: string,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    return this.eventsService.leave(id, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Query(() => [Event], { name: 'upcomingEvents' })
+  async upcoming(@Context() context: GqlContext) {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return this.eventsService.findUpcomingEvents(userId, authToken);
   }
 }

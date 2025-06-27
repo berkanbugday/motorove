@@ -142,8 +142,17 @@ model User {
   createdEvents       Event[]            @relation("EventCreatedBy")
   updatedEvents       Event[]            @relation("EventUpdatedBy")
   eventParticipations EventParticipant[]
-  sentInvitations     EventInvitation[]  @relation("SentInvitations")
   receivedInvitations EventInvitation[]  @relation("ReceivedInvitations")
+  Event               Event?             @relation(fields: [eventId], references: [id])
+  eventId             String?
+
+  // Added relations for EventInvitation
+  createdEventInvitations EventInvitation[] @relation("EventInvitationCreatedBy")
+  updatedEventInvitations EventInvitation[] @relation("EventInvitationUpdatedBy")
+
+  // EventParticipant relations
+  createdEventParticipants EventParticipant[] @relation("EventParticipantCreatedBy")
+  updatedEventParticipants EventParticipant[] @relation("EventParticipantUpdatedBy")
 
   @@index([email])
   @@index([supabaseId])
@@ -428,10 +437,11 @@ model Event {
   isActive    Boolean  @default(true)
 
   // Relationships
-  participants EventParticipant[]
-  invitations  EventInvitation[]
-  addresses    Address[]
-  groups       Group[]
+  participants  EventParticipant[]
+  invitations   EventInvitation[]
+  addresses     Address[]
+  invitedGroups Group[]
+  invitedUsers  User[]
 
   @@index([eventType])
   @@index([startDateTime])
@@ -442,20 +452,28 @@ model Event {
 
 // Event participant model
 model EventParticipant {
-  id        String                 @id @default(uuid())
-  event     Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId   String
-  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  status    EventParticipantStatus @default(JOINED)
-  createdAt DateTime               @default(now())
-  updatedAt DateTime               @updatedAt
+  id      String                 @id @default(uuid())
+  event   Event                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+  status  EventParticipantStatus @default(JOINED)
 
-  @@unique([eventId, userId])
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("EventParticipantCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("EventParticipantUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+
+  @@unique([eventId, createdById])
   @@index([eventId])
-  @@index([userId])
+  @@index([createdById])
   @@index([status])
   @@index([createdAt])
+  @@index([isActive])
 }
 
 // Event invitation model
@@ -463,18 +481,24 @@ model EventInvitation {
   id        String           @id @default(uuid())
   eventId   String
   event     Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  inviterId String
-  inviter   User             @relation("SentInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
   inviteeId String
   invitee   User             @relation("ReceivedInvitations", fields: [inviteeId], references: [id], onDelete: Cascade)
   status    InvitationStatus @default(PENDING)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("EventInvitationCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("EventInvitationUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
 
   @@unique([eventId, inviteeId])
   @@index([eventId])
-  @@index([inviterId])
+  @@index([createdById])
   @@index([inviteeId])
   @@index([status])
   @@index([createdAt])
+  @@index([isActive])
 }

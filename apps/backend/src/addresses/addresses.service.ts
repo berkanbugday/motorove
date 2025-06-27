@@ -9,35 +9,75 @@ import { UpdateAddressInput } from './dto/update-address.input';
 import { AddressFilterInput } from './dto/address-filter.input';
 import { AddressType } from '../enums/models/address-type.enum';
 import { Language } from '../enums/models/language.enum';
+import { Address } from './models/address.model';
+import { Post } from 'src/posts/models/post.model';
+import { Event } from 'src/events/models/event.model';
 
 @Injectable()
 export class AddressesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createAddress(userId: string, createAddressInput: CreateAddressInput) {
+  async findAll(
+    limit?: number,
+    skip?: number,
+    filters?: AddressFilterInput,
+  ): Promise<Address[]> {
+    const addresses = (await this.prisma.address.findMany({
+      take: limit || undefined,
+      skip: skip || undefined,
+      where: {
+        ...(filters?.postId && { postId: filters.postId }),
+        ...(filters?.eventId && { eventId: filters.eventId }),
+        ...(filters?.type && { type: filters.type }),
+        ...(filters?.language && { language: filters.language }),
+      },
+      include: {
+        post: true,
+        event: true,
+      },
+    })) as unknown as Address[];
+
+    return addresses;
+  }
+
+  async findOne(id: string): Promise<Address> {
+    const address = (await this.prisma.address.findUnique({
+      where: { id },
+      include: {
+        post: true,
+        event: true,
+      },
+    })) as unknown as Address;
+
+    if (!address) {
+      throw new NotFoundException(`Address with ID ${id} not found`);
+    }
+
+    return address;
+  }
+
+  async create(input: CreateAddressInput, userId: string): Promise<Address> {
     // Check if we are creating an address for a post or an event
-    if (!createAddressInput.postId && !createAddressInput.eventId) {
+    if (!input.postId && !input.eventId) {
       throw new BadRequestException(
         'Either postId or eventId must be provided',
       );
     }
 
-    if (createAddressInput.postId && createAddressInput.eventId) {
+    if (input.postId && input.eventId) {
       throw new BadRequestException(
         'Cannot associate address with both post and event',
       );
     }
 
     // If creating for a post, check if user owns the post
-    if (createAddressInput.postId) {
-      const post = await this.prisma.post.findUnique({
-        where: { id: createAddressInput.postId },
-      });
+    if (input.postId) {
+      const post = (await this.prisma.post.findUnique({
+        where: { id: input.postId },
+      })) as unknown as Post;
 
       if (!post) {
-        throw new NotFoundException(
-          `Post with ID ${createAddressInput.postId} not found`,
-        );
+        throw new NotFoundException(`Post with ID ${input.postId} not found`);
       }
 
       if (post.createdById !== userId) {
@@ -48,15 +88,13 @@ export class AddressesService {
     }
 
     // If creating for an event, check if user owns the event
-    if (createAddressInput.eventId) {
-      const event = await this.prisma.event.findUnique({
-        where: { id: createAddressInput.eventId },
-      });
+    if (input.eventId) {
+      const event = (await this.prisma.event.findUnique({
+        where: { id: input.eventId },
+      })) as unknown as Event;
 
       if (!event) {
-        throw new NotFoundException(
-          `Event with ID ${createAddressInput.eventId} not found`,
-        );
+        throw new NotFoundException(`Event with ID ${input.eventId} not found`);
       }
 
       if (event.createdById !== userId) {
@@ -67,37 +105,33 @@ export class AddressesService {
     }
 
     // Create the address with type-safe handling of latitude and longitude
-    return this.prisma.address.create({
+    const address = (await this.prisma.address.create({
       data: {
-        address: createAddressInput.address,
-        language: createAddressInput.language,
-        type: createAddressInput.type,
-        latitude: createAddressInput.latitude,
-        longitude: createAddressInput.longitude,
-        post: createAddressInput.postId
-          ? { connect: { id: createAddressInput.postId } }
-          : undefined,
-        event: createAddressInput.eventId
-          ? { connect: { id: createAddressInput.eventId } }
-          : undefined,
+        address: input.address,
+        language: input.language,
+        type: input.type,
+        latitude: input.latitude,
+        longitude: input.longitude,
+        post: input.postId ? { connect: { id: input.postId } } : undefined,
+        event: input.eventId ? { connect: { id: input.eventId } } : undefined,
       },
-    });
+    })) as unknown as Address;
+
+    return address;
   }
 
-  async updateAddress(userId: string, updateAddressInput: UpdateAddressInput) {
+  async update(input: UpdateAddressInput, userId: string): Promise<Address> {
     // First, find the address to check ownership
-    const address = await this.prisma.address.findUnique({
-      where: { id: updateAddressInput.id },
+    const address = (await this.prisma.address.findUnique({
+      where: { id: input.id },
       include: {
         post: true,
         event: true,
       },
-    });
+    })) as unknown as Address;
 
     if (!address) {
-      throw new NotFoundException(
-        `Address with ID ${updateAddressInput.id} not found`,
-      );
+      throw new NotFoundException(`Address with ID ${input.id} not found`);
     }
 
     // Check permissions - user should own the post or event this address is attached to
@@ -114,7 +148,7 @@ export class AddressesService {
     }
 
     // Cannot change postId or eventId after creation
-    if (updateAddressInput.postId || updateAddressInput.eventId) {
+    if (input.postId || input.eventId) {
       throw new BadRequestException(
         'Cannot change the associated post or event after address creation',
       );
@@ -130,98 +164,54 @@ export class AddressesService {
     } = {};
 
     // Add only defined fields to update data
-    if (updateAddressInput.address !== undefined) {
-      updateData.address = updateAddressInput.address;
+    if (input.address !== undefined) {
+      updateData.address = input.address;
     }
 
-    if (updateAddressInput.language !== undefined) {
-      updateData.language = updateAddressInput.language;
+    if (input.language !== undefined) {
+      updateData.language = input.language;
     }
 
-    if (updateAddressInput.type !== undefined) {
-      updateData.type = updateAddressInput.type;
+    if (input.type !== undefined) {
+      updateData.type = input.type;
     }
 
-    if (updateAddressInput.latitude !== undefined) {
-      updateData.latitude = updateAddressInput.latitude;
+    if (input.latitude !== undefined) {
+      updateData.latitude = input.latitude;
     }
 
-    if (updateAddressInput.longitude !== undefined) {
-      updateData.longitude = updateAddressInput.longitude;
+    if (input.longitude !== undefined) {
+      updateData.longitude = input.longitude;
     }
 
     // Update the address with the constructed data object
-    return this.prisma.address.update({
-      where: { id: updateAddressInput.id },
+    const updatedAddress = (await this.prisma.address.update({
+      where: { id: input.id },
       data: updateData,
-    });
+    })) as unknown as Address;
+
+    return updatedAddress;
   }
 
-  async findAll(limit?: number, skip?: number, filters?: AddressFilterInput) {
-    return await this.prisma.address.findMany({
-      take: limit || undefined,
-      skip: skip || undefined,
-      where: {
-        postId: filters?.postId || undefined,
-        eventId: filters?.eventId || undefined,
-        type: filters?.type || undefined,
-        language: filters?.language || undefined,
-      },
-      include: {
-        post: true,
-        event: true,
-      },
-    });
-  }
-
-  async findOne(id: string) {
-    const address = await this.prisma.address.findUnique({
-      where: { id },
-      include: {
-        post: true,
-        event: true,
-      },
-    });
-
-    if (!address) {
-      throw new NotFoundException(`Address with ID ${id} not found`);
-    }
-
-    return address;
-  }
-
-  async removeAddress(userId: string, id: string) {
+  async remove(id: string): Promise<Address> {
     // Find address to check permissions
-    const address = await this.prisma.address.findUnique({
+    const address = (await this.prisma.address.findUnique({
       where: { id },
       include: {
         post: true,
         event: true,
       },
-    });
+    })) as unknown as Address;
 
     if (!address) {
       throw new NotFoundException(`Address with ID ${id} not found`);
-    }
-
-    // Check permissions
-    if (address.post && address.post.createdById !== userId) {
-      throw new BadRequestException(
-        'You do not have permission to remove this address',
-      );
-    }
-
-    if (address.event && address.event.createdById !== userId) {
-      throw new BadRequestException(
-        'You do not have permission to remove this address',
-      );
     }
 
     // Delete the address
-    await this.prisma.address.delete({
+    const deletedAddress = (await this.prisma.address.delete({
       where: { id },
-    });
+    })) as unknown as Address;
 
-    return true;
+    return deletedAddress;
   }
 }
