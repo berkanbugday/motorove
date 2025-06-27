@@ -19,7 +19,7 @@ import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter'
 import { NotificationsModule } from './notifications/notifications.module';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
-import { FollowsModule } from './follows/follows.module';
+import { UserFollowingsModule } from './user-followings/user-followings.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { AddressesModule } from './addresses/addresses.module';
@@ -69,7 +69,7 @@ import { AddressesModule } from './addresses/addresses.module';
     NotificationsModule,
     PostsModule,
     CommentsModule,
-    FollowsModule,
+    UserFollowingsModule,
     UsersModule,
     EventsModule,
     AddressesModule,

@@ -1,6 +1,5 @@
 import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
 import { CommentsService } from './comments.service';
-import { Comment } from './models/comment.model';
 import { CreateCommentInput } from './dto/create-comment.input';
 import { UpdateCommentInput } from './dto/update-comment.input';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -8,13 +7,14 @@ import { User } from '../users/models/user.model';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CommentFilterInput } from './dto/comment-filter.input';
+import { CommentDto } from './dto/comment.dto';
 
-@Resolver(() => Comment)
+@Resolver(() => CommentDto)
 export class CommentsResolver {
   constructor(private readonly commentsService: CommentsService) {}
 
   @UseGuards(JwtGuard)
-  @Query(() => [Comment], { name: 'comments' })
+  @Query(() => [CommentDto], { name: 'comments' })
   async findAll(
     @Args('postId', { type: () => ID }) postId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
@@ -26,13 +26,13 @@ export class CommentsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => Comment, { name: 'comment' })
+  @Query(() => CommentDto, { name: 'comment' })
   async findOne(@Args('id', { type: () => ID }) id: string) {
     return this.commentsService.findOne(id);
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Comment)
+  @Mutation(() => CommentDto)
   async create(
     @CurrentUser() user: User,
     @Args('input') input: CreateCommentInput,
@@ -41,7 +41,7 @@ export class CommentsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Comment)
+  @Mutation(() => CommentDto)
   async update(
     @CurrentUser() user: User,
     @Args('input') input: UpdateCommentInput,
@@ -50,7 +50,7 @@ export class CommentsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Comment)
+  @Mutation(() => CommentDto)
   async remove(
     @CurrentUser() user: User,
     @Args('id', { type: () => ID }) id: string,

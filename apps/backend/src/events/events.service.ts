@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../core/storage/storage.service';
 import { CreateEventInput } from './dto/create-event.input';
@@ -7,8 +11,11 @@ import { EventFilterInput } from './dto/event-filter.input';
 import { RoadType } from '../enums/models/road-type.enum';
 import { DifficultyLevel } from '../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../enums/models/experience-level.enum';
-import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { EventParticipantStatus } from '../enums/models/event-participant-status.enum';
+import { EventDto } from './dto/event.dto';
+import { Event } from './models/event.model';
+import { plainToClass } from 'class-transformer';
+import { Group } from 'src/groups/models/group.model';
 
 @Injectable()
 export class EventsService {
@@ -23,15 +30,17 @@ export class EventsService {
     filters?: EventFilterInput,
     currentUserId?: string,
     authToken?: string,
-  ): Promise<Event[]> {
+  ): Promise<EventDto[]> {
     const where = this.buildFilterQuery(filters);
 
     const events = (await this.prisma.event.findMany({
       where,
       include: {
         createdBy: true,
+        updatedBy: true,
         participants: true,
         addresses: true,
+        invitedGroups: true,
       },
       orderBy: {
         startDateTime: 'asc',
@@ -41,37 +50,465 @@ export class EventsService {
     })) as unknown as Event[];
 
     // Map events to GraphQL format with additional fields
-    const mappedEvents = await Promise.all(
-      events.map((event) =>
-        this.mapPrismaEventToGraphQLEvent(event, currentUserId, authToken),
-      ),
+    return await Promise.all(
+      events.map((event) => this.mapToDto(event, currentUserId, authToken)),
     );
-
-    return mappedEvents;
   }
 
-  async findOne(id: string, currentUserId?: string, authToken?: string) {
-    const event = await this.prisma.event.findUnique({
+  async findOne(
+    id: string,
+    currentUserId?: string,
+    authToken?: string,
+  ): Promise<EventDto> {
+    const event = (await this.prisma.event.findUnique({
       where: { id },
       include: {
         createdBy: true,
-        group: true,
+        updatedBy: true,
         participants: true,
         addresses: true,
+        invitedGroups: true,
         invitations: {
           include: {
             invitee: true,
           },
         },
       },
-    });
+    })) as unknown as Event;
 
-    if (!event) {
-      return null;
+    if (!event || !event.isActive) {
+      throw new NotFoundException(`Event with ID ${id} not found`);
     }
 
     // Map event to GraphQL format with additional fields
-    return this.mapPrismaEventToGraphQLEvent(event, currentUserId, authToken);
+    return this.mapToDto(event, currentUserId, authToken);
+  }
+
+  async create(
+    input: CreateEventInput,
+    userId: string,
+    authToken?: string,
+  ): Promise<EventDto> {
+    const {
+      title,
+      description,
+      eventType,
+      startDateTime,
+      endDateTime,
+      maxParticipants,
+      isPrivate,
+      images,
+      addresses,
+      invitedGroupIds,
+      roadType,
+      difficultyLevel,
+      routeDescription,
+      restStops,
+      campingInfo,
+      equipmentChecklist,
+      instructorInfo,
+      topicsCovered,
+      experienceLevel,
+      price,
+    } = input;
+
+    // Process uploaded images if they exist
+    let processedImages: string[] | undefined;
+    if (images && images.length > 0) {
+      processedImages = (
+        await Promise.all(
+          images.map((image, index) =>
+            this.processImageUpload(
+              image,
+              'events/images',
+              `event-${userId}-${index}`,
+              authToken,
+            ),
+          ),
+        )
+      ).filter(Boolean) as string[];
+    }
+
+    const event = (await this.prisma.event.create({
+      data: {
+        title,
+        description,
+        eventType,
+        startDateTime,
+        endDateTime,
+        maxParticipants,
+        isPrivate,
+        images: processedImages,
+        invitedGroupIds: invitedGroupIds || [],
+        roadType: roadType as RoadType,
+        difficultyLevel: difficultyLevel as DifficultyLevel,
+        routeDescription,
+        restStops,
+        campingInfo,
+        equipmentChecklist,
+        instructorInfo,
+        topicsCovered,
+        experienceLevel: experienceLevel as ExperienceLevel,
+        price: price ? parseFloat(price) : null,
+        createdBy: { connect: { id: userId } },
+        updatedBy: { connect: { id: userId } },
+        // Handle addresses
+        addresses: addresses?.length
+          ? {
+              createMany: {
+                data: addresses.map((addr) => ({
+                  address: addr.address,
+                  language: addr.language,
+                  type: addr.type,
+                  latitude: addr.latitude,
+                  longitude: addr.longitude,
+                })),
+              },
+            }
+          : undefined,
+        // Handle invited groups if provided
+        invitedGroups: invitedGroupIds?.length
+          ? {
+              connect: invitedGroupIds.map((id) => ({ id })),
+            }
+          : undefined,
+      },
+      include: {
+        createdBy: true,
+        updatedBy: true,
+        addresses: true,
+        invitedGroups: true,
+      },
+    })) as unknown as Event;
+
+    return this.mapToDto(event, userId, authToken);
+  }
+
+  async update(
+    input: UpdateEventInput,
+    userId: string,
+    authToken?: string,
+  ): Promise<EventDto> {
+    const {
+      id,
+      title,
+      description,
+      eventType,
+      startDateTime,
+      endDateTime,
+      maxParticipants,
+      isPrivate,
+      images,
+      addresses,
+      invitedGroupIds,
+      roadType,
+      difficultyLevel,
+      routeDescription,
+      restStops,
+      campingInfo,
+      equipmentChecklist,
+      instructorInfo,
+      topicsCovered,
+      experienceLevel,
+      price,
+    } = input;
+
+    // Process uploaded images if they exist
+    let processedImages: string[] | undefined;
+    if (images && images.length > 0) {
+      processedImages = (
+        await Promise.all(
+          images.map(async (image, index) => {
+            const imageUrl = await this.processImageUpload(
+              image,
+              'events/images',
+              `event-${userId}-${index}`,
+              authToken,
+            );
+
+            if (imageUrl && imageUrl.startsWith('events/images')) {
+              return imageUrl;
+            }
+
+            const imageUrlWithoutQuery = imageUrl?.split('?')[0];
+            return `events/images/${imageUrlWithoutQuery?.split('/').pop()}`;
+          }),
+        )
+      ).filter(Boolean);
+    }
+
+    // First get the current event to handle group relationships properly
+    const currentEvent = (await this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        invitedGroups: true,
+      },
+    })) as unknown as Event;
+
+    if (!currentEvent) {
+      throw new NotFoundException(`Event with id ${id} not found`);
+    }
+
+    const event = (await this.prisma.event.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        eventType,
+        startDateTime,
+        endDateTime,
+        maxParticipants,
+        isPrivate,
+        images: processedImages,
+        invitedGroupIds: invitedGroupIds || [],
+        roadType: roadType as RoadType,
+        difficultyLevel: difficultyLevel as DifficultyLevel,
+        routeDescription,
+        restStops,
+        campingInfo,
+        equipmentChecklist,
+        instructorInfo,
+        topicsCovered,
+        experienceLevel: experienceLevel as ExperienceLevel,
+        price: price ? parseFloat(price) : null,
+        updatedBy: { connect: { id: userId } },
+        updatedAt: new Date(),
+        // Handle addresses update - delete old ones if new ones provided
+        addresses: addresses?.length
+          ? {
+              deleteMany: {}, // Delete old addresses
+              createMany: {
+                data: addresses.map((addr) => ({
+                  address: addr.address,
+                  language: addr.language,
+                  type: addr.type,
+                  latitude: addr.latitude,
+                  longitude: addr.longitude,
+                })),
+              },
+            }
+          : undefined,
+        // Handle invited groups if provided
+        invitedGroups: invitedGroupIds?.length
+          ? {
+              disconnect: currentEvent.invitedGroups?.map((group: Group) => ({
+                id: group.id,
+              })),
+              connect: invitedGroupIds.map((id) => ({ id })),
+            }
+          : undefined,
+      },
+      include: {
+        createdBy: true,
+        updatedBy: true,
+        addresses: true,
+        participants: true,
+        invitedGroups: true,
+      },
+    })) as unknown as Event;
+
+    return this.mapToDto(event, userId, authToken);
+  }
+
+  async remove(id: string, userId: string): Promise<boolean> {
+    const event = (await this.prisma.event.update({
+      where: { id },
+      data: {
+        isActive: false,
+        updatedBy: { connect: { id: userId } },
+        updatedAt: new Date(),
+      },
+      include: {
+        createdBy: true,
+        updatedBy: true,
+        participants: true,
+        addresses: true,
+        invitedGroups: true,
+      },
+    })) as unknown as Event;
+
+    return event.isActive === false;
+  }
+
+  async join(
+    eventId: string,
+    userId: string,
+    authToken?: string,
+  ): Promise<EventDto> {
+    const participant = await this.prisma.eventParticipant.create({
+      data: {
+        event: { connect: { id: eventId } },
+        createdBy: { connect: { id: userId } },
+        status: EventParticipantStatus.JOINED,
+      },
+      include: {
+        event: true,
+        createdBy: true,
+      },
+    });
+
+    return this.mapToDto(participant.event, userId, authToken);
+  }
+
+  async leave(
+    eventId: string,
+    userId: string,
+    authToken?: string,
+  ): Promise<EventDto> {
+    const participant = await this.prisma.eventParticipant.findFirst({
+      where: {
+        eventId,
+        createdById: userId,
+      },
+    });
+
+    if (!participant) {
+      throw new NotFoundException('Participant not found');
+    }
+
+    await this.prisma.eventParticipant.update({
+      where: { id: participant.id },
+      data: {
+        status: EventParticipantStatus.LEFT,
+      },
+    });
+
+    const event = await this.findOne(eventId, userId, authToken);
+
+    return event;
+  }
+
+  async findUpcomingEvents(
+    userId: string,
+    authToken?: string,
+  ): Promise<EventDto[]> {
+    const now = new Date();
+
+    const events = (await this.prisma.event.findMany({
+      where: {
+        startDateTime: {
+          gte: now,
+        },
+        OR: [
+          {
+            isPrivate: false,
+          },
+          {
+            participants: {
+              some: {
+                createdById: userId,
+              },
+            },
+          },
+          {
+            createdById: userId,
+          },
+          {
+            invitations: {
+              some: {
+                inviteeId: userId,
+              },
+            },
+          },
+          {
+            invitedGroups: {
+              some: {
+                memberships: {
+                  some: {
+                    userId: userId,
+                  },
+                },
+              },
+            },
+          },
+        ],
+        isActive: true,
+      },
+      orderBy: {
+        startDateTime: 'asc',
+      },
+      include: {
+        createdBy: true,
+        updatedBy: true,
+        participants: {
+          include: {
+            createdBy: true,
+          },
+        },
+        addresses: true,
+        invitedGroups: true,
+      },
+    })) as unknown as Event[];
+
+    // Map events to GraphQL format with additional fields
+    return await Promise.all(
+      events.map((event) => this.mapToDto(event, userId, authToken)),
+    );
+  }
+
+  // Helper method to map Prisma event to DTO with additional calculated fields
+  private async mapToDto(
+    event: any,
+    currentUserId?: string,
+    authToken?: string,
+  ): Promise<EventDto> {
+    // Process images to get signed URLs if needed
+    let processedImages = event.images || [];
+
+    if (
+      Array.isArray(processedImages) &&
+      processedImages.length > 0 &&
+      authToken
+    ) {
+      try {
+        processedImages = await Promise.all(
+          processedImages.map(async (imageUrl) => {
+            if (imageUrl && typeof imageUrl === 'string') {
+              return await this.storageService.getSignedUrl(
+                imageUrl,
+                60,
+                authToken,
+              );
+            }
+            return imageUrl;
+          }),
+        );
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error getting signed URLs:', errorMessage);
+      }
+    }
+
+    // Calculate if current user is participating and their status
+    let isParticipating = false;
+    let participationStatus = null;
+
+    if (currentUserId) {
+      const participation = event.participants?.find(
+        (p: any) => p.createdById === currentUserId,
+      );
+
+      isParticipating = !!participation;
+      participationStatus = participation?.status || null;
+    }
+
+    // Calculate number of participants
+    const participantsCount =
+      event.participants?.filter(
+        (p: any) => p.status === EventParticipantStatus.JOINED,
+      ).length || 0;
+
+    // Create base DTO with transformed data
+    const eventWithExtras = {
+      ...event,
+      images: processedImages,
+      isParticipating,
+      participationStatus,
+      participantsCount,
+    };
+
+    return plainToClass(EventDto, eventWithExtras);
   }
 
   // Process base64 image and upload to Supabase storage
@@ -123,386 +560,6 @@ export class EventsService {
       }
     }
     return 'image/jpeg'; // Default
-  }
-
-  async create(
-    createEventInput: CreateEventInput,
-    userId: string,
-    authToken?: string,
-  ) {
-    const {
-      title,
-      description,
-      eventType,
-      startDateTime,
-      endDateTime,
-      maxParticipants,
-      isPrivate,
-      images,
-      addresses,
-      invitedGroupIds,
-      roadType,
-      difficultyLevel,
-      routeDescription,
-      restStops,
-      campingInfo,
-      equipmentChecklist,
-      instructorInfo,
-      topicsCovered,
-      experienceLevel,
-      price,
-    } = createEventInput;
-
-    // Process uploaded images if they exist
-    let processedImages: string[] = [];
-    if (images && images.length > 0) {
-      processedImages = (
-        await Promise.all(
-          images.map((image, index) =>
-            this.processImageUpload(
-              image,
-              'events/images',
-              `event-${userId}-${index}`,
-              authToken,
-            ),
-          ),
-        )
-      ).filter(Boolean) as string[];
-    }
-
-    const event = await this.prisma.event.create({
-      data: {
-        title,
-        description,
-        eventType,
-        startDateTime,
-        endDateTime,
-        maxParticipants,
-        isPrivate,
-        images: processedImages,
-        roadType: roadType as RoadType,
-        difficultyLevel: difficultyLevel as DifficultyLevel,
-        routeDescription,
-        restStops,
-        campingInfo,
-        equipmentChecklist,
-        instructorInfo,
-        topicsCovered,
-        experienceLevel: experienceLevel as ExperienceLevel,
-        price: price ? parseFloat(price) : null,
-        createdBy: { connect: { id: userId } },
-        updatedBy: { connect: { id: userId } },
-        // Handle addresses
-        addresses: addresses?.length
-          ? {
-              createMany: {
-                data: addresses.map((addr) => ({
-                  address: addr.address,
-                  language: addr.language,
-                  type: addr.type,
-                  latitude: addr.latitude,
-                  longitude: addr.longitude,
-                })),
-              },
-            }
-          : undefined,
-        // Handle invited groups if provided
-        group: invitedGroupIds?.[0]
-          ? { connect: { id: invitedGroupIds[0] } }
-          : undefined,
-      },
-      include: {
-        createdBy: true,
-        group: true,
-        addresses: true,
-      },
-    });
-
-    return event;
-  }
-
-  // Map Prisma event to GraphQL event with additional calculated fields
-  private async mapPrismaEventToGraphQLEvent(
-    prismaEvent: any,
-    currentUserId?: string,
-    authToken?: string,
-  ): Promise<any> {
-    // Process images to get signed URLs if needed
-    let processedImages = prismaEvent.images || [];
-
-    if (
-      Array.isArray(processedImages) &&
-      processedImages.length > 0 &&
-      authToken
-    ) {
-      try {
-        processedImages = await Promise.all(
-          processedImages.map(async (imageUrl) => {
-            if (imageUrl && typeof imageUrl === 'string') {
-              return await this.storageService.getSignedUrl(
-                imageUrl,
-                60,
-                authToken,
-              );
-            }
-            return imageUrl;
-          }),
-        );
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        console.error('Error getting signed URLs:', errorMessage);
-      }
-    }
-
-    // Calculate if current user is participating
-    let isParticipating = false;
-    let participationStatus = null;
-
-    if (currentUserId) {
-      const participation = prismaEvent.participants?.find(
-        (p: any) => p.userId === currentUserId,
-      );
-
-      isParticipating = !!participation;
-      participationStatus = participation?.status || null;
-    }
-
-    // Calculate number of participants
-    const participantsCount =
-      prismaEvent.participants?.filter(
-        (p: any) => p.status === EventParticipantStatus.JOINED,
-      ).length || 0;
-
-    return {
-      ...prismaEvent,
-      images: processedImages,
-      isParticipating,
-      participationStatus,
-      participantsCount,
-    };
-  }
-
-  async update(
-    id: string,
-    updateEventInput: UpdateEventInput,
-    userId: string,
-    authToken?: string,
-  ) {
-    const {
-      title,
-      description,
-      eventType,
-      startDateTime,
-      endDateTime,
-      maxParticipants,
-      isPrivate,
-      images,
-      addresses,
-      invitedGroupIds,
-      roadType,
-      difficultyLevel,
-      routeDescription,
-      restStops,
-      campingInfo,
-      equipmentChecklist,
-      instructorInfo,
-      topicsCovered,
-      experienceLevel,
-      price,
-    } = updateEventInput;
-
-    // Process uploaded images if they exist
-    let processedImages: string[] | undefined;
-    if (images && images.length > 0) {
-      processedImages = (
-        await Promise.all(
-          images.map(async (image, index) => {
-            const imageUrl = await this.processImageUpload(
-              image,
-              'events/images',
-              `event-${userId}-${index}`,
-              authToken,
-            );
-
-            if (imageUrl && imageUrl.startsWith('events/images')) {
-              return imageUrl;
-            }
-
-            const imageUrlWithoutQuery = imageUrl?.split('?')[0];
-            return `events/images/${imageUrlWithoutQuery?.split('/').pop()}`;
-          }),
-        )
-      ).filter(Boolean);
-    }
-
-    return this.prisma.event.update({
-      where: { id },
-      data: {
-        title,
-        description,
-        eventType,
-        startDateTime,
-        endDateTime,
-        maxParticipants,
-        isPrivate,
-        images: processedImages,
-        roadType: roadType as RoadType,
-        difficultyLevel: difficultyLevel as DifficultyLevel,
-        routeDescription,
-        restStops,
-        campingInfo,
-        equipmentChecklist,
-        instructorInfo,
-        topicsCovered,
-        experienceLevel: experienceLevel as ExperienceLevel,
-        price: price ? parseFloat(price) : null,
-        updatedBy: { connect: { id: userId } },
-        updatedAt: new Date(),
-        // Handle addresses update - delete old ones if new ones provided
-        addresses: addresses?.length
-          ? {
-              deleteMany: {}, // Delete old addresses
-              createMany: {
-                data: addresses.map((addr) => ({
-                  address: addr.address,
-                  language: addr.language,
-                  type: addr.type,
-                  latitude: addr.latitude,
-                  longitude: addr.longitude,
-                })),
-              },
-            }
-          : undefined,
-        // Handle group update if invitedGroupIds provided
-        group: invitedGroupIds?.[0]
-          ? { connect: { id: invitedGroupIds[0] } }
-          : undefined,
-      },
-      include: {
-        createdBy: true,
-        group: true,
-        addresses: true,
-        participants: true,
-      },
-    });
-  }
-
-  async remove(id: string) {
-    return this.prisma.event.update({
-      where: { id },
-      data: {
-        isActive: false,
-      },
-    });
-  }
-
-  async joinEvent(eventId: string, userId: string) {
-    return this.prisma.eventParticipant.create({
-      data: {
-        event: { connect: { id: eventId } },
-        user: { connect: { id: userId } },
-        status: EventParticipantStatus.JOINED,
-      },
-      include: {
-        event: true,
-        user: true,
-      },
-    });
-  }
-
-  async leaveEvent(eventId: string, userId: string) {
-    const participant = await this.prisma.eventParticipant.findFirst({
-      where: {
-        eventId,
-        userId,
-      },
-    });
-
-    if (!participant) {
-      throw new Error('Participant not found');
-    }
-
-    return this.prisma.eventParticipant.update({
-      where: { id: participant.id },
-      data: {
-        status: EventParticipantStatus.LEFT,
-      },
-      include: {
-        event: true,
-        user: true,
-      },
-    });
-  }
-
-  async getUpcomingEvents(userId: string, authToken?: string) {
-    const now = new Date();
-
-    const events = await this.prisma.event.findMany({
-      where: {
-        startDateTime: {
-          gte: now,
-        },
-        OR: [
-          {
-            isPrivate: false,
-          },
-          {
-            participants: {
-              some: {
-                userId,
-              },
-            },
-          },
-          {
-            createdById: userId,
-          },
-          {
-            invitations: {
-              some: {
-                inviteeId: userId,
-              },
-            },
-          },
-          {
-            groupId: {
-              not: null,
-            },
-            group: {
-              memberships: {
-                some: {
-                  userId,
-                  status: InvitationStatus.ACCEPTED,
-                },
-              },
-            },
-          },
-        ],
-        isActive: true,
-      },
-      orderBy: {
-        startDateTime: 'asc',
-      },
-      include: {
-        createdBy: true,
-        group: true,
-        participants: {
-          include: {
-            user: true,
-          },
-        },
-        addresses: true,
-      },
-    });
-
-    // Map events to GraphQL format with additional fields
-    const mappedEvents = await Promise.all(
-      events.map((event) =>
-        this.mapPrismaEventToGraphQLEvent(event, userId, authToken),
-      ),
-    );
-
-    return mappedEvents;
   }
 
   // Helper method to build the filter query
@@ -558,7 +615,11 @@ export class EventsService {
     }
 
     if (groupId) {
-      where.groupId = groupId;
+      where.invitedGroups = {
+        some: {
+          id: groupId,
+        },
+      };
     }
 
     if (createdById) {

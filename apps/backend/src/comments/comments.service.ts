@@ -11,6 +11,8 @@ import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { CommentFilterInput } from './dto/comment-filter.input';
 import { GroupMembership } from '../group-memberships/models/group-membership.model';
+import { CommentDto } from './dto/comment.dto';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class CommentsService {
@@ -21,7 +23,7 @@ export class CommentsService {
     limit?: number,
     skip?: number,
     filters?: CommentFilterInput,
-  ): Promise<Comment[]> {
+  ): Promise<CommentDto[]> {
     const where = {
       postId,
       isActive: filters?.isActive || true,
@@ -49,10 +51,10 @@ export class CommentsService {
       take: limit || undefined,
     })) as unknown as Comment[];
 
-    return comments;
+    return comments.map((comment) => this.mapToDto(comment));
   }
 
-  async findOne(id: string): Promise<Comment> {
+  async findOne(id: string): Promise<CommentDto> {
     const comment = (await this.prisma.comment.findUnique({
       where: { id },
       include: {
@@ -80,10 +82,10 @@ export class CommentsService {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }
 
-    return comment;
+    return this.mapToDto(comment);
   }
 
-  async create(input: CreateCommentInput, userId: string): Promise<Comment> {
+  async create(input: CreateCommentInput, userId: string): Promise<CommentDto> {
     // Check if the post exists and is active
     const post = await this.prisma.post.findUnique({
       where: { id: input.postId },
@@ -150,10 +152,10 @@ export class CommentsService {
       },
     })) as unknown as Comment;
 
-    return comment;
+    return this.mapToDto(comment);
   }
 
-  async update(input: UpdateCommentInput, userId: string): Promise<Comment> {
+  async update(input: UpdateCommentInput, userId: string): Promise<CommentDto> {
     const comment = (await this.prisma.comment.findUnique({
       where: { id: input.id },
       include: {
@@ -208,10 +210,10 @@ export class CommentsService {
       },
     })) as unknown as Comment;
 
-    return updatedComment;
+    return this.mapToDto(updatedComment);
   }
 
-  async remove(id: string, userId: string): Promise<Comment> {
+  async remove(id: string, userId: string): Promise<CommentDto> {
     const comment = (await this.prisma.comment.findUnique({
       where: { id },
       include: {
@@ -263,6 +265,22 @@ export class CommentsService {
       },
     })) as unknown as Comment;
 
-    return deletedComment;
+    return this.mapToDto(deletedComment);
+  }
+
+  private mapToDto(comment: Comment): CommentDto {
+    const dto = plainToClass(CommentDto, comment);
+
+    // Handle nested replies recursively
+    if (comment.replies && comment.replies.length > 0) {
+      dto.replies = comment.replies.map((reply) => this.mapToDto(reply));
+    }
+
+    // Handle parent comment if exists
+    if (comment.parent) {
+      dto.parent = this.mapToDto(comment.parent);
+    }
+
+    return dto;
   }
 }
