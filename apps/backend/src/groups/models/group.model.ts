@@ -1,9 +1,11 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import { BaseModel } from '../../core/models';
 import { GroupMembership } from '../../group-memberships/models/group-membership.model';
 import { City } from '../../cities/models/city.model';
 import { GroupTag } from '../../group-tags/models/group-tag.model';
+import { Post } from '../../posts/models/post.model';
+import { Event } from '../../events/models/event.model';
 
 @ObjectType()
 export class Group extends BaseModel {
@@ -18,6 +20,9 @@ export class Group extends BaseModel {
 
   @Field(() => String, { nullable: true })
   cover: string | null;
+
+  @Field(() => ID)
+  cityId: string;
 
   @Field(() => City)
   city: City;
@@ -34,9 +39,9 @@ export class Group extends BaseModel {
   @Field(() => [GroupMembership])
   memberships: GroupMembership[];
 
-  @Field(() => Boolean, { nullable: true })
-  isMember?: boolean;
+  @Field(() => [Post])
+  posts: Post[];
 
-  @Field(() => Boolean, { nullable: true })
-  isAdmin?: boolean;
+  @Field(() => [Event])
+  events: Event[];
 }

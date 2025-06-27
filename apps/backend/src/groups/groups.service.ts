@@ -9,8 +9,10 @@ import { CreateGroupInput } from './dto/create-group.input';
 import { UpdateGroupInput } from './dto/update-group.input';
 import { StorageService } from '../core/storage/storage.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
-import { GroupMembershipStatus } from 'src/enums/models/group-membership-status.enum';
-import { GroupFilterInput } from './dto/group-filter.input';
+import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { FilterGroupInput } from './dto/filter-group.input';
+import { Group } from './models/group.model';
+import { GroupDto } from './dto/group.dto';
 
 @Injectable()
 export class GroupsService {
@@ -19,92 +21,239 @@ export class GroupsService {
     private storageService: StorageService,
   ) {}
 
-  // Process base64 image and upload to Supabase storage
-  private async processImageUpload(
-    base64Image: string | null | undefined,
-    path: string,
-    filePrefix: string,
+  async findAll(
+    limit?: number,
+    skip?: number,
+    query?: string,
+    filters?: FilterGroupInput,
+    userId?: string,
     authToken?: string,
-  ): Promise<string | undefined> {
-    if (!base64Image) return undefined;
-
-    try {
-      // Check if it's a URL or base64 data
-      if (base64Image.startsWith('http')) {
-        return base64Image; // Already a URL, just return it
-      }
-
-      // Extract content type
-      const contentType = this.getContentTypeFromBase64(base64Image);
-      const filename = `${filePrefix}-${Date.now()}`;
-
-      // Upload to Supabase storage
-      const imageUrl = await this.storageService.uploadFile(
-        base64Image,
-        path,
-        {
-          contentType,
-          filename,
+  ): Promise<GroupDto[]> {
+    const groups = (await this.prisma.group.findMany({
+      where: {
+        memberships: {
+          none: { userId, status: InvitationStatus.ACCEPTED },
         },
-        authToken,
-      );
+        isActive: true,
+        ...(query
+          ? {
+              name: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            }
+          : {}),
+        ...(filters?.tags && filters.tags.length > 0
+          ? {
+              tags: {
+                some: {
+                  id: {
+                    in: filters.tags,
+                  },
+                },
+              },
+            }
+          : {}),
+        ...(filters?.city && filters.city !== null
+          ? {
+              city: {
+                id: filters.city,
+              },
+            }
+          : {}),
+        ...(filters?.privacy && filters.privacy !== 'ALL'
+          ? {
+              privacy: filters.privacy,
+            }
+          : {}),
+      },
+      include: {
+        createdBy: true,
+        city: true,
+        tags: {
+          orderBy: {
+            value: 'asc',
+          },
+        },
+        memberships: {
+          where: {
+            status: InvitationStatus.ACCEPTED,
+          },
+          include: {
+            user: true,
+          },
+        },
+      },
+      take: limit || undefined,
+      skip: skip || undefined,
+      orderBy: {
+        createdAt: 'desc', // Show newest groups first
+      },
+    })) as unknown as Group[];
 
-      return imageUrl;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
-    }
+    return await Promise.all(
+      groups.map(async (group) => this.mapToDto(group, authToken)),
+    );
   }
 
-  // Extract content type from base64 data
-  private getContentTypeFromBase64(base64Data: string): string {
-    if (base64Data.includes('data:')) {
-      const matches = base64Data.match(
-        /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/,
-      );
-      if (matches && matches.length > 1) {
-        return matches[1];
-      }
-    }
-    return 'image/jpeg'; // Default
-  }
-
-  async createGroup(
-    userId: string,
-    createGroupInput: CreateGroupInput,
+  async findJoinedGroups(
+    limit?: number,
+    skip?: number,
+    filters?: FilterGroupInput,
+    userId?: string,
     authToken?: string,
-  ) {
+  ): Promise<GroupDto[]> {
+    const groups = (await this.prisma.group.findMany({
+      where: {
+        memberships: {
+          some: {
+            userId,
+            status: InvitationStatus.ACCEPTED,
+            ...(filters?.role && filters.role !== 'ALL'
+              ? {
+                  role: filters.role,
+                }
+              : {}),
+          },
+        },
+        isActive: true,
+        ...(filters?.tags && filters.tags.length > 0
+          ? {
+              tags: {
+                some: {
+                  id: {
+                    in: filters.tags,
+                  },
+                },
+              },
+            }
+          : {}),
+        ...(filters?.city && filters.city !== null
+          ? {
+              city: {
+                id: filters.city,
+              },
+            }
+          : {}),
+        ...(filters?.privacy && filters.privacy !== 'ALL'
+          ? {
+              privacy: filters.privacy,
+            }
+          : {}),
+      },
+      include: {
+        createdBy: true,
+        city: true,
+        tags: {
+          orderBy: {
+            value: 'asc',
+          },
+        },
+        memberships: {
+          where: {
+            status: InvitationStatus.ACCEPTED,
+          },
+          include: {
+            user: true,
+          },
+        },
+      },
+      take: limit || undefined,
+      skip: skip || undefined,
+      orderBy: {
+        createdAt: 'desc', // Show newest groups first
+      },
+    })) as unknown as Group[];
+
+    return await Promise.all(
+      groups.map(async (group) => this.mapToDto(group, authToken)),
+    );
+  }
+
+  async findOne(
+    id: string,
+    userId: string,
+    authToken?: string,
+  ): Promise<GroupDto> {
+    const group = (await this.prisma.group.findUnique({
+      where: { id, isActive: true },
+      include: {
+        createdBy: true,
+        city: true,
+        tags: {
+          orderBy: {
+            value: 'asc',
+          },
+        },
+        memberships: {
+          where: {
+            status: InvitationStatus.ACCEPTED,
+          },
+          include: {
+            user: true,
+          },
+        },
+      },
+    })) as unknown as Group;
+
+    if (!group) {
+      throw new NotFoundException(`Group with ID ${id} not found`);
+    }
+
+    const groupDto = await this.mapToDto(group, authToken);
+
+    // Check if the user is a member of the group
+    const membership = group.memberships.find(
+      (membership) =>
+        membership.user.id === userId &&
+        membership.status === InvitationStatus.ACCEPTED,
+    );
+
+    const isMember = !!membership;
+    const isAdmin = isMember && membership.role === GroupMemberRole.ADMIN;
+
+    return {
+      ...groupDto,
+      isMember,
+      isAdmin,
+    };
+  }
+
+  async create(
+    input: CreateGroupInput,
+    userId: string,
+    authToken?: string,
+  ): Promise<GroupDto> {
     // Process images if they exist
     const logoUrl = await this.processImageUpload(
-      createGroupInput.logo,
+      input.logo,
       'groups/logos',
       `logo-${userId}`,
       authToken,
     );
 
     const coverUrl = await this.processImageUpload(
-      createGroupInput.cover,
+      input.cover,
       'groups/covers',
       `cover-${userId}`,
       authToken,
     );
 
     // Create group and set the creator as an admin member in a transaction
-    return await this.prisma.$transaction(async (tx) => {
+    const createdGroup = (await this.prisma.$transaction(async (tx) => {
       // Create the group with proper type conversions
       const prismaData = {
-        name: createGroupInput.name,
-        description: createGroupInput.description,
+        name: input.name,
+        description: input.description,
         logo: logoUrl,
         cover: coverUrl,
         city: {
-          connect: { id: createGroupInput.city.id },
+          connect: { id: input.city.id },
         },
-        privacy: createGroupInput.privacy,
-        membersCapacity: createGroupInput.membersCapacity,
+        privacy: input.privacy,
+        membersCapacity: input.membersCapacity,
         tags: {
-          connect: createGroupInput.tags.map((tag) => ({
+          connect: input.tags.map((tag) => ({
             id: tag.id,
           })),
         },
@@ -116,21 +265,21 @@ export class GroupsService {
         },
       };
 
-      const group = await tx.group.create({
+      const createdGroup = (await tx.group.create({
         data: prismaData,
-      });
+      })) as unknown as Group;
 
       // Add the creator as an admin member
       await tx.groupMembership.create({
         data: {
           group: {
-            connect: { id: group.id },
+            connect: { id: createdGroup.id },
           },
           user: {
             connect: { id: userId },
           },
           role: GroupMemberRole.ADMIN, // Creator is automatically an admin
-          status: GroupMembershipStatus.APPROVED,
+          status: InvitationStatus.ACCEPTED,
           createdBy: {
             connect: { id: userId },
           },
@@ -140,41 +289,28 @@ export class GroupsService {
         },
       });
 
-      return await tx.group.findUnique({
-        where: { id: group.id },
-        include: {
-          createdBy: true,
-          city: true,
-          tags: true,
-          memberships: {
-            where: {
-              status: GroupMembershipStatus.APPROVED,
-            },
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-    });
+      return createdGroup;
+    })) as unknown as Group;
+
+    return await this.mapToDto(createdGroup, authToken);
   }
 
-  async updateGroup(
+  async update(
+    input: UpdateGroupInput,
     userId: string,
-    updateGroupInput: UpdateGroupInput,
     authToken?: string,
-  ) {
-    const { id, ...updateData } = updateGroupInput;
+  ): Promise<GroupDto> {
+    const { id, ...updateData } = input;
 
     // Check if the group exists
-    const group = await this.prisma.group.findUnique({
+    const group = (await this.prisma.group.findUnique({
       where: { id },
       include: {
         createdBy: true,
         city: true,
         tags: true,
       },
-    });
+    })) as unknown as Group;
 
     if (!group) {
       throw new NotFoundException(`Group with ID ${id} not found`);
@@ -242,7 +378,7 @@ export class GroupsService {
     }
 
     // Update the group
-    await this.prisma.group.update({
+    const updatedGroup = (await this.prisma.group.update({
       where: { id },
       data: processedUpdateData,
       include: {
@@ -251,150 +387,70 @@ export class GroupsService {
         tags: true,
         memberships: {
           where: {
-            status: GroupMembershipStatus.APPROVED,
+            status: InvitationStatus.ACCEPTED,
           },
           include: {
             user: true,
           },
         },
       },
-    });
+    })) as unknown as Group;
 
-    return await this.findOne(id, userId, authToken);
+    return await this.mapToDto(updatedGroup, authToken);
   }
 
-  async findAll(
-    userId: string,
+  // Process base64 image and upload to Supabase storage
+  private async processImageUpload(
+    base64Image: string | null | undefined,
+    path: string,
+    filePrefix: string,
     authToken?: string,
-    limit?: number,
-    skip?: number,
-    query?: string,
-    filters?: GroupFilterInput,
-  ) {
-    const groups = await this.prisma.group.findMany({
-      where: {
-        memberships: {
-          none: { userId, status: GroupMembershipStatus.APPROVED },
+  ): Promise<string | undefined> {
+    if (!base64Image) return undefined;
+
+    try {
+      // Check if it's a URL or base64 data
+      if (base64Image.startsWith('http')) {
+        return base64Image; // Already a URL, just return it
+      }
+
+      // Extract content type
+      const contentType = this.getContentTypeFromBase64(base64Image);
+      const filename = `${filePrefix}-${Date.now()}`;
+
+      // Upload to Supabase storage
+      const imageUrl = await this.storageService.uploadFile(
+        base64Image,
+        path,
+        {
+          contentType,
+          filename,
         },
-        isActive: true,
-        ...(query
-          ? {
-              name: {
-                contains: query,
-                mode: 'insensitive',
-              },
-            }
-          : {}),
-        ...(filters?.tags && filters.tags.length > 0
-          ? {
-              tags: {
-                some: {
-                  id: {
-                    in: filters.tags,
-                  },
-                },
-              },
-            }
-          : {}),
-        ...(filters?.city && filters.city !== null
-          ? {
-              city: {
-                id: filters.city,
-              },
-            }
-          : {}),
-        ...(filters?.privacy && filters.privacy !== 'ALL'
-          ? {
-              privacy: filters.privacy,
-            }
-          : {}),
-      },
-      include: {
-        createdBy: true,
-        city: true,
-        tags: {
-          orderBy: {
-            value: 'asc',
-          },
-        },
-        memberships: {
-          where: {
-            status: GroupMembershipStatus.APPROVED,
-          },
-          include: {
-            user: true,
-          },
-        },
-      },
-      take: limit || undefined,
-      skip: skip || undefined,
-      orderBy: {
-        createdAt: 'desc', // Show newest groups first
-      },
-    });
+        authToken,
+      );
 
-    return Promise.all(
-      groups.map(async (group) => {
-        let logoUrl = group.logo;
-        let coverUrl = group.cover;
-
-        try {
-          if (group.logo) {
-            logoUrl = await this.storageService.getSignedUrl(
-              group.logo,
-              60,
-              authToken,
-            );
-          }
-
-          if (group.cover) {
-            coverUrl = await this.storageService.getSignedUrl(
-              group.cover,
-              60,
-              authToken,
-            );
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-          console.error('Error getting signed URLs:', errorMessage);
-        }
-
-        return {
-          ...group,
-          logo: logoUrl,
-          cover: coverUrl,
-        };
-      }),
-    );
+      return imageUrl;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
+    }
   }
 
-  async findOne(id: string, userId: string, authToken?: string) {
-    const group = await this.prisma.group.findUnique({
-      where: { id, isActive: true },
-      include: {
-        createdBy: true,
-        city: true,
-        tags: {
-          orderBy: {
-            value: 'asc',
-          },
-        },
-        memberships: {
-          where: {
-            status: GroupMembershipStatus.APPROVED,
-          },
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
-
-    if (!group) {
-      throw new NotFoundException(`Group with ID ${id} not found`);
+  // Extract content type from base64 data
+  private getContentTypeFromBase64(base64Data: string): string {
+    if (base64Data.includes('data:')) {
+      const matches = base64Data.match(
+        /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/,
+      );
+      if (matches && matches.length > 1) {
+        return matches[1];
+      }
     }
+    return 'image/jpeg'; // Default
+  }
 
+  private async mapToDto(group: Group, authToken?: string): Promise<GroupDto> {
     let logoUrl = group.logo;
     let coverUrl = group.cover;
 
@@ -420,146 +476,10 @@ export class GroupsService {
       console.error('Error getting signed URLs:', errorMessage);
     }
 
-    // Check if the user is a member of the group
-    const membership = group.memberships.find(
-      (membership) =>
-        membership.user.id === userId &&
-        membership.status === GroupMembershipStatus.APPROVED,
-    );
-
-    const isMember = !!membership;
-    const isAdmin = isMember && membership.role === GroupMemberRole.ADMIN;
-
     return {
       ...group,
       logo: logoUrl,
       cover: coverUrl,
-      isMember,
-      isAdmin,
     };
-  }
-
-  async findJoinedGroups(
-    userId: string,
-    authToken?: string,
-    limit?: number,
-    skip?: number,
-    filters?: GroupFilterInput,
-  ) {
-    const groups = await this.prisma.group.findMany({
-      where: {
-        memberships: {
-          some: {
-            userId,
-            status: GroupMembershipStatus.APPROVED,
-            ...(filters?.role && filters.role !== 'ALL'
-              ? {
-                  role: filters.role,
-                }
-              : {}),
-          },
-        },
-        isActive: true,
-        ...(filters?.tags && filters.tags.length > 0
-          ? {
-              tags: {
-                some: {
-                  id: {
-                    in: filters.tags,
-                  },
-                },
-              },
-            }
-          : {}),
-        ...(filters?.city && filters.city !== null
-          ? {
-              city: {
-                id: filters.city,
-              },
-            }
-          : {}),
-        ...(filters?.privacy && filters.privacy !== 'ALL'
-          ? {
-              privacy: filters.privacy,
-            }
-          : {}),
-      },
-      include: {
-        createdBy: true,
-        city: true,
-        tags: {
-          orderBy: {
-            value: 'asc',
-          },
-        },
-        memberships: {
-          where: {
-            status: GroupMembershipStatus.APPROVED,
-          },
-          include: {
-            user: true,
-          },
-        },
-      },
-      take: limit || undefined,
-      skip: skip || undefined,
-      orderBy: {
-        createdAt: 'desc', // Show newest groups first
-      },
-    });
-
-    return Promise.all(
-      groups.map(async (group) => {
-        let logoUrl = group.logo;
-        let coverUrl = group.cover;
-
-        try {
-          if (group.logo) {
-            logoUrl = await this.storageService.getSignedUrl(
-              group.logo,
-              60,
-              authToken,
-            );
-          }
-
-          if (group.cover) {
-            coverUrl = await this.storageService.getSignedUrl(
-              group.cover,
-              60,
-              authToken,
-            );
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-          console.error('Error getting signed URLs:', errorMessage);
-        }
-
-        return {
-          ...group,
-          logo: logoUrl,
-          cover: coverUrl,
-        };
-      }),
-    );
-  }
-
-  async findCreatedByUser(userId: string) {
-    return await this.prisma.group.findMany({
-      where: {
-        createdById: userId,
-        isActive: true,
-      },
-      include: {
-        createdBy: true,
-        city: true,
-        tags: true,
-        memberships: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
   }
 }

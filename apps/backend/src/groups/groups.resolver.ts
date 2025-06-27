@@ -1,13 +1,13 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { GroupsService } from './groups.service';
-import { Group } from './models/group.model';
 import { CreateGroupInput } from './dto/create-group.input';
 import { UpdateGroupInput } from './dto/update-group.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Request } from 'express';
 import { Int } from '@nestjs/graphql';
-import { GroupFilterInput } from './dto/group-filter.input';
+import { FilterGroupInput } from './dto/filter-group.input';
+import { GroupDto } from './dto/group.dto';
 
 interface GqlContext {
   req: Request & {
@@ -16,93 +16,89 @@ interface GqlContext {
   };
 }
 
-@Resolver(() => Group)
+@Resolver(() => GroupDto)
 export class GroupsResolver {
   constructor(private readonly groupsService: GroupsService) {}
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Group)
-  createGroup(
-    @Args('createGroupInput') createGroupInput: CreateGroupInput,
-    @Context() context: GqlContext,
-  ) {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-
-    return this.groupsService.createGroup(userId, createGroupInput, authToken);
-  }
-
-  @UseGuards(JwtGuard)
-  @Mutation(() => Group)
-  updateGroup(
-    @Args('updateGroupInput') updateGroupInput: UpdateGroupInput,
-    @Context() context: GqlContext,
-  ) {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-
-    return this.groupsService.updateGroup(userId, updateGroupInput, authToken);
-  }
-
-  @UseGuards(JwtGuard)
-  @Query(() => [Group], { name: 'groups' })
-  findAll(
+  @Query(() => [GroupDto], { name: 'groups' })
+  async findAll(
     @Context() context: GqlContext,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
     @Args('query', { type: () => String, nullable: true }) query?: string,
-    @Args('filters', { type: () => GroupFilterInput, nullable: true })
-    filters?: GroupFilterInput,
-  ) {
+    @Args('filters', { type: () => FilterGroupInput, nullable: true })
+    filters?: FilterGroupInput,
+  ): Promise<GroupDto[]> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.groupsService.findAll(
-      userId,
-      authToken,
+    return await this.groupsService.findAll(
       limit,
       skip,
       query,
       filters,
+      userId,
+      authToken,
     );
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => Group, { name: 'group' })
-  findOne(@Args('id') id: string, @Context() context: GqlContext) {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.groupsService.findOne(id, userId, authToken);
-  }
-
-  @UseGuards(JwtGuard)
-  @Query(() => [Group], { name: 'joinedGroups' })
-  findJoinedGroups(
+  @Query(() => [GroupDto], { name: 'joinedGroups' })
+  async findJoinedGroups(
     @Context() context: GqlContext,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
-    @Args('filters', { type: () => GroupFilterInput, nullable: true })
-    filters?: GroupFilterInput,
-  ) {
+    @Args('filters', { type: () => FilterGroupInput, nullable: true })
+    filters?: FilterGroupInput,
+  ): Promise<GroupDto[]> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.groupsService.findJoinedGroups(
-      userId,
-      authToken,
+    return await this.groupsService.findJoinedGroups(
       limit,
       skip,
       filters,
+      userId,
+      authToken,
     );
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => [Group], { name: 'createdGroups' })
-  findCreatedByMe(@Context() context: GqlContext) {
+  @Query(() => GroupDto, { name: 'group' })
+  async findOne(
+    @Args('id') id: string,
+    @Context() context: GqlContext,
+  ): Promise<GroupDto> {
     const userId = context.req.user.id;
-    return this.groupsService.findCreatedByUser(userId);
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return await this.groupsService.findOne(id, userId, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => GroupDto)
+  async create(
+    @Args('input') input: CreateGroupInput,
+    @Context() context: GqlContext,
+  ): Promise<GroupDto> {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return await this.groupsService.create(input, userId, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => GroupDto)
+  async update(
+    @Args('input') input: UpdateGroupInput,
+    @Context() context: GqlContext,
+  ): Promise<GroupDto> {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
+    return await this.groupsService.update(input, userId, authToken);
   }
 }

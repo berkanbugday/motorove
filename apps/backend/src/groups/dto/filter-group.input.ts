@@ -2,7 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsOptional } from 'class-validator';
 
 @InputType()
-export class GroupFilterInput {
+export class FilterGroupInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   city?: string;

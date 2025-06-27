@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { IsBoolean, IsString, IsUUID } from 'class-validator';
+import { IsString, IsUUID } from 'class-validator';
 
 @ObjectType()
 export class GroupTagDto {
@@ -10,8 +10,4 @@ export class GroupTagDto {
   @Field()
   @IsString()
   value: string;
-
-  @Field()
-  @IsBoolean()
-  isActive: boolean;
 }
