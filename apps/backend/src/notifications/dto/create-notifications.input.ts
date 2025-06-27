@@ -9,7 +9,7 @@ import {
 import { NotificationType } from '../../enums/models/notification-type.enum';
 
 @InputType()
-export class SendBulkNotificationInput {
+export class CreateNotificationsInput {
   @Field(() => [String])
   @IsArray()
   @IsNotEmpty()

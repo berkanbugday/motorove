@@ -1,53 +1,11 @@
-import { Field, InputType, ID, Float } from '@nestjs/graphql';
-import {
-  IsNotEmpty,
-  IsString,
-  IsArray,
-  IsOptional,
-  IsUUID,
-  IsNumber,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { PostAddressInput } from './create-post.input';
+import { Field, InputType, ID, PartialType } from '@nestjs/graphql';
+import { IsNotEmpty, IsUUID } from 'class-validator';
+import { CreatePostInput } from './create-post.input';
 
 @InputType()
-export class UpdatePostInput {
+export class UpdatePostInput extends PartialType(CreatePostInput) {
   @Field(() => ID)
   @IsNotEmpty()
   @IsUUID()
   id: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  content?: string;
-
-  @Field(() => [String], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  images?: string[];
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  latitude?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  longitude?: number;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsUUID()
-  groupId?: string;
-
-  @Field(() => [PostAddressInput], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => PostAddressInput)
-  addresses?: PostAddressInput[];
 }

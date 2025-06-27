@@ -1,10 +1,11 @@
-import { Resolver, Query, Args, Context } from '@nestjs/graphql';
+import { Resolver, Query, Args, Context, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { User } from './models/user.model';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { UsersService } from './users.service';
 import { Request } from 'express';
-import { SearchUsersInput } from './dto/search-users.input';
+import { UserDto } from './dto/user.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 interface GqlContext {
   req: Request & {
@@ -13,46 +14,34 @@ interface GqlContext {
   };
 }
 
-@Resolver(() => User)
+@Resolver(() => UserDto)
 export class UsersResolver {
   constructor(private usersService: UsersService) {}
 
-  @Query(() => User, { nullable: true })
   @UseGuards(JwtGuard)
-  async user(@Args('id') id: string): Promise<User | null> {
-    return this.usersService.findOne(id);
+  @Query(() => [UserDto], { name: 'users' })
+  async findAll(
+    @CurrentUser() user: User,
+    @Args('query', { type: () => String, nullable: true }) query?: string,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+  ): Promise<UserDto[]> {
+    return await this.usersService.findAll(query, limit, skip, user.id);
   }
 
-  @Query(() => User, { nullable: true })
   @UseGuards(JwtGuard)
+  @Query(() => UserDto, { name: 'user' })
+  async findOne(@Args('id') id: string): Promise<UserDto> {
+    return await this.usersService.findOne(id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Query(() => UserDto)
   async userProfile(
     @Context() context: GqlContext,
     @Args('id') id: string,
-  ): Promise<User | null> {
+  ): Promise<UserDto> {
     const userId = context.req.user.id;
-    return this.usersService.getUserProfile(id, userId);
-  }
-
-  @Query(() => [User])
-  @UseGuards(JwtGuard)
-  async searchUsers(
-    @Context() context: GqlContext,
-    @Args('searchUsersInput') input: SearchUsersInput,
-  ): Promise<User[]> {
-    const userId = context.req.user.id;
-    return this.usersService.searchUsers(
-      input.query,
-      userId,
-      input.limit,
-      input.skip,
-    );
-  }
-
-  @Query(() => [User])
-  @UseGuards(JwtGuard)
-  async getUsersByIds(
-    @Args('ids', { type: () => [String] }) ids: string[],
-  ): Promise<User[]> {
-    return this.usersService.findByIds(ids);
+    return await this.usersService.userProfile(id, userId);
   }
 }

@@ -34,10 +34,6 @@ export class UserDto {
   @IsString()
   avatar: string | null;
 
-  @Field(() => String)
-  @IsString()
-  supabaseId: string;
-
   @Field(() => Date)
   @IsDate()
   createdAt: Date;

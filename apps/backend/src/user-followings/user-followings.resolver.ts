@@ -18,7 +18,11 @@ export class UserFollowingsResolver {
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
-    return this.userFollowingsService.findFollowerUsers(userId, limit, skip);
+    return await this.userFollowingsService.findFollowerUsers(
+      userId,
+      limit,
+      skip,
+    );
   }
 
   @UseGuards(JwtGuard)
@@ -28,7 +32,11 @@ export class UserFollowingsResolver {
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
-    return this.userFollowingsService.findFollowingUsers(userId, limit, skip);
+    return await this.userFollowingsService.findFollowingUsers(
+      userId,
+      limit,
+      skip,
+    );
   }
 
   @UseGuards(JwtGuard)
@@ -37,7 +45,7 @@ export class UserFollowingsResolver {
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
   ): Promise<UserFollowingDto> {
-    return this.userFollowingsService.follow(user.id, userId);
+    return await this.userFollowingsService.follow(user.id, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -46,7 +54,7 @@ export class UserFollowingsResolver {
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
   ): Promise<UserFollowingDto> {
-    return this.userFollowingsService.unfollow(user.id, userId);
+    return await this.userFollowingsService.unfollow(user.id, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -55,6 +63,6 @@ export class UserFollowingsResolver {
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
   ): Promise<boolean> {
-    return this.userFollowingsService.isFollowing(user.id, userId);
+    return await this.userFollowingsService.isFollowing(user.id, userId);
   }
 }

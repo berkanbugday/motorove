@@ -8,13 +8,14 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { FilterAddressInput } from './dto/filter-address.input';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from 'src/users/models/user.model';
+import { AddressDto } from './dto/address.dto';
 
-@Resolver(() => Address)
+@Resolver(() => AddressDto)
 export class AddressesResolver {
   constructor(private readonly addressesService: AddressesService) {}
 
   @UseGuards(JwtGuard)
-  @Query(() => [Address], { name: 'addresses' })
+  @Query(() => [AddressDto], { name: 'addresses' })
   async findAll(
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
@@ -25,13 +26,13 @@ export class AddressesResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => Address, { name: 'address' })
+  @Query(() => AddressDto, { name: 'address' })
   async findOne(@Args('id', { type: () => ID }) id: string) {
     return await this.addressesService.findOne(id);
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Address)
+  @Mutation(() => AddressDto)
   async create(
     @Args('input') input: CreateAddressInput,
     @CurrentUser() user: User,
@@ -40,7 +41,7 @@ export class AddressesResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Address)
+  @Mutation(() => AddressDto)
   async update(
     @Args('input') input: UpdateAddressInput,
     @CurrentUser() user: User,

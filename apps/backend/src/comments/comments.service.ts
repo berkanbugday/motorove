@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentInput } from './dto/create-comment.input';
@@ -16,6 +17,7 @@ import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class CommentsService {
+  private readonly logger = new Logger(CommentsService.name);
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(
@@ -24,248 +26,275 @@ export class CommentsService {
     skip?: number,
     filters?: FilterCommentInput,
   ): Promise<CommentDto[]> {
-    const where = {
-      postId,
-      isActive: filters?.isActive || true,
-      parentId: filters?.parentId || null,
-      ...(filters?.createdById && { createdById: filters.createdById }),
-    };
+    try {
+      const where = {
+        postId,
+        isActive: filters?.isActive || true,
+        parentId: filters?.parentId || null,
+        ...(filters?.createdById && { createdById: filters.createdById }),
+      };
 
-    const comments = (await this.prisma.comment.findMany({
-      where,
-      include: {
-        createdBy: true,
-        updatedBy: true,
-        post: true,
-        replies: {
-          where: { isActive: true },
-          include: {
-            createdBy: true,
-            updatedBy: true,
+      const comments = (await this.prisma.comment.findMany({
+        where,
+        include: {
+          createdBy: true,
+          updatedBy: true,
+          post: true,
+          replies: {
+            where: { isActive: true },
+            include: {
+              createdBy: true,
+              updatedBy: true,
+            },
+            orderBy: { createdAt: 'asc' },
           },
-          orderBy: { createdAt: 'asc' },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: skip || undefined,
-      take: limit || undefined,
-    })) as unknown as Comment[];
+        orderBy: { createdAt: 'desc' },
+        skip: skip || undefined,
+        take: limit || undefined,
+      })) as unknown as Comment[];
 
-    return comments.map((comment) => this.mapToDto(comment));
+      return await Promise.all(
+        comments.map((comment) => this.mapToDto(comment)),
+      );
+    } catch (error) {
+      this.logger.error(`Failed to get comments for post ${postId}`, error);
+      throw error;
+    }
   }
 
   async findOne(id: string): Promise<CommentDto> {
-    const comment = (await this.prisma.comment.findUnique({
-      where: { id },
-      include: {
-        createdBy: true,
-        updatedBy: true,
-        post: true,
-        parent: {
-          include: {
-            createdBy: true,
-            updatedBy: true,
+    try {
+      const comment = (await this.prisma.comment.findUnique({
+        where: { id },
+        include: {
+          createdBy: true,
+          updatedBy: true,
+          post: true,
+          parent: {
+            include: {
+              createdBy: true,
+              updatedBy: true,
+            },
+          },
+          replies: {
+            where: { isActive: true },
+            include: {
+              createdBy: true,
+              updatedBy: true,
+            },
+            orderBy: { createdAt: 'asc' },
           },
         },
-        replies: {
-          where: { isActive: true },
-          include: {
-            createdBy: true,
-            updatedBy: true,
-          },
-          orderBy: { createdAt: 'asc' },
-        },
-      },
-    })) as unknown as Comment;
+      })) as unknown as Comment;
 
-    if (!comment || !comment.isActive) {
-      throw new NotFoundException(`Comment with ID ${id} not found`);
+      if (!comment || !comment.isActive) {
+        throw new NotFoundException(`Comment with ID ${id} not found`);
+      }
+
+      return this.mapToDto(comment);
+    } catch (error) {
+      this.logger.error(`Failed to get comment with ID ${id}`, error);
+      throw error;
     }
-
-    return this.mapToDto(comment);
   }
 
   async create(input: CreateCommentInput, userId: string): Promise<CommentDto> {
-    // Check if the post exists and is active
-    const post = await this.prisma.post.findUnique({
-      where: { id: input.postId },
-      include: {
-        group: true,
-      },
-    });
-
-    if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${input.postId} not found`);
-    }
-
-    if (post.groupId) {
-      // Check if user is a member of the group
-      const membership = await this.prisma.groupMembership.findUnique({
-        where: {
-          groupId_userId: {
-            groupId: post.groupId,
-            userId,
-          },
+    try {
+      // Check if the post exists and is active
+      const post = await this.prisma.post.findUnique({
+        where: { id: input.postId },
+        include: {
+          group: true,
         },
       });
 
-      if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
-        throw new ForbiddenException(
-          'You must be an approved member of the group to comment on a post',
-        );
+      if (!post || !post.isActive) {
+        throw new NotFoundException(`Post with ID ${input.postId} not found`);
       }
+
+      if (post.groupId) {
+        // Check if user is a member of the group
+        const membership = await this.prisma.groupMembership.findUnique({
+          where: {
+            groupId_userId: {
+              groupId: post.groupId,
+              userId,
+            },
+          },
+        });
+
+        if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
+          throw new ForbiddenException(
+            'You must be an approved member of the group to comment on a post',
+          );
+        }
+      }
+
+      // If parentId is provided, check if the parent comment exists and belongs to the same post
+      if (input.parentId) {
+        const parentComment = await this.prisma.comment.findUnique({
+          where: { id: input.parentId },
+        });
+
+        if (!parentComment || !parentComment.isActive) {
+          throw new NotFoundException(
+            `Parent comment with ID ${input.parentId} not found`,
+          );
+        }
+
+        if (parentComment.postId !== input.postId) {
+          throw new ForbiddenException(
+            'Parent comment must belong to the same post',
+          );
+        }
+      }
+
+      const comment = (await this.prisma.comment.create({
+        data: {
+          content: input.content,
+          postId: input.postId,
+          createdById: userId,
+          updatedById: userId,
+          parentId: input.parentId,
+        },
+        include: {
+          createdBy: true,
+          updatedBy: true,
+          post: true,
+          parent: true,
+          replies: true,
+        },
+      })) as unknown as Comment;
+
+      return this.mapToDto(comment);
+    } catch (error) {
+      this.logger.error(`Failed to create comment`, error);
+      throw error;
     }
-
-    // If parentId is provided, check if the parent comment exists and belongs to the same post
-    if (input.parentId) {
-      const parentComment = await this.prisma.comment.findUnique({
-        where: { id: input.parentId },
-      });
-
-      if (!parentComment || !parentComment.isActive) {
-        throw new NotFoundException(
-          `Parent comment with ID ${input.parentId} not found`,
-        );
-      }
-
-      if (parentComment.postId !== input.postId) {
-        throw new ForbiddenException(
-          'Parent comment must belong to the same post',
-        );
-      }
-    }
-
-    const comment = (await this.prisma.comment.create({
-      data: {
-        content: input.content,
-        postId: input.postId,
-        createdById: userId,
-        updatedById: userId,
-        parentId: input.parentId,
-      },
-      include: {
-        createdBy: true,
-        updatedBy: true,
-        post: true,
-        parent: true,
-        replies: true,
-      },
-    })) as unknown as Comment;
-
-    return this.mapToDto(comment);
   }
 
   async update(input: UpdateCommentInput, userId: string): Promise<CommentDto> {
-    const comment = (await this.prisma.comment.findUnique({
-      where: { id: input.id },
-      include: {
-        createdBy: true,
-        post: {
-          include: {
-            group: {
-              include: {
-                memberships: {
-                  where: {
-                    userId,
-                    status: InvitationStatus.ACCEPTED,
+    try {
+      const comment = (await this.prisma.comment.findUnique({
+        where: { id: input.id },
+        include: {
+          createdBy: true,
+          post: {
+            include: {
+              group: {
+                include: {
+                  memberships: {
+                    where: {
+                      userId,
+                      status: InvitationStatus.ACCEPTED,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    })) as unknown as Comment;
+      })) as unknown as Comment;
 
-    if (!comment || !comment.isActive) {
-      throw new NotFoundException(`Comment with ID ${input.id} not found`);
+      if (!comment || !comment.isActive) {
+        throw new NotFoundException(`Comment with ID ${input.id} not found`);
+      }
+
+      // Check if user is the creator or an admin of the group (if post has a group)
+      const isCreator = comment.createdById === userId;
+      const isGroupAdmin =
+        comment.post.group?.memberships?.some(
+          (membership: GroupMembership) =>
+            membership.role === GroupMemberRole.ADMIN,
+        ) || false;
+
+      if (!isCreator && !isGroupAdmin) {
+        throw new ForbiddenException(
+          'You do not have permission to update this comment',
+        );
+      }
+
+      const updatedComment = (await this.prisma.comment.update({
+        where: { id: input.id },
+        data: {
+          ...input,
+          updatedById: userId,
+        },
+        include: {
+          createdBy: true,
+          updatedBy: true,
+          post: true,
+          parent: true,
+          replies: true,
+        },
+      })) as unknown as Comment;
+
+      return this.mapToDto(updatedComment);
+    } catch (error) {
+      this.logger.error(`Failed to update comment`, error);
+      throw error;
     }
-
-    // Check if user is the creator or an admin of the group (if post has a group)
-    const isCreator = comment.createdById === userId;
-    const isGroupAdmin =
-      comment.post.group?.memberships?.some(
-        (membership: GroupMembership) =>
-          membership.role === GroupMemberRole.ADMIN,
-      ) || false;
-
-    if (!isCreator && !isGroupAdmin) {
-      throw new ForbiddenException(
-        'You do not have permission to update this comment',
-      );
-    }
-
-    const updatedComment = (await this.prisma.comment.update({
-      where: { id: input.id },
-      data: {
-        ...input,
-        updatedById: userId,
-      },
-      include: {
-        createdBy: true,
-        updatedBy: true,
-        post: true,
-        parent: true,
-        replies: true,
-      },
-    })) as unknown as Comment;
-
-    return this.mapToDto(updatedComment);
   }
 
   async remove(id: string, userId: string): Promise<CommentDto> {
-    const comment = (await this.prisma.comment.findUnique({
-      where: { id },
-      include: {
-        createdBy: true,
-        post: {
-          include: {
-            group: {
-              include: {
-                memberships: {
-                  where: {
-                    userId,
-                    status: InvitationStatus.ACCEPTED,
+    try {
+      const comment = (await this.prisma.comment.findUnique({
+        where: { id },
+        include: {
+          createdBy: true,
+          post: {
+            include: {
+              group: {
+                include: {
+                  memberships: {
+                    where: {
+                      userId,
+                      status: InvitationStatus.ACCEPTED,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    })) as unknown as Comment;
+      })) as unknown as Comment;
 
-    if (!comment || !comment.isActive) {
-      throw new NotFoundException(`Comment with ID ${id} not found`);
+      if (!comment || !comment.isActive) {
+        throw new NotFoundException(`Comment with ID ${id} not found`);
+      }
+
+      // Check if user is the creator or an admin of the group (if post has a group)
+      const isCreator = comment.createdById === userId;
+      const isGroupAdmin =
+        comment.post.group?.memberships?.some(
+          (membership: GroupMembership) =>
+            membership.role === GroupMemberRole.ADMIN,
+        ) || false;
+
+      if (!isCreator && !isGroupAdmin) {
+        throw new ForbiddenException(
+          'You do not have permission to delete this comment',
+        );
+      }
+
+      const deletedComment = (await this.prisma.comment.update({
+        where: { id },
+        data: { isActive: false, updatedById: userId },
+        include: {
+          createdBy: true,
+          updatedBy: true,
+          post: true,
+          parent: true,
+          replies: true,
+        },
+      })) as unknown as Comment;
+
+      return this.mapToDto(deletedComment);
+    } catch (error) {
+      this.logger.error(`Failed to delete comment`, error);
+      throw error;
     }
-
-    // Check if user is the creator or an admin of the group (if post has a group)
-    const isCreator = comment.createdById === userId;
-    const isGroupAdmin =
-      comment.post.group?.memberships?.some(
-        (membership: GroupMembership) =>
-          membership.role === GroupMemberRole.ADMIN,
-      ) || false;
-
-    if (!isCreator && !isGroupAdmin) {
-      throw new ForbiddenException(
-        'You do not have permission to delete this comment',
-      );
-    }
-
-    const deletedComment = (await this.prisma.comment.update({
-      where: { id },
-      data: { isActive: false, updatedById: userId },
-      include: {
-        createdBy: true,
-        updatedBy: true,
-        post: true,
-        parent: true,
-        replies: true,
-      },
-    })) as unknown as Comment;
-
-    return this.mapToDto(deletedComment);
   }
 
   private mapToDto(comment: Comment): CommentDto {

@@ -1,27 +1,14 @@
-import { Field, InputType, Float } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsString,
   IsArray,
   IsOptional,
   IsUUID,
-  IsNumber,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-
-@InputType()
-export class PostAddressInput {
-  @Field()
-  @IsNotEmpty()
-  @IsString()
-  address: string;
-
-  @Field()
-  @IsNotEmpty()
-  @IsString()
-  language: string;
-}
+import { CreateAddressInput } from '../../addresses/dto/create-address.input';
 
 @InputType()
 export class CreatePostInput {
@@ -36,25 +23,15 @@ export class CreatePostInput {
   @IsString({ each: true })
   images?: string[];
 
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  latitude?: number;
-
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  longitude?: number;
-
   @Field({ nullable: true })
   @IsOptional()
   @IsUUID()
   groupId?: string;
 
-  @Field(() => [PostAddressInput], { nullable: true })
+  @Field(() => [CreateAddressInput], { nullable: true })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => PostAddressInput)
-  addresses?: PostAddressInput[];
+  @Type(() => CreateAddressInput)
+  addresses?: CreateAddressInput[];
 }

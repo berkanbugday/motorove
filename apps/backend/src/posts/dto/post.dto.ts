@@ -1,16 +1,19 @@
-import { Field, ObjectType, ID, Float } from '@nestjs/graphql';
+import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
 import {
   IsArray,
   IsBoolean,
   IsDate,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
-  IsNumber,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
+import { GroupDto } from '../../groups/dto/group.dto';
+import { AddressDto } from 'src/addresses/dto/address.dto';
+import { CommentDto } from 'src/comments/dto/comment.dto';
 
 @ObjectType()
 export class PostDto {
@@ -27,20 +30,26 @@ export class PostDto {
   @IsArray()
   images?: string[];
 
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
-  @IsNumber()
-  latitude?: number | null;
+  @Field(() => GroupDto)
+  @ValidateNested()
+  @Type(() => GroupDto)
+  group: GroupDto;
 
-  @Field(() => Float, { nullable: true })
-  @IsOptional()
+  @Field(() => Int)
   @IsNumber()
-  longitude?: number | null;
+  likesCount: number;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsUUID()
-  groupId?: string;
+  @Field(() => Int)
+  @IsNumber()
+  commentsCount: number;
+
+  @Field(() => Boolean)
+  @IsBoolean()
+  isLiked: boolean;
+
+  @Field(() => Boolean)
+  @IsBoolean()
+  isSaved: boolean;
 
   @Field(() => UserDto)
   @ValidateNested()
@@ -48,27 +57,16 @@ export class PostDto {
   createdBy: UserDto;
 
   @Field()
-  @IsUUID()
-  createdById: string;
-
-  @Field()
   @IsDate()
   createdAt: Date;
 
-  @Field(() => UserDto)
+  @Field(() => [AddressDto])
   @ValidateNested()
-  @Type(() => UserDto)
-  updatedBy: UserDto;
+  @Type(() => AddressDto)
+  addresses: AddressDto[];
 
-  @Field()
-  @IsUUID()
-  updatedById: string;
-
-  @Field()
-  @IsDate()
-  updatedAt: Date;
-
-  @Field()
-  @IsBoolean()
-  isActive: boolean;
+  @Field(() => [CommentDto])
+  @ValidateNested()
+  @Type(() => CommentDto)
+  comments: CommentDto[];
 }
