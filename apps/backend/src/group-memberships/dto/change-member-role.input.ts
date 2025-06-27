@@ -1,6 +1,7 @@
 import { InputType, Field, registerEnumType } from '@nestjs/graphql';
-import { IsUUID, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
 import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
+import { BaseGroupMembershipInput } from './base-group-membership.input';
 
 registerEnumType(GroupMemberRole, {
   name: 'GroupMemberRole',
@@ -8,17 +9,7 @@ registerEnumType(GroupMemberRole, {
 });
 
 @InputType()
-export class ChangeMemberRoleInput {
-  @Field()
-  @IsUUID()
-  @IsNotEmpty()
-  groupId: string;
-
-  @Field()
-  @IsUUID()
-  @IsNotEmpty()
-  userId: string;
-
+export class ChangeMemberRoleInput extends BaseGroupMembershipInput {
   @Field(() => GroupMemberRole)
   @IsEnum(GroupMemberRole)
   @IsNotEmpty()

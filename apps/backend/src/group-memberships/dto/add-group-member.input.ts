@@ -1,15 +1,5 @@
-import { InputType, Field, ID } from '@nestjs/graphql';
-import { IsUUID, IsNotEmpty } from 'class-validator';
+import { InputType } from '@nestjs/graphql';
+import { BaseGroupMembershipInput } from './base-group-membership.input';
 
 @InputType()
-export class AddGroupMemberInput {
-  @Field(() => ID)
-  @IsUUID()
-  @IsNotEmpty()
-  groupId: string;
-
-  @Field(() => ID)
-  @IsUUID()
-  @IsNotEmpty()
-  userId: string;
-}
+export class AddGroupMemberInput extends BaseGroupMembershipInput {}
