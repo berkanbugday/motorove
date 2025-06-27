@@ -3,8 +3,40 @@
 # ------------------------------------------------------
 
 input AddGroupMemberInput {
-  groupId: String!
-  userId: String!
+  groupId: ID!
+  userId: ID!
+}
+
+type Address {
+  address: String!
+  event: Event
+  eventId: String
+  id: ID!
+  language: String!
+  latitude: Float!
+  longitude: Float!
+  post: Post
+  postId: String
+  type: AddressType!
+}
+
+type AddressDto {
+  address: String!
+  event: EventDto
+  id: ID!
+  language: String!
+  latitude: Float!
+  longitude: Float!
+  post: PostDto
+  type: AddressType!
+}
+
+"""The types of addresses that can be associated with a post or event"""
+enum AddressType {
+  EVENT_FINISH_LOCATION
+  EVENT_MEETING_POINT
+  EVENT_START_LOCATION
+  POST_LOCATION
 }
 
 type AuthResponse {
@@ -13,9 +45,9 @@ type AuthResponse {
 }
 
 input ChangeMemberRoleInput {
-  groupId: String!
+  groupId: ID!
   role: GroupMemberRole!
-  userId: String!
+  userId: ID!
 }
 
 type City {
@@ -23,7 +55,7 @@ type City {
   value: String!
 }
 
-input CityInput {
+type CityDto {
   id: ID!
   value: String!
 }
@@ -45,38 +77,38 @@ type Comment {
   updatedById: String!
 }
 
-input CreateCommentInput {
+type CommentDto {
   content: String!
+  createdAt: DateTime!
+  createdBy: UserDto!
+  createdById: String!
+  id: ID!
+  parent: CommentDto
   parentId: ID
-  postId: String!
+  post: PostDto
+  postId: ID!
+  replies: [CommentDto!]
+  updatedAt: DateTime!
+  updatedBy: UserDto!
+  updatedById: String!
 }
 
-input CreateGroupInput {
-  city: CityInput!
-  cover: String
-  description: String!
-  logo: String
-  membersCapacity: Int
-  name: String!
-  privacy: GroupPrivacy!
-  tags: [GroupTagInput!]!
+input CreateAddressInput {
+  address: String!
+  eventId: String
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+  postId: String
+  type: AddressType!
 }
 
-input CreateNotificationInput {
+input CreateNotificationsInput {
   body: String!
   data: String
   title: String!
   type: NotificationType!
-  userId: String!
-}
-
-input CreatePostInput {
-  addresses: [PostAddressInput!]
-  content: String!
-  groupId: String
-  images: [String!]
-  latitude: Float
-  longitude: Float
+  userIds: [String!]!
 }
 
 """
@@ -90,27 +122,211 @@ input DeviceTokenInput {
   userId: String!
 }
 
+"""Difficulty level for motorcycle rides"""
+enum DifficultyLevel {
+  EASY
+  HARD
+  MEDIUM
+}
+
 type EnumItem {
   key: String!
   value: String!
 }
 
-type Follow {
+type Event {
+  addresses: [Address!]
+  campingInfo: String
   createdAt: DateTime!
-  follower: User!
-  following: User!
+  createdBy: User!
+  createdById: String!
+  description: String!
+  difficultyLevel: DifficultyLevel
+  endDateTime: DateTime
+  equipmentChecklist: String
+  eventType: EventType!
+  experienceLevel: ExperienceLevel
   id: ID!
+  images: [String!]
+  instructorInfo: String
+  invitations: [EventInvitation!]
+  invitedGroupIds: [String!]
+  invitedGroups: [Group!]
+  invitedUserIds: [String!]
+  invitedUsers: [User!]
+  isActive: Boolean!
+  isPrivate: Boolean!
+  maxParticipants: Int
+  participants: [EventParticipant!]
+  price: Float
+  restStops: String
+  roadType: RoadType
+  routeDescription: String
+  startDateTime: DateTime!
+  title: String!
+  topicsCovered: String
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
 }
 
-input FollowUserInput {
-  userId: String!
+type EventDto {
+  addresses: [Address!]
+  campingInfo: String
+  createdAt: DateTime!
+  createdBy: UserDto!
+  createdById: String!
+  description: String!
+  difficultyLevel: DifficultyLevel
+  endDateTime: DateTime
+  equipmentChecklist: String
+  eventType: EventType!
+  experienceLevel: ExperienceLevel
+  id: ID!
+  images: [String!]
+  instructorInfo: String
+  isActive: Boolean!
+  isParticipating: Boolean
+  isPrivate: Boolean!
+  maxParticipants: Int
+  participantsCount: Int
+  participationStatus: EventParticipantStatus
+  price: Float
+  restStops: String
+  roadType: RoadType
+  routeDescription: String
+  startDateTime: DateTime!
+  title: String!
+  topicsCovered: String
+  updatedAt: DateTime!
+  updatedBy: UserDto!
+  updatedById: String!
+}
+
+input EventFilterInput {
+  createdById: String
+  difficultyLevel: DifficultyLevel
+  eventType: EventType
+  experienceLevel: ExperienceLevel
+  groupId: String
+  isActive: Boolean
+  isPrivate: Boolean
+  query: String
+  roadType: RoadType
+  startDateFrom: DateTime
+  startDateTo: DateTime
+}
+
+type EventInvitation {
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  event: Event!
+  eventId: String!
+  id: ID!
+  invitee: User!
+  inviteeId: String!
+  isActive: Boolean!
+  status: InvitationStatus!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+}
+
+type EventParticipant {
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  event: Event!
+  eventId: String!
+  id: ID!
+  isActive: Boolean!
+  status: EventParticipantStatus!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+}
+
+enum EventParticipantStatus {
+  JOINED
+  LEFT
+}
+
+"""The types of events that can be created"""
+enum EventType {
+  CAMPING_RIDE
+  GROUP_RIDE
+  MEET_UP
+  SOCIAL_RESPONSIBILITY
+  SOLO_RIDE
+  TRAINING
+}
+
+"""Experience level for workshops and training events"""
+enum ExperienceLevel {
+  ADVANCED
+  ALL_LEVELS
+  BEGINNER
+  INTERMEDIATE
+}
+
+input FilterAddressInput {
+  eventId: String
+  language: Language
+  postId: String
+  type: AddressType
+}
+
+input FilterCommentInput {
+  createdById: ID
+  isActive: Boolean
+  parentId: ID
+  postId: ID
+}
+
+input FilterGroupInput {
+  city: String
+  privacy: String = "ALL"
+  role: String = "ALL"
+  tags: [String!]! = []
+}
+
+input FilterGroupMembershipInput {
+  groupId: String
+  isActive: Boolean
+  role: GroupMemberRole
+  status: InvitationStatus
+  userId: String
 }
 
 type Group {
   city: City!
+  cityId: ID!
   cover: String
   createdAt: DateTime!
   createdBy: User!
+  createdById: String!
+  description: String!
+  events: [Event!]!
+  id: ID!
+  isActive: Boolean!
+  logo: String
+  membersCapacity: Int
+  memberships: [GroupMembership!]!
+  name: String!
+  posts: [Post!]!
+  privacy: GroupPrivacy!
+  tags: [GroupTag!]!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+}
+
+type GroupDto {
+  city: CityDto!
+  cover: String
+  createdAt: DateTime!
+  createdBy: UserDto!
   createdById: String!
   description: String!
   id: ID!
@@ -119,20 +335,12 @@ type Group {
   isMember: Boolean
   logo: String
   membersCapacity: Int
-  memberships: [GroupMembership!]!
   name: String!
   privacy: GroupPrivacy!
-  tags: [GroupTag!]!
+  tags: [GroupTagDto!]!
   updatedAt: DateTime!
-  updatedBy: User!
+  updatedBy: UserDto!
   updatedById: String!
-}
-
-input GroupFilterInput {
-  city: String
-  privacy: String = "ALL"
-  role: String = "ALL"
-  tags: [String!]! = []
 }
 
 """The role of a user in a group"""
@@ -151,7 +359,7 @@ type GroupMembership {
   isActive: Boolean!
   joinedAt: DateTime!
   role: GroupMemberRole!
-  status: GroupMembershipStatus!
+  status: InvitationStatus!
   updatedAt: DateTime!
   updatedBy: User!
   updatedById: String!
@@ -159,10 +367,13 @@ type GroupMembership {
   userId: String!
 }
 
-enum GroupMembershipStatus {
-  APPROVED
-  PENDING
-  REJECTED
+type GroupMembershipDto {
+  group: GroupDto
+  id: ID!
+  joinedAt: DateTime!
+  role: GroupMemberRole!
+  status: InvitationStatus!
+  user: UserDto
 }
 
 """Privacy levels for groups"""
@@ -173,12 +384,25 @@ enum GroupPrivacy {
 
 type GroupTag {
   id: ID!
+  isActive: Boolean!
   value: String!
 }
 
-input GroupTagInput {
+type GroupTagDto {
   id: ID!
   value: String!
+}
+
+enum InvitationStatus {
+  ACCEPTED
+  PENDING
+  REJECTED
+}
+
+"""Supported languages in the application"""
+enum Language {
+  EN
+  TR
 }
 
 input LeaveGroupInput {
@@ -186,55 +410,44 @@ input LeaveGroupInput {
 }
 
 type Mutation {
-  addGroupMember(addGroupMemberInput: AddGroupMemberInput!): GroupMembership!
-  changeMemberRole(changeMemberRoleInput: ChangeMemberRoleInput!): GroupMembership!
-  createComment(createCommentInput: CreateCommentInput!): Comment!
-  createGroup(createGroupInput: CreateGroupInput!): Group!
-  createNotification(createNotificationInput: CreateNotificationInput!): Notification!
-  createPost(createPostInput: CreatePostInput!): Post!
-  deleteAllNotifications: Boolean!
-  deleteNotification(id: ID!): Notification!
-  followUser(followUserInput: FollowUserInput!): Follow!
-  leaveGroup(leaveGroupInput: LeaveGroupInput!): GroupMembership!
-  likePost(postId: ID!): PostLike!
-  markAllNotificationsAsRead(userId: String!): [Notification!]!
-  markNotificationAsRead(id: ID!): Notification!
+  addMember(input: AddGroupMemberInput!): GroupMembershipDto!
+  create(input: CreateAddressInput!): AddressDto!
+  createBulk(input: CreateNotificationsInput!): Boolean!
+  delete(id: ID!): NotificationDto!
+  deleteAll: [NotificationDto!]!
+  follow(userId: ID!): UserFollowingDto!
+  join(id: ID!): EventDto!
+  leave(id: ID!): EventDto!
+  leaveGroup(input: LeaveGroupInput!): GroupMembershipDto!
+  likePost(postId: ID!): PostInteractionDto!
+  markAllAsRead: [NotificationDto!]!
+  markAsRead(id: ID!): NotificationDto!
   refreshToken(token: String!): AuthResponse!
-  removeComment(id: ID!): Comment!
+  remove(id: String!): Boolean!
   removeDeviceToken(token: String!, userId: String!): Boolean!
-  removeGroupMember(removeGroupMemberInput: RemoveGroupMemberInput!): GroupMembership!
-  removePost(id: ID!): Post!
-  saveDeviceToken(deviceTokenInput: DeviceTokenInput!): Boolean!
-  savePost(postId: ID!): PostSave!
-  sendBulkNotifications(sendBulkNotificationInput: SendBulkNotificationInput!): Boolean!
+  removeMember(input: RemoveGroupMemberInput!): GroupMembershipDto!
+  saveDeviceToken(input: DeviceTokenInput!): Boolean!
+  savePost(postId: ID!): PostInteractionDto!
   signIn(signInInput: SignInInput!): AuthResponse!
   signUp(signUpInput: SignUpInput!): AuthResponse!
-  unfollowUser(unFollowUserInput: FollowUserInput!): Follow!
-  unlikePost(postId: ID!): ID!
-  unsavePost(postId: ID!): ID!
-  updateComment(updateCommentInput: UpdateCommentInput!): Comment!
-  updateGroup(updateGroupInput: UpdateGroupInput!): Group!
-  updateMembershipStatus(updateMembershipStatusInput: UpdateMembershipStatusInput!): GroupMembership!
-  updatePost(updatePostInput: UpdatePostInput!): Post!
+  unfollow(userId: ID!): UserFollowingDto!
+  unlikePost(postId: ID!): PostInteractionDto!
+  unsavePost(postId: ID!): PostInteractionDto!
+  update(input: UpdateAddressInput!): AddressDto!
+  updateMemberRole(input: ChangeMemberRoleInput!): GroupMembershipDto!
+  updateMemberStatus(input: UpdateMembershipStatusInput!): GroupMembershipDto!
 }
 
-type Notification {
+type NotificationDto {
   body: String!
   createdAt: DateTime!
-  createdBy: User!
-  createdById: String!
   data: String
   id: ID!
-  isActive: Boolean!
   read: Boolean!
   status: NotificationStatus!
   title: String!
   type: NotificationType!
-  updatedAt: DateTime!
-  updatedBy: User!
-  updatedById: String!
   user: User!
-  userId: String!
 }
 
 """The status of a notification"""
@@ -268,9 +481,8 @@ enum NotificationType {
 }
 
 type Post {
-  addresses: [PostAddress!]
-  comments: [Comment!]!
-  commentsCount: Int!
+  addresses: [Address!]
+  comments: [Comment!]
   content: String!
   createdAt: DateTime!
   createdBy: User!
@@ -280,27 +492,35 @@ type Post {
   id: ID!
   images: [String!]
   isActive: Boolean!
-  isLiked: Boolean!
-  isSaved: Boolean!
-  latitude: Float
-  likesCount: Int!
-  longitude: Float
-  savesCount: Int!
+  likes: [PostLike!]
+  saves: [PostSave!]
   updatedAt: DateTime!
   updatedBy: User!
   updatedById: String!
 }
 
-type PostAddress {
-  address: String!
-  id: String!
-  language: String!
-  postId: String!
+type PostDto {
+  addresses: [AddressDto!]!
+  comments: [CommentDto!]!
+  commentsCount: Int!
+  content: String!
+  createdAt: DateTime!
+  createdBy: UserDto!
+  group: GroupDto!
+  id: ID!
+  images: [String!]
+  isLiked: Boolean!
+  isSaved: Boolean!
+  likesCount: Int!
 }
 
-input PostAddressInput {
-  address: String!
-  language: String!
+type PostInteractionDto {
+  createdAt: DateTime!
+  id: ID!
+  post: PostDto!
+  postId: String!
+  user: UserDto!
+  userId: String!
 }
 
 type PostLike {
@@ -322,59 +542,53 @@ type PostSave {
 }
 
 type Query {
-  cities: [City!]!
-  city(id: ID!): City
-  comment(id: ID!): Comment!
-  comments(postId: ID!): [Comment!]!
-  createdGroups: [Group!]!
+  address(id: ID!): AddressDto!
+  addresses(filters: FilterAddressInput, limit: Int, skip: Int): [AddressDto!]!
+  cities: [CityDto!]!
+  city(id: ID!): CityDto!
+  comment(id: ID!): CommentDto!
+  comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
+  count: Float!
+  event(id: ID!): EventDto!
+  events(filters: EventFilterInput, limit: Int, skip: Int): [EventDto!]!
+  followerUsers(limit: Int, skip: Int, userId: ID!): [UserDto!]!
+  followingUsers(limit: Int, skip: Int, userId: ID!): [UserDto!]!
+  getAddressTypes: [EnumItem!]!
   getDifficultyLevels: [EnumItem!]!
   getEventTypes: [EnumItem!]!
   getExperienceLevels: [EnumItem!]!
   getGroupMemberRoles: [EnumItem!]!
-  getGroupMembershipStatuses: [EnumItem!]!
   getGroupPrivacyOptions: [EnumItem!]!
+  getInvitationStatuses: [EnumItem!]!
+  getLanguages: [EnumItem!]!
   getRoadTypes: [EnumItem!]!
-  getUsersByIds(ids: [String!]!): [User!]!
-  group(id: String!): Group!
-  groupMembers(groupId: String!): [GroupMembership!]!
-  groupMembership(id: String!): GroupMembership!
-  groupMemberships: [GroupMembership!]!
-  groupTag(id: ID!): GroupTag
-  groupTags: [GroupTag!]!
-  groups(filters: GroupFilterInput, limit: Int, query: String, skip: Int): [Group!]!
-  isFollowing(userId: String!): Boolean!
-  joinedGroups(filters: GroupFilterInput, limit: Int, skip: Int): [Group!]!
-  myFollowers(limit: Int, skip: Int): [User!]!
-  myFollowing(limit: Int, skip: Int): [User!]!
-  myGroupMemberships: [GroupMembership!]!
-  notifications(limit: Int, skip: Int): [Notification!]!
-  notificationsCount(onlyUnread: Boolean = true): Float!
-  post(id: ID!): Post!
-  posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [Post!]!
-  searchUsers(searchUsersInput: SearchUsersInput!): [User!]!
-  user(id: String!): User
-  userFollowers(limit: Int, skip: Int, userId: String!): [User!]!
-  userFollowing(limit: Int, skip: Int, userId: String!): [User!]!
-  userProfile(id: String!): User
+  group(id: String!): GroupDto!
+  groupMembership(id: ID!): GroupMembershipDto!
+  groupMemberships(filters: FilterGroupMembershipInput): [GroupMembershipDto!]!
+  groupTag(id: ID!): GroupTagDto!
+  groupTags: [GroupTagDto!]!
+  groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
+  isFollowing(userId: ID!): Boolean!
+  joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
+  notifications(limit: Int, skip: Int): [NotificationDto!]!
+  post(id: ID!): PostDto!
+  posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [PostDto!]!
+  upcomingEvents: [EventDto!]!
+  user(id: String!): UserDto!
+  userProfile(id: String!): UserDto!
+  users(limit: Int, query: String, skip: Int): [UserDto!]!
 }
 
 input RemoveGroupMemberInput {
-  groupId: String!
-  userId: String!
+  groupId: ID!
+  userId: ID!
 }
 
-input SearchUsersInput {
-  limit: Int
-  query: String!
-  skip: Int
-}
-
-input SendBulkNotificationInput {
-  body: String!
-  data: String
-  title: String!
-  type: NotificationType!
-  userIds: [String!]!
+"""Type of road surface for motorcycle rides"""
+enum RoadType {
+  ASPHALT
+  MIXED
+  OFF_ROAD
 }
 
 type Session {
@@ -395,37 +609,21 @@ input SignUpInput {
   password: String!
 }
 
-input UpdateCommentInput {
-  content: String
-  id: ID!
-}
-
-input UpdateGroupInput {
-  city: CityInput
-  cover: String
-  description: String
-  id: ID!
-  logo: String
-  membersCapacity: Int
-  name: String
-  privacy: GroupPrivacy
-  tags: [GroupTagInput!]
+input UpdateAddressInput {
+  address: String
+  eventId: String
+  id: String!
+  language: Language
+  latitude: Float
+  longitude: Float
+  postId: String
+  type: AddressType
 }
 
 input UpdateMembershipStatusInput {
-  groupId: String!
-  status: GroupMembershipStatus!
-  userId: String!
-}
-
-input UpdatePostInput {
-  addresses: [PostAddressInput!]
-  content: String
-  groupId: String
-  id: ID!
-  images: [String!]
-  latitude: Float
-  longitude: Float
+  groupId: ID!
+  status: InvitationStatus!
+  userId: ID!
 }
 
 type User {
@@ -434,13 +632,31 @@ type User {
   createdGroups: [Group!]
   email: String!
   firstName: String
+  groupMemberships: [GroupMembership!]
+  id: ID!
+  isActive: Boolean!
+  lastName: String
+  supabaseId: String!
+  updatedAt: DateTime!
+}
+
+type UserDto {
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  firstName: String
   followerCount: Int
   followingCount: Int
-  groupMemberships: [GroupMembership!]
   id: ID!
   isActive: Boolean!
   isFollowing: Boolean
   lastName: String
-  supabaseId: String!
   updatedAt: DateTime!
+}
+
+type UserFollowingDto {
+  createdAt: DateTime!
+  follower: UserDto!
+  following: UserDto!
+  id: ID!
 }

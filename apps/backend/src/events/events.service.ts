@@ -537,7 +537,7 @@ export class EventsService {
 
       // Calculate if current user is participating and their status
       let isParticipating = false;
-      let participationStatus = null;
+      let participationStatus: EventParticipantStatus | null = null;
 
       if (currentUserId && event.participants) {
         const participation = event.participants.find(
@@ -639,28 +639,7 @@ export class EventsService {
       isPrivate,
     } = filters;
 
-    const where: {
-      isActive: boolean;
-      eventType?: string;
-      startDateTime?: {
-        gte?: Date;
-        lte?: Date;
-      };
-      OR?: Array<{
-        title?: { contains: string; mode: string };
-        description?: { contains: string; mode: string };
-      }>;
-      difficultyLevel?: string;
-      experienceLevel?: string;
-      roadType?: string;
-      invitedGroups?: {
-        some: {
-          id: string;
-        };
-      };
-      createdById?: string;
-      isPrivate?: boolean;
-    } = { isActive: true };
+    const where: any = { isActive: true };
 
     if (eventType) {
       where.eventType = eventType;
