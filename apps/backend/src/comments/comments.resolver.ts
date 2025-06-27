@@ -6,7 +6,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { CommentFilterInput } from './dto/comment-filter.input';
+import { FilterCommentInput } from './dto/filter-comment.input';
 import { CommentDto } from './dto/comment.dto';
 
 @Resolver(() => CommentDto)
@@ -19,16 +19,16 @@ export class CommentsResolver {
     @Args('postId', { type: () => ID }) postId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
-    @Args('filters', { type: () => CommentFilterInput, nullable: true })
-    filters?: CommentFilterInput,
+    @Args('filters', { type: () => FilterCommentInput, nullable: true })
+    filters?: FilterCommentInput,
   ) {
-    return this.commentsService.findAll(postId, limit, skip, filters);
+    return await this.commentsService.findAll(postId, limit, skip, filters);
   }
 
   @UseGuards(JwtGuard)
   @Query(() => CommentDto, { name: 'comment' })
   async findOne(@Args('id', { type: () => ID }) id: string) {
-    return this.commentsService.findOne(id);
+    return await this.commentsService.findOne(id);
   }
 
   @UseGuards(JwtGuard)
@@ -37,7 +37,7 @@ export class CommentsResolver {
     @CurrentUser() user: User,
     @Args('input') input: CreateCommentInput,
   ) {
-    return this.commentsService.create(input, user.id);
+    return await this.commentsService.create(input, user.id);
   }
 
   @UseGuards(JwtGuard)
@@ -46,7 +46,7 @@ export class CommentsResolver {
     @CurrentUser() user: User,
     @Args('input') input: UpdateCommentInput,
   ) {
-    return this.commentsService.update(input, user.id);
+    return await this.commentsService.update(input, user.id);
   }
 
   @UseGuards(JwtGuard)
@@ -55,6 +55,6 @@ export class CommentsResolver {
     @CurrentUser() user: User,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    return this.commentsService.remove(id, user.id);
+    return await this.commentsService.remove(id, user.id);
   }
 }

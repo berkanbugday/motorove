@@ -2,7 +2,7 @@ import { InputType, Field, ID } from '@nestjs/graphql';
 import { IsOptional, IsUUID, IsBoolean } from 'class-validator';
 
 @InputType()
-export class CommentFilterInput {
+export class FilterCommentInput {
   @Field(() => ID, { nullable: true })
   @IsOptional()
   @IsUUID()

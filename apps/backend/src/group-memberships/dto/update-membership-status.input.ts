@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { GroupMembershipStatus } from '../../enums/models/group-membership-status.enum';
+import { InvitationStatus } from '../../enums/models/invitation-status.enum';
 
 @InputType()
 export class UpdateMembershipStatusInput {
@@ -9,6 +9,6 @@ export class UpdateMembershipStatusInput {
   @Field()
   userId: string;
 
-  @Field(() => GroupMembershipStatus)
-  status: GroupMembershipStatus;
+  @Field(() => InvitationStatus)
+  status: InvitationStatus;
 }

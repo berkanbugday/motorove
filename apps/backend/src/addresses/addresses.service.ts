@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressInput } from './dto/create-address.input';
 import { UpdateAddressInput } from './dto/update-address.input';
-import { AddressFilterInput } from './dto/address-filter.input';
+import { FilterAddressInput } from './dto/filter-address.input';
 import { AddressType } from '../enums/models/address-type.enum';
 import { Language } from '../enums/models/language.enum';
 import { Address } from './models/address.model';
@@ -20,7 +20,7 @@ export class AddressesService {
   async findAll(
     limit?: number,
     skip?: number,
-    filters?: AddressFilterInput,
+    filters?: FilterAddressInput,
   ): Promise<Address[]> {
     const addresses = (await this.prisma.address.findMany({
       take: limit || undefined,

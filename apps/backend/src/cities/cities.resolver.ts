@@ -1,18 +1,18 @@
 import { Resolver, Query, Args, ID } from '@nestjs/graphql';
 import { CitiesService } from './cities.service';
-import { City } from './models/city.model';
+import { CityDto } from './dto/city.dto';
 
-@Resolver(() => City)
+@Resolver(() => CityDto)
 export class CitiesResolver {
   constructor(private readonly citiesService: CitiesService) {}
 
-  @Query(() => [City], { name: 'cities' })
-  findAll() {
+  @Query(() => [CityDto], { name: 'cities' })
+  findAll(): Promise<CityDto[]> {
     return this.citiesService.findAll();
   }
 
-  @Query(() => City, { name: 'city', nullable: true })
-  findOne(@Args('id', { type: () => ID }) id: string) {
+  @Query(() => CityDto, { name: 'city' })
+  findOne(@Args('id', { type: () => ID }) id: string): Promise<CityDto> {
     return this.citiesService.findOne(id);
   }
 }

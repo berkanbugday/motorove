@@ -9,7 +9,7 @@ import { UpdateCommentInput } from './dto/update-comment.input';
 import { Comment } from './models/comment.model';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { InvitationStatus } from '../enums/models/invitation-status.enum';
-import { CommentFilterInput } from './dto/comment-filter.input';
+import { FilterCommentInput } from './dto/filter-comment.input';
 import { GroupMembership } from '../group-memberships/models/group-membership.model';
 import { CommentDto } from './dto/comment.dto';
 import { plainToClass } from 'class-transformer';
@@ -22,7 +22,7 @@ export class CommentsService {
     postId: string,
     limit?: number,
     skip?: number,
-    filters?: CommentFilterInput,
+    filters?: FilterCommentInput,
   ): Promise<CommentDto[]> {
     const where = {
       postId,

@@ -7,9 +7,15 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
-import { GroupMembershipStatus } from '../enums/models/group-membership-status.enum';
+import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { NotificationsService } from '../notifications/notifications.service';
-import { NotificationType } from 'src/enums/models/notification-type.enum';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { GroupMembershipDto } from './dto/group-membership.dto';
+import { FilterGroupMembershipInput } from './dto/filter-group-membership.input';
+import { GroupMembership } from './models/group-membership.model';
+import { UserDto } from 'src/users/dto/user.dto';
+import { GroupDto } from 'src/groups/dto/group.dto';
+import { Group } from 'src/groups/models/group.model';
 
 @Injectable()
 export class GroupMembershipsService {
@@ -18,60 +24,62 @@ export class GroupMembershipsService {
     private notificationsService: NotificationsService,
   ) {}
 
-  async findAll() {
-    return await this.prisma.groupMembership.findMany({
+  async findAll(
+    filters?: FilterGroupMembershipInput,
+  ): Promise<GroupMembershipDto[]> {
+    const { groupId, userId, role, status, isActive = true } = filters || {};
+
+    const memberships = (await this.prisma.groupMembership.findMany({
       where: {
-        isActive: true,
+        ...(groupId && { groupId }),
+        ...(userId && { userId }),
+        ...(role && { role }),
+        ...(status && { status }),
+        isActive,
       },
       include: {
         group: true,
         user: true,
+        createdBy: true,
+        updatedBy: true,
       },
-    });
+    })) as unknown as GroupMembership[];
+
+    return await Promise.all(
+      memberships.map((membership) => this.mapToDto(membership)),
+    );
   }
 
-  async findByGroup(groupId: string) {
-    return await this.prisma.groupMembership.findMany({
-      where: {
-        groupId,
-        isActive: true,
-      },
-      include: {
-        user: true,
-      },
-    });
-  }
-
-  async findByUser(userId: string) {
-    return await this.prisma.groupMembership.findMany({
-      where: {
-        userId,
-        isActive: true,
-      },
-      include: {
-        group: true,
-      },
-    });
-  }
-
-  async findOne(id: string) {
-    return await this.prisma.groupMembership.findUnique({
+  async findOne(id: string): Promise<GroupMembershipDto> {
+    const membership = (await this.prisma.groupMembership.findUnique({
       where: { id },
       include: {
         group: true,
         user: true,
+        createdBy: true,
+        updatedBy: true,
       },
-    });
+    })) as unknown as GroupMembership;
+
+    if (!membership) {
+      throw new NotFoundException(`Group membership with ID ${id} not found`);
+    }
+
+    return this.mapToDto(membership);
   }
 
-  async addMember(groupId: string, userId: string, adminId: string) {
+  async addMember(
+    groupId: string,
+    userId: string,
+    adminId: string,
+  ): Promise<GroupMembershipDto> {
     // Check if the group exists
-    const group = await this.prisma.group.findUnique({
+    const group = (await this.prisma.group.findUnique({
       where: { id: groupId, isActive: true },
       include: {
         memberships: true,
       },
-    });
+    })) as unknown as Group;
 
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);
@@ -99,7 +107,7 @@ export class GroupMembershipsService {
     }
 
     // Add the user as a member
-    return this.prisma.groupMembership.create({
+    const membership = (await this.prisma.groupMembership.create({
       data: {
         group: {
           connect: { id: groupId },
@@ -110,8 +118,8 @@ export class GroupMembershipsService {
         role: GroupMemberRole.MEMBER,
         status:
           group.privacy === GroupPrivacy.PRIVATE
-            ? GroupMembershipStatus.PENDING
-            : GroupMembershipStatus.APPROVED,
+            ? InvitationStatus.PENDING
+            : InvitationStatus.ACCEPTED,
         createdBy: {
           connect: { id: adminId },
         },
@@ -122,23 +130,27 @@ export class GroupMembershipsService {
       include: {
         group: true,
         user: true,
+        createdBy: true,
+        updatedBy: true,
       },
-    });
+    })) as unknown as GroupMembership;
+
+    return this.mapToDto(membership);
   }
 
-  async changeMemberRole(
+  async updateMemberRole(
     groupId: string,
     userId: string,
     newRole: GroupMemberRole,
     adminId: string,
-  ) {
+  ): Promise<GroupMembershipDto> {
     // Check if the group exists
-    const group = await this.prisma.group.findUnique({
+    const group = (await this.prisma.group.findUnique({
       where: { id: groupId, isActive: true },
       include: {
         memberships: true,
       },
-    });
+    })) as unknown as Group;
 
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);
@@ -167,7 +179,7 @@ export class GroupMembershipsService {
     }
 
     // Update the member's role
-    const updatedMembership = await this.prisma.groupMembership.update({
+    const updatedMembership = (await this.prisma.groupMembership.update({
       where: {
         groupId_userId: {
           groupId,
@@ -184,8 +196,10 @@ export class GroupMembershipsService {
       include: {
         group: true,
         user: true,
+        createdBy: true,
+        updatedBy: true,
       },
-    });
+    })) as unknown as GroupMembership;
 
     if (updatedMembership.role === newRole) {
       // Send notification to the user
@@ -205,18 +219,22 @@ export class GroupMembershipsService {
       );
     }
 
-    return updatedMembership;
+    return this.mapToDto(updatedMembership);
   }
 
-  async removeMember(groupId: string, userId: string, adminId: string) {
+  async removeMember(
+    groupId: string,
+    userId: string,
+    adminId: string,
+  ): Promise<GroupMembershipDto> {
     // Check if the group exists
-    const group = await this.prisma.group.findUnique({
+    const group = (await this.prisma.group.findUnique({
       where: { id: groupId, isActive: true },
       include: {
         memberships: true,
         createdBy: true,
       },
-    });
+    })) as unknown as Group;
 
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);
@@ -231,7 +249,7 @@ export class GroupMembershipsService {
         );
       }
 
-      return this.prisma.groupMembership.delete({
+      const removedMembership = (await this.prisma.groupMembership.delete({
         where: {
           groupId_userId: {
             groupId,
@@ -241,8 +259,12 @@ export class GroupMembershipsService {
         include: {
           group: true,
           user: true,
+          createdBy: true,
+          updatedBy: true,
         },
-      });
+      })) as unknown as GroupMembership;
+
+      return this.mapToDto(removedMembership);
     }
 
     // If removing another member, check if the admin user has admin rights
@@ -268,7 +290,7 @@ export class GroupMembershipsService {
     }
 
     // Delete the membership
-    return this.prisma.groupMembership.delete({
+    const deletedMembership = (await this.prisma.groupMembership.delete({
       where: {
         groupId_userId: {
           groupId,
@@ -278,23 +300,27 @@ export class GroupMembershipsService {
       include: {
         group: true,
         user: true,
+        createdBy: true,
+        updatedBy: true,
       },
-    });
+    })) as unknown as GroupMembership;
+
+    return this.mapToDto(deletedMembership);
   }
 
-  async updateMembershipStatus(
+  async updateMemberStatus(
     groupId: string,
     userId: string,
-    newStatus: GroupMembershipStatus,
+    newStatus: InvitationStatus,
     adminId: string,
-  ) {
+  ): Promise<GroupMembershipDto> {
     // Check if the group exists
-    const group = await this.prisma.group.findUnique({
+    const group = (await this.prisma.group.findUnique({
       where: { id: groupId, isActive: true },
       include: {
         memberships: true,
       },
-    });
+    })) as unknown as Group;
 
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);
@@ -323,7 +349,7 @@ export class GroupMembershipsService {
     }
 
     // Update the membership status
-    return this.prisma.groupMembership.update({
+    const updatedMembership = (await this.prisma.groupMembership.update({
       where: {
         groupId_userId: {
           groupId,
@@ -340,40 +366,66 @@ export class GroupMembershipsService {
       include: {
         group: true,
         user: true,
+        createdBy: true,
+        updatedBy: true,
       },
-    });
+    })) as unknown as GroupMembership;
+
+    // Send notification to the user
+    await this.notificationsService.createAndSendNotification(
+      {
+        userId,
+        title: 'Membership status updated',
+        body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newStatus}`,
+        type: NotificationType.GROUP_MEMBERSHIP_STATUS_UPDATED,
+        data: JSON.stringify({
+          groupId: updatedMembership.group.id,
+          groupName: updatedMembership.group.name,
+          status: newStatus,
+        }),
+      },
+      userId,
+    );
+
+    return this.mapToDto(updatedMembership);
   }
 
   async leaveGroup(groupId: string, userId: string) {
     // Check if the group exists
-    const group = await this.prisma.group.findUnique({
-      where: { id: groupId, isActive: true },
+    const group = (await this.prisma.group.findUnique({
+      where: { id: groupId },
       include: {
-        memberships: true,
         createdBy: true,
       },
-    });
+    })) as unknown as Group;
 
     if (!group) {
       throw new NotFoundException(`Group with ID ${groupId} not found`);
     }
 
-    // Check if the user is the creator - creators can't leave their own groups
+    // Check if the user is the creator of the group
     if (group.createdBy.id === userId) {
       throw new ForbiddenException(
         'Group creators cannot leave their own groups. Transfer ownership first or delete the group.',
       );
     }
 
-    // Check if the user is actually a member of the group
-    const membership = group.memberships.find((m) => m.userId === userId);
+    // Check if the user is a member
+    const membership = (await this.prisma.groupMembership.findUnique({
+      where: {
+        groupId_userId: {
+          groupId,
+          userId,
+        },
+      },
+    })) as unknown as GroupMembership;
 
     if (!membership) {
       throw new NotFoundException(`You are not a member of this group`);
     }
 
-    // Delete the membership (leave the group)
-    const deletedMembership = await this.prisma.groupMembership.delete({
+    // Leave the group
+    const deletedMembership = (await this.prisma.groupMembership.delete({
       where: {
         groupId_userId: {
           groupId,
@@ -383,32 +435,25 @@ export class GroupMembershipsService {
       include: {
         group: true,
         user: true,
+        createdBy: true,
+        updatedBy: true,
       },
-    });
+    })) as unknown as GroupMembership;
 
-    // Send notification to group admins about the member leaving
-    const adminMemberships = group.memberships.filter(
-      (m) => m.role === GroupMemberRole.ADMIN && m.userId !== userId,
-    );
+    return this.mapToDto(deletedMembership);
+  }
 
-    for (const adminMembership of adminMemberships) {
-      await this.notificationsService.createAndSendNotification(
-        {
-          userId: adminMembership.userId,
-          title: 'Member left group',
-          body: `${deletedMembership.user.firstName} ${deletedMembership.user.lastName} has left ${deletedMembership.group.name}`,
-          type: NotificationType.GROUP_LEAVE,
-          data: JSON.stringify({
-            groupId: deletedMembership.group.id,
-            groupName: deletedMembership.group.name,
-            userId: deletedMembership.user.id,
-            userName: `${deletedMembership.user.firstName} ${deletedMembership.user.lastName}`,
-          }),
-        },
-        adminMembership.userId,
-      );
-    }
-
-    return deletedMembership;
+  /**
+   * Maps a GroupMembership entity from the database to a GroupMembershipDto
+   */
+  private mapToDto(membership: GroupMembership): GroupMembershipDto {
+    return {
+      id: membership.id,
+      group: membership.group as unknown as GroupDto,
+      user: membership.user as unknown as UserDto,
+      role: membership.role,
+      status: membership.status,
+      joinedAt: membership.joinedAt,
+    };
   }
 }

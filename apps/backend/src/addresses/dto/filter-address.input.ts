@@ -4,7 +4,7 @@ import { AddressType } from '../../enums/models/address-type.enum';
 import { Language } from '../../enums/models/language.enum';
 
 @InputType()
-export class AddressFilterInput {
+export class FilterAddressInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
