@@ -1,6 +1,5 @@
 import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
 import { AddressesService } from './addresses.service';
-import { Address } from './models/address.model';
 import { CreateAddressInput } from './dto/create-address.input';
 import { UpdateAddressInput } from './dto/update-address.input';
 import { UseGuards } from '@nestjs/common';

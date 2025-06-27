@@ -148,7 +148,13 @@ export class PostsService {
     authToken?: string,
   ): Promise<PostDto> {
     // Create data object, handling undefined groupId
-    const postData: any = {
+    const postData: {
+      content: string;
+      createdById: string;
+      updatedById: string;
+      groupId?: string;
+      images?: string[];
+    } = {
       content: input.content,
       createdById: userId,
       updatedById: userId,
@@ -291,7 +297,15 @@ export class PostsService {
     }
 
     // Process update data
-    const updateData: any = {
+    const updateData: {
+      title?: string;
+      content?: string;
+      updatedById: string;
+      updatedAt: Date;
+      groupId?: string;
+      images?: string[];
+      addresses?: any;
+    } = {
       ...input,
       updatedById: userId,
       updatedAt: new Date(),

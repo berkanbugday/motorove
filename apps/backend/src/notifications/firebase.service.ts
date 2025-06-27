@@ -31,7 +31,10 @@ export class FirebaseService implements OnModuleInit {
 
         let parsedServiceAccount: Record<string, unknown>;
         try {
-          parsedServiceAccount = JSON.parse(serviceAccount);
+          parsedServiceAccount = JSON.parse(serviceAccount) as Record<
+            string,
+            unknown
+          >;
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : 'Error parsing JSON';

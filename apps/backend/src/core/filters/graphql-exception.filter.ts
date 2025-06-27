@@ -183,9 +183,11 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
     }
 
     // For unknown errors
+    const safeMessage =
+      typeof exception === 'string' ? exception : 'Internal server error';
     return {
       error: exception,
-      message: 'Internal server error',
+      message: safeMessage,
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       stack: undefined,
     };

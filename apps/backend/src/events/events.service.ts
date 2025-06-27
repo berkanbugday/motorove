@@ -490,7 +490,19 @@ export class EventsService {
 
   // Helper method to map Prisma event to DTO with additional calculated fields
   private async mapToDto(
-    event: any,
+    event: {
+      id: string;
+      title: string;
+      description?: string;
+      images?: string[];
+      participants?: Array<{
+        id: string;
+        createdById: string;
+        status: EventParticipantStatus;
+      }>;
+      createdById: string;
+      [key: string]: any;
+    },
     currentUserId?: string,
     authToken?: string,
   ): Promise<EventDto> {
@@ -527,9 +539,9 @@ export class EventsService {
       let isParticipating = false;
       let participationStatus = null;
 
-      if (currentUserId) {
-        const participation = event.participants?.find(
-          (p: any) => p.createdById === currentUserId,
+      if (currentUserId && event.participants) {
+        const participation = event.participants.find(
+          (p) => p.createdById === currentUserId,
         );
 
         isParticipating = !!participation;
@@ -537,10 +549,11 @@ export class EventsService {
       }
 
       // Calculate number of participants
-      const participantsCount =
-        event.participants?.filter(
-          (p: any) => p.status === EventParticipantStatus.JOINED,
-        ).length || 0;
+      const participantsCount = event.participants
+        ? event.participants.filter(
+            (p) => p.status === EventParticipantStatus.JOINED,
+          ).length
+        : 0;
 
       // Create base DTO with transformed data
       const eventWithExtras = {
@@ -626,7 +639,28 @@ export class EventsService {
       isPrivate,
     } = filters;
 
-    const where: any = { isActive: true };
+    const where: {
+      isActive: boolean;
+      eventType?: string;
+      startDateTime?: {
+        gte?: Date;
+        lte?: Date;
+      };
+      OR?: Array<{
+        title?: { contains: string; mode: string };
+        description?: { contains: string; mode: string };
+      }>;
+      difficultyLevel?: string;
+      experienceLevel?: string;
+      roadType?: string;
+      invitedGroups?: {
+        some: {
+          id: string;
+        };
+      };
+      createdById?: string;
+      isPrivate?: boolean;
+    } = { isActive: true };
 
     if (eventType) {
       where.eventType = eventType;
