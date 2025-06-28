@@ -5,3 +5,5 @@ registerEnumType(ExperienceLevel, {
   name: 'ExperienceLevel',
   description: 'Experience level for workshops and training events',
 });
+
+export { ExperienceLevel };

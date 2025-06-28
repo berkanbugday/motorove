@@ -6,3 +6,5 @@ registerEnumType(AddressType, {
   description:
     'The types of addresses that can be associated with a post or event',
 });
+
+export { AddressType };

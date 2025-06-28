@@ -5,3 +5,5 @@ registerEnumType(EventType, {
   name: 'EventType',
   description: 'The types of events that can be created',
 });
+
+export { EventType };

@@ -5,3 +5,5 @@ registerEnumType(DifficultyLevel, {
   name: 'DifficultyLevel',
   description: 'Difficulty level for motorcycle rides',
 });
+
+export { DifficultyLevel };

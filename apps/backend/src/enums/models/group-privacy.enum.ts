@@ -6,4 +6,4 @@ registerEnumType(GroupPrivacy, {
   description: 'Privacy levels for groups',
 });
 
-export default GroupPrivacy;
+export { GroupPrivacy };

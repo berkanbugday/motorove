@@ -11,3 +11,4 @@ export * from "./post";
 export * from "./address";
 export * from "./comment";
 export * from "./city";
+export * from "./notification";

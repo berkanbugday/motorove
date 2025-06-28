@@ -725,11 +725,28 @@ export class PostsService {
       }
     }
 
+    // For group data, if it exists, count the members
+    let groupWithMemberCount = null;
+    if (prismaPost.group) {
+      const groupMembersCount = await this.prisma.groupMembership.count({
+        where: {
+          groupId: prismaPost.group.id,
+          isActive: true,
+        },
+      });
+
+      // Create a new object with all group properties plus membersCount
+      groupWithMemberCount = {
+        ...(prismaPost.group as any),
+        membersCount: groupMembersCount,
+      };
+    }
+
     return {
       id: prismaPost.id,
       content: prismaPost.content,
       images: processedImages,
-      group: prismaPost.group as GroupDto,
+      group: groupWithMemberCount as unknown as GroupDto,
       comments: prismaPost.comments as unknown as CommentDto[],
       addresses: prismaPost.addresses as unknown as AddressDto[],
       likesCount,

@@ -5,3 +5,5 @@ registerEnumType(Language, {
   name: 'Language',
   description: 'Supported languages in the application',
 });
+
+export { Language };

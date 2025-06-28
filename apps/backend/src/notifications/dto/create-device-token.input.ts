@@ -1,8 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString } from 'class-validator';
+import { ICreateDeviceToken } from '@motorove/shared';
 
 @InputType()
-export class DeviceTokenInput {
+export class CreateDeviceTokenInput implements ICreateDeviceToken {
   @Field()
   @IsNotEmpty()
   @IsString()

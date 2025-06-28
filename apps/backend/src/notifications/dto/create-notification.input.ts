@@ -6,10 +6,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { NotificationType } from '@motorove/shared';
+import { ICreateNotification, NotificationType } from '@motorove/shared';
 
 @InputType()
-export class CreateNotificationInput {
+export class CreateNotificationInput implements ICreateNotification {
   @Field()
   @IsNotEmpty()
   @IsString()

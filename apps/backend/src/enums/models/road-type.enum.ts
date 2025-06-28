@@ -5,3 +5,5 @@ registerEnumType(RoadType, {
   name: 'RoadType',
   description: 'Type of road surface for motorcycle rides',
 });
+
+export { RoadType };

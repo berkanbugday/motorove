@@ -5,3 +5,5 @@ registerEnumType(NotificationStatus, {
   name: 'NotificationStatus',
   description: 'The status of a notification',
 });
+
+export { NotificationStatus };

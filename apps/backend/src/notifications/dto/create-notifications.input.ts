@@ -6,10 +6,10 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { NotificationType } from '../../enums/models/notification-type.enum';
+import { ICreateNotifications, NotificationType } from '@motorove/shared';
 
 @InputType()
-export class CreateNotificationsInput {
+export class CreateNotificationsInput implements ICreateNotifications {
   @Field(() => [String])
   @IsArray()
   @IsNotEmpty()

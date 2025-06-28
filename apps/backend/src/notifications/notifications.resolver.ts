@@ -4,7 +4,7 @@ import { Notification } from './models/notification.model';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { DeviceTokenInput } from './dto/device-token.input';
+import { DeviceTokenInput } from './dto/create-device-token.input';
 import { CreateNotificationsInput } from './dto/create-notifications.input';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
