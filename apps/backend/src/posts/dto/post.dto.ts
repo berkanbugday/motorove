@@ -11,12 +11,12 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
-import { GroupDto } from '../../groups/dto/group.dto';
 import { AddressDto } from 'src/addresses/dto/address.dto';
 import { CommentDto } from 'src/comments/dto/comment.dto';
+import { IPost } from '@motorove/shared';
 
 @ObjectType()
-export class PostDto {
+export class PostDto implements IPost {
   @Field(() => ID)
   @IsUUID()
   id: string;
@@ -29,11 +29,6 @@ export class PostDto {
   @IsOptional()
   @IsArray()
   images?: string[];
-
-  @Field(() => GroupDto)
-  @ValidateNested()
-  @Type(() => GroupDto)
-  group: GroupDto;
 
   @Field(() => Int)
   @IsNumber()
@@ -54,7 +49,7 @@ export class PostDto {
   @Field(() => UserDto)
   @ValidateNested()
   @Type(() => UserDto)
-  createdBy: UserDto;
+  createdBy: Partial<UserDto>;
 
   @Field()
   @IsDate()

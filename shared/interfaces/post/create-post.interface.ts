@@ -1,4 +1,4 @@
-import { ICreateAddress } from "./create-address.interface";
+import { ICreateAddress } from "../address";
 
 /**
  * Create Post Interface
