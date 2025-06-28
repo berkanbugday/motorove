@@ -1,10 +1,13 @@
 /**
  * Post domain model
+ * Based on the backend Post model
  */
 
+import {AddressType, Language} from '../enums';
+import {Address} from './address.model';
+import {Comment} from './comment.model';
+import {Group} from './group.model';
 import {UserProfile} from './user.model';
-import {Language} from '../enums';
-import {AddressType} from '../enums';
 
 /**
  * Post content types
@@ -18,7 +21,7 @@ export interface PostAddress {
   id: string;
   postId: string;
   address: string;
-  language: string;
+  language: Language;
   type: AddressType;
   latitude: number;
   longitude: number;
@@ -29,39 +32,44 @@ export interface PostAddress {
  */
 export interface PostAddressInput {
   address: string;
-  language: string;
+  language: Language;
   type: AddressType;
   latitude: number;
   longitude: number;
 }
 
 /**
- * Post model
+ * Basic post information
  */
 export interface Post {
   id: string;
   content: string;
   images?: string[];
-  latitude?: number | null;
-  longitude?: number | null;
   groupId?: string;
-  group?: {
-    id: string;
-    name: string;
-    image?: string;
-  };
-  comments?: Comment[];
-  addresses?: PostAddress[];
-  likesCount: number;
-  savesCount: number;
-  commentsCount: number;
-  isLiked: boolean;
-  isSaved: boolean;
-  createdBy: UserProfile;
-  updatedBy?: UserProfile;
+  createdById: string;
+  updatedById: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  isActive: boolean;
+
+  // Additional fields for frontend
+  likesCount?: number;
+  commentsCount?: number;
+  isLiked?: boolean;
+  isSaved?: boolean;
+}
+
+/**
+ * Post with relations
+ */
+export interface PostWithRelations extends Post {
+  group?: Group;
+  createdBy?: UserProfile;
+  updatedBy?: UserProfile;
+  addresses?: Address[];
+  comments?: Comment[];
+  likes?: any[]; // Will be properly typed as PostLike[]
+  saves?: any[]; // Will be properly typed as PostSave[]
 }
 
 /**
@@ -102,6 +110,8 @@ export interface UpdateCommentInput {
 export interface PostLike {
   id: string;
   postId: string;
+  userId: string;
+  createdAt: string;
 }
 
 /**
@@ -110,6 +120,8 @@ export interface PostLike {
 export interface PostSave {
   id: string;
   postId: string;
+  userId: string;
+  createdAt: string;
 }
 
 /**
@@ -118,8 +130,6 @@ export interface PostSave {
 export interface CreatePostInput {
   content: string;
   images?: string[];
-  latitude?: number;
-  longitude?: number;
   groupId?: string | null;
   addresses?: PostAddressInput[];
 }
@@ -131,8 +141,6 @@ export interface UpdatePostInput {
   id: string;
   content?: string;
   images?: string[];
-  latitude?: number | null;
-  longitude?: number | null;
   groupId?: string | null;
   addresses?: PostAddressInput[];
 }
