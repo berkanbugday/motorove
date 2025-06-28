@@ -18,6 +18,7 @@ import {
   DELETE_NOTIFICATION,
   DELETE_ALL_NOTIFICATIONS,
 } from './graphql/notification.graphql';
+import {INotification, ICreateDeviceToken} from '@motorove/shared/interfaces';
 import {useCallback, useState} from 'react';
 
 const DEVICE_TOKEN_KEY = 'fcm_token';
@@ -26,22 +27,6 @@ export interface NotificationPayload {
   title: string;
   body: string;
   data?: Record<string, string>;
-}
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-  type: string;
-  data?: Record<string, any>;
-}
-
-export interface DeviceTokenInput {
-  userId: string;
-  token: string;
-  deviceType: string;
 }
 
 // Helper function to get device type
@@ -306,7 +291,7 @@ export const useSaveDeviceToken = (onSuccess?: () => void) => {
     },
   );
 
-  const saveDeviceToken = async (input: DeviceTokenInput) => {
+  const saveDeviceToken = async (input: ICreateDeviceToken) => {
     try {
       const result = await saveDeviceTokenMutation({
         variables: {
@@ -384,9 +369,10 @@ export const useRemoveDeviceToken = (onSuccess?: () => void) => {
   };
 };
 
-// Hook for getting user notifications
+// Hook for getting notifications
 export const useGetNotifications = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
+
   const {
     data,
     loading,
@@ -396,51 +382,39 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
   } = useQuery(GET_NOTIFICATIONS, {
     variables: {limit, skip},
     onError: errorObj => {
-      loggingService.error('Failed to get user notifications:', errorObj);
+      loggingService.error('Error fetching notifications:', errorObj);
     },
   });
 
   // Wrap the original refetch to reset hasMore state
   const refetch = useCallback(async () => {
     setHasMore(true);
-    return await originalRefetch();
+    return originalRefetch();
   }, [originalRefetch]);
 
-  const loadMore = useCallback(async () => {
-    if (!hasMore || loading) {
-      return;
-    }
-
-    try {
-      const result = await fetchMore({
+  // Function to load more notifications (pagination)
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore && data?.notifications) {
+      fetchMore({
         variables: {
-          skip: data?.notifications?.length || 0,
+          skip: data.notifications.length,
           limit,
         },
-        updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) {
-            return prev;
+      })
+        .then(({data: newData}) => {
+          // Check if there are more items to load
+          if (newData?.notifications?.length < limit) {
+            setHasMore(false);
           }
-
-          return {
-            notifications: [
-              ...prev.notifications,
-              ...fetchMoreResult.notifications,
-            ],
-          };
-        },
-      });
-
-      if (result.data.notifications.length < limit) {
-        setHasMore(false);
-      }
-    } catch (errorObj) {
-      loggingService.error('Error loading more notifications:', errorObj);
+        })
+        .catch(err => {
+          loggingService.error('Error loading more notifications:', err);
+        });
     }
-  }, [data?.notifications?.length, fetchMore, hasMore, limit, loading]);
+  }, [loading, hasMore, data, fetchMore, limit]);
 
   return {
-    notifications: (data?.notifications as Notification[]) || [],
+    notifications: (data?.notifications as INotification[]) || [],
     loading,
     error,
     refetch,

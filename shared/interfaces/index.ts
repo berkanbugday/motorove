@@ -1,14 +1,13 @@
-// Export common interfaces
-export * from "./common";
-
-// Export all domain-specific interfaces
+// Export all interfaces
 export * from "./user";
 export * from "./group";
-export * from "./group-membership";
 export * from "./group-tag";
-export * from "./event";
+export * from "./group-membership";
 export * from "./post";
-export * from "./address";
 export * from "./comment";
-export * from "./city";
 export * from "./notification";
+export * from "./city";
+export * from "./address";
+export * from "./common";
+export * from "./event";
+export * from "./user-following";

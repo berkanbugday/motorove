@@ -1,5 +1,5 @@
 import {useLazyQuery} from '@apollo/client';
-import {User} from '../types';
+import {IUser} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {SEARCH_USERS} from './graphql/user.graphql';
 import {useCallback, useEffect, useState} from 'react';
@@ -12,7 +12,7 @@ import {GET_MY_FOLLOWING} from './graphql/follow.graphql';
  * @returns Users data, loading state, error state and functions for search operations
  */
 export const useSearchUsers = (initialQuery = '') => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [skip, setSkip] = useState<number>(0);
@@ -118,7 +118,7 @@ export const useSearchUsers = (initialQuery = '') => {
  * @returns Following users data, loading state, error state and functions for pagination
  */
 export const useMyFollowing = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [skip, setSkip] = useState<number>(0);
@@ -204,7 +204,7 @@ export const userService = {
    * @param skip Number of results to skip (for pagination)
    * @returns Array of matching users
    */
-  async searchUsers(query: string, limit = 20, skip = 0): Promise<User[]> {
+  async searchUsers(query: string, limit = 20, skip = 0): Promise<IUser[]> {
     try {
       const {data} = await apolloClient.query({
         query: SEARCH_USERS,
@@ -230,7 +230,7 @@ export const userService = {
    * @param skip Number of results to skip (for pagination)
    * @returns Array of users the current user follows
    */
-  async getMyFollowing(limit = 20, skip = 0): Promise<User[]> {
+  async getMyFollowing(limit = 20, skip = 0): Promise<IUser[]> {
     try {
       const {data} = await apolloClient.query({
         query: GET_MY_FOLLOWING,

@@ -1,5 +1,8 @@
 import { ObjectType, Field, Float, ID } from '@nestjs/graphql';
-import { AddressType, Language, IAddress } from '@motorove/shared';
+import { IAddress } from '@motorove/shared';
+import { AddressType } from '../../enums/models/address-type.enum';
+import { Language } from '../../enums/models/language.enum';
+
 import {
   IsEnum,
   IsNotEmpty,

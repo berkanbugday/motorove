@@ -1,6 +1,7 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { GroupMemberRole, IChangeMemberRole } from '@motorove/shared';
+import { IChangeMemberRole } from '@motorove/shared';
+import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
 import { BaseGroupMembershipInput } from './base-group-membership.input';
 
 @InputType()

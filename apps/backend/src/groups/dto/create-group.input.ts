@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { GroupPrivacy } from '@motorove/shared';
+import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import {
   IsString,
   IsOptional,

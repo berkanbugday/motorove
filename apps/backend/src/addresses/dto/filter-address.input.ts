@@ -1,6 +1,7 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsOptional, IsString, IsEnum } from 'class-validator';
-import { AddressType, Language } from '@motorove/shared';
+import { AddressType } from '../../enums/models/address-type.enum';
+import { Language } from '../../enums/models/language.enum';
 
 @InputType()
 export class FilterAddressInput {

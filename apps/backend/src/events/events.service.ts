@@ -9,12 +9,10 @@ import { StorageService } from '../core/storage/storage.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
 import { FilterEventInput } from './dto/filter-event.input';
-import {
-  RoadType,
-  DifficultyLevel,
-  ExperienceLevel,
-  EventParticipantStatus,
-} from '@motorove/shared';
+import { EventParticipantStatus } from '../enums/models/event-participant-status.enum';
+import { RoadType } from '../enums/models/road-type.enum';
+import { DifficultyLevel } from '../enums/models/difficulty-level.enum';
+import { ExperienceLevel } from '../enums/models/experience-level.enum';
 import { EventDto } from './dto/event.dto';
 import { Event } from './models/event.model';
 import { plainToClass } from 'class-transformer';

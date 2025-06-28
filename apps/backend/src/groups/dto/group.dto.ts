@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
-import { GroupPrivacy, IGroup } from '@motorove/shared';
+import { IGroup } from '@motorove/shared';
+import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import {
   IsArray,
   IsBoolean,

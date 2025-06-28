@@ -2,24 +2,16 @@ import {gql} from '@apollo/client';
 import {USER_FRAGMENT} from './user.graphql';
 
 // Fragment
-export const FOLLOW_USER_FRAGMENT = gql`
-  fragment FollowUserFragment on Follow {
-    following {
-      ...UserFragment
-    }
+export const USER_FOLLOWING_FRAGMENT = gql`
+  fragment UserFollowingFragment on UserFollowingDto {
+    id
     follower {
       ...UserFragment
     }
-  }
-  ${USER_FRAGMENT}
-`;
-
-export const UNFOLLOW_USER_FRAGMENT = gql`
-  fragment UnfollowUserFragment on Unfollow {
-    id
     following {
       ...UserFragment
     }
+    createdAt
   }
   ${USER_FRAGMENT}
 `;
@@ -44,8 +36,8 @@ export const GET_MY_FOLLOWING = gql`
 `;
 
 export const GET_USER_FOLLOWERS = gql`
-  query GetUserFollowers($userId: String!, $limit: Int, $skip: Int) {
-    userFollowers(userId: $userId, limit: $limit, skip: $skip) {
+  query GetUserFollowers($userId: ID!, $limit: Int, $skip: Int) {
+    followerUsers(userId: $userId, limit: $limit, skip: $skip) {
       ...UserFragment
     }
   }
@@ -53,8 +45,8 @@ export const GET_USER_FOLLOWERS = gql`
 `;
 
 export const GET_USER_FOLLOWING = gql`
-  query GetUserFollowing($userId: String!, $limit: Int, $skip: Int) {
-    userFollowing(userId: $userId, limit: $limit, skip: $skip) {
+  query GetUserFollowing($userId: ID!, $limit: Int, $skip: Int) {
+    followingUsers(userId: $userId, limit: $limit, skip: $skip) {
       ...UserFragment
     }
   }
@@ -62,26 +54,26 @@ export const GET_USER_FOLLOWING = gql`
 `;
 
 export const CHECK_IS_FOLLOWING = gql`
-  query CheckIsFollowing($userId: String!) {
+  query CheckIsFollowing($userId: ID!) {
     isFollowing(userId: $userId)
   }
 `;
 
 // Mutations
 export const FOLLOW_USER = gql`
-  mutation FollowUser($input: FollowUserInput!) {
-    followUser(followUserInput: $input) {
-      ...FollowUserFragment
+  mutation FollowUser($userId: ID!) {
+    follow(userId: $userId) {
+      ...UserFollowingFragment
     }
   }
-  ${FOLLOW_USER_FRAGMENT}
+  ${USER_FOLLOWING_FRAGMENT}
 `;
 
 export const UNFOLLOW_USER = gql`
-  mutation UnfollowUser($input: UnfollowUserInput!) {
-    unfollowUser(unFollowUserInput: $input) {
-      ...UnfollowUserFragment
+  mutation UnfollowUser($userId: ID!) {
+    unfollow(userId: $userId) {
+      ...UserFollowingFragment
     }
   }
-  ${UNFOLLOW_USER_FRAGMENT}
+  ${USER_FOLLOWING_FRAGMENT}
 `;

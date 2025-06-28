@@ -7,7 +7,8 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ICreateAddress } from '@motorove/shared';
-import { AddressType, Language } from '@motorove/shared';
+import { AddressType } from '../../enums/models/address-type.enum';
+import { Language } from '../../enums/models/language.enum';
 
 @InputType()
 export class CreateAddressInput implements ICreateAddress {

@@ -1,5 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { InvitationStatus, IUpdateMembershipStatus } from '@motorove/shared';
+import { IUpdateMembershipStatus } from '@motorove/shared';
+import { InvitationStatus } from '../../enums/models/invitation-status.enum';
 import { BaseGroupMembershipInput } from './base-group-membership.input';
 
 @InputType()

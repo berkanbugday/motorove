@@ -1,6 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsOptional } from 'class-validator';
-import { GroupMemberRole, GroupPrivacy, IFilterGroup } from '@motorove/shared';
+import { IFilterGroup } from '@motorove/shared';
+import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
+import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 
 @InputType()
 export class FilterGroupInput implements IFilterGroup {
