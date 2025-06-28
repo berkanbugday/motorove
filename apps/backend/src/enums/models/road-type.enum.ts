@@ -1,10 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-
-export enum RoadType {
-  ASPHALT = 'ASPHALT',
-  OFF_ROAD = 'OFF_ROAD',
-  MIXED = 'MIXED',
-}
+import { RoadType } from '@motorove/shared';
 
 registerEnumType(RoadType, {
   name: 'RoadType',

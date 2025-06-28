@@ -1,9 +1,10 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { GroupMembership } from '../../group-memberships/models/group-membership.model';
 import { Group } from '../../groups/models/group.model';
+import { IUser } from '@motorove/shared';
 
 @ObjectType()
-export class User {
+export class User implements IUser {
   @Field(() => ID)
   id: string;
 

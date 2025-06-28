@@ -8,13 +8,14 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IEventFilter } from '@motorove/shared';
 import { EventType } from '../../enums/models/event-type.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
 
 @InputType()
-export class EventFilterInput {
+export class EventFilterInput implements IEventFilter {
   @Field(() => EventType, { nullable: true })
   @IsEnum(EventType)
   @IsOptional()

@@ -8,10 +8,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ICreatePost } from '@motorove/shared';
 import { CreateAddressInput } from '../../addresses/dto/create-address.input';
 
 @InputType()
-export class CreatePostInput {
+export class CreatePostInput implements ICreatePost {
   @Field()
   @IsNotEmpty()
   @IsString()

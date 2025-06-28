@@ -1,0 +1,10 @@
+/**
+ * Address Type Enum
+ * Types of addresses
+ */
+export enum AddressType {
+  POST_LOCATION = "POST_LOCATION",
+  EVENT_MEETING_POINT = "EVENT_MEETING_POINT",
+  EVENT_START_LOCATION = "EVENT_START_LOCATION",
+  EVENT_FINISH_LOCATION = "EVENT_FINISH_LOCATION",
+}

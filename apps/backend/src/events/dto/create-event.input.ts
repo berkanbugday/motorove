@@ -18,10 +18,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ICreateEvent } from '@motorove/shared';
 import { CreateAddressInput } from 'src/addresses/dto/create-address.input';
 
 @InputType()
-export class CreateEventInput {
+export class CreateEventInput implements ICreateEvent {
   @Field(() => String)
   @IsString()
   @MaxLength(100)

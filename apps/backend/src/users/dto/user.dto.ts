@@ -8,43 +8,48 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { UserDto as SharedUserDto } from '@motorove/shared';
 
 @ObjectType()
-export class UserDto {
+export class UserDto extends SharedUserDto {
   @Field(() => ID)
   @IsUUID()
-  id: string;
+  declare id: string;
 
   @Field(() => String)
   @IsEmail()
-  email: string;
+  declare email: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  firstName: string | null;
+  declare firstName: string | null;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  lastName: string | null;
+  declare lastName: string | null;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  avatar: string | null;
+  declare avatar: string | null;
+
+  @Field(() => String)
+  @IsString()
+  declare supabaseId: string;
 
   @Field(() => Date)
   @IsDate()
-  createdAt: Date;
+  declare createdAt: Date;
 
   @Field(() => Date)
   @IsDate()
-  updatedAt: Date;
+  declare updatedAt: Date;
 
   @Field(() => Boolean)
   @IsBoolean()
-  isActive: boolean;
+  declare isActive: boolean;
 
   @Field(() => Int, { nullable: true })
   @IsOptional()

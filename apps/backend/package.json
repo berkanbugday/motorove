@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@apollo/server": "^4.12.0",
+    "@motorove/shared": "workspace:*",
     "@nestjs/apollo": "^13.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",

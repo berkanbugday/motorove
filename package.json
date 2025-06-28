@@ -1,0 +1,26 @@
+{
+  "name": "motorove",
+  "version": "1.0.0",
+  "description": "Motorove monorepo containing backend, mobile, and shared packages",
+  "private": true,
+  "workspaces": [
+    "apps/backend",
+    "apps/mobile",
+    "shared"
+  ],
+  "scripts": {
+    "build:shared": "cd shared && pnpm build",
+    "build:backend": "cd apps/backend && pnpm build",
+    "build:mobile": "cd apps/mobile && pnpm build",
+    "dev:backend": "cd apps/backend && pnpm start:dev",
+    "dev:mobile": "cd apps/mobile && pnpm start"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.10.0"
+} 
