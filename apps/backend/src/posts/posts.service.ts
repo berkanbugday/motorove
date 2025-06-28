@@ -763,9 +763,7 @@ export class PostsService {
   ): PostInteractionDto {
     return {
       id: prismaInteraction.id,
-      post: prismaInteraction.post as unknown as PostDto,
       postId: prismaInteraction.postId,
-      user: prismaInteraction.user as unknown as UserDto,
       userId: prismaInteraction.userId,
       createdAt: prismaInteraction.createdAt,
     };
