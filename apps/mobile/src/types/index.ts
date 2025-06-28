@@ -11,6 +11,9 @@ export * from './navigation.types';
 // Domain models
 export * from './models';
 
+// Enums
+export * from './enums';
+
 // User type
 export type User = {
   id: string;

@@ -6,6 +6,9 @@ export const POST_ADDRESS_FRAGMENT = gql`
     postId
     address
     language
+    type
+    latitude
+    longitude
   }
 `;
 

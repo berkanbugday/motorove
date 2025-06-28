@@ -91,22 +91,30 @@ export const SkeletonGroup: React.FC<SkeletonGroupProps> = ({
 }) => {
   // Determine which components to show based on preset
   const determineShowAvatar = () => {
-    if (showAvatar !== undefined) return showAvatar;
+    if (showAvatar !== undefined) {
+      return showAvatar;
+    }
     return ['post', 'profile', 'comment', 'messageRow'].includes(preset);
   };
 
   const determineShowHeader = () => {
-    if (showHeader !== undefined) return showHeader;
+    if (showHeader !== undefined) {
+      return showHeader;
+    }
     return ['post', 'profile', 'comment', 'messageRow'].includes(preset);
   };
 
   const determineShowImage = () => {
-    if (showImage !== undefined) return showImage;
+    if (showImage !== undefined) {
+      return showImage;
+    }
     return ['post', 'eventCard', 'groupCard'].includes(preset);
   };
 
   const determineShowFooter = () => {
-    if (showFooter !== undefined) return showFooter;
+    if (showFooter !== undefined) {
+      return showFooter;
+    }
     return preset === 'post' || preset === 'groupCard';
   };
 

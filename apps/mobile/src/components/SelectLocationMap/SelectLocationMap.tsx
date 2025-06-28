@@ -11,6 +11,7 @@ import {RNMapMarkerType} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
 import {PostAddressInput} from '../../types/models/post.model';
+import {AddressType} from '../../types/enums/address-type.enum';
 
 interface SelectLocationMapProps {
   onLocationSelect: (location: {
@@ -23,6 +24,7 @@ interface SelectLocationMapProps {
   initialLocation?: {
     latitude?: number;
     longitude?: number;
+    addresses?: PostAddressInput[];
   };
 }
 
@@ -94,7 +96,14 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
         }
       }, 500);
 
-      fetchLocationDetails(initialLocation.latitude, initialLocation.longitude);
+      if (initialLocation.addresses && initialLocation.addresses.length > 0) {
+        setLocationAddresses(initialLocation.addresses);
+      } else {
+        fetchLocationDetails(
+          initialLocation.latitude,
+          initialLocation.longitude,
+        );
+      }
     } else {
       // Otherwise, get the user's current location
       setIsLoading(true);
@@ -172,6 +181,9 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
           return {
             address: address || data.display_name,
             language,
+            type: AddressType.POST_LOCATION,
+            latitude,
+            longitude,
           } as PostAddressInput;
         }
 

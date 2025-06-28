@@ -53,3 +53,21 @@ export const GET_EXPERIENCE_LEVELS = gql`
     }
   }
 `;
+
+export const GET_ADDRESS_TYPES = gql`
+  query GetAddressTypes {
+    getAddressTypes {
+      key
+      value
+    }
+  }
+`;
+
+export const GET_LANGUAGES = gql`
+  query GetLanguages {
+    getLanguages {
+      key
+      value
+    }
+  }
+`;

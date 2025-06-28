@@ -3,6 +3,8 @@
  */
 
 import {UserProfile} from './user.model';
+import {Language} from '../enums';
+import {AddressType} from '../enums';
 
 /**
  * Post content types
@@ -17,6 +19,9 @@ export interface PostAddress {
   postId: string;
   address: string;
   language: string;
+  type: AddressType;
+  latitude: number;
+  longitude: number;
 }
 
 /**
@@ -25,6 +30,9 @@ export interface PostAddress {
 export interface PostAddressInput {
   address: string;
   language: string;
+  type: AddressType;
+  latitude: number;
+  longitude: number;
 }
 
 /**

@@ -6,6 +6,8 @@ import {
   GET_ROAD_TYPES,
   GET_DIFFICULTY_LEVELS,
   GET_EXPERIENCE_LEVELS,
+  GET_ADDRESS_TYPES,
+  GET_LANGUAGES,
 } from './graphql/enum.graphql';
 import {toPascalCase} from '@utils/stringUtils';
 
@@ -105,6 +107,34 @@ export const useEnumExperienceLevels = () => {
   return {experienceLevels, loading, error};
 };
 
+export const useEnumAddressTypes = () => {
+  const {data, loading, error} = useQuery(GET_ADDRESS_TYPES);
+
+  const addressTypes: DropdownItem[] = data?.getAddressTypes
+    ? data.getAddressTypes.map((type: EnumItem, index: number) => ({
+        id: index + 1,
+        label: toPascalCase(type.value),
+        value: type.value,
+      }))
+    : [];
+
+  return {addressTypes, loading, error};
+};
+
+export const useEnumLanguages = () => {
+  const {data, loading, error} = useQuery(GET_LANGUAGES);
+
+  const languages: DropdownItem[] = data?.getLanguages
+    ? data.getLanguages.map((language: EnumItem, index: number) => ({
+        id: index + 1,
+        label: language.value.toLowerCase(),
+        value: language.value,
+      }))
+    : [];
+
+  return {languages, loading, error};
+};
+
 // Export all as EnumService object
 export const EnumService = {
   useEnumPrivacyOptions,
@@ -113,6 +143,8 @@ export const EnumService = {
   useEnumRoadTypes,
   useEnumDifficultyLevels,
   useEnumExperienceLevels,
+  useEnumAddressTypes,
+  useEnumLanguages,
 };
 
 export default EnumService;
