@@ -1,5 +1,5 @@
 {
-  "name": "motorove",
+  "name": "@motorove/mobile",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -19,12 +19,13 @@
     "build:ios:staging": "ENVFILE=.env.staging react-native run-ios --scheme 'motoroveStaging' --configuration Staging",
     "build:ios:prod": "ENVFILE=.env.prod react-native run-ios --scheme 'motorove' --configuration Release",
     "lint": "ESLINT_USE_FLAT_CONFIG=true eslint --config eslint.config.cjs .",
-    "start": "react-native start",
+    "dev": "react-native start",
     "test": "jest",
     "run-both": "concurrently \"pnpm android:dev\" \"pnpm ios:dev\"",
     "postinstall": "patch-package",
     "clear-cache": "node scripts/clear-metro-cache.js",
-    "start:clean": "pnpm clear-cache && RESET_CACHE=true react-native start"
+    "start:clean": "pnpm clear-cache && RESET_CACHE=true react-native start",
+    "clean": "rimraf .turbo node_modules"
   },
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -88,7 +89,7 @@
     "prettier": "2.8.8",
     "react-native-svg-transformer": "^1.5.0",
     "react-test-renderer": "19.0.0",
-    "rimraf": "^5.0.5",
+    "rimraf": "^5.0.10",
     "typescript": "5.0.4"
   },
   "engines": {

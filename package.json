@@ -9,13 +9,19 @@
     "shared"
   ],
   "scripts": {
-    "build:shared": "cd shared && pnpm build",
-    "build:backend": "cd apps/backend && pnpm build",
-    "build:mobile": "cd apps/mobile && pnpm build",
-    "dev:backend": "cd apps/backend && pnpm start:dev",
-    "dev:mobile": "cd apps/mobile && pnpm start"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "clean": "turbo clean",
+    "build:shared": "turbo build --filter=@motorove/shared",
+    "build:backend": "turbo build --filter=@motorove/backend",
+    "build:mobile": "turbo build --filter=@motorove/mobile",
+    "dev:backend": "turbo dev --filter=@motorove/backend",
+    "dev:mobile": "turbo dev --filter=@motorove/mobile"
   },
   "devDependencies": {
+    "turbo": "^1.12.4",
     "typescript": "^5.0.0"
   },
   "engines": {

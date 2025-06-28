@@ -1,0 +1,27 @@
+# Turborepo
+.turbo
+**/node_modules
+
+# Build outputs
+**/dist
+**/build
+
+# Environment variables
+**/.env*
+!**/.env.example
+
+# Logs
+**/*.log
+**/logs
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
