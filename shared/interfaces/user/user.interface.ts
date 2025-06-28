@@ -11,30 +11,6 @@ export interface IUser {
   supabaseId: string;
   createdAt: Date | string;
   updatedAt: Date | string;
+  isFollowing?: boolean;
   isActive: boolean;
-}
-
-/**
- * Basic user profile information
- */
-export interface IUserProfile
-  extends Pick<IUser, "id" | "email" | "firstName" | "lastName" | "avatar"> {
-  displayName?: string;
-  bio?: string;
-}
-
-/**
- * Extended user information
- */
-export interface IUserDetails extends IUserProfile {
-  phoneNumber?: string;
-  location?: {
-    country?: string;
-    city?: string;
-    address?: string;
-  };
-  preferences?: {
-    notifications: boolean;
-    theme: "light" | "dark" | "system";
-  };
 }
