@@ -10,21 +10,20 @@ import Geolocation from '@react-native-community/geolocation';
 import {RNMapMarkerType} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
-import {PostAddressInput} from '../../types/models/post.model';
-import {AddressType} from '../../types/enums/address-type.enum';
+import {IAddress, AddressType} from '@motorove/shared';
 
 interface SelectLocationMapProps {
   onLocationSelect: (location: {
     latitude?: number;
     longitude?: number;
     name?: string;
-    addresses?: PostAddressInput[];
+    addresses?: IAddress[];
   }) => void;
   onClose: () => void;
   initialLocation?: {
     latitude?: number;
     longitude?: number;
-    addresses?: PostAddressInput[];
+    addresses?: IAddress[];
   };
 }
 
@@ -47,9 +46,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [locationAddresses, setLocationAddresses] = useState<
-    PostAddressInput[]
-  >([]);
+  const [locationAddresses, setLocationAddresses] = useState<IAddress[]>([]);
 
   // Function to animate to a specific location
   const animateToLocation = (latitude: number, longitude: number) => {
@@ -184,7 +181,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
             type: AddressType.POST_LOCATION,
             latitude,
             longitude,
-          } as PostAddressInput;
+          } as IAddress;
         }
 
         return null;
@@ -193,7 +190,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
       const addresses = await Promise.all(addressPromises);
       const validAddresses = addresses.filter(
         addr => addr !== null,
-      ) as PostAddressInput[];
+      ) as IAddress[];
       setLocationAddresses(validAddresses);
     } catch (error) {
       console.error('Error fetching location details:', error);
