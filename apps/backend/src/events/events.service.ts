@@ -8,11 +8,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../core/storage/storage.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
-import { EventFilterInput } from './dto/event-filter.input';
-import { RoadType } from '../enums/models/road-type.enum';
-import { DifficultyLevel } from '../enums/models/difficulty-level.enum';
-import { ExperienceLevel } from '../enums/models/experience-level.enum';
-import { EventParticipantStatus } from '../enums/models/event-participant-status.enum';
+import { FilterEventInput } from './dto/filter-event.input';
+import {
+  RoadType,
+  DifficultyLevel,
+  ExperienceLevel,
+  EventParticipantStatus,
+} from '@motorove/shared';
 import { EventDto } from './dto/event.dto';
 import { Event } from './models/event.model';
 import { plainToClass } from 'class-transformer';
@@ -29,7 +31,7 @@ export class EventsService {
   async findAll(
     limit?: number,
     skip?: number,
-    filters?: EventFilterInput,
+    filters?: FilterEventInput,
     currentUserId?: string,
     authToken?: string,
   ): Promise<EventDto[]> {
@@ -537,7 +539,7 @@ export class EventsService {
 
       // Calculate if current user is participating and their status
       let isParticipating = false;
-      let participationStatus: EventParticipantStatus | null = null;
+      let participationStatus: string | null = null;
 
       if (currentUserId && event.participants) {
         const participation = event.participants.find(
@@ -623,7 +625,7 @@ export class EventsService {
   }
 
   // Helper method to build the filter query
-  private buildFilterQuery(filters?: EventFilterInput) {
+  private buildFilterQuery(filters?: FilterEventInput) {
     if (!filters) return { isActive: true };
 
     const {

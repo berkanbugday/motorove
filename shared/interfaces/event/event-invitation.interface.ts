@@ -1,5 +1,5 @@
-import { IBase, IBaseWithRelations } from "./base.interface";
-import { InvitationStatus } from "../enums/invitation-status.enum";
+import { IBase, IBaseWithRelations } from "../common/base.interface";
+import { InvitationStatus } from "../../enums";
 
 /**
  * Event Invitation Interface

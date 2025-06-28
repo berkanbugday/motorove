@@ -9,13 +9,15 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IEventFilter } from '@motorove/shared';
-import { EventType } from '../../enums/models/event-type.enum';
-import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
-import { ExperienceLevel } from '../../enums/models/experience-level.enum';
-import { RoadType } from '../../enums/models/road-type.enum';
+import {
+  EventType,
+  DifficultyLevel,
+  ExperienceLevel,
+  RoadType,
+} from '@motorove/shared';
 
 @InputType()
-export class EventFilterInput implements IEventFilter {
+export class FilterEventInput implements IEventFilter {
   @Field(() => EventType, { nullable: true })
   @IsEnum(EventType)
   @IsOptional()

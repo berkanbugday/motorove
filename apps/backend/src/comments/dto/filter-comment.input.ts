@@ -1,8 +1,9 @@
 import { InputType, Field, ID } from '@nestjs/graphql';
 import { IsOptional, IsUUID, IsBoolean } from 'class-validator';
+import { IFilterComment } from '@motorove/shared';
 
 @InputType()
-export class FilterCommentInput {
+export class FilterCommentInput implements IFilterComment {
   @Field(() => ID, { nullable: true })
   @IsOptional()
   @IsUUID()

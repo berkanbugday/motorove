@@ -10,7 +10,7 @@ import {
 import { EventsService } from './events.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
-import { EventFilterInput } from './dto/event-filter.input';
+import { FilterEventInput } from './dto/filter-event.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Request } from 'express';
@@ -33,8 +33,8 @@ export class EventsResolver {
     @Context() context: GqlContext,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
-    @Args('filters', { type: () => EventFilterInput, nullable: true })
-    filters?: EventFilterInput,
+    @Args('filters', { type: () => FilterEventInput, nullable: true })
+    filters?: FilterEventInput,
   ) {
     const userId = context.req.user?.id;
     const authHeader = context.req.headers.authorization;

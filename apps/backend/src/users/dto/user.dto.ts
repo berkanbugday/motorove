@@ -8,10 +8,10 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
-import { UserDto as SharedUserDto } from '@motorove/shared';
+import { IUser } from '@motorove/shared';
 
 @ObjectType()
-export class UserDto extends SharedUserDto {
+export class UserDto implements IUser {
   @Field(() => ID)
   @IsUUID()
   declare id: string;

@@ -1,15 +1,5 @@
-import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { InputType } from '@nestjs/graphql';
+import { CityDto } from './city.dto';
 
 @InputType()
-export class CityInput {
-  @Field(() => ID)
-  @IsString()
-  @IsNotEmpty()
-  id: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  value: string;
-}
+export class CityInput extends CityDto {}

@@ -1,7 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
-import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
-import { InvitationStatus } from '../../enums/models/invitation-status.enum';
+import { GroupMemberRole, InvitationStatus } from '@motorove/shared';
 
 @InputType()
 export class FilterGroupMembershipInput {

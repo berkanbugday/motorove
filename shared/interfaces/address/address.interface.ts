@@ -1,5 +1,4 @@
-import { AddressType } from "../enums/address-type.enum";
-import { Language } from "../enums/language.enum";
+import { AddressType, Language } from "../../enums";
 
 /**
  * Address Interface

@@ -1,8 +1,10 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { EventType } from '../../enums/models/event-type.enum';
-import { RoadType } from '../../enums/models/road-type.enum';
-import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
-import { ExperienceLevel } from '../../enums/models/experience-level.enum';
+import {
+  EventType,
+  RoadType,
+  DifficultyLevel,
+  ExperienceLevel,
+} from '@motorove/shared';
 import {
   IsEnum,
   IsOptional,

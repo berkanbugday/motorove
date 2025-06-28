@@ -3,10 +3,12 @@ import { Group } from '../../groups/models/group.model';
 import { EventParticipant } from './event-participant.model';
 import { EventInvitation } from './event-invitation.model';
 import { BaseModel } from '../../core/models/base.model';
-import { EventType } from '../../enums/models/event-type.enum';
-import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
-import { RoadType } from '../../enums/models/road-type.enum';
-import { ExperienceLevel } from '../../enums/models/experience-level.enum';
+import {
+  EventType,
+  DifficultyLevel,
+  RoadType,
+  ExperienceLevel,
+} from '@motorove/shared';
 import { User } from 'src/users/models/user.model';
 import { Address } from 'src/addresses/models/address.model';
 

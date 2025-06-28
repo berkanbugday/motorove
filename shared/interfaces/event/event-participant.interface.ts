@@ -1,5 +1,5 @@
-import { IBase, IBaseWithRelations } from "./base.interface";
-import { EventParticipantStatus } from "../enums/event-participant-status.enum";
+import { IBase, IBaseWithRelations } from "../common/base.interface";
+import { EventParticipantStatus } from "../../enums";
 
 /**
  * Event Participant Interface

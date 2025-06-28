@@ -1,3 +1,5 @@
+import { IUser } from "../user";
+
 /**
  * Base Interface
  * Common fields for all entities with auditing
@@ -16,18 +18,6 @@ export interface IBase {
  * Extends base interface with common relation fields
  */
 export interface IBaseWithRelations extends IBase {
-  createdBy?: {
-    id: string;
-    email: string;
-    firstName?: string | null;
-    lastName?: string | null;
-    avatar?: string | null;
-  };
-  updatedBy?: {
-    id: string;
-    email: string;
-    firstName?: string | null;
-    lastName?: string | null;
-    avatar?: string | null;
-  };
+  createdBy?: Partial<IUser>;
+  updatedBy?: Partial<IUser>;
 }

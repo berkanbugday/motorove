@@ -1,7 +1,9 @@
-import { EventType } from "../enums/event-type.enum";
-import { DifficultyLevel } from "../enums/difficulty-level.enum";
-import { ExperienceLevel } from "../enums/experience-level.enum";
-import { RoadType } from "../enums/road-type.enum";
+import {
+  EventType,
+  DifficultyLevel,
+  ExperienceLevel,
+  RoadType,
+} from "../../enums";
 
 /**
  * Event Filter Interface

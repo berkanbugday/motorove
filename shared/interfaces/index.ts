@@ -2,9 +2,10 @@
 export * from "./common";
 
 // Export all domain-specific interfaces
-export * from "./users";
-export * from "./groups";
-export * from "./events";
-export * from "./posts";
-export * from "./addresses";
-export * from "./comments";
+export * from "./user";
+export * from "./group";
+export * from "./event";
+export * from "./post";
+export * from "./address";
+export * from "./comment";
+export * from "./city";

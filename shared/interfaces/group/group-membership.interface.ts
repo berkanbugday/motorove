@@ -1,5 +1,4 @@
-import { GroupMemberRole } from "../enums/group-member-role.enum";
-import { InvitationStatus } from "../enums/invitation-status.enum";
+import { GroupMemberRole, InvitationStatus } from "../../enums";
 
 /**
  * Group Membership Interface
