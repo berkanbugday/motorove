@@ -1,28 +1,27 @@
-import { IBase } from "../common";
 import { IUser } from "../user";
 
 /**
  * User Following Interface
  * Represents a follow relationship between users
  */
-export interface IUserFollowing extends IBase {
+export interface IUserFollowing {
+  /**
+   * ID of the follow relationship
+   */
+  id: string;
+
   /**
    * User who is following
    */
-  follower: IUser;
+  follower: Partial<IUser>;
 
   /**
    * User who is being followed
    */
-  following: IUser;
+  following: Partial<IUser>;
 
   /**
-   * ID of the follower user
+   * Date and time the follow relationship was created
    */
-  followerId: string;
-
-  /**
-   * ID of the following user
-   */
-  followingId: string;
+  createdAt: Date;
 }
