@@ -1,15 +1,5 @@
-import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { InputType } from '@nestjs/graphql';
+import { GroupTagDto } from './group-tag.dto';
 
 @InputType()
-export class GroupTagInput {
-  @Field(() => ID)
-  @IsString()
-  @IsNotEmpty()
-  id: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  value: string;
-}
+export class GroupTagInput extends GroupTagDto {}

@@ -5,6 +5,7 @@ export * from "./common";
 export * from "./user";
 export * from "./group";
 export * from "./group-membership";
+export * from "./group-tag";
 export * from "./event";
 export * from "./post";
 export * from "./address";
