@@ -1,15 +1,10 @@
-import { GroupPrivacy } from "../../enums";
+import { GroupMemberRole, GroupPrivacy } from "../../enums";
 
 /**
  * Filter Group Interface
  * Used for filtering groups in queries
  */
 export interface IFilterGroup {
-  /**
-   * Optional search term for matching name or description
-   */
-  searchTerm?: string;
-
   /**
    * Optional city ID to filter by
    */
@@ -23,25 +18,10 @@ export interface IFilterGroup {
   /**
    * Optional tag IDs to filter by
    */
-  tagIds?: string[];
+  tags?: string[];
 
   /**
-   * Filter by active status
+   * Optional role to filter by
    */
-  isActive?: boolean;
-
-  /**
-   * Filter groups that the user is a member of
-   */
-  isMember?: boolean;
-
-  /**
-   * Filter groups that the user is an admin of
-   */
-  isAdmin?: boolean;
-
-  /**
-   * Filter groups that the user created
-   */
-  createdById?: string;
+  role?: GroupMemberRole;
 }

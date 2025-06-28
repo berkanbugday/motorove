@@ -13,7 +13,7 @@ export class PostInteractionDto {
   @Field(() => PostDto)
   @ValidateNested()
   @Type(() => PostDto)
-  post: PostDto;
+  post: Partial<PostDto>;
 
   @Field()
   @IsUUID()
@@ -22,7 +22,7 @@ export class PostInteractionDto {
   @Field(() => UserDto)
   @ValidateNested()
   @Type(() => UserDto)
-  user: UserDto;
+  user: Partial<UserDto>;
 
   @Field()
   @IsUUID()

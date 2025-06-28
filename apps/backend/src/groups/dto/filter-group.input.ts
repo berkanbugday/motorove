@@ -1,23 +1,27 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsOptional } from 'class-validator';
+import { GroupMemberRole, GroupPrivacy, IFilterGroup } from '@motorove/shared';
 
 @InputType()
-export class FilterGroupInput {
+export class FilterGroupInput implements IFilterGroup {
   @Field(() => String, { nullable: true })
   @IsOptional()
-  city?: string;
+  cityId?: string;
 
-  @Field(() => String, { nullable: true, defaultValue: 'ALL' })
+  @Field(() => GroupPrivacy, { nullable: true, defaultValue: GroupPrivacy.ALL })
   @IsOptional()
-  @IsEnum(['PUBLIC', 'PRIVATE', 'ALL'])
-  privacy?: 'PUBLIC' | 'PRIVATE' | 'ALL' = 'ALL';
+  @IsEnum(GroupPrivacy)
+  privacy?: GroupPrivacy = GroupPrivacy.ALL;
 
   @Field(() => [String], { defaultValue: [] })
   @IsOptional()
-  tags: string[] = [];
+  tags?: string[] = [];
 
-  @Field(() => String, { nullable: true, defaultValue: 'ALL' })
+  @Field(() => GroupMemberRole, {
+    nullable: true,
+    defaultValue: GroupMemberRole.ALL,
+  })
   @IsOptional()
-  @IsEnum(['ADMIN', 'MEMBER', 'ALL'])
-  role?: 'ADMIN' | 'MEMBER' | 'ALL';
+  @IsEnum(GroupMemberRole)
+  role?: GroupMemberRole = GroupMemberRole.ALL;
 }

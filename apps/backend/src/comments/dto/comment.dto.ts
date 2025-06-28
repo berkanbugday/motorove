@@ -2,11 +2,11 @@ import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { IsUUID, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PostDto } from '../../posts/dto/post.dto';
-import { ICommentWithRelations } from '@motorove/shared';
+import { IComment } from '@motorove/shared';
 import { BaseDto } from '../../core/models/base.dto';
 
 @ObjectType()
-export class CommentDto extends BaseDto implements ICommentWithRelations {
+export class CommentDto extends BaseDto implements IComment {
   @Field()
   @IsString()
   content: string;

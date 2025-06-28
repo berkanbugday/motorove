@@ -1,4 +1,4 @@
-import { IBase, IBaseWithRelations } from "../common";
+import { IBase } from "../common";
 import { IPost } from "../post";
 
 /**
@@ -9,12 +9,6 @@ export interface IComment extends IBase {
   content: string;
   postId: string;
   parentId?: string | null;
-}
-
-/**
- * Comment with relations
- */
-export interface ICommentWithRelations extends IBaseWithRelations, IComment {
   post?: Partial<IPost>;
   parent?: Partial<IComment> | null;
   replies?: Partial<IComment>[];

@@ -1,4 +1,4 @@
-import { GroupPrivacy } from "../enums/group-privacy.enum";
+import { GroupPrivacy } from "../../enums";
 
 /**
  * Group Interface
@@ -10,28 +10,20 @@ export interface IGroup {
   description: string;
   logo?: string | null;
   cover?: string | null;
-  cityId: string;
+  city: string;
   privacy: GroupPrivacy;
+  tags: string[];
   membersCapacity?: number | null;
-  createdById: string;
+  membersCount?: number | null;
+  isMember?: boolean;
+  isAdmin?: boolean;
   createdAt: Date | string;
-  updatedById: string;
-  updatedAt: Date | string;
-  isActive: boolean;
 }
 
 /**
  * Group with related entities
  */
 export interface IGroupWithRelations extends IGroup {
-  city?: {
-    id: string;
-    value: string;
-  };
-  tags?: Array<{
-    id: string;
-    value: string;
-  }>;
   createdBy?: {
     id: string;
     email: string;

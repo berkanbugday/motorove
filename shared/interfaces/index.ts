@@ -4,6 +4,7 @@ export * from "./common";
 // Export all domain-specific interfaces
 export * from "./user";
 export * from "./group";
+export * from "./group-membership";
 export * from "./event";
 export * from "./post";
 export * from "./address";

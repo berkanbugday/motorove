@@ -1,9 +1,9 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { User } from '../../users/models/user.model';
-import { IBaseWithRelations } from '@motorove/shared';
+import { IBase } from '@motorove/shared';
 
 @ObjectType({ isAbstract: true })
-export abstract class BaseModel implements IBaseWithRelations {
+export abstract class BaseModel implements IBase {
   @Field(() => ID)
   id: string;
 

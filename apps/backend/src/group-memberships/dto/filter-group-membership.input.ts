@@ -1,9 +1,13 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
-import { GroupMemberRole, InvitationStatus } from '@motorove/shared';
+import {
+  GroupMemberRole,
+  IFilterGroupMembership,
+  InvitationStatus,
+} from '@motorove/shared';
 
 @InputType()
-export class FilterGroupMembershipInput {
+export class FilterGroupMembershipInput implements IFilterGroupMembership {
   @Field(() => String, { nullable: true })
   @IsUUID()
   @IsOptional()

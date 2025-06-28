@@ -1,4 +1,6 @@
 import { AddressType, Language } from "../../enums";
+import { IEvent } from "../event/event.interface";
+import { IPost } from "../post/post.interface";
 
 /**
  * Address Interface
@@ -13,19 +15,4 @@ export interface IAddress {
   longitude: number;
   postId?: string | null;
   eventId?: string | null;
-}
-
-/**
- * Address with relations
- */
-export interface IAddressWithRelations extends IAddress {
-  post?: {
-    id: string;
-    content: string;
-  } | null;
-
-  event?: {
-    id: string;
-    title: string;
-  } | null;
 }

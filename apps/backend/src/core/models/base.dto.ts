@@ -1,11 +1,11 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { IBaseWithRelations } from '@motorove/shared';
+import { IBase } from '@motorove/shared';
 import { UserDto } from '../../users/dto/user.dto';
 import { IsNotEmpty, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 @ObjectType({ isAbstract: true })
-export abstract class BaseDto implements IBaseWithRelations {
+export abstract class BaseDto implements IBase {
   @Field(() => ID)
   @IsUUID()
   @IsNotEmpty()

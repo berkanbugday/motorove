@@ -1,8 +1,9 @@
 import { InputType, Field, ID } from '@nestjs/graphql';
 import { IsUUID, IsNotEmpty } from 'class-validator';
+import { IBaseGroupMembership } from '@motorove/shared';
 
 @InputType({ isAbstract: true })
-export class BaseGroupMembershipInput {
+export class BaseGroupMembershipInput implements IBaseGroupMembership {
   @Field(() => ID)
   @IsUUID()
   @IsNotEmpty()

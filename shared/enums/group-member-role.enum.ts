@@ -5,4 +5,5 @@
 export enum GroupMemberRole {
   ADMIN = "ADMIN",
   MEMBER = "MEMBER",
+  ALL = "ALL",
 }
