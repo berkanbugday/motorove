@@ -18,7 +18,7 @@ export class CommentDto extends BaseDto implements IComment {
   @Field(() => PostDto, { nullable: true })
   @ValidateNested()
   @Type(() => PostDto)
-  post?: Partial<PostDto>;
+  post?: PostDto;
 
   @Field(() => ID, { nullable: true })
   @IsUUID()
@@ -27,10 +27,10 @@ export class CommentDto extends BaseDto implements IComment {
   @Field(() => CommentDto, { nullable: true })
   @ValidateNested()
   @Type(() => CommentDto)
-  parent?: Partial<CommentDto>;
+  parent?: CommentDto;
 
   @Field(() => [CommentDto], { nullable: true })
   @ValidateNested({ each: true })
   @Type(() => CommentDto)
-  replies?: Partial<CommentDto>[];
+  replies?: CommentDto[];
 }

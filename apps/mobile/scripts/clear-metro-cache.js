@@ -13,7 +13,6 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const rimraf = require('rimraf');
 
 // Define known Metro cache locations
 const cacheDirs = [
@@ -32,7 +31,7 @@ const cacheDirs = [
 function clearDirectory(directory) {
   if (fs.existsSync(directory)) {
     console.log(`Clearing Metro cache at: ${directory}`);
-    rimraf.sync(directory);
+    fs.rmSync(directory, {recursive: true});
     console.log(`✅ Cache cleared: ${directory}`);
     return true;
   }

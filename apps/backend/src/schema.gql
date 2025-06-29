@@ -423,8 +423,8 @@ type Mutation {
   removeMember(input: RemoveGroupMemberInput!): GroupMembershipDto!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
-  signIn(signInInput: SignInInput!): AuthResponse!
-  signUp(signUpInput: SignUpInput!): AuthResponse!
+  signIn(input: SignInInput!): AuthResponse!
+  signUp(input: SignUpInput!): AuthResponse!
   unfollow(userId: ID!): UserFollowingDto!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
@@ -502,6 +502,7 @@ type PostDto {
   content: String!
   createdAt: DateTime!
   createdBy: UserDto!
+  group: GroupDto!
   id: ID!
   images: [String!]
   isLiked: Boolean!
@@ -597,8 +598,8 @@ input SignInInput {
 
 input SignUpInput {
   email: String!
-  firstName: String
-  lastName: String
+  firstName: String!
+  lastName: String!
   password: String!
 }
 
@@ -624,11 +625,11 @@ type User {
   createdAt: DateTime!
   createdGroups: [Group!]
   email: String!
-  firstName: String
+  firstName: String!
   groupMemberships: [GroupMembership!]
   id: ID!
   isActive: Boolean!
-  lastName: String
+  lastName: String!
   supabaseId: String!
   updatedAt: DateTime!
 }
