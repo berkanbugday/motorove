@@ -14,6 +14,7 @@ import { UserDto } from '../../users/dto/user.dto';
 import { AddressDto } from 'src/addresses/dto/address.dto';
 import { CommentDto } from 'src/comments/dto/comment.dto';
 import { IPost } from '@motorove/shared';
+import { GroupDto } from 'src/groups/dto/group.dto';
 
 @ObjectType()
 export class PostDto implements IPost {
@@ -49,7 +50,7 @@ export class PostDto implements IPost {
   @Field(() => UserDto)
   @ValidateNested()
   @Type(() => UserDto)
-  createdBy: Partial<UserDto>;
+  createdBy: UserDto;
 
   @Field()
   @IsDate()
@@ -64,4 +65,9 @@ export class PostDto implements IPost {
   @ValidateNested()
   @Type(() => CommentDto)
   comments: CommentDto[];
+
+  @Field(() => GroupDto)
+  @ValidateNested()
+  @Type(() => GroupDto)
+  group: GroupDto;
 }

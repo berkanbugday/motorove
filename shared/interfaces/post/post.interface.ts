@@ -1,6 +1,7 @@
 import { IUser } from "../user";
 import { IAddress } from "../address";
 import { IComment } from "../comment";
+import { IGroup } from "../group";
 
 export interface IPost {
   id: string;
@@ -10,8 +11,9 @@ export interface IPost {
   commentsCount: number;
   isLiked: boolean;
   isSaved: boolean;
-  createdBy: Partial<IUser>;
+  createdBy: IUser;
   createdAt: Date;
-  addresses: Partial<IAddress>[];
-  comments: Partial<IComment>[];
+  addresses: IAddress[];
+  comments: IComment[];
+  group: IGroup;
 }

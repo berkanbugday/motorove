@@ -5,12 +5,12 @@
 export interface IUser {
   id: string;
   email: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  avatar?: string | null;
+  firstName?: string;
+  lastName?: string;
+  avatar?: string;
   supabaseId: string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
+  createdAt: Date;
+  updatedAt: Date;
   isFollowing?: boolean;
   isActive: boolean;
 }

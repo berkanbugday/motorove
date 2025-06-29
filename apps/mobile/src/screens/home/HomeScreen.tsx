@@ -41,7 +41,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {Post} from '../../types/models/post.model';
+import {IPost, Language} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -448,7 +448,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
   // Transform Post model to FeedCard props
   const transformPostToFeedCard = useCallback(
-    (post: Post) => {
+    (post: IPost) => {
       // Create labels from post data
       const labels = [];
 
@@ -468,7 +468,7 @@ export const HomeScreen = ({navigation}: Props) => {
         labels.push({
           icon: 'map-pin' as IconName,
           text:
-            post.addresses?.find(address => address.language === 'en')
+            post.addresses?.find(address => address.language === Language.EN)
               ?.address || 'Location',
         });
       }
@@ -482,7 +482,7 @@ export const HomeScreen = ({navigation}: Props) => {
       return {
         id: post.id,
         userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
-        avatarSource: formatAvatarSource(post.group?.image), // Use group image or default
+        avatarSource: formatAvatarSource(post.createdBy.avatar),
         timeAgo: relativeTime(post.createdAt),
         content: post.content,
         images,
@@ -499,7 +499,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
   // Render feed post with comment navigation and dropdown menu
   const renderFeedPost = useCallback(
-    ({item}: {item: Post}) => {
+    ({item}: {item: IPost}) => {
       // Determine if this is the user's own post
       const isOwnPost = item.createdBy.id === user?.id;
       // Transform Post model to FeedCard props

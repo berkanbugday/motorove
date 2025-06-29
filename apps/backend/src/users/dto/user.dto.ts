@@ -23,17 +23,17 @@ export class UserDto implements IUser {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  declare firstName: string | null;
+  declare firstName?: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  declare lastName: string | null;
+  declare lastName?: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  declare avatar: string | null;
+  declare avatar?: string;
 
   @Field(() => String)
   @IsString()

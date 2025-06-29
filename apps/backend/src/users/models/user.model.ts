@@ -11,14 +11,14 @@ export class User implements IUser {
   @Field(() => String)
   email: string;
 
-  @Field(() => String, { nullable: true })
-  firstName: string | null;
+  @Field(() => String)
+  firstName: string;
+
+  @Field(() => String)
+  lastName: string;
 
   @Field(() => String, { nullable: true })
-  lastName: string | null;
-
-  @Field(() => String, { nullable: true })
-  avatar: string | null;
+  avatar?: string;
 
   @Field(() => String)
   supabaseId: string;
