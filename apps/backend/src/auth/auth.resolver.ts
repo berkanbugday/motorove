@@ -10,18 +10,14 @@ export class AuthResolver {
   constructor(private authService: AuthService) {}
 
   @Mutation(() => AuthResponse)
-  async signUp(
-    @Args('signUpInput') signUpInput: SignUpInput,
-  ): Promise<AuthResponse> {
-    const { email, password, firstName, lastName } = signUpInput;
+  async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
+    const { email, password, firstName, lastName } = input;
     return this.authService.signUp(email, password, firstName, lastName);
   }
 
   @Mutation(() => AuthResponse)
-  async signIn(
-    @Args('signInInput') signInInput: SignInInput,
-  ): Promise<AuthResponse> {
-    const { email, password } = signInInput;
+  async signIn(@Args('input') input: SignInInput): Promise<AuthResponse> {
+    const { email, password } = input;
     return this.authService.signIn(email, password);
   }
 
