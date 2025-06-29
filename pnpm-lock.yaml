@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      patch-package:
+        specifier: 8.0.0
+        version: 8.0.0
+      postinstall-postinstall:
+        specifier: 2.1.0
+        version: 2.1.0
     devDependencies:
       turbo:
         specifier: 1.12.4
@@ -331,12 +338,6 @@ importers:
       metro-cache:
         specifier: 0.82.1
         version: 0.82.1
-      patch-package:
-        specifier: 8.0.0
-        version: 8.0.0
-      postinstall-postinstall:
-        specifier: 2.1.0
-        version: 2.1.0
       prettier:
         specifier: 2.8.8
         version: 2.8.8
@@ -7295,8 +7296,8 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
-  token-types@6.0.2:
-    resolution: {integrity: sha512-p04i+HzAr5Ro1ZBPwE03gf948+F2bwxXNa4xqNy5Z9iHlcWravI1u8lmEW2q0Dg0NKErOHM1OcybFV5UtJ2I4Q==}
+  token-types@6.0.3:
+    resolution: {integrity: sha512-IKJ6EzuPPWtKtEIEPpIdXv9j5j2LGJEYk0CKY2efgKoYKLBiZdh6iQkLVBow/CB3phyWAWCyk+bZeaimJn6uRQ==}
     engines: {node: '>=14.16'}
 
   tr46@0.0.3:
@@ -10767,9 +10768,7 @@ snapshots:
       metro-runtime: 0.82.4
     transitivePeerDependencies:
       - '@babel/core'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.73.2': {}
 
@@ -13379,7 +13378,7 @@ snapshots:
     dependencies:
       get-stream: 9.0.1
       strtok3: 9.1.1
-      token-types: 6.0.2
+      token-types: 6.0.3
       uint8array-extras: 1.4.0
 
   filelist@1.0.4:
@@ -16437,7 +16436,7 @@ snapshots:
 
   toidentifier@1.0.1: {}
 
-  token-types@6.0.2:
+  token-types@6.0.3:
     dependencies:
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1

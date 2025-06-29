@@ -25,7 +25,7 @@
     "check:deps": "pnpm dlx depcheck",
     "check:outdated": "pnpm -r exec pnpm outdated",
     "update:deps": "pnpm -r update",
-    "preinstall": "npx only-allow pnpm"
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "turbo": "1.12.4",
@@ -35,5 +35,9 @@
     "node": ">=18.0.0",
     "pnpm": ">=9.6.0"
   },
-  "packageManager": "pnpm@9.6.0"
-} 
+  "packageManager": "pnpm@9.6.0",
+  "dependencies": {
+    "patch-package": "8.0.0",
+    "postinstall-postinstall": "2.1.0"
+  }
+}
