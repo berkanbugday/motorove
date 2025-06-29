@@ -4,6 +4,7 @@ const {
 } = require('react-native-reanimated/metro-config');
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 const {FileStore} = require('metro-cache');
 
 /**
@@ -45,10 +46,52 @@ if (shouldResetCache) {
   console.log(`📦 Using Metro cache at: ${cacheDir}`);
 }
 
+/**
+ * Handle special pnpm node_modules structure
+ * This helps Metro understand pnpm's symlinked structure
+ */
+function getPnpmDependencyPath(packageName) {
+  try {
+    const nodeModules = path.resolve(__dirname, '../../node_modules');
+    const pnpmDir = path.resolve(nodeModules, '.pnpm');
+
+    // Direct resolution attempt
+    const directPath = path.join(nodeModules, packageName);
+    if (fs.existsSync(directPath)) {
+      return directPath;
+    }
+
+    // If not found directly, look in .pnpm directory
+    if (fs.existsSync(pnpmDir)) {
+      const dirs = fs.readdirSync(pnpmDir);
+      const packageDir = dirs.find(dir => dir.startsWith(`${packageName}@`));
+
+      if (packageDir) {
+        return path.join(pnpmDir, packageDir, 'node_modules', packageName);
+      }
+    }
+
+    return null;
+  } catch (err) {
+    console.error(`Error resolving ${packageName}:`, err.message);
+    return null;
+  }
+}
+
+// Build the extraNodeModules with special handling for critical packages
+const criticalPackages = ['metro', 'metro-runtime', 'react', 'react-native'];
+criticalPackages.forEach(pkg => {
+  const resolvedPath = getPnpmDependencyPath(pkg);
+  if (resolvedPath) {
+    extraNodeModules[pkg] = resolvedPath;
+  }
+});
+
 const config = {
   watchFolders: [
     // Add the root of the project to allow importing from monorepo packages
     path.resolve(__dirname, '../..'),
+    path.resolve(__dirname, '../../shared'),
   ],
   resolver: {
     // Configure module resolution for monorepo packages
@@ -83,6 +126,15 @@ const config = {
   // Increase cache size limit (default is 50MB)
   maxWorkers: Math.max(os.cpus().length - 1, 1),
   resetCache: shouldResetCache,
+  symbolicator: {
+    // Improve error reporting
+    customizeFrame: frame => {
+      return {
+        ...frame,
+        collapse: false,
+      };
+    },
+  },
 };
 
 const mergedConfig = mergeConfig(defaultConfig, config);
