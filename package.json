@@ -18,7 +18,14 @@
     "build:backend": "turbo build --filter=@motorove/backend",
     "build:mobile": "turbo build --filter=@motorove/mobile",
     "dev:backend": "turbo dev --filter=@motorove/backend",
-    "dev:mobile": "turbo dev --filter=@motorove/mobile"
+    "dev:mobile": "turbo dev --filter=@motorove/mobile",
+    "format": "turbo format",
+    "clean:deps": "rm -rf node_modules && pnpm -r exec rm -rf node_modules",
+    "reset": "pnpm clean:deps && pnpm install",
+    "check:deps": "pnpm dlx depcheck",
+    "check:outdated": "pnpm -r exec pnpm outdated",
+    "update:deps": "pnpm -r update",
+    "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
     "turbo": "1.12.4",

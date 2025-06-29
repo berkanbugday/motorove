@@ -4,18 +4,35 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "build/**"]
     },
     "test": {
-      "dependsOn": ["build"],
-      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"],
+      "outputs": ["coverage/**"]
     },
-    "lint": {},
+    "lint": {
+      "outputs": []
+    },
+    "format": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "clean": {
+      "cache": false
+    },
+    "postinstall": {
+      "cache": false
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "start:prod": {
+      "dependsOn": ["^build"],
       "cache": false
     }
   }
