@@ -8,7 +8,7 @@ The application uses the following environment files:
 
 1. `.env.dev` - Development environment configuration
 2. `.env.staging` - Staging environment configuration
-3. `.env.prod` - Production environment configuration
+3. `.env` - Production environment configuration
 
 These files are not committed to the repository for security reasons. You need to create them based on the examples provided.
 
@@ -100,7 +100,7 @@ FIREBASE_APP_ID_ANDROID_STAGING=your_staging_android_app_id
 FIREBASE_DATABASE_URL_STAGING=
 ```
 
-### Production (.env.prod)
+### Production (.env)
 
 ```
 # Production Environment Configuration

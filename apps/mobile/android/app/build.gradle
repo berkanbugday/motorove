@@ -11,7 +11,7 @@ apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.grad
  project.ext.envConfigFiles = [
         dev:".env.dev",
         staging:".env.staging",
-        prod:".env.prod"
+        prod:".env"
 ]
 
 react {

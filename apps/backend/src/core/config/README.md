@@ -14,8 +14,7 @@ This module provides a comprehensive, type-safe configuration system for the Nes
 
 The application uses the following environment files in order of precedence:
 
-1. `.env.{NODE_ENV}` - Environment-specific configuration (e.g., `.env.development`, `.env.staging`, `.env.production`)
-2. `.env` - Base configuration shared across all environments
+1. `.env.{NODE_ENV}` - Environment-specific configuration (e.g., `.env.dev`, `.env.staging`, `.env`)
 
 ## Required Environment Variables
 
@@ -98,7 +97,7 @@ FEATURE_X_ENABLED=true
 FEATURE_Y_ENABLED=true
 ```
 
-### `.env.production`
+### `.env`
 
 ```
 # PRODUCTION ENVIRONMENT

@@ -257,7 +257,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Get the path to the env file\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  ENVFILE=.env.dev\nelif [ \"${CONFIGURATION}\" = \"Staging\" ]; then\n  ENVFILE=.env.staging\nelif [ \"${CONFIGURATION}\" = \"Release\" ]; then\n  ENVFILE=.env.prod\nfi\n\n# Extract app name,version and build number from .env file\nexport APP_NAME=$(grep \"APP_NAME\" ../$ENVFILE | cut -d '=' -f2)\nexport VERSION_NUMBER=$(grep \"APP_VERSION\" ../$ENVFILE | cut -d'=' -f2)\nexport BUILD_NUMBER=$(grep \"APP_BUILD_NUMBER\" ../$ENVFILE | cut -d'=' -f2)\n\n# Set Info.plist values\n/usr/libexec/PlistBuddy -c \"Set :CFBundleDisplayName $APP_NAME\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $VERSION_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\necho \"Updated version to $VERSION_NUMBER ($BUILD_NUMBER)\"\n";
+			shellScript = "# Get the path to the env file\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  ENVFILE=.env.dev\nelif [ \"${CONFIGURATION}\" = \"Staging\" ]; then\n  ENVFILE=.env.staging\nelif [ \"${CONFIGURATION}\" = \"Release\" ]; then\n  ENVFILE=.env\nfi\n\n# Extract app name,version and build number from .env file\nexport APP_NAME=$(grep \"APP_NAME\" ../$ENVFILE | cut -d '=' -f2)\nexport VERSION_NUMBER=$(grep \"APP_VERSION\" ../$ENVFILE | cut -d'=' -f2)\nexport BUILD_NUMBER=$(grep \"APP_BUILD_NUMBER\" ../$ENVFILE | cut -d'=' -f2)\n\n# Set Info.plist values\n/usr/libexec/PlistBuddy -c \"Set :CFBundleDisplayName $APP_NAME\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $VERSION_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\necho \"Updated version to $VERSION_NUMBER ($BUILD_NUMBER)\"\n";
 		};
 		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -468,7 +468,7 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENVFILE = .env.prod;
+				ENVFILE = .env;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
