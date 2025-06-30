@@ -1,9 +1,9 @@
 import React from 'react';
 
 // SVG imports
-import Eye from '@assets/icons/eye.svg';
-import EyeSlash from '@assets/icons/eye-slash.svg';
-import Envelope from '@assets/icons/envelope.svg';
+import EyeFilled from '@assets/icons/eye-filled.svg';
+import EyeSlashFilled from '@assets/icons/eye-slash-filled.svg';
+import EnvelopeFilled from '@assets/icons/envelope-filled.svg';
 // Brand Icons
 import Google from '@assets/icons/brands/google.svg';
 import Apple from '@assets/icons/brands/apple.svg';
@@ -94,9 +94,9 @@ import {colors} from '@theme/colors';
 
 // Type for icons
 export type IconName =
-  | 'eye'
-  | 'eye-slash'
-  | 'envelope'
+  | 'eye-filled'
+  | 'eye-slash-filled'
+  | 'envelope-filled'
   | 'google'
   | 'apple'
   | 'facebook'
@@ -204,12 +204,12 @@ export function Icon({
 
   // Render the appropriate SVG component based on name
   switch (name) {
-    case 'eye':
-      return <Eye {...commonProps} />;
-    case 'eye-slash':
-      return <EyeSlash {...commonProps} />;
-    case 'envelope':
-      return <Envelope {...commonProps} />;
+    case 'eye-filled':
+      return <EyeFilled {...commonProps} />;
+    case 'eye-slash-filled':
+      return <EyeSlashFilled {...commonProps} />;
+    case 'envelope-filled':
+      return <EnvelopeFilled {...commonProps} />;
     case 'google':
       return <Google {...commonProps} />;
     case 'apple':

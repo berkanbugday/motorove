@@ -1,5 +1,5 @@
 import {useLazyQuery} from '@apollo/client';
-import {User} from '../types';
+import {IUser} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {SEARCH_USERS} from './graphql/user.graphql';
 import {useCallback, useEffect, useState} from 'react';
@@ -12,7 +12,7 @@ import {GET_MY_FOLLOWING} from './graphql/follow.graphql';
  * @returns Users data, loading state, error state and functions for search operations
  */
 export const useSearchUsers = (initialQuery = '') => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [skip, setSkip] = useState<number>(0);
@@ -114,86 +114,6 @@ export const useSearchUsers = (initialQuery = '') => {
 };
 
 /**
- * Hook for getting users that the current user is following with pagination
- * @returns Following users data, loading state, error state and functions for pagination
- */
-export const useMyFollowing = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [skip, setSkip] = useState<number>(0);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-
-  const [getFollowingQuery] = useLazyQuery(GET_MY_FOLLOWING, {
-    fetchPolicy: 'network-only',
-    onError: errorObj => {
-      loggingService.error('Error fetching following:', errorObj);
-      setError(errorObj);
-      setLoading(false);
-    },
-  });
-
-  const fetchFollowing = useCallback(
-    async (skipValue = 0, append = false) => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const {data} = await getFollowingQuery({
-          variables: {
-            limit: 20,
-            skip: skipValue,
-          },
-          fetchPolicy: 'network-only',
-        });
-
-        if (data?.myFollowing) {
-          if (append) {
-            setUsers(prevUsers => [...prevUsers, ...data.myFollowing]);
-          } else {
-            setUsers(data.myFollowing);
-          }
-          setHasMore(data.myFollowing.length === 20);
-          setSkip(skipValue + data.myFollowing.length);
-        }
-      } catch (e) {
-        loggingService.error('Error fetching following users:', e);
-        setError(e as Error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [getFollowingQuery],
-  );
-
-  // Effect to fetch data on mount
-  useEffect(() => {
-    fetchFollowing(0, false);
-  }, [fetchFollowing]);
-
-  const refresh = useCallback(() => {
-    setSkip(0); // Reset pagination
-    fetchFollowing(0, false);
-  }, [fetchFollowing]);
-
-  const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      // Load additional users with real-time data
-      fetchFollowing(skip, true);
-    }
-  }, [loading, hasMore, fetchFollowing, skip]);
-
-  return {
-    users,
-    loading,
-    error,
-    hasMore,
-    refresh,
-    loadMore,
-  };
-};
-
-/**
  * User service for handling user-related operations
  */
 export const userService = {
@@ -204,7 +124,7 @@ export const userService = {
    * @param skip Number of results to skip (for pagination)
    * @returns Array of matching users
    */
-  async searchUsers(query: string, limit = 20, skip = 0): Promise<User[]> {
+  async searchUsers(query: string, limit = 20, skip = 0): Promise<IUser[]> {
     try {
       const {data} = await apolloClient.query({
         query: SEARCH_USERS,
@@ -230,7 +150,7 @@ export const userService = {
    * @param skip Number of results to skip (for pagination)
    * @returns Array of users the current user follows
    */
-  async getMyFollowing(limit = 20, skip = 0): Promise<User[]> {
+  async getMyFollowing(limit = 20, skip = 0): Promise<IUser[]> {
     try {
       const {data} = await apolloClient.query({
         query: GET_MY_FOLLOWING,
@@ -253,7 +173,6 @@ export const userService = {
  */
 export const UserService = {
   useSearchUsers,
-  useMyFollowing,
 };
 
 export default UserService;

@@ -31,14 +31,15 @@ export class GroupMembershipsService {
     try {
       const { groupId, userId, role, status, isActive = true } = filters || {};
 
+      // Build where clause with proper types
+      const whereClause: any = { isActive };
+      if (groupId) whereClause.groupId = groupId;
+      if (userId) whereClause.userId = userId;
+      if (role) whereClause.role = role;
+      if (status) whereClause.status = status;
+
       const memberships = (await this.prisma.groupMembership.findMany({
-        where: {
-          ...(groupId && { groupId }),
-          ...(userId && { userId }),
-          ...(role && { role }),
-          ...(status && { status }),
-          isActive,
-        },
+        where: whereClause,
         include: {
           group: true,
           user: true,
@@ -204,7 +205,7 @@ export class GroupMembershipsService {
           },
         },
         data: {
-          role: newRole,
+          role: newRole as any,
           updatedBy: {
             connect: { id: adminId },
           },

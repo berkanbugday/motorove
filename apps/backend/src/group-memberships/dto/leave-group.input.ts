@@ -1,10 +1,10 @@
-import { InputType, Field } from '@nestjs/graphql';
-import { IsUUID, IsNotEmpty } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 @InputType()
 export class LeaveGroupInput {
-  @Field()
-  @IsUUID()
+  @Field(() => String)
   @IsNotEmpty()
+  @IsUUID()
   groupId: string;
 }

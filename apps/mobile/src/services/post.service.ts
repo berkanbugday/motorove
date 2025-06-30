@@ -10,11 +10,7 @@ import {
   UNSAVE_POST,
   UPDATE_POST,
 } from './graphql/post.graphql';
-import {
-  Post,
-  CreatePostInput,
-  UpdatePostInput,
-} from '../types/models/post.model';
+import {IPost, ICreatePost, IUpdatePost} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
@@ -43,7 +39,7 @@ export const useCreatePost = (onSuccess?: () => void) => {
     },
   });
 
-  const createPost = async (input: CreatePostInput) => {
+  const createPost = async (input: ICreatePost) => {
     try {
       const result = await createPostMutation({
         variables: {input: {...input, images: input.images ?? []}},
@@ -87,7 +83,7 @@ export const useUpdatePost = (onSuccess?: () => void) => {
     },
   });
 
-  const updatePost = async (input: UpdatePostInput) => {
+  const updatePost = async (input: IUpdatePost) => {
     try {
       const result = await updatePostMutation({
         variables: {input: {...input, images: input.images ?? []}},
@@ -162,7 +158,7 @@ export const useGetPost = (id: string) => {
   });
 
   return {
-    post: data?.post as Post | undefined,
+    post: data?.post as IPost | undefined,
     loading,
     error,
     refetch,
@@ -243,7 +239,7 @@ export const useGetPosts = (
   ]);
 
   return {
-    posts: (data?.posts as Post[]) || [],
+    posts: (data?.posts as IPost[]) || [],
     loading,
     error,
     refetch,

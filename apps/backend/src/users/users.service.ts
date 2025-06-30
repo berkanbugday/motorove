@@ -62,9 +62,9 @@ export class UsersService {
 
     return users.map((user) => ({
       ...user,
-      firstName: user.firstName || null,
-      lastName: user.lastName || null,
-      avatar: user.avatar || null,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar || undefined,
       isFollowing: followingIdsSet.has(user.id),
     }));
   }
@@ -80,9 +80,9 @@ export class UsersService {
 
     return {
       ...user,
-      firstName: user.firstName || null,
-      lastName: user.lastName || null,
-      avatar: user.avatar || null,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar || undefined,
     };
   }
 
@@ -121,9 +121,9 @@ export class UsersService {
 
     return {
       ...user,
-      firstName: user.firstName || null,
-      lastName: user.lastName || null,
-      avatar: user.avatar || null,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar || undefined,
       isFollowing: !!isFollowing,
       followerCount,
       followingCount,

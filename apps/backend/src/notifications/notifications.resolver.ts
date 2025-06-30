@@ -4,11 +4,11 @@ import { Notification } from './models/notification.model';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { DeviceTokenInput } from './dto/device-token.input';
 import { CreateNotificationsInput } from './dto/create-notifications.input';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
 import { NotificationDto } from './dto/notification.dto';
+import { CreateDeviceTokenInput } from './dto/create-device-token.input';
 
 @Resolver(() => NotificationDto)
 export class NotificationsResolver {
@@ -83,7 +83,7 @@ export class NotificationsResolver {
   @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
   async saveDeviceToken(
-    @Args('input') input: DeviceTokenInput,
+    @Args('input') input: CreateDeviceTokenInput,
   ): Promise<string> {
     return await this.notificationsService.saveDeviceToken(
       input.userId,

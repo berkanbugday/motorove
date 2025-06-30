@@ -7,17 +7,15 @@ import {
   ScrollView,
   SafeAreaView,
   Image,
-  TouchableOpacity,
   useWindowDimensions,
-  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Icon, AnimatedInput, Button, Body, Caption} from '@components';
+import {Icon, AnimatedInput, Button, Body} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signinSchema, SigninFormValues} from '@utils/validation';
-import {colors, spacing, radius} from '@theme';
+import {colors, spacing, radius, commonStyles} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAuth} from '@navigation/utils/navigationUtils';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
@@ -44,11 +42,11 @@ export const SigninScreen = () => {
     },
   });
 
-  function togglePasswordVisibility() {
+  const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  }
+  };
 
-  async function onSubmit(data: SigninFormValues) {
+  const onSubmit = async (data: SigninFormValues) => {
     try {
       await signin(data.email.trim(), data.password.trim());
       // If successful, the navigation in RootNavigator will change to MainNavigator
@@ -67,25 +65,25 @@ export const SigninScreen = () => {
         });
       }
     }
-  }
+  };
 
-  function handleSignUp() {
+  const handleSignUp = () => {
     // Navigate to sign up screen
     navigation.navigate('Signup');
-  }
+  };
 
-  function handleForgotPassword() {
+  const handleForgotPassword = () => {
     navigation.navigate('ForgotPassword');
-  }
+  };
 
-  function handleSocialSignin(provider: 'google' | 'apple' | 'facebook') {
-    // Notify user that social signin is not implemented yet
-    Alert.alert(
-      'Not Implemented',
-      `Social signin with ${provider} is not implemented yet.`,
-      [{text: 'OK'}],
-    );
-  }
+  // function handleSocialSignin(provider: 'google' | 'apple' | 'facebook') {
+  //   // Notify user that social signin is not implemented yet
+  //   Alert.alert(
+  //     'Not Implemented',
+  //     `Social signin with ${provider} is not implemented yet.`,
+  //     [{text: 'OK'}],
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
@@ -113,7 +111,7 @@ export const SigninScreen = () => {
                   name="email"
                   label="Email Address"
                   keyboardType="email-address"
-                  icon={<Icon name="envelope" size={20} />}
+                  icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
                   testID="signin-email"
                 />
@@ -123,11 +121,11 @@ export const SigninScreen = () => {
                   name="password"
                   label="Password"
                   secureTextEntry={!showPassword}
-                  icon={<Icon name="eye-slash" size={20} />}
                   error={errors.password}
                   onToggleSecureEntry={togglePasswordVisibility}
                   showPassword={showPassword}
                   testID="signin-password"
+                  showClearButton={false}
                 />
 
                 <Button
@@ -148,7 +146,7 @@ export const SigninScreen = () => {
                   testID="signin-button"
                 />
 
-                <View style={styles.dividerContainer}>
+                {/* <View style={styles.dividerContainer}>
                   <View style={styles.divider} />
                   <Caption style={styles.dividerText}>or continue with</Caption>
                   <View style={styles.divider} />
@@ -180,7 +178,7 @@ export const SigninScreen = () => {
                       color={colors.neutral.black}
                     />
                   </TouchableOpacity>
-                </View>
+                </View> */}
 
                 <View style={styles.signupContainer}>
                   <Body color={colors.neutral.grey}>
@@ -205,12 +203,11 @@ export const SigninScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   content: {
     flex: 1,
-    padding: spacing.screen.horizontal,
+    paddingHorizontal: spacing.md,
   },
   logoContainer: {
     alignItems: 'center',
@@ -264,8 +261,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   signupLink: {
-    color: colors.primary.main,
+    color: colors.neutral.black,
     marginLeft: -20,
     fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
 });

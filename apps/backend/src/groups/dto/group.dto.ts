@@ -1,22 +1,17 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { IGroup } from '@motorove/shared';
 import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import {
   IsArray,
   IsBoolean,
-  IsDate,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
-  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { CityDto } from '../../cities/dto/city.dto';
-import { UserDto } from '../../users/dto/user.dto';
-import { GroupTagDto } from '../../group-tags/dto/group-tag.dto';
 
 @ObjectType()
-export class GroupDto {
+export class GroupDto implements IGroup {
   @Field(() => ID)
   @IsUUID()
   id: string;
@@ -39,24 +34,25 @@ export class GroupDto {
   @IsString()
   cover: string | null;
 
-  @Field(() => CityDto)
-  @ValidateNested()
-  @Type(() => CityDto)
-  city: CityDto;
+  @Field(() => String)
+  city: string;
 
   @Field(() => GroupPrivacy)
   privacy: GroupPrivacy;
 
-  @Field(() => [GroupTagDto])
+  @Field(() => [String])
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => GroupTagDto)
-  tags: GroupTagDto[];
+  tags: string[];
 
   @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsNumber()
   membersCapacity: number | null;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  membersCount: number | null;
 
   @Field(() => Boolean, { nullable: true })
   @IsOptional()
@@ -68,33 +64,6 @@ export class GroupDto {
   @IsBoolean()
   isAdmin?: boolean;
 
-  @Field(() => UserDto)
-  @ValidateNested()
-  @Type(() => UserDto)
-  createdBy: UserDto;
-
-  @Field()
-  @IsUUID()
-  createdById: string;
-
-  @Field()
-  @IsDate()
+  @Field(() => Date)
   createdAt: Date;
-
-  @Field(() => UserDto)
-  @ValidateNested()
-  @Type(() => UserDto)
-  updatedBy: UserDto;
-
-  @Field()
-  @IsUUID()
-  updatedById: string;
-
-  @Field()
-  @IsDate()
-  updatedAt: Date;
-
-  @Field()
-  @IsBoolean()
-  isActive: boolean;
 }

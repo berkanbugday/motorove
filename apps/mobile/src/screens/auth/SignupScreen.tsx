@@ -1,14 +1,6 @@
 import React, {useState, useRef} from 'react';
-import {
-  StyleSheet,
-  View,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  SafeAreaView,
-  Image,
-  useWindowDimensions,
-} from 'react-native';
+import {StyleSheet, View, SafeAreaView, Image, ScrollView} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuth} from '@navigation/utils/navigationUtils';
@@ -27,7 +19,7 @@ import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signupSchema, SignupFormValues} from '@utils/validation';
-import {colors, spacing, fontSizes, radius} from '@theme';
+import {colors, spacing, fontSizes, radius, commonStyles} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {termsOfService, privacyPolicy} from '@constants/legalContent';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
@@ -41,7 +33,6 @@ export const SignupScreen = () => {
   const termsBottomSheetRef = useRef<BottomSheetRef>(null);
   const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
   const {signup} = useAuth();
-  const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
   const {handleGraphQLError} = useGraphQLErrorHandler();
@@ -53,42 +44,39 @@ export const SignupScreen = () => {
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      fullName: 'Berkan Buğday',
-      email: 'berkan.bugday92@gmail.com',
-      password: '12345678',
-      confirmPassword: '12345678',
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
       agreeToTerms: true,
     },
   });
 
-  function handleGoBack(): void {
+  const handleGoBack = () => {
     navigation.goBack();
-  }
+  };
 
-  function togglePasswordVisibility() {
+  const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  }
+  };
 
-  function toggleConfirmPasswordVisibility() {
+  const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
-  }
+  };
 
-  async function onSubmit(data: SignupFormValues) {
+  const onSubmit = async (data: SignupFormValues) => {
     try {
-      // Split fullName into firstName and lastName for our API
-      const nameParts = data.fullName.split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-
-      await signup(data.email, data.password, firstName, lastName);
+      await signup(data.email, data.password, data.firstName, data.lastName);
 
       setUserEmail(data.email);
       setSignupSuccess(true);
-      // // Navigate to account setup screen
-      // navigation.navigate('AccountSetup', {
-      //   email: data.email,
-      //   fullName: data.fullName,
-      // });
+      // Navigate to account setup screen
+      navigation.navigate('AccountSetup', {
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      });
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
       // Handle specific error types
@@ -104,22 +92,22 @@ export const SignupScreen = () => {
         });
       }
     }
-  }
+  };
 
-  function handleSignin() {
+  const handleSignin = () => {
     // Navigate to signin screen
     navigation.navigate('Signin');
-  }
+  };
 
-  function handleResendVerificationEmail() {
+  const handleResendVerificationEmail = () => {
     // TODO: Implement actual email verification
-  }
+  };
 
-  function handleBackToSignup() {
+  const handleBackToSignup = () => {
     // Navigate to signup screen
     setSignupSuccess(false);
     navigation.navigate('Signup');
-  }
+  };
 
   // Social signup is commented out in UI, so this function is not currently used
   // function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
@@ -131,13 +119,13 @@ export const SignupScreen = () => {
   //   );
   // }
 
-  function handleTermsPress() {
+  const handleTermsPress = () => {
     termsBottomSheetRef.current?.open('full');
-  }
+  };
 
-  function handlePrivacyPress() {
+  const handlePrivacyPress = () => {
     privacyBottomSheetRef.current?.open('full');
-  }
+  };
 
   // View when signup is successful
   if (signupSuccess) {
@@ -148,7 +136,11 @@ export const SignupScreen = () => {
             Verify your email
           </Title>
           <View style={styles.successContainer}>
-            <Icon name="envelope" size={60} color={colors.status.success} />
+            <Icon
+              name="envelope-filled"
+              size={60}
+              color={colors.status.success}
+            />
             <Body>We've sent a verification email to</Body>
             <Body color={colors.neutral.black} weight="semiBold">
               {userEmail}
@@ -186,162 +178,171 @@ export const SignupScreen = () => {
         onBackPress={handleGoBack}
       />
       <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardAvoidingView}>
-          <ScrollView keyboardShouldPersistTaps="handled">
-            <View style={[styles.content, {minHeight: height * 0.8}]}>
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require('@assets/images/motorove_logo_dark.png')}
-                  style={styles.logo}
-                  resizeMode="contain"
-                />
-              </View>
+        <KeyboardAwareScrollView
+          showsVerticalScrollIndicator={false}
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          keyboardShouldPersistTaps="handled">
+          <View style={styles.content}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('@assets/images/motorove_logo_dark.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
 
-              <Subtitle
-                align="center"
-                weight="medium"
-                color={colors.neutral.grey}
-                style={styles.welcomeText}>
-                Create an account to get started
-              </Subtitle>
+            <Subtitle
+              align="center"
+              weight="medium"
+              color={colors.neutral.grey}
+              style={styles.welcomeText}>
+              Create an account to get started
+            </Subtitle>
 
-              <View style={styles.form}>
-                <AnimatedInput
-                  control={control}
-                  name="fullName"
-                  label="Full Name"
-                  icon={<Icon name="user" size={20} />}
-                  error={errors.fullName}
-                  testID="signup-fullname"
-                />
+            <View style={styles.form}>
+              <AnimatedInput
+                control={control}
+                name="firstName"
+                label="First Name"
+                icon={<Icon name="user-filled" size={20} />}
+                error={errors.firstName}
+                testID="signup-firstname"
+              />
 
-                <AnimatedInput
-                  control={control}
-                  name="email"
-                  label="Email Address"
-                  keyboardType="email-address"
-                  icon={<Icon name="envelope" size={20} />}
-                  error={errors.email}
-                  testID="signup-email"
-                />
+              <AnimatedInput
+                control={control}
+                name="lastName"
+                label="Last Name"
+                icon={<Icon name="user-filled" size={20} />}
+                error={errors.lastName}
+                testID="signup-lastname"
+              />
 
-                <AnimatedInput
-                  control={control}
-                  name="password"
-                  label="Password"
-                  secureTextEntry={!showPassword}
-                  icon={<Icon name="eye-slash" size={20} />}
-                  error={errors.password}
-                  onToggleSecureEntry={togglePasswordVisibility}
-                  showPassword={showPassword}
-                  testID="signup-password"
-                />
+              <AnimatedInput
+                control={control}
+                name="email"
+                label="Email Address"
+                keyboardType="email-address"
+                icon={<Icon name="envelope-filled" size={20} />}
+                error={errors.email}
+                testID="signup-email"
+              />
 
-                <AnimatedInput
-                  control={control}
-                  name="confirmPassword"
-                  label="Confirm Password"
-                  secureTextEntry={!showConfirmPassword}
-                  icon={<Icon name="eye-slash" size={20} />}
-                  error={errors.confirmPassword}
-                  onToggleSecureEntry={toggleConfirmPasswordVisibility}
-                  showPassword={showConfirmPassword}
-                  testID="signup-confirm-password"
-                />
+              <AnimatedInput
+                control={control}
+                name="password"
+                label="Password"
+                secureTextEntry={!showPassword}
+                error={errors.password}
+                onToggleSecureEntry={togglePasswordVisibility}
+                showPassword={showPassword}
+                testID="signup-password"
+                showClearButton={false}
+              />
 
-                <Checkbox
-                  control={control}
-                  name="agreeToTerms"
-                  error={errors.agreeToTerms}
-                  testID="terms-checkbox"
-                  variant="outline"
-                  size="medium"
-                  label={
-                    <View style={styles.termsTextContainer}>
-                      <BodySmall color={colors.neutral.grey}>
-                        I agree to the
-                      </BodySmall>
-                      <Button
-                        title="Terms of Service"
-                        variant="text"
-                        onPress={handleTermsPress}
-                        textStyle={styles.termsLink}
-                      />
-                      <BodySmall color={colors.neutral.grey}>and</BodySmall>
-                      <Button
-                        title="Privacy Policy"
-                        variant="text"
-                        onPress={handlePrivacyPress}
-                        textStyle={styles.termsLink}
-                      />
-                    </View>
-                  }
-                />
-                <Button
-                  title="Sign Up"
-                  shape="round"
-                  onPress={handleSubmit(onSubmit)}
-                  loading={isSubmitting}
-                  disabled={isSubmitting}
-                  testID="signup-button"
-                />
+              <AnimatedInput
+                control={control}
+                name="confirmPassword"
+                label="Confirm Password"
+                secureTextEntry={!showConfirmPassword}
+                error={errors.confirmPassword}
+                onToggleSecureEntry={toggleConfirmPasswordVisibility}
+                showPassword={showConfirmPassword}
+                testID="signup-confirm-password"
+                showClearButton={false}
+              />
 
-                {/* <View style={styles.dividerContainer}>
-                  <View style={styles.divider} />
-                  <BodySmall
-                    color={colors.neutral.grey}
-                    style={styles.dividerText}>
-                    or continue with
-                  </BodySmall>
-                  <View style={styles.divider} />
-                </View> */}
-
-                {/* <View style={styles.socialButtonsContainer}>
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignup('google')}>
-                    <Icon
-                      name="google"
-                      size={18}
-                      color={colors.neutral.black}
+              <Checkbox
+                control={control}
+                name="agreeToTerms"
+                error={errors.agreeToTerms}
+                testID="terms-checkbox"
+                variant="outline"
+                size="medium"
+                label={
+                  <View style={styles.termsTextContainer}>
+                    <BodySmall color={colors.neutral.grey}>
+                      I agree to the
+                    </BodySmall>
+                    <Button
+                      title="Terms of Service"
+                      variant="text"
+                      onPress={handleTermsPress}
+                      textStyle={styles.termsLink}
                     />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignup('apple')}>
-                    <Icon name="apple" size={18} color={colors.neutral.black} />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignup('facebook')}>
-                    <Icon
-                      name="facebook"
-                      size={18}
-                      color={colors.neutral.black}
+                    <BodySmall color={colors.neutral.grey}>and</BodySmall>
+                    <Button
+                      title="Privacy Policy"
+                      variant="text"
+                      onPress={handlePrivacyPress}
+                      textStyle={styles.termsLink}
                     />
-                  </TouchableOpacity>
-                </View> */}
+                  </View>
+                }
+              />
+              <Button
+                title="Sign Up"
+                shape="round"
+                onPress={handleSubmit(onSubmit)}
+                loading={isSubmitting}
+                disabled={isSubmitting}
+                testID="signup-button"
+              />
 
-                <View style={styles.signinContainer}>
-                  <Body color={colors.neutral.grey}>
-                    Already have an account?
-                  </Body>
-                  <Button
-                    title="Sign In"
-                    variant="text"
-                    onPress={handleSignin}
-                    textStyle={styles.signinLink}
-                    testID="signin-button"
+              {/* <View style={styles.dividerContainer}>
+                <View style={styles.divider} />
+                <BodySmall
+                  color={colors.neutral.grey}
+                  style={styles.dividerText}>
+                  or continue with
+                </BodySmall>
+                <View style={styles.divider} />
+              </View> */}
+
+              {/* <View style={styles.socialButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.socialButton}
+                  onPress={() => handleSocialSignup('google')}>
+                  <Icon
+                    name="google"
+                    size={18}
+                    color={colors.neutral.black}
                   />
-                </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.socialButton}
+                  onPress={() => handleSocialSignup('apple')}>
+                  <Icon name="apple" size={18} color={colors.neutral.black} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.socialButton}
+                  onPress={() => handleSocialSignup('facebook')}>
+                  <Icon
+                    name="facebook"
+                    size={18}
+                    color={colors.neutral.black}
+                  />
+                </TouchableOpacity>
+              </View> */}
+
+              <View style={styles.signinContainer}>
+                <Body color={colors.neutral.grey}>
+                  Already have an account?
+                </Body>
+                <Button
+                  title="Sign In"
+                  variant="text"
+                  onPress={handleSignin}
+                  textStyle={styles.signinLink}
+                  testID="signin-button"
+                />
               </View>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </View>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
 
       {/* Terms of Service Bottom Sheet */}
@@ -387,15 +388,11 @@ export const SignupScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
+    ...commonStyles.container,
   },
   content: {
     flex: 1,
-    padding: spacing.screen.horizontal,
+    paddingHorizontal: spacing.md,
   },
   logoContainer: {
     alignItems: 'center',
@@ -443,8 +440,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   signinLink: {
-    color: colors.primary.main,
+    color: colors.neutral.black,
     marginLeft: -20,
+    textDecorationLine: 'underline',
   },
   termsTextContainer: {
     flexDirection: 'row',

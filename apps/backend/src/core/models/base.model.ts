@@ -1,13 +1,14 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { User } from '../../users/models/user.model';
+import { IBase } from '@motorove/shared';
 
 @ObjectType({ isAbstract: true })
-export abstract class BaseModel {
+export abstract class BaseModel implements IBase {
   @Field(() => ID)
   id: string;
 
   @Field(() => User)
-  createdBy: User;
+  createdBy: Partial<User>;
 
   @Field()
   createdById: string;
@@ -16,7 +17,7 @@ export abstract class BaseModel {
   createdAt: Date;
 
   @Field(() => User)
-  updatedBy: User;
+  updatedBy: Partial<User>;
 
   @Field()
   updatedById: string;

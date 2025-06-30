@@ -10,7 +10,7 @@ export type AuthStackParamList = {
   Welcome: undefined;
   ForgotPassword: undefined;
   Signup: undefined;
-  AccountSetup: {email?: string; fullName?: string};
+  AccountSetup: {email?: string; firstName?: string; lastName?: string};
 };
 
 export type AuthScreenNavigationProp<T extends keyof AuthStackParamList> =

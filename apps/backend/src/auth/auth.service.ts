@@ -19,8 +19,8 @@ export class AuthService {
   async signUp(
     email: string,
     password: string,
-    firstName?: string,
-    lastName?: string,
+    firstName: string,
+    lastName: string,
   ): Promise<AuthResponse> {
     try {
       // First, check if the email already exists in our database
@@ -53,8 +53,8 @@ export class AuthService {
       const user = await this.prismaService.user.create({
         data: {
           email,
-          firstName: firstName || null,
-          lastName: lastName || null,
+          firstName,
+          lastName,
           supabaseId: data.user.id,
         },
       });
@@ -62,9 +62,7 @@ export class AuthService {
       return {
         user: {
           ...user,
-          firstName: user.firstName || null,
-          lastName: user.lastName || null,
-          avatar: user.avatar || null,
+          avatar: user.avatar || undefined,
         },
         session: data.session || null,
       };
@@ -102,9 +100,7 @@ export class AuthService {
     return {
       user: {
         ...user,
-        firstName: user.firstName || null,
-        lastName: user.lastName || null,
-        avatar: user.avatar || null,
+        avatar: user.avatar || undefined,
       },
       session: data.session || null,
     };
@@ -156,9 +152,7 @@ export class AuthService {
       return {
         user: {
           ...user,
-          firstName: user.firstName || null,
-          lastName: user.lastName || null,
-          avatar: user.avatar || null,
+          avatar: user.avatar || undefined,
         },
         session: data.session || null,
       };
@@ -207,9 +201,9 @@ export class AuthService {
 
     return {
       ...user,
-      firstName: user.firstName || null,
-      lastName: user.lastName || null,
-      avatar: user.avatar || null,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      avatar: user.avatar || undefined,
     };
   }
 }

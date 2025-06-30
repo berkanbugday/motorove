@@ -6,11 +6,12 @@ import {
   IsNumber,
   IsEnum,
 } from 'class-validator';
+import { ICreateAddress } from '@motorove/shared';
 import { AddressType } from '../../enums/models/address-type.enum';
 import { Language } from '../../enums/models/language.enum';
 
 @InputType()
-export class CreateAddressInput {
+export class CreateAddressInput implements ICreateAddress {
   @Field(() => String)
   @IsNotEmpty()
   @IsString()
@@ -23,6 +24,7 @@ export class CreateAddressInput {
 
   @Field(() => AddressType)
   @IsNotEmpty()
+  @IsEnum(AddressType)
   type: AddressType;
 
   @Field(() => Float)

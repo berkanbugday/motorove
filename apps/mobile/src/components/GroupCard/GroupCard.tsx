@@ -13,6 +13,7 @@ import {Icon, IconName} from '../Icon';
 import {colors} from '@theme';
 import {styles} from './GroupCard.styles';
 import {toPascalCase} from '@utils/stringUtils';
+import {GroupPrivacy} from '@motorove/shared';
 
 export interface BadgeProps {
   /**
@@ -63,9 +64,9 @@ export interface GroupCardProps {
   membersCapacity?: number;
 
   /**
-   * Privacy level of the group ("public", "private", "members-only")
+   * Privacy level of the group
    */
-  privacy?: string;
+  privacy?: GroupPrivacy;
 
   /**
    * Badge to display on the card (e.g. "Official", "Featured", etc.)
@@ -103,7 +104,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   tags = [],
   currentMembers = 0,
   membersCapacity,
-  privacy = 'public',
+  privacy = GroupPrivacy.PUBLIC,
   badge,
   onPress,
   onJoinPress,
@@ -195,7 +196,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   const renderPrivacyBadge = () => {
     let iconName: IconName = 'lock-open-filled';
 
-    if (privacy === 'PRIVATE') {
+    if (privacy === GroupPrivacy.PRIVATE) {
       iconName = 'lock-filled';
     }
 

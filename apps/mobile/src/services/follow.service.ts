@@ -8,7 +8,7 @@ import {
   GET_USER_FOLLOWING,
   UNFOLLOW_USER,
 } from './graphql/follow.graphql';
-import {User} from '../types';
+import {IUser, IUserFollowing} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 
@@ -48,7 +48,7 @@ export const useMyFollowers = (limit?: number, skip?: number) => {
   };
 
   return {
-    followers: (data?.myFollowers as User[]) || [],
+    followers: (data?.myFollowers as IUser[]) || [],
     loading,
     error,
     refetch,
@@ -92,7 +92,7 @@ export const useMyFollowing = (limit?: number, skip?: number) => {
   };
 
   return {
-    following: (data?.myFollowing as User[]) || [],
+    following: (data?.myFollowing as IUser[]) || [],
     loading,
     error,
     refetch,
@@ -136,9 +136,9 @@ export const useUserFollowers = (
           return prev;
         }
         return {
-          userFollowers: [
-            ...prev.userFollowers,
-            ...fetchMoreResult.userFollowers,
+          followerUsers: [
+            ...prev.followerUsers,
+            ...fetchMoreResult.followerUsers,
           ],
         };
       },
@@ -146,7 +146,7 @@ export const useUserFollowers = (
   };
 
   return {
-    followers: (data?.userFollowers as User[]) || [],
+    followers: (data?.followerUsers as IUser[]) || [],
     loading,
     error,
     refetch,
@@ -190,9 +190,9 @@ export const useUserFollowing = (
           return prev;
         }
         return {
-          userFollowing: [
-            ...prev.userFollowing,
-            ...fetchMoreResult.userFollowing,
+          followingUsers: [
+            ...prev.followingUsers,
+            ...fetchMoreResult.followingUsers,
           ],
         };
       },
@@ -200,7 +200,7 @@ export const useUserFollowing = (
   };
 
   return {
-    following: (data?.userFollowing as User[]) || [],
+    following: (data?.followingUsers as IUser[]) || [],
     loading,
     error,
     refetch,
@@ -266,15 +266,13 @@ export const useFollowUser = (onSuccess?: (isFollowing: boolean) => void) => {
   const followUser = async (userId: string) => {
     try {
       const result = await followUserMutation({
-        variables: {
-          input: {userId},
-        },
+        variables: {userId},
         refetchQueries: [
           {query: GET_MY_FOLLOWING},
           {query: GET_USER_FOLLOWERS, variables: {userId}},
         ],
       });
-      return result.data?.followUser;
+      return result.data?.follow as IUserFollowing;
     } catch (err) {
       loggingService.error('Error in followUser:', err);
       return null;
@@ -309,22 +307,20 @@ export const useUnfollowUser = (onSuccess?: (isFollowing: boolean) => void) => {
     },
     refetchQueries: [
       {query: GET_MY_FOLLOWING},
-      {query: GET_USER_FOLLOWERS, variables: {userId: ''}}, // Will be updated in the call
+      {query: GET_USER_FOLLOWERS, variables: {userId: ''}},
     ],
   });
 
   const unfollowUser = async (userId: string) => {
     try {
       const result = await unfollowUserMutation({
-        variables: {
-          input: {userId},
-        },
+        variables: {userId},
         refetchQueries: [
           {query: GET_MY_FOLLOWING},
           {query: GET_USER_FOLLOWERS, variables: {userId}},
         ],
       });
-      return result.data?.unfollowUser;
+      return result.data?.unfollow as IUserFollowing;
     } catch (err) {
       loggingService.error('Error in unfollowUser:', err);
       return null;

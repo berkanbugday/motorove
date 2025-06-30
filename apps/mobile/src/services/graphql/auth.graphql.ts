@@ -27,7 +27,7 @@ export const AUTH_RESPONSE_FRAGMENT = gql`
 // Sign up mutation
 export const SIGN_UP = gql`
   mutation SignUp($input: SignUpInput!) {
-    signUp(signUpInput: $input) {
+    signUp(input: $input) {
       ...AuthResponseFragment
     }
   }
@@ -37,7 +37,7 @@ export const SIGN_UP = gql`
 // Sign in mutation
 export const SIGN_IN = gql`
   mutation SignIn($input: SignInInput!) {
-    signIn(signInInput: $input) {
+    signIn(input: $input) {
       ...AuthResponseFragment
     }
   }

@@ -1,13 +1,16 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { ICity } from '@motorove/shared';
 
 @ObjectType()
-export class CityDto {
+export class CityDto implements ICity {
   @Field(() => ID)
   @IsUUID()
+  @IsNotEmpty()
   id: string;
 
   @Field()
   @IsString()
+  @IsNotEmpty()
   value: string;
 }

@@ -10,5 +10,5 @@ export enum NodeEnv {
 export enum NodeEnvFileName {
   development = '.env.dev',
   staging = '.env.staging',
-  production = '.env.prod',
+  production = '.env',
 }

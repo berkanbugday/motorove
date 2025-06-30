@@ -83,7 +83,7 @@ SKIP_GIT_CLEAN_CHECK="false"
 CI="false"
 ```
 
-### .env.prod
+### .env
 
 ```
 # Common variables

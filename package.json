@@ -1,0 +1,43 @@
+{
+  "name": "motorove",
+  "version": "1.0.0",
+  "description": "Motorove monorepo containing backend, mobile, and shared packages",
+  "private": true,
+  "workspaces": [
+    "apps/backend",
+    "apps/mobile",
+    "shared"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "clean": "turbo clean",
+    "build:shared": "turbo build --filter=@motorove/shared",
+    "build:backend": "turbo build --filter=@motorove/backend",
+    "build:mobile": "turbo build --filter=@motorove/mobile",
+    "dev:backend": "turbo dev --filter=@motorove/backend",
+    "dev:mobile": "turbo dev --filter=@motorove/mobile",
+    "format": "turbo format",
+    "clean:deps": "rm -rf node_modules && pnpm -r exec rm -rf node_modules",
+    "reset": "pnpm clean:deps && pnpm install",
+    "check:deps": "pnpm dlx depcheck",
+    "check:outdated": "pnpm -r exec pnpm outdated",
+    "update:deps": "pnpm -r update",
+    "postinstall": "patch-package"
+  },
+  "devDependencies": {
+    "turbo": "1.12.4",
+    "typescript": "5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.6.0"
+  },
+  "packageManager": "pnpm@9.6.0",
+  "dependencies": {
+    "patch-package": "8.0.0",
+    "postinstall-postinstall": "2.1.0"
+  }
+}

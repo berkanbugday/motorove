@@ -12,14 +12,11 @@ import {
   IsPositive,
   ArrayMinSize,
   ArrayMaxSize,
-  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { CityInput } from '../../cities/dto/city.input';
-import { GroupTagInput } from '../../group-tags/dto/group-tag.input';
+import { ICreateGroup } from '@motorove/shared';
 
 @InputType()
-export class CreateGroupInput {
+export class CreateGroupInput implements ICreateGroup {
   @Field()
   @IsString()
   @IsNotEmpty()
@@ -44,11 +41,9 @@ export class CreateGroupInput {
   @IsOptional()
   cover?: string;
 
-  @Field(() => CityInput)
-  @ValidateNested()
-  @Type(() => CityInput)
+  @Field(() => String)
   @IsNotEmpty({ message: 'City is required' })
-  city: CityInput;
+  cityId: string;
 
   @Field(() => GroupPrivacy)
   @IsEnum(GroupPrivacy)
@@ -61,11 +56,9 @@ export class CreateGroupInput {
   @IsPositive({ message: 'Members capacity must be a positive number' })
   membersCapacity?: number;
 
-  @Field(() => [GroupTagInput])
+  @Field(() => [String])
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => GroupTagInput)
   @ArrayMinSize(1, { message: 'Please select at least 1 tag' })
   @ArrayMaxSize(3, { message: 'You can select up to 3 tags' })
-  tags: GroupTagInput[];
+  tagIds: string[];
 }

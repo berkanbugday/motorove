@@ -22,12 +22,10 @@ type Address {
 
 type AddressDto {
   address: String!
-  event: EventDto
   id: ID!
-  language: String!
+  language: Language!
   latitude: Float!
   longitude: Float!
-  post: PostDto
   type: AddressType!
 }
 
@@ -83,6 +81,7 @@ type CommentDto {
   createdBy: UserDto!
   createdById: String!
   id: ID!
+  isActive: Boolean!
   parent: CommentDto
   parentId: ID
   post: PostDto
@@ -103,6 +102,12 @@ input CreateAddressInput {
   type: AddressType!
 }
 
+input CreateDeviceTokenInput {
+  deviceType: String!
+  token: String!
+  userId: String!
+}
+
 input CreateNotificationsInput {
   body: String!
   data: String
@@ -115,12 +120,6 @@ input CreateNotificationsInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
-
-input DeviceTokenInput {
-  deviceType: String!
-  token: String!
-  userId: String!
-}
 
 """Difficulty level for motorcycle rides"""
 enum DifficultyLevel {
@@ -203,20 +202,6 @@ type EventDto {
   updatedById: String!
 }
 
-input EventFilterInput {
-  createdById: String
-  difficultyLevel: DifficultyLevel
-  eventType: EventType
-  experienceLevel: ExperienceLevel
-  groupId: String
-  isActive: Boolean
-  isPrivate: Boolean
-  query: String
-  roadType: RoadType
-  startDateFrom: DateTime
-  startDateTo: DateTime
-}
-
 type EventInvitation {
   createdAt: DateTime!
   createdBy: User!
@@ -284,10 +269,24 @@ input FilterCommentInput {
   postId: ID
 }
 
+input FilterEventInput {
+  createdById: String
+  difficultyLevel: DifficultyLevel
+  eventType: EventType
+  experienceLevel: ExperienceLevel
+  groupId: String
+  isActive: Boolean
+  isPrivate: Boolean
+  query: String
+  roadType: RoadType
+  startDateFrom: DateTime
+  startDateTo: DateTime
+}
+
 input FilterGroupInput {
-  city: String
-  privacy: String = "ALL"
-  role: String = "ALL"
+  cityId: String
+  privacy: GroupPrivacy = ALL
+  role: GroupMemberRole = ALL
   tags: [String!]! = []
 }
 
@@ -323,29 +322,25 @@ type Group {
 }
 
 type GroupDto {
-  city: CityDto!
+  city: String!
   cover: String
   createdAt: DateTime!
-  createdBy: UserDto!
-  createdById: String!
   description: String!
   id: ID!
-  isActive: Boolean!
   isAdmin: Boolean
   isMember: Boolean
   logo: String
   membersCapacity: Int
+  membersCount: Int
   name: String!
   privacy: GroupPrivacy!
-  tags: [GroupTagDto!]!
-  updatedAt: DateTime!
-  updatedBy: UserDto!
-  updatedById: String!
+  tags: [String!]!
 }
 
 """The role of a user in a group"""
 enum GroupMemberRole {
   ADMIN
+  ALL
   MEMBER
 }
 
@@ -368,16 +363,16 @@ type GroupMembership {
 }
 
 type GroupMembershipDto {
-  group: GroupDto
+  group: GroupDto!
   id: ID!
   joinedAt: DateTime!
   role: GroupMemberRole!
-  status: InvitationStatus!
-  user: UserDto
+  user: UserDto!
 }
 
 """Privacy levels for groups"""
 enum GroupPrivacy {
+  ALL
   PRIVATE
   PUBLIC
 }
@@ -426,10 +421,10 @@ type Mutation {
   remove(id: String!): Boolean!
   removeDeviceToken(token: String!, userId: String!): Boolean!
   removeMember(input: RemoveGroupMemberInput!): GroupMembershipDto!
-  saveDeviceToken(input: DeviceTokenInput!): Boolean!
+  saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
-  signIn(signInInput: SignInInput!): AuthResponse!
-  signUp(signUpInput: SignUpInput!): AuthResponse!
+  signIn(input: SignInInput!): AuthResponse!
+  signUp(input: SignUpInput!): AuthResponse!
   unfollow(userId: ID!): UserFollowingDto!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
@@ -447,7 +442,6 @@ type NotificationDto {
   status: NotificationStatus!
   title: String!
   type: NotificationType!
-  user: User!
 }
 
 """The status of a notification"""
@@ -461,6 +455,8 @@ enum NotificationStatus {
 
 """The type of notification"""
 enum NotificationType {
+  EVENT_INVITATION
+  EVENT_REMINDER
   FRIEND_REQUEST
   GROUP_INVITE
   GROUP_JOIN
@@ -517,9 +513,7 @@ type PostDto {
 type PostInteractionDto {
   createdAt: DateTime!
   id: ID!
-  post: PostDto!
   postId: String!
-  user: UserDto!
   userId: String!
 }
 
@@ -550,7 +544,7 @@ type Query {
   comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
   count: Float!
   event(id: ID!): EventDto!
-  events(filters: EventFilterInput, limit: Int, skip: Int): [EventDto!]!
+  events(filters: FilterEventInput, limit: Int, skip: Int): [EventDto!]!
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserDto!]!
   followingUsers(limit: Int, skip: Int, userId: ID!): [UserDto!]!
   getAddressTypes: [EnumItem!]!
@@ -604,8 +598,8 @@ input SignInInput {
 
 input SignUpInput {
   email: String!
-  firstName: String
-  lastName: String
+  firstName: String!
+  lastName: String!
   password: String!
 }
 
@@ -631,11 +625,11 @@ type User {
   createdAt: DateTime!
   createdGroups: [Group!]
   email: String!
-  firstName: String
+  firstName: String!
   groupMemberships: [GroupMembership!]
   id: ID!
   isActive: Boolean!
-  lastName: String
+  lastName: String!
   supabaseId: String!
   updatedAt: DateTime!
 }
@@ -651,6 +645,7 @@ type UserDto {
   isActive: Boolean!
   isFollowing: Boolean
   lastName: String
+  supabaseId: String!
   updatedAt: DateTime!
 }
 

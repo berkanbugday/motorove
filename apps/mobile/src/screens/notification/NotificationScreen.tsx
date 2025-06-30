@@ -31,16 +31,7 @@ import {
 } from '@services/notification.service';
 import {relativeTime} from '@utils/dateUtils';
 import {useAuth} from '@contexts';
-
-// Define the Notification interface based on what's returned from the API
-interface Notification {
-  id: string;
-  title: string;
-  body: string;
-  read: boolean;
-  createdAt: string;
-  type: string;
-}
+import {INotification} from '@motorove/shared';
 
 /**
  * NotificationSkeleton - Skeleton component for notification items
@@ -110,7 +101,7 @@ export const NotificationScreen = () => {
   });
 
   // Safe cast to our Notification type
-  const notifications = apiNotifications as unknown as readonly Notification[];
+  const notifications = apiNotifications as unknown as readonly INotification[];
 
   const [refreshing, setRefreshing] = useState(false);
   const [existingUnreadNotifications, setExistingUnreadNotifications] =
@@ -192,7 +183,7 @@ export const NotificationScreen = () => {
   const renderNotificationItem = ({
     item,
   }: {
-    item: Notification;
+    item: INotification;
   }): React.ReactElement => {
     // Actions for swipe gestures
     const rightActions: SwipeAction[] = [

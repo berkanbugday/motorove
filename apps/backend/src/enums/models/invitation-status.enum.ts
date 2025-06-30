@@ -1,9 +1,6 @@
 import { registerEnumType } from '@nestjs/graphql';
-
-export enum InvitationStatus {
-  PENDING = 'PENDING',
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED',
-}
+import { InvitationStatus } from '@motorove/shared';
 
 registerEnumType(InvitationStatus, { name: 'InvitationStatus' });
+
+export { InvitationStatus };

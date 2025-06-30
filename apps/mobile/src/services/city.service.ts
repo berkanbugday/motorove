@@ -1,12 +1,7 @@
 import {useQuery} from '@apollo/client';
 import {GET_CITIES, GET_CITY} from './graphql/city.graphql';
 import {loggingService} from './logging.service';
-
-// Type definitions
-export interface City {
-  id: string;
-  value: string;
-}
+import {ICity} from '@motorove/shared/interfaces';
 
 // Hook for getting all cities
 export const useGetCities = () => {
@@ -17,7 +12,7 @@ export const useGetCities = () => {
   });
 
   return {
-    cities: (data?.cities as City[]) || [],
+    cities: (data?.cities as ICity[]) || [],
     loading,
     error,
     refetch,
@@ -35,7 +30,7 @@ export const useGetCity = (id: string) => {
   });
 
   return {
-    city: data?.city as City | undefined,
+    city: data?.city as ICity | undefined,
     loading,
     error,
     refetch,

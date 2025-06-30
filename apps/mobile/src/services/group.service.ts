@@ -7,56 +7,16 @@ import {
   UPDATE_GROUP,
   SEARCH_GROUPS,
 } from './graphql/group.graphql';
+import {
+  IGroup,
+  ICreateGroup,
+  IUpdateGroup,
+  IFilterGroup,
+} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback, useEffect} from 'react';
-
-// Type definitions
-export interface CreateGroupInput {
-  name: string;
-  description: string;
-  logo: string | null | undefined;
-  cover: string | null | undefined;
-  city: {id: string; value: string};
-  privacy: string | undefined;
-  membersCapacity: number | null;
-  tags: {id: string; value: string}[];
-}
-
-export interface UpdateGroupInput extends CreateGroupInput {
-  id: string;
-}
-
-export interface Group {
-  id: string;
-  name: string;
-  description: string;
-  logo: string | null;
-  cover: string | null;
-  isMember: boolean;
-  isAdmin: boolean;
-  city: {id: string; value: string};
-  privacy: string;
-  memberships: {
-    id: string;
-    role: string;
-    user: {
-      id: string;
-      firstName: string;
-      lastName: string;
-      avatar: string;
-    };
-  }[];
-  membersCapacity: number | null;
-  tags: {id: string; value: string}[];
-}
-
-export interface GroupFilters {
-  city: string | null;
-  tags: string[];
-  privacy: 'ALL' | 'PUBLIC' | 'PRIVATE';
-  role: 'ALL' | 'ADMIN' | 'MEMBER';
-}
+import {GroupMemberRole, GroupPrivacy} from '@motorove/shared/enums';
 
 // Hook for creating a group
 export const useCreateGroup = (onSuccess?: () => void) => {
@@ -82,7 +42,7 @@ export const useCreateGroup = (onSuccess?: () => void) => {
     },
   });
 
-  const createGroup = async (input: CreateGroupInput) => {
+  const createGroup = async (input: ICreateGroup) => {
     try {
       const result = await createGroupMutation({
         variables: {
@@ -132,7 +92,7 @@ export const useUpdateGroup = (onSuccess?: () => void) => {
     },
   });
 
-  const updateGroup = async (input: UpdateGroupInput) => {
+  const updateGroup = async (input: IUpdateGroup) => {
     try {
       const result = await updateGroupMutation({
         variables: {
@@ -169,7 +129,7 @@ export const useGetGroup = (id: string) => {
   });
 
   return {
-    group: data?.group as Group | undefined,
+    group: data?.group as IGroup | undefined,
     loading,
     error,
     refetch,
@@ -179,11 +139,11 @@ export const useGetGroup = (id: string) => {
 // Hook for getting user's groups
 export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
-  const [filters, setFilters] = useState<GroupFilters>({
-    city: null,
+  const [filters, setFilters] = useState<IFilterGroup>({
+    cityId: undefined,
     tags: [],
-    privacy: 'ALL',
-    role: 'ALL',
+    privacy: GroupPrivacy.ALL,
+    role: GroupMemberRole.ALL,
   });
 
   const {
@@ -257,7 +217,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   ]);
 
   // Apply filters and reset pagination
-  const applyFilters = useCallback((newFilters: GroupFilters) => {
+  const applyFilters = useCallback((newFilters: IFilterGroup) => {
     setFilters(newFilters);
     setHasMore(true);
   }, []);
@@ -272,7 +232,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   }, [filters, limit, originalRefetch]);
 
   return {
-    groups: (data?.joinedGroups as Group[]) || [],
+    groups: (data?.joinedGroups as IGroup[]) || [],
     loading,
     error,
     refetch,
@@ -286,11 +246,11 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
 // Hook for getting all groups
 export const useGetGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
-  const [filters, setFilters] = useState<GroupFilters>({
-    city: null,
+  const [filters, setFilters] = useState<IFilterGroup>({
+    cityId: undefined,
     tags: [],
-    privacy: 'ALL',
-    role: 'ALL',
+    privacy: GroupPrivacy.ALL,
+    role: GroupMemberRole.ALL,
   });
 
   const {
@@ -348,7 +308,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
   }, [data?.groups?.length, fetchMore, hasMore, limit, loading, filters]);
 
   // Apply filters and reset pagination
-  const applyFilters = useCallback((newFilters: GroupFilters) => {
+  const applyFilters = useCallback((newFilters: IFilterGroup) => {
     setFilters(newFilters);
     setHasMore(true);
   }, []);
@@ -363,7 +323,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
   }, [filters, limit, originalRefetch]);
 
   return {
-    groups: (data?.groups as Group[]) || [],
+    groups: (data?.groups as IGroup[]) || [],
     loading,
     error,
     refetch,
@@ -429,7 +389,7 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
   }, [data?.groups?.length, fetchMore, hasMore, limit, loading, query]);
 
   return {
-    groups: (data?.groups as Group[]) || [],
+    groups: (data?.groups as IGroup[]) || [],
     loading,
     error,
     refetch,

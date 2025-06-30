@@ -29,7 +29,7 @@ import {
   MainScreenNavigationProp,
   MainStackParamList,
 } from '@navigation/types/navigationTypes';
-import {Group, useGetGroup} from '@services/group.service';
+import {useGetGroup} from '@services/group.service';
 import {Icon, IconName} from '@components/Icon';
 import {Chip} from '@components/Chip';
 import {Button} from '@components/Button';
@@ -45,7 +45,7 @@ import {
   useUnsavePost,
   useRemovePost,
 } from '@services/post.service';
-import {Post} from '@app-types/models/post.model';
+import {IPost, IGroup, Language, IAddress} from '@motorove/shared';
 import {relativeTime} from '@utils/dateUtils';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {toPascalCase} from '@utils/stringUtils';
@@ -77,13 +77,13 @@ const formatAvatarSource = (imageUrl?: string) => {
 };
 
 // Transform Post model to FeedCard props - matching HomeScreen implementation
-const transformPostToFeedCard = (post: Post) => {
+const transformPostToFeedCard = (post: IPost) => {
   // Create labels from post data
   const labels = [];
 
   if (post.addresses && post.addresses.length > 0) {
     const addressText = post.addresses?.find(
-      address => address.language === 'en',
+      (address: IAddress) => address.language === Language.EN,
     )?.address;
     if (addressText) {
       labels.push({
@@ -342,7 +342,7 @@ export const GroupDetailScreen = () => {
   );
 
   // Get member roles from enum service
-  const {memberRoles, loading: loadingRoles} = useEnumGroupMemberRoles();
+  const {groupMemberRoles, loading: loadingRoles} = useEnumGroupMemberRoles();
 
   // Track which member row has actions visible
   const [activeMemberId, setActiveMemberId] = useState<string | null>(null);
@@ -740,7 +740,7 @@ export const GroupDetailScreen = () => {
   );
 
   const handleJoinGroup = useCallback(
-    async (_group: Group) => {
+    async (_group: IGroup) => {
       if (
         _group?.membersCapacity &&
         _group?.memberships?.length >= _group?.membersCapacity

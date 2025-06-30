@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback} from 'react';
+import React, {useRef, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,7 +7,7 @@ import {
   Image,
   ImageSourcePropType,
 } from 'react-native';
-import Carousel, {Pagination} from 'react-native-snap-carousel';
+import Carousel from 'react-native-snap-carousel';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {Button, Title, Body, Typography} from '@components';
@@ -50,14 +50,14 @@ const carouselItems: CarouselItem[] = [
 
 // Carousel Item Component
 const CarouselItemComponent = ({item}: {item: CarouselItem}) => (
-  <View style={styles.slide}>
+  <View key={item.id} style={styles.slide}>
     <View style={[styles.imageContainer, {backgroundColor: item.color}]}>
       {item.image ? (
         <Image source={item.image} style={styles.image} resizeMode="contain" />
       ) : (
         <Typography
           variant="title"
-          color="#FFFFFF"
+          color={colors.neutral.white}
           align="center"
           style={styles.imageText}>
           {item.title}
@@ -108,7 +108,6 @@ const ButtonSection = ({
 );
 
 export function WelcomeScreen(): React.JSX.Element {
-  const [activeSlide, setActiveSlide] = useState(0);
   const carouselRef = useRef(null);
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AuthScreenNavigationProp<'Welcome'>>();
@@ -124,11 +123,6 @@ export function WelcomeScreen(): React.JSX.Element {
     await markAsNotFirstTime();
     navigation.replace('Signup');
   }, [navigation, markAsNotFirstTime]);
-
-  // Handle carousel snap
-  const handleSnapToItem = useCallback((index: number) => {
-    setActiveSlide(index);
-  }, []);
 
   // Calculate bottom padding for button container
   const bottomPadding = Math.max(
@@ -148,19 +142,7 @@ export function WelcomeScreen(): React.JSX.Element {
             renderItem={({item}) => <CarouselItemComponent item={item} />}
             sliderWidth={screenWidth}
             itemWidth={screenWidth - 60}
-            onSnapToItem={handleSnapToItem}
-            useScrollView={true}
-            loop={false}
-          />
-          <Pagination
-            dotsLength={carouselItems.length}
-            activeDotIndex={activeSlide}
-            dotStyle={styles.paginationDot}
-            inactiveDotStyle={styles.paginationInactiveDot}
-            inactiveDotOpacity={0.5}
-            inactiveDotScale={0.7}
-            animatedFriction={3}
-            animatedTension={100}
+            loop={true}
           />
         </View>
 
@@ -216,16 +198,6 @@ const styles = StyleSheet.create({
   text: {
     color: colors.neutral.grey,
     textAlign: 'center',
-  },
-  paginationDot: {
-    width: 25,
-    height: 10,
-    borderRadius: radius.round,
-    backgroundColor: colors.neutral.black,
-  },
-  paginationInactiveDot: {
-    width: 10,
-    backgroundColor: colors.neutral.lightGrey,
   },
   buttonContainer: {
     paddingHorizontal: spacing.screen.horizontal,

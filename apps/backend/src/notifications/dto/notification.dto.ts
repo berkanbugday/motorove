@@ -1,10 +1,10 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { NotificationType } from '../../enums/models/notification-type.enum';
 import { NotificationStatus } from '../../enums/models/notification-status.enum';
-import { User } from '../../users/models/user.model';
+import { INotification } from '@motorove/shared';
 
 @ObjectType()
-export class NotificationDto {
+export class NotificationDto implements INotification {
   @Field(() => ID)
   id: string;
 
@@ -19,9 +19,6 @@ export class NotificationDto {
 
   @Field(() => String, { nullable: true })
   data?: string;
-
-  @Field(() => User)
-  user: User;
 
   @Field(() => NotificationStatus)
   status: NotificationStatus;

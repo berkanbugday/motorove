@@ -1,15 +1,14 @@
-import { InputType, Field, registerEnumType } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IChangeMemberRole } from '@motorove/shared';
 import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
 import { BaseGroupMembershipInput } from './base-group-membership.input';
 
-registerEnumType(GroupMemberRole, {
-  name: 'GroupMemberRole',
-  description: 'The role of a user in a group',
-});
-
 @InputType()
-export class ChangeMemberRoleInput extends BaseGroupMembershipInput {
+export class ChangeMemberRoleInput
+  extends BaseGroupMembershipInput
+  implements IChangeMemberRole
+{
   @Field(() => GroupMemberRole)
   @IsEnum(GroupMemberRole)
   @IsNotEmpty()

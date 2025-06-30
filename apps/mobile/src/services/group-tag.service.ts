@@ -1,12 +1,7 @@
 import {useQuery} from '@apollo/client';
 import {GET_GROUP_TAGS, GET_GROUP_TAG} from './graphql/group-tag.graphql';
 import {loggingService} from './logging.service';
-
-// Type definitions
-export interface GroupTag {
-  id: string;
-  value: string;
-}
+import {IGroupTag} from '@motorove/shared/interfaces';
 
 // Hook for getting all group tags
 export const useGetGroupTags = () => {
@@ -17,7 +12,7 @@ export const useGetGroupTags = () => {
   });
 
   return {
-    groupTags: (data?.groupTags as GroupTag[]) || [],
+    groupTags: (data?.groupTags as IGroupTag[]) || [],
     loading,
     error,
     refetch,
@@ -35,7 +30,7 @@ export const useGetGroupTag = (id: string) => {
   });
 
   return {
-    groupTag: data?.groupTag as GroupTag | undefined,
+    groupTag: data?.groupTag as IGroupTag | undefined,
     loading,
     error,
     refetch,

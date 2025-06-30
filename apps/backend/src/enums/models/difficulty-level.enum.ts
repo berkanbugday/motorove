@@ -1,12 +1,9 @@
 import { registerEnumType } from '@nestjs/graphql';
-
-export enum DifficultyLevel {
-  EASY = 'EASY',
-  MEDIUM = 'MEDIUM',
-  HARD = 'HARD',
-}
+import { DifficultyLevel } from '@motorove/shared';
 
 registerEnumType(DifficultyLevel, {
   name: 'DifficultyLevel',
   description: 'Difficulty level for motorcycle rides',
 });
+
+export { DifficultyLevel };

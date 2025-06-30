@@ -1,0 +1,16 @@
+{
+  "name": "@motorove/shared",
+  "version": "0.1.0",
+  "description": "Shared types, interfaces, DTOs, and enums for Motorove",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "devDependencies": {
+    "typescript": "5.7.3"
+  }
+}

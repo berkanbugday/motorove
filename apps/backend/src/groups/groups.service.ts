@@ -35,16 +35,13 @@ export class GroupsService {
     try {
       const groups = (await this.prisma.group.findMany({
         where: {
-          memberships: {
-            none: { userId, status: InvitationStatus.ACCEPTED },
-          },
           isActive: true,
           ...(query
             ? {
-                name: {
-                  contains: query,
-                  mode: 'insensitive',
-                },
+                OR: [
+                  { name: { contains: query, mode: 'insensitive' } },
+                  { description: { contains: query, mode: 'insensitive' } },
+                ],
               }
             : {}),
           ...(filters?.tags && filters.tags.length > 0
@@ -58,10 +55,10 @@ export class GroupsService {
                 },
               }
             : {}),
-          ...(filters?.city && filters.city !== null
+          ...(filters?.cityId && filters.cityId !== null
             ? {
                 city: {
-                  id: filters.city,
+                  id: filters.cityId,
                 },
               }
             : {}),
@@ -137,10 +134,10 @@ export class GroupsService {
                 },
               }
             : {}),
-          ...(filters?.city && filters.city !== null
+          ...(filters?.cityId && filters.cityId !== null
             ? {
                 city: {
-                  id: filters.city,
+                  id: filters.cityId,
                 },
               }
             : {}),
@@ -258,60 +255,60 @@ export class GroupsService {
         authToken,
       );
 
-      // Create group and set the creator as an admin member in a transaction
-      const createdGroup = (await this.prisma.$transaction(async (tx) => {
-        // Create the group with proper type conversions
-        const prismaData = {
-          name: input.name,
-          description: input.description,
-          logo: logoUrl,
-          cover: coverUrl,
-          city: {
-            connect: { id: input.city.id },
+      // Use explicit casting to handle type conflicts
+      const prismaData: any = {
+        name: input.name,
+        description: input.description,
+        logo: logoUrl,
+        cover: coverUrl,
+        city: {
+          connect: { id: input.cityId },
+        },
+        privacy: input.privacy,
+        membersCapacity: input.membersCapacity,
+        tags: {
+          connect: input.tagIds.map((tagId) => ({
+            id: tagId,
+          })),
+        },
+        createdBy: {
+          connect: { id: userId },
+        },
+        updatedBy: {
+          connect: { id: userId },
+        },
+      };
+
+      const group = (await this.prisma.group.create({
+        data: prismaData,
+        include: {
+          createdBy: true,
+          city: true,
+          tags: true,
+        },
+      })) as unknown as Group;
+
+      // Create an admin membership for the creator
+      await this.prisma.groupMembership.create({
+        data: {
+          group: {
+            connect: { id: group.id },
           },
-          privacy: input.privacy,
-          membersCapacity: input.membersCapacity,
-          tags: {
-            connect: input.tags.map((tag) => ({
-              id: tag.id,
-            })),
+          user: {
+            connect: { id: userId },
           },
+          role: GroupMemberRole.ADMIN,
+          status: InvitationStatus.ACCEPTED,
           createdBy: {
             connect: { id: userId },
           },
           updatedBy: {
             connect: { id: userId },
           },
-        };
+        },
+      });
 
-        const createdGroup = (await tx.group.create({
-          data: prismaData,
-        })) as unknown as Group;
-
-        // Add the creator as an admin member
-        await tx.groupMembership.create({
-          data: {
-            group: {
-              connect: { id: createdGroup.id },
-            },
-            user: {
-              connect: { id: userId },
-            },
-            role: GroupMemberRole.ADMIN, // Creator is automatically an admin
-            status: InvitationStatus.ACCEPTED,
-            createdBy: {
-              connect: { id: userId },
-            },
-            updatedBy: {
-              connect: { id: userId },
-            },
-          },
-        });
-
-        return createdGroup;
-      })) as unknown as Group;
-
-      return await this.mapToDto(createdGroup, authToken);
+      return this.mapToDto(group, authToken);
     } catch (error) {
       this.logger.error(`Failed to create group`, error);
       throw error;
@@ -324,87 +321,90 @@ export class GroupsService {
     authToken?: string,
   ): Promise<GroupDto> {
     try {
-      const { id, ...updateData } = input;
-
-      // Check if the group exists
-      const group = (await this.prisma.group.findUnique({
-        where: { id },
+      // Verify that the group exists
+      const existingGroup = (await this.prisma.group.findFirst({
+        where: {
+          id: input.id,
+          isActive: true,
+          memberships: {
+            some: {
+              userId,
+              role: GroupMemberRole.ADMIN,
+              status: InvitationStatus.ACCEPTED,
+            },
+          },
+        },
         include: {
-          createdBy: true,
-          city: true,
           tags: true,
         },
       })) as unknown as Group;
 
-      if (!group) {
-        throw new NotFoundException(`Group with ID ${id} not found`);
-      }
-
-      // Check if the user is the creator of the group
-      if (group.createdBy.id !== userId) {
-        throw new ForbiddenException(
-          'You are not authorized to update this group',
+      if (!existingGroup) {
+        throw new NotFoundException(
+          `Group with ID ${input.id} not found or you don't have permission to update it`,
         );
       }
 
-      // Process images if they exist
-      let logoUrl = updateData.logo;
-      let coverUrl = updateData.cover;
+      // Extract update data from input
+      const updateData = { ...input };
+      const id = updateData.id;
+      // Use a separate variable instead of deleting
+      const updateDataWithoutId = { ...updateData };
+      delete (updateDataWithoutId as any).id;
 
-      if (updateData.logo && updateData.logo !== group.logo) {
-        logoUrl = await this.processImageUpload(
-          updateData.logo,
+      // Process images if provided
+      if (updateDataWithoutId.logo !== undefined) {
+        updateDataWithoutId.logo = await this.processImageUpload(
+          updateDataWithoutId.logo,
           'groups/logos',
-          `logo-${userId}`,
+          `logo-${existingGroup.id}`,
           authToken,
         );
       }
 
-      if (updateData.cover && updateData.cover !== group.cover) {
-        coverUrl = await this.processImageUpload(
-          updateData.cover,
+      if (updateDataWithoutId.cover !== undefined) {
+        updateDataWithoutId.cover = await this.processImageUpload(
+          updateDataWithoutId.cover,
           'groups/covers',
-          `cover-${userId}`,
+          `cover-${existingGroup.id}`,
           authToken,
         );
       }
 
-      // Handle enum conversions
-      const processedUpdateData: Record<string, unknown> = {
-        ...updateData,
-        logo: logoUrl?.startsWith('groups/logos') ? logoUrl : group.logo,
-        cover: coverUrl?.startsWith('groups/covers') ? coverUrl : group.cover,
+      // Build the update object
+      const updateObject: any = {
+        ...updateDataWithoutId,
         updatedBy: {
           connect: { id: userId },
         },
-        updatedAt: new Date(),
       };
 
-      if (updateData.city && 'id' in updateData.city) {
-        processedUpdateData.city = {
-          connect: { id: updateData.city.id },
+      // Handle cityId separately
+      if (updateDataWithoutId.cityId) {
+        updateObject.city = {
+          connect: { id: updateDataWithoutId.cityId },
         };
+        delete updateObject.cityId;
       }
 
-      if (updateData.privacy) {
-        processedUpdateData.privacy = updateData.privacy;
-      }
-
-      if (updateData.tags && Array.isArray(updateData.tags)) {
-        processedUpdateData.tags = {
-          disconnect: group.tags.map((tag) => ({
-            id: tag.id,
-          })),
-          connect: updateData.tags.map((tag) => ({
-            id: tag.id,
+      // Handle tagIds separately
+      if (
+        updateDataWithoutId.tagIds &&
+        Array.isArray(updateDataWithoutId.tagIds)
+      ) {
+        // Disconnect existing tags
+        updateObject.tags = {
+          set: [], // Clear existing connections
+          connect: updateDataWithoutId.tagIds.map((tagId) => ({
+            id: tagId,
           })),
         };
+        delete updateObject.tagIds;
       }
 
-      // Update the group
       const updatedGroup = (await this.prisma.group.update({
         where: { id },
-        data: processedUpdateData,
+        data: updateObject,
         include: {
           createdBy: true,
           city: true,
@@ -420,7 +420,7 @@ export class GroupsService {
         },
       })) as unknown as Group;
 
-      return await this.mapToDto(updatedGroup, authToken);
+      return this.mapToDto(updatedGroup, authToken);
     } catch (error) {
       this.logger.error(`Failed to update group`, error);
       throw error;

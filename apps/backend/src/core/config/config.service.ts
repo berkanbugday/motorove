@@ -17,13 +17,6 @@ export class ConfigService {
   }
 
   /**
-   * Get a nested configuration value with proper typing
-   */
-  getNestedConfig<T>(key: string, defaultValue?: T): T {
-    return this.configService.get<T>(key) ?? (defaultValue as T);
-  }
-
-  /**
    * Check if the application is running in development mode
    */
   isDevelopment(): boolean {
@@ -49,63 +42,5 @@ export class ConfigService {
    */
   getEnvironment(): NodeEnv {
     return this.configService.get<NodeEnv>('environment') ?? NodeEnv.Dev;
-  }
-
-  /**
-   * Get all authentication-related configurations
-   */
-  getAuthConfig(): { jwtSecret: string; jwtExpiration: string } {
-    return (
-      this.configService.get<{ jwtSecret: string; jwtExpiration: string }>(
-        'auth',
-      ) ?? {
-        jwtSecret: '',
-        jwtExpiration: '1d',
-      }
-    );
-  }
-
-  /**
-   * Get all application-related configurations
-   */
-  getAppConfig(): {
-    name: string;
-    port: number;
-    host: string;
-    apiPrefix: string;
-    corsOrigin: string;
-    swaggerEnable: boolean;
-  } {
-    return (
-      this.configService.get<{
-        name: string;
-        port: number;
-        host: string;
-        apiPrefix: string;
-        corsOrigin: string;
-        swaggerEnable: boolean;
-      }>('app') ?? {
-        name: 'Motorove API',
-        port: 3000,
-        host: '0.0.0.0',
-        apiPrefix: 'api',
-        corsOrigin: '*',
-        swaggerEnable: false,
-      }
-    );
-  }
-
-  /**
-   * Get logging configuration
-   */
-  getLoggingConfig(): { level: string; prettyPrint: boolean } {
-    return (
-      this.configService.get<{ level: string; prettyPrint: boolean }>(
-        'logging',
-      ) ?? {
-        level: 'info',
-        prettyPrint: false,
-      }
-    );
   }
 }

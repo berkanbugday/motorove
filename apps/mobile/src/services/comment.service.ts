@@ -7,10 +7,10 @@ import {
   UPDATE_COMMENT,
 } from './graphql/comment.graphql';
 import {
-  Comment,
-  CreateCommentInput,
-  UpdateCommentInput,
-} from '../types/models/post.model';
+  IComment,
+  ICreateComment,
+  IUpdateComment,
+} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
@@ -43,7 +43,7 @@ export const useCreateComment = (onSuccess?: () => void) => {
     },
   );
 
-  const createComment = async (input: CreateCommentInput) => {
+  const createComment = async (input: ICreateComment) => {
     try {
       const result = await createCommentMutation({
         variables: {input},
@@ -112,7 +112,7 @@ export const useUpdateComment = (onSuccess?: () => void) => {
     },
   );
 
-  const updateComment = async (input: UpdateCommentInput) => {
+  const updateComment = async (input: IUpdateComment) => {
     try {
       const result = await updateCommentMutation({
         variables: {input},
@@ -211,7 +211,7 @@ export const useGetComment = (id: string) => {
   });
 
   return {
-    comment: data?.comment as Comment | undefined,
+    comment: data?.comment as IComment | undefined,
     loading,
     error,
     refetch,
@@ -242,7 +242,7 @@ export const useGetComments = (postId: string) => {
   }, [originalRefetch]);
 
   return {
-    comments: data?.comments as Comment[] | undefined,
+    comments: data?.comments as IComment[] | undefined,
     loading,
     error,
     refetch,
