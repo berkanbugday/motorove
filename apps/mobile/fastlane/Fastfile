@@ -7,7 +7,7 @@ import "./helpers/Fastlane.helper"
 before_all do |lane, options|
   # Use appropriate .env file by default
   env = options[:env] || "dev"
-  env_file = "./fastlane/.env.#{env}"
+  env_file = env == "prod" ? "./fastlane/.env" : "./fastlane/.env.#{env}"
   UI.message("Loading environment from #{env_file}")
   Dotenv.load(env_file)
 end
@@ -51,7 +51,7 @@ platform :ios do
       automatic_release: false,
       skip_metadata: true,
       skip_screenshots: true,
-      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa"
+      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}.ipa"
     )
   end
   
@@ -119,7 +119,7 @@ platform :android do
     upload_to_play_store(
       track: ENV["ANDROID_TRACK"] || "prod",
       release_status: ENV["ANDROID_RELEASE_STATUS"] || "completed",
-      apk: "build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk"
+      apk: "build/android/#{env}/#{ENV['APP_NAME']}.apk"
     )
   end
   
