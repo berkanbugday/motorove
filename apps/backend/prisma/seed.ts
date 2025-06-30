@@ -86,38 +86,6 @@ const CITIES = [
   'Düzce',
 ];
 
-const GROUP_TAGS = [
-  // Motorcycle Types
-  'Touring',
-  'Cafe Racer',
-  'Cruiser',
-  'Sport',
-  'Adventure',
-  'Naked',
-  'Custom',
-  'Vintage',
-  'Electric',
-
-  // Rider Experience Levels
-  'Beginner',
-  'Intermediate',
-  'Advanced',
-
-  // Riding Patterns
-  'Weekend Rider',
-  'Daily Commuter',
-  'Long Distance',
-  'Urban Rider',
-
-  // Special Interests
-  'Mechanics',
-  'Customization',
-  'Restoration',
-
-  // Events
-  'Meetup',
-];
-
 async function main() {
   // Seed cities
   console.log('Seeding cities...');
@@ -139,24 +107,6 @@ async function main() {
     console.log(`Created ${cityEntries.length} cities`);
   } else {
     console.log(`Cities already exist, skipping seeding`);
-  }
-
-  // Seed group tags
-  console.log('Seeding group tags...');
-  const existingGroupTags = await prisma.groupTag.findMany();
-
-  // Only seed if no group tags exist
-  if (existingGroupTags.length === 0) {
-    for (const tagValue of GROUP_TAGS) {
-      await prisma.groupTag.create({
-        data: {
-          value: tagValue,
-        },
-      });
-    }
-    console.log(`Created ${GROUP_TAGS.length} group tags`);
-  } else {
-    console.log(`Group tags already exist, skipping seeding`);
   }
 
   console.log(`Seeding finished.`);

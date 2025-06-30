@@ -11,7 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env.dev("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 enum GroupPrivacy {
@@ -66,6 +66,7 @@ enum EventType {
   CAMPING_RIDE
   MEET_UP
   TRAINING
+  MOTOFEST
   SOCIAL_RESPONSIBILITY
 }
 
@@ -105,17 +106,118 @@ enum Language {
   TR
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  PREFER_NOT_TO_SAY
+}
+
+enum RidingStyle {
+  TOURING
+  COMMUTING
+  OFF_ROAD
+  ADVENTURE
+  TRACK
+  CAFE_RACER
+  CRUISER
+  SPORT
+  STUNT
+  GROUP_RIDE
+  SOLO_RIDE
+  TOURING_WITH_CAMPING
+  SCOOTER
+  CUSTOM
+}
+
+enum EquipmentType {
+  FULL_FACE_HELMET
+  MODULAR_HELMET
+  OPEN_FACE_HELMET
+  OFF_ROAD_HELMET
+  HALF_HELMET
+  RIDING_JACKET
+  ARMOR
+  BACK_PROTECTOR
+  AIRBAG_VEST
+  RIDING_PANTS
+  KNEE_GUARDS
+  GLOVES
+  BOOTS
+  GOGGLES
+  RAIN_SUIT
+  INTERCOM
+  CAMERA
+  GPS_DEVICE
+  FIRST_AID_KIT
+}
+
+enum SocialMediaPlatform {
+  INSTAGRAM
+  FACEBOOK
+  TWITTER
+  YOUTUBE
+  TIKTOK
+  LINKEDIN
+}
+
+enum Interest {
+  BIKE_CUSTOMIZATION
+  DIY_MAINTENANCE
+  VINTAGE_BIKES
+  ELECTRIC_BIKES
+  RIDING_SKILLS
+  MOTO_PHOTOGRAPHY
+  CONTENT_CREATION
+  MEETING_RIDERS
+  COMMUNITY_EVENTS
+  MOTO_FESTIVALS
+  EXPLORING_NATURE
+  MOUNTAIN_ROADS
+  COASTAL_RIDES
+  CROSS_BORDER_TRIPS
+  RIDING_ABROAD
+}
+
+// Add new GroupTag enum
+enum GroupTag {
+  BEGINNER
+  ADVANCED
+  CAMPING
+  TOURING
+  OFF_ROAD
+  CITY_RIDES
+  TRACK_DAY
+  SCOOTER_GROUP
+  WOMEN_ONLY
+  WEEKEND_RIDERS
+  CROSS_COUNTRY
+  BORDER_RIDES
+  DIY_AND_CUSTOM
+  MECHANIC_DISCUSSION
+  EVENT_ORGANIZERS
+  SOCIAL_RESPONSIBILITY
+}
+
 // Models
 model User {
   id         String   @id @default(uuid())
-  email      String   @unique
   firstName  String
   lastName   String
   avatar     String?
   supabaseId String   @unique
+  email      String   @unique
+  bio        String?
+  cityId     String?
+  city       City?    @relation(fields: [cityId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   isActive   Boolean  @default(true)
+
+  // New fields
+  dateOfBirth DateTime?
+  gender      Gender?
+  ridingStyle RidingStyle[] @default([])
+  interests   Interest[]    @default([])
 
   // Relations
   createdGroups        Group[]           @relation("GroupCreatedBy")
@@ -133,6 +235,16 @@ model User {
   updatedComments      Comment[]         @relation("CommentUpdatedBy")
   postLikes            PostLike[]
   postSaves            PostSave[]
+  socialMediaProfiles  SocialMedia[]
+  updatedSocialMedia   SocialMedia[]     @relation("SocialMediaUpdatedBy")
+
+  // Garage system relations
+  garages            Garage[]     @relation("UserGarages")
+  updatedGarages     Garage[]     @relation("GarageUpdatedBy")
+  createdMotorcycles Motorcycle[] @relation("MotorcycleCreatedBy")
+  updatedMotorcycles Motorcycle[] @relation("MotorcycleUpdatedBy")
+  createdEquipment   Equipment[]  @relation("EquipmentCreatedBy")
+  updatedEquipment   Equipment[]  @relation("EquipmentUpdatedBy")
 
   // Following system relations
   followers UserFollowing[] @relation("UserFollowers")
@@ -141,21 +253,117 @@ model User {
   // Event relations
   createdEvents       Event[]            @relation("EventCreatedBy")
   updatedEvents       Event[]            @relation("EventUpdatedBy")
-  eventParticipations EventParticipant[]
+  eventParticipations EventParticipant[] @relation("EventParticipantCreatedBy")
   receivedInvitations EventInvitation[]  @relation("ReceivedInvitations")
-  Event               Event?             @relation(fields: [eventId], references: [id])
-  eventId             String?
 
   // Added relations for EventInvitation
   createdEventInvitations EventInvitation[] @relation("EventInvitationCreatedBy")
   updatedEventInvitations EventInvitation[] @relation("EventInvitationUpdatedBy")
 
   // EventParticipant relations
-  createdEventParticipants EventParticipant[] @relation("EventParticipantCreatedBy")
   updatedEventParticipants EventParticipant[] @relation("EventParticipantUpdatedBy")
 
-  @@index([email])
   @@index([supabaseId])
+  @@index([isActive])
+  @@index([ridingStyle])
+  @@index([gender])
+  @@index([interests])
+  @@index([cityId])
+}
+
+// New model for user garages
+model Garage {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  equipments  Equipment[]
+  motorcycles Motorcycle[] // Add relation to motorcycles
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("UserGarages", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("GarageUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([createdById])
+  @@index([isActive])
+}
+
+// New model for motorcycles
+model Motorcycle {
+  id          String   @id @default(uuid())
+  brand       String
+  model       String
+  year        Int?
+  description String?
+  images      String[] @default([])
+  garageId    String // Change to reference garage instead of user
+  garage      Garage   @relation(fields: [garageId], references: [id], onDelete: Cascade)
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("MotorcycleCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("MotorcycleUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([garageId])
+  @@index([brand])
+  @@index([isActive])
+}
+
+// New model for equipment in garages
+model Equipment {
+  id          String        @id @default(uuid())
+  name        String
+  type        EquipmentType
+  brand       String
+  model       String
+  year        Int?
+  description String?
+  images      String[]      @default([])
+  garageId    String
+  garage      Garage        @relation(fields: [garageId], references: [id], onDelete: Cascade)
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("EquipmentCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("EquipmentUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([garageId])
+  @@index([type])
+  @@index([brand])
+  @@index([isActive])
+}
+
+// New model for social media profiles
+model SocialMedia {
+  id       String              @id @default(uuid())
+  platform SocialMediaPlatform
+  username String
+  url      String
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("SocialMediaUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@unique([createdById, platform])
+  @@index([createdById])
+  @@index([platform])
   @@index([isActive])
 }
 
@@ -165,15 +373,9 @@ model City {
 
   // Relations
   groups Group[]
-}
+  users  User[]
 
-model GroupTag {
-  id       String  @id @default(uuid())
-  value    String
-  isActive Boolean @default(true)
-
-  // Relations
-  groups Group[] @relation("GroupToTags")
+  @@index([value])
 }
 
 model Group {
@@ -185,7 +387,7 @@ model Group {
   cityId          String
   city            City         @relation(fields: [cityId], references: [id])
   privacy         GroupPrivacy
-  tags            GroupTag[]   @relation("GroupToTags")
+  tags            GroupTag[] // Changed from GroupTag[] relation to GroupTag[] enum array
   membersCapacity Int?
 
   // Base model fields
@@ -410,8 +612,6 @@ model Event {
   maxParticipants Int?
   isPrivate       Boolean   @default(false)
   images          String[]
-  invitedUserIds  String[]  @default([]) // Added field from Event model
-  invitedGroupIds String[]  @default([]) // Added field from Event model
 
   // Ride-specific fields
   roadType           RoadType?
@@ -441,7 +641,6 @@ model Event {
   invitations   EventInvitation[]
   addresses     Address[]
   invitedGroups Group[]
-  invitedUsers  User[]
 
   @@index([eventType])
   @@index([startDateTime])
@@ -465,8 +664,6 @@ model EventParticipant {
   updatedBy   User?    @relation("EventParticipantUpdatedBy", fields: [updatedById], references: [id])
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
-  User        User?    @relation(fields: [userId], references: [id])
-  userId      String?
 
   @@unique([eventId, createdById])
   @@index([eventId])

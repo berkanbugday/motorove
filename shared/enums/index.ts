@@ -5,6 +5,7 @@ export * from "./event-type.enum";
 export * from "./experience-level.enum";
 export * from "./group-member-role.enum";
 export * from "./group-privacy.enum";
+export * from "./group-tag.enum";
 export * from "./invitation-status.enum";
 export * from "./language.enum";
 export * from "./notification-status.enum";
