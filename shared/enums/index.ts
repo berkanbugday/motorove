@@ -11,3 +11,8 @@ export * from "./language.enum";
 export * from "./notification-status.enum";
 export * from "./notification-type.enum";
 export * from "./road-type.enum";
+export * from "./gender.enum";
+export * from "./riding-style.enum";
+export * from "./equipment-type.enum";
+export * from "./social-media-platform.enum";
+export * from "./interest.enum";
