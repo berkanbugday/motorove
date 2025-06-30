@@ -1,11 +1,11 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { User } from '../users/models/user.model';
+
 import { AuthResponse } from './models/auth-response.model';
 import { SignUpInput } from './dto/signup.input';
 import { SignInInput } from './dto/signin.input';
 
-@Resolver(() => User)
+@Resolver(() => AuthResponse)
 export class AuthResolver {
   constructor(private authService: AuthService) {}
 

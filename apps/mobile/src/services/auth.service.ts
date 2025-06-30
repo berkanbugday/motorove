@@ -19,10 +19,10 @@ let tokenRefreshTimer: NodeJS.Timeout | null = null;
 class AuthService {
   // Sign up a new user
   async signUp(
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
-    firstName?: string,
-    lastName?: string,
   ): Promise<AuthResponse> {
     try {
       const {data, errors} = await apolloClient.mutate({

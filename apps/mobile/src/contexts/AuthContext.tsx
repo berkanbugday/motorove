@@ -21,10 +21,10 @@ const defaultAuthState: AuthState = {
 export interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<AuthResponse>;
   signUp: (
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
-    firstName?: string,
-    lastName?: string,
   ) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
@@ -150,10 +150,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   // Sign up
   const signUp = async (
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
-    firstName?: string,
-    lastName?: string,
   ): Promise<AuthResponse> => {
     try {
       setAuthState(prevState => ({...prevState, isLoading: true}));

@@ -4,9 +4,9 @@
  */
 export interface IUser {
   id: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
   avatar?: string;
   supabaseId: string;
   createdAt: Date;

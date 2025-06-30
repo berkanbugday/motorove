@@ -1,12 +1,5 @@
 import React, {useState, useRef} from 'react';
-import {
-  StyleSheet,
-  View,
-  Platform,
-  SafeAreaView,
-  Image,
-  ScrollView,
-} from 'react-native';
+import {StyleSheet, View, SafeAreaView, Image, ScrollView} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
