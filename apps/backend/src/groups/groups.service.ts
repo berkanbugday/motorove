@@ -1,6 +1,5 @@
 import {
   Injectable,
-  ForbiddenException,
   NotFoundException,
   BadRequestException,
   Logger,
@@ -33,49 +32,35 @@ export class GroupsService {
     authToken?: string,
   ): Promise<GroupDto[]> {
     try {
+      const whereClause: any = {
+        isActive: true,
+      };
+
+      // Add text search if provided
+      if (query) {
+        whereClause.OR = [
+          { name: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+        ];
+      }
+
+      // Add city filter if provided
+      if (filters?.cityId && filters.cityId !== null) {
+        whereClause.city = { id: filters.cityId };
+      }
+
+      // Add privacy filter if provided
+      if (filters?.privacy && filters.privacy !== 'ALL') {
+        whereClause.privacy = filters.privacy;
+      }
+
+      // Skip tag filtering for now since it's causing issues with the enum
+
       const groups = (await this.prisma.group.findMany({
-        where: {
-          isActive: true,
-          ...(query
-            ? {
-                OR: [
-                  { name: { contains: query, mode: 'insensitive' } },
-                  { description: { contains: query, mode: 'insensitive' } },
-                ],
-              }
-            : {}),
-          ...(filters?.tags && filters.tags.length > 0
-            ? {
-                tags: {
-                  some: {
-                    id: {
-                      in: filters.tags,
-                    },
-                  },
-                },
-              }
-            : {}),
-          ...(filters?.cityId && filters.cityId !== null
-            ? {
-                city: {
-                  id: filters.cityId,
-                },
-              }
-            : {}),
-          ...(filters?.privacy && filters.privacy !== 'ALL'
-            ? {
-                privacy: filters.privacy,
-              }
-            : {}),
-        },
+        where: whereClause,
         include: {
           createdBy: true,
           city: true,
-          tags: {
-            orderBy: {
-              value: 'asc',
-            },
-          },
           memberships: {
             where: {
               status: InvitationStatus.ACCEPTED,
@@ -92,8 +77,19 @@ export class GroupsService {
         },
       })) as unknown as Group[];
 
+      // Filter manually by tags if needed
+      let filteredGroups = groups;
+      if (filters && filters.tags && filters.tags.length > 0) {
+        filteredGroups = groups.filter((group) => {
+          // Make sure both arrays exist
+          if (!group.tags || !filters.tags) return false;
+          // Check if any tag from filters exists in group tags
+          return group.tags.some((tag) => filters.tags!.includes(tag));
+        });
+      }
+
       return await Promise.all(
-        groups.map(async (group) => this.mapToDto(group, authToken)),
+        filteredGroups.map(async (group) => this.mapToDto(group, authToken)),
       );
     } catch (error) {
       this.logger.error(`Failed to get groups`, error);
@@ -109,48 +105,38 @@ export class GroupsService {
     authToken?: string,
   ): Promise<GroupDto[]> {
     try {
-      const groups = (await this.prisma.group.findMany({
-        where: {
-          memberships: {
-            some: {
-              userId,
-              status: InvitationStatus.ACCEPTED,
-              ...(filters?.role && filters.role !== 'ALL'
-                ? {
-                    role: filters.role,
-                  }
-                : {}),
-            },
+      const whereClause: any = {
+        isActive: true,
+        memberships: {
+          some: {
+            userId,
+            status: InvitationStatus.ACCEPTED,
+            ...(filters?.role && filters.role !== 'ALL'
+              ? {
+                  role: filters.role,
+                }
+              : {}),
           },
-          isActive: true,
-          ...(filters?.tags && filters.tags.length > 0
-            ? {
-                tags: {
-                  hasSome: filters.tags,
-                },
-              }
-            : {}),
-          ...(filters?.cityId && filters.cityId !== null
-            ? {
-                city: {
-                  id: filters.cityId,
-                },
-              }
-            : {}),
-          ...(filters?.privacy && filters.privacy !== 'ALL'
-            ? {
-                privacy: filters.privacy,
-              }
-            : {}),
         },
+      };
+
+      // Add city filter if provided
+      if (filters?.cityId && filters.cityId !== null) {
+        whereClause.city = { id: filters.cityId };
+      }
+
+      // Add privacy filter if provided
+      if (filters?.privacy && filters.privacy !== 'ALL') {
+        whereClause.privacy = filters.privacy;
+      }
+
+      // Skip tag filtering for now since it's causing issues with the enum
+
+      const groups = (await this.prisma.group.findMany({
+        where: whereClause,
         include: {
           createdBy: true,
           city: true,
-          tags: {
-            orderBy: {
-              value: 'asc',
-            },
-          },
           memberships: {
             where: {
               status: InvitationStatus.ACCEPTED,
@@ -167,8 +153,19 @@ export class GroupsService {
         },
       })) as unknown as Group[];
 
+      // Filter manually by tags if needed
+      let filteredGroups = groups;
+      if (filters && filters.tags && filters.tags.length > 0) {
+        filteredGroups = groups.filter((group) => {
+          // Make sure both arrays exist
+          if (!group.tags || !filters.tags) return false;
+          // Check if any tag from filters exists in group tags
+          return group.tags.some((tag) => filters.tags!.includes(tag));
+        });
+      }
+
       return await Promise.all(
-        groups.map(async (group) => this.mapToDto(group, authToken)),
+        filteredGroups.map(async (group) => this.mapToDto(group, authToken)),
       );
     } catch (error) {
       this.logger.error(`Failed to get joined groups`, error);
@@ -187,11 +184,6 @@ export class GroupsService {
         include: {
           createdBy: true,
           city: true,
-          tags: {
-            orderBy: {
-              value: 'asc',
-            },
-          },
           memberships: {
             where: {
               status: InvitationStatus.ACCEPTED,
@@ -262,11 +254,7 @@ export class GroupsService {
         },
         privacy: input.privacy,
         membersCapacity: input.membersCapacity,
-        tags: {
-          connect: input.tagIds.map((tagId) => ({
-            id: tagId,
-          })),
-        },
+        tags: input.tags, // Now directly using the enum array
         createdBy: {
           connect: { id: userId },
         },
@@ -280,7 +268,6 @@ export class GroupsService {
         include: {
           createdBy: true,
           city: true,
-          tags: true,
         },
       })) as unknown as Group;
 
@@ -329,9 +316,6 @@ export class GroupsService {
               status: InvitationStatus.ACCEPTED,
             },
           },
-        },
-        include: {
-          tags: true,
         },
       })) as unknown as Group;
 
@@ -383,28 +367,12 @@ export class GroupsService {
         delete updateObject.cityId;
       }
 
-      // Handle tagIds separately
-      if (
-        updateDataWithoutId.tagIds &&
-        Array.isArray(updateDataWithoutId.tagIds)
-      ) {
-        // Disconnect existing tags
-        updateObject.tags = {
-          set: [], // Clear existing connections
-          connect: updateDataWithoutId.tagIds.map((tagId) => ({
-            id: tagId,
-          })),
-        };
-        delete updateObject.tagIds;
-      }
-
       const updatedGroup = (await this.prisma.group.update({
         where: { id },
         data: updateObject,
         include: {
           createdBy: true,
           city: true,
-          tags: true,
           memberships: {
             where: {
               status: InvitationStatus.ACCEPTED,

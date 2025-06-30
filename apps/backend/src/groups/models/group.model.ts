@@ -3,7 +3,7 @@ import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import { BaseModel } from '../../core/models';
 import { GroupMembership } from '../../group-memberships/models/group-membership.model';
 import { City } from '../../cities/models/city.model';
-import { GroupTag } from '../../group-tags/models/group-tag.model';
+import { GroupTag } from '../../enums/models/group-tag.enum';
 import { Post } from '../../posts/models/post.model';
 import { Event } from '../../events/models/event.model';
 

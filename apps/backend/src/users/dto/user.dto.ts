@@ -20,15 +20,13 @@ export class UserDto implements IUser {
   @IsEmail()
   declare email: string;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+  @Field(() => String)
   @IsString()
-  declare firstName?: string;
+  declare firstName: string;
 
-  @Field(() => String, { nullable: true })
-  @IsOptional()
+  @Field(() => String)
   @IsString()
-  declare lastName?: string;
+  declare lastName: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

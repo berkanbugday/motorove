@@ -1,5 +1,6 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
+import { GroupTag } from '../../enums/models/group-tag.enum';
 import {
   IsString,
   IsOptional,
@@ -56,9 +57,12 @@ export class CreateGroupInput implements ICreateGroup {
   @IsPositive({ message: 'Members capacity must be a positive number' })
   membersCapacity?: number;
 
-  @Field(() => [String])
+  @Field(() => [GroupTag])
   @IsArray()
   @ArrayMinSize(1, { message: 'Please select at least 1 tag' })
   @ArrayMaxSize(3, { message: 'You can select up to 3 tags' })
-  tagIds: string[];
+  tags: GroupTag[];
+
+  // Keep tagIds for backward compatibility with the interface
+  tagIds?: string[];
 }

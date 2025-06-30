@@ -3,6 +3,7 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { IFilterGroup } from '@motorove/shared';
 import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
+import { GroupTag } from '../../enums/models/group-tag.enum';
 
 @InputType()
 export class FilterGroupInput implements IFilterGroup {
@@ -15,9 +16,9 @@ export class FilterGroupInput implements IFilterGroup {
   @IsEnum(GroupPrivacy)
   privacy?: GroupPrivacy = GroupPrivacy.ALL;
 
-  @Field(() => [String], { defaultValue: [] })
+  @Field(() => [GroupTag], { defaultValue: [] })
   @IsOptional()
-  tags?: string[] = [];
+  tags?: GroupTag[] = [];
 
   @Field(() => GroupMemberRole, {
     nullable: true,
