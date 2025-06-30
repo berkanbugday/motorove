@@ -81,7 +81,7 @@ export const AccountSetupScreen = () => {
   const {height} = useWindowDimensions();
   const navigation = useNavigation<AuthScreenNavigationProp<'AccountSetup'>>();
   const route = useRoute<AuthScreenRouteProp<'AccountSetup'>>();
-  const {fullName} = route.params || {};
+  const {firstName} = route.params || {};
   const insets = useSafeAreaInsets();
   const wizardRef = useRef<WizardHandle>(null);
 
@@ -352,8 +352,8 @@ export const AccountSetupScreen = () => {
           keyboardShouldPersistTaps="handled">
           <View style={[styles.content, {minHeight: height * 0.8}]}>
             <Title align="center" style={styles.welcomeText}>
-              {fullName ? `Hi ${fullName.split(' ')[0]}!` : 'Almost there!'}{' '}
-              Let's complete your profile
+              {firstName ? `Hi ${firstName}!` : 'Almost there!'} Let's complete
+              your profile
             </Title>
 
             <Wizard

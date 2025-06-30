@@ -383,7 +383,10 @@ function AnimatedInputBase({
           <TouchableOpacity
             onPress={onToggleSecureEntry}
             testID={`${testID}-toggle`}>
-            <Icon name={showPassword ? 'eye' : 'eye-slash'} size={20} />
+            <Icon
+              name={showPassword ? 'eye-filled' : 'eye-slash-filled'}
+              size={20}
+            />
           </TouchableOpacity>
         ) : (
           icon
