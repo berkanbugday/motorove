@@ -29,7 +29,9 @@ type AddressDto {
   type: AddressType!
 }
 
-"""The types of addresses that can be associated with a post or event"""
+"""
+The types of addresses that can be associated with a post or event
+"""
 enum AddressType {
   EVENT_FINISH_LOCATION
   EVENT_MEETING_POINT
@@ -121,7 +123,9 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""Difficulty level for motorcycle rides"""
+"""
+Difficulty level for motorcycle rides
+"""
 enum DifficultyLevel {
   EASY
   HARD
@@ -237,7 +241,9 @@ enum EventParticipantStatus {
   LEFT
 }
 
-"""The types of events that can be created"""
+"""
+The types of events that can be created
+"""
 enum EventType {
   CAMPING_RIDE
   GROUP_RIDE
@@ -247,7 +253,9 @@ enum EventType {
   TRAINING
 }
 
-"""Experience level for workshops and training events"""
+"""
+Experience level for workshops and training events
+"""
 enum ExperienceLevel {
   ADVANCED
   ALL_LEVELS
@@ -337,7 +345,9 @@ type GroupDto {
   tags: [String!]!
 }
 
-"""The role of a user in a group"""
+"""
+The role of a user in a group
+"""
 enum GroupMemberRole {
   ADMIN
   ALL
@@ -370,7 +380,9 @@ type GroupMembershipDto {
   user: UserDto!
 }
 
-"""Privacy levels for groups"""
+"""
+Privacy levels for groups
+"""
 enum GroupPrivacy {
   ALL
   PRIVATE
@@ -394,7 +406,9 @@ enum InvitationStatus {
   REJECTED
 }
 
-"""Supported languages in the application"""
+"""
+Supported languages in the application
+"""
 enum Language {
   EN
   TR
@@ -444,7 +458,9 @@ type NotificationDto {
   type: NotificationType!
 }
 
-"""The status of a notification"""
+"""
+The status of a notification
+"""
 enum NotificationStatus {
   DELIVERED
   FAILED
@@ -453,7 +469,9 @@ enum NotificationStatus {
   SENT
 }
 
-"""The type of notification"""
+"""
+The type of notification
+"""
 enum NotificationType {
   EVENT_INVITATION
   EVENT_REMINDER
@@ -541,7 +559,12 @@ type Query {
   cities: [CityDto!]!
   city(id: ID!): CityDto!
   comment(id: ID!): CommentDto!
-  comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
+  comments(
+    filters: FilterCommentInput
+    limit: Int
+    postId: ID!
+    skip: Int
+  ): [CommentDto!]!
   count: Float!
   event(id: ID!): EventDto!
   events(filters: FilterEventInput, limit: Int, skip: Int): [EventDto!]!
@@ -561,7 +584,12 @@ type Query {
   groupMemberships(filters: FilterGroupMembershipInput): [GroupMembershipDto!]!
   groupTag(id: ID!): GroupTagDto!
   groupTags: [GroupTagDto!]!
-  groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
+  groups(
+    filters: FilterGroupInput
+    limit: Int
+    query: String
+    skip: Int
+  ): [GroupDto!]!
   isFollowing(userId: ID!): Boolean!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
@@ -578,7 +606,9 @@ input RemoveGroupMemberInput {
   userId: ID!
 }
 
-"""Type of road surface for motorcycle rides"""
+"""
+Type of road surface for motorcycle rides
+"""
 enum RoadType {
   ASPHALT
   MIXED

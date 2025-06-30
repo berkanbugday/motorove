@@ -126,11 +126,7 @@ export class GroupsService {
           ...(filters?.tags && filters.tags.length > 0
             ? {
                 tags: {
-                  some: {
-                    id: {
-                      in: filters.tags,
-                    },
-                  },
+                  hasSome: filters.tags,
                 },
               }
             : {}),
