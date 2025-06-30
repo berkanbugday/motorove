@@ -41,7 +41,7 @@ If you prefer to set up environment files manually, create the following files:
 - `.env` - Base configuration shared across all environments
 - `.env.development` - Development-specific configuration
 - `.env.staging` - Staging-specific configuration
-- `.env.production` - Production-specific configuration
+- `.env` - Production-specific configuration
 - `.env.test` - Test-specific configuration
 
 You can use the templates in `src/core/config/README.md` as a reference.

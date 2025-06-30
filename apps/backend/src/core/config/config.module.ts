@@ -3,7 +3,6 @@ import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { join } from 'path';
 import { ConfigService } from './config.service';
-import configuration from './configuration';
 import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
 
 @Global()
@@ -12,7 +11,6 @@ import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
     NestConfigModule.forRoot({
       isGlobal: true,
       envFilePath: getEnvFilePath(),
-      load: [configuration],
       cache: true,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()

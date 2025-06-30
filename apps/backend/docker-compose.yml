@@ -6,7 +6,7 @@ services:
     image: postgres:16-alpine
     container_name: motorove-postgres
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - '${DB_PORT:-5432}:5432'
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -16,7 +16,7 @@ services:
     networks:
       - motorove-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
       target: development
     container_name: motorove-api-dev
     ports:
-      - "${API_PORT:-3000}:3000"
+      - '${API_PORT:-3000}:3000'
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-motorove}?schema=public
@@ -53,7 +53,7 @@ services:
       target: staging
     container_name: motorove-api-staging
     ports:
-      - "${API_PORT:-3001}:3000"
+      - '${API_PORT:-3001}:3000'
     environment:
       - NODE_ENV=staging
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-motorove_staging}?schema=public
@@ -74,13 +74,12 @@ services:
       target: production
     container_name: motorove-api-prod
     ports:
-      - "${API_PORT:-3002}:3000"
+      - '${API_PORT:-3002}:3000'
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-motorove_prod}?schema=public
     env_file:
       - .env
-      - .env.production
     depends_on:
       postgres:
         condition: service_healthy

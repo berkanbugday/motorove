@@ -19,7 +19,7 @@ These files are not committed to the repository for security reasons. You need t
    ```bash
    cp .env.dev.example .env.dev
    cp .env.staging.example .env.staging
-   cp .env.prod.example .env.prod
+   cp .env.example .env
    ```
 
 2. Update the values in each file according to your environment settings

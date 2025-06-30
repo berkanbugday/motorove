@@ -32,21 +32,21 @@ async function bootstrap() {
   );
 
   // Configure CORS based on environment
-  const corsOrigin = configService.getAppConfig().corsOrigin;
+  const corsOrigin = configService.get<string>('CORS_ORIGIN');
   app.enableCors({
     origin: corsOrigin,
     credentials: true,
   });
 
   // Apply API prefix if configured
-  const apiPrefix = configService.getAppConfig().apiPrefix;
+  const apiPrefix = configService.get<string>('API_PREFIX');
   if (apiPrefix) {
     app.setGlobalPrefix(apiPrefix);
   }
 
   // Get port and host from configuration
-  const port = configService.getAppConfig().port;
-  const host = configService.getAppConfig().host;
+  const port = configService.get<number>('PORT');
+  const host = configService.get<string>('HOST');
   const environment = configService.getEnvironment();
 
   // Start the server
