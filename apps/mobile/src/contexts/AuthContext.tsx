@@ -158,10 +158,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     try {
       setAuthState(prevState => ({...prevState, isLoading: true}));
       const response = await authService.signUp(
-        email,
-        password,
         firstName,
         lastName,
+        email,
+        password,
       );
 
       // Ensure we're setting the state correctly after signup

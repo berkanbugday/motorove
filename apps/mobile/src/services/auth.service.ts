@@ -29,10 +29,10 @@ class AuthService {
         mutation: SIGN_UP,
         variables: {
           input: {
-            email,
-            password,
             firstName,
             lastName,
+            email,
+            password,
           },
         },
       });

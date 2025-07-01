@@ -238,10 +238,7 @@ const GroupEventCard: React.FC<GroupEventCardProps> = ({
                     {zIndex: 10 - index, marginLeft: index > 0 ? -10 : 0},
                   ]}>
                   <Image
-                    source={
-                      participant.avatar ||
-                      require('@assets/images/default-avatar.png')
-                    }
+                    source={participant.avatar || undefined}
                     style={styles.participantAvatar}
                   />
                 </View>

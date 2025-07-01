@@ -17,10 +17,10 @@ export class AuthService {
   ) {}
 
   async signUp(
-    email: string,
-    password: string,
     firstName: string,
     lastName: string,
+    email: string,
+    password: string,
   ): Promise<AuthResponse> {
     try {
       // First, check if the email already exists in our database
@@ -52,18 +52,16 @@ export class AuthService {
       // Create user in our database
       const user = await this.prismaService.user.create({
         data: {
-          email,
           firstName,
           lastName,
+          email,
           supabaseId: data.user.id,
+          avatar: 'users/avatars/default.png',
         },
       });
 
       return {
-        user: {
-          ...user,
-          avatar: user.avatar || undefined,
-        },
+        user,
         session: data.session || null,
       };
     } catch (error) {

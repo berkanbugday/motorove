@@ -20,7 +20,6 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signupSchema, SignupFormValues} from '@utils/validation';
 import {colors, spacing, fontSizes, radius, commonStyles} from '@theme';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {termsOfService, privacyPolicy} from '@constants/legalContent';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {GraphQLFormattedError} from 'graphql';
@@ -33,7 +32,6 @@ export const SignupScreen = () => {
   const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
   const {signup} = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const insets = useSafeAreaInsets();
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {
     control,
@@ -65,16 +63,10 @@ export const SignupScreen = () => {
 
   const onSubmit = async (data: SignupFormValues) => {
     try {
-      await signup(data.email, data.password, data.firstName, data.lastName);
+      await signup(data.firstName, data.lastName, data.email, data.password);
 
       setUserEmail(data.email);
       setSignupSuccess(true);
-      // Navigate to account setup screen
-      navigation.navigate('AccountSetup', {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-      });
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
       // Handle specific error types
@@ -105,12 +97,6 @@ export const SignupScreen = () => {
     // TODO: Implement actual email verification
   };
 
-  const handleBackToSignup = () => {
-    // Navigate to signup screen
-    setSignupSuccess(false);
-    navigation.navigate('Signup');
-  };
-
   // Social signup is commented out in UI, so this function is not currently used
   // function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
   //   // Notify user that social signup is not implemented yet
@@ -132,43 +118,37 @@ export const SignupScreen = () => {
   // View when signup is successful
   if (signupSuccess) {
     return (
-      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
-        <View style={styles.content}>
-          <Title align="center" style={styles.successTitle}>
-            Verify your email
-          </Title>
-          <View style={styles.successContainer}>
-            <Icon
-              name="envelope-filled"
-              size={60}
-              color={colors.status.success}
-            />
-            <Body>We've sent a verification email to</Body>
-            <Body color={colors.neutral.black} weight="semiBold">
-              {userEmail}
-            </Body>
-            <BodySmall align="center" style={styles.successText}>
-              If you don't see the email, check your spam folder
-            </BodySmall>
-          </View>
-          <Button
-            title="Resend Verification Email"
-            variant="primary"
-            shape="round"
-            onPress={handleResendVerificationEmail}
-            style={{marginVertical: spacing.sm}}
-            testID="resend-verification-email-button"
-          />
-          <Button
-            title="Back to Signup"
-            variant="outline"
-            shape="round"
-            onPress={handleBackToSignup}
-            style={{marginVertical: spacing.sm}}
-            testID="back-to-signup-button"
-          />
+      <View style={[styles.content, {justifyContent: 'center'}]}>
+        <Title align="center" style={styles.successTitle}>
+          Verify your email
+        </Title>
+        <View style={styles.successContainer}>
+          <Icon name="paper-plane" size={40} />
+          <Body style={{marginTop: spacing.md}}>
+            We've sent a verification email to
+          </Body>
+          <Body weight="semiBold">{userEmail}</Body>
+          <BodySmall align="center" style={styles.successText}>
+            If you don't see the email, check your spam folder
+          </BodySmall>
         </View>
-      </SafeAreaView>
+        <Button
+          title="Back to Sign In"
+          variant="primary"
+          shape="round"
+          onPress={handleSignin}
+          style={{marginVertical: spacing.sm}}
+          testID="back-to-signin-button"
+        />
+        <Button
+          title="Resend Verification Email"
+          variant="outline"
+          shape="round"
+          onPress={handleResendVerificationEmail}
+          style={{marginVertical: spacing.sm}}
+          testID="resend-verification-email-button"
+        />
+      </View>
     );
   }
 

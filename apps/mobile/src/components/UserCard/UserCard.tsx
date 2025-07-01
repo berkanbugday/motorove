@@ -82,11 +82,7 @@ export const UserCard: React.FC<UserCardProps> = ({
       <View style={styles.content}>
         <View style={styles.avatarContainer}>
           <Image
-            source={
-              user.avatar
-                ? {uri: user.avatar}
-                : require('@assets/images/default-avatar.png')
-            }
+            source={user.avatar ? {uri: user.avatar} : undefined}
             style={styles.avatar}
           />
         </View>
