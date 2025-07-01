@@ -27,7 +27,6 @@ import {GraphQLFormattedError} from 'graphql';
 
 export const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const termsBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -48,21 +47,20 @@ export const SignupScreen = () => {
       lastName: '',
       email: '',
       password: '',
-      confirmPassword: '',
       agreeToTerms: true,
     },
   });
 
   const handleGoBack = () => {
-    navigation.goBack();
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('Signin');
+    }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
   };
 
   const onSubmit = async (data: SignupFormValues) => {
@@ -81,12 +79,12 @@ export const SignupScreen = () => {
       await handleGraphQLError(error as GraphQLFormattedError);
       // Handle specific error types
       if (error instanceof Error) {
-        setError('confirmPassword', {
+        setError('password', {
           type: 'manual',
           message: error.message || 'Registration failed',
         });
       } else {
-        setError('confirmPassword', {
+        setError('password', {
           type: 'manual',
           message: 'An unexpected error occurred. Please try again.',
         });
@@ -96,7 +94,11 @@ export const SignupScreen = () => {
 
   const handleSignin = () => {
     // Navigate to signin screen
-    navigation.navigate('Signin');
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('Signin');
+    }
   };
 
   const handleResendVerificationEmail = () => {
@@ -238,18 +240,6 @@ export const SignupScreen = () => {
                 onToggleSecureEntry={togglePasswordVisibility}
                 showPassword={showPassword}
                 testID="signup-password"
-                showClearButton={false}
-              />
-
-              <AnimatedInput
-                control={control}
-                name="confirmPassword"
-                label="Confirm Password"
-                secureTextEntry={!showConfirmPassword}
-                error={errors.confirmPassword}
-                onToggleSecureEntry={toggleConfirmPasswordVisibility}
-                showPassword={showConfirmPassword}
-                testID="signup-confirm-password"
                 showClearButton={false}
               />
 

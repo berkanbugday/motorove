@@ -25,36 +25,27 @@ export const forgotPasswordSchema = z.object({
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 // Signup form schema
-export const signupSchema = z
-  .object({
-    firstName: z
-      .string({required_error: 'First name is required'})
-      .nonempty('First name is required')
-      .min(2, 'First name must be at least 2 characters'),
-    lastName: z
-      .string({required_error: 'Last name is required'})
-      .nonempty('Last name is required')
-      .min(2, 'Last name must be at least 2 characters'),
-    email: z
-      .string({required_error: 'Email is required'})
-      .nonempty('Email is required')
-      .email('Email is invalid'),
-    password: z
-      .string({required_error: 'Password is required'})
-      .nonempty('Password is required')
-      .min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z
-      .string({required_error: 'Confirm password is required'})
-      .nonempty('Confirm password is required')
-      .min(6, 'Confirm password must be at least 6 characters'),
-    agreeToTerms: z.boolean().refine(val => val === true, {
-      message: 'You must agree to the Terms of Service and Privacy Policy',
-    }),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+export const signupSchema = z.object({
+  firstName: z
+    .string({required_error: 'First name is required'})
+    .nonempty('First name is required')
+    .min(2, 'First name must be at least 2 characters'),
+  lastName: z
+    .string({required_error: 'Last name is required'})
+    .nonempty('Last name is required')
+    .min(2, 'Last name must be at least 2 characters'),
+  email: z
+    .string({required_error: 'Email is required'})
+    .nonempty('Email is required')
+    .email('Email is invalid'),
+  password: z
+    .string({required_error: 'Password is required'})
+    .nonempty('Password is required')
+    .min(6, 'Password must be at least 6 characters'),
+  agreeToTerms: z.boolean().refine(val => val === true, {
+    message: 'You must agree to the Terms of Service and Privacy Policy',
+  }),
+});
 
 export type SignupFormValues = z.infer<typeof signupSchema>;
 
