@@ -39,7 +39,14 @@ enum AddressType {
 
 type AuthResponse {
   session: Session
-  user: User!
+  user: AuthUser!
+}
+
+type AuthUser {
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
 }
 
 input ChangeMemberRoleInput {
@@ -131,6 +138,49 @@ enum DifficultyLevel {
 type EnumItem {
   key: String!
   value: String!
+}
+
+type Equipment {
+  brand: String!
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  description: String
+  garage: Garage!
+  garageId: String!
+  id: ID!
+  images: [String!]
+  isActive: Boolean!
+  model: String!
+  name: String!
+  type: EquipmentType!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+  year: Int
+}
+
+"""Types of motorcycle equipment"""
+enum EquipmentType {
+  AIRBAG_VEST
+  ARMOR
+  BACK_PROTECTOR
+  BOOTS
+  CAMERA
+  FIRST_AID_KIT
+  FULL_FACE_HELMET
+  GLOVES
+  GOGGLES
+  GPS_DEVICE
+  HALF_HELMET
+  INTERCOM
+  KNEE_GUARDS
+  MODULAR_HELMET
+  OFF_ROAD_HELMET
+  OPEN_FACE_HELMET
+  RAIN_SUIT
+  RIDING_JACKET
+  RIDING_PANTS
 }
 
 type Event {
@@ -232,6 +282,7 @@ type EventParticipant {
   updatedById: String!
 }
 
+"""Status of a participant in an event"""
 enum EventParticipantStatus {
   JOINED
   LEFT
@@ -242,6 +293,7 @@ enum EventType {
   CAMPING_RIDE
   GROUP_RIDE
   MEET_UP
+  MOTOFEST
   SOCIAL_RESPONSIBILITY
   SOLO_RIDE
   TRAINING
@@ -296,6 +348,28 @@ input FilterGroupMembershipInput {
   role: GroupMemberRole
   status: InvitationStatus
   userId: String
+}
+
+type Garage {
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  description: String
+  equipments: [Equipment!]
+  id: ID!
+  isActive: Boolean!
+  motorcycles: [Motorcycle!]
+  name: String!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+}
+
+"""Gender options"""
+enum Gender {
+  FEMALE
+  MALE
+  PREFER_NOT_TO_SAY
 }
 
 type Group {
@@ -380,25 +454,40 @@ enum GroupPrivacy {
 """Tags for categorizing groups"""
 enum GroupTag {
   ADVANCED
-  ADVENTURE
-  BEGINNERS
-  CAFE_RACER
-  COMMUNITY_SERVICE
-  CRUISER
-  CUSTOM
-  LEARNING
-  MAINTENANCE
-  MOTO_CAMPING
-  OFFROAD
-  PHOTOGRAPHY
-  RACING
-  SOCIAL
-  SPORT
-  TECHNICAL
+  BEGINNER
+  BORDER_RIDES
+  CAMPING
+  CITY_RIDES
+  CROSS_COUNTRY
+  DIY_AND_CUSTOM
+  EVENT_ORGANIZERS
+  MECHANIC_DISCUSSION
+  OFF_ROAD
+  SCOOTER_GROUP
+  SOCIAL_RESPONSIBILITY
   TOURING
   TRACK_DAY
-  TRAINING
-  VINTAGE
+  WEEKEND_RIDERS
+  WOMEN_ONLY
+}
+
+"""Different interests for motorcyclists"""
+enum Interest {
+  BIKE_CUSTOMIZATION
+  COASTAL_RIDES
+  COMMUNITY_EVENTS
+  CONTENT_CREATION
+  CROSS_BORDER_TRIPS
+  DIY_MAINTENANCE
+  ELECTRIC_BIKES
+  EXPLORING_NATURE
+  MEETING_RIDERS
+  MOTO_FESTIVALS
+  MOTO_PHOTOGRAPHY
+  MOUNTAIN_ROADS
+  RIDING_ABROAD
+  RIDING_SKILLS
+  VINTAGE_BIKES
 }
 
 enum InvitationStatus {
@@ -415,6 +504,24 @@ enum Language {
 
 input LeaveGroupInput {
   groupId: String!
+}
+
+type Motorcycle {
+  brand: String!
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  description: String
+  garage: Garage!
+  garageId: String!
+  id: ID!
+  images: [String!]
+  isActive: Boolean!
+  model: String!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+  year: Int
 }
 
 type Mutation {
@@ -444,6 +551,25 @@ type Mutation {
   update(input: UpdateAddressInput!): AddressDto!
   updateMemberRole(input: ChangeMemberRoleInput!): GroupMembershipDto!
   updateMemberStatus(input: UpdateMembershipStatusInput!): GroupMembershipDto!
+}
+
+type Notification {
+  body: String!
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  data: String
+  id: ID!
+  isActive: Boolean!
+  read: Boolean!
+  status: NotificationStatus!
+  title: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+  user: User!
+  userId: String!
 }
 
 type NotificationDto {
@@ -589,6 +715,24 @@ input RemoveGroupMemberInput {
   userId: ID!
 }
 
+"""Different styles of motorcycle riding"""
+enum RidingStyle {
+  ADVENTURE
+  CAFE_RACER
+  COMMUTING
+  CRUISER
+  CUSTOM
+  GROUP_RIDE
+  OFF_ROAD
+  SCOOTER
+  SOLO_RIDE
+  SPORT
+  STUNT
+  TOURING
+  TOURING_WITH_CAMPING
+  TRACK
+}
+
 """Type of road surface for motorcycle rides"""
 enum RoadType {
   ASPHALT
@@ -614,6 +758,30 @@ input SignUpInput {
   password: String!
 }
 
+type SocialMedia {
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  id: ID!
+  isActive: Boolean!
+  platform: SocialMediaPlatform!
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+  url: String!
+  username: String!
+}
+
+"""Social media platform types"""
+enum SocialMediaPlatform {
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  TIKTOK
+  TWITTER
+  YOUTUBE
+}
+
 input UpdateAddressInput {
   address: String
   eventId: String
@@ -633,14 +801,33 @@ input UpdateMembershipStatusInput {
 
 type User {
   avatar: String
+  bio: String
+  city: City
+  cityId: String
+  comments: [Comment!]
   createdAt: DateTime!
+  createdEventInvitations: [EventInvitation!]
   createdGroups: [Group!]
+  dateOfBirth: DateTime
   email: String!
+  eventParticipations: [EventParticipant!]
   firstName: String!
+  followers: [UserFollowing!]
+  following: [UserFollowing!]
+  garages: [Garage!]
+  gender: Gender
   groupMemberships: [GroupMembership!]
   id: ID!
+  interests: [Interest!]
   isActive: Boolean!
   lastName: String!
+  notifications: [Notification!]
+  postLikes: [PostLike!]
+  postSaves: [PostSave!]
+  posts: [Post!]
+  receivedInvitations: [EventInvitation!]
+  ridingStyle: [RidingStyle!]
+  socialMediaProfiles: [SocialMedia!]
   supabaseId: String!
   updatedAt: DateTime!
 }
@@ -658,6 +845,15 @@ type UserDto {
   lastName: String!
   supabaseId: String!
   updatedAt: DateTime!
+}
+
+type UserFollowing {
+  createdAt: DateTime!
+  follower: User!
+  followerId: String!
+  following: User!
+  followingId: String!
+  id: ID!
 }
 
 type UserFollowingDto {

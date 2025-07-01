@@ -1,5 +1,4 @@
 import {gql} from '@apollo/client';
-import {USER_FRAGMENT} from './user.graphql';
 
 // Session fragment
 export const SESSION_FRAGMENT = gql`
@@ -7,6 +6,17 @@ export const SESSION_FRAGMENT = gql`
     access_token
     refresh_token
     expires_in
+    expires_at
+  }
+`;
+
+// Auth user fragment
+export const AUTH_USER_FRAGMENT = gql`
+  fragment AuthUserFragment on AuthUser {
+    id
+    firstName
+    lastName
+    email
   }
 `;
 
@@ -14,13 +24,13 @@ export const SESSION_FRAGMENT = gql`
 export const AUTH_RESPONSE_FRAGMENT = gql`
   fragment AuthResponseFragment on AuthResponse {
     user {
-      ...UserFragment
+      ...AuthUserFragment
     }
     session {
       ...SessionFragment
     }
   }
-  ${USER_FRAGMENT}
+  ${AUTH_USER_FRAGMENT}
   ${SESSION_FRAGMENT}
 `;
 
@@ -52,14 +62,4 @@ export const REFRESH_TOKEN = gql`
     }
   }
   ${AUTH_RESPONSE_FRAGMENT}
-`;
-
-// Get current user query (if needed)
-export const GET_CURRENT_USER = gql`
-  query GetCurrentUser {
-    me {
-      ...UserFragment
-    }
-  }
-  ${USER_FRAGMENT}
 `;

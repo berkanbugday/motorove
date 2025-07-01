@@ -6,8 +6,8 @@ import {
 import { SupabaseService } from './supabase.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { User } from '../users/models/user.model';
 import { AuthResponse } from './models/auth-response.model';
+import { AuthUser } from './models/auth-user.model';
 
 @Injectable()
 export class AuthService {
@@ -61,8 +61,13 @@ export class AuthService {
       });
 
       return {
-        user,
-        session: data.session || null,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
+        session: data.session,
       };
     } catch (error) {
       if (
@@ -88,7 +93,7 @@ export class AuthService {
 
     // Get user from our database
     const user = await this.prismaService.user.findUnique({
-      where: { supabaseId: data.user.id },
+      where: { email },
     });
 
     if (!user) {
@@ -97,8 +102,10 @@ export class AuthService {
 
     return {
       user: {
-        ...user,
-        avatar: user.avatar || undefined,
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
       },
       session: data.session || null,
     };
@@ -149,8 +156,10 @@ export class AuthService {
 
       return {
         user: {
-          ...user,
-          avatar: user.avatar || undefined,
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
         },
         session: data.session || null,
       };
@@ -182,7 +191,7 @@ export class AuthService {
     }
   }
 
-  async validateUser(token: string): Promise<User> {
+  async validateUser(token: string): Promise<AuthUser> {
     const { data, error } = await this.supabaseService.getUser(token);
 
     if (error || !data.user) {
@@ -198,10 +207,10 @@ export class AuthService {
     }
 
     return {
-      ...user,
+      id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
-      avatar: user.avatar || undefined,
+      email: user.email,
     };
   }
 }

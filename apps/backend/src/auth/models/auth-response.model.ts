@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { User } from '../../users/models/user.model';
+import { AuthUser } from './auth-user.model';
 
 @ObjectType()
 export class Session {
@@ -15,8 +15,8 @@ export class Session {
 
 @ObjectType()
 export class AuthResponse {
-  @Field(() => User)
-  user: User;
+  @Field(() => AuthUser)
+  user: AuthUser;
 
   @Field(() => Session, { nullable: true })
   session: Session | null;
