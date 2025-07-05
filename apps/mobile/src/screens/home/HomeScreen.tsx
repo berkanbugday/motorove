@@ -736,7 +736,8 @@ export const HomeScreen = ({navigation}: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    ...commonStyles.container,
+    flex: 1,
+    backgroundColor: colors.secondary.light,
   },
   topHeaderBar: {
     borderBottomStartRadius: 20,

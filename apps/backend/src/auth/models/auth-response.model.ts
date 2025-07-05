@@ -11,6 +11,9 @@ export class Session {
 
   @Field()
   expires_in: number;
+
+  @Field({ nullable: true })
+  expires_at?: number;
 }
 
 @ObjectType()

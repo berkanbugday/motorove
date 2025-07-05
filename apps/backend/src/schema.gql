@@ -742,6 +742,7 @@ enum RoadType {
 
 type Session {
   access_token: String!
+  expires_at: Float
   expires_in: Float!
   refresh_token: String!
 }
