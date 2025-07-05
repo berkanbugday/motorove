@@ -1,7 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {apolloClient, resetApolloStore} from '@configs/apolloClientConfig';
-import {SIGN_IN, SIGN_UP, REFRESH_TOKEN} from './graphql';
+import {
+  SIGN_IN,
+  SIGN_UP,
+  REFRESH_TOKEN,
+  RESET_PASSWORD,
+  UPDATE_PASSWORD,
+} from './graphql';
 import {
   AuthUser,
   AuthResponse,
@@ -668,6 +674,54 @@ class AuthService {
       }
     } catch (error) {
       loggingService.error('Token debug check failed:', error);
+    }
+  }
+
+  // Reset password (sends reset password email)
+  async resetPassword(email: string): Promise<boolean> {
+    try {
+      const {data, errors} = await apolloClient.mutate({
+        mutation: RESET_PASSWORD,
+        variables: {
+          input: {
+            email,
+          },
+        },
+      });
+
+      if (errors) {
+        loggingService.error('Reset password error:', errors[0]);
+        throw errors[0];
+      }
+
+      return data.resetPassword;
+    } catch (error) {
+      loggingService.error('Reset password error:', error);
+      throw error;
+    }
+  }
+
+  // Update password (used after resetting password)
+  async updatePassword(newPassword: string): Promise<boolean> {
+    try {
+      const {data, errors} = await apolloClient.mutate({
+        mutation: UPDATE_PASSWORD,
+        variables: {
+          input: {
+            password: newPassword,
+          },
+        },
+      });
+
+      if (errors) {
+        loggingService.error('Update password error:', errors[0]);
+        throw errors[0];
+      }
+
+      return data.updatePassword;
+    } catch (error) {
+      loggingService.error('Update password error:', error);
+      throw error;
     }
   }
 }

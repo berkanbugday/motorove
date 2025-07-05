@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Icon, AnimatedInput, Button, Body} from '@components';
+import {Icon, AnimatedInput, Button, Body, TopHeaderBar} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signinSchema, SigninFormValues} from '@utils/validation';
@@ -73,7 +73,7 @@ export const SigninScreen = () => {
   };
 
   const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword');
+    navigation.navigate('ResetPassword');
   };
 
   // function handleSocialSignin(provider: 'google' | 'apple' | 'facebook') {
@@ -87,7 +87,8 @@ export const SigninScreen = () => {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
+      <TopHeaderBar showShadow={false} />
+      <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}>

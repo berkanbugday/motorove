@@ -14,15 +14,19 @@ export const signinSchema = z.object({
 
 export type SigninFormValues = z.infer<typeof signinSchema>;
 
-// Forgot password form schema
-export const forgotPasswordSchema = z.object({
+// Reset password form schema
+export const resetPasswordSchema = z.object({
   email: z
     .string({required_error: 'Email is required'})
     .nonempty('Email is required')
     .email('Email is invalid'),
 });
 
-export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
+// For backward compatibility
+export const forgotPasswordSchema = resetPasswordSchema;
+export type ForgotPasswordFormValues = ResetPasswordFormValues;
 
 // Signup form schema
 export const signupSchema = z.object({

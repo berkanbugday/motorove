@@ -63,3 +63,17 @@ export const REFRESH_TOKEN = gql`
   }
   ${AUTH_RESPONSE_FRAGMENT}
 `;
+
+// Reset password mutation
+export const RESET_PASSWORD = gql`
+  mutation ResetPassword($input: ResetPasswordInput!) {
+    resetPassword(input: $input)
+  }
+`;
+
+// Update password mutation
+export const UPDATE_PASSWORD = gql`
+  mutation UpdatePassword($input: UpdatePasswordInput!) {
+    updatePassword(input: $input)
+  }
+`;

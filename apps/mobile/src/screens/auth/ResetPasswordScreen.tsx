@@ -21,30 +21,30 @@ import {
   BodySmall,
   Caption,
 } from '@components';
-import {
-  ForgotPasswordFormValues,
-  forgotPasswordSchema,
-} from '@utils/validation';
+import {ResetPasswordFormValues, resetPasswordSchema} from '@utils/validation';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import authService from '@services/auth.service';
+import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 
-export const ForgotPasswordScreen = () => {
+export const ResetPasswordScreen = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {height} = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const {handleGraphQLError} = useGraphQLErrorHandler();
 
   const {
     control,
     handleSubmit,
     formState: {errors, isSubmitting},
     setError,
-  } = useForm<ForgotPasswordFormValues>({
-    resolver: zodResolver(forgotPasswordSchema),
+  } = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: '',
     },
@@ -66,11 +66,8 @@ export const ForgotPasswordScreen = () => {
   async function handleResetPassword(): Promise<void> {
     handleSubmit(async formValues => {
       try {
-        // TODO: Implement actual password reset with Supabase
-        // Example: const { error } = await supabase.auth.resetPasswordForEmail(formValues.email);
-
-        // For demo purposes, simulate success after a delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Use the authService to send reset password request
+        await authService.resetPassword(formValues.email);
 
         // Store email for confirmation screen
         setUserEmail(formValues.email);
@@ -78,6 +75,7 @@ export const ForgotPasswordScreen = () => {
         // Set email sent flag to show confirmation view
         setEmailSent(true);
       } catch (error) {
+        await handleGraphQLError(error as any);
         setError('email', {
           type: 'manual',
           message: 'Failed to send reset email. Please try again.',
@@ -95,7 +93,11 @@ export const ForgotPasswordScreen = () => {
             Check your email
           </Title>
           <View style={styles.successContainer}>
-            <Icon name="envelope" size={60} color={colors.status.successDark} />
+            <Icon
+              name="envelope-filled"
+              size={60}
+              color={colors.status.successDark}
+            />
             <Body>We've sent a email to</Body>
             <Body color={colors.neutral.black} weight="semiBold">
               {userEmail}
@@ -166,9 +168,9 @@ export const ForgotPasswordScreen = () => {
                   name="email"
                   label="Email Address"
                   keyboardType="email-address"
-                  icon={<Icon name="envelope" size={20} />}
+                  icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
-                  testID="forgot-password-email"
+                  testID="reset-password-email"
                 />
 
                 <Button
@@ -255,20 +257,23 @@ const styles = StyleSheet.create({
   resetButton: {
     backgroundColor: colors.primary.main,
   },
+  successContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: spacing.lg,
+  },
+  emailText: {
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xl,
+  },
   linkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: spacing.sm,
   },
   linkButton: {
     color: colors.primary.main,
-    marginLeft: -20,
-  },
-  successContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emailText: {
-    marginBottom: spacing.md,
+    fontWeight: '600',
   },
 });

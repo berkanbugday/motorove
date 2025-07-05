@@ -541,6 +541,7 @@ type Mutation {
   remove(id: String!): Boolean!
   removeDeviceToken(token: String!, userId: String!): Boolean!
   removeMember(input: RemoveGroupMemberInput!): GroupMembershipDto!
+  resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
   signIn(input: SignInInput!): AuthResponse!
@@ -551,6 +552,7 @@ type Mutation {
   update(input: UpdateAddressInput!): AddressDto!
   updateMemberRole(input: ChangeMemberRoleInput!): GroupMembershipDto!
   updateMemberStatus(input: UpdateMembershipStatusInput!): GroupMembershipDto!
+  updatePassword(input: UpdatePasswordInput!): Boolean!
 }
 
 type Notification {
@@ -715,6 +717,10 @@ input RemoveGroupMemberInput {
   userId: ID!
 }
 
+input ResetPasswordInput {
+  email: String!
+}
+
 """Different styles of motorcycle riding"""
 enum RidingStyle {
   ADVENTURE
@@ -798,6 +804,10 @@ input UpdateMembershipStatusInput {
   groupId: ID!
   status: InvitationStatus!
   userId: ID!
+}
+
+input UpdatePasswordInput {
+  password: String!
 }
 
 type User {

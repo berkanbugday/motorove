@@ -213,4 +213,44 @@ export class AuthService {
       email: user.email,
     };
   }
+
+  async resetPassword(email: string): Promise<boolean> {
+    try {
+      // First verify if the user exists in our database
+      const user = await this.prismaService.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      const { error } = await this.supabaseService.resetPassword(email);
+
+      if (error) {
+        throw new UnauthorizedException(error.message);
+      }
+
+      return true;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Failed to send password reset email');
+    }
+  }
+
+  async updatePassword(password: string): Promise<boolean> {
+    try {
+      const { error } = await this.supabaseService.updatePassword(password);
+
+      if (error) {
+        throw new UnauthorizedException(error.message);
+      }
+
+      return true;
+    } catch {
+      throw new UnauthorizedException('Failed to update password');
+    }
+  }
 }

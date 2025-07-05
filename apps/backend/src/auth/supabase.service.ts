@@ -24,21 +24,21 @@ export class SupabaseService {
   }
 
   async signUp(email: string, password: string) {
-    return this.supabase.auth.signUp({
+    return await this.supabase.auth.signUp({
       email,
       password,
     });
   }
 
   async signIn(email: string, password: string) {
-    return this.supabase.auth.signInWithPassword({
+    return await this.supabase.auth.signInWithPassword({
       email,
       password,
     });
   }
 
   async refreshToken(refreshToken: string) {
-    return this.supabase.auth.refreshSession({
+    return await this.supabase.auth.refreshSession({
       refresh_token: refreshToken,
     });
   }
@@ -48,6 +48,14 @@ export class SupabaseService {
   }
 
   async getUser(jwt: string) {
-    return this.supabase.auth.getUser(jwt);
+    return await this.supabase.auth.getUser(jwt);
+  }
+
+  async resetPassword(email: string) {
+    return await this.supabase.auth.resetPasswordForEmail(email);
+  }
+
+  async updatePassword(newPassword: string) {
+    return await this.supabase.auth.updateUser({ password: newPassword });
   }
 }

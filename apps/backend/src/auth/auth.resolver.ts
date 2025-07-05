@@ -4,6 +4,8 @@ import { AuthService } from './auth.service';
 import { AuthResponse } from './models/auth-response.model';
 import { SignUpInput } from './dto/signup.input';
 import { SignInInput } from './dto/signin.input';
+import { ResetPasswordInput } from './dto/reset-password.input';
+import { UpdatePasswordInput } from './dto/update-password.input';
 
 @Resolver(() => AuthResponse)
 export class AuthResolver {
@@ -24,5 +26,19 @@ export class AuthResolver {
   @Mutation(() => AuthResponse)
   async refreshToken(@Args('token') token: string): Promise<AuthResponse> {
     return await this.authService.refreshToken(token);
+  }
+
+  @Mutation(() => Boolean)
+  async resetPassword(
+    @Args('input') input: ResetPasswordInput,
+  ): Promise<boolean> {
+    return await this.authService.resetPassword(input.email);
+  }
+
+  @Mutation(() => Boolean)
+  async updatePassword(
+    @Args('input') input: UpdatePasswordInput,
+  ): Promise<boolean> {
+    return await this.authService.updatePassword(input.password);
   }
 }
