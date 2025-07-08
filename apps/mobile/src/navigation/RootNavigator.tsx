@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {ActivityIndicator, View} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, LinkingOptions} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {AuthNavigator} from './stacks/AuthNavigator';
@@ -10,6 +10,21 @@ import {RootStackParamList} from '../types/navigation.types';
 import {loggingService} from '@services/logging.service';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// Define the linking configuration
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['motorove://', 'https://motorove.app'],
+  config: {
+    screens: {
+      Auth: {
+        screens: {
+          UpdatePassword: 'update-password',
+        },
+      },
+      Main: 'main',
+    },
+  },
+};
 
 /**
  * Root navigator - determines which stack to show based on auth state
@@ -39,7 +54,7 @@ export function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {isAuthenticated ? (
           // User is authenticated, show main app screens

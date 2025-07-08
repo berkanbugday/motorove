@@ -1,4 +1,6 @@
 {
   "name": "motorove",
-  "displayName": "Motorove"
+  "displayName": "Motorove",
+  "scheme": "motorove",
+  "host": "motorove.app"
 }

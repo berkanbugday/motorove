@@ -227,7 +227,6 @@ export class AuthService {
 
       const { error } = await this.supabaseService.resetPassword(email);
 
-      console.log('error', error);
       if (error) {
         throw new UnauthorizedException(error.message);
       }
