@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
@@ -18,7 +18,6 @@ import {
   TopHeaderBar,
   Title,
   Body,
-  BodySmall,
   Caption,
 } from '@components';
 import {ResetPasswordFormValues, resetPasswordSchema} from '@utils/validation';
@@ -26,23 +25,22 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import authService from '@services/auth.service';
-import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
+import {AuthHooks} from '@services/auth.service';
+import {loggingService} from '@services/logging.service';
 
 export const ResetPasswordScreen = () => {
-  const [emailSent, setEmailSent] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {height} = useWindowDimensions();
-  const insets = useSafeAreaInsets();
-  const {handleGraphQLError} = useGraphQLErrorHandler();
+  const {resetPassword, loading} = AuthHooks.useResetPassword(() => {
+    // Reset form after successful submission
+    reset();
+  });
 
   const {
     control,
     handleSubmit,
-    formState: {errors, isSubmitting},
-    setError,
+    formState: {errors},
+    reset,
   } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -63,72 +61,18 @@ export const ResetPasswordScreen = () => {
     navigation.navigate('Support');
   }
 
-  async function handleResetPassword(): Promise<void> {
-    handleSubmit(async formValues => {
-      try {
-        // Use the authService to send reset password request
-        await authService.resetPassword(formValues.email);
+  const onSubmit = async (
+    formValues: ResetPasswordFormValues,
+  ): Promise<void> => {
+    try {
+      // Use the new hook-based resetPassword function
+      await resetPassword(formValues.email);
+    } catch (error) {
+      loggingService.error('Error in onSubmit:', error);
+      // Error handling is now done in the hook
+    }
+  };
 
-        // Store email for confirmation screen
-        setUserEmail(formValues.email);
-
-        // Set email sent flag to show confirmation view
-        setEmailSent(true);
-      } catch (error) {
-        await handleGraphQLError(error as any);
-        setError('email', {
-          type: 'manual',
-          message: 'Failed to send reset email. Please try again.',
-        });
-      }
-    })();
-  }
-
-  // View when email has been sent
-  if (emailSent) {
-    return (
-      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
-        <View style={styles.content}>
-          <Title align="center" style={styles.title}>
-            Check your email
-          </Title>
-          <View style={styles.successContainer}>
-            <Icon
-              name="envelope-filled"
-              size={60}
-              color={colors.status.successDark}
-            />
-            <Body>We've sent a email to</Body>
-            <Body color={colors.neutral.black} weight="semiBold">
-              {userEmail}
-            </Body>
-            <BodySmall align="center" style={styles.emailText}>
-              If you don't see the email, please check your spam folder
-            </BodySmall>
-          </View>
-          <Button
-            title="Resend Reset Link"
-            variant="primary"
-            shape="round"
-            onPress={handleResetPassword}
-            style={{marginVertical: spacing.sm}}
-            testID="resend-reset-link-button"
-          />
-
-          <Button
-            title="Back to Sign In"
-            variant="outline"
-            shape="round"
-            onPress={handleSigninPress}
-            style={{marginVertical: spacing.sm}}
-            testID="back-to-signin-button"
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Reset password form view
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -176,9 +120,9 @@ export const ResetPasswordScreen = () => {
                 <Button
                   title="Send Reset Link"
                   shape="round"
-                  onPress={handleResetPassword}
-                  loading={isSubmitting}
-                  disabled={isSubmitting}
+                  onPress={handleSubmit(onSubmit)}
+                  loading={loading}
+                  disabled={loading}
                   style={styles.resetButton}
                   testID="send-reset-button"
                 />
@@ -233,7 +177,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: spacing.screen.horizontal,
+    paddingHorizontal: spacing.md,
   },
   logoContainer: {
     alignItems: 'center',
@@ -270,10 +214,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: spacing.sm,
   },
   linkButton: {
-    color: colors.primary.main,
-    fontWeight: '600',
+    color: colors.neutral.black,
+    marginLeft: -20,
+    textDecorationLine: 'underline',
   },
 });

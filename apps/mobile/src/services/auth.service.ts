@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {apolloClient, resetApolloStore} from '@configs/apolloClientConfig';
+import {useMutation} from '@apollo/client';
 import {
   SIGN_IN,
   SIGN_UP,
@@ -15,6 +16,111 @@ import {
   AUTH_STORAGE_KEYS as STORAGE_KEYS,
 } from '../types/auth.types';
 import {loggingService} from './logging.service';
+import {showToast} from '@components';
+
+// Hook for resetting password
+export const useResetPassword = (onSuccess?: () => void) => {
+  const [resetPasswordMutation, {loading, error}] = useMutation(
+    RESET_PASSWORD,
+    {
+      onCompleted: _data => {
+        showToast({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Password reset email sent successfully!',
+        });
+
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: errorObj => {
+        loggingService.error('Error resetting password:', errorObj);
+        showToast({
+          type: 'error',
+          text1: 'Error',
+          text2:
+            errorObj.message || 'Failed to send reset email. Please try again.',
+        });
+      },
+    },
+  );
+
+  const resetPassword = async (email: string): Promise<boolean> => {
+    try {
+      const result = await resetPasswordMutation({
+        variables: {
+          input: {
+            email,
+          },
+        },
+      });
+      return result.data?.resetPassword || false;
+    } catch (err) {
+      loggingService.error('Error in resetPassword:', err);
+      // Error is already handled in onError callback
+      return false;
+    }
+  };
+
+  return {
+    resetPassword,
+    loading,
+    error,
+  };
+};
+
+// Hook for updating password
+export const useUpdatePassword = (onSuccess?: () => void) => {
+  const [updatePasswordMutation, {loading, error}] = useMutation(
+    UPDATE_PASSWORD,
+    {
+      onCompleted: _data => {
+        showToast({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Password updated successfully!',
+        });
+
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: errorObj => {
+        loggingService.error('Error updating password:', errorObj);
+        showToast({
+          type: 'error',
+          text1: 'Error',
+          text2:
+            errorObj.message || 'Failed to update password. Please try again.',
+        });
+      },
+    },
+  );
+
+  const updatePassword = async (newPassword: string): Promise<boolean> => {
+    try {
+      const result = await updatePasswordMutation({
+        variables: {
+          input: {
+            password: newPassword,
+          },
+        },
+      });
+      return result.data?.updatePassword || false;
+    } catch (err) {
+      loggingService.error('Error in updatePassword:', err);
+      // Error is already handled in onError callback
+      return false;
+    }
+  };
+
+  return {
+    updatePassword,
+    loading,
+    error,
+  };
+};
 
 // Simple mutex for token refresh to avoid concurrent refresh attempts
 let isRefreshing = false;
@@ -676,56 +782,14 @@ class AuthService {
       loggingService.error('Token debug check failed:', error);
     }
   }
-
-  // Reset password (sends reset password email)
-  async resetPassword(email: string): Promise<boolean> {
-    try {
-      const {data, errors} = await apolloClient.mutate({
-        mutation: RESET_PASSWORD,
-        variables: {
-          input: {
-            email,
-          },
-        },
-      });
-
-      if (errors) {
-        loggingService.error('Reset password error:', errors[0]);
-        throw errors[0];
-      }
-
-      return data.resetPassword;
-    } catch (error) {
-      loggingService.error('Reset password error:', error);
-      throw error;
-    }
-  }
-
-  // Update password (used after resetting password)
-  async updatePassword(newPassword: string): Promise<boolean> {
-    try {
-      const {data, errors} = await apolloClient.mutate({
-        mutation: UPDATE_PASSWORD,
-        variables: {
-          input: {
-            password: newPassword,
-          },
-        },
-      });
-
-      if (errors) {
-        loggingService.error('Update password error:', errors[0]);
-        throw errors[0];
-      }
-
-      return data.updatePassword;
-    } catch (error) {
-      loggingService.error('Update password error:', error);
-      throw error;
-    }
-  }
 }
 
 // Singleton instance
 const authService = new AuthService();
 export default authService;
+
+// Export hooks in a service object, similar to GroupService pattern
+export const AuthHooks = {
+  useResetPassword,
+  useUpdatePassword,
+};

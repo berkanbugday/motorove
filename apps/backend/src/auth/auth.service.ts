@@ -217,16 +217,17 @@ export class AuthService {
   async resetPassword(email: string): Promise<boolean> {
     try {
       // First verify if the user exists in our database
-      const user = await this.prismaService.user.findUnique({
-        where: { email },
-      });
+      // const user = await this.prismaService.user.findUnique({
+      //   where: { email },
+      // });
 
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
+      // if (!user) {
+      //   throw new UnauthorizedException('User not found');
+      // }
 
       const { error } = await this.supabaseService.resetPassword(email);
 
+      console.log('error', error);
       if (error) {
         throw new UnauthorizedException(error.message);
       }

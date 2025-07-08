@@ -24,8 +24,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {z} from 'zod';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import authService from '@services/auth.service';
+import {AuthHooks} from '@services/auth.service';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 
 // Password update form schema
@@ -49,17 +48,26 @@ type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
 export const UpdatePasswordScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {height} = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const {handleGraphQLError} = useGraphQLErrorHandler();
+
+  const {updatePassword, loading} = AuthHooks.useUpdatePassword(() => {
+    // Reset form after successful submission
+    reset();
+
+    // Navigate to sign in screen after successful password update
+    setTimeout(() => {
+      navigation.navigate('Signin');
+    }, 1500);
+  });
 
   const {
     control,
     handleSubmit,
-    formState: {errors, isSubmitting},
+    formState: {errors},
     setError,
+    reset,
   } = useForm<UpdatePasswordFormValues>({
     resolver: zodResolver(updatePasswordSchema),
     defaultValues: {
@@ -70,10 +78,6 @@ export const UpdatePasswordScreen = () => {
 
   function handleGoBack(): void {
     navigation.goBack();
-  }
-
-  function handleSigninPress(): void {
-    navigation.navigate('Signin');
   }
 
   function togglePasswordVisibility(): void {
@@ -88,9 +92,8 @@ export const UpdatePasswordScreen = () => {
     formValues: UpdatePasswordFormValues,
   ): Promise<void> {
     try {
-      // Use the authService to update the password
-      await authService.updatePassword(formValues.password);
-      setIsSuccess(true);
+      // Use the new hook-based updatePassword function
+      await updatePassword(formValues.password);
     } catch (error) {
       await handleGraphQLError(error as any);
       setError('password', {
@@ -100,42 +103,10 @@ export const UpdatePasswordScreen = () => {
     }
   }
 
-  // Success view
-  if (isSuccess) {
-    return (
-      <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
-        <View style={styles.content}>
-          <Title align="center" style={styles.title}>
-            Password Updated
-          </Title>
-          <View style={styles.successContainer}>
-            <Icon
-              name="check-filled"
-              size={60}
-              color={colors.status.successDark}
-            />
-            <Body align="center" style={styles.successText}>
-              Your password has been successfully updated. You can now sign in
-              with your new password.
-            </Body>
-          </View>
-          <Button
-            title="Sign In"
-            variant="primary"
-            shape="round"
-            onPress={handleSigninPress}
-            style={{marginVertical: spacing.sm}}
-            testID="back-to-signin-button"
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        showBackButton
+        showBackButton={false}
         showShadow={false}
         includeStatusBar={true}
         onBackPress={handleGoBack}
@@ -195,8 +166,8 @@ export const UpdatePasswordScreen = () => {
                   title="Update Password"
                   shape="round"
                   onPress={handleSubmit(handleUpdatePassword)}
-                  loading={isSubmitting}
-                  disabled={isSubmitting}
+                  loading={loading}
+                  disabled={loading}
                   style={styles.resetButton}
                   testID="update-password-button"
                 />
@@ -219,7 +190,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: spacing.screen.horizontal,
+    paddingHorizontal: spacing.md,
   },
   logoContainer: {
     alignItems: 'center',
@@ -242,14 +213,5 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     backgroundColor: colors.primary.main,
-  },
-  successContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: spacing.lg,
-  },
-  successText: {
-    marginTop: spacing.md,
-    textAlign: 'center',
   },
 });

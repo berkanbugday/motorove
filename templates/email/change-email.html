@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #F5F5F7;
+            background-color: white;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -17,7 +17,7 @@
         .email-container {
             max-width: 600px;
             width: 100%;
-            background-color: #F5F5F7;
+            background-color: white;
         }
         
         .logo-container {
@@ -30,12 +30,12 @@
         }
         
         .divider {
-            border-top: 1px solid #E0E0E0;
+            border-top: 1px solid #ddd;
             margin: 20px 0;
         }
         
         .content-card {
-            background-color: white;
+            background-color: #F5F5F7;
             padding: 30px;
             text-align: center;
             border-radius: 5px;
@@ -58,7 +58,7 @@
             color: white;
             padding: 12px 30px;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 200px;
             margin-top: 20px;
             font-weight: bold;
             border: none;
@@ -99,7 +99,7 @@
             <h1>E-POSTA ADRESİ DEĞİŞİKLİĞİ</h1>
             <p>Merhaba, hesabınızın e-posta adresini değiştirme talebinde bulundunuz.</p>
             <p>Yeni e-posta adresinizi doğrulamak ve değişikliği tamamlamak için aşağıdaki butona tıklayın.</p>
-            <a href="https://motorove.com/change-email" class="button">E-Posta Değişikliğini Onayla</a>
+            <a href="{{ .ConfirmationURL }}" class="button">E-Posta Değişikliğini Onayla</a>
         </div>
         
         <div class="divider"></div>

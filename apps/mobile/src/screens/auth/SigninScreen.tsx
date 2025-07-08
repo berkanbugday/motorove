@@ -16,7 +16,6 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signinSchema, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius, commonStyles} from '@theme';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useAuth} from '@navigation/utils/navigationUtils';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {GraphQLFormattedError} from 'graphql';
@@ -26,7 +25,6 @@ export const SigninScreen = () => {
   const {signin} = useAuth();
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const insets = useSafeAreaInsets();
   const {handleGraphQLError} = useGraphQLErrorHandler();
 
   const {

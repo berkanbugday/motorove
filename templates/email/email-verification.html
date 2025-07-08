@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #F5F5F7;
+            background-color: white;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -17,7 +17,7 @@
         .email-container {
             max-width: 600px;
             width: 100%;
-            background-color: #F5F5F7;
+            background-color: white;
         }
         
         .logo-container {
@@ -30,12 +30,12 @@
         }
         
         .divider {
-            border-top: 1px solid #E0E0E0;
+            border-top: 1px solid #ddd;
             margin: 20px 0;
         }
         
         .content-card {
-            background-color: white;
+            background-color: #F5F5F7;
             padding: 30px;
             text-align: center;
             border-radius: 5px;
@@ -58,7 +58,7 @@
             color: white;
             padding: 12px 30px;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 200px;
             margin-top: 20px;
             font-weight: bold;
             border: none;
@@ -99,7 +99,7 @@
             <h1>HOŞ GELDİNİZ!</h1>
             <p>Merhaba, motorcu topluluğumuza katıldığınız için teşekkürler! Artık Motorove topluluğunun bir parçasısınız.</p>
             <p>Hesabınızı aktifleştirmek ve tüm özelliklere erişmek için lütfen e-posta adresinizi doğrulayın.</p>
-            <a href="https://motorove.com/verify" class="button">E-Postamı Doğrula</a>
+            <a href="{{ .ConfirmationURL }}" class="button">E-Postamı Doğrula</a>
         </div>
         
         <div class="divider"></div>
