@@ -240,9 +240,17 @@ export class AuthService {
     }
   }
 
-  async updatePassword(password: string): Promise<boolean> {
+  async updatePassword(
+    email: string,
+    token: string,
+    password: string,
+  ): Promise<boolean> {
     try {
-      const { error } = await this.supabaseService.updatePassword(password);
+      const { error } = await this.supabaseService.updatePassword(
+        email,
+        token,
+        password,
+      );
 
       if (error) {
         throw new UnauthorizedException(error.message);

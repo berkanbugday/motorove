@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -9,7 +9,7 @@ import {
   Image,
   useWindowDimensions,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {
   Icon,
@@ -21,44 +21,53 @@ import {
 } from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {z} from 'zod';
+import {
+  UpdatePasswordFormValues,
+  updatePasswordSchema,
+} from '@utils/validation';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
-import {AuthHooks} from '@services/auth.service';
-import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
+import {useUpdatePassword} from '@services/auth.service';
+import {loggingService} from '@services/logging.service';
 
-// Password update form schema
-const updatePasswordSchema = z
-  .object({
-    password: z
-      .string({required_error: 'Password is required'})
-      .nonempty('Password is required')
-      .min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z
-      .string({required_error: 'Please confirm your password'})
-      .nonempty('Please confirm your password'),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
+// Define the route params type
+type UpdatePasswordParams = {
+  email: string;
+  token: string;
+};
 
 export const UpdatePasswordScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const route =
+    useRoute<RouteProp<Record<string, UpdatePasswordParams>, string>>();
   const {height} = useWindowDimensions();
-  const {handleGraphQLError} = useGraphQLErrorHandler();
 
-  const {updatePassword, loading} = AuthHooks.useUpdatePassword(() => {
+  // Extract email and token from route params
+  const email = route.params?.email;
+  const token = route.params?.token;
+
+  // Log the received params for debugging
+  useEffect(() => {
+    if (email && token) {
+      loggingService.info('Received password reset params:', {
+        email,
+        tokenExists: !!token,
+      });
+    }
+  }, [email, token]);
+
+  const {updatePassword, loading} = useUpdatePassword(() => {
     // Reset form after successful submission
     reset();
 
     // Navigate to sign in screen after successful password update
     setTimeout(() => {
-      navigation.navigate('Signin');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'Signin'}],
+      });
     }, 1500);
   });
 
@@ -66,7 +75,6 @@ export const UpdatePasswordScreen = () => {
     control,
     handleSubmit,
     formState: {errors},
-    setError,
     reset,
   } = useForm<UpdatePasswordFormValues>({
     resolver: zodResolver(updatePasswordSchema),
@@ -88,20 +96,21 @@ export const UpdatePasswordScreen = () => {
     setShowConfirmPassword(!showConfirmPassword);
   }
 
-  async function handleUpdatePassword(
+  const onSubmit = async (
     formValues: UpdatePasswordFormValues,
-  ): Promise<void> {
+  ): Promise<void> => {
     try {
-      // Use the new hook-based updatePassword function
-      await updatePassword(formValues.password);
+      if (!email || !token) {
+        loggingService.error('Missing required parameters: email or token');
+        return;
+      }
+
+      // Use the hook-based updatePassword function with all required parameters
+      await updatePassword(email, token, formValues.password);
     } catch (error) {
-      await handleGraphQLError(error as any);
-      setError('password', {
-        type: 'manual',
-        message: 'Failed to update password. Please try again.',
-      });
+      loggingService.error('Error in onSubmit:', error);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -165,9 +174,9 @@ export const UpdatePasswordScreen = () => {
                 <Button
                   title="Update Password"
                   shape="round"
-                  onPress={handleSubmit(handleUpdatePassword)}
+                  onPress={handleSubmit(onSubmit)}
                   loading={loading}
-                  disabled={loading}
+                  disabled={loading || !email || !token}
                   style={styles.resetButton}
                   testID="update-password-button"
                 />

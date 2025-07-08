@@ -807,7 +807,9 @@ input UpdateMembershipStatusInput {
 }
 
 input UpdatePasswordInput {
+  email: String!
   password: String!
+  token: String!
 }
 
 type User {

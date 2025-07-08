@@ -9,7 +9,8 @@ export const signinSchema = z.object({
   password: z
     .string({required_error: 'Password is required'})
     .nonempty('Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(6, 'Password must be at least 6 characters')
+    .regex(/^\S*$/, 'Password cannot contain spaces'),
 });
 
 export type SigninFormValues = z.infer<typeof signinSchema>;
@@ -28,6 +29,25 @@ export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 export const forgotPasswordSchema = resetPasswordSchema;
 export type ForgotPasswordFormValues = ResetPasswordFormValues;
 
+// Update password form schema
+export const updatePasswordSchema = z
+  .object({
+    password: z
+      .string({required_error: 'Password is required'})
+      .nonempty('Password is required')
+      .min(6, 'Password must be at least 6 characters')
+      .regex(/^\S*$/, 'Password cannot contain spaces'),
+    confirmPassword: z
+      .string({required_error: 'Please confirm your password'})
+      .nonempty('Please confirm your password'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+export type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
+
 // Signup form schema
 export const signupSchema = z.object({
   firstName: z
@@ -45,7 +65,8 @@ export const signupSchema = z.object({
   password: z
     .string({required_error: 'Password is required'})
     .nonempty('Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(6, 'Password must be at least 6 characters')
+    .regex(/^\S*$/, 'Password cannot contain spaces'),
   agreeToTerms: z.boolean().refine(val => val === true, {
     message: 'You must agree to the Terms of Service and Privacy Policy',
   }),

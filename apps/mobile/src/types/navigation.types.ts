@@ -8,7 +8,8 @@ import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
 export type AuthStackParamList = {
   Signin: {mode?: 'signin' | 'signup'};
   Welcome: undefined;
-  ForgotPassword: undefined;
+  ResetPassword: undefined;
+  UpdatePassword: {email?: string; token?: string};
   Signup: undefined;
   AccountSetup: {email?: string; firstName?: string; lastName?: string};
 };

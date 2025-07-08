@@ -7,7 +7,7 @@ export type AuthStackParamList = {
   Signin: {mode?: 'signin' | 'signup'};
   Welcome: undefined;
   ResetPassword: undefined;
-  UpdatePassword: undefined;
+  UpdatePassword: {email?: string; token?: string};
   Signup: undefined;
   AccountSetup: {email?: string; firstName?: string; lastName?: string};
 };

@@ -25,13 +25,13 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
-import {AuthHooks} from '@services/auth.service';
+import {useResetPassword} from '@services/auth.service';
 import {loggingService} from '@services/logging.service';
 
 export const ResetPasswordScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {height} = useWindowDimensions();
-  const {resetPassword, loading} = AuthHooks.useResetPassword(() => {
+  const {resetPassword, loading} = useResetPassword(() => {
     // Reset form after successful submission
     reset();
   });

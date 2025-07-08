@@ -39,6 +39,10 @@ export class AuthResolver {
   async updatePassword(
     @Args('input') input: UpdatePasswordInput,
   ): Promise<boolean> {
-    return await this.authService.updatePassword(input.password);
+    return await this.authService.updatePassword(
+      input.email,
+      input.token,
+      input.password,
+    );
   }
 }

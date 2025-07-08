@@ -18,7 +18,7 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       Auth: {
         screens: {
-          UpdatePassword: 'update-password',
+          UpdatePassword: 'update-password/:email/:token',
         },
       },
       Main: 'main',

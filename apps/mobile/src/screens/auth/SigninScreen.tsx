@@ -31,7 +31,6 @@ export const SigninScreen = () => {
     control,
     handleSubmit,
     formState: {errors, isSubmitting},
-    setError,
   } = useForm<SigninFormValues>({
     resolver: zodResolver(signinSchema),
     defaultValues: {
@@ -50,18 +49,6 @@ export const SigninScreen = () => {
       // If successful, the navigation in RootNavigator will change to MainNavigator
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
-      // Handle specific error types
-      if (error instanceof Error) {
-        setError('password', {
-          type: 'manual',
-          message: error.message || 'Invalid credentials',
-        });
-      } else {
-        setError('password', {
-          type: 'manual',
-          message: 'An unexpected error occurred. Please try again.',
-        });
-      }
     }
   };
 

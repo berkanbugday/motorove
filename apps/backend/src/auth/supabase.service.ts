@@ -55,7 +55,21 @@ export class SupabaseService {
     return await this.supabase.auth.resetPasswordForEmail(email);
   }
 
-  async updatePassword(newPassword: string) {
-    return await this.supabase.auth.updateUser({ password: newPassword });
+  async updatePassword(email: string, token: string, password: string) {
+    const { error: verifyError } = await this.supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'recovery',
+    });
+
+    if (verifyError) {
+      throw new Error(verifyError.message);
+    }
+
+    const { error } = await this.supabase.auth.updateUser({
+      password,
+    });
+
+    return { error };
   }
 }

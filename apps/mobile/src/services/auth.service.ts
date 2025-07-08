@@ -98,12 +98,18 @@ export const useUpdatePassword = (onSuccess?: () => void) => {
     },
   );
 
-  const updatePassword = async (newPassword: string): Promise<boolean> => {
+  const updatePassword = async (
+    email: string,
+    token: string,
+    password: string,
+  ): Promise<boolean> => {
     try {
       const result = await updatePasswordMutation({
         variables: {
           input: {
-            password: newPassword,
+            password,
+            email,
+            token,
           },
         },
       });
