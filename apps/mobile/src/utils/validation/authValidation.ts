@@ -1,83 +1,101 @@
 import {z} from 'zod';
+import {TFunction} from 'i18next';
 
-// Signin form schema
-export const signinSchema = z.object({
-  email: z
-    .string({required_error: 'Email is required'})
-    .nonempty('Email is required')
-    .email('Email is invalid'),
-  password: z
-    .string({required_error: 'Password is required'})
-    .nonempty('Password is required')
-    .min(6, 'Password must be at least 6 characters')
-    .regex(/^\S*$/, 'Password cannot contain spaces'),
-});
+/**
+ * Creates validation schemas with translated error messages
+ * @param t Translation function
+ * @returns Object containing all authentication validation schemas
+ */
+export const createAuthSchemas = (t: TFunction) => {
+  // Signin form schema
+  const signinSchema = z.object({
+    email: z
+      .string({required_error: t('validation.email.required')})
+      .nonempty(t('validation.email.required'))
+      .email(t('validation.email.invalid')),
+    password: z
+      .string({required_error: t('validation.password.required')})
+      .nonempty(t('validation.password.required'))
+      .min(6, t('validation.password.minLength'))
+      .regex(/^\S*$/, t('validation.password.noSpaces')),
+  });
 
-export type SigninFormValues = z.infer<typeof signinSchema>;
+  // Reset password form schema
+  const resetPasswordSchema = z.object({
+    email: z
+      .string({required_error: t('validation.email.required')})
+      .nonempty(t('validation.email.required'))
+      .email(t('validation.email.invalid')),
+  });
 
-// Reset password form schema
-export const resetPasswordSchema = z.object({
-  email: z
-    .string({required_error: 'Email is required'})
-    .nonempty('Email is required')
-    .email('Email is invalid'),
-});
+  // Signup form schema
+  const signupSchema = z.object({
+    firstName: z
+      .string({required_error: t('validation.firstName.required')})
+      .nonempty(t('validation.firstName.required'))
+      .min(2, t('validation.firstName.minLength')),
+    lastName: z
+      .string({required_error: t('validation.lastName.required')})
+      .nonempty(t('validation.lastName.required'))
+      .min(2, t('validation.lastName.minLength')),
+    email: z
+      .string({required_error: t('validation.email.required')})
+      .nonempty(t('validation.email.required'))
+      .email(t('validation.email.invalid')),
+    password: z
+      .string({required_error: t('validation.password.required')})
+      .nonempty(t('validation.password.required'))
+      .min(6, t('validation.password.minLength'))
+      .regex(/^\S*$/, t('validation.password.noSpaces')),
+    agreeToTerms: z.boolean().refine(val => val === true, {
+      message: t('validation.agreeToTerms.required'),
+    }),
+  });
 
-export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+  // Account setup form schema
+  const accountSetupSchema = z.object({
+    username: z
+      .string({required_error: t('validation.username.required')})
+      .nonempty(t('validation.username.required'))
+      .min(3, t('validation.username.minLength'))
+      .max(30, t('validation.username.maxLength'))
+      .regex(/^[a-zA-Z0-9._]+$/, t('validation.username.invalidFormat')),
+    userType: z
+      .string({required_error: t('validation.userType.required')})
+      .nonempty(t('validation.userType.required'))
+      .min(1, t('validation.userType.select')),
+    bio: z.string().max(150, t('validation.bio.maxLength')).optional(),
+    phoneNumber: z
+      .string()
+      .regex(/^\+?[0-9]{10,15}$/, t('validation.phoneNumber.invalid'))
+      .optional(),
+    birthDate: z
+      .date({invalid_type_error: t('validation.birthDate.invalid')})
+      .min(new Date(1900, 0, 1), t('validation.birthDate.tooOld'))
+      .max(new Date(), t('validation.birthDate.future'))
+      .optional(),
+    profilePhotoUrl: z.string().optional(),
+    interests: z.array(z.string()).optional(),
+  });
 
-// Signup form schema
-export const signupSchema = z.object({
-  firstName: z
-    .string({required_error: 'First name is required'})
-    .nonempty('First name is required')
-    .min(2, 'First name must be at least 2 characters'),
-  lastName: z
-    .string({required_error: 'Last name is required'})
-    .nonempty('Last name is required')
-    .min(2, 'Last name must be at least 2 characters'),
-  email: z
-    .string({required_error: 'Email is required'})
-    .nonempty('Email is required')
-    .email('Email is invalid'),
-  password: z
-    .string({required_error: 'Password is required'})
-    .nonempty('Password is required')
-    .min(6, 'Password must be at least 6 characters')
-    .regex(/^\S*$/, 'Password cannot contain spaces'),
-  agreeToTerms: z.boolean().refine(val => val === true, {
-    message: 'You must agree to the Terms of Service and Privacy Policy',
-  }),
-});
+  return {
+    signinSchema,
+    resetPasswordSchema,
+    signupSchema,
+    accountSetupSchema,
+  };
+};
 
-export type SignupFormValues = z.infer<typeof signupSchema>;
-
-// Account setup form schema
-export const accountSetupSchema = z.object({
-  username: z
-    .string({required_error: 'Username is required'})
-    .nonempty('Username is required')
-    .min(3, 'Username must be at least 3 characters')
-    .max(30, 'Username must be at most 30 characters')
-    .regex(
-      /^[a-zA-Z0-9._]+$/,
-      'Username can only contain letters, numbers, dots and underscores',
-    ),
-  userType: z
-    .string({required_error: 'User type is required'})
-    .nonempty('User type is required')
-    .min(1, 'Please select a user type'),
-  bio: z.string().max(150, 'Bio cannot exceed 150 characters').optional(),
-  phoneNumber: z
-    .string()
-    .regex(/^\+?[0-9]{10,15}$/, 'Please enter a valid phone number')
-    .optional(),
-  birthDate: z
-    .date({invalid_type_error: 'Please select a valid date'})
-    .min(new Date(1900, 0, 1), 'Date is too far in the past')
-    .max(new Date(), 'Date cannot be in the future')
-    .optional(),
-  profilePhotoUrl: z.string().optional(),
-  interests: z.array(z.string()).optional(),
-});
-
-export type AccountSetupFormValues = z.infer<typeof accountSetupSchema>;
+// For backward compatibility, export the types
+export type SigninFormValues = z.infer<
+  ReturnType<typeof createAuthSchemas>['signinSchema']
+>;
+export type ResetPasswordFormValues = z.infer<
+  ReturnType<typeof createAuthSchemas>['resetPasswordSchema']
+>;
+export type SignupFormValues = z.infer<
+  ReturnType<typeof createAuthSchemas>['signupSchema']
+>;
+export type AccountSetupFormValues = z.infer<
+  ReturnType<typeof createAuthSchemas>['accountSetupSchema']
+>;

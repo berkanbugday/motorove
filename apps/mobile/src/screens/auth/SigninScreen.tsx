@@ -14,7 +14,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Icon, AnimatedInput, Button, Body, TopHeaderBar} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {signinSchema, SigninFormValues} from '@utils/validation';
+import {createAuthSchemas, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useAuth} from '@navigation/utils/navigationUtils';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
@@ -28,6 +28,9 @@ export const SigninScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
+
+  // Create validation schema with translations
+  const {signinSchema} = createAuthSchemas(t);
 
   const {
     control,
@@ -89,13 +92,15 @@ export const SigninScreen = () => {
                 />
               </View>
 
-              <Body style={styles.welcomeText}>{t('auth.login')}</Body>
+              <Body style={styles.welcomeText}>
+                {t('screens.signin.welcomeBack')}
+              </Body>
 
               <View style={styles.form}>
                 <AnimatedInput
                   control={control}
                   name="email"
-                  label={t('auth.email')}
+                  label={t('screens.signin.emailAddress')}
                   keyboardType="email-address"
                   icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
@@ -105,7 +110,7 @@ export const SigninScreen = () => {
                 <AnimatedInput
                   control={control}
                   name="password"
-                  label={t('auth.password')}
+                  label={t('screens.signin.password')}
                   secureTextEntry={!showPassword}
                   error={errors.password}
                   onToggleSecureEntry={togglePasswordVisibility}
@@ -115,7 +120,7 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title={t('auth.forgotPassword')}
+                  title={t('screens.signin.forgotPassword')}
                   variant="text"
                   size="small"
                   onPress={handleForgotPassword}
@@ -124,7 +129,7 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title={t('auth.login')}
+                  title={t('screens.signin.signIn')}
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
@@ -168,10 +173,10 @@ export const SigninScreen = () => {
 
                 <View style={styles.signupContainer}>
                   <Body color={colors.neutral.grey}>
-                    {t('auth.newAccount')}
+                    {t('screens.signin.noAccount')}
                   </Body>
                   <Button
-                    title={t('auth.signUp')}
+                    title={t('screens.signin.signUp')}
                     variant="text"
                     onPress={handleSignUp}
                     textStyle={styles.signupLink}

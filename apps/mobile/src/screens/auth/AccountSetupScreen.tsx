@@ -31,12 +31,13 @@ import Dropdown, {DropdownItem} from '@components/Dropdown';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
-  accountSetupSchema,
+  createAuthSchemas,
   AccountSetupFormValues,
 } from '@utils/validation/authValidation';
 import {colors, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
+import {useTranslation} from '@hooks/useTranslation';
 
 // User type options for dropdown
 const userTypeOptions: DropdownItem[] = [
@@ -84,6 +85,10 @@ export const AccountSetupScreen = () => {
   const {firstName} = route.params || {};
   const insets = useSafeAreaInsets();
   const wizardRef = useRef<WizardHandle>(null);
+  const {t} = useTranslation();
+
+  // Create validation schema with translations
+  const {accountSetupSchema} = createAuthSchemas(t);
 
   const {
     control,
