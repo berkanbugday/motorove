@@ -43,7 +43,6 @@ export const SignupScreen = () => {
     control,
     handleSubmit,
     formState: {errors, isSubmitting},
-    setError,
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -75,18 +74,6 @@ export const SignupScreen = () => {
       setSignupSuccess(true);
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
-      // Handle specific error types
-      if (error instanceof Error) {
-        setError('password', {
-          type: 'manual',
-          message: error.message || 'Registration failed',
-        });
-      } else {
-        setError('password', {
-          type: 'manual',
-          message: 'An unexpected error occurred. Please try again.',
-        });
-      }
     }
   };
 

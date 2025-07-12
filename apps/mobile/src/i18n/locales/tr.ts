@@ -27,6 +27,8 @@ export default {
     no: 'Hayır',
     required: 'Zorunlu',
     and: 've',
+    success: 'Başarılı',
+    error: 'Hata',
   },
 
   // Main navigation items
@@ -85,6 +87,9 @@ export default {
       resetPasswordInstructions:
         'Şifre sıfırlama bağlantısı almak için e-postanızı girin',
       emailAddress: 'E-posta Adresi',
+      emailSent: 'Şifre sıfırlama e-postası başarıyla gönderildi!',
+      emailSendFailed:
+        'Sıfırlama e-postası gönderilemedi. Lütfen tekrar deneyin.',
     },
     // signup screen
     signup: {

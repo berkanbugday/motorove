@@ -40,7 +40,7 @@ class GraphQLErrorService {
             errorMessage &&
             errorMessage.includes('Invalid Refresh Token: Already Used')
           ) {
-            loggingService.warning(
+            loggingService.error(
               'Refresh token already used, signing out user',
             );
             await errorService.handleError(error, errorType, {
@@ -59,6 +59,7 @@ class GraphQLErrorService {
             // Don't show an error toast if we successfully refreshed the token
             return true;
           } catch (refreshError) {
+            loggingService.error('Error refreshing token:', refreshError);
             // If refresh fails, handle as a regular auth error
             await errorService.handleError(error, errorType, {
               fallbackMessage:
@@ -71,6 +72,7 @@ class GraphQLErrorService {
           break;
         case 'UNAUTHORIZED':
           errorType = ErrorType.AUTHORIZATION;
+          loggingService.error('Unauthorized error:', error);
           await errorService.handleError(error, errorType, {
             showToast: true,
             fallbackMessage:
@@ -84,6 +86,7 @@ class GraphQLErrorService {
 
         case 'FORBIDDEN':
           errorType = ErrorType.AUTHORIZATION;
+          loggingService.error('Forbidden error:', error);
           await errorService.handleError(error, errorType, {
             fallbackMessage:
               'You do not have permission to perform this action.',
@@ -93,6 +96,7 @@ class GraphQLErrorService {
 
         case 'CONFLICT':
           errorType = ErrorType.VALIDATION;
+          loggingService.error('Conflict error:', error);
           await errorService.handleError(error, errorType, {
             showToast: true,
             fallbackMessage:
@@ -104,6 +108,7 @@ class GraphQLErrorService {
 
         case 'BAD_USER_INPUT':
           errorType = ErrorType.VALIDATION;
+          loggingService.error('Bad user input error:', error);
           await errorService.handleError(error, errorType, {
             fallbackMessage: 'Please check your information and try again.',
           });
@@ -111,6 +116,7 @@ class GraphQLErrorService {
           break;
 
         case 'INTERNAL_SERVER_ERROR':
+          loggingService.error('Internal server error:', error);
           await errorService.handleError(error, errorType, {
             fallbackMessage:
               'Something went wrong on our end. Please try again later.',
@@ -121,7 +127,7 @@ class GraphQLErrorService {
         case 'PERSISTED_QUERY_NOT_FOUND':
         case 'PERSISTED_QUERY_NOT_SUPPORTED':
           // Handle Apollo specific errors
-          loggingService.warning('Apollo client error:', errorCode);
+          loggingService.error('Apollo client error:', errorCode);
           await errorService.handleError(error, ErrorType.API, {
             showToast: false, // Don't show toast for these technical errors
           });
@@ -136,6 +142,7 @@ class GraphQLErrorService {
 
     // If not handled by specific cases above, handle as a general API error
     if (!handled) {
+      loggingService.error('Unhandled GraphQL error:', error);
       await errorService.handleError(error, errorType, {
         showToast: options.showToast,
         fallbackMessage: options.fallbackMessage,

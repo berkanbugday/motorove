@@ -27,6 +27,8 @@ export default {
     no: 'No',
     required: 'Required',
     and: 'and',
+    success: 'Success',
+    error: 'Error',
   },
 
   // Main navigation items
@@ -85,6 +87,8 @@ export default {
       resetPasswordInstructions:
         'Enter your email address to reset your password',
       emailAddress: 'Email Address',
+      emailSent: 'Password reset email sent successfully!',
+      emailSendFailed: 'Failed to send reset email. Please try again.',
     },
     // Signup screen
     signup: {
