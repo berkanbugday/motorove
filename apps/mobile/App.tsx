@@ -10,7 +10,7 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {View, ActivityIndicator, StyleSheet} from 'react-native';
 import {RootNavigator} from '@navigation/RootNavigator';
-import {AuthProvider} from '@contexts';
+import {AuthProvider, LanguageProvider} from '@contexts';
 import {ApolloProvider} from '@apollo/client';
 import {apolloClient} from '@configs/apolloClientConfig';
 import EncryptedStorage from 'react-native-encrypted-storage';
@@ -23,6 +23,10 @@ import {notificationService} from '@services/notification.service';
 import ToastMessage from '@components/ToastMessage';
 import NetworkStatusBar from '@components/NetworkAware';
 import BottomSheetProvider from '@components/BottomSheet/BottomSheetProvider';
+
+// Import i18n configuration
+import './src/i18n';
+
 // Initialize Sentry if DSN is provided
 if (
   AppConfig.ENABLE_LOGS &&
@@ -93,18 +97,20 @@ function App(): React.JSX.Element {
 
   return (
     <ErrorBoundary>
-      <NetworkStatusBar />
       <GestureHandlerRootView style={{flex: 1}}>
         <ApolloProvider client={apolloClient}>
-          <ToastMessage.Provider>
-            <SafeAreaProvider>
-              <BottomSheetProvider.Provider>
-                <AuthProvider>
-                  <RootNavigator />
-                </AuthProvider>
-              </BottomSheetProvider.Provider>
-            </SafeAreaProvider>
-          </ToastMessage.Provider>
+          <LanguageProvider>
+            <NetworkStatusBar />
+            <ToastMessage.Provider>
+              <SafeAreaProvider>
+                <BottomSheetProvider.Provider>
+                  <AuthProvider>
+                    <RootNavigator />
+                  </AuthProvider>
+                </BottomSheetProvider.Provider>
+              </SafeAreaProvider>
+            </ToastMessage.Provider>
+          </LanguageProvider>
         </ApolloProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>

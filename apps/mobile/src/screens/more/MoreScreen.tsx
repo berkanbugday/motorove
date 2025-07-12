@@ -14,6 +14,8 @@ import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
 import {useAuth} from '@contexts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import LanguageSelector from '@/components/LanguageSelector';
+import {useTranslation} from '@/hooks/useTranslation';
 
 type MenuSection = {
   title: string;
@@ -31,6 +33,7 @@ export const MoreScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Notification'>>();
   const {signOut} = useAuth();
   const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
 
   const handleProfilePress = () => {
     // Navigate to profile screen when implemented
@@ -52,20 +55,20 @@ export const MoreScreen: React.FC = () => {
 
   const menuSections: MenuSection[] = [
     {
-      title: 'Profile',
+      title: t('profile.settings'),
       items: [
         {
           icon: (
             <Icon name="user-filled" size={18} color={colors.neutral.black} />
           ),
-          title: 'My Profile',
+          title: t('profile.editProfile'),
           onPress: handleProfilePress,
         },
         {
           icon: (
             <Icon name="bell-filled" size={18} color={colors.neutral.black} />
           ),
-          title: 'Notifications',
+          title: t('navigation.notifications'),
           onPress: handleNotificationsPress,
           showBadge: false, // Set to true when you have unread notifications
         },
@@ -73,13 +76,13 @@ export const MoreScreen: React.FC = () => {
           icon: (
             <Icon name="gear-filled" size={18} color={colors.neutral.black} />
           ),
-          title: 'Settings',
+          title: t('navigation.settings'),
           onPress: handleSettingsPress,
         },
       ],
     },
     {
-      title: 'Events',
+      title: t('navigation.events'),
       items: [
         {
           icon: (
@@ -89,14 +92,14 @@ export const MoreScreen: React.FC = () => {
               color={colors.neutral.black}
             />
           ),
-          title: 'Create Event',
+          title: t('events.create'),
           onPress: handleCreateEventPress,
         },
         {
           icon: (
             <Icon name="clock-filled" size={18} color={colors.neutral.black} />
           ),
-          title: 'My Events',
+          title: t('events.upcoming'),
           onPress: () => {
             // Navigate to my events when implemented
             // navigation.navigate('MyEvents');
@@ -105,13 +108,13 @@ export const MoreScreen: React.FC = () => {
       ],
     },
     {
-      title: 'Account',
+      title: t('settings.account'),
       items: [
         {
           icon: (
             <Icon name="lock-filled" size={18} color={colors.neutral.black} />
           ),
-          title: 'Privacy Policy',
+          title: t('settings.privacyPolicy'),
           onPress: () => {
             // Open privacy policy
             // navigation.navigate('PrivacyPolicy');
@@ -121,7 +124,7 @@ export const MoreScreen: React.FC = () => {
           icon: (
             <Icon name="earth-filled" size={18} color={colors.neutral.black} />
           ),
-          title: 'Terms of Service',
+          title: t('settings.termsOfService'),
           onPress: () => {
             // Open terms of service
             // navigation.navigate('TermsOfService');
@@ -131,7 +134,7 @@ export const MoreScreen: React.FC = () => {
           icon: (
             <Icon name="error-filled" size={18} color={colors.status.error} />
           ),
-          title: 'Sign Out',
+          title: t('auth.logout'),
           onPress: signOut,
         },
       ],
@@ -180,6 +183,16 @@ export const MoreScreen: React.FC = () => {
           {paddingBottom: insets.bottom + 100},
         ]}>
         {menuSections.map(renderSection)}
+
+        {/* Language Selector */}
+        <View style={[styles.sectionMargin]}>
+          <Typography variant="subtitle" weight="semiBold">
+            {t('settings.language')}
+          </Typography>
+          <View style={styles.languageSelectorContainer}>
+            <LanguageSelector />
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -228,5 +241,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.primary.main,
     marginRight: spacing.sm,
+  },
+  languageSelectorContainer: {
+    marginTop: spacing.sm,
   },
 });

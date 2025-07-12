@@ -4,3 +4,4 @@ export * from './useMapMarkers';
 export * from './useMapMovement';
 export * from './useComponentAnimation';
 export * from './useMapMarkerCards';
+export * from './useTranslation';

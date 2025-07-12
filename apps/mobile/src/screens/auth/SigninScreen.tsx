@@ -18,6 +18,7 @@ import {signinSchema, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useAuth} from '@navigation/utils/navigationUtils';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
+import {useTranslation} from '@hooks/useTranslation';
 import {GraphQLFormattedError} from 'graphql';
 
 export const SigninScreen = () => {
@@ -26,6 +27,7 @@ export const SigninScreen = () => {
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
+  const {t} = useTranslation();
 
   const {
     control,
@@ -87,15 +89,13 @@ export const SigninScreen = () => {
                 />
               </View>
 
-              <Body style={styles.welcomeText}>
-                Welcome back! Please signin to continue
-              </Body>
+              <Body style={styles.welcomeText}>{t('auth.login')}</Body>
 
               <View style={styles.form}>
                 <AnimatedInput
                   control={control}
                   name="email"
-                  label="Email Address"
+                  label={t('auth.email')}
                   keyboardType="email-address"
                   icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
@@ -105,7 +105,7 @@ export const SigninScreen = () => {
                 <AnimatedInput
                   control={control}
                   name="password"
-                  label="Password"
+                  label={t('auth.password')}
                   secureTextEntry={!showPassword}
                   error={errors.password}
                   onToggleSecureEntry={togglePasswordVisibility}
@@ -115,7 +115,7 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title="Forgot password?"
+                  title={t('auth.forgotPassword')}
                   variant="text"
                   size="small"
                   onPress={handleForgotPassword}
@@ -124,7 +124,7 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title="Sign In"
+                  title={t('auth.login')}
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
@@ -168,10 +168,10 @@ export const SigninScreen = () => {
 
                 <View style={styles.signupContainer}>
                   <Body color={colors.neutral.grey}>
-                    Don't have an account?
+                    {t('auth.newAccount')}
                   </Body>
                   <Button
-                    title="Sign Up"
+                    title={t('auth.signUp')}
                     variant="text"
                     onPress={handleSignUp}
                     textStyle={styles.signupLink}
