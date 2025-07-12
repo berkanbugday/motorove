@@ -4,9 +4,11 @@ import { SupabaseService } from './supabase.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthResolver } from './auth.resolver';
+import { AuthController } from './auth.controller';
 
 @Module({
   imports: [PrismaModule, ConfigModule],
+  controllers: [AuthController],
   providers: [AuthService, SupabaseService, AuthResolver],
   exports: [AuthService, SupabaseService],
 })
