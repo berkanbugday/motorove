@@ -16,11 +16,7 @@ const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['motorove://', 'https://motorove.app'],
   config: {
     screens: {
-      Auth: {
-        screens: {
-          UpdatePassword: 'update-password/:email/:token',
-        },
-      },
+      Auth: 'auth',
       Main: 'main',
     },
   },

@@ -34,6 +34,10 @@ export const ResetPasswordScreen = () => {
   const {resetPassword, loading} = useResetPassword(() => {
     // Reset form after successful submission
     reset();
+    // Navigate to signin screen
+    setTimeout(() => {
+      navigation.navigate('Signin');
+    }, 1500);
   });
 
   const {

@@ -25,29 +25,6 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
-// For backward compatibility
-export const forgotPasswordSchema = resetPasswordSchema;
-export type ForgotPasswordFormValues = ResetPasswordFormValues;
-
-// Update password form schema
-export const updatePasswordSchema = z
-  .object({
-    password: z
-      .string({required_error: 'Password is required'})
-      .nonempty('Password is required')
-      .min(6, 'Password must be at least 6 characters')
-      .regex(/^\S*$/, 'Password cannot contain spaces'),
-    confirmPassword: z
-      .string({required_error: 'Please confirm your password'})
-      .nonempty('Please confirm your password'),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-export type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
-
 // Signup form schema
 export const signupSchema = z.object({
   firstName: z
