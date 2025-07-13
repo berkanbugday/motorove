@@ -442,7 +442,6 @@ class AuthService {
 
               return {
                 ...updatedParsedData,
-                isLoading: false,
               };
             }
 
@@ -464,7 +463,6 @@ class AuthService {
                 accessToken: null,
                 refreshToken: null,
                 expiresAt: null,
-                isLoading: false,
               };
             }
 
@@ -475,7 +473,6 @@ class AuthService {
               accessToken: parsedData.accessToken,
               refreshToken: parsedData.refreshToken,
               expiresAt: parsedData.expiresAt,
-              isLoading: false,
             };
           }
         }
@@ -503,7 +500,6 @@ class AuthService {
           accessToken: parsedData.accessToken,
           refreshToken: parsedData.refreshToken,
           expiresAt: parsedData.expiresAt,
-          isLoading: false,
         };
       }
 
@@ -526,7 +522,6 @@ class AuthService {
           accessToken,
           refreshToken,
           expiresAt,
-          isLoading: false,
         };
 
         // Migrate to encrypted storage
@@ -555,7 +550,6 @@ class AuthService {
         accessToken: null,
         refreshToken: null,
         expiresAt: null,
-        isLoading: false,
       };
     } catch (error) {
       loggingService.error('Error getting auth state:', error);
@@ -564,7 +558,6 @@ class AuthService {
         accessToken: null,
         refreshToken: null,
         expiresAt: null,
-        isLoading: false,
       };
     }
   }
@@ -592,6 +585,12 @@ class AuthService {
   // Convert GraphQL auth response to our AuthResponse format
   private convertGraphQLAuthResponse(graphQLResponse: any): AuthResponse {
     const {user, session} = graphQLResponse;
+
+    // Extract hasCompletedSetup or default to false
+    const userWithSetupStatus = {
+      ...user,
+      hasCompletedSetup: user.hasCompletedSetup,
+    };
 
     // If session exists, convert expires_in to expires_at
     let processedSession;
@@ -624,7 +623,7 @@ class AuthService {
     }
 
     return {
-      user,
+      user: userWithSetupStatus,
       session: processedSession || undefined,
     };
   }
@@ -661,7 +660,7 @@ class AuthService {
 
   // Save auth data to encrypted storage
   private async saveAuthDataToEncryptedStorage(
-    authState: Omit<AuthState, 'isLoading'>,
+    authState: AuthState,
   ): Promise<void> {
     try {
       // Save the main auth data and refresh token atomically (as much as possible)

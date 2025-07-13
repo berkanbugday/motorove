@@ -11,6 +11,7 @@ export interface AuthUser {
   firstName?: string;
   lastName?: string;
   avatar?: string;
+  hasCompletedSetup?: boolean;
 }
 
 /**
@@ -46,11 +47,14 @@ export const AUTH_STORAGE_KEYS = {
   AUTH_DATA: 'encrypted_auth_data',
 };
 
-export interface AuthContextType {
-  user: AuthUser | null;
-  accessToken: string | null;
-  isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+export interface AuthContextType extends AuthState {
+  signIn: (email: string, password: string) => Promise<AuthResponse>;
+  signUp: (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+  ) => Promise<AuthResponse>;
   signOut: () => Promise<void>;
+  loadAuthState: () => Promise<void>;
 }

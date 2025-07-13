@@ -5,7 +5,6 @@ import {loggingService} from '@services/logging.service';
 import {
   notificationService,
   useRemoveDeviceToken,
-  useSaveDeviceToken,
 } from '@services/notification.service';
 
 // Default auth state
@@ -55,7 +54,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const {removeDeviceToken} = useRemoveDeviceToken();
-  const {saveDeviceToken} = useSaveDeviceToken();
 
   // Load authentication state on component mount
   useEffect(() => {
@@ -65,7 +63,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   // Load authentication state
   const loadAuthState = async (): Promise<void> => {
     try {
-      setAuthState(prevState => ({...prevState}));
       const state = await authService.getAuthState();
 
       // Log authentication state for debugging
@@ -75,7 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         expiresAt: state.expiresAt,
       });
 
-      setAuthState({...state});
+      setAuthState(state);
 
       // Setup token refresh if needed
       if (state.user && state.accessToken && state.expiresAt) {
@@ -94,7 +91,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     password: string,
   ): Promise<AuthResponse> => {
     try {
-      setAuthState(prevState => ({...prevState}));
       const response = await authService.signIn(email, password);
 
       // Ensure we're setting the state correctly after signin
@@ -112,36 +108,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       setAuthState(newState);
 
-      // Request notification permissions after successful sign-in
-      if (response.user && response.session?.access_token) {
-        try {
-          // Request notification permission
-          const permission =
-            await notificationService.service.requestPermissions();
-
-          // If permission is granted and we have a device token, save it to the server
-          if (permission) {
-            const token = await notificationService.service.getDeviceToken();
-            if (token && response.user.id) {
-              saveDeviceToken({
-                userId: response.user.id,
-                token: token,
-                deviceType: notificationService.getDeviceType(),
-              });
-            }
-          }
-        } catch (notificationError) {
-          loggingService.error(
-            'Error requesting notification permissions:',
-            notificationError,
-          );
-          // Don't throw the error - we don't want to interrupt signin flow for notification errors
-        }
-      }
-
       return response;
     } catch (error) {
-      setAuthState(prevState => ({...prevState}));
       throw error;
     }
   };
@@ -154,7 +122,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     password: string,
   ): Promise<AuthResponse> => {
     try {
-      setAuthState(prevState => ({...prevState}));
       const response = await authService.signUp(
         firstName,
         lastName,
@@ -179,7 +146,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       return response;
     } catch (error) {
-      setAuthState(prevState => ({...prevState}));
       throw error;
     }
   };
@@ -187,8 +153,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   // Sign out
   const signOut = async (): Promise<void> => {
     try {
-      setAuthState(prevState => ({...prevState}));
-
       // Clean up notification service if user was logged in
       if (authState.user && authState.user.id) {
         try {
@@ -205,7 +169,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       setAuthState({...defaultAuthState});
     } catch (error) {
       loggingService.error('Error signing out:', error);
-      setAuthState(prevState => ({...prevState}));
       throw error;
     }
   };

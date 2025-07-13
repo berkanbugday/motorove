@@ -13,4 +13,7 @@ export class AuthUser {
 
   @Field()
   email: string;
+
+  @Field(() => Boolean, { defaultValue: false })
+  hasCompletedSetup: boolean;
 }

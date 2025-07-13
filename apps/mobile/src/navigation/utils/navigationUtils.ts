@@ -60,7 +60,6 @@ export function useAuth() {
 
   return {
     isAuthenticated,
-    isLoading: authContext.isLoading,
     user: authContext.user,
     signin: authContext.signIn,
     signup: authContext.signUp,

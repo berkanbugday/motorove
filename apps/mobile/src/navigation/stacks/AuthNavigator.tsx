@@ -10,17 +10,21 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 type AuthNavigatorProps = {
   isFirstTime: boolean;
+  initialRoute?: keyof AuthStackParamList;
 };
 
 /**
  * Authentication navigation stack - shown when user is NOT authenticated
  * Includes Welcome, Signin, and ResetPassword screens
  */
-export function AuthNavigator({isFirstTime}: AuthNavigatorProps) {
+export function AuthNavigator({isFirstTime, initialRoute}: AuthNavigatorProps) {
+  // Determine initial route
+  const startRoute = initialRoute || (isFirstTime ? 'Welcome' : 'Signin');
+
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName={isFirstTime ? 'Welcome' : 'Signin'}>
+      initialRouteName={startRoute}>
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Signin" component={SigninScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />

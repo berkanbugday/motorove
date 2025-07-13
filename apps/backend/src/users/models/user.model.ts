@@ -67,6 +67,9 @@ export class User implements IUser {
   @Field(() => Boolean)
   isActive: boolean;
 
+  @Field(() => Boolean, { defaultValue: false })
+  hasCompletedSetup: boolean;
+
   @Field(() => [Group], { nullable: true })
   createdGroups?: Group[];
 

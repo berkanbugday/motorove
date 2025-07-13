@@ -66,6 +66,7 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
+          hasCompletedSetup: user.hasCompletedSetup,
         },
         session: data.session || null,
       };
@@ -106,6 +107,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        hasCompletedSetup: user.hasCompletedSetup,
       },
       session: data.session || null,
     };
@@ -160,6 +162,7 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
+          hasCompletedSetup: user.hasCompletedSetup,
         },
         session: data.session || null,
       };
@@ -211,6 +214,7 @@ export class AuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      hasCompletedSetup: user.hasCompletedSetup,
     };
   }
 

@@ -49,7 +49,19 @@ export const SigninScreen = () => {
 
   const onSubmit = async (data: SigninFormValues) => {
     try {
-      await signin(data.email.trim(), data.password.trim());
+      const response = await signin(data.email.trim(), data.password.trim());
+
+      if (response.user?.hasCompletedSetup) {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Main'}],
+        });
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Auth', params: {screen: 'AccountSetup'}}],
+        });
+      }
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
     }

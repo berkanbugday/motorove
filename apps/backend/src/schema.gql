@@ -45,6 +45,7 @@ type AuthResponse {
 type AuthUser {
   email: String!
   firstName: String!
+  hasCompletedSetup: Boolean!
   id: ID!
   lastName: String!
 }
@@ -830,6 +831,7 @@ type User {
   garages: [Garage!]
   gender: Gender
   groupMemberships: [GroupMembership!]
+  hasCompletedSetup: Boolean!
   id: ID!
   interests: [Interest!]
   isActive: Boolean!
