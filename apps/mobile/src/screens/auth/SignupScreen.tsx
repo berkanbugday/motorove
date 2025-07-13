@@ -68,10 +68,17 @@ export const SignupScreen = () => {
 
   const onSubmit = async (data: SignupFormValues) => {
     try {
-      await signup(data.firstName, data.lastName, data.email, data.password);
+      const response = await signup(
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.password,
+      );
 
-      setUserEmail(data.email);
-      setSignupSuccess(true);
+      if (response.user) {
+        setUserEmail(data.email);
+        setSignupSuccess(true);
+      }
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
     }

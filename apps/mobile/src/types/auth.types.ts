@@ -33,7 +33,6 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   expiresAt: number | null;
-  isLoading: boolean;
 }
 
 /**

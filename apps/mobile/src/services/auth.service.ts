@@ -163,10 +163,6 @@ class AuthService {
 
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.signUp);
-      await this.saveAuthData(authResponse);
-
-      // Start background token refresh
-      this.setupBackgroundTokenRefresh(authResponse);
 
       return authResponse;
     } catch (error) {
@@ -629,7 +625,7 @@ class AuthService {
 
     return {
       user,
-      session: processedSession,
+      session: processedSession || undefined,
     };
   }
 
