@@ -14,10 +14,11 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Icon, AnimatedInput, Button, Body, TopHeaderBar} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {signinSchema, SigninFormValues} from '@utils/validation';
+import {createAuthSchemas, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useAuth} from '@navigation/utils/navigationUtils';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
+import {useTranslation} from '@hooks/useTranslation';
 import {GraphQLFormattedError} from 'graphql';
 
 export const SigninScreen = () => {
@@ -26,6 +27,9 @@ export const SigninScreen = () => {
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
+  const {t} = useTranslation();
+
+  const {signinSchema} = createAuthSchemas(t);
 
   const {
     control,
@@ -46,29 +50,18 @@ export const SigninScreen = () => {
   const onSubmit = async (data: SigninFormValues) => {
     try {
       await signin(data.email.trim(), data.password.trim());
-      // If successful, the navigation in RootNavigator will change to MainNavigator
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
     }
   };
 
   const handleSignUp = () => {
-    // Navigate to sign up screen
     navigation.navigate('Signup');
   };
 
   const handleForgotPassword = () => {
     navigation.navigate('ResetPassword');
   };
-
-  // function handleSocialSignin(provider: 'google' | 'apple' | 'facebook') {
-  //   // Notify user that social signin is not implemented yet
-  //   Alert.alert(
-  //     'Not Implemented',
-  //     `Social signin with ${provider} is not implemented yet.`,
-  //     [{text: 'OK'}],
-  //   );
-  // }
 
   return (
     <View style={styles.container}>
@@ -88,14 +81,14 @@ export const SigninScreen = () => {
               </View>
 
               <Body style={styles.welcomeText}>
-                Welcome back! Please signin to continue
+                {t('screens.signin.welcomeBack')}
               </Body>
 
               <View style={styles.form}>
                 <AnimatedInput
                   control={control}
                   name="email"
-                  label="Email Address"
+                  label={t('screens.signin.emailAddress')}
                   keyboardType="email-address"
                   icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
@@ -105,7 +98,7 @@ export const SigninScreen = () => {
                 <AnimatedInput
                   control={control}
                   name="password"
-                  label="Password"
+                  label={t('screens.signin.password')}
                   secureTextEntry={!showPassword}
                   error={errors.password}
                   onToggleSecureEntry={togglePasswordVisibility}
@@ -115,7 +108,7 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title="Forgot password?"
+                  title={t('screens.signin.forgotPassword')}
                   variant="text"
                   size="small"
                   onPress={handleForgotPassword}
@@ -124,54 +117,19 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title="Sign In"
+                  title={t('screens.signin.signIn')}
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
                   disabled={isSubmitting}
                   testID="signin-button"
                 />
-
-                {/* <View style={styles.dividerContainer}>
-                  <View style={styles.divider} />
-                  <Caption style={styles.dividerText}>or continue with</Caption>
-                  <View style={styles.divider} />
-                </View>
-
-                <View style={styles.socialButtonsContainer}>
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignin('google')}>
-                    <Icon
-                      name="google"
-                      size={18}
-                      color={colors.neutral.black}
-                    />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignin('apple')}>
-                    <Icon name="apple" size={18} color={colors.neutral.black} />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignin('facebook')}>
-                    <Icon
-                      name="facebook"
-                      size={18}
-                      color={colors.neutral.black}
-                    />
-                  </TouchableOpacity>
-                </View> */}
-
                 <View style={styles.signupContainer}>
                   <Body color={colors.neutral.grey}>
-                    Don't have an account?
+                    {t('screens.signin.noAccount')}
                   </Body>
                   <Button
-                    title="Sign Up"
+                    title={t('screens.signin.signUp')}
                     variant="text"
                     onPress={handleSignUp}
                     textStyle={styles.signupLink}

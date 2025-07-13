@@ -2,6 +2,7 @@ import {captureException} from '@sentry/react-native';
 import NetInfo from '@react-native-community/netinfo';
 import {showToast} from '@components';
 import {errorToMessage} from '@utils/errorUtils';
+import i18n from '../i18n/i18n';
 
 /**
  * Types of errors that can be handled
@@ -87,7 +88,7 @@ class ErrorService {
    * Handle network-specific errors
    */
   private handleNetworkError(
-    message: string = 'Network connection is unavailable',
+    message: string = i18n.t('errors.network.default'),
     options: ErrorHandlingOptions = {},
   ): void {
     const {showToast: shouldShowToast, logToSentry, context} = options;
@@ -102,9 +103,7 @@ class ErrorService {
 
     // Show toast if enabled
     if (shouldShowToast) {
-      this.showErrorToast(
-        message || 'Please check your internet connection and try again',
-      );
+      this.showErrorToast(message || i18n.t('errors.network.checkConnection'));
     }
   }
 
@@ -135,7 +134,7 @@ class ErrorService {
   showErrorToast(message: string): void {
     showToast({
       type: 'error',
-      text1: 'Error',
+      text1: i18n.t('common.error'),
       text2: message,
     });
   }
@@ -146,7 +145,7 @@ class ErrorService {
   showSuccessToast(message: string): void {
     showToast({
       type: 'success',
-      text1: 'Success',
+      text1: i18n.t('common.success'),
       text2: message,
     });
   }
@@ -157,7 +156,7 @@ class ErrorService {
   showInfoToast(message: string): void {
     showToast({
       type: 'info',
-      text1: 'Info',
+      text1: i18n.t('common.info'),
       text2: message,
     });
   }

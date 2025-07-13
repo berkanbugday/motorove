@@ -38,6 +38,7 @@ import {useCreatePost} from '@services/post.service';
 import {CreatePostInput, PostAddressInput} from '../../types/models/post.model';
 import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
+import {Language} from '@motorove/shared';
 
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
@@ -388,7 +389,7 @@ export const CreatePostScreen = () => {
               title={
                 location.addresses.length > 0
                   ? location.addresses.find(
-                      address => address.language === 'en',
+                      address => address.language === Language.EN.toLowerCase(),
                     )?.address
                   : 'Add location'
               }

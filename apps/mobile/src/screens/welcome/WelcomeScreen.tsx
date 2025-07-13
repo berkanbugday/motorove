@@ -14,60 +14,47 @@ import {Button, Title, Body, Typography} from '@components';
 import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
 import {colors, spacing, radius, commonStyles} from '@theme';
+import {useTranslation} from '@hooks/useTranslation';
 
 const {width: screenWidth} = Dimensions.get('window');
 
 // Define carousel item interface
 interface CarouselItem {
   id: number;
-  title: string;
-  text: string;
+  titleKey: string;
+  textKey: string;
   color: string;
   image?: ImageSourcePropType;
 }
 
-// Carousel data - moved outside component to avoid recreation on each render
-const carouselItems: CarouselItem[] = [
-  {
-    id: 1,
-    title: 'Welcome to Motorove',
-    text: 'Your ultimate motorcycle companion',
-    color: '#2E64E5',
-  },
-  {
-    id: 2,
-    title: 'Discover Routes',
-    text: 'Find the best routes for your rides',
-    color: '#4CAF50',
-  },
-  {
-    id: 3,
-    title: 'Join Community',
-    text: 'Connect with fellow riders',
-    color: '#FF9800',
-  },
-];
-
 // Carousel Item Component
-const CarouselItemComponent = ({item}: {item: CarouselItem}) => (
-  <View key={item.id} style={styles.slide}>
-    <View style={[styles.imageContainer, {backgroundColor: item.color}]}>
-      {item.image ? (
-        <Image source={item.image} style={styles.image} resizeMode="contain" />
-      ) : (
-        <Typography
-          variant="title"
-          color={colors.neutral.white}
-          align="center"
-          style={styles.imageText}>
-          {item.title}
-        </Typography>
-      )}
+const CarouselItemComponent = ({item}: {item: CarouselItem}) => {
+  const {t} = useTranslation();
+
+  return (
+    <View key={item.id} style={styles.slide}>
+      <View style={[styles.imageContainer, {backgroundColor: item.color}]}>
+        {item.image ? (
+          <Image
+            source={item.image}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        ) : (
+          <Typography
+            variant="title"
+            color={colors.neutral.white}
+            align="center"
+            style={styles.imageText}>
+            {t(item.titleKey)}
+          </Typography>
+        )}
+      </View>
+      <Title style={styles.title}>{t(item.titleKey)}</Title>
+      <Body style={styles.text}>{t(item.textKey)}</Body>
     </View>
-    <Title style={styles.title}>{item.title}</Title>
-    <Body style={styles.text}>{item.text}</Body>
-  </View>
-);
+  );
+};
 
 // Button Section Component
 type ButtonSectionProps = {
@@ -80,38 +67,64 @@ const ButtonSection = ({
   onSigninPress,
   onSignupPress,
   bottomPadding,
-}: ButtonSectionProps) => (
-  <View
-    style={[
-      styles.buttonContainer,
-      {
-        paddingBottom: bottomPadding,
-      },
-    ]}>
-    <Button
-      title="Sign Up"
-      onPress={onSignupPress}
-      variant="primary"
-      shape="round"
-      style={styles.button}
-      testID="welcome-signup-button"
-    />
-    <Button
-      title="Sign In"
-      onPress={onSigninPress}
-      variant="outline"
-      shape="round"
-      style={styles.button}
-      testID="welcome-signin-button"
-    />
-  </View>
-);
+}: ButtonSectionProps) => {
+  const {t} = useTranslation();
+
+  return (
+    <View
+      style={[
+        styles.buttonContainer,
+        {
+          paddingBottom: bottomPadding,
+        },
+      ]}>
+      <Button
+        title={t('screens.welcome.signUp')}
+        onPress={onSignupPress}
+        variant="primary"
+        shape="round"
+        style={styles.button}
+        testID="welcome-signup-button"
+      />
+      <Button
+        title={t('screens.welcome.signIn')}
+        onPress={onSigninPress}
+        variant="outline"
+        shape="round"
+        style={styles.button}
+        testID="welcome-signin-button"
+      />
+    </View>
+  );
+};
 
 export function WelcomeScreen(): React.JSX.Element {
   const carouselRef = useRef(null);
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AuthScreenNavigationProp<'Welcome'>>();
   const {markAsNotFirstTime} = useFirstTimeCheck();
+
+  // Carousel data - moved outside component to avoid recreation on each render
+  const carouselItems: CarouselItem[] = [
+    {
+      id: 1,
+      titleKey: 'navigation.welcome',
+      textKey: 'screens.welcome.slides.discoverCommunity',
+      color: '#2E64E5',
+    },
+    {
+      id: 2,
+      titleKey: 'screens.welcome.slides.joinEvents',
+      textKey: 'screens.welcome.slides.joinEvents',
+      color: '#4CAF50',
+    },
+    {
+      id: 3,
+      titleKey: 'screens.welcome.slides.createGroups',
+      textKey: 'screens.welcome.slides.shareExperiences',
+      color: '#FF9800',
+    },
+  ];
 
   // Event Handlers - memoized with useCallback
   const handleSignin = useCallback(async () => {

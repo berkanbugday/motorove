@@ -1,6 +1,7 @@
 /**
  * Error utilities for converting various error types to user-friendly messages
  */
+import i18n from '../i18n/i18n';
 
 /**
  * Convert any error to a user-friendly message
@@ -10,9 +11,9 @@
  */
 export function errorToMessage(
   error: any,
-  fallbackMessage = 'Something went wrong. Please try again.',
+  fallbackMessage = i18n.t('errors.general.somethingWrong'),
 ): string {
-  if (fallbackMessage) {
+  if (!error) {
     return fallbackMessage;
   }
 
@@ -22,8 +23,8 @@ export function errorToMessage(
   }
 
   // Handle GraphQL errors
-  if (error && error.message.length > 0) {
-    return extractGraphQLErrorMessage(error);
+  if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+    return extractGraphQLErrorMessage(error.graphQLErrors[0]);
   }
 
   // Handle network errors
@@ -31,7 +32,7 @@ export function errorToMessage(
     if (error.networkError.result && error.networkError.result.errors) {
       return extractGraphQLErrorMessage(error.networkError.result.errors[0]);
     }
-    return 'Network error. Please check your connection and try again.';
+    return i18n.t('errors.network.checkConnection');
   }
 
   // Handle HTTP errors
@@ -53,14 +54,14 @@ export function errorToMessage(
  */
 function extractGraphQLErrorMessage(graphQLError: any): string {
   if (!graphQLError) {
-    return 'An error occurred';
+    return i18n.t('errors.general.default');
   }
 
   // Try to get the message from various possible locations
   const message =
     graphQLError.message ||
     (graphQLError.extensions && graphQLError.extensions.message) ||
-    'An error occurred';
+    i18n.t('errors.general.default');
 
   return humanizeErrorMessage(message);
 }
@@ -83,7 +84,8 @@ function extractHttpErrorMessage(error: any): string {
       return humanizeErrorMessage(
         typeof error.response.data.error === 'string'
           ? error.response.data.error
-          : error.response.data.error.message || 'An error occurred',
+          : error.response.data.error.message ||
+              i18n.t('errors.general.default'),
       );
     }
   }
@@ -91,23 +93,23 @@ function extractHttpErrorMessage(error: any): string {
   // Use HTTP status code to generate a message
   switch (error.response.status) {
     case 400:
-      return 'Invalid request. Please check your information.';
+      return i18n.t('errors.http.400');
     case 401:
-      return 'You need to sign in to access this feature.';
+      return i18n.t('errors.http.401');
     case 403:
-      return 'You do not have permission to perform this action.';
+      return i18n.t('errors.http.403');
     case 404:
-      return 'The requested information could not be found.';
+      return i18n.t('errors.http.404');
     case 408:
-      return 'The request timed out. Please try again.';
+      return i18n.t('errors.http.408');
     case 500:
-      return 'Server error. Please try again later.';
+      return i18n.t('errors.http.500');
     case 502:
     case 503:
     case 504:
-      return 'The service is temporarily unavailable. Please try again later.';
+      return i18n.t('errors.http.503');
     default:
-      return `Error: ${error.response.status}`;
+      return `${i18n.t('errors.general.error')}: ${error.response.status}`;
   }
 }
 
@@ -116,7 +118,7 @@ function extractHttpErrorMessage(error: any): string {
  */
 function humanizeErrorMessage(message: string): string {
   if (!message) {
-    return 'An error occurred';
+    return i18n.t('errors.general.default');
   }
 
   // Remove technical prefixes
@@ -124,7 +126,7 @@ function humanizeErrorMessage(message: string): string {
   message = message.replace(/^exception:/i, '').trim();
 
   if (message.includes('Invalid login credentials')) {
-    return 'Invalid email or password';
+    return i18n.t('errors.auth.invalidCredentials');
   }
 
   // Make first letter uppercase if it's not

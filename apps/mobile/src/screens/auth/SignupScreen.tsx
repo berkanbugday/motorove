@@ -14,15 +14,17 @@ import {
   BodySmall,
   Subtitle,
   TopHeaderBar,
+  Caption,
 } from '@components';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {signupSchema, SignupFormValues} from '@utils/validation';
+import {createAuthSchemas, SignupFormValues} from '@utils/validation';
 import {colors, spacing, fontSizes, radius, commonStyles} from '@theme';
 import {termsOfService, privacyPolicy} from '@constants/legalContent';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {GraphQLFormattedError} from 'graphql';
+import {useTranslation} from '@hooks/useTranslation';
 
 export const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,11 +35,15 @@ export const SignupScreen = () => {
   const {signup} = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
+  const {t} = useTranslation();
+
+  // Create validation schema with translations
+  const {signupSchema} = createAuthSchemas(t);
+
   const {
     control,
     handleSubmit,
     formState: {errors, isSubmitting},
-    setError,
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -63,24 +69,19 @@ export const SignupScreen = () => {
 
   const onSubmit = async (data: SignupFormValues) => {
     try {
-      await signup(data.firstName, data.lastName, data.email, data.password);
+      const response = await signup(
+        data.firstName,
+        data.lastName,
+        data.email,
+        data.password,
+      );
 
-      setUserEmail(data.email);
-      setSignupSuccess(true);
+      if (response.user) {
+        setUserEmail(data.email);
+        setSignupSuccess(true);
+      }
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
-      // Handle specific error types
-      if (error instanceof Error) {
-        setError('password', {
-          type: 'manual',
-          message: error.message || 'Registration failed',
-        });
-      } else {
-        setError('password', {
-          type: 'manual',
-          message: 'An unexpected error occurred. Please try again.',
-        });
-      }
     }
   };
 
@@ -97,16 +98,6 @@ export const SignupScreen = () => {
     // TODO: Implement actual email verification
   };
 
-  // Social signup is commented out in UI, so this function is not currently used
-  // function handleSocialSignup(provider: 'google' | 'apple' | 'facebook') {
-  //   // Notify user that social signup is not implemented yet
-  //   Alert.alert(
-  //     'Not Implemented',
-  //     `Social signup with ${provider} is not implemented yet.`,
-  //     [{text: 'OK'}],
-  //   );
-  // }
-
   const handleTermsPress = () => {
     termsBottomSheetRef.current?.open('full');
   };
@@ -120,20 +111,20 @@ export const SignupScreen = () => {
     return (
       <View style={[styles.content, {justifyContent: 'center'}]}>
         <Title align="center" style={styles.successTitle}>
-          Verify your email
+          {t('screens.signup.verifyEmail')}
         </Title>
         <View style={styles.successContainer}>
           <Icon name="paper-plane" size={40} />
           <Body style={{marginTop: spacing.md}}>
-            We've sent a verification email to
+            {t('screens.signup.verificationEmailSent')}
           </Body>
           <Body weight="semiBold">{userEmail}</Body>
           <BodySmall align="center" style={styles.successText}>
-            If you don't see the email, check your spam folder
+            {t('screens.signup.checkSpamFolder')}
           </BodySmall>
         </View>
         <Button
-          title="Back to Sign In"
+          title={t('screens.signup.signIn')}
           variant="primary"
           shape="round"
           onPress={handleSignin}
@@ -141,7 +132,7 @@ export const SignupScreen = () => {
           testID="back-to-signin-button"
         />
         <Button
-          title="Resend Verification Email"
+          title={t('screens.signup.resendVerificationEmail')}
           variant="outline"
           shape="round"
           onPress={handleResendVerificationEmail}
@@ -179,14 +170,14 @@ export const SignupScreen = () => {
               weight="medium"
               color={colors.neutral.grey}
               style={styles.welcomeText}>
-              Create an account to get started
+              {t('screens.signup.createAccountIntro')}
             </Subtitle>
 
             <View style={styles.form}>
               <AnimatedInput
                 control={control}
                 name="firstName"
-                label="First Name"
+                label={t('screens.signup.firstName')}
                 icon={<Icon name="user-filled" size={20} />}
                 error={errors.firstName}
                 testID="signup-firstname"
@@ -195,7 +186,7 @@ export const SignupScreen = () => {
               <AnimatedInput
                 control={control}
                 name="lastName"
-                label="Last Name"
+                label={t('screens.signup.lastName')}
                 icon={<Icon name="user-filled" size={20} />}
                 error={errors.lastName}
                 testID="signup-lastname"
@@ -204,7 +195,7 @@ export const SignupScreen = () => {
               <AnimatedInput
                 control={control}
                 name="email"
-                label="Email Address"
+                label={t('screens.signup.emailAddress')}
                 keyboardType="email-address"
                 icon={<Icon name="envelope-filled" size={20} />}
                 error={errors.email}
@@ -214,7 +205,7 @@ export const SignupScreen = () => {
               <AnimatedInput
                 control={control}
                 name="password"
-                label="Password"
+                label={t('screens.signup.password')}
                 secureTextEntry={!showPassword}
                 error={errors.password}
                 onToggleSecureEntry={togglePasswordVisibility}
@@ -232,18 +223,20 @@ export const SignupScreen = () => {
                 size="medium"
                 label={
                   <View style={styles.termsTextContainer}>
-                    <BodySmall color={colors.neutral.grey}>
-                      I agree to the
-                    </BodySmall>
+                    <Caption color={colors.neutral.grey}>
+                      {t('screens.signup.iAgreeTo')}
+                    </Caption>
                     <Button
-                      title="Terms of Service"
+                      title={t('screens.signup.termsOfService')}
                       variant="text"
                       onPress={handleTermsPress}
                       textStyle={styles.termsLink}
                     />
-                    <BodySmall color={colors.neutral.grey}>and</BodySmall>
+                    <Caption color={colors.neutral.grey}>
+                      {t('common.and')}
+                    </Caption>
                     <Button
-                      title="Privacy Policy"
+                      title={t('screens.signup.privacyPolicy')}
                       variant="text"
                       onPress={handlePrivacyPress}
                       textStyle={styles.termsLink}
@@ -251,65 +244,16 @@ export const SignupScreen = () => {
                   </View>
                 }
               />
+
               <Button
-                title="Sign Up"
+                title={t('screens.signup.signUp')}
                 shape="round"
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
                 disabled={isSubmitting}
+                style={styles.signupButton}
                 testID="signup-button"
               />
-
-              {/* <View style={styles.dividerContainer}>
-                <View style={styles.divider} />
-                <BodySmall
-                  color={colors.neutral.grey}
-                  style={styles.dividerText}>
-                  or continue with
-                </BodySmall>
-                <View style={styles.divider} />
-              </View> */}
-
-              {/* <View style={styles.socialButtonsContainer}>
-                <TouchableOpacity
-                  style={styles.socialButton}
-                  onPress={() => handleSocialSignup('google')}>
-                  <Icon
-                    name="google"
-                    size={18}
-                    color={colors.neutral.black}
-                  />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.socialButton}
-                  onPress={() => handleSocialSignup('apple')}>
-                  <Icon name="apple" size={18} color={colors.neutral.black} />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.socialButton}
-                  onPress={() => handleSocialSignup('facebook')}>
-                  <Icon
-                    name="facebook"
-                    size={18}
-                    color={colors.neutral.black}
-                  />
-                </TouchableOpacity>
-              </View> */}
-
-              <View style={styles.signinContainer}>
-                <Body color={colors.neutral.grey}>
-                  Already have an account?
-                </Body>
-                <Button
-                  title="Sign In"
-                  variant="text"
-                  onPress={handleSignin}
-                  textStyle={styles.signinLink}
-                  testID="signin-button"
-                />
-              </View>
             </View>
           </View>
         </KeyboardAwareScrollView>
@@ -322,7 +266,7 @@ export const SignupScreen = () => {
         initialSnap="closed">
         <View style={styles.bottomSheetContent}>
           <Title align="center" style={styles.bottomSheetTitle}>
-            Terms of Service
+            {t('screens.signup.termsOfService')}
           </Title>
           <ScrollView
             style={styles.legalScrollView}
@@ -341,7 +285,7 @@ export const SignupScreen = () => {
         initialSnap="closed">
         <View style={styles.bottomSheetContent}>
           <Title align="center" style={styles.bottomSheetTitle}>
-            Privacy Policy
+            {t('screens.signup.privacyPolicy')}
           </Title>
           <ScrollView
             style={styles.legalScrollView}
@@ -447,5 +391,8 @@ const styles = StyleSheet.create({
   },
   bottomSheetTitle: {
     marginBottom: spacing.sm,
+  },
+  signupButton: {
+    marginTop: spacing.md,
   },
 });

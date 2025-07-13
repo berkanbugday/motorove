@@ -54,6 +54,7 @@ import {
   useEnumDifficultyLevels,
   useEnumExperienceLevels,
 } from '@services/enum.service';
+import {Language} from '@motorove/shared';
 
 export const CreateEventScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
@@ -272,10 +273,10 @@ export const CreateEventScreen: React.FC = () => {
 
       // Get display address (prefer English)
       const englishAddress = location.addresses?.find(
-        addr => addr.language === 'en',
+        addr => addr.language === Language.EN.toLowerCase(),
       );
       const turkishAddress = location.addresses?.find(
-        addr => addr.language === 'tr',
+        addr => addr.language === Language.TR.toLowerCase(),
       );
       const displayAddress =
         englishAddress?.address || turkishAddress?.address || '';
@@ -300,10 +301,10 @@ export const CreateEventScreen: React.FC = () => {
 
       // Get display address (prefer English)
       const englishAddress = location.addresses?.find(
-        addr => addr.language === 'en',
+        addr => addr.language === Language.EN.toLowerCase(),
       );
       const turkishAddress = location.addresses?.find(
-        addr => addr.language === 'tr',
+        addr => addr.language === Language.TR.toLowerCase(),
       );
       const displayAddress =
         englishAddress?.address || turkishAddress?.address || '';
@@ -328,10 +329,10 @@ export const CreateEventScreen: React.FC = () => {
 
       // Get display address (prefer English)
       const englishAddress = location.addresses?.find(
-        addr => addr.language === 'en',
+        addr => addr.language === Language.EN.toLowerCase(),
       );
       const turkishAddress = location.addresses?.find(
-        addr => addr.language === 'tr',
+        addr => addr.language === Language.TR.toLowerCase(),
       );
       const displayAddress =
         englishAddress?.address || turkishAddress?.address || '';

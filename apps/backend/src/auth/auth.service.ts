@@ -67,7 +67,7 @@ export class AuthService {
           lastName: user.lastName,
           email: user.email,
         },
-        session: data.session,
+        session: data.session || null,
       };
     } catch (error) {
       if (

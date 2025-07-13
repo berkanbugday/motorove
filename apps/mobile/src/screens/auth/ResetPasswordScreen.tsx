@@ -18,19 +18,20 @@ import {
   TopHeaderBar,
   Title,
   Body,
-  Caption,
 } from '@components';
-import {ResetPasswordFormValues, resetPasswordSchema} from '@utils/validation';
+import {ResetPasswordFormValues, createAuthSchemas} from '@utils/validation';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
 import {useResetPassword} from '@services/auth.service';
 import {loggingService} from '@services/logging.service';
+import {useTranslation} from '@hooks/useTranslation';
 
 export const ResetPasswordScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {height} = useWindowDimensions();
+  const {t} = useTranslation();
   const {resetPassword, loading} = useResetPassword(() => {
     // Reset form after successful submission
     reset();
@@ -39,6 +40,9 @@ export const ResetPasswordScreen = () => {
       navigation.navigate('Signin');
     }, 1500);
   });
+
+  // Create validation schema with translations
+  const {resetPasswordSchema} = createAuthSchemas(t);
 
   const {
     control,
@@ -54,15 +58,6 @@ export const ResetPasswordScreen = () => {
 
   function handleGoBack(): void {
     navigation.goBack();
-  }
-
-  function handleSigninPress(): void {
-    navigation.navigate('Signin');
-  }
-
-  function handleSupportPress(): void {
-    // Navigate to support or open support contact options
-    navigation.navigate('Support');
   }
 
   const onSubmit = async (
@@ -100,21 +95,20 @@ export const ResetPasswordScreen = () => {
               </View>
 
               <Title align="center" style={styles.title}>
-                Reset your password
+                {t('screens.resetPassword.resetPassword')}
               </Title>
               <Body
                 align="center"
                 color={colors.neutral.grey}
                 style={styles.subtitle}>
-                Enter your email address and we'll send you instructions to
-                reset your password.
+                {t('screens.resetPassword.resetPasswordInstructions')}
               </Body>
 
               <View style={styles.form}>
                 <AnimatedInput
                   control={control}
                   name="email"
-                  label="Email Address"
+                  label={t('screens.resetPassword.emailAddress')}
                   keyboardType="email-address"
                   icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
@@ -122,7 +116,7 @@ export const ResetPasswordScreen = () => {
                 />
 
                 <Button
-                  title="Send Reset Link"
+                  title={t('screens.resetPassword.resetPassword')}
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={loading}
@@ -130,38 +124,6 @@ export const ResetPasswordScreen = () => {
                   style={styles.resetButton}
                   testID="send-reset-button"
                 />
-
-                <View>
-                  <View style={styles.linkContainer}>
-                    <Body color={colors.neutral.grey}>
-                      Remember your password?
-                    </Body>
-                    <Button
-                      title="Sign In"
-                      variant="text"
-                      onPress={handleSigninPress}
-                      textStyle={styles.linkButton}
-                      testID="signin-link"
-                    />
-                  </View>
-
-                  <View style={styles.linkContainer}>
-                    <Body color={colors.neutral.grey}>Need help? </Body>
-                    <Button
-                      title="Contact Support"
-                      variant="text"
-                      onPress={handleSupportPress}
-                      textStyle={styles.linkButton}
-                      testID="support-link"
-                    />
-                  </View>
-
-                  <Caption align="center" color={colors.neutral.grey}>
-                    For your security, a password reset link will be sent to
-                    your registered email address. The link will expire in 24
-                    hours.
-                  </Caption>
-                </View>
               </View>
             </View>
           </ScrollView>

@@ -7,7 +7,7 @@ import {
   SIGN_UP,
   REFRESH_TOKEN,
   RESET_PASSWORD,
-  UPDATE_PASSWORD,
+  // UPDATE_PASSWORD,
 } from './graphql';
 import {
   AuthUser,
@@ -17,17 +17,19 @@ import {
 } from '../types/auth.types';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
+import {useTranslation} from '@hooks/useTranslation';
 
 // Hook for resetting password
 export const useResetPassword = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [resetPasswordMutation, {loading, error}] = useMutation(
     RESET_PASSWORD,
     {
       onCompleted: _data => {
         showToast({
           type: 'success',
-          text1: 'Success',
-          text2: 'Password reset email sent successfully!',
+          text1: t('common.success'),
+          text2: t('screens.resetPassword.emailSent'),
         });
 
         if (onSuccess) {
@@ -38,9 +40,8 @@ export const useResetPassword = (onSuccess?: () => void) => {
         loggingService.error('Error resetting password:', errorObj);
         showToast({
           type: 'error',
-          text1: 'Error',
-          text2:
-            errorObj.message || 'Failed to send reset email. Please try again.',
+          text1: t('common.error'),
+          text2: errorObj.message || t('screens.resetPassword.emailSendFailed'),
         });
       },
     },
@@ -71,62 +72,62 @@ export const useResetPassword = (onSuccess?: () => void) => {
 };
 
 // Hook for updating password
-export const useUpdatePassword = (onSuccess?: () => void) => {
-  const [updatePasswordMutation, {loading, error}] = useMutation(
-    UPDATE_PASSWORD,
-    {
-      onCompleted: _data => {
-        showToast({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Password updated successfully!',
-        });
+// export const useUpdatePassword = (onSuccess?: () => void) => {
+//   const {t} = useTranslation();
+//   const [updatePasswordMutation, {loading, error}] = useMutation(
+//     UPDATE_PASSWORD,
+//     {
+//       onCompleted: _data => {
+//         showToast({
+//           type: 'success',
+//           text1: t('common.success'),
+//           text2: t('auth.passwordUpdated'),
+//         });
 
-        if (onSuccess) {
-          onSuccess();
-        }
-      },
-      onError: errorObj => {
-        loggingService.error('Error updating password:', errorObj);
-        showToast({
-          type: 'error',
-          text1: 'Error',
-          text2:
-            errorObj.message || 'Failed to update password. Please try again.',
-        });
-      },
-    },
-  );
+//         if (onSuccess) {
+//           onSuccess();
+//         }
+//       },
+//       onError: errorObj => {
+//         loggingService.error('Error updating password:', errorObj);
+//         showToast({
+//           type: 'error',
+//           text1: t('common.error'),
+//           text2: errorObj.message || t('auth.passwordUpdateFailed'),
+//         });
+//       },
+//     },
+//   );
 
-  const updatePassword = async (
-    email: string,
-    token: string,
-    password: string,
-  ): Promise<boolean> => {
-    try {
-      const result = await updatePasswordMutation({
-        variables: {
-          input: {
-            password,
-            email,
-            token,
-          },
-        },
-      });
-      return result.data?.updatePassword || false;
-    } catch (err) {
-      loggingService.error('Error in updatePassword:', err);
-      // Error is already handled in onError callback
-      return false;
-    }
-  };
+//   const updatePassword = async (
+//     email: string,
+//     token: string,
+//     password: string,
+//   ): Promise<boolean> => {
+//     try {
+//       const result = await updatePasswordMutation({
+//         variables: {
+//           input: {
+//             password,
+//             email,
+//             token,
+//           },
+//         },
+//       });
+//       return result.data?.updatePassword || false;
+//     } catch (err) {
+//       loggingService.error('Error in updatePassword:', err);
+//       // Error is already handled in onError callback
+//       return false;
+//     }
+//   };
 
-  return {
-    updatePassword,
-    loading,
-    error,
-  };
-};
+//   return {
+//     updatePassword,
+//     loading,
+//     error,
+//   };
+// };
 
 // Simple mutex for token refresh to avoid concurrent refresh attempts
 let isRefreshing = false;
@@ -162,10 +163,6 @@ class AuthService {
 
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.signUp);
-      await this.saveAuthData(authResponse);
-
-      // Start background token refresh
-      this.setupBackgroundTokenRefresh(authResponse);
 
       return authResponse;
     } catch (error) {
@@ -628,7 +625,7 @@ class AuthService {
 
     return {
       user,
-      session: processedSession,
+      session: processedSession || undefined,
     };
   }
 
@@ -797,5 +794,5 @@ export default authService;
 // Export hooks in a service object, similar to GroupService pattern
 export const AuthHooks = {
   useResetPassword,
-  useUpdatePassword,
+  // useUpdatePassword,
 };

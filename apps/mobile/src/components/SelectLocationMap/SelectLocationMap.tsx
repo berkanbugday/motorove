@@ -10,7 +10,7 @@ import Geolocation from '@react-native-community/geolocation';
 import {RNMapMarkerType} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
-import {IAddress, AddressType} from '@motorove/shared';
+import {IAddress, AddressType, Language} from '@motorove/shared';
 
 interface SelectLocationMapProps {
   onLocationSelect: (location: {
@@ -139,7 +139,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   // Fetch location name using reverse geocoding for both Turkish and English
   const fetchLocationDetails = async (latitude: number, longitude: number) => {
     try {
-      const languages = ['en', 'tr'];
+      const languages = [Language.EN.toLowerCase(), Language.TR.toLowerCase()];
       const addressPromises = languages.map(async language => {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${language}`,
@@ -266,10 +266,10 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
     }
 
     const englishAddress = locationAddresses.find(
-      addr => addr.language === 'en',
+      addr => addr.language === Language.EN.toLowerCase(),
     );
     const turkishAddress = locationAddresses.find(
-      addr => addr.language === 'tr',
+      addr => addr.language === Language.TR.toLowerCase(),
     );
 
     return (
