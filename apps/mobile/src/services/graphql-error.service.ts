@@ -3,6 +3,7 @@ import {errorService, ErrorType} from './error.service';
 import authService from './auth.service';
 import {loggingService} from './index';
 import {ApolloError} from '@apollo/client';
+import i18n from '../i18n/i18n';
 
 /**
  * Service for handling GraphQL errors outside of React components
@@ -44,8 +45,7 @@ class GraphQLErrorService {
               'Refresh token already used, signing out user',
             );
             await errorService.handleError(error, errorType, {
-              fallbackMessage:
-                'Your session has expired. Please sign in again.',
+              fallbackMessage: i18n.t('errors.auth.sessionExpired'),
               showToast: true,
             });
             authService.signOut();
@@ -62,8 +62,7 @@ class GraphQLErrorService {
             loggingService.error('Error refreshing token:', refreshError);
             // If refresh fails, handle as a regular auth error
             await errorService.handleError(error, errorType, {
-              fallbackMessage:
-                'Your session has expired. Please sign in again.',
+              fallbackMessage: i18n.t('errors.auth.sessionExpired'),
             });
             // Redirect to sign in or clear auth state
             authService.signOut();
@@ -76,10 +75,7 @@ class GraphQLErrorService {
           await errorService.handleError(error, errorType, {
             showToast: true,
             fallbackMessage:
-              errorMessage === 'Invalid login credentials'
-                ? 'Invalid email or password'
-                : errorMessage ||
-                  'You do not have permission to perform this action.',
+              errorMessage || i18n.t('errors.graphql.unauthorized'),
           });
           handled = true;
           break;
@@ -88,8 +84,7 @@ class GraphQLErrorService {
           errorType = ErrorType.AUTHORIZATION;
           loggingService.error('Forbidden error:', error);
           await errorService.handleError(error, errorType, {
-            fallbackMessage:
-              'You do not have permission to perform this action.',
+            fallbackMessage: i18n.t('errors.graphql.forbidden'),
           });
           handled = true;
           break;
@@ -99,9 +94,7 @@ class GraphQLErrorService {
           loggingService.error('Conflict error:', error);
           await errorService.handleError(error, errorType, {
             showToast: true,
-            fallbackMessage:
-              errorMessage ||
-              'A conflict occurred. This resource may already exist.',
+            fallbackMessage: errorMessage || i18n.t('errors.graphql.conflict'),
           });
           handled = true;
           break;
@@ -110,7 +103,7 @@ class GraphQLErrorService {
           errorType = ErrorType.VALIDATION;
           loggingService.error('Bad user input error:', error);
           await errorService.handleError(error, errorType, {
-            fallbackMessage: 'Please check your information and try again.',
+            fallbackMessage: i18n.t('errors.graphql.badUserInput'),
           });
           handled = true;
           break;
@@ -118,8 +111,7 @@ class GraphQLErrorService {
         case 'INTERNAL_SERVER_ERROR':
           loggingService.error('Internal server error:', error);
           await errorService.handleError(error, errorType, {
-            fallbackMessage:
-              'Something went wrong on our end. Please try again later.',
+            fallbackMessage: i18n.t('errors.graphql.internalServerError'),
           });
           handled = true;
           break;
@@ -145,7 +137,8 @@ class GraphQLErrorService {
       loggingService.error('Unhandled GraphQL error:', error);
       await errorService.handleError(error, errorType, {
         showToast: options.showToast,
-        fallbackMessage: options.fallbackMessage,
+        fallbackMessage:
+          options.fallbackMessage || i18n.t('errors.api.default'),
       });
     }
 
@@ -180,10 +173,13 @@ class GraphQLErrorService {
         return result;
       } catch (error) {
         if (error instanceof ApolloError && error.graphQLErrors?.length > 0) {
-          await this.handleGraphQLError(error.graphQLErrors[0]);
+          await this.handleGraphQLError(error.graphQLErrors[0], {
+            fallbackMessage: options.fallbackErrorMessage,
+          });
         } else {
           await errorService.handleError(error, ErrorType.API, {
-            fallbackMessage: options.fallbackErrorMessage,
+            fallbackMessage:
+              options.fallbackErrorMessage || i18n.t('errors.api.default'),
           });
         }
         return null;

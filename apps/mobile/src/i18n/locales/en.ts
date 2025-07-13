@@ -29,6 +29,7 @@ export default {
     and: 'and',
     success: 'Success',
     error: 'Error',
+    info: 'Info',
   },
 
   // Main navigation items
@@ -563,27 +564,60 @@ export default {
 
   // Error messages
   errors: {
-    general: 'Something went wrong',
-    networkError: 'Network error',
-    unauthorized: 'Unauthorized',
-    notFound: 'Not found',
-    serverError: 'Server error',
-    tryAgain: 'Please try again',
-    requiredField: 'This field is required',
-    invalidInput: 'Invalid input',
-    emailAlreadyExists: 'Email already exists',
-    usernameAlreadyExists: 'Username already taken',
-    connectionError: 'Connection error',
-    sessionExpired: 'Session expired',
-    permissionDenied: 'Permission denied',
-    fileTooBig: 'File is too large',
-    invalidFileType: 'Invalid file type',
-    uploadFailed: 'Upload failed',
-    locationAccessDenied: 'Location access denied',
-    cameraAccessDenied: 'Camera access denied',
-    microphoneAccessDenied: 'Microphone access denied',
-    photoLibraryAccessDenied: 'Photo library access denied',
-    notificationAccessDenied: 'Notification access denied',
+    // General errors
+    general: {
+      somethingWrong: 'Something went wrong. Please try again.',
+      default: 'An error occurred',
+    },
+    // Network errors
+    network: {
+      default: 'Network connection is unavailable',
+      checkConnection: 'Please check your internet connection and try again',
+      timeout: 'The request timed out. Please try again.',
+      offline: 'You are offline. Please check your connection and try again.',
+    },
+    // Authentication errors
+    auth: {
+      sessionExpired: 'Your session has expired. Please sign in again.',
+      invalidCredentials: 'Invalid email or password!',
+      unauthorized: 'You need to sign in to access this feature.',
+      forbidden: 'You do not have permission to perform this action.',
+      alreadyUsed: 'This email is already in use.',
+    },
+    // API errors
+    api: {
+      default: 'An error occurred while processing your request.',
+      serverError: 'Something went wrong on our end. Please try again later.',
+      badRequest: 'Invalid request. Please check your information.',
+      notFound: 'The requested information could not be found.',
+      serviceUnavailable:
+        'The service is temporarily unavailable. Please try again later.',
+      conflict: 'A conflict occurred. This resource may already exist.',
+      badUserInput: 'Please check your information and try again.',
+    },
+    // GraphQL specific errors
+    graphql: {
+      unauthenticated: 'Your session has expired. Please sign in again.',
+      unauthorized: 'You do not have permission to perform this action.',
+      forbidden:
+        'Access forbidden. You do not have permission for this operation.',
+      conflict: 'A conflict occurred. This resource may already exist.',
+      badUserInput: 'Please check your information and try again.',
+      internalServerError:
+        'Something went wrong on our end. Please try again later.',
+    },
+    // HTTP status code errors
+    http: {
+      400: 'Invalid request. Please check your information.',
+      401: 'You need to sign in to access this feature.',
+      403: 'You do not have permission to perform this action.',
+      404: 'The requested information could not be found.',
+      408: 'The request timed out. Please try again.',
+      500: 'Server error. Please try again later.',
+      502: 'The service is temporarily unavailable. Please try again later.',
+      503: 'The service is temporarily unavailable. Please try again later.',
+      504: 'The service is temporarily unavailable. Please try again later.',
+    },
   },
 
   // Equipment types

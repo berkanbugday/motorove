@@ -29,7 +29,6 @@ export const SigninScreen = () => {
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
 
-  // Create validation schema with translations
   const {signinSchema} = createAuthSchemas(t);
 
   const {
@@ -51,29 +50,18 @@ export const SigninScreen = () => {
   const onSubmit = async (data: SigninFormValues) => {
     try {
       await signin(data.email.trim(), data.password.trim());
-      // If successful, the navigation in RootNavigator will change to MainNavigator
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
     }
   };
 
   const handleSignUp = () => {
-    // Navigate to sign up screen
     navigation.navigate('Signup');
   };
 
   const handleForgotPassword = () => {
     navigation.navigate('ResetPassword');
   };
-
-  // function handleSocialSignin(provider: 'google' | 'apple' | 'facebook') {
-  //   // Notify user that social signin is not implemented yet
-  //   Alert.alert(
-  //     'Not Implemented',
-  //     `Social signin with ${provider} is not implemented yet.`,
-  //     [{text: 'OK'}],
-  //   );
-  // }
 
   return (
     <View style={styles.container}>
@@ -136,41 +124,6 @@ export const SigninScreen = () => {
                   disabled={isSubmitting}
                   testID="signin-button"
                 />
-
-                {/* <View style={styles.dividerContainer}>
-                  <View style={styles.divider} />
-                  <Caption style={styles.dividerText}>or continue with</Caption>
-                  <View style={styles.divider} />
-                </View>
-
-                <View style={styles.socialButtonsContainer}>
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignin('google')}>
-                    <Icon
-                      name="google"
-                      size={18}
-                      color={colors.neutral.black}
-                    />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignin('apple')}>
-                    <Icon name="apple" size={18} color={colors.neutral.black} />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.socialButton}
-                    onPress={() => handleSocialSignin('facebook')}>
-                    <Icon
-                      name="facebook"
-                      size={18}
-                      color={colors.neutral.black}
-                    />
-                  </TouchableOpacity>
-                </View> */}
-
                 <View style={styles.signupContainer}>
                   <Body color={colors.neutral.grey}>
                     {t('screens.signin.noAccount')}

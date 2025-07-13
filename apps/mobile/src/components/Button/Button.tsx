@@ -59,7 +59,6 @@ export function Button({
     size === 'small' && styles.smallButton,
     size === 'medium' && styles.mediumButton,
     size === 'large' && styles.largeButton,
-    disabled && styles.disabledButton,
     style,
   ];
 
@@ -78,7 +77,7 @@ export function Button({
 
   const getTextColor = () => {
     if (disabled || loading) {
-      return colors.neutral.lightGrey; // Let the Typography component handle disabled state
+      return colors.neutral.lightGrey;
     }
     if (variant === 'primary') {
       return colors.neutral.white;
@@ -255,9 +254,6 @@ const styles = StyleSheet.create({
   largeButton: {
     paddingVertical: spacing.button.paddingVertical.large,
     paddingHorizontal: spacing.button.paddingHorizontal.large,
-  },
-  disabledButton: {
-    backgroundColor: colors.neutral.grey,
   },
   contentContainer: {
     flexDirection: 'row',

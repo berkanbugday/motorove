@@ -29,6 +29,7 @@ export default {
     and: 've',
     success: 'Başarılı',
     error: 'Hata',
+    info: 'Bilgi',
   },
 
   // Main navigation items
@@ -564,27 +565,62 @@ export default {
 
   // Error messages
   errors: {
-    general: 'Bir şeyler yanlış gitti',
-    networkError: 'Ağ hatası',
-    unauthorized: 'Yetkisiz erişim',
-    notFound: 'Bulunamadı',
-    serverError: 'Sunucu hatası',
-    tryAgain: 'Lütfen tekrar deneyin',
-    requiredField: 'Bu alan zorunludur',
-    invalidInput: 'Geçersiz giriş',
-    emailAlreadyExists: 'E-posta adresi zaten kayıtlı',
-    usernameAlreadyExists: 'Kullanıcı adı zaten alınmış',
-    connectionError: 'Bağlantı hatası',
-    sessionExpired: 'Oturum süresi doldu',
-    permissionDenied: 'İzin reddedildi',
-    fileTooBig: 'Dosya çok büyük',
-    invalidFileType: 'Geçersiz dosya türü',
-    uploadFailed: 'Yükleme başarısız',
-    locationAccessDenied: 'Konum erişimi reddedildi',
-    cameraAccessDenied: 'Kamera erişimi reddedildi',
-    microphoneAccessDenied: 'Mikrofon erişimi reddedildi',
-    photoLibraryAccessDenied: 'Fotoğraf kütüphanesi erişimi reddedildi',
-    notificationAccessDenied: 'Bildirim erişimi reddedildi',
+    // General errors
+    general: {
+      somethingWrong: 'Bir şeyler yanlış gitti. Lütfen tekrar deneyin.',
+      default: 'Bir hata oluştu',
+    },
+    // Network errors
+    network: {
+      default: 'Ağ bağlantısı kullanılamıyor',
+      checkConnection:
+        'Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin',
+      timeout: 'İstek zaman aşımına uğradı. Lütfen tekrar deneyin.',
+      offline:
+        'Çevrimdışısınız. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+    },
+    // Authentication errors
+    auth: {
+      sessionExpired: 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.',
+      invalidCredentials: 'Geçersiz e-posta veya şifre!',
+      unauthorized: 'Bu özelliğe erişmek için giriş yapmanız gerekiyor.',
+      forbidden: 'Bu işlemi gerçekleştirme izniniz yok.',
+      alreadyUsed: 'Bu e-posta zaten kullanımda.',
+    },
+    // API errors
+    api: {
+      default: 'İsteğiniz işlenirken bir hata oluştu.',
+      serverError:
+        'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+      badRequest: 'Geçersiz istek. Lütfen bilgilerinizi kontrol edin.',
+      notFound: 'İstenen bilgi bulunamadı.',
+      serviceUnavailable:
+        'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
+      conflict: 'Bir çakışma oluştu. Bu kaynak zaten mevcut olabilir.',
+      badUserInput: 'Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.',
+    },
+    // GraphQL specific errors
+    graphql: {
+      unauthenticated: 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.',
+      unauthorized: 'Bu işlemi gerçekleştirme izniniz yok.',
+      forbidden: 'Erişim yasak. Bu işlem için izniniz yok.',
+      conflict: 'Bir çakışma oluştu. Bu kaynak zaten mevcut olabilir.',
+      badUserInput: 'Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.',
+      internalServerError:
+        'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+    },
+    // HTTP status code errors
+    http: {
+      400: 'Geçersiz istek. Lütfen bilgilerinizi kontrol edin.',
+      401: 'Bu özelliğe erişmek için giriş yapmanız gerekiyor.',
+      403: 'Bu işlemi gerçekleştirme izniniz yok.',
+      404: 'İstenen bilgi bulunamadı.',
+      408: 'İstek zaman aşımına uğradı. Lütfen tekrar deneyin.',
+      500: 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.',
+      502: 'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
+      503: 'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
+      504: 'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
+    },
   },
 
   // Equipment types
