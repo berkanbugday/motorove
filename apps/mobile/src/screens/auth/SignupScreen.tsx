@@ -14,6 +14,7 @@ import {
   BodySmall,
   Subtitle,
   TopHeaderBar,
+  Caption,
 } from '@components';
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
@@ -222,18 +223,18 @@ export const SignupScreen = () => {
                 size="medium"
                 label={
                   <View style={styles.termsTextContainer}>
-                    <BodySmall color={colors.neutral.grey}>
+                    <Caption color={colors.neutral.grey}>
                       {t('screens.signup.iAgreeTo')}
-                    </BodySmall>
+                    </Caption>
                     <Button
                       title={t('screens.signup.termsOfService')}
                       variant="text"
                       onPress={handleTermsPress}
                       textStyle={styles.termsLink}
                     />
-                    <BodySmall color={colors.neutral.grey}>
+                    <Caption color={colors.neutral.grey}>
                       {t('common.and')}
-                    </BodySmall>
+                    </Caption>
                     <Button
                       title={t('screens.signup.privacyPolicy')}
                       variant="text"
