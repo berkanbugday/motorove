@@ -586,6 +586,7 @@ export default {
       unauthorized: 'Bu özelliğe erişmek için giriş yapmanız gerekiyor.',
       forbidden: 'Bu işlemi gerçekleştirme izniniz yok.',
       alreadyUsed: 'Bu e-posta zaten kullanımda.',
+      emailNotConfirmed: 'Lütfen e-posta adresinizi onaylayın.',
     },
     // API errors
     api: {

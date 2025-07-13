@@ -129,6 +129,10 @@ function humanizeErrorMessage(message: string): string {
     return i18n.t('errors.auth.invalidCredentials');
   }
 
+  if (message.includes('Email not confirmed')) {
+    return i18n.t('errors.auth.emailNotConfirmed');
+  }
+
   // Make first letter uppercase if it's not
   if (message.length > 0 && /[a-z]/.test(message[0])) {
     message = message.charAt(0).toUpperCase() + message.slice(1);

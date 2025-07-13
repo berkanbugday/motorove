@@ -583,6 +583,7 @@ export default {
       unauthorized: 'You need to sign in to access this feature.',
       forbidden: 'You do not have permission to perform this action.',
       alreadyUsed: 'This email is already in use.',
+      emailNotConfirmed: 'Please confirm your email address.',
     },
     // API errors
     api: {
