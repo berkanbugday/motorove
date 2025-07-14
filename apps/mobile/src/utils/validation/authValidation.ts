@@ -58,14 +58,21 @@ export const createAuthSchemas = (t: TFunction) => {
     dateOfBirth: z
       .date({invalid_type_error: t('validation.dateOfBirth.invalid')})
       .min(new Date(1950, 0, 1), t('validation.dateOfBirth.too_old'))
-      .max(new Date(), t('validation.dateOfBirth.future')),
-    gender: z.nativeEnum(Gender, {
-      required_error: t('validation.gender.required'),
-      invalid_type_error: t('validation.gender.invalid'),
-    }),
+      .max(
+        new Date(new Date().getFullYear() - 17, 0, 1),
+        t('validation.dateOfBirth.future'),
+      )
+      .optional(),
+    gender: z
+      .nativeEnum(Gender, {
+        required_error: t('validation.gender.required'),
+        invalid_type_error: t('validation.gender.invalid'),
+      })
+      .optional(),
     city: z
       .string({required_error: t('validation.city.required')})
       .nonempty(t('validation.city.required')),
+    ridingStyles: z.array(z.string()).optional(),
   });
 
   return {

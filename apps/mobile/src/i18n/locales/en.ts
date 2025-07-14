@@ -26,6 +26,7 @@ export default {
     yes: 'Yes',
     no: 'No',
     required: 'Required',
+    optional: 'Optional',
     and: 'and',
     success: 'Success',
     error: 'Error',
@@ -524,6 +525,10 @@ export default {
     bottomSheet: {
       close: 'Close',
     },
+    multiSelect: {
+      noResults: 'No results found',
+      maxItemsReached: 'Maximum {{count}} items can be selected',
+    },
   },
 
   // Validation messages
@@ -651,6 +656,18 @@ export default {
       boots: 'Boots',
       protectors: 'Protectors',
       other: 'Other',
+    },
+    ridingStyle: {
+      touring: 'Touring',
+      commuting: 'Commuting',
+      off_road: 'Off Road',
+      adventure: 'Adventure',
+      track: 'Track',
+      sport: 'Sport',
+      stunt: 'Stunt',
+      group_ride: 'Group Ride',
+      solo_ride: 'Solo Ride',
+      touring_with_camping: 'Touring with Camping',
     },
   },
 };

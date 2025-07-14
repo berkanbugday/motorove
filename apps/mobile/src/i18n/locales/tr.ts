@@ -28,6 +28,7 @@ export default {
     yes: 'Evet',
     no: 'Hayır',
     required: 'Zorunlu',
+    optional: 'İsteğe Bağlı',
     and: 've',
     success: 'Başarılı',
     error: 'Hata',
@@ -121,6 +122,8 @@ export default {
       date_of_birth: 'Doğum Tarihi',
       gender: 'Cinsiyet',
       city: 'Şehir',
+      riding_preferences: 'Sürüş Tercihleri',
+      riding_styles: 'Sürüş Stili',
     },
     // Home screen
     home: {
@@ -529,6 +532,10 @@ export default {
     bottomSheet: {
       close: 'Kapat',
     },
+    multiSelect: {
+      noResults: 'Sonuç bulunamadı',
+      maxItemsReached: 'En fazla {{count}} öğe seçilebilir',
+    },
   },
 
   // Validation messages
@@ -659,6 +666,18 @@ export default {
       boots: 'Bot',
       protectors: 'Koruyucular',
       other: 'Diğer',
+    },
+    ridingStyle: {
+      touring: 'Tur',
+      commuting: 'Günlük Ulaşım',
+      off_road: 'Arazi',
+      adventure: 'Macera',
+      track: 'Pist',
+      sport: 'Spor',
+      stunt: 'Akrobatik',
+      group_ride: 'Grup Sürüşü',
+      solo_ride: 'Yalnız Sürüş',
+      touring_with_camping: 'Kamplı Tur',
     },
   },
 };

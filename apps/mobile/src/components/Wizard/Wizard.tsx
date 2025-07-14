@@ -9,6 +9,7 @@ import {spacing} from '@theme';
 import {ProgressIndicator, ProgressIndicatorType} from '../ProgressIndicator';
 import {Body} from '../Typography';
 import {loggingService} from '@services/logging.service';
+import {useTranslation} from '@hooks/useTranslation';
 
 export type WizardStep = {
   id: string;
@@ -52,6 +53,7 @@ export const Wizard = forwardRef<WizardHandle, WizardProps>(
   ) => {
     const [currentStepIndex, setCurrentStepIndex] = useState(initialStep);
     const [stepsData, setStepsData] = useState<Record<string, any>>({});
+    const {t} = useTranslation();
 
     const isFirstStep = currentStepIndex === 0;
     const isLastStep = currentStepIndex === steps.length - 1;
@@ -144,7 +146,7 @@ export const Wizard = forwardRef<WizardHandle, WizardProps>(
 
         <Body align="center" weight="semiBold" style={styles.stepTitle}>
           {currentStep.title}
-          {currentStep.optional ? ' (Optional)' : ''}
+          {currentStep.optional ? ` (${t('common.optional')})` : ''}
         </Body>
 
         <View style={styles.content}>{currentStep.content}</View>

@@ -135,4 +135,10 @@ export interface DropdownProps {
    * When false, dropdown works as a regular select dropdown
    */
   searchable?: boolean;
+
+  /**
+   * Whether to show the clear button when an item is selected or search text exists
+   * Default is true
+   */
+  showClearButton?: boolean;
 }

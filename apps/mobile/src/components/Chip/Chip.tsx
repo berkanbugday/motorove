@@ -72,9 +72,9 @@ export const Chip: React.FC<ChipProps> = ({
 }) => {
   // Determine background and text colors based on variant, color, and states
   const getBackgroundColor = () => {
-    if (disabled) {
-      return colors.neutral.veryLightGrey;
-    }
+    // if (disabled) {
+    //   return colors.neutral.veryLightGrey;
+    // }
 
     if (variant === 'filled') {
       if (selected) {
@@ -151,9 +151,9 @@ export const Chip: React.FC<ChipProps> = ({
   };
 
   const getBorderColor = () => {
-    if (disabled) {
-      return colors.neutral.lightGrey;
-    }
+    // if (disabled) {
+    //   return colors.neutral.lightGrey;
+    // }
     if (variant !== 'outlined') {
       return 'transparent';
     }
@@ -181,9 +181,9 @@ export const Chip: React.FC<ChipProps> = ({
   };
 
   const getTextColor = () => {
-    if (disabled) {
-      return colors.neutral.grey;
-    }
+    // if (disabled) {
+    //   return colors.neutral.grey;
+    // }
 
     if (variant === 'filled') {
       // For filled variant, use white text on dark backgrounds, and dark text on light backgrounds

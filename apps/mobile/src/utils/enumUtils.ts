@@ -101,7 +101,7 @@ export class EnumUtils {
     return this.getDropdownOptions(Gender, 'enums.gender');
   }
 
-  static getRidingStyles(): DropdownItem[] {
+  static getRidingStyleDropdownOptions(): DropdownItem[] {
     return this.getDropdownOptions(RidingStyle, 'enums.ridingStyle');
   }
 

@@ -23,6 +23,8 @@ import {
   Title,
   BodySmall,
   DateTimePicker,
+  MultiSelect,
+  MultiSelectItem,
 } from '@components';
 import {useForm, FormProvider} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -53,6 +55,9 @@ export const AccountSetupScreen = () => {
   const [selectedGender, setSelectedGender] = useState<DropdownItem | null>(
     null,
   );
+  const [selectedRidingStyles, setSelectedRidingStyles] = useState<
+    MultiSelectItem[]
+  >([]);
   // Fetch cities from backend
   const {cities, loading: loadingCities} = useGetCities();
 
@@ -71,9 +76,10 @@ export const AccountSetupScreen = () => {
   const methods = useForm<AccountSetupFormValues>({
     resolver: zodResolver(accountSetupSchema),
     defaultValues: {
-      dateOfBirth: new Date(1990, 1, 1),
+      dateOfBirth: undefined,
       gender: undefined,
       city: '',
+      ridingStyles: [],
     },
     mode: 'onChange',
   });
@@ -98,6 +104,18 @@ export const AccountSetupScreen = () => {
     setValue('gender', item?.value, {shouldValidate: true});
   };
 
+  // Handle riding styles selection
+  const handleRidingStylesChange = (items: MultiSelectItem[]) => {
+    setSelectedRidingStyles(items);
+    setValue(
+      'ridingStyles',
+      items.map(x => x.value || ''),
+      {
+        shouldValidate: true,
+      },
+    );
+  };
+
   const onSubmit = useCallback(
     async (data: AccountSetupFormValues) => {
       try {
@@ -107,6 +125,7 @@ export const AccountSetupScreen = () => {
           dateOfBirth: data.dateOfBirth,
           gender: data.gender,
           city: data.city,
+          ridingStyles: data.ridingStyles,
         });
 
         // Simulate API call
@@ -167,13 +186,15 @@ export const AccountSetupScreen = () => {
               onSelect={handleCitySelect}
               error={errors.city?.message}
               searchable={true}
+              showClearButton={false}
               testID="city-dropdown"
             />
             <DateTimePicker
               control={control}
               name="dateOfBirth"
               placeholder={t('screens.accountSetup.date_of_birth')}
-              maximumDate={new Date()}
+              minimumDate={new Date(1950, 0, 1)}
+              maximumDate={new Date(new Date().getFullYear() - 17, 0, 1)}
               error={errors.dateOfBirth}
               testID="date-of-birth-picker"
               locale={language}
@@ -185,26 +206,31 @@ export const AccountSetupScreen = () => {
               onSelect={handleGenderSelect}
               error={errors.gender?.message}
               searchable={false}
+              showClearButton={false}
               testID="gender-dropdown"
             />
           </View>
         ),
       },
       {
-        id: 'contact-info',
-        title: 'Contact Information',
+        id: 'riding-preferences',
+        title: t('screens.accountSetup.riding_preferences'),
         validate: async () => {
-          return true; // No fields to validate in this step anymore
+          return true; // Optional step, no validation required
         },
-        optional: true,
+        optional: false,
         content: (
-          <ScrollView style={styles.stepContent}>
-            <View style={styles.emptyStepContent}>
-              <Text style={styles.emptyStepText}>
-                Please proceed to the next step
-              </Text>
-            </View>
-          </ScrollView>
+          <View style={styles.fieldsContainer}>
+            <MultiSelect
+              label={t('screens.accountSetup.riding_styles')}
+              placeholder=""
+              data={EnumUtils.getRidingStyleDropdownOptions()}
+              selectedItems={selectedRidingStyles}
+              onSelectionChange={handleRidingStylesChange}
+              searchable={false}
+              testID="riding-styles-multiselect"
+            />
+          </View>
         ),
       },
       {
@@ -240,6 +266,8 @@ export const AccountSetupScreen = () => {
       handleGenderSelect,
       selectedCity,
       selectedGender,
+      selectedRidingStyles,
+      handleRidingStylesChange,
     ],
   );
 
@@ -297,17 +325,16 @@ export const AccountSetupScreen = () => {
                       onPress={handleSubmit(onSubmit)}
                       loading={loading}
                       style={styles.continueButton}
-                      textStyle={{fontSize: fontSizes.sm}}
                       testID="complete-setup-button"
                     />
                   </>
                 ) : isFirstStep ? (
                   <Button
                     title={t('common.next')}
-                    variant="primary"
+                    variant="dark"
                     shape="round"
                     onPress={handleNextStep}
-                    style={{flex: 1}}
+                    style={styles.continueButton}
                     testID="continue-button"
                   />
                 ) : (
@@ -322,7 +349,7 @@ export const AccountSetupScreen = () => {
                     />
                     <Button
                       title={t('common.next')}
-                      variant="primary"
+                      variant="dark"
                       shape="round"
                       onPress={handleNextStep}
                       style={styles.continueButton}
@@ -363,7 +390,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     paddingVertical: spacing.md,
-    gap: spacing.lg,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -395,5 +421,11 @@ const styles = StyleSheet.create({
   fieldsContainer: {
     marginTop: spacing.md,
     gap: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: fontSizes.md,
+    fontWeight: '600',
+    color: colors.neutral.black,
+    marginBottom: spacing.xs,
   },
 });

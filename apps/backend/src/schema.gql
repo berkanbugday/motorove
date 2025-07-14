@@ -725,13 +725,9 @@ input ResetPasswordInput {
 """Different styles of motorcycle riding"""
 enum RidingStyle {
   ADVENTURE
-  CAFE_RACER
   COMMUTING
-  CRUISER
-  CUSTOM
   GROUP_RIDE
   OFF_ROAD
-  SCOOTER
   SOLO_RIDE
   SPORT
   STUNT

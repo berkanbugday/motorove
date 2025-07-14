@@ -1,40 +1,27 @@
 import {StyleSheet, Platform} from 'react-native';
-import {colors, fontSizes, radius, spacing} from '@theme';
+import {colors, fontSizes, spacing, radius} from '../../theme';
 
-export const createStyles = (props: {
+interface StyleProps {
   isOpen: boolean;
   maxHeight?: number;
-  hasError?: boolean;
-  disabled?: boolean;
-}) => {
+  hasError: boolean;
+  disabled: boolean;
+}
+
+export const createStyles = (props: StyleProps) => {
   return StyleSheet.create({
     container: {
       width: '100%',
       position: 'relative',
       zIndex: props.isOpen ? 10 : 1,
+      marginBottom: spacing.form.inputMarginBottom,
     },
     inputWrapper: {
       position: 'relative',
       width: '100%',
     },
-    labelContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: spacing.xs,
-    },
-    label: {
-      color: props.disabled
-        ? colors.neutral.lightGrey
-        : props.hasError
-        ? colors.status.error
-        : colors.neutral.black,
-      fontSize: fontSizes.md,
-      fontWeight: '600',
-      marginBottom: spacing.xs / 2,
-    },
     inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      height: spacing.form.inputHeight,
       borderWidth: 1,
       borderColor: props.hasError
         ? colors.status.error
@@ -43,20 +30,44 @@ export const createStyles = (props: {
         : colors.neutral.lightGrey,
       borderRadius: radius.sm,
       paddingHorizontal: spacing.form.inputPaddingHorizontal,
-      height: spacing.form.inputHeight,
       backgroundColor: props.disabled
         ? colors.neutral.veryLightGrey
         : colors.neutral.white,
+      flexDirection: 'row',
+      alignItems: 'center',
+      position: 'relative',
+      zIndex: 1,
     },
     input: {
       flex: 1,
-      height: spacing.form.inputHeight,
+      fontSize: fontSizes.md,
       color: props.disabled ? colors.neutral.lightGrey : colors.neutral.black,
+      padding: 0,
+      height: '100%',
     },
-    iconContainer: {
-      padding: spacing.xs,
-      justifyContent: 'center',
+    // Added styles for real-time chip updates
+    flexContainer: {
+      flex: 1,
+      flexDirection: 'row',
       alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    chipScrollView: {
+      maxHeight: spacing.form.inputHeight - spacing.xs,
+      marginVertical: spacing.xs / 2,
+    },
+    // End of added styles
+    selectedItemContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      // flexWrap: 'wrap',
+      flex: 1,
+      gap: spacing.xs,
+    },
+    selectedItemText: {
+      fontSize: fontSizes.md,
+      color: colors.neutral.black,
+      fontWeight: '500',
     },
     dropdown: {
       position: 'absolute',
@@ -75,21 +86,20 @@ export const createStyles = (props: {
     item: {
       paddingVertical: spacing.sm,
       paddingHorizontal: spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     selectedItem: {
       backgroundColor: colors.secondary.main,
     },
-    selectedItemContainer: {
-      flex: 1,
-      justifyContent: 'center',
-    },
     itemText: {
       fontSize: fontSizes.md,
       color: colors.neutral.black,
+      flex: 1,
     },
-    selectedItemText: {
-      fontWeight: '500',
-      color: colors.neutral.black,
+    disabledText: {
+      color: colors.neutral.lightGrey,
     },
     noResults: {
       padding: spacing.md,
@@ -110,6 +120,13 @@ export const createStyles = (props: {
       color: colors.neutral.grey,
       fontSize: fontSizes.xs,
       marginTop: spacing.xs / 2,
+      marginLeft: spacing.sm,
+    },
+    maxItemsText: {
+      color: colors.status.warning,
+      fontSize: fontSizes.xs,
+      marginTop: spacing.xs,
+      marginLeft: spacing.sm,
     },
     loadingContainer: {
       padding: spacing.md,
@@ -118,6 +135,15 @@ export const createStyles = (props: {
     },
     clearButton: {
       padding: spacing.xs,
+    },
+    placeholder: {
+      color: colors.neutral.grey,
+      fontSize: fontSizes.md,
+    },
+    arrowIcon: {
+      width: 16,
+      height: 16,
+      marginLeft: spacing.xs,
     },
   });
 };

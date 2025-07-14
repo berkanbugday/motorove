@@ -52,3 +52,10 @@ export * from './withErrorHandling';
 
 // Export the Icon component
 export {Icon, type IconName} from './Icon';
+
+// Export the MultiSelect component
+export {
+  default as MultiSelect,
+  type MultiSelectItem,
+  type MultiSelectProps,
+} from './MultiSelect';
