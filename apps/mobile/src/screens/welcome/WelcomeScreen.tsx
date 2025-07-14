@@ -79,7 +79,7 @@ const ButtonSection = ({
         },
       ]}>
       <Button
-        title={t('screens.welcome.signUp')}
+        title={t('screens.welcome.sign_up')}
         onPress={onSignupPress}
         variant="primary"
         shape="round"
@@ -87,7 +87,7 @@ const ButtonSection = ({
         testID="welcome-signup-button"
       />
       <Button
-        title={t('screens.welcome.signIn')}
+        title={t('screens.welcome.sign_in')}
         onPress={onSigninPress}
         variant="outline"
         shape="round"
@@ -109,19 +109,19 @@ export function WelcomeScreen(): React.JSX.Element {
     {
       id: 1,
       titleKey: 'navigation.welcome',
-      textKey: 'screens.welcome.slides.discoverCommunity',
+      textKey: 'screens.welcome.slides.discover_community',
       color: '#2E64E5',
     },
     {
       id: 2,
-      titleKey: 'screens.welcome.slides.joinEvents',
-      textKey: 'screens.welcome.slides.joinEvents',
+      titleKey: 'screens.welcome.slides.join_events',
+      textKey: 'screens.welcome.slides.join_events',
       color: '#4CAF50',
     },
     {
       id: 3,
-      titleKey: 'screens.welcome.slides.createGroups',
-      textKey: 'screens.welcome.slides.shareExperiences',
+      titleKey: 'screens.welcome.slides.create_groups',
+      textKey: 'screens.welcome.slides.share_experiences',
       color: '#FF9800',
     },
   ];

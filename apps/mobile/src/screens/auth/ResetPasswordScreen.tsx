@@ -95,20 +95,20 @@ export const ResetPasswordScreen = () => {
               </View>
 
               <Title align="center" style={styles.title}>
-                {t('screens.resetPassword.resetPassword')}
+                {t('screens.resetPassword.reset_password')}
               </Title>
               <Body
                 align="center"
                 color={colors.neutral.grey}
                 style={styles.subtitle}>
-                {t('screens.resetPassword.resetPasswordInstructions')}
+                {t('screens.resetPassword.reset_password_instructions')}
               </Body>
 
               <View style={styles.form}>
                 <AnimatedInput
                   control={control}
                   name="email"
-                  label={t('screens.resetPassword.emailAddress')}
+                  label={t('screens.resetPassword.email_address')}
                   keyboardType="email-address"
                   icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
@@ -116,7 +116,7 @@ export const ResetPasswordScreen = () => {
                 />
 
                 <Button
-                  title={t('screens.resetPassword.resetPassword')}
+                  title={t('screens.resetPassword.reset_password')}
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={loading}

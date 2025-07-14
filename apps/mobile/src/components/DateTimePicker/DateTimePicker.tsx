@@ -68,6 +68,10 @@ interface BaseDateTimePickerProps {
    * Text for the cancel button
    */
   cancelText?: string;
+  /**
+   * Locale for date and time formatting (e.g., 'en-US', 'tr-TR', 'de-DE')
+   */
+  locale?: string;
 }
 
 interface StandaloneDateTimePickerProps extends BaseDateTimePickerProps {
@@ -125,6 +129,7 @@ export function DateTimePicker<T extends FieldValues = any>(
       theme,
       confirmText,
       cancelText,
+      locale,
     } = props as FormDateTimePickerProps<T>;
 
     return (
@@ -149,6 +154,7 @@ export function DateTimePicker<T extends FieldValues = any>(
             theme={theme}
             confirmText={confirmText}
             cancelText={cancelText}
+            locale={locale}
           />
         )}
       />
@@ -173,6 +179,7 @@ export function DateTimePicker<T extends FieldValues = any>(
     theme,
     confirmText,
     cancelText,
+    locale,
   } = props as StandaloneDateTimePickerProps;
 
   return (
@@ -193,6 +200,7 @@ export function DateTimePicker<T extends FieldValues = any>(
       theme={theme}
       confirmText={confirmText}
       cancelText={cancelText}
+      locale={locale}
     />
   );
 }
@@ -215,6 +223,7 @@ interface DateTimePickerBaseProps {
   theme?: 'light' | 'dark' | 'auto';
   confirmText?: string;
   cancelText?: string;
+  locale?: string;
 }
 
 function DateTimePickerBase({
@@ -234,6 +243,7 @@ function DateTimePickerBase({
   theme = 'auto',
   confirmText,
   cancelText,
+  locale,
 }: DateTimePickerBaseProps) {
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const currentValue = value || new Date();
@@ -275,14 +285,14 @@ function DateTimePickerBase({
     }
 
     if (mode === 'date') {
-      return date.toLocaleDateString(undefined, dateOptions);
+      return date.toLocaleDateString(locale, dateOptions);
     } else if (mode === 'time') {
-      return date.toLocaleTimeString(undefined, timeOptions);
+      return date.toLocaleTimeString(locale, timeOptions);
     } else {
       return `${date.toLocaleDateString(
-        undefined,
+        locale,
         dateOptions,
-      )} ${date.toLocaleTimeString(undefined, timeOptions)}`;
+      )} ${date.toLocaleTimeString(locale, timeOptions)}`;
     }
   };
 
@@ -344,6 +354,7 @@ function DateTimePickerBase({
         is24hourSource={is24Hour ? 'device' : 'locale'}
         confirmText={confirmText}
         cancelText={cancelText}
+        locale={locale}
       />
     </View>
   );
@@ -351,7 +362,6 @@ function DateTimePickerBase({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     width: '100%',
   },
 });

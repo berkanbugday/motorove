@@ -22,6 +22,7 @@ import {
   DropdownItem,
   Title,
   BodySmall,
+  DateTimePicker,
 } from '@components';
 import {useForm, FormProvider} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -34,8 +35,8 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useTranslation} from '@hooks/useTranslation';
 import {useAuth} from '@contexts/AuthContext';
-import {Gender} from '@motorove/shared/enums';
 import {useGetCities} from '@services/city.service';
+import {EnumUtils} from '@utils/enumUtils';
 
 export const AccountSetupScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -44,12 +45,14 @@ export const AccountSetupScreen = () => {
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
   const wizardRef = useRef<WizardHandle>(null);
-  const {t} = useTranslation();
+  const {t, language} = useTranslation();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isFirstStep, setIsFirstStep] = useState(true);
   const [isLastStep, setIsLastStep] = useState(false);
   const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
-
+  const [selectedGender, setSelectedGender] = useState<DropdownItem | null>(
+    null,
+  );
   // Fetch cities from backend
   const {cities, loading: loadingCities} = useGetCities();
 
@@ -68,8 +71,8 @@ export const AccountSetupScreen = () => {
   const methods = useForm<AccountSetupFormValues>({
     resolver: zodResolver(accountSetupSchema),
     defaultValues: {
-      dateOfBirth: new Date(),
-      gender: Gender.MALE,
+      dateOfBirth: new Date(1990, 1, 1),
+      gender: undefined,
       city: '',
     },
     mode: 'onChange',
@@ -84,13 +87,16 @@ export const AccountSetupScreen = () => {
   } = methods;
 
   // Handle city selection
-  const handleCitySelect = useCallback(
-    (item: DropdownItem | null) => {
-      setSelectedCity(item);
-      setValue('city', item?.value || '', {shouldValidate: true});
-    },
-    [setValue],
-  );
+  const handleCitySelect = (item: DropdownItem | null) => {
+    setSelectedCity(item);
+    setValue('city', item?.value || '', {shouldValidate: true});
+  };
+
+  // Handle gender selection
+  const handleGenderSelect = (item: DropdownItem | null) => {
+    setSelectedGender(item);
+    setValue('gender', item?.value, {shouldValidate: true});
+  };
 
   const onSubmit = useCallback(
     async (data: AccountSetupFormValues) => {
@@ -146,41 +152,53 @@ export const AccountSetupScreen = () => {
     () => [
       {
         id: 'basic-info',
-        title: t('screens.accountSetup.basicInformation'),
+        title: t('screens.accountSetup.basic_information'),
         validate: async () => {
-          const result = await trigger(['city']);
+          const result = await trigger(['city', 'dateOfBirth', 'gender']);
           return result;
         },
         content: (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            style={styles.stepContent}>
-            <View style={styles.fieldContainer}>
-              <Dropdown
-                label={t('screens.accountSetup.city')}
-                data={cityDropdownItems}
-                loading={loadingCities}
-                selectedItem={selectedCity}
-                onSelect={handleCitySelect}
-                error={errors.city?.message}
-                searchable={true}
-                testID="city-dropdown"
-              />
-            </View>
-          </ScrollView>
+          <View style={styles.fieldsContainer}>
+            <Dropdown
+              label={t('screens.accountSetup.city')}
+              data={cityDropdownItems}
+              loading={loadingCities}
+              selectedItem={selectedCity}
+              onSelect={handleCitySelect}
+              error={errors.city?.message}
+              searchable={true}
+              testID="city-dropdown"
+            />
+            <DateTimePicker
+              control={control}
+              name="dateOfBirth"
+              placeholder={t('screens.accountSetup.date_of_birth')}
+              maximumDate={new Date()}
+              error={errors.dateOfBirth}
+              testID="date-of-birth-picker"
+              locale={language}
+            />
+            <Dropdown
+              label={t('screens.accountSetup.gender')}
+              data={EnumUtils.getGenderDropdownOptions()}
+              selectedItem={selectedGender}
+              onSelect={handleGenderSelect}
+              error={errors.gender?.message}
+              searchable={false}
+              testID="gender-dropdown"
+            />
+          </View>
         ),
       },
       {
         id: 'contact-info',
         title: 'Contact Information',
         validate: async () => {
-          const result = await trigger(['dateOfBirth', 'gender']);
-          return result;
+          return true; // No fields to validate in this step anymore
         },
         optional: true,
         content: (
           <ScrollView style={styles.stepContent}>
-            {/* Contact information fields have been removed */}
             <View style={styles.emptyStepContent}>
               <Text style={styles.emptyStepText}>
                 Please proceed to the next step
@@ -213,11 +231,15 @@ export const AccountSetupScreen = () => {
       trigger,
       control,
       errors.city,
+      errors.dateOfBirth,
+      errors.gender,
       cityDropdownItems,
       loadingCities,
       t,
       handleCitySelect,
+      handleGenderSelect,
       selectedCity,
+      selectedGender,
     ],
   );
 
@@ -241,7 +263,7 @@ export const AccountSetupScreen = () => {
                 : ''}
             </Title>
             <BodySmall style={styles.welcomeText}>
-              {t('screens.accountSetup.letUsCompleteYourProfile')}
+              {t('screens.accountSetup.let_us_complete_your_profile')}
             </BodySmall>
             <FormProvider {...methods}>
               <View style={styles.wizardContainer}>
@@ -370,7 +392,8 @@ const styles = StyleSheet.create({
     color: colors.neutral.grey,
     textAlign: 'center',
   },
-  fieldContainer: {
-    marginBottom: spacing.md,
+  fieldsContainer: {
+    marginTop: spacing.md,
+    gap: spacing.lg,
   },
 });

@@ -18,6 +18,9 @@ import {
   EquipmentType,
   SocialMediaPlatform,
 } from '@motorove/shared';
+import {toPascalCase} from '@utils/stringUtils';
+import {DropdownItem} from '@components/Dropdown/types';
+import {i18n} from '@/i18n';
 
 /**
  * EnumItem represents a single enum value with a key and display value
@@ -34,118 +37,112 @@ export interface EnumItem {
  */
 export class EnumUtils {
   /**
-   * Convert any enum to an array of EnumItem objects
+   * Get enum values as options with translated labels
    * @param enumObject - The enum to convert
-   * @returns Array of EnumItem objects
-   */
-  static enumToArray(enumObject: Record<string, string>): EnumItem[] {
-    return Object.entries(enumObject).map(([key, value]) => ({
-      key,
-      value,
-    }));
-  }
-
-  /**
-   * Convert any enum to an array of EnumItem objects with custom labels
-   * @param enumObject - The enum to convert
-   * @param labelMap - Map of enum values to display labels
-   * @returns Array of EnumItem objects with labels
-   */
-  static enumToArrayWithLabels(
-    enumObject: Record<string, string>,
-    labelMap: Record<string, string>,
-  ): EnumItem[] {
-    return Object.entries(enumObject).map(([key, value]) => ({
-      key,
-      value,
-      label: labelMap[value] || value,
-    }));
-  }
-
-  /**
-   * Get enum values as options suitable for dropdowns, pickers, etc.
-   * @returns Array of { label: string, value: string } objects
+   * @param translationNamespace - The i18n namespace where translations are found (e.g., 'equipment')
+   * @param fallbackFormatter - Optional function to format value if translation is not found
+   * @returns Array of dropdown items with translated labels
    */
   static getDropdownOptions(
     enumObject: Record<string, string>,
-    labelMap?: Record<string, string>,
-  ): {label: string; value: string}[] {
-    return Object.entries(enumObject).map(([_, value]) => ({
-      label: labelMap?.[value] || value,
-      value,
-    }));
+    translationNamespace: string,
+  ): DropdownItem[] {
+    return Object.entries(enumObject).map(([key, value]) => {
+      // Try to get translation for this enum value
+      const translationKey = value.toLowerCase();
+      const label = i18n.t(`${translationNamespace}.${translationKey}`);
+
+      return {
+        id: key,
+        label,
+        value: value,
+      };
+    });
   }
 
   // Specific enum getters
-  static getGroupPrivacyOptions(): EnumItem[] {
-    return this.enumToArray(GroupPrivacy);
+  static getGroupPrivacyOptions(): DropdownItem[] {
+    return this.getDropdownOptions(GroupPrivacy, 'enums.groupPrivacy');
   }
 
-  static getGroupMemberRoles(): EnumItem[] {
-    return this.enumToArray(GroupMemberRole);
+  static getGroupMemberRoles(): DropdownItem[] {
+    return this.getDropdownOptions(GroupMemberRole, 'enums.groupMemberRole');
   }
 
-  static getInvitationStatuses(): EnumItem[] {
-    return this.enumToArray(InvitationStatus);
+  static getInvitationStatuses(): DropdownItem[] {
+    return this.getDropdownOptions(InvitationStatus, 'enums.invitationStatus');
   }
 
-  static getEventTypes(): EnumItem[] {
-    return this.enumToArray(EventType);
+  static getEventTypes(): DropdownItem[] {
+    return this.getDropdownOptions(EventType, 'enums.eventType');
   }
 
-  static getRoadTypes(): EnumItem[] {
-    return this.enumToArray(RoadType);
+  static getRoadTypes(): DropdownItem[] {
+    return this.getDropdownOptions(RoadType, 'enums.roadType');
   }
 
-  static getDifficultyLevels(): EnumItem[] {
-    return this.enumToArray(DifficultyLevel);
+  static getDifficultyLevels(): DropdownItem[] {
+    return this.getDropdownOptions(DifficultyLevel, 'enums.difficultyLevel');
   }
 
-  static getExperienceLevels(): EnumItem[] {
-    return this.enumToArray(ExperienceLevel);
+  static getExperienceLevels(): DropdownItem[] {
+    return this.getDropdownOptions(ExperienceLevel, 'enums.experienceLevel');
   }
 
-  static getAddressTypes(): EnumItem[] {
-    return this.enumToArray(AddressType);
+  static getAddressTypes(): DropdownItem[] {
+    return this.getDropdownOptions(AddressType, 'enums.addressType');
   }
 
-  static getLanguages(): EnumItem[] {
-    return this.enumToArray(Language);
+  static getLanguages(): DropdownItem[] {
+    return this.getDropdownOptions(Language, 'enums.language');
   }
 
-  static getGenders(): EnumItem[] {
-    return this.enumToArray(Gender);
+  static getGenders(): DropdownItem[] {
+    return this.getDropdownOptions(Gender, 'enums.gender');
   }
 
-  static getRidingStyles(): EnumItem[] {
-    return this.enumToArray(RidingStyle);
+  static getRidingStyles(): DropdownItem[] {
+    return this.getDropdownOptions(RidingStyle, 'enums.ridingStyle');
   }
 
-  static getEquipmentTypes(): EnumItem[] {
-    return this.enumToArray(EquipmentType);
+  static getEquipmentTypes(): DropdownItem[] {
+    return this.getDropdownOptions(EquipmentType, 'enums.equipmentType');
   }
 
-  static getSocialMediaPlatforms(): EnumItem[] {
-    return this.enumToArray(SocialMediaPlatform);
+  static getSocialMediaPlatforms(): DropdownItem[] {
+    return this.getDropdownOptions(
+      SocialMediaPlatform,
+      'enums.socialMediaPlatform',
+    );
   }
 
-  static getInterests(): EnumItem[] {
-    return this.enumToArray(Interest);
+  static getInterests(): DropdownItem[] {
+    return this.getDropdownOptions(Interest, 'enums.interest');
   }
 
-  static getEventParticipantStatuses(): EnumItem[] {
-    return this.enumToArray(EventParticipantStatus);
+  static getEventParticipantStatuses(): DropdownItem[] {
+    return this.getDropdownOptions(
+      EventParticipantStatus,
+      'enums.eventParticipantStatus',
+    );
   }
 
-  static getNotificationStatuses(): EnumItem[] {
-    return this.enumToArray(NotificationStatus);
+  static getNotificationStatuses(): DropdownItem[] {
+    return this.getDropdownOptions(
+      NotificationStatus,
+      'enums.notificationStatus',
+    );
   }
 
-  static getNotificationTypes(): EnumItem[] {
-    return this.enumToArray(NotificationType);
+  static getNotificationTypes(): DropdownItem[] {
+    return this.getDropdownOptions(NotificationType, 'enums.notificationType');
   }
 
-  static getGroupTags(): EnumItem[] {
-    return this.enumToArray(GroupTag);
+  static getGroupTags(): DropdownItem[] {
+    return this.getDropdownOptions(GroupTag, 'enums.groupTag');
+  }
+
+  static getGenderDropdownOptions(): DropdownItem[] {
+    return this.getDropdownOptions(Gender, 'enums.gender');
   }
 }

@@ -103,7 +103,7 @@ class ErrorService {
 
     // Show toast if enabled
     if (shouldShowToast) {
-      this.showErrorToast(message || i18n.t('errors.network.checkConnection'));
+      this.showErrorToast(message || i18n.t('errors.network.check_connection'));
     }
   }
 

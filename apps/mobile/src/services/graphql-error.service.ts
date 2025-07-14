@@ -45,7 +45,7 @@ class GraphQLErrorService {
               'Refresh token already used, signing out user',
             );
             await errorService.handleError(error, errorType, {
-              fallbackMessage: i18n.t('errors.auth.sessionExpired'),
+              fallbackMessage: i18n.t('errors.auth.session_expired'),
               showToast: true,
             });
             authService.signOut();
@@ -62,7 +62,7 @@ class GraphQLErrorService {
             loggingService.error('Error refreshing token:', refreshError);
             // If refresh fails, handle as a regular auth error
             await errorService.handleError(error, errorType, {
-              fallbackMessage: i18n.t('errors.auth.sessionExpired'),
+              fallbackMessage: i18n.t('errors.auth.session_expired'),
             });
             // Redirect to sign in or clear auth state
             authService.signOut();
@@ -103,7 +103,7 @@ class GraphQLErrorService {
           errorType = ErrorType.VALIDATION;
           loggingService.error('Bad user input error:', error);
           await errorService.handleError(error, errorType, {
-            fallbackMessage: i18n.t('errors.graphql.badUserInput'),
+            fallbackMessage: i18n.t('errors.graphql.bad_user_input'),
           });
           handled = true;
           break;
@@ -111,7 +111,7 @@ class GraphQLErrorService {
         case 'INTERNAL_SERVER_ERROR':
           loggingService.error('Internal server error:', error);
           await errorService.handleError(error, errorType, {
-            fallbackMessage: i18n.t('errors.graphql.internalServerError'),
+            fallbackMessage: i18n.t('errors.graphql.internal_server_error'),
           });
           handled = true;
           break;

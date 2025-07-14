@@ -11,7 +11,7 @@ import i18n from '../i18n/i18n';
  */
 export function errorToMessage(
   error: any,
-  fallbackMessage = i18n.t('errors.general.somethingWrong'),
+  fallbackMessage = i18n.t('errors.general.something_wrong'),
 ): string {
   if (!error) {
     return fallbackMessage;
@@ -32,7 +32,7 @@ export function errorToMessage(
     if (error.networkError.result && error.networkError.result.errors) {
       return extractGraphQLErrorMessage(error.networkError.result.errors[0]);
     }
-    return i18n.t('errors.network.checkConnection');
+    return i18n.t('errors.network.check_connection');
   }
 
   // Handle HTTP errors
@@ -126,11 +126,11 @@ function humanizeErrorMessage(message: string): string {
   message = message.replace(/^exception:/i, '').trim();
 
   if (message.includes('Invalid login credentials')) {
-    return i18n.t('errors.auth.invalidCredentials');
+    return i18n.t('errors.auth.invalid_credentials');
   }
 
   if (message.includes('Email not confirmed')) {
-    return i18n.t('errors.auth.emailNotConfirmed');
+    return i18n.t('errors.auth.email_not_confirmed');
   }
 
   // Make first letter uppercase if it's not

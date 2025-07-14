@@ -111,20 +111,20 @@ export const SignupScreen = () => {
     return (
       <View style={[styles.content, {justifyContent: 'center'}]}>
         <Title align="center" style={styles.successTitle}>
-          {t('screens.signup.verifyEmail')}
+          {t('screens.signUp.verify_email')}
         </Title>
         <View style={styles.successContainer}>
           <Icon name="paper-plane" size={40} />
           <Body style={{marginTop: spacing.md}}>
-            {t('screens.signup.verificationEmailSent')}
+            {t('screens.signUp.verification_email_sent')}
           </Body>
           <Body weight="semiBold">{userEmail}</Body>
           <BodySmall align="center" style={styles.successText}>
-            {t('screens.signup.checkSpamFolder')}
+            {t('screens.signUp.check_spam_folder')}
           </BodySmall>
         </View>
         <Button
-          title={t('screens.signup.signIn')}
+          title={t('screens.signUp.sign_in')}
           variant="primary"
           shape="round"
           onPress={handleSignin}
@@ -132,7 +132,7 @@ export const SignupScreen = () => {
           testID="back-to-signin-button"
         />
         <Button
-          title={t('screens.signup.resendVerificationEmail')}
+          title={t('screens.signUp.resend_verification_email')}
           variant="outline"
           shape="round"
           onPress={handleResendVerificationEmail}
@@ -170,14 +170,14 @@ export const SignupScreen = () => {
               weight="medium"
               color={colors.neutral.grey}
               style={styles.welcomeText}>
-              {t('screens.signup.createAccountIntro')}
+              {t('screens.signUp.create_account_intro')}
             </Subtitle>
 
             <View style={styles.form}>
               <AnimatedInput
                 control={control}
                 name="firstName"
-                label={t('screens.signup.firstName')}
+                label={t('screens.signUp.first_name')}
                 icon={<Icon name="user-filled" size={20} />}
                 error={errors.firstName}
                 testID="signup-firstname"
@@ -186,7 +186,7 @@ export const SignupScreen = () => {
               <AnimatedInput
                 control={control}
                 name="lastName"
-                label={t('screens.signup.lastName')}
+                label={t('screens.signUp.last_name')}
                 icon={<Icon name="user-filled" size={20} />}
                 error={errors.lastName}
                 testID="signup-lastname"
@@ -195,7 +195,7 @@ export const SignupScreen = () => {
               <AnimatedInput
                 control={control}
                 name="email"
-                label={t('screens.signup.emailAddress')}
+                label={t('screens.signUp.email_address')}
                 keyboardType="email-address"
                 icon={<Icon name="envelope-filled" size={20} />}
                 error={errors.email}
@@ -205,7 +205,7 @@ export const SignupScreen = () => {
               <AnimatedInput
                 control={control}
                 name="password"
-                label={t('screens.signup.password')}
+                label={t('screens.signUp.password')}
                 secureTextEntry={!showPassword}
                 error={errors.password}
                 onToggleSecureEntry={togglePasswordVisibility}
@@ -224,10 +224,10 @@ export const SignupScreen = () => {
                 label={
                   <View style={styles.termsTextContainer}>
                     <Caption color={colors.neutral.grey}>
-                      {t('screens.signup.iAgreeTo')}
+                      {t('screens.signUp.i_agree_to')}
                     </Caption>
                     <Button
-                      title={t('screens.signup.termsOfService')}
+                      title={t('screens.signUp.terms_of_service')}
                       variant="text"
                       onPress={handleTermsPress}
                       textStyle={styles.termsLink}
@@ -236,7 +236,7 @@ export const SignupScreen = () => {
                       {t('common.and')}
                     </Caption>
                     <Button
-                      title={t('screens.signup.privacyPolicy')}
+                      title={t('screens.signUp.privacy_policy')}
                       variant="text"
                       onPress={handlePrivacyPress}
                       textStyle={styles.termsLink}
@@ -246,7 +246,7 @@ export const SignupScreen = () => {
               />
 
               <Button
-                title={t('screens.signup.signUp')}
+                title={t('screens.signUp.sign_up')}
                 shape="round"
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
@@ -266,7 +266,7 @@ export const SignupScreen = () => {
         initialSnap="closed">
         <View style={styles.bottomSheetContent}>
           <Title align="center" style={styles.bottomSheetTitle}>
-            {t('screens.signup.termsOfService')}
+            {t('screens.signUp.terms_of_service')}
           </Title>
           <ScrollView
             style={styles.legalScrollView}
@@ -285,7 +285,7 @@ export const SignupScreen = () => {
         initialSnap="closed">
         <View style={styles.bottomSheetContent}>
           <Title align="center" style={styles.bottomSheetTitle}>
-            {t('screens.signup.privacyPolicy')}
+            {t('screens.signUp.privacy_policy')}
           </Title>
           <ScrollView
             style={styles.legalScrollView}

@@ -17,8 +17,8 @@ export const createAuthSchemas = (t: TFunction) => {
     password: z
       .string({required_error: t('validation.password.required')})
       .nonempty(t('validation.password.required'))
-      .min(6, t('validation.password.minLength'))
-      .regex(/^\S*$/, t('validation.password.noSpaces')),
+      .min(6, t('validation.password.min_length'))
+      .regex(/^\S*$/, t('validation.password.no_spaces')),
   });
 
   // Reset password form schema
@@ -34,11 +34,11 @@ export const createAuthSchemas = (t: TFunction) => {
     firstName: z
       .string({required_error: t('validation.firstName.required')})
       .nonempty(t('validation.firstName.required'))
-      .min(2, t('validation.firstName.minLength')),
+      .min(2, t('validation.firstName.min_length')),
     lastName: z
       .string({required_error: t('validation.lastName.required')})
       .nonempty(t('validation.lastName.required'))
-      .min(2, t('validation.lastName.minLength')),
+      .min(2, t('validation.lastName.min_length')),
     email: z
       .string({required_error: t('validation.email.required')})
       .nonempty(t('validation.email.required'))
@@ -46,8 +46,8 @@ export const createAuthSchemas = (t: TFunction) => {
     password: z
       .string({required_error: t('validation.password.required')})
       .nonempty(t('validation.password.required'))
-      .min(6, t('validation.password.minLength'))
-      .regex(/^\S*$/, t('validation.password.noSpaces')),
+      .min(6, t('validation.password.min_length'))
+      .regex(/^\S*$/, t('validation.password.no_spaces')),
     agreeToTerms: z.boolean().refine(val => val === true, {
       message: t('validation.agreeToTerms.required'),
     }),
@@ -57,7 +57,7 @@ export const createAuthSchemas = (t: TFunction) => {
   const accountSetupSchema = z.object({
     dateOfBirth: z
       .date({invalid_type_error: t('validation.dateOfBirth.invalid')})
-      .min(new Date(1950, 0, 1), t('validation.dateOfBirth.tooOld'))
+      .min(new Date(1950, 0, 1), t('validation.dateOfBirth.too_old'))
       .max(new Date(), t('validation.dateOfBirth.future')),
     gender: z.nativeEnum(Gender, {
       required_error: t('validation.gender.required'),

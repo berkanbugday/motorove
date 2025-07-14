@@ -93,14 +93,14 @@ export const SigninScreen = () => {
               </View>
 
               <Body style={styles.welcomeText}>
-                {t('screens.signin.welcomeBack')}
+                {t('screens.signIn.welcome_back')}
               </Body>
 
               <View style={styles.form}>
                 <AnimatedInput
                   control={control}
                   name="email"
-                  label={t('screens.signin.emailAddress')}
+                  label={t('screens.signIn.email_address')}
                   keyboardType="email-address"
                   icon={<Icon name="envelope-filled" size={20} />}
                   error={errors.email}
@@ -110,7 +110,7 @@ export const SigninScreen = () => {
                 <AnimatedInput
                   control={control}
                   name="password"
-                  label={t('screens.signin.password')}
+                  label={t('screens.signIn.password')}
                   secureTextEntry={!showPassword}
                   error={errors.password}
                   onToggleSecureEntry={togglePasswordVisibility}
@@ -120,7 +120,7 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title={t('screens.signin.forgotPassword')}
+                  title={t('screens.signIn.forgot_password')}
                   variant="text"
                   size="small"
                   onPress={handleForgotPassword}
@@ -129,7 +129,7 @@ export const SigninScreen = () => {
                 />
 
                 <Button
-                  title={t('screens.signin.signIn')}
+                  title={t('screens.signIn.sign_in')}
                   shape="round"
                   onPress={handleSubmit(onSubmit)}
                   loading={isSubmitting}
@@ -138,10 +138,10 @@ export const SigninScreen = () => {
                 />
                 <View style={styles.signupContainer}>
                   <Body color={colors.neutral.grey}>
-                    {t('screens.signin.noAccount')}
+                    {t('screens.signIn.no_account')}
                   </Body>
                   <Button
-                    title={t('screens.signin.signUp')}
+                    title={t('screens.signIn.sign_up')}
                     variant="text"
                     onPress={handleSignUp}
                     textStyle={styles.signupLink}
