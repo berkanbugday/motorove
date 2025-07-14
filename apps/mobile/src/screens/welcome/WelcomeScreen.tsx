@@ -129,7 +129,7 @@ export function WelcomeScreen(): React.JSX.Element {
   // Event Handlers - memoized with useCallback
   const handleSignin = useCallback(async () => {
     await markAsNotFirstTime();
-    navigation.replace('Signin', {mode: 'signin'});
+    navigation.replace('Signin');
   }, [navigation, markAsNotFirstTime]);
 
   const handleSignup = useCallback(async () => {

@@ -15,6 +15,7 @@ import {createStyles} from './Dropdown.styles';
 import {DropdownItem, DropdownProps} from './types';
 import {colors, fontSizes, spacing} from '@theme';
 import {Icon} from '@components/Icon';
+import {useTranslation} from '../../hooks/useTranslation';
 
 // Animation constants
 const ANIMATION_DURATION = 200;
@@ -24,7 +25,7 @@ const LABEL_TOP_POSITION = spacing.md;
 const Dropdown: React.FC<DropdownProps> = ({
   data,
   label,
-  placeholder = 'Search...',
+  placeholder,
   selectedItem,
   onSelect,
   renderItem,
@@ -48,6 +49,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   testID,
   searchable = true,
 }) => {
+  const {t} = useTranslation();
   const [isOpen, setIsOpen] = useState(initiallyOpen);
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -289,6 +291,8 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }, [isOpen]);
 
+  const defaultPlaceholder = placeholder || t('components.dropdown.search');
+
   return (
     <View style={[styles.container, containerStyle]} testID={testID}>
       {/* Input field with animated label */}
@@ -332,7 +336,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                   selectedItem?.label && isOpen
                     ? selectedItem.label
                     : isFocused || !label
-                    ? placeholder
+                    ? defaultPlaceholder
                     : ''
                 }
                 placeholderTextColor={colors.neutral.grey}
@@ -401,7 +405,9 @@ const Dropdown: React.FC<DropdownProps> = ({
                 renderNoResults()
               ) : (
                 <View style={styles.noResults}>
-                  <Text style={styles.noResultsText}>No results found</Text>
+                  <Text style={styles.noResultsText}>
+                    {t('components.dropdown.noResults')}
+                  </Text>
                 </View>
               )
             ) : (
