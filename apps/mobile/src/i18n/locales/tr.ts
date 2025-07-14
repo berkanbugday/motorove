@@ -6,10 +6,12 @@ export default {
     back: 'Geri',
     next: 'İleri',
     continue: 'Devam Et',
+    complete: 'Tamamla',
     save: 'Kaydet',
     delete: 'Sil',
     edit: 'Düzenle',
     loading: 'Yükleniyor...',
+    completing: 'Tamamlanıyor...',
     search: 'Ara',
     filter: 'Filtrele',
     apply: 'Uygula',
@@ -108,6 +110,17 @@ export default {
       checkSpamFolder: 'Eğer görmüyorsanız spam klasörünüzü kontrol edin',
       signIn: 'Giriş Yap',
       resendVerificationEmail: 'E-postayı Tekrar Gönder',
+    },
+
+    // Account Setup screen
+    accountSetup: {
+      hi: 'Merhaba',
+      letUsCompleteYourProfile:
+        'Profilinizi tamamlamak için lütfen aşağıdaki bilgileri giriniz.',
+      basicInformation: 'Temel Bilgiler',
+      dateOfBirth: 'Doğum Tarihi',
+      gender: 'Cinsiyet',
+      city: 'Şehir',
     },
     // Home screen
     home: {

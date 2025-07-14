@@ -2,7 +2,7 @@ import {gql} from '@apollo/client';
 
 // City fragment
 export const CITY_FRAGMENT = gql`
-  fragment CityFragment on City {
+  fragment CityFragment on CityDto {
     id
     value
   }

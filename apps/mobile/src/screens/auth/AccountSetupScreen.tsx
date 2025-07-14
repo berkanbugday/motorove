@@ -17,11 +17,13 @@ import {
   Wizard,
   WizardHandle,
   WizardStep,
-  Title,
   TopHeaderBar,
   Dropdown,
+  DropdownItem,
+  Title,
+  BodySmall,
 } from '@components';
-import {useForm, FormProvider, Controller} from 'react-hook-form';
+import {useForm, FormProvider} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
   createAuthSchemas,
@@ -34,7 +36,6 @@ import {useTranslation} from '@hooks/useTranslation';
 import {useAuth} from '@contexts/AuthContext';
 import {Gender} from '@motorove/shared/enums';
 import {useGetCities} from '@services/city.service';
-import {ICity} from '@motorove/shared/interfaces';
 
 export const AccountSetupScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -47,9 +48,19 @@ export const AccountSetupScreen = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isFirstStep, setIsFirstStep] = useState(true);
   const [isLastStep, setIsLastStep] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
 
   // Fetch cities from backend
   const {cities, loading: loadingCities} = useGetCities();
+
+  // Transform cities into dropdown items
+  const cityDropdownItems = useMemo(() => {
+    return cities?.map(city => ({
+      label: city.value || '',
+      value: city.id || '',
+      id: city.id || '',
+    })) as DropdownItem[];
+  }, [cities]);
 
   // Create validation schema with translations
   const {accountSetupSchema} = createAuthSchemas(t);
@@ -69,7 +80,17 @@ export const AccountSetupScreen = () => {
     control,
     formState: {errors},
     trigger,
+    setValue,
   } = methods;
+
+  // Handle city selection
+  const handleCitySelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedCity(item);
+      setValue('city', item?.value || '', {shouldValidate: true});
+    },
+    [setValue],
+  );
 
   const onSubmit = useCallback(
     async (data: AccountSetupFormValues) => {
@@ -120,48 +141,30 @@ export const AccountSetupScreen = () => {
     handleSubmit(onSubmit)();
   }, [handleSubmit, onSubmit]);
 
-  // Format cities data for dropdown
-  const cityDropdownItems = useMemo(() => {
-    return cities.map((city: ICity) => ({
-      id: city.id,
-      label: city.value,
-      value: city.id,
-    }));
-  }, [cities]);
-
   // Define wizard steps
   const wizardSteps = useMemo<WizardStep[]>(
     () => [
       {
         id: 'basic-info',
-        title: 'Basic Information',
+        title: t('screens.accountSetup.basicInformation'),
         validate: async () => {
           const result = await trigger(['city']);
           return result;
         },
         content: (
-          <ScrollView style={styles.stepContent}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={styles.stepContent}>
             <View style={styles.fieldContainer}>
-              <Controller
-                control={control}
-                name="city"
-                render={({field: {onChange, value}}) => (
-                  <Dropdown
-                    label={t('city.label')}
-                    placeholder={t('city.placeholder')}
-                    data={cityDropdownItems}
-                    loading={loadingCities}
-                    selectedItem={
-                      value
-                        ? cityDropdownItems.find(item => item.value === value)
-                        : null
-                    }
-                    onSelect={item => onChange(item?.value || '')}
-                    error={errors.city?.message}
-                    searchable={true}
-                    testID="city-dropdown"
-                  />
-                )}
+              <Dropdown
+                label={t('screens.accountSetup.city')}
+                data={cityDropdownItems}
+                loading={loadingCities}
+                selectedItem={selectedCity}
+                onSelect={handleCitySelect}
+                error={errors.city?.message}
+                searchable={true}
+                testID="city-dropdown"
               />
             </View>
           </ScrollView>
@@ -206,7 +209,16 @@ export const AccountSetupScreen = () => {
         ),
       },
     ],
-    [trigger, control, errors.city, cityDropdownItems, loadingCities, t],
+    [
+      trigger,
+      control,
+      errors.city,
+      cityDropdownItems,
+      loadingCities,
+      t,
+      handleCitySelect,
+      selectedCity,
+    ],
   );
 
   // Update step status when wizard step changes
@@ -223,10 +235,14 @@ export const AccountSetupScreen = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}>
           <View style={[styles.content, {minHeight: height * 0.8}]}>
-            <Title align="center" style={styles.welcomeText}>
-              {user?.firstName ? `Hi ${user?.firstName}!` : 'Almost there!'}{' '}
-              Let's complete your profile
+            <Title>
+              {user?.firstName
+                ? `${t('screens.accountSetup.hi')} ${user?.firstName}!`
+                : ''}
             </Title>
+            <BodySmall style={styles.welcomeText}>
+              {t('screens.accountSetup.letUsCompleteYourProfile')}
+            </BodySmall>
             <FormProvider {...methods}>
               <View style={styles.wizardContainer}>
                 <Wizard
@@ -243,7 +259,7 @@ export const AccountSetupScreen = () => {
                 {isLastStep ? (
                   <>
                     <Button
-                      title="Back"
+                      title={t('common.back')}
                       variant="outline"
                       shape="round"
                       onPress={handlePreviousStep}
@@ -251,7 +267,9 @@ export const AccountSetupScreen = () => {
                       testID="back-button"
                     />
                     <Button
-                      title={loading ? 'Completing...' : 'Complete'}
+                      title={
+                        loading ? t('common.completing') : t('common.complete')
+                      }
                       variant="primary"
                       shape="round"
                       onPress={handleSubmit(onSubmit)}
@@ -263,7 +281,7 @@ export const AccountSetupScreen = () => {
                   </>
                 ) : isFirstStep ? (
                   <Button
-                    title="Continue"
+                    title={t('common.next')}
                     variant="primary"
                     shape="round"
                     onPress={handleNextStep}
@@ -273,7 +291,7 @@ export const AccountSetupScreen = () => {
                 ) : (
                   <>
                     <Button
-                      title="Back"
+                      title={t('common.back')}
                       variant="outline"
                       shape="round"
                       onPress={handlePreviousStep}
@@ -281,7 +299,7 @@ export const AccountSetupScreen = () => {
                       testID="back-button"
                     />
                     <Button
-                      title="Continue"
+                      title={t('common.next')}
                       variant="primary"
                       shape="round"
                       onPress={handleNextStep}
@@ -310,10 +328,10 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.md,
-    alignItems: 'center',
   },
   welcomeText: {
-    marginBottom: spacing.xl,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
   },
   wizardContainer: {
     flex: 1,

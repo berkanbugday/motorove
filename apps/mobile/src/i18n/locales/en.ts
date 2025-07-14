@@ -108,6 +108,16 @@ export default {
       signIn: 'Sign In',
       resendVerificationEmail: 'Resend Email',
     },
+
+    // Account Setup screen
+    accountSetup: {
+      hi: 'Hi',
+      letUsCompleteYourProfile: "Let's complete your profile",
+      basicInformation: 'Basic Information',
+      dateOfBirth: 'Date of Birth',
+      gender: 'Gender',
+      city: 'City',
+    },
     // Home screen
     home: {
       welcomeMessage: 'Welcome to Motorove',
