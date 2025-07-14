@@ -557,6 +557,18 @@ export default {
       tooOld: 'Date is too far in the past',
       future: 'Date cannot be in the future',
     },
+    dateOfBirth: {
+      invalid: 'Please select a valid date',
+      tooOld: 'Date is too far in the past',
+      future: 'Date cannot be in the future',
+    },
+    gender: {
+      required: 'Gender is required',
+      invalid: 'Please select a valid gender',
+    },
+    city: {
+      required: 'City is required',
+    },
     agreeToTerms: {
       required: 'You must agree to the Terms of Service and Privacy Policy',
     },

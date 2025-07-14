@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useCallback, useMemo} from 'react';
 import {
   StyleSheet,
   View,
@@ -7,28 +7,21 @@ import {
   Platform,
   ScrollView,
   SafeAreaView,
-  Image,
-  TouchableOpacity,
   useWindowDimensions,
   Alert,
 } from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {
-  AuthScreenNavigationProp,
-  AuthScreenRouteProp,
-} from '@navigation/types/navigationTypes';
-import {
-  Icon,
-  AnimatedInput,
   Button,
   Wizard,
   WizardHandle,
   WizardStep,
   Title,
-  Chip,
+  TopHeaderBar,
+  Dropdown,
 } from '@components';
-import Dropdown, {DropdownItem} from '@components/Dropdown';
-import {useForm} from 'react-hook-form';
+import {useForm, FormProvider, Controller} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
   createAuthSchemas,
@@ -38,341 +31,271 @@ import {colors, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useTranslation} from '@hooks/useTranslation';
-
-// User type options for dropdown
-const userTypeOptions: DropdownItem[] = [
-  {id: '1', label: 'Rider', value: 'rider'},
-  {id: '2', label: 'Mechanic', value: 'mechanic'},
-  {id: '3', label: 'Enthusiast', value: 'enthusiast'},
-  {id: '4', label: 'Professional', value: 'professional'},
-  {id: '5', label: 'Beginner', value: 'beginner'},
-  {id: '6', label: 'Other', value: 'other'},
-  {id: '7', label: 'Admin', value: 'admin'},
-  {id: '8', label: 'Moderator', value: 'moderator'},
-  {id: '9', label: 'Support', value: 'support'},
-  {id: '10', label: 'Developer', value: 'developer'},
-  {id: '11', label: 'Designer', value: 'designer'},
-  {id: '12', label: 'Writer', value: 'writer'},
-  {id: '13', label: 'Editor', value: 'editor'},
-];
-
-// User interests options for chips
-const interestOptions = [
-  {id: '1', label: 'Sport Bikes'},
-  {id: '2', label: 'Cruisers'},
-  {id: '3', label: 'Adventure'},
-  {id: '4', label: 'Touring'},
-  {id: '5', label: 'Off-Road'},
-  {id: '6', label: 'Vintage'},
-  {id: '7', label: 'Racing'},
-  {id: '8', label: 'Stunts'},
-  {id: '9', label: 'Customization'},
-  {id: '10', label: 'Maintenance'},
-  {id: '11', label: 'Community'},
-  {id: '12', label: 'Events'},
-];
+import {useAuth} from '@contexts/AuthContext';
+import {Gender} from '@motorove/shared/enums';
+import {useGetCities} from '@services/city.service';
+import {ICity} from '@motorove/shared/interfaces';
 
 export const AccountSetupScreen = () => {
   const [loading, setLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedUserType, setSelectedUserType] = useState<DropdownItem | null>(
-    null,
-  );
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const {height} = useWindowDimensions();
   const navigation = useNavigation<AuthScreenNavigationProp<'AccountSetup'>>();
-  const route = useRoute<AuthScreenRouteProp<'AccountSetup'>>();
-  const {firstName} = route.params || {};
+  const {user} = useAuth();
   const insets = useSafeAreaInsets();
   const wizardRef = useRef<WizardHandle>(null);
   const {t} = useTranslation();
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [isFirstStep, setIsFirstStep] = useState(true);
+  const [isLastStep, setIsLastStep] = useState(false);
+
+  // Fetch cities from backend
+  const {cities, loading: loadingCities} = useGetCities();
 
   // Create validation schema with translations
   const {accountSetupSchema} = createAuthSchemas(t);
 
-  const {
-    control,
-    handleSubmit,
-    formState: {errors},
-    setValue,
-    trigger,
-  } = useForm<AccountSetupFormValues>({
+  const methods = useForm<AccountSetupFormValues>({
     resolver: zodResolver(accountSetupSchema),
     defaultValues: {
-      username: 'berkanbugday',
-      bio: '',
-      phoneNumber: '',
-      profilePhotoUrl: '',
-      userType: '',
-      interests: [],
+      dateOfBirth: new Date(),
+      gender: Gender.MALE,
+      city: '',
     },
     mode: 'onChange',
   });
 
-  // Handle user type selection
-  const handleUserTypeSelect = (item: DropdownItem | null) => {
-    setSelectedUserType(item);
-    setValue('userType', item?.value || '', {shouldValidate: true});
-  };
+  const {
+    handleSubmit,
+    control,
+    formState: {errors},
+    trigger,
+  } = methods;
 
-  // Handle interest selection
-  const handleInterestToggle = (interestId: string) => {
-    setSelectedInterests(prevInterests => {
-      const newInterests = prevInterests.includes(interestId)
-        ? prevInterests.filter(id => id !== interestId)
-        : [...prevInterests, interestId];
+  const onSubmit = useCallback(
+    async (data: AccountSetupFormValues) => {
+      try {
+        setLoading(true);
+        // In a real app, you would submit this data to your API
+        loggingService.info('Form data submitted:', {
+          dateOfBirth: data.dateOfBirth,
+          gender: data.gender,
+          city: data.city,
+        });
 
-      // Update the form value
-      setValue('interests', newInterests, {shouldValidate: true});
-      return newInterests;
-    });
-  };
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-  const handleChoosePhoto = () => {
-    // This would normally integrate with the device camera/photo library
-    // For this example, we'll just show a placeholder
-    Alert.alert('Upload Photo', 'This would open the camera or photo library', [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: 'Use Placeholder',
-        onPress: () => {
-          // In a real app, this would be a URL to an uploaded image
-          setSelectedImage('https://via.placeholder.com/150');
-          setValue('profilePhotoUrl', 'https://via.placeholder.com/150', {
-            shouldValidate: true,
-          });
-        },
-      },
-    ]);
-  };
+        // Navigate to the main app
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Main' as any}],
+        });
+      } catch (error) {
+        loggingService.error('Error submitting form:', error);
+        Alert.alert(
+          'Error',
+          'There was a problem setting up your account. Please try again.',
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigation],
+  );
 
-  const onSubmit = async (data: AccountSetupFormValues) => {
-    try {
-      setLoading(true);
-      // In a real app, you would submit this data to your API
-      loggingService.info('Form data submitted:', {
-        username: data.username,
-        userType: data.userType,
-        interests: data.interests,
-        phoneNumber: data.phoneNumber,
-        profilePhotoUrl: data.profilePhotoUrl,
-      });
+  // Navigation handlers
+  const handleNextStep = useCallback(() => {
+    wizardRef.current?.nextStep();
+  }, []);
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  const handlePreviousStep = useCallback(() => {
+    wizardRef.current?.previousStep();
+  }, []);
 
-      // Navigate to the main app
-      navigation.reset({
-        index: 0,
-        routes: [{name: 'Main' as any}],
-      });
-    } catch (error) {
-      loggingService.error('Error submitting form:', error);
-      Alert.alert(
-        'Error',
-        'There was a problem setting up your account. Please try again.',
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleStepChange = useCallback((index: number) => {
+    setCurrentStepIndex(index);
+  }, []);
+
+  const handleWizardComplete = useCallback(() => {
+    handleSubmit(onSubmit)();
+  }, [handleSubmit, onSubmit]);
+
+  // Format cities data for dropdown
+  const cityDropdownItems = useMemo(() => {
+    return cities.map((city: ICity) => ({
+      id: city.id,
+      label: city.value,
+      value: city.id,
+    }));
+  }, [cities]);
 
   // Define wizard steps
-  const basicInfoStep: WizardStep = {
-    id: 'basic-info',
-    title: 'Basic Information',
-    validate: async () => {
-      // Validate username, userType, and interests fields
-      const result = await trigger(['username', 'userType']);
-      return result;
-    },
-    content: (
-      <View style={styles.stepContent}>
-        <AnimatedInput
-          control={control}
-          name="username"
-          label="Username"
-          icon={<Icon name="user" size={20} />}
-          error={errors.username}
-          testID="setup-username"
-        />
-
-        <View style={styles.dropdownContainer}>
-          <Dropdown
-            data={userTypeOptions}
-            label="User Type"
-            selectedItem={selectedUserType}
-            onSelect={handleUserTypeSelect}
-            error={errors.userType?.message}
-            testID="user-type-dropdown"
-          />
-        </View>
-
-        <View>
-          <Text style={styles.interestsLabel}>Select Your Interests</Text>
-          <View style={styles.chipsContainer}>
-            {interestOptions.map(interest => (
-              <Chip
-                key={interest.id}
-                label={interest.label}
-                variant={
-                  selectedInterests.includes(interest.id)
-                    ? 'filled'
-                    : 'outlined'
-                }
-                color="dark"
-                selected={selectedInterests.includes(interest.id)}
-                onPress={() => handleInterestToggle(interest.id)}
-                testID={`interest-chip-${interest.id}`}
+  const wizardSteps = useMemo<WizardStep[]>(
+    () => [
+      {
+        id: 'basic-info',
+        title: 'Basic Information',
+        validate: async () => {
+          const result = await trigger(['city']);
+          return result;
+        },
+        content: (
+          <ScrollView style={styles.stepContent}>
+            <View style={styles.fieldContainer}>
+              <Controller
+                control={control}
+                name="city"
+                render={({field: {onChange, value}}) => (
+                  <Dropdown
+                    label={t('city.label')}
+                    placeholder={t('city.placeholder')}
+                    data={cityDropdownItems}
+                    loading={loadingCities}
+                    selectedItem={
+                      value
+                        ? cityDropdownItems.find(item => item.value === value)
+                        : null
+                    }
+                    onSelect={item => onChange(item?.value || '')}
+                    error={errors.city?.message}
+                    searchable={true}
+                    testID="city-dropdown"
+                  />
+                )}
               />
-            ))}
-          </View>
-        </View>
-
-        <Button
-          title="Continue"
-          variant="primary"
-          shape="round"
-          onPress={() => wizardRef.current?.nextStep()}
-          style={styles.button}
-          testID="continue-button"
-        />
-      </View>
-    ),
-  };
-
-  const contactInfoStep: WizardStep = {
-    id: 'contact-info',
-    title: 'Contact Information',
-    validate: async () => {
-      // Since the contact info fields are optional, we'll always return true
-      // But if we had required fields here, we would validate them
-      const result = await trigger(['phoneNumber']);
-      return result;
-    },
-    optional: true,
-    content: (
-      <View style={styles.stepContent}>
-        <AnimatedInput
-          control={control}
-          name="phoneNumber"
-          label="Phone Number (Optional)"
-          icon={<Icon name="envelope" size={20} />}
-          keyboardType="phone-pad"
-          error={errors.phoneNumber}
-          testID="setup-phone"
-        />
-
-        <View style={styles.navigationButtons}>
-          <Button
-            title="Back"
-            variant="outline"
-            shape="round"
-            onPress={() => wizardRef.current?.previousStep()}
-            style={styles.backButton}
-            testID="back-button"
-          />
-          <Button
-            title="Continue"
-            variant="primary"
-            shape="round"
-            onPress={() => wizardRef.current?.nextStep()}
-            style={styles.continueButton}
-            testID="continue-button"
-          />
-        </View>
-      </View>
-    ),
-  };
-
-  const profilePhotoStep: WizardStep = {
-    id: 'profile-photo',
-    title: 'Profile Photo',
-    optional: true,
-    validate: async () => {
-      // Profile photo is optional, but we'll validate to ensure
-      // it meets requirements if one is provided
-      const result = await trigger('profilePhotoUrl');
-      return result;
-    },
-    content: (
-      <View style={styles.stepContent}>
-        <View style={styles.photoContainer}>
-          <TouchableOpacity
-            style={styles.photoButton}
-            onPress={handleChoosePhoto}>
-            {selectedImage ? (
-              <Image
-                source={{uri: selectedImage}}
-                style={styles.profilePhoto}
-              />
-            ) : (
-              <View style={styles.photoPlaceholder}>
-                <Icon name="user" size={50} color={colors.neutral.grey} />
-              </View>
-            )}
-            <View style={styles.photoEditBadge}>
-              <Icon name="user" size={16} color={colors.neutral.white} />
             </View>
-          </TouchableOpacity>
-          <Text style={styles.photoHelpText}>Add profile photo</Text>
-        </View>
+          </ScrollView>
+        ),
+      },
+      {
+        id: 'contact-info',
+        title: 'Contact Information',
+        validate: async () => {
+          const result = await trigger(['dateOfBirth', 'gender']);
+          return result;
+        },
+        optional: true,
+        content: (
+          <ScrollView style={styles.stepContent}>
+            {/* Contact information fields have been removed */}
+            <View style={styles.emptyStepContent}>
+              <Text style={styles.emptyStepText}>
+                Please proceed to the next step
+              </Text>
+            </View>
+          </ScrollView>
+        ),
+      },
+      {
+        id: 'profile-photo',
+        title: 'Profile Photo',
+        optional: true,
+        validate: async () => {
+          const result = await trigger(['dateOfBirth', 'gender']);
+          return result;
+        },
+        content: (
+          <ScrollView style={styles.stepContent}>
+            {/* Profile photo fields have been removed */}
+            <View style={styles.emptyStepContent}>
+              <Text style={styles.emptyStepText}>
+                Please proceed to the next step
+              </Text>
+            </View>
+          </ScrollView>
+        ),
+      },
+    ],
+    [trigger, control, errors.city, cityDropdownItems, loadingCities, t],
+  );
 
-        <View style={styles.navigationButtons}>
-          <Button
-            title="Back"
-            variant="outline"
-            shape="round"
-            onPress={() => wizardRef.current?.previousStep()}
-            style={styles.backButton}
-            testID="back-button"
-          />
-          <Button
-            title={loading ? 'Completing...' : 'Complete Setup'}
-            variant="primary"
-            shape="round"
-            onPress={handleSubmit(onSubmit)}
-            loading={loading}
-            style={styles.continueButton}
-            textStyle={{fontSize: fontSizes.sm}}
-            testID="complete-setup-button"
-          />
-        </View>
-      </View>
-    ),
-  };
-
-  const wizardSteps = [basicInfoStep, contactInfoStep, profilePhotoStep];
+  // Update step status when wizard step changes
+  React.useEffect(() => {
+    setIsFirstStep(currentStepIndex === 0);
+    setIsLastStep(currentStepIndex === wizardSteps.length - 1);
+  }, [currentStepIndex, wizardSteps.length]);
 
   return (
-    <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled">
+    <View style={styles.container}>
+      <TopHeaderBar showBackButton={false} showShadow={false} />
+      <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}>
           <View style={[styles.content, {minHeight: height * 0.8}]}>
             <Title align="center" style={styles.welcomeText}>
-              {firstName ? `Hi ${firstName}!` : 'Almost there!'} Let's complete
-              your profile
+              {user?.firstName ? `Hi ${user?.firstName}!` : 'Almost there!'}{' '}
+              Let's complete your profile
             </Title>
+            <FormProvider {...methods}>
+              <View style={styles.wizardContainer}>
+                <Wizard
+                  ref={wizardRef}
+                  steps={wizardSteps}
+                  onComplete={handleWizardComplete}
+                  progressIndicatorType="line"
+                  onStepChange={handleStepChange}
+                />
+              </View>
 
-            <Wizard
-              ref={wizardRef}
-              steps={wizardSteps}
-              onComplete={() => {
-                handleSubmit(onSubmit)();
-              }}
-              progressIndicatorType="line"
-            />
+              {/* Navigation Buttons */}
+              <View style={styles.buttonContainer}>
+                {isLastStep ? (
+                  <>
+                    <Button
+                      title="Back"
+                      variant="outline"
+                      shape="round"
+                      onPress={handlePreviousStep}
+                      style={styles.backButton}
+                      testID="back-button"
+                    />
+                    <Button
+                      title={loading ? 'Completing...' : 'Complete'}
+                      variant="primary"
+                      shape="round"
+                      onPress={handleSubmit(onSubmit)}
+                      loading={loading}
+                      style={styles.continueButton}
+                      textStyle={{fontSize: fontSizes.sm}}
+                      testID="complete-setup-button"
+                    />
+                  </>
+                ) : isFirstStep ? (
+                  <Button
+                    title="Continue"
+                    variant="primary"
+                    shape="round"
+                    onPress={handleNextStep}
+                    style={{flex: 1}}
+                    testID="continue-button"
+                  />
+                ) : (
+                  <>
+                    <Button
+                      title="Back"
+                      variant="outline"
+                      shape="round"
+                      onPress={handlePreviousStep}
+                      style={styles.backButton}
+                      testID="back-button"
+                    />
+                    <Button
+                      title="Continue"
+                      variant="primary"
+                      shape="round"
+                      onPress={handleNextStep}
+                      style={styles.continueButton}
+                      testID="continue-button"
+                    />
+                  </>
+                )}
+              </View>
+            </FormProvider>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 };
 
@@ -386,76 +309,31 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
     alignItems: 'center',
   },
   welcomeText: {
     marginBottom: spacing.xl,
   },
-  stepContent: {
+  wizardContainer: {
+    flex: 1,
     width: '100%',
+  },
+  stepContent: {
+    flex: 1,
+    width: '100%',
+    paddingVertical: spacing.md,
     gap: spacing.lg,
   },
-  dropdownContainer: {
-    width: '100%',
-  },
-  photoContainer: {
-    alignItems: 'center',
-  },
-  photoButton: {
-    position: 'relative',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    overflow: 'visible',
-  },
-  profilePhoto: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-  },
-  photoPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.neutral.lightGrey,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.neutral.grey,
-  },
-  photoEditBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: colors.primary.main,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: colors.neutral.white,
-  },
-  photoHelpText: {
-    marginTop: spacing.sm,
-    fontSize: 14,
-    color: colors.neutral.grey,
-  },
-  errorText: {
-    color: colors.status.error,
-    fontSize: 12,
-    marginLeft: spacing.sm,
-    marginTop: -spacing.sm,
-  },
-  button: {
-    marginTop: spacing.lg,
-  },
-  navigationButtons: {
+  buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: spacing.lg,
     gap: spacing.md,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
   },
   backButton: {
     flex: 1,
@@ -463,15 +341,18 @@ const styles = StyleSheet.create({
   continueButton: {
     flex: 1,
   },
-  interestsLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.neutral.darkGrey,
-    marginBottom: spacing.sm,
+  emptyStepContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
   },
-  chipsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
+  emptyStepText: {
+    fontSize: 18,
+    color: colors.neutral.grey,
+    textAlign: 'center',
+  },
+  fieldContainer: {
+    marginBottom: spacing.md,
   },
 });

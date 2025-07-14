@@ -558,6 +558,18 @@ export default {
       tooOld: 'Tarih çok geçmişte',
       future: 'Tarih gelecekte olamaz',
     },
+    dateOfBirth: {
+      invalid: 'Lütfen geçerli bir tarih seçin',
+      tooOld: 'Tarih çok geçmişte',
+      future: 'Tarih gelecekte olamaz',
+    },
+    gender: {
+      required: 'Cinsiyet gereklidir',
+      invalid: 'Lütfen geçerli bir cinsiyet seçin',
+    },
+    city: {
+      required: 'Şehir gereklidir',
+    },
     agreeToTerms: {
       required: 'Kullanım Şartları ve Gizlilik Politikasını kabul etmelisiniz',
     },

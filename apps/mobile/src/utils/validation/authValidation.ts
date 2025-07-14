@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {TFunction} from 'i18next';
+import {Gender} from '@motorove/shared/enums';
 
 /**
  * Creates validation schemas with translated error messages
@@ -54,28 +55,17 @@ export const createAuthSchemas = (t: TFunction) => {
 
   // Account setup form schema
   const accountSetupSchema = z.object({
-    username: z
-      .string({required_error: t('validation.username.required')})
-      .nonempty(t('validation.username.required'))
-      .min(3, t('validation.username.minLength'))
-      .max(30, t('validation.username.maxLength'))
-      .regex(/^[a-zA-Z0-9._]+$/, t('validation.username.invalidFormat')),
-    userType: z
-      .string({required_error: t('validation.userType.required')})
-      .nonempty(t('validation.userType.required'))
-      .min(1, t('validation.userType.select')),
-    bio: z.string().max(150, t('validation.bio.maxLength')).optional(),
-    phoneNumber: z
-      .string()
-      .regex(/^\+?[0-9]{10,15}$/, t('validation.phoneNumber.invalid'))
-      .optional(),
-    birthDate: z
-      .date({invalid_type_error: t('validation.birthDate.invalid')})
-      .min(new Date(1900, 0, 1), t('validation.birthDate.tooOld'))
-      .max(new Date(), t('validation.birthDate.future'))
-      .optional(),
-    profilePhotoUrl: z.string().optional(),
-    interests: z.array(z.string()).optional(),
+    dateOfBirth: z
+      .date({invalid_type_error: t('validation.dateOfBirth.invalid')})
+      .min(new Date(1950, 0, 1), t('validation.dateOfBirth.tooOld'))
+      .max(new Date(), t('validation.dateOfBirth.future')),
+    gender: z.nativeEnum(Gender, {
+      required_error: t('validation.gender.required'),
+      invalid_type_error: t('validation.gender.invalid'),
+    }),
+    city: z
+      .string({required_error: t('validation.city.required')})
+      .nonempty(t('validation.city.required')),
   });
 
   return {
