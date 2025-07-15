@@ -224,15 +224,6 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
     onSelectionChange(newSelectedItems);
   };
 
-  // Clear all selections function - unused but may be needed in future
-  // const handleClear = () => {
-  //   onSelectionChange([]);
-  //   setInternalSearchQuery('');
-  //   if (inputRef.current && searchable) {
-  //     inputRef.current.focus();
-  //   }
-  // };
-
   // Create styles
   const styles = createStyles({
     isOpen,
@@ -376,15 +367,14 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
             {/* Dropdown arrow icon */}
             <TouchableOpacity
-              style={styles.clearButton}
+              style={styles.iconContainer}
               onPress={toggleDropdown}
-              hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}
               disabled={disabled}>
               <Icon
                 name={isOpen ? 'chevron-up' : 'chevron-down'}
-                size={18}
+                size={16}
                 color={
-                  disabled ? colors.neutral.lightGrey : colors.neutral.black
+                  disabled ? colors.neutral.lightGrey : colors.neutral.grey
                 }
               />
             </TouchableOpacity>
@@ -478,13 +468,15 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
       </View>
 
       {/* Error or Helper text */}
-      <Text
-        style={[
-          error ? styles.errorText : styles.helperText,
-          maxItemsReached && isOpen && !error ? styles.maxItemsText : null,
-        ]}>
-        {getDisplayText()}
-      </Text>
+      {getDisplayText() ? (
+        <Text
+          style={[
+            error ? styles.errorText : styles.helperText,
+            maxItemsReached && isOpen && !error ? styles.maxItemsText : null,
+          ]}>
+          {getDisplayText()}
+        </Text>
+      ) : null}
     </View>
   );
 };

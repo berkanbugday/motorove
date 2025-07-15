@@ -20,7 +20,8 @@ export const createStyles = (props: StyleProps) => {
       width: '100%',
     },
     inputContainer: {
-      height: spacing.form.inputHeight,
+      flexDirection: 'row',
+      alignItems: 'center',
       borderWidth: 1,
       borderColor: props.hasError
         ? colors.status.error
@@ -29,20 +30,15 @@ export const createStyles = (props: StyleProps) => {
         : colors.neutral.lightGrey,
       borderRadius: radius.sm,
       paddingHorizontal: spacing.form.inputPaddingHorizontal,
+      height: spacing.form.inputHeight,
       backgroundColor: props.disabled
         ? colors.neutral.veryLightGrey
         : colors.neutral.white,
-      flexDirection: 'row',
-      alignItems: 'center',
-      position: 'relative',
-      zIndex: 1,
     },
     input: {
       flex: 1,
-      fontSize: fontSizes.md,
+      height: spacing.form.inputHeight,
       color: props.disabled ? colors.neutral.lightGrey : colors.neutral.black,
-      padding: 0,
-      height: '100%',
     },
     // Added styles for real-time chip updates
     flexContainer: {
@@ -53,13 +49,12 @@ export const createStyles = (props: StyleProps) => {
     },
     chipScrollView: {
       maxHeight: spacing.form.inputHeight - spacing.xs,
-      marginVertical: spacing.xs / 2,
+      marginVertical: spacing.xs,
     },
     // End of added styles
     selectedItemContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      // flexWrap: 'wrap',
       flex: 1,
       gap: spacing.xs,
     },
@@ -85,9 +80,6 @@ export const createStyles = (props: StyleProps) => {
     item: {
       paddingVertical: spacing.sm,
       paddingHorizontal: spacing.md,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
     },
     selectedItem: {
       backgroundColor: colors.secondary.main,
@@ -95,7 +87,6 @@ export const createStyles = (props: StyleProps) => {
     itemText: {
       fontSize: fontSizes.md,
       color: colors.neutral.black,
-      flex: 1,
     },
     disabledText: {
       color: colors.neutral.lightGrey,
@@ -132,8 +123,10 @@ export const createStyles = (props: StyleProps) => {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    clearButton: {
+    iconContainer: {
       padding: spacing.xs,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     placeholder: {
       color: colors.neutral.grey,

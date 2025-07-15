@@ -266,25 +266,6 @@ const Dropdown: React.FC<DropdownProps> = ({
     openDropdown();
   };
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    // Note: To fully implement Android back button handling,
-    // we would use BackHandler from react-native
-    // const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-    //   if (isOpen) {
-    //     closeDropdown();
-    //     return true; // Prevent default behavior
-    //   }
-    //   return false;
-    // });
-
-    // return () => backHandler.remove();
-
-    return () => {
-      // Clean up any listeners if needed
-    };
-  }, [isOpen, closeDropdown]);
-
   // Update position when opening dropdown
   useEffect(() => {
     if (isOpen) {

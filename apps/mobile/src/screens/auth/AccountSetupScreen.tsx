@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useMemo} from 'react';
+import React, {useState, useRef, useCallback, useMemo, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -306,7 +306,7 @@ export const AccountSetupScreen = () => {
   );
 
   // Update step status when wizard step changes
-  React.useEffect(() => {
+  useEffect(() => {
     setIsFirstStep(currentStepIndex === 0);
     setIsLastStep(currentStepIndex === wizardSteps.length - 1);
   }, [currentStepIndex, wizardSteps.length]);

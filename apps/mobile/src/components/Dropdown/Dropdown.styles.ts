@@ -17,21 +17,6 @@ export const createStyles = (props: {
       position: 'relative',
       width: '100%',
     },
-    labelContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: spacing.xs,
-    },
-    label: {
-      color: props.disabled
-        ? colors.neutral.lightGrey
-        : props.hasError
-        ? colors.status.error
-        : colors.neutral.black,
-      fontSize: fontSizes.md,
-      fontWeight: '600',
-      marginBottom: spacing.xs / 2,
-    },
     inputContainer: {
       flexDirection: 'row',
       alignItems: 'center',
