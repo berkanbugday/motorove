@@ -123,9 +123,10 @@ export default {
       date_of_birth: 'Doğum Tarihi',
       gender: 'Cinsiyet',
       city: 'Şehir',
-      riding_preferences: 'Sürüş Tercihleri',
+      riding_preferences_and_interests: 'Sürüş Tercihleri ve İlgi Alanları',
       riding_styles: 'Sürüş Stili',
       interests: 'İlgi Alanları',
+      profile_photo: 'Profil Fotoğrafı',
     },
     // Home screen
     home: {

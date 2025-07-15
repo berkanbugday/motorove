@@ -237,11 +237,8 @@ export const AccountSetupScreen = () => {
       },
       {
         id: 'riding-preferences',
-        title: t('screens.accountSetup.riding_preferences'),
-        validate: async () => {
-          return true; // Optional step, no validation required
-        },
-        optional: false,
+        title: t('screens.accountSetup.riding_preferences_and_interests'),
+        optional: true,
         content: (
           <View style={styles.fieldsContainer}>
             <MultiSelect
@@ -265,22 +262,9 @@ export const AccountSetupScreen = () => {
       },
       {
         id: 'profile-photo',
-        title: 'Profile Photo',
+        title: t('screens.accountSetup.profile_photo'),
         optional: true,
-        validate: async () => {
-          const result = await trigger(['dateOfBirth', 'gender']);
-          return result;
-        },
-        content: (
-          <ScrollView style={styles.stepContent}>
-            {/* Profile photo fields have been removed */}
-            <View style={styles.emptyStepContent}>
-              <Text style={styles.emptyStepText}>
-                Please proceed to the next step
-              </Text>
-            </View>
-          </ScrollView>
-        ),
+        content: <></>,
       },
     ],
     [

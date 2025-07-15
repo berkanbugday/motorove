@@ -119,9 +119,10 @@ export default {
       date_of_birth: 'Date of Birth',
       gender: 'Gender',
       city: 'City',
-      riding_preferences: 'Riding Preferences',
+      riding_preferences_and_interests: 'Riding Preferences and Interests',
       riding_styles: 'Riding Styles',
       interests: 'Interests',
+      profile_photo: 'Profile Photo',
     },
     // Home screen
     home: {
