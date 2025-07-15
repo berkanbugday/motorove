@@ -2,7 +2,8 @@ export default {
   // Common words and phrases used across the app
   common: {
     ok: 'Tamam',
-    cancel: 'İptal',
+    cancel: 'Vazgeç',
+    confirm: 'Onayla',
     back: 'Geri',
     next: 'İleri',
     continue: 'Devam Et',

@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {TFunction} from 'i18next';
-import {Gender} from '@motorove/shared/enums';
+import {Gender, Interest, RidingStyle} from '@motorove/shared/enums';
 
 /**
  * Creates validation schemas with translated error messages
@@ -57,22 +57,28 @@ export const createAuthSchemas = (t: TFunction) => {
   const accountSetupSchema = z.object({
     dateOfBirth: z
       .date({invalid_type_error: t('validation.dateOfBirth.invalid')})
-      .min(new Date(1950, 0, 1), t('validation.dateOfBirth.too_old'))
+      .min(
+        new Date(new Date().getFullYear() - 80, 0, 1),
+        t('validation.dateOfBirth.too_old'),
+      )
       .max(
-        new Date(new Date().getFullYear() - 17, 0, 1),
+        new Date(new Date().getFullYear() - 13, 0, 1),
         t('validation.dateOfBirth.future'),
       )
+      .nullable()
       .optional(),
     gender: z
       .nativeEnum(Gender, {
         required_error: t('validation.gender.required'),
         invalid_type_error: t('validation.gender.invalid'),
       })
+      .nullable()
       .optional(),
     city: z
       .string({required_error: t('validation.city.required')})
       .nonempty(t('validation.city.required')),
-    ridingStyles: z.array(z.string()).optional(),
+    ridingStyles: z.array(z.nativeEnum(RidingStyle)).optional(),
+    interests: z.array(z.nativeEnum(Interest)).optional(),
   });
 
   return {

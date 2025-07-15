@@ -32,6 +32,11 @@ interface BaseDateTimePickerProps {
    * Maximum selectable date
    */
   maximumDate?: Date;
+
+  /**
+   * Default value
+   */
+  defaultValue?: Date;
   /**
    * Whether the date picker is disabled
    */
@@ -95,8 +100,8 @@ interface FormDateTimePickerProps<T extends FieldValues>
   extends BaseDateTimePickerProps {
   control: Control<T>;
   name: Path<T>;
-  value?: undefined;
-  onChange?: undefined;
+  value?: Date;
+  onChange?: (date: Date) => void;
   error?: FieldError;
 }
 
@@ -119,6 +124,7 @@ export function DateTimePicker<T extends FieldValues = any>(
       displayFormat,
       minimumDate,
       maximumDate,
+      defaultValue,
       disabled,
       style,
       testID,
@@ -144,6 +150,7 @@ export function DateTimePicker<T extends FieldValues = any>(
             displayFormat={displayFormat}
             minimumDate={minimumDate}
             maximumDate={maximumDate}
+            defaultValue={defaultValue}
             disabled={disabled}
             style={style}
             testID={testID}
@@ -169,6 +176,7 @@ export function DateTimePicker<T extends FieldValues = any>(
     displayFormat,
     minimumDate,
     maximumDate,
+    defaultValue,
     disabled,
     style,
     testID,
@@ -190,6 +198,7 @@ export function DateTimePicker<T extends FieldValues = any>(
       displayFormat={displayFormat}
       minimumDate={minimumDate}
       maximumDate={maximumDate}
+      defaultValue={defaultValue}
       disabled={disabled}
       style={style}
       testID={testID}
@@ -213,6 +222,7 @@ interface DateTimePickerBaseProps {
   displayFormat?: 'short' | 'medium' | 'long' | 'full';
   minimumDate?: Date;
   maximumDate?: Date;
+  defaultValue?: Date;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   testID?: string;
@@ -233,6 +243,7 @@ function DateTimePickerBase({
   displayFormat = 'medium',
   minimumDate,
   maximumDate,
+  defaultValue,
   disabled = false,
   style,
   testID,
@@ -240,13 +251,13 @@ function DateTimePickerBase({
   mode = 'date',
   is24Hour = true,
   minuteInterval,
-  theme = 'auto',
+  theme = 'light',
   confirmText,
   cancelText,
   locale,
 }: DateTimePickerBaseProps) {
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-  const currentValue = value || new Date();
+  const currentValue = defaultValue || new Date();
 
   const formatDateTime = (date: Date): string => {
     if (!date) {
@@ -323,7 +334,6 @@ function DateTimePickerBase({
       <AnimatedInput
         value={value ? formatDateTime(value) : ''}
         onChangeText={() => {}} // Read-only input
-        placeholder={placeholder}
         icon={
           <Icon
             name={getIconName()}

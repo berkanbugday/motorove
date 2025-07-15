@@ -29,7 +29,7 @@ export const useResetPassword = (onSuccess?: () => void) => {
         showToast({
           type: 'success',
           text1: t('common.success'),
-          text2: t('screens.resetPassword.emailSent'),
+          text2: t('screens.resetPassword.email_sent'),
         });
 
         if (onSuccess) {
@@ -41,7 +41,8 @@ export const useResetPassword = (onSuccess?: () => void) => {
         showToast({
           type: 'error',
           text1: t('common.error'),
-          text2: errorObj.message || t('screens.resetPassword.emailSendFailed'),
+          text2:
+            errorObj.message || t('screens.resetPassword.email_send_failed'),
         });
       },
     },

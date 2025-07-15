@@ -39,6 +39,7 @@ import {useTranslation} from '@hooks/useTranslation';
 import {useAuth} from '@contexts/AuthContext';
 import {useGetCities} from '@services/city.service';
 import {EnumUtils} from '@utils/enumUtils';
+import {Interest, RidingStyle} from '@motorove/shared/enums';
 
 export const AccountSetupScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -58,6 +59,9 @@ export const AccountSetupScreen = () => {
   const [selectedRidingStyles, setSelectedRidingStyles] = useState<
     MultiSelectItem[]
   >([]);
+  const [selectedInterests, setSelectedInterests] = useState<MultiSelectItem[]>(
+    [],
+  );
   // Fetch cities from backend
   const {cities, loading: loadingCities} = useGetCities();
 
@@ -76,10 +80,11 @@ export const AccountSetupScreen = () => {
   const methods = useForm<AccountSetupFormValues>({
     resolver: zodResolver(accountSetupSchema),
     defaultValues: {
-      dateOfBirth: undefined,
-      gender: undefined,
+      dateOfBirth: null,
+      gender: null,
       city: '',
       ridingStyles: [],
+      interests: [],
     },
     mode: 'onChange',
   });
@@ -109,7 +114,19 @@ export const AccountSetupScreen = () => {
     setSelectedRidingStyles(items);
     setValue(
       'ridingStyles',
-      items.map(x => x.value || ''),
+      items.map(x => x.value as RidingStyle),
+      {
+        shouldValidate: true,
+      },
+    );
+  };
+
+  // Handle interests selection
+  const handleInterestsChange = (items: MultiSelectItem[]) => {
+    setSelectedInterests(items);
+    setValue(
+      'interests',
+      items.map(x => x.value as Interest),
       {
         shouldValidate: true,
       },
@@ -126,6 +143,7 @@ export const AccountSetupScreen = () => {
           gender: data.gender,
           city: data.city,
           ridingStyles: data.ridingStyles,
+          interests: data.interests,
         });
 
         // Simulate API call
@@ -193,11 +211,16 @@ export const AccountSetupScreen = () => {
               control={control}
               name="dateOfBirth"
               placeholder={t('screens.accountSetup.date_of_birth')}
-              minimumDate={new Date(1950, 0, 1)}
-              maximumDate={new Date(new Date().getFullYear() - 17, 0, 1)}
+              cancelText={t('common.cancel')}
+              confirmText={t('common.confirm')}
+              minimumDate={new Date(new Date().getFullYear() - 80, 0, 1)}
+              maximumDate={new Date(new Date().getFullYear() - 13, 0, 1)}
+              defaultValue={new Date(new Date().getFullYear() - 20, 0, 1)}
               error={errors.dateOfBirth}
               testID="date-of-birth-picker"
               locale={language}
+              displayFormat="long"
+              mode="date"
             />
             <Dropdown
               label={t('screens.accountSetup.gender')}
@@ -229,6 +252,15 @@ export const AccountSetupScreen = () => {
               onSelectionChange={handleRidingStylesChange}
               searchable={false}
               testID="riding-styles-multiselect"
+            />
+            <MultiSelect
+              label={t('screens.accountSetup.interests')}
+              placeholder=""
+              data={EnumUtils.getInterestDropdownOptions()}
+              selectedItems={selectedInterests}
+              onSelectionChange={handleInterestsChange}
+              searchable={false}
+              testID="interests-multiselect"
             />
           </View>
         ),
@@ -268,6 +300,8 @@ export const AccountSetupScreen = () => {
       selectedGender,
       selectedRidingStyles,
       handleRidingStylesChange,
+      selectedInterests,
+      handleInterestsChange,
     ],
   );
 

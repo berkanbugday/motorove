@@ -1,4 +1,4 @@
-import {StyleSheet, Platform} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {colors, fontSizes, spacing, radius} from '../../theme';
 
 interface StyleProps {
@@ -14,7 +14,6 @@ export const createStyles = (props: StyleProps) => {
       width: '100%',
       position: 'relative',
       zIndex: props.isOpen ? 10 : 1,
-      marginBottom: spacing.form.inputMarginBottom,
     },
     inputWrapper: {
       position: 'relative',

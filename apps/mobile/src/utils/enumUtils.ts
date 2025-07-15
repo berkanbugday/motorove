@@ -116,7 +116,7 @@ export class EnumUtils {
     );
   }
 
-  static getInterests(): DropdownItem[] {
+  static getInterestDropdownOptions(): DropdownItem[] {
     return this.getDropdownOptions(Interest, 'enums.interest');
   }
 
