@@ -2,13 +2,14 @@ import React, {useState, useRef, useCallback, useMemo, useEffect} from 'react';
 import {
   StyleSheet,
   View,
-  Text,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   SafeAreaView,
   useWindowDimensions,
   Alert,
+  Image,
+  TouchableOpacity,
+  Text,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -25,6 +26,8 @@ import {
   DateTimePicker,
   MultiSelect,
   MultiSelectItem,
+  Icon,
+  showToast,
 } from '@components';
 import {useForm, FormProvider} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -32,7 +35,7 @@ import {
   createAuthSchemas,
   AccountSetupFormValues,
 } from '@utils/validation/authValidation';
-import {colors, fontSizes, spacing} from '@theme';
+import {colors, fontSizes, spacing, radius, getShadow} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useTranslation} from '@hooks/useTranslation';
@@ -40,6 +43,7 @@ import {useAuth} from '@contexts/AuthContext';
 import {useGetCities} from '@services/city.service';
 import {EnumUtils} from '@utils/enumUtils';
 import {Interest, RidingStyle} from '@motorove/shared/enums';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 export const AccountSetupScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -62,6 +66,10 @@ export const AccountSetupScreen = () => {
   const [selectedInterests, setSelectedInterests] = useState<MultiSelectItem[]>(
     [],
   );
+  const [selectedImage, setSelectedImage] = useState<{
+    uri: string;
+    base64?: string;
+  } | null>(null);
   // Fetch cities from backend
   const {cities, loading: loadingCities} = useGetCities();
 
@@ -85,6 +93,7 @@ export const AccountSetupScreen = () => {
       city: '',
       ridingStyles: [],
       interests: [],
+      profilePhoto: undefined,
     },
     mode: 'onChange',
   });
@@ -133,6 +142,51 @@ export const AccountSetupScreen = () => {
     );
   };
 
+  // Handle profile photo selection
+  const handleSelectProfilePhoto = async () => {
+    try {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+        quality: 0.8,
+        selectionLimit: 1,
+        includeBase64: true,
+      });
+
+      if (result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+
+        // Check file size - 5MB limit
+        if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
+          showToast({
+            type: 'error',
+            text1: t('common.error'),
+            text2: t('screens.accountSetup.image_too_large'),
+          });
+          return;
+        }
+
+        const newImage = {
+          uri: asset.uri || '',
+          base64: asset.base64
+            ? `data:image/jpeg;base64,${asset.base64}`
+            : undefined,
+        };
+
+        setSelectedImage(newImage);
+        setValue('profilePhoto', newImage.base64 || newImage.uri, {
+          shouldValidate: true,
+        });
+      }
+    } catch (error) {
+      loggingService.error('Error selecting profile photo:', error);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('screens.accountSetup.failed_to_select_image'),
+      });
+    }
+  };
+
   const onSubmit = useCallback(
     async (data: AccountSetupFormValues) => {
       try {
@@ -144,6 +198,7 @@ export const AccountSetupScreen = () => {
           city: data.city,
           ridingStyles: data.ridingStyles,
           interests: data.interests,
+          profilePhoto: data.profilePhoto ? '(Photo data included)' : undefined,
         });
 
         // Simulate API call
@@ -264,7 +319,40 @@ export const AccountSetupScreen = () => {
         id: 'profile-photo',
         title: t('screens.accountSetup.profile_photo'),
         optional: true,
-        content: <></>,
+        content: (
+          <View style={styles.profilePhotoContainer}>
+            <View style={styles.avatarContainer}>
+              {selectedImage ? (
+                <Image
+                  source={{uri: selectedImage.uri}}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <Icon
+                    name="user-filled"
+                    size={64}
+                    color={colors.neutral.white}
+                  />
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              onPress={handleSelectProfilePhoto}
+              activeOpacity={0.8}
+              style={styles.uploadPhotoButton}
+              testID="select-profile-photo-button">
+              <Icon
+                name="camera-filled"
+                size={18}
+                color={colors.neutral.black}
+              />
+              <BodySmall style={styles.uploadPhotoText}>
+                {t('screens.accountSetup.upload_photo')}
+              </BodySmall>
+            </TouchableOpacity>
+          </View>
+        ),
       },
     ],
     [
@@ -284,6 +372,7 @@ export const AccountSetupScreen = () => {
       handleRidingStylesChange,
       selectedInterests,
       handleInterestsChange,
+      selectedImage,
     ],
   );
 
@@ -443,5 +532,52 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.neutral.black,
     marginBottom: spacing.xs,
+  },
+  // Profile photo styles
+  profilePhotoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xl,
+  },
+  avatarContainer: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    marginBottom: spacing.md,
+    ...getShadow('small'),
+  },
+  avatar: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 2,
+    borderColor: colors.neutral.black,
+  },
+  avatarPlaceholder: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: colors.neutral.black,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  uploadPhotoButton: {
+    position: 'absolute',
+    top: 180,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.neutral.white,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.round,
+    gap: spacing.sm,
+    ...getShadow('medium'),
+  },
+  uploadPhotoText: {
+    fontSize: fontSizes.sm,
+    fontWeight: '500',
+    color: colors.neutral.black,
   },
 });

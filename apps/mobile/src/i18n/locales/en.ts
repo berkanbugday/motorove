@@ -123,6 +123,9 @@ export default {
       riding_styles: 'Riding Styles',
       interests: 'Interests',
       profile_photo: 'Profile Photo',
+      image_too_large: 'Image is too large (maximum size: 5MB)',
+      failed_to_select_image: 'Failed to select image. Please try again.',
+      upload_photo: 'Upload photo',
     },
     // Home screen
     home: {

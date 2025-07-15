@@ -117,16 +117,18 @@ export default {
     // Account Setup screen
     accountSetup: {
       hi: 'Merhaba',
-      let_us_complete_your_profile:
-        'Profilinizi tamamlamak için lütfen aşağıdaki bilgileri giriniz.',
+      let_us_complete_your_profile: 'Profilini tamamlayalım',
       basic_information: 'Temel Bilgiler',
       date_of_birth: 'Doğum Tarihi',
       gender: 'Cinsiyet',
       city: 'Şehir',
       riding_preferences_and_interests: 'Sürüş Tercihleri ve İlgi Alanları',
-      riding_styles: 'Sürüş Stili',
+      riding_styles: 'Sürüş Stilleri',
       interests: 'İlgi Alanları',
       profile_photo: 'Profil Fotoğrafı',
+      image_too_large: 'Resim çok büyük (maksimum boyut: 5MB)',
+      failed_to_select_image: 'Resim seçilemedi. Lütfen tekrar deneyin.',
+      upload_photo: 'Fotoğraf yükle',
     },
     // Home screen
     home: {
