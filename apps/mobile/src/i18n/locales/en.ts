@@ -119,6 +119,9 @@ export default {
       date_of_birth: 'Date of Birth',
       gender: 'Gender',
       city: 'City',
+      riding_preferences: 'Riding Preferences',
+      riding_styles: 'Riding Styles',
+      interests: 'Interests',
     },
     // Home screen
     home: {
@@ -669,6 +672,22 @@ export default {
       group_ride: 'Group Ride',
       solo_ride: 'Solo Ride',
       touring_with_camping: 'Touring with Camping',
+    },
+    interest: {
+      motorcycle_customization: 'Motorcycle Customization',
+      diy_maintenance: 'Do It Yourself (Maintenance, Repairs)',
+      vintage_motorcycles: 'Vintage Motorcycles',
+      electric_motorcycles: 'Electric Motorcycles',
+      riding_skills: 'Riding Skills',
+      moto_photography: 'Moto Photography',
+      content_creation: 'Content Creation',
+      meeting_riders: 'Meeting Riders',
+      community_events: 'Community Events',
+      moto_festivals: 'Moto Festivals',
+      exploring_nature: 'Exploring Nature',
+      mountain_roads: 'Mountain Roads',
+      coastal_rides: 'Coastal Rides',
+      cross_border_trips: 'Cross Border Trips',
     },
   },
 };

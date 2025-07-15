@@ -69,7 +69,7 @@ export default {
       sign_in: 'Giriş Yap',
       sign_up: 'Kayıt Ol',
       slides: {
-        discover_community: 'Motorsiklet Topluluğunu Keşfet',
+        discover_community: 'Motosiklet Topluluğunu Keşfet',
         join_events: 'Etkinliklere Katıl',
         create_groups: 'Gruplar Oluştur',
         share_experiences: 'Deneyimlerini Paylaş',
@@ -125,6 +125,7 @@ export default {
       city: 'Şehir',
       riding_preferences: 'Sürüş Tercihleri',
       riding_styles: 'Sürüş Stili',
+      interests: 'İlgi Alanları',
     },
     // Home screen
     home: {
@@ -679,6 +680,22 @@ export default {
       group_ride: 'Grup Sürüşü',
       solo_ride: 'Yalnız Sürüş',
       touring_with_camping: 'Kamplı Tur',
+    },
+    interest: {
+      motorcycle_customization: 'Motosiklet Kişiselleştirme',
+      diy_maintenance: 'Kendin Yap (Bakım, Tamir)',
+      vintage_motorcycles: 'Klasik Motosikletler',
+      electric_motorcycles: 'Elektrikli Motosikletler',
+      riding_skills: 'Sürüş Becerileri',
+      moto_photography: 'Motosiklet Fotoğrafçılığı',
+      content_creation: 'İçerik Üretimi',
+      meeting_riders: 'Sürücülerle Tanışmak',
+      community_events: 'Topluluk Etkinlikleri',
+      moto_festivals: 'Motosiklet Festivalleri',
+      exploring_nature: 'Doğayı Keşfetmek',
+      mountain_roads: 'Dağ Yolları',
+      coastal_rides: 'Sahil Sürüşleri',
+      cross_border_trips: 'Yurtdışı Turları',
     },
   },
 };

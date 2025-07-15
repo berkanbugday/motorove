@@ -29,7 +29,7 @@ const LABEL_TOP_POSITION = spacing.md;
 const MultiSelect: React.FC<MultiSelectProps> = ({
   data,
   label,
-  placeholder = 'Select items',
+  placeholder,
   selectedItems = [],
   onSelectionChange,
   renderItem,

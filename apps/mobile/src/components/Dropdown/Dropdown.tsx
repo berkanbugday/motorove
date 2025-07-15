@@ -273,8 +273,6 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }, [isOpen]);
 
-  const defaultPlaceholder = placeholder || t('components.dropdown.search');
-
   return (
     <View style={[styles.container, containerStyle]} testID={testID}>
       {/* Input field with animated label */}
@@ -318,7 +316,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                   selectedItem?.label && isOpen
                     ? selectedItem.label
                     : isFocused || !label
-                    ? defaultPlaceholder
+                    ? placeholder
                     : ''
                 }
                 placeholderTextColor={colors.neutral.grey}

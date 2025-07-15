@@ -206,6 +206,7 @@ export const AccountSetupScreen = () => {
               searchable={true}
               showClearButton={false}
               testID="city-dropdown"
+              placeholder={t('components.dropdown.search')}
             />
             <DateTimePicker
               control={control}
@@ -246,7 +247,6 @@ export const AccountSetupScreen = () => {
           <View style={styles.fieldsContainer}>
             <MultiSelect
               label={t('screens.accountSetup.riding_styles')}
-              placeholder=""
               data={EnumUtils.getRidingStyleDropdownOptions()}
               selectedItems={selectedRidingStyles}
               onSelectionChange={handleRidingStylesChange}
@@ -255,7 +255,6 @@ export const AccountSetupScreen = () => {
             />
             <MultiSelect
               label={t('screens.accountSetup.interests')}
-              placeholder=""
               data={EnumUtils.getInterestDropdownOptions()}
               selectedItems={selectedInterests}
               onSelectionChange={handleInterestsChange}
