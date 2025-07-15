@@ -2,25 +2,24 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Keyboard,
   ActivityIndicator,
   Animated,
-  TextStyle,
   LayoutChangeEvent,
   ScrollView,
+  Modal,
+  Dimensions,
 } from 'react-native';
-import {createStyles} from './Dropdown.styles';
+import {
+  createStyles,
+  modalStyles,
+  createAnimatedLabelStyle,
+} from './Dropdown.styles';
 import {DropdownItem, DropdownProps} from './types';
-import {colors, fontSizes, spacing} from '@theme';
+import {colors} from '@theme';
 import {Icon} from '@components/Icon';
 import {useTranslation} from '../../hooks/useTranslation';
-
-// Animation constants
-const ANIMATION_DURATION = 200;
-const LABEL_LEFT_POSITION = spacing.md;
-const LABEL_TOP_POSITION = spacing.md;
 
 const Dropdown: React.FC<DropdownProps> = ({
   data,
@@ -31,13 +30,13 @@ const Dropdown: React.FC<DropdownProps> = ({
   renderItem,
   renderNoResults,
   searchProperty = 'label',
-  searchQuery: externalSearchQuery,
-  onSearchQueryChange,
+  searchQuery: _searchQuery,
+  onSearchQueryChange: _onSearchQueryChange,
   maxHeight,
   disabled = false,
   error,
   containerStyle,
-  dropdownStyle,
+  dropdownStyle: _dropdownStyle,
   inputStyle,
   itemStyle,
   helperText,
@@ -47,63 +46,46 @@ const Dropdown: React.FC<DropdownProps> = ({
   onClose,
   onOpen,
   testID,
-  searchable = true,
   showClearButton = true,
 }) => {
   const {t} = useTranslation();
   const [isOpen, setIsOpen] = useState(initiallyOpen);
-  const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [_dropdownPosition, setDropdownPosition] = useState({
+  const [modalPosition, setModalPosition] = useState({
     top: 0,
     left: 0,
     width: 0,
+    height: 0,
   });
-  const inputRef = useRef<TextInput>(null);
-  const dropdownRef = useRef<View>(null);
   const flatListRef = useRef<ScrollView>(null);
   const inputWrapperRef = useRef<View>(null);
   const animatedIsFocused = useRef(
-    new Animated.Value(selectedItem?.label || internalSearchQuery ? 1 : 0),
+    new Animated.Value(selectedItem?.label ? 1 : 0),
   ).current;
-
-  // Use external search query if provided (controlled component)
-  const searchQuery =
-    externalSearchQuery !== undefined
-      ? externalSearchQuery
-      : internalSearchQuery;
 
   // Animation effect for label
   useEffect(() => {
     Animated.timing(animatedIsFocused, {
-      toValue: isFocused || searchQuery || selectedItem?.label ? 1 : 0,
-      duration: ANIMATION_DURATION,
+      toValue: isFocused || selectedItem?.label ? 1 : 0,
+      duration: 200, // ANIMATION_DURATION
       useNativeDriver: false,
     }).start();
-  }, [animatedIsFocused, isFocused, searchQuery, selectedItem]);
+  }, [animatedIsFocused, isFocused, selectedItem]);
 
-  // Filter items based on search query
-  const filteredItems = data.filter(item => {
-    // When dropdown is open and a selectedItem exists but no search query,
-    // we want to show all items with the selected one highlighted
-    if ((isOpen && selectedItem?.id && !searchQuery) || !searchable) {
-      return true;
-    }
-
-    const searchPropertyValue = String(
-      item[searchProperty as keyof typeof item] || '',
-    ).toLowerCase();
-    return searchPropertyValue.includes(searchQuery.toLowerCase());
-  });
-
-  // Update dropdown position when opening
-  const updateDropdownPosition = () => {
+  // Calculate modal position
+  const updateModalPosition = () => {
     if (inputWrapperRef.current && isOpen) {
       inputWrapperRef.current.measureInWindow((x, y, width, height) => {
-        setDropdownPosition({
-          top: y + height + 2,
+        // Adjust position based on device dimensions
+        const windowHeight = Dimensions.get('window').height;
+        const remainingSpace = windowHeight - y - height;
+        const dropdownHeight = Math.min(maxHeight || 200, remainingSpace - 10); // 10px buffer
+
+        setModalPosition({
+          top: y + height,
           left: x,
           width: width,
+          height: dropdownHeight,
         });
       });
     }
@@ -112,7 +94,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   // Handle layout changes
   const handleLayout = (_event: LayoutChangeEvent) => {
     if (isOpen) {
-      updateDropdownPosition();
+      updateModalPosition();
     }
   };
 
@@ -125,21 +107,12 @@ const Dropdown: React.FC<DropdownProps> = ({
     setIsOpen(true);
     setIsFocused(true);
 
-    // Clear search query when opening to show all items with selected item highlighted
-    if (selectedItem?.id && !isOpen) {
-      setInternalSearchQuery('');
-    }
-
     if (onOpen) {
       onOpen();
     }
-    // Focus the input when dropdown opens if searchable
-    if (inputRef.current && searchable) {
-      inputRef.current.focus();
-    }
 
-    // Update dropdown position after state change
-    setTimeout(updateDropdownPosition, 0);
+    // Update modal position after state change
+    setTimeout(updateModalPosition, 50);
 
     // Scroll to selected item when dropdown opens
     setTimeout(() => {
@@ -158,7 +131,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         }
       }
     }, 100);
-  }, [disabled, onOpen, selectedItem, data, isOpen, searchable]);
+  }, [disabled, onOpen, selectedItem, data, isOpen]);
 
   const closeDropdown = useCallback(() => {
     setIsOpen(false);
@@ -178,19 +151,6 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }, [isOpen, openDropdown, closeDropdown]);
 
-  // Handle search query change
-  const handleSearchChange = (text: string) => {
-    if (!searchable) {
-      return;
-    }
-
-    if (onSearchQueryChange) {
-      onSearchQueryChange(text);
-    } else {
-      setInternalSearchQuery(text);
-    }
-  };
-
   // Get display text for selected item
   const getSelectedText = () => {
     if (
@@ -206,16 +166,11 @@ const Dropdown: React.FC<DropdownProps> = ({
   const handleSelect = (item: DropdownItem) => {
     onSelect(item);
     closeDropdown();
-    setInternalSearchQuery('');
   };
 
   // Clear selection
   const handleClear = () => {
     onSelect(null);
-    setInternalSearchQuery('');
-    if (inputRef.current && searchable) {
-      inputRef.current.focus();
-    }
   };
 
   // Create styles
@@ -226,52 +181,20 @@ const Dropdown: React.FC<DropdownProps> = ({
     disabled,
   });
 
-  // Animated label style
-  const labelStyle: Animated.AnimatedProps<TextStyle> = {
-    position: 'absolute',
-    left: LABEL_LEFT_POSITION,
-    top: animatedIsFocused.interpolate({
-      inputRange: [0, 1],
-      outputRange: [LABEL_TOP_POSITION, -10],
-    }),
-    fontSize: animatedIsFocused.interpolate({
-      inputRange: [0, 1],
-      outputRange: [fontSizes.sm, fontSizes.xs],
-    }),
-    color: animatedIsFocused.interpolate({
-      inputRange: [0, 1],
-      outputRange: [
-        colors.neutral.grey,
-        error
-          ? colors.status.error
-          : isOpen
-          ? colors.neutral.black
-          : colors.neutral.black,
-      ],
-    }),
-    fontWeight: animatedIsFocused.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['500', '600'],
-    }),
-    backgroundColor: colors.neutral.white,
-    paddingHorizontal: 4,
-    zIndex: 5,
-  };
+  // Create animated label style
+  const labelStyle = createAnimatedLabelStyle(animatedIsFocused, isOpen, error);
 
   // Handle label press to focus the input
   const handleLabelPress = () => {
-    if (inputRef.current && searchable) {
-      inputRef.current.focus();
-    }
     openDropdown();
   };
 
-  // Update position when opening dropdown
+  // Update position when window dimensions change
   useEffect(() => {
     if (isOpen) {
-      updateDropdownPosition();
+      updateModalPosition();
     }
-  }, [isOpen]);
+  }, [isOpen, Dimensions.get('window').width, Dimensions.get('window').height]);
 
   return (
     <View style={[styles.container, containerStyle]} testID={testID}>
@@ -285,7 +208,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           <TouchableOpacity
             activeOpacity={1}
             onPress={handleLabelPress}
-            style={{zIndex: 5}}>
+            style={styles.touchableLabel}>
             <Animated.Text style={labelStyle}>{label}</Animated.Text>
           </TouchableOpacity>
         )}
@@ -295,48 +218,25 @@ const Dropdown: React.FC<DropdownProps> = ({
           activeOpacity={disabled ? 1 : 0.7}
           onPress={toggleDropdown}
           disabled={disabled}
-          style={{width: '100%'}}>
+          style={styles.fullWidth}>
           <View style={[styles.inputContainer, inputStyle]}>
-            {selectedItem && !isOpen ? (
-              <View style={styles.selectedItemContainer}>
-                <Text
-                  style={[
-                    styles.selectedItemText,
-                    {color: colors.neutral.black},
-                  ]}>
-                  {getSelectedText()}
-                </Text>
-              </View>
-            ) : (
-              <TextInput
-                ref={inputRef}
-                value={searchQuery}
-                onChangeText={handleSearchChange}
-                placeholder={
-                  selectedItem?.label && isOpen
-                    ? selectedItem.label
-                    : isFocused || !label
-                    ? placeholder
-                    : ''
-                }
-                placeholderTextColor={colors.neutral.grey}
+            {/* Display selected value or placeholder */}
+            <View style={styles.selectedItemContainer}>
+              <Text
                 style={[
-                  styles.input,
-                  selectedItem?.label && isOpen
-                    ? {color: colors.neutral.black}
-                    : {},
-                ]}
-                editable={!disabled && isOpen && searchable}
-                onFocus={openDropdown}
-                onBlur={() => setIsFocused(false)}
-                pointerEvents={isOpen && searchable ? 'auto' : 'none'}
-              />
-            )}
+                  styles.selectedItemText,
+                  {
+                    color: selectedItem
+                      ? colors.neutral.black
+                      : colors.neutral.grey,
+                  },
+                ]}>
+                {getSelectedText() || placeholder}
+              </Text>
+            </View>
 
             {/* Clear button */}
-            {showClearButton &&
-            ((isOpen && searchQuery && searchable) ||
-              (!isOpen && selectedItem && selectedItem.id)) ? (
+            {showClearButton && selectedItem && selectedItem.id ? (
               <TouchableOpacity
                 onPress={handleClear}
                 style={styles.clearButton}>
@@ -360,50 +260,67 @@ const Dropdown: React.FC<DropdownProps> = ({
           </View>
         </TouchableOpacity>
 
-        {/* Dropdown list right after the input wrapper */}
-        {isOpen && (
-          <View
-            ref={dropdownRef}
-            style={[
-              styles.dropdown,
-              dropdownStyle,
-              {
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                width: '100%',
-                zIndex: 1000,
-                elevation: 5,
-                marginTop: 0,
-              },
-            ]}>
-            {loading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator color={colors.neutral.black} />
-              </View>
-            ) : filteredItems.length === 0 ? (
-              renderNoResults ? (
-                renderNoResults()
-              ) : (
-                <View style={styles.noResults}>
-                  <Text style={styles.noResultsText}>
-                    {t('components.dropdown.no_results')}
-                  </Text>
+        {/* Dropdown list using Modal for overlay */}
+        <Modal
+          visible={isOpen}
+          transparent={true}
+          animationType="none"
+          onRequestClose={closeDropdown}>
+          <TouchableOpacity
+            style={modalStyles.backdrop}
+            activeOpacity={1}
+            onPress={closeDropdown}>
+            <View
+              style={[
+                modalStyles.dropdownContainer,
+                {
+                  top: modalPosition.top,
+                  left: modalPosition.left,
+                  width: modalPosition.width,
+                  maxHeight: modalPosition.height,
+                },
+              ]}>
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator color={colors.neutral.black} />
                 </View>
-              )
-            ) : (
-              <ScrollView
-                ref={flatListRef}
-                keyboardShouldPersistTaps="handled"
-                nestedScrollEnabled
-                showsVerticalScrollIndicator={false}
-                style={{maxHeight: maxHeight || 200}}>
-                {filteredItems.map(item => {
-                  const isItemSelected =
-                    selectedItem && selectedItem.id === item.id;
+              ) : data.length === 0 ? (
+                renderNoResults ? (
+                  renderNoResults()
+                ) : (
+                  <View style={styles.noResults}>
+                    <Text style={styles.noResultsText}>
+                      {t('components.dropdown.no_results')}
+                    </Text>
+                  </View>
+                )
+              ) : (
+                <ScrollView
+                  ref={flatListRef}
+                  keyboardShouldPersistTaps="handled"
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}>
+                  {data.map(item => {
+                    const isItemSelected =
+                      selectedItem && selectedItem.id === item.id;
 
-                  // If a custom render function is provided, use it
-                  if (renderItem) {
+                    // If a custom render function is provided, use it
+                    if (renderItem) {
+                      return (
+                        <TouchableOpacity
+                          key={item.id.toString()}
+                          onPress={() => handleSelect(item)}
+                          style={[
+                            styles.item,
+                            isItemSelected && styles.selectedItem,
+                            itemStyle,
+                          ]}>
+                          {renderItem(item)}
+                        </TouchableOpacity>
+                      );
+                    }
+
+                    // Default render implementation
                     return (
                       <TouchableOpacity
                         key={item.id.toString()}
@@ -413,35 +330,21 @@ const Dropdown: React.FC<DropdownProps> = ({
                           isItemSelected && styles.selectedItem,
                           itemStyle,
                         ]}>
-                        {renderItem(item)}
+                        <Text
+                          style={[
+                            styles.itemText,
+                            isItemSelected && styles.selectedItemText,
+                          ]}>
+                          {item[searchProperty as keyof typeof item]}
+                        </Text>
                       </TouchableOpacity>
                     );
-                  }
-
-                  // Default render implementation
-                  return (
-                    <TouchableOpacity
-                      key={item.id.toString()}
-                      onPress={() => handleSelect(item)}
-                      style={[
-                        styles.item,
-                        isItemSelected && styles.selectedItem,
-                        itemStyle,
-                      ]}>
-                      <Text
-                        style={[
-                          styles.itemText,
-                          isItemSelected && styles.selectedItemText,
-                        ]}>
-                        {item[searchProperty as keyof typeof item]}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-            )}
-          </View>
-        )}
+                  })}
+                </ScrollView>
+              )}
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </View>
 
       {/* Error or Helper text */}

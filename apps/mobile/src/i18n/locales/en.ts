@@ -458,10 +458,7 @@ export default {
       loading: 'Loading...',
     },
     dropdown: {
-      select: 'Select',
-      search: 'Search',
       no_results: 'No results found',
-      clear: 'Clear',
     },
     datePicker: {
       select: 'Select Date',
@@ -530,8 +527,8 @@ export default {
       close: 'Close',
     },
     multiSelect: {
-      noResults: 'No results found',
-      maxItemsReached: 'Maximum {{count}} items can be selected',
+      no_results: 'No results found',
+      max_items_reached: 'Maximum {{count}} items can be selected',
     },
   },
 

@@ -206,7 +206,6 @@ export const AccountSetupScreen = () => {
               searchable={true}
               showClearButton={false}
               testID="city-dropdown"
-              placeholder={t('components.dropdown.search')}
             />
             <DateTimePicker
               control={control}

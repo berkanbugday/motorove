@@ -463,10 +463,7 @@ export default {
       loading: 'Yükleniyor...',
     },
     dropdown: {
-      select: 'Seç',
-      search: 'Ara',
       no_results: 'Sonuç bulunamadı',
-      clear: 'Temizle',
     },
     datePicker: {
       select: 'Tarih Seç',
@@ -535,8 +532,8 @@ export default {
       close: 'Kapat',
     },
     multiSelect: {
-      noResults: 'Sonuç bulunamadı',
-      maxItemsReached: 'En fazla {{count}} öğe seçilebilir',
+      no_results: 'Sonuç bulunamadı',
+      max_items_reached: 'En fazla {{count}} öğe seçilebilir',
     },
   },
 

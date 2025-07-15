@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Animated, TextStyle} from 'react-native';
 import {colors, fontSizes, radius, spacing} from '@theme';
 
 export const createStyles = (props: {
@@ -48,14 +48,16 @@ export const createStyles = (props: {
       top: '100%',
       left: 0,
       right: 0,
-      marginTop: spacing.xs / 2,
+      width: '100%',
+      zIndex: 1000,
+      elevation: 5,
+      marginTop: 2,
       borderWidth: 1,
       borderColor: colors.neutral.lightGrey,
       borderRadius: radius.sm,
       backgroundColor: colors.neutral.white,
       maxHeight: props.maxHeight || 200,
       overflow: 'hidden',
-      zIndex: 20,
     },
     item: {
       paddingVertical: spacing.sm,
@@ -104,5 +106,71 @@ export const createStyles = (props: {
     clearButton: {
       padding: spacing.xs,
     },
+    touchableLabel: {
+      zIndex: 5,
+    },
+    fullWidth: {
+      width: '100%',
+    },
   });
+};
+
+export const modalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    borderWidth: 1,
+    borderColor: colors.neutral.lightGrey,
+    borderRadius: 8,
+    backgroundColor: colors.neutral.white,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+});
+
+export const createAnimatedLabelStyle = (
+  animatedIsFocused: Animated.Value,
+  isOpen: boolean,
+  error?: string,
+): Animated.AnimatedProps<TextStyle> => {
+  // Animation constants
+  const LABEL_LEFT_POSITION = spacing.md;
+  const LABEL_TOP_POSITION = spacing.md;
+
+  return {
+    position: 'absolute',
+    left: LABEL_LEFT_POSITION,
+    top: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: [LABEL_TOP_POSITION, -10],
+    }),
+    fontSize: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: [fontSizes.sm, fontSizes.xs],
+    }),
+    color: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: [
+        colors.neutral.grey,
+        error
+          ? colors.status.error
+          : isOpen
+          ? colors.neutral.black
+          : colors.neutral.black,
+      ],
+    }),
+    fontWeight: animatedIsFocused.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['500', '600'],
+    }),
+    backgroundColor: colors.neutral.white,
+    paddingHorizontal: 4,
+    zIndex: 5,
+  };
 };
