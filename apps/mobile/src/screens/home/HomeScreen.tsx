@@ -22,15 +22,12 @@ import {
 } from '@components';
 import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
-import {colors, commonStyles, fontSizes, spacing} from '@theme';
+import {colors, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import type {WeatherData} from '@components/WeatherWidget/weather';
 import type {IconName} from '@components/Icon';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {
-  MainStackParamList,
-  TabParamList,
-} from '@navigation/types/navigationTypes';
+import {TabParamList} from '@navigation/types/navigationTypes';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
@@ -127,9 +124,7 @@ const upcomingEvents: EventItem[] = [
 ];
 
 // Change from MainStackParamList to accepting both TabParamList and MainStackParamList
-type Props =
-  | NativeStackScreenProps<MainStackParamList, 'Home'>
-  | NativeStackScreenProps<TabParamList, 'HomeTab'>;
+type Props = NativeStackScreenProps<TabParamList, 'HomeTab'>;
 
 export const HomeScreen = ({navigation}: Props) => {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
@@ -504,7 +499,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
       return (
         <FeedCard
-          avatarSource={feedCardProps.avatarSource}
+          avatarSource={feedCardProps.avatarSource || {uri: ''}}
           userName={feedCardProps.userName}
           timeAgo={feedCardProps.timeAgo}
           labels={feedCardProps.labels}

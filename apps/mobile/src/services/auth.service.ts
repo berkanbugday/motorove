@@ -594,12 +594,6 @@ class AuthService {
   private convertGraphQLAuthResponse(graphQLResponse: any): AuthResponse {
     const {user, session} = graphQLResponse;
 
-    // Extract hasCompletedSetup or default to false
-    const userWithSetupStatus = {
-      ...user,
-      hasCompletedSetup: user.hasCompletedSetup,
-    };
-
     // If session exists, convert expires_in to expires_at
     let processedSession;
     if (session) {
@@ -631,7 +625,7 @@ class AuthService {
     }
 
     return {
-      user: userWithSetupStatus,
+      user: user,
       session: processedSession || undefined,
     };
   }
@@ -667,7 +661,7 @@ class AuthService {
   }
 
   // Save auth data to encrypted storage
-  private async saveAuthDataToEncryptedStorage(
+  async saveAuthDataToEncryptedStorage(
     authState: Omit<AuthState, 'isLoading'>,
   ): Promise<void> {
     try {

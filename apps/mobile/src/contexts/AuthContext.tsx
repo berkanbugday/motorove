@@ -25,6 +25,7 @@ export interface AuthContextType extends AuthState {
     email: string,
     password: string,
   ) => Promise<AuthResponse>;
+  accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
 }
@@ -36,6 +37,9 @@ const AuthContext = createContext<AuthContextType>({
     throw new Error('Not implemented');
   },
   signUp: async () => {
+    throw new Error('Not implemented');
+  },
+  accountSetup: async () => {
     throw new Error('Not implemented');
   },
   signOut: async () => {
@@ -158,6 +162,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     }
   };
 
+  // Account setup
+  const accountSetup = async (hasCompletedSetup: boolean): Promise<void> => {
+    try {
+      const newState: AuthState = {
+        ...authState,
+        user: {
+          ...authState.user!,
+          hasCompletedSetup,
+        },
+      };
+      setAuthState(newState);
+
+      await authService.saveAuthDataToEncryptedStorage(newState);
+    } catch (error) {
+      setAuthState(prevState => ({...prevState, isLoading: false}));
+    }
+  };
+
   // Sign out
   const signOut = async (): Promise<void> => {
     try {
@@ -189,6 +211,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         ...authState,
         signIn,
         signUp,
+        accountSetup,
         signOut,
         loadAuthState,
       }}>

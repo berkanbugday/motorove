@@ -45,21 +45,25 @@ export function RootNavigator() {
           // User is authenticated, decide whether to show main app or account setup
           !user?.hasCompletedSetup ? (
             <Stack.Screen
+              key="setup"
               name="Auth"
               children={() => (
                 <AuthNavigator
+                  key="setup"
                   isFirstTime={false}
                   initialRoute="AccountSetup"
                 />
               )}
             />
           ) : (
-            <Stack.Screen name="Main" component={MainNavigator} />
+            <Stack.Screen key="main" name="Main" component={MainNavigator} />
           )
         ) : (
           // User is not authenticated, show auth flow
-          <Stack.Screen name="Auth">
-            {props => <AuthNavigator {...props} isFirstTime={isFirstTime} />}
+          <Stack.Screen key="auth" name="Auth">
+            {props => (
+              <AuthNavigator key="auth" {...props} isFirstTime={isFirstTime} />
+            )}
           </Stack.Screen>
         )}
       </Stack.Navigator>

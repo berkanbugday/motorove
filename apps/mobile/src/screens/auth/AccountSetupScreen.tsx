@@ -9,8 +9,6 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {
   Button,
   Wizard,
@@ -47,8 +45,7 @@ import {IAccountSetup} from '@motorove/shared/interfaces';
 
 export const AccountSetupScreen = () => {
   const {height} = useWindowDimensions();
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const {user} = useAuth();
+  const {user, accountSetup: accountSetupAuth} = useAuth();
   const insets = useSafeAreaInsets();
   const wizardRef = useRef<WizardHandle>(null);
   const {t, language} = useTranslation();
@@ -211,10 +208,7 @@ export const AccountSetupScreen = () => {
 
         const result = await accountSetup(accountSetupData);
         if (result) {
-          navigation.reset({
-            index: 0,
-            routes: [{name: 'Main'}],
-          });
+          await accountSetupAuth(true);
         }
       } catch (error) {
         loggingService.error('Error submitting form:', error);
@@ -225,7 +219,7 @@ export const AccountSetupScreen = () => {
         });
       }
     },
-    [navigation, t, accountSetup],
+    [t, accountSetup, accountSetupAuth],
   );
 
   // Navigation handlers
