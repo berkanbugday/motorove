@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AccountSetupInput {
+  avatar: String
+  cityId: String!
+  dateOfBirth: String
+  gender: Gender
+  interests: [Interest!]
+  ridingStyles: [RidingStyle!]
+}
+
 input AddGroupMemberInput {
   groupId: ID!
   userId: ID!
@@ -525,6 +534,7 @@ type Motorcycle {
 }
 
 type Mutation {
+  accountSetup(input: AccountSetupInput!): UserDto!
   addMember(input: AddGroupMemberInput!): GroupMembershipDto!
   create(input: CreateAddressInput!): AddressDto!
   createBulk(input: CreateNotificationsInput!): Boolean!
@@ -836,7 +846,7 @@ type User {
   postSaves: [PostSave!]
   posts: [Post!]
   receivedInvitations: [EventInvitation!]
-  ridingStyle: [RidingStyle!]
+  ridingStyles: [RidingStyle!]
   socialMediaProfiles: [SocialMedia!]
   supabaseId: String!
   updatedAt: DateTime!

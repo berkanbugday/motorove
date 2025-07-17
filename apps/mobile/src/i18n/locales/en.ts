@@ -129,6 +129,7 @@ export default {
       failed_to_select_image: 'Failed to select image. Please try again.',
       upload_photo: 'Upload photo',
       setup_failed: 'Profile setup failed',
+      success_completed_account_setup: 'Profile setup completed successfully',
     },
 
     // Home screen

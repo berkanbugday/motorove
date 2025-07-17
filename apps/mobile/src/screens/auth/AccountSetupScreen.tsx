@@ -40,9 +40,10 @@ import {useTranslation} from '@hooks/useTranslation';
 import {useAuth} from '@contexts/AuthContext';
 import {useGetCities} from '@services/city.service';
 import {EnumUtils} from '@utils/enumUtils';
-import {Interest, RidingStyle} from '@motorove/shared/enums';
+import {Gender, Interest, RidingStyle} from '@motorove/shared/enums';
 import {launchImageLibrary} from 'react-native-image-picker';
-// import {useUpdateUser} from '@services/user.service';
+import {useAccountSetup} from '@services/user.service';
+import {IAccountSetup} from '@motorove/shared/interfaces';
 
 export const AccountSetupScreen = () => {
   const {height} = useWindowDimensions();
@@ -75,7 +76,7 @@ export const AccountSetupScreen = () => {
   // Fetch cities from backend
   const {cities, loading: loadingCities} = useGetCities();
   // Use the updateUser hook
-  // const {updateUser, loading} = useUpdateUser();
+  const {accountSetup, loading: loadingAccountSetup} = useAccountSetup();
 
   // Transform cities into dropdown items
   const cityDropdownItems = useMemo(() => {
@@ -198,16 +199,19 @@ export const AccountSetupScreen = () => {
     async (data: AccountSetupFormValues) => {
       try {
         // Update user profile in the backend
-        // await updateUser({
-        //   dateOfBirth: data.dateOfBirth?.toLocaleDateString(),
-        //   gender: data.gender,
-        //   cityId: data.city,
-        //   ridingStyles: data.ridingStyles,
-        //   interests: data.interests,
-        //   avatar: data.avatar,
-        //   hasCompletedSetup: true,
-        // });
-        // // Navigate to the main app
+
+        const accountSetupData: IAccountSetup = {
+          cityId: data.city,
+          dateOfBirth: data.dateOfBirth,
+          gender: data.gender as Gender,
+          ridingStyles: data.ridingStyles as RidingStyle[],
+          interests: data.interests as Interest[],
+          avatar: data.avatar as string,
+        };
+
+        const result = await accountSetup(accountSetupData);
+        console.log('result', result);
+        // Navigate to the main app
         // navigation.reset({
         //   index: 0,
         //   routes: [{name: 'Main' as any}],
@@ -221,8 +225,7 @@ export const AccountSetupScreen = () => {
         });
       }
     },
-    // [navigation, t, updateUser],
-    [navigation, t],
+    [navigation, t, accountSetup],
   );
 
   // Navigation handlers
@@ -427,11 +430,15 @@ export const AccountSetupScreen = () => {
                       testID="back-button"
                     />
                     <Button
-                      title={t('common.complete')}
+                      title={
+                        loadingAccountSetup
+                          ? t('common.completing')
+                          : t('common.complete')
+                      }
                       variant="primary"
                       shape="round"
                       onPress={handleSubmit(onSubmit)}
-                      // loading={loading}
+                      loading={loadingAccountSetup}
                       style={styles.continueButton}
                       testID="complete-setup-button"
                     />

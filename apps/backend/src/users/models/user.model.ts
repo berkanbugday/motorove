@@ -53,7 +53,7 @@ export class User implements IUser {
   gender?: Gender;
 
   @Field(() => [RidingStyle], { nullable: true })
-  ridingStyle?: RidingStyle[];
+  ridingStyles?: RidingStyle[];
 
   @Field(() => [Interest], { nullable: true })
   interests?: Interest[];

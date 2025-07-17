@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { SupabaseService } from '../../auth/supabase.service';
 import { ConfigService } from '../config/config.service';
 import { randomUUID } from 'crypto';
@@ -142,5 +142,56 @@ export class StorageService {
     }
 
     return data.signedUrl;
+  }
+
+  // Process base64 image and upload to Supabase storage
+  async processImageUpload(
+    base64Image: string | null | undefined,
+    path: string,
+    filePrefix: string,
+    authToken?: string,
+  ): Promise<string | undefined> {
+    if (!base64Image) return undefined;
+
+    try {
+      // Check if it's a URL or base64 data
+      if (base64Image.startsWith('http')) {
+        return base64Image; // Already a URL, just return it
+      }
+
+      // Extract content type
+      const contentType = this.getContentTypeFromBase64(base64Image);
+      const filename = `${filePrefix}-${Date.now()}`;
+
+      // Upload to Supabase storage
+      const imageUrl = await this.uploadFile(
+        base64Image,
+        path,
+        {
+          contentType,
+          filename,
+        },
+        authToken,
+      );
+
+      return imageUrl;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
+    }
+  }
+
+  // Extract content type from base64 data
+  private getContentTypeFromBase64(base64Data: string): string {
+    if (base64Data.includes('data:')) {
+      const matches = base64Data.match(
+        /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/,
+      );
+      if (matches && matches.length > 1) {
+        return matches[1];
+      }
+    }
+    return 'image/jpeg'; // Default
   }
 }

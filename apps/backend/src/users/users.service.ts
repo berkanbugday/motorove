@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from './models/user.model';
 import { UserDto } from './dto/user.dto';
 import { UserFollowing } from '../user-followings/models/user-following.model';
+import { AccountSetupInput } from './dto/account-setup.input';
+import { StorageService } from '../core/storage/storage.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(UsersService.name);
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
   async findAll(
     query?: string,
@@ -128,5 +134,55 @@ export class UsersService {
       followerCount,
       followingCount,
     };
+  }
+
+  async accountSetup(
+    input: AccountSetupInput,
+    userId: string,
+    authToken?: string,
+  ): Promise<UserDto> {
+    try {
+      // Process avatar if present and is base64
+      console.log('input', input);
+      const avatarUrl = await this.storageService.processImageUpload(
+        input.avatar,
+        'users/avatars',
+        `avatar-${userId}`,
+        authToken,
+      );
+
+      // Prepare update data
+      const accountSetupData: any = {
+        city: { connect: { id: input.cityId } },
+        dateOfBirth: input.dateOfBirth
+          ? new Date(input.dateOfBirth)
+          : undefined,
+        gender: input.gender,
+        ridingStyles: input.ridingStyles,
+        interests: input.interests,
+        avatar: avatarUrl,
+        hasCompletedSetup: true,
+        updatedAt: new Date(),
+      };
+
+      const user = await this.prisma.user.update({
+        where: { id: userId },
+        data: accountSetupData,
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return {
+        ...user,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        avatar: user.avatar || undefined,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to account setup`, error);
+      throw error;
+    }
   }
 }

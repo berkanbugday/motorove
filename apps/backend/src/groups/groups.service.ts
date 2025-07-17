@@ -229,14 +229,14 @@ export class GroupsService {
   ): Promise<GroupDto> {
     try {
       // Process images if they exist
-      const logoUrl = await this.processImageUpload(
+      const logoUrl = await this.storageService.processImageUpload(
         input.logo,
         'groups/logos',
         `logo-${userId}`,
         authToken,
       );
 
-      const coverUrl = await this.processImageUpload(
+      const coverUrl = await this.storageService.processImageUpload(
         input.cover,
         'groups/covers',
         `cover-${userId}`,
@@ -334,7 +334,7 @@ export class GroupsService {
 
       // Process images if provided
       if (updateDataWithoutId.logo !== undefined) {
-        updateDataWithoutId.logo = await this.processImageUpload(
+        updateDataWithoutId.logo = await this.storageService.processImageUpload(
           updateDataWithoutId.logo,
           'groups/logos',
           `logo-${existingGroup.id}`,
@@ -343,12 +343,13 @@ export class GroupsService {
       }
 
       if (updateDataWithoutId.cover !== undefined) {
-        updateDataWithoutId.cover = await this.processImageUpload(
-          updateDataWithoutId.cover,
-          'groups/covers',
-          `cover-${existingGroup.id}`,
-          authToken,
-        );
+        updateDataWithoutId.cover =
+          await this.storageService.processImageUpload(
+            updateDataWithoutId.cover,
+            'groups/covers',
+            `cover-${existingGroup.id}`,
+            authToken,
+          );
       }
 
       // Build the update object
@@ -389,57 +390,6 @@ export class GroupsService {
       this.logger.error(`Failed to update group`, error);
       throw error;
     }
-  }
-
-  // Process base64 image and upload to Supabase storage
-  private async processImageUpload(
-    base64Image: string | null | undefined,
-    path: string,
-    filePrefix: string,
-    authToken?: string,
-  ): Promise<string | undefined> {
-    if (!base64Image) return undefined;
-
-    try {
-      // Check if it's a URL or base64 data
-      if (base64Image.startsWith('http')) {
-        return base64Image; // Already a URL, just return it
-      }
-
-      // Extract content type
-      const contentType = this.getContentTypeFromBase64(base64Image);
-      const filename = `${filePrefix}-${Date.now()}`;
-
-      // Upload to Supabase storage
-      const imageUrl = await this.storageService.uploadFile(
-        base64Image,
-        path,
-        {
-          contentType,
-          filename,
-        },
-        authToken,
-      );
-
-      return imageUrl;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
-    }
-  }
-
-  // Extract content type from base64 data
-  private getContentTypeFromBase64(base64Data: string): string {
-    if (base64Data.includes('data:')) {
-      const matches = base64Data.match(
-        /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/,
-      );
-      if (matches && matches.length > 1) {
-        return matches[1];
-      }
-    }
-    return 'image/jpeg'; // Default
   }
 
   private async mapToDto(group: Group, authToken?: string): Promise<GroupDto> {

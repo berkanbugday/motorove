@@ -1,10 +1,12 @@
-import {useLazyQuery} from '@apollo/client';
-import {IUser} from '@motorove/shared/interfaces';
+import {useLazyQuery, useMutation} from '@apollo/client';
+import {IAccountSetup, IUser} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
-import {SEARCH_USERS} from './graphql/user.graphql';
+import {SEARCH_USERS, ACCOUNT_SETUP} from './graphql/user.graphql';
 import {useCallback, useEffect, useState} from 'react';
 import {apolloClient} from '../configs/apolloClientConfig';
 import {GET_MY_FOLLOWING} from './graphql/follow.graphql';
+import {showToast} from '@components';
+import {useTranslation} from '@hooks/useTranslation';
 
 /**
  * Hook for searching users by name or email with pagination
@@ -44,11 +46,7 @@ export const useSearchUsers = (initialQuery = '') => {
 
         const {data} = await searchUsersQuery({
           variables: {
-            input: {
-              query,
-              limit: 20,
-              skip: skipValue,
-            },
+            input: {query, limit: 20, skip: skipValue},
           },
           fetchPolicy: 'network-only',
         });
@@ -113,6 +111,50 @@ export const useSearchUsers = (initialQuery = '') => {
   };
 };
 
+export const useAccountSetup = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
+  const [accountSetupMutation, {loading, error}] = useMutation(ACCOUNT_SETUP, {
+    onCompleted: _data => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.accountSetup.success_completed_account_setup'),
+      });
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error during account setup:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.accountSetup.setup_failed'),
+      });
+    },
+  });
+
+  const accountSetup = async (input: IAccountSetup) => {
+    try {
+      const result = await accountSetupMutation({
+        variables: {
+          input,
+        },
+      });
+      return result.data?.accountSetup;
+    } catch (err) {
+      loggingService.error('Error in accountSetup:', err);
+      return null;
+    }
+  };
+
+  return {
+    accountSetup,
+    loading,
+    error,
+  };
+};
+
 /**
  * User service for handling user-related operations
  */
@@ -173,6 +215,7 @@ export const userService = {
  */
 export const UserService = {
   useSearchUsers,
+  useAccountSetup,
 };
 
 export default UserService;

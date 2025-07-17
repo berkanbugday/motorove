@@ -14,7 +14,7 @@ import {AUTH_STORAGE_KEYS} from '../types/auth.types';
 import {captureException} from '@sentry/react-native';
 import NetInfo from '@react-native-community/netinfo';
 import authService from '@services/auth.service';
-import {loggingService} from '@services/index';
+import {errorService, ErrorType, loggingService} from '@services/index';
 import {RetryLink} from '@apollo/client/link/retry';
 import {Platform} from 'react-native';
 
@@ -200,6 +200,9 @@ const errorLink = onError(
               variables: operation.variables,
               networkError,
             },
+          });
+          errorService.handleError(networkError, ErrorType.NETWORK, {
+            showToast: true,
           });
         } else {
           loggingService.warning('Device is offline. Network error expected.');

@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, Context, Int } from '@nestjs/graphql';
+import { Resolver, Query, Args, Context, Int, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { User } from './models/user.model';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -6,6 +6,7 @@ import { UsersService } from './users.service';
 import { Request } from 'express';
 import { UserDto } from './dto/user.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { AccountSetupInput } from './dto/account-setup.input';
 
 interface GqlContext {
   req: Request & {
@@ -43,5 +44,17 @@ export class UsersResolver {
   ): Promise<UserDto> {
     const userId = context.req.user.id;
     return await this.usersService.userProfile(id, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => UserDto)
+  async accountSetup(
+    @Context() context: GqlContext,
+    @Args('input') input: AccountSetupInput,
+  ): Promise<UserDto> {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return await this.usersService.accountSetup(input, userId, authToken);
   }
 }

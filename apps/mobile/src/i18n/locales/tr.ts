@@ -130,6 +130,7 @@ export default {
       failed_to_select_image: 'Resim seçilemedi. Lütfen tekrar deneyin.',
       upload_photo: 'Fotoğraf yükle',
       setup_failed: 'Profil ayarları güncellenemedi',
+      success_completed_account_setup: 'Profil ayarları başarıyla tamamlandı',
     },
 
     // Home screen

@@ -199,25 +199,25 @@ enum GroupTag {
 
 // Models
 model User {
-  id         String   @id @default(uuid())
-  firstName  String
-  lastName   String
-  avatar     String?
-  supabaseId String   @unique
-  email      String   @unique
-  bio        String?
-  cityId     String?
-  city       City?    @relation(fields: [cityId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  isActive   Boolean  @default(true)
-  hasCompletedSetup Boolean @default(false)
+  id                String   @id @default(uuid())
+  firstName         String
+  lastName          String
+  avatar            String?
+  supabaseId        String   @unique
+  email             String   @unique
+  bio               String?
+  cityId            String?
+  city              City?    @relation(fields: [cityId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  isActive          Boolean  @default(true)
+  hasCompletedSetup Boolean  @default(false)
 
   // New fields
-  dateOfBirth DateTime?
-  gender      Gender?
-  ridingStyle RidingStyle[] @default([])
-  interests   Interest[]    @default([])
+  dateOfBirth  DateTime?
+  gender       Gender?
+  ridingStyles RidingStyle[] @default([])
+  interests    Interest[]    @default([])
 
   // Relations
   createdGroups        Group[]           @relation("GroupCreatedBy")
@@ -265,7 +265,7 @@ model User {
 
   @@index([supabaseId])
   @@index([isActive])
-  @@index([ridingStyle])
+  @@index([ridingStyles])
   @@index([gender])
   @@index([interests])
   @@index([cityId])
