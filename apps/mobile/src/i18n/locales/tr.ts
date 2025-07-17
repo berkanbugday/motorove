@@ -117,7 +117,7 @@ export default {
     // Account Setup screen
     accountSetup: {
       hi: 'Merhaba',
-      let_us_complete_your_profile: 'Profilini tamamlayalım',
+      let_us_complete_your_profile: 'Hadi, Profilinizi tamamlayalım!',
       basic_information: 'Temel Bilgiler',
       date_of_birth: 'Doğum Tarihi',
       gender: 'Cinsiyet',
@@ -125,11 +125,40 @@ export default {
       riding_preferences_and_interests: 'Sürüş Tercihleri ve İlgi Alanları',
       riding_styles: 'Sürüş Stilleri',
       interests: 'İlgi Alanları',
-      profile_photo: 'Profil Fotoğrafı',
+      avatar: 'Profil Fotoğrafı',
       image_too_large: 'Resim çok büyük (maksimum boyut: 5MB)',
       failed_to_select_image: 'Resim seçilemedi. Lütfen tekrar deneyin.',
       upload_photo: 'Fotoğraf yükle',
+      setup_failed: 'Profil ayarları güncellenemedi',
+
+      // Notification permission screen
+      notifications: 'Bildirimler',
+      stay_connected: 'Bağlantıda Kalın',
+      notification_description:
+        'Etkinlikler, mesajlar ve motosiklet topluluğunuzdaki aktivitelerden haberdar olmak için bildirimleri etkinleştirin.',
+      enable_notifications: 'Bildirimleri Etkinleştir',
+      notifications_enabled: 'Bildirimler Etkinleştirildi',
+      notification_permission_granted: 'Bildirim izinleri başarıyla verildi!',
+      notification_permission_denied:
+        'Bildirim izinleri reddedildi. Daha sonra ayarlardan etkinleştirebilirsiniz.',
+      notification_permission_error:
+        'Bildirim izinleri istenirken bir hata oluştu.',
+      permissions_granted: 'İzinler başarıyla verildi',
+
+      // Notification feature titles and descriptions
+      notification_feature_events_title: 'Etkinlikler',
+      notification_feature_events:
+        'Yaklaşan sürüşler, atölyeler ve yakınınızdaki etkinlikler hakkında bildirim alın.',
+
+      notification_feature_comments_title: 'Yorumlar',
+      notification_feature_comments:
+        'Birileri gönderilerinize yorum yaptığında veya size yanıt verdiğinde haberdar olun.',
+
+      notification_feature_groups_title: 'Gruplar',
+      notification_feature_groups:
+        'Motosiklet gruplarınız ve topluluklarınızdaki güncellemeleri kaçırmayın.',
     },
+
     // Home screen
     home: {
       welcome_message: "Motorove'e Hoş Geldiniz",

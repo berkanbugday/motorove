@@ -32,6 +32,8 @@ export default {
     success: 'Success',
     error: 'Error',
     info: 'Info',
+    complete: 'Complete',
+    completing: 'Completing...',
   },
 
   // Main navigation items
@@ -114,7 +116,7 @@ export default {
     // Account Setup screen
     accountSetup: {
       hi: 'Hi',
-      let_us_complete_your_profile: "Let's complete your profile",
+      let_us_complete_your_profile: "Let's complete your profile!",
       basic_information: 'Basic Information',
       date_of_birth: 'Date of Birth',
       gender: 'Gender',
@@ -122,11 +124,41 @@ export default {
       riding_preferences_and_interests: 'Riding Preferences and Interests',
       riding_styles: 'Riding Styles',
       interests: 'Interests',
-      profile_photo: 'Profile Photo',
+      avatar: 'Profile Photo',
       image_too_large: 'Image is too large (maximum size: 5MB)',
       failed_to_select_image: 'Failed to select image. Please try again.',
       upload_photo: 'Upload photo',
+      setup_failed: 'Profile setup failed',
+
+      // Notification permission screen
+      notifications: 'Notifications',
+      stay_connected: 'Stay Connected',
+      notification_description:
+        'Enable notifications to stay updated on events, messages, and activity from your motorcycle community.',
+      enable_notifications: 'Enable Notifications',
+      notifications_enabled: 'Notifications Enabled',
+      notification_permission_granted:
+        'Notification permissions granted successfully!',
+      notification_permission_denied:
+        'Notification permissions were denied. You can enable them later in settings.',
+      notification_permission_error:
+        'There was an error requesting notification permissions.',
+      permissions_granted: 'Permissions granted successfully',
+
+      // Notification feature titles and descriptions
+      notification_feature_events_title: 'Events',
+      notification_feature_events:
+        'Get notified about upcoming rides, workshops, and events near you.',
+
+      notification_feature_comments_title: 'Comments',
+      notification_feature_comments:
+        'Stay in the loop when someone comments on your posts or replies to you.',
+
+      notification_feature_groups_title: 'Groups',
+      notification_feature_groups:
+        'Never miss updates from your motorcycle groups and communities.',
     },
+
     // Home screen
     home: {
       welcome_message: 'Welcome to Motorove',

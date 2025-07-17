@@ -79,7 +79,7 @@ export const createAuthSchemas = (t: TFunction) => {
       .nonempty(t('validation.city.required')),
     ridingStyles: z.array(z.nativeEnum(RidingStyle)).optional(),
     interests: z.array(z.nativeEnum(Interest)).optional(),
-    profilePhoto: z.string().optional(),
+    avatar: z.string().nullable().optional(),
   });
 
   return {

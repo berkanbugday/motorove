@@ -154,10 +154,4 @@ export interface MultiSelectProps {
    * Test ID for component testing
    */
   testID?: string;
-
-  /**
-   * Whether the component is searchable
-   * Defaults to true
-   */
-  searchable?: boolean;
 }

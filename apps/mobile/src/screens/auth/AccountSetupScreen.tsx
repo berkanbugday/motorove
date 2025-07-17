@@ -6,10 +6,9 @@ import {
   Platform,
   SafeAreaView,
   useWindowDimensions,
-  Alert,
   Image,
   TouchableOpacity,
-  Text,
+  ScrollView,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -23,6 +22,7 @@ import {
   DropdownItem,
   Title,
   BodySmall,
+  Body,
   DateTimePicker,
   MultiSelect,
   MultiSelectItem,
@@ -44,9 +44,9 @@ import {useGetCities} from '@services/city.service';
 import {EnumUtils} from '@utils/enumUtils';
 import {Interest, RidingStyle} from '@motorove/shared/enums';
 import {launchImageLibrary} from 'react-native-image-picker';
+// import {useUpdateUser} from '@services/user.service';
 
 export const AccountSetupScreen = () => {
-  const [loading, setLoading] = useState(false);
   const {height} = useWindowDimensions();
   const navigation = useNavigation<AuthScreenNavigationProp<'AccountSetup'>>();
   const {user} = useAuth();
@@ -60,6 +60,9 @@ export const AccountSetupScreen = () => {
   const [selectedGender, setSelectedGender] = useState<DropdownItem | null>(
     null,
   );
+  const [dateOfBirthValue, setDateOfBirthValue] = useState<Date>(
+    new Date(new Date().getFullYear() - 20, 0, 1),
+  );
   const [selectedRidingStyles, setSelectedRidingStyles] = useState<
     MultiSelectItem[]
   >([]);
@@ -68,10 +71,19 @@ export const AccountSetupScreen = () => {
   );
   const [selectedImage, setSelectedImage] = useState<{
     uri: string;
-    base64?: string;
+    base64?: string | null;
   } | null>(null);
+  const [showNotificationActivateButton, setShowNotificationActivateButton] =
+    useState(true);
+  // Add notification permission state
+  const [notificationPermissionGranted, setNotificationPermissionGranted] =
+    useState<boolean | null>(null);
+  const [requestingPermission, setRequestingPermission] = useState(false);
+
   // Fetch cities from backend
   const {cities, loading: loadingCities} = useGetCities();
+  // Use the updateUser hook
+  // const {updateUser, loading} = useUpdateUser();
 
   // Transform cities into dropdown items
   const cityDropdownItems = useMemo(() => {
@@ -93,7 +105,7 @@ export const AccountSetupScreen = () => {
       city: '',
       ridingStyles: [],
       interests: [],
-      profilePhoto: undefined,
+      avatar: null,
     },
     mode: 'onChange',
   });
@@ -104,7 +116,10 @@ export const AccountSetupScreen = () => {
     formState: {errors},
     trigger,
     setValue,
+    watch,
   } = methods;
+
+  const dateOfBirth = watch('dateOfBirth');
 
   // Handle city selection
   const handleCitySelect = (item: DropdownItem | null) => {
@@ -142,8 +157,8 @@ export const AccountSetupScreen = () => {
     );
   };
 
-  // Handle profile photo selection
-  const handleSelectProfilePhoto = async () => {
+  // Handle avatar selection
+  const handleSelectAvatar = async () => {
     try {
       const result = await launchImageLibrary({
         mediaType: 'photo',
@@ -169,16 +184,16 @@ export const AccountSetupScreen = () => {
           uri: asset.uri || '',
           base64: asset.base64
             ? `data:image/jpeg;base64,${asset.base64}`
-            : undefined,
+            : null,
         };
 
         setSelectedImage(newImage);
-        setValue('profilePhoto', newImage.base64 || newImage.uri, {
+        setValue('avatar', newImage.base64 || newImage.uri, {
           shouldValidate: true,
         });
       }
     } catch (error) {
-      loggingService.error('Error selecting profile photo:', error);
+      loggingService.error('Error selecting avatar:', error);
       showToast({
         type: 'error',
         text1: t('common.error'),
@@ -187,39 +202,134 @@ export const AccountSetupScreen = () => {
     }
   };
 
+  // Initialize notification service on mount
+  useEffect(() => {
+    const initNotificationService = async () => {
+      try {
+        // Since we don't have direct access to the NotificationService class,
+        // we'll create a function that wraps the initialization logic
+
+        // First, check if Firebase is already initialized
+        const firebase = await import('@react-native-firebase/app');
+        const messaging = await import('@react-native-firebase/messaging');
+        const config = await import('@configs');
+
+        if (!firebase.default.apps.length) {
+          // Initialize Firebase with configuration
+          await firebase.default.initializeApp(config.getFirebaseConfig());
+        }
+
+        // Setup notification handling
+        messaging
+          .default()
+          .setBackgroundMessageHandler(async () => Promise.resolve());
+        messaging.default().onMessage(async remoteMessage => {
+          showToast({
+            type: 'info',
+            text1: remoteMessage.notification?.title,
+            text2: remoteMessage.notification?.body,
+          });
+          return Promise.resolve();
+        });
+      } catch (error) {
+        loggingService.error(
+          'Failed to initialize notification service:',
+          error,
+        );
+      }
+    };
+
+    initNotificationService();
+  }, []);
+
+  // Handle notification permission request
+  const handleRequestNotificationPermission = async () => {
+    try {
+      setRequestingPermission(true);
+
+      // Import the required modules
+      const {PermissionsAndroid, Platform} = require('react-native');
+      const messaging = await import('@react-native-firebase/messaging');
+      const AsyncStorage = await import(
+        '@react-native-async-storage/async-storage'
+      );
+
+      // Request notification permissions
+      if (Platform.OS === 'android') {
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+      }
+
+      const authStatus = await messaging.default().requestPermission();
+      const granted =
+        authStatus === messaging.default.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.default.AuthorizationStatus.PROVISIONAL;
+
+      setNotificationPermissionGranted(granted);
+
+      if (granted) {
+        // Get device token and store it
+        await messaging.default().registerDeviceForRemoteMessages();
+        const token = await messaging.default().getToken();
+        if (token) {
+          await AsyncStorage.default.setItem('fcm_token', token);
+        }
+
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.accountSetup.notification_permission_granted'),
+        });
+      } else {
+        setShowNotificationActivateButton(false);
+        showToast({
+          type: 'info',
+          text1: t('common.info'),
+          text2: t('screens.accountSetup.notification_permission_denied'),
+        });
+      }
+    } catch (error) {
+      loggingService.error('Error requesting notification permission:', error);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('screens.accountSetup.notification_permission_error'),
+      });
+    } finally {
+      setRequestingPermission(false);
+    }
+  };
+
   const onSubmit = useCallback(
     async (data: AccountSetupFormValues) => {
       try {
-        setLoading(true);
-        // In a real app, you would submit this data to your API
-        loggingService.info('Form data submitted:', {
-          dateOfBirth: data.dateOfBirth,
-          gender: data.gender,
-          city: data.city,
-          ridingStyles: data.ridingStyles,
-          interests: data.interests,
-          profilePhoto: data.profilePhoto ? '(Photo data included)' : undefined,
-        });
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        // Navigate to the main app
-        navigation.reset({
-          index: 0,
-          routes: [{name: 'Main' as any}],
-        });
+        // Update user profile in the backend
+        // await updateUser({
+        //   dateOfBirth: data.dateOfBirth?.toLocaleDateString(),
+        //   gender: data.gender,
+        //   cityId: data.city,
+        //   ridingStyles: data.ridingStyles,
+        //   interests: data.interests,
+        //   avatar: data.avatar,
+        //   hasCompletedSetup: true,
+        // });
+        // // Navigate to the main app
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{name: 'Main' as any}],
+        // });
       } catch (error) {
         loggingService.error('Error submitting form:', error);
-        Alert.alert(
-          'Error',
-          'There was a problem setting up your account. Please try again.',
-        );
-      } finally {
-        setLoading(false);
+        showToast({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('screens.accountSetup.setup_failed'),
+        });
       }
     },
-    [navigation],
+    // [navigation, t, updateUser],
+    [navigation, t],
   );
 
   // Navigation handlers
@@ -246,7 +356,7 @@ export const AccountSetupScreen = () => {
         id: 'basic-info',
         title: t('screens.accountSetup.basic_information'),
         validate: async () => {
-          const result = await trigger(['city', 'dateOfBirth', 'gender']);
+          const result = await trigger(['city', 'dateOfBirth']);
           return result;
         },
         content: (
@@ -258,7 +368,6 @@ export const AccountSetupScreen = () => {
               selectedItem={selectedCity}
               onSelect={handleCitySelect}
               error={errors.city?.message}
-              searchable={true}
               showClearButton={false}
               testID="city-dropdown"
             />
@@ -270,7 +379,7 @@ export const AccountSetupScreen = () => {
               confirmText={t('common.confirm')}
               minimumDate={new Date(new Date().getFullYear() - 80, 0, 1)}
               maximumDate={new Date(new Date().getFullYear() - 13, 0, 1)}
-              defaultValue={new Date(new Date().getFullYear() - 20, 0, 1)}
+              defaultValue={dateOfBirthValue}
               error={errors.dateOfBirth}
               testID="date-of-birth-picker"
               locale={language}
@@ -283,7 +392,6 @@ export const AccountSetupScreen = () => {
               selectedItem={selectedGender}
               onSelect={handleGenderSelect}
               error={errors.gender?.message}
-              searchable={false}
               showClearButton={false}
               testID="gender-dropdown"
             />
@@ -301,7 +409,6 @@ export const AccountSetupScreen = () => {
               data={EnumUtils.getRidingStyleDropdownOptions()}
               selectedItems={selectedRidingStyles}
               onSelectionChange={handleRidingStylesChange}
-              searchable={false}
               testID="riding-styles-multiselect"
             />
             <MultiSelect
@@ -309,18 +416,17 @@ export const AccountSetupScreen = () => {
               data={EnumUtils.getInterestDropdownOptions()}
               selectedItems={selectedInterests}
               onSelectionChange={handleInterestsChange}
-              searchable={false}
               testID="interests-multiselect"
             />
           </View>
         ),
       },
       {
-        id: 'profile-photo',
-        title: t('screens.accountSetup.profile_photo'),
+        id: 'avatar',
+        title: t('screens.accountSetup.avatar'),
         optional: true,
         content: (
-          <View style={styles.profilePhotoContainer}>
+          <View style={styles.avatarSectionContainer}>
             <View style={styles.avatarContainer}>
               {selectedImage ? (
                 <Image
@@ -338,10 +444,10 @@ export const AccountSetupScreen = () => {
               )}
             </View>
             <TouchableOpacity
-              onPress={handleSelectProfilePhoto}
+              onPress={handleSelectAvatar}
               activeOpacity={0.8}
               style={styles.uploadPhotoButton}
-              testID="select-profile-photo-button">
+              testID="select-avatar-button">
               <Icon
                 name="camera-filled"
                 size={18}
@@ -352,6 +458,126 @@ export const AccountSetupScreen = () => {
               </BodySmall>
             </TouchableOpacity>
           </View>
+        ),
+      },
+      {
+        id: 'notification-permission',
+        title: t('screens.accountSetup.notifications'),
+        optional: true,
+        content: (
+          <ScrollView>
+            <View style={styles.notificationSectionContainer}>
+              <View style={styles.bellIconContainer}>
+                <Icon
+                  name="bell-filled"
+                  size={24}
+                  color={colors.primary.main}
+                />
+              </View>
+
+              <Title style={styles.notificationTitle}>
+                {t('screens.accountSetup.stay_connected')}
+              </Title>
+
+              <Body style={styles.notificationDescription}>
+                {t('screens.accountSetup.notification_description')}
+              </Body>
+
+              <View style={styles.notificationFeatures}>
+                <View style={styles.featureItem}>
+                  <View style={styles.featureIconContainer}>
+                    <Icon
+                      name="bell-exclamation-filled"
+                      size={24}
+                      color={colors.neutral.white}
+                    />
+                  </View>
+                  <View style={styles.featureTextContainer}>
+                    <BodySmall style={styles.featureTitle}>
+                      {t(
+                        'screens.accountSetup.notification_feature_events_title',
+                      )}
+                    </BodySmall>
+                    <BodySmall style={styles.featureText}>
+                      {t('screens.accountSetup.notification_feature_events')}
+                    </BodySmall>
+                  </View>
+                </View>
+
+                <View style={styles.featureItem}>
+                  <View style={styles.featureIconContainer}>
+                    <Icon
+                      name="comments-filled"
+                      size={24}
+                      color={colors.neutral.white}
+                    />
+                  </View>
+                  <View style={styles.featureTextContainer}>
+                    <BodySmall style={styles.featureTitle}>
+                      {t(
+                        'screens.accountSetup.notification_feature_comments_title',
+                      )}
+                    </BodySmall>
+                    <BodySmall style={styles.featureText}>
+                      {t('screens.accountSetup.notification_feature_comments')}
+                    </BodySmall>
+                  </View>
+                </View>
+
+                <View style={styles.featureItem}>
+                  <View style={styles.featureIconContainer}>
+                    <Icon
+                      name="users-filled"
+                      size={24}
+                      color={colors.neutral.white}
+                    />
+                  </View>
+                  <View style={styles.featureTextContainer}>
+                    <BodySmall style={styles.featureTitle}>
+                      {t(
+                        'screens.accountSetup.notification_feature_groups_title',
+                      )}
+                    </BodySmall>
+                    <BodySmall style={styles.featureText}>
+                      {t('screens.accountSetup.notification_feature_groups')}
+                    </BodySmall>
+                  </View>
+                </View>
+              </View>
+
+              {/* Status indicator */}
+              {notificationPermissionGranted && (
+                <View style={styles.statusContainer}>
+                  <Icon
+                    name="check-filled"
+                    size={24}
+                    color={colors.status.success}
+                  />
+                  <BodySmall style={styles.statusText}>
+                    {t('screens.accountSetup.permissions_granted')}
+                  </BodySmall>
+                </View>
+              )}
+              {!showNotificationActivateButton && (
+                <Button
+                  title={
+                    notificationPermissionGranted
+                      ? t('screens.accountSetup.notifications_enabled')
+                      : t('screens.accountSetup.enable_notifications')
+                  }
+                  variant={
+                    notificationPermissionGranted ? 'secondary' : 'primary'
+                  }
+                  shape="round"
+                  onPress={handleRequestNotificationPermission}
+                  loading={requestingPermission}
+                  disabled={notificationPermissionGranted === true}
+                  style={styles.notificationButton}
+                  testID="notification-permission-button"
+                />
+              )}
+            </View>
+          </ScrollView>
         ),
       },
     ],
@@ -373,6 +599,9 @@ export const AccountSetupScreen = () => {
       selectedInterests,
       handleInterestsChange,
       selectedImage,
+      notificationPermissionGranted,
+      requestingPermission,
+      handleRequestNotificationPermission,
     ],
   );
 
@@ -381,6 +610,12 @@ export const AccountSetupScreen = () => {
     setIsFirstStep(currentStepIndex === 0);
     setIsLastStep(currentStepIndex === wizardSteps.length - 1);
   }, [currentStepIndex, wizardSteps.length]);
+
+  useEffect(() => {
+    if (dateOfBirth) {
+      setDateOfBirthValue(dateOfBirth);
+    }
+  }, [dateOfBirth]);
 
   return (
     <View style={styles.container}>
@@ -533,8 +768,8 @@ const styles = StyleSheet.create({
     color: colors.neutral.black,
     marginBottom: spacing.xs,
   },
-  // Profile photo styles
-  profilePhotoContainer: {
+  // Avatar styles
+  avatarSectionContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: spacing.xl,
@@ -561,7 +796,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   uploadPhotoButton: {
     position: 'absolute',
     top: 180,
@@ -579,5 +813,88 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.sm,
     fontWeight: '500',
     color: colors.neutral.black,
+  },
+  // Notification permission styles
+  notificationSectionContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.md,
+    gap: spacing.md,
+  },
+  bellIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.primary.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    ...getShadow('medium'),
+  },
+  notificationTitle: {
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+    color: colors.neutral.darkGrey,
+  },
+  notificationDescription: {
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+    maxWidth: '90%',
+    color: colors.neutral.grey,
+  },
+  notificationFeatures: {
+    width: '100%',
+    gap: spacing.lg,
+    marginVertical: spacing.md,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.secondary.light,
+    borderRadius: radius.md,
+    ...getShadow('small'),
+  },
+  featureIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.primary.main,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureTextContainer: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontWeight: '600',
+    color: colors.neutral.darkGrey,
+    marginBottom: spacing.xs / 2,
+  },
+  featureText: {
+    color: colors.neutral.grey,
+    flex: 1,
+  },
+  notificationButton: {
+    marginTop: spacing.lg,
+    width: '100%',
+    ...getShadow('small'),
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.status.success + '20', // 20% opacity
+    borderRadius: radius.md,
+  },
+  statusText: {
+    color: colors.status.success,
+    fontWeight: '500',
   },
 });
