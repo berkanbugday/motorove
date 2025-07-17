@@ -2,7 +2,7 @@ import { Gender, RidingStyle, Interest } from "../../enums";
 
 export interface IAccountSetup {
   cityId: string;
-  dateOfBirth?: Date | null;
+  dateOfBirth?: string | null;
   gender?: Gender | null;
   ridingStyles?: RidingStyle[] | null;
   interests?: Interest[] | null;

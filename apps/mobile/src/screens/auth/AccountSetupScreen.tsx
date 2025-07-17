@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {AuthScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {
   Button,
   Wizard,
@@ -47,7 +47,7 @@ import {IAccountSetup} from '@motorove/shared/interfaces';
 
 export const AccountSetupScreen = () => {
   const {height} = useWindowDimensions();
-  const navigation = useNavigation<AuthScreenNavigationProp<'AccountSetup'>>();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
   const wizardRef = useRef<WizardHandle>(null);
@@ -202,7 +202,7 @@ export const AccountSetupScreen = () => {
 
         const accountSetupData: IAccountSetup = {
           cityId: data.city,
-          dateOfBirth: data.dateOfBirth,
+          dateOfBirth: data.dateOfBirth?.toISOString(),
           gender: data.gender as Gender,
           ridingStyles: data.ridingStyles as RidingStyle[],
           interests: data.interests as Interest[],
@@ -210,12 +210,12 @@ export const AccountSetupScreen = () => {
         };
 
         const result = await accountSetup(accountSetupData);
-        console.log('result', result);
-        // Navigate to the main app
-        // navigation.reset({
-        //   index: 0,
-        //   routes: [{name: 'Main' as any}],
-        // });
+        if (result) {
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Main'}],
+          });
+        }
       } catch (error) {
         loggingService.error('Error submitting form:', error);
         showToast({

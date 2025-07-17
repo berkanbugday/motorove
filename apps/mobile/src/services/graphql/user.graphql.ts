@@ -11,17 +11,6 @@ export const USER_FRAGMENT = gql`
   }
 `;
 
-export const ACCOUNT_SETUP_FRAGMENT = gql`
-  fragment AccountSetupFragment on User {
-    cityId
-    dateOfBirth
-    gender
-    ridingStyles
-    interests
-    avatar
-  }
-`;
-
 // Queries
 export const SEARCH_USERS = gql`
   query SearchUsers($input: SearchUsersInput!) {
@@ -34,9 +23,6 @@ export const SEARCH_USERS = gql`
 
 export const ACCOUNT_SETUP = gql`
   mutation AccountSetup($input: AccountSetupInput!) {
-    accountSetup(input: $input) {
-      ...AccountSetupFragment
-    }
+    accountSetup(input: $input)
   }
-  ${ACCOUNT_SETUP_FRAGMENT}
 `;

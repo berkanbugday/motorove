@@ -534,7 +534,7 @@ type Motorcycle {
 }
 
 type Mutation {
-  accountSetup(input: AccountSetupInput!): UserDto!
+  accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddGroupMemberInput!): GroupMembershipDto!
   create(input: CreateAddressInput!): AddressDto!
   createBulk(input: CreateNotificationsInput!): Boolean!

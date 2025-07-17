@@ -2,7 +2,6 @@ import { InputType, Field } from '@nestjs/graphql';
 import {
   IsOptional,
   IsString,
-  IsDate,
   IsEnum,
   IsArray,
   IsNotEmpty,
@@ -21,8 +20,8 @@ export class AccountSetupInput implements IAccountSetup {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  @IsDate()
-  dateOfBirth?: Date | null;
+  @IsString()
+  dateOfBirth?: string | null;
 
   @Field(() => Gender, { nullable: true })
   @IsOptional()

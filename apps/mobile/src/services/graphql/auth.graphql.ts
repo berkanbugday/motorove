@@ -17,6 +17,7 @@ export const AUTH_USER_FRAGMENT = gql`
     firstName
     lastName
     email
+    hasCompletedSetup
   }
 `;
 

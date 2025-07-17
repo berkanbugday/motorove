@@ -47,11 +47,11 @@ export class UsersResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => UserDto)
+  @Mutation(() => Boolean)
   async accountSetup(
     @Context() context: GqlContext,
     @Args('input') input: AccountSetupInput,
-  ): Promise<UserDto> {
+  ): Promise<boolean> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;

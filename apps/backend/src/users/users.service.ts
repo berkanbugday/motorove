@@ -140,7 +140,7 @@ export class UsersService {
     input: AccountSetupInput,
     userId: string,
     authToken?: string,
-  ): Promise<UserDto> {
+  ): Promise<boolean> {
     try {
       // Process avatar if present and is base64
       console.log('input', input);
@@ -154,9 +154,7 @@ export class UsersService {
       // Prepare update data
       const accountSetupData: any = {
         city: { connect: { id: input.cityId } },
-        dateOfBirth: input.dateOfBirth
-          ? new Date(input.dateOfBirth)
-          : undefined,
+        dateOfBirth: input.dateOfBirth,
         gender: input.gender,
         ridingStyles: input.ridingStyles,
         interests: input.interests,
@@ -174,12 +172,7 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
 
-      return {
-        ...user,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatar: user.avatar || undefined,
-      };
+      return user.hasCompletedSetup;
     } catch (error) {
       this.logger.error(`Failed to account setup`, error);
       throw error;

@@ -21,7 +21,6 @@ export enum BreadcrumbCategory {
   UI = 'ui',
   USER = 'user',
   COMPONENT = 'component',
-  AUTHENTICATION = 'authentication',
   DATABASE = 'database',
   NETWORK = 'network',
 }

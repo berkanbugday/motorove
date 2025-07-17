@@ -32,23 +32,22 @@ class GraphQLErrorService {
     // Handle based on error code
     if (errorCode) {
       switch (errorCode) {
-        case 'UNAUTHENTICATED':
+        case 'UNAUTHORIZED':
           // Handle authentication errors
-          errorType = ErrorType.AUTHENTICATION;
+          errorType = ErrorType.AUTHORIZATION;
 
           // Check for specific refresh token errors
           if (
             errorMessage &&
-            errorMessage.includes('Invalid Refresh Token: Already Used')
+            (errorMessage.includes('Invalid Refresh Token: Already Used') ||
+              errorMessage.includes('Invalid token'))
           ) {
-            loggingService.error(
-              'Refresh token already used, signing out user',
-            );
+            loggingService.error('Refresh token error, signing out user');
             await errorService.handleError(error, errorType, {
               fallbackMessage: i18n.t('errors.auth.session_expired'),
               showToast: true,
             });
-            authService.signOut();
+            await authService.signOut();
             handled = true;
             break;
           }
@@ -69,17 +68,6 @@ class GraphQLErrorService {
             handled = true;
           }
           break;
-        case 'UNAUTHORIZED':
-          errorType = ErrorType.AUTHORIZATION;
-          loggingService.error('Unauthorized error:', error);
-          await errorService.handleError(error, errorType, {
-            showToast: true,
-            fallbackMessage:
-              errorMessage || i18n.t('errors.graphql.unauthorized'),
-          });
-          handled = true;
-          break;
-
         case 'FORBIDDEN':
           errorType = ErrorType.AUTHORIZATION;
           loggingService.error('Forbidden error:', error);
@@ -88,7 +76,6 @@ class GraphQLErrorService {
           });
           handled = true;
           break;
-
         case 'CONFLICT':
           errorType = ErrorType.VALIDATION;
           loggingService.error('Conflict error:', error);
@@ -98,7 +85,6 @@ class GraphQLErrorService {
           });
           handled = true;
           break;
-
         case 'BAD_USER_INPUT':
           errorType = ErrorType.VALIDATION;
           loggingService.error('Bad user input error:', error);
@@ -107,7 +93,6 @@ class GraphQLErrorService {
           });
           handled = true;
           break;
-
         case 'INTERNAL_SERVER_ERROR':
           loggingService.error('Internal server error:', error);
           await errorService.handleError(error, errorType, {
@@ -115,7 +100,6 @@ class GraphQLErrorService {
           });
           handled = true;
           break;
-
         case 'PERSISTED_QUERY_NOT_FOUND':
         case 'PERSISTED_QUERY_NOT_SUPPORTED':
           // Handle Apollo specific errors
@@ -125,7 +109,6 @@ class GraphQLErrorService {
           });
           handled = true;
           break;
-
         default:
           // Will be handled by the general case below
           break;

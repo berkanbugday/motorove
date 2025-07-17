@@ -77,7 +77,7 @@ const errorLink = onError(
         }
 
         // Handle authentication errors with automatic token refresh
-        if (extensions?.code === 'UNAUTHENTICATED') {
+        if (extensions?.code === 'UNAUTHORIZED') {
           // Skip token refresh for operations that are themselves refreshing tokens
           if (operation.operationName === 'RefreshToken') {
             loggingService.info(
@@ -125,7 +125,7 @@ const errorLink = onError(
                     ) ||
                     gqlError.message.includes('Invalid Refresh Token') || // General invalid from backend
                     gqlError.message.includes('User not found') || // User associated with token not found
-                    (gqlError.extensions?.code === 'UNAUTHENTICATED' &&
+                    (gqlError.extensions?.code === 'UNAUTHORIZED' &&
                       gqlError.message.includes('Invalid token'))
                   ) {
                     isUnrecoverableRefreshTokenError = true;
@@ -152,12 +152,12 @@ const errorLink = onError(
                     },
                   );
                   // User requested not to sign out automatically even on unrecoverable refresh token errors.
-                  // authService.signOut().catch(e => {
-                  //   loggingService.error(
-                  //     'Error during sign out after unrecoverable refresh token error:',
-                  //     e,
-                  //   );
-                  // });
+                  authService.signOut().catch(e => {
+                    loggingService.error(
+                      'Error during sign out after unrecoverable refresh token error:',
+                      e,
+                    );
+                  });
                 } else {
                   // For other errors (e.g., temporary network issue during refresh attempt),
                   // log the error but do not sign out immediately.
