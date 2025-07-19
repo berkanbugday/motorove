@@ -77,8 +77,20 @@ const errorLink = onError(
         }
 
         // Handle authentication errors with automatic token refresh
-        if (extensions?.code === 'UNAUTHENTICATED') {
+        if (extensions?.code === 'UNAUTHORIZED') {
           // Return a new observable for the refresh token flow
+
+          if (operation.operationName === 'SignIn') {
+            errorService.handleError(err, ErrorType.AUTHORIZATION, {
+              showToast: true,
+            });
+            return new Observable(observer => {
+              authService.signOut();
+              observer.error(err);
+              observer.complete();
+            });
+          }
+
           return new Observable(observer => {
             // Attempt to refresh the token
             authService

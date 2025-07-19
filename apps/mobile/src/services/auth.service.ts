@@ -207,13 +207,7 @@ class AuthService {
   // Sign out the current user
   async signOut(): Promise<void> {
     try {
-      // Clear background refresh timer
-      this.clearBackgroundTokenRefresh();
-
-      // For GraphQL, we don't need a specific signout endpoint
-      // Just clear the local auth data and reset Apollo cache
       await this.clearAuthData();
-      await resetApolloStore();
     } catch (error) {
       loggingService.error('Signout error:', error);
       // Still clear local auth data even if something fails
@@ -350,7 +344,9 @@ class AuthService {
         }
 
         // Now that we have a successful response, remove the old refresh token
-        await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        if (refreshToken) {
+          await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        }
 
         // Convert GraphQL response to our AuthResponse format
         const authResponse = this.convertGraphQLAuthResponse(data.refreshToken);
@@ -370,7 +366,9 @@ class AuthService {
           (error.message.includes('Token already used') ||
             error.message.includes('Invalid Refresh Token'))
         ) {
-          await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+          if (refreshToken) {
+            await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+          }
         }
 
         // Log and rethrow the error
@@ -696,8 +694,16 @@ class AuthService {
       this.clearBackgroundTokenRefresh();
 
       // Remove auth data from all storage sources
-      await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
-      await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      const authData = await EncryptedStorage.getItem(STORAGE_KEYS.AUTH_DATA);
+      if (authData) {
+        await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
+      }
+      const refreshToken = await EncryptedStorage.getItem(
+        STORAGE_KEYS.REFRESH_TOKEN,
+      );
+      if (refreshToken) {
+        await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      }
 
       // Clear AsyncStorage items just to be thorough
       await this.clearAsyncStorageAuthData();
