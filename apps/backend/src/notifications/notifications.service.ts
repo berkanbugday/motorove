@@ -73,6 +73,7 @@ export class NotificationsService {
         title: input.title,
         body: input.body,
         type: input.type,
+        channel: input.channels,
         data: parsedData,
         userId,
         status: NotificationStatus.PENDING,
@@ -161,6 +162,7 @@ export class NotificationsService {
           title: input.title,
           body: input.body,
           type: input.type,
+          channel: input.channel,
           data: input.data,
           user: {
             connect: { id: input.userId },

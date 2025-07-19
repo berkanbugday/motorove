@@ -57,6 +57,7 @@ type AuthUser {
   hasCompletedSetup: Boolean!
   id: ID!
   lastName: String!
+  notificationPermission: NotificationPermission!
 }
 
 input ChangeMemberRoleInput {
@@ -127,6 +128,7 @@ input CreateDeviceTokenInput {
 
 input CreateNotificationsInput {
   body: String!
+  channels: NotificationChannel!
   data: String
   title: String!
   type: NotificationType!
@@ -585,6 +587,12 @@ type Notification {
   userId: String!
 }
 
+"""Channel for notifications"""
+enum NotificationChannel {
+  EMAIL
+  PUSH
+}
+
 type NotificationDto {
   body: String!
   createdAt: DateTime!
@@ -594,6 +602,13 @@ type NotificationDto {
   status: NotificationStatus!
   title: String!
   type: NotificationType!
+}
+
+"""Permission for notifications"""
+enum NotificationPermission {
+  ALLOWED
+  BLOCKED
+  UNKNOWN
 }
 
 """The status of a notification"""
@@ -842,6 +857,8 @@ type User {
   interests: [Interest!]
   isActive: Boolean!
   lastName: String!
+  notificationPermission: NotificationPermission!
+  notificationSettings: [UserNotificationSetting!]
   notifications: [Notification!]
   postLikes: [PostLike!]
   postSaves: [PostSave!]
@@ -882,4 +899,14 @@ type UserFollowingDto {
   follower: UserDto!
   following: UserDto!
   id: ID!
+}
+
+type UserNotificationSetting {
+  channel: NotificationChannel!
+  createdAt: DateTime!
+  id: ID!
+  isEnabled: Boolean!
+  notificationType: NotificationType!
+  updatedAt: DateTime!
+  userId: String!
 }

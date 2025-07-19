@@ -18,6 +18,8 @@ export class AuthUser {
   @Field(() => Boolean, { defaultValue: false })
   hasCompletedSetup: boolean;
 
-  @Field()
+  @Field(() => NotificationPermission, {
+    defaultValue: NotificationPermission.UNKNOWN,
+  })
   notificationPermission: NotificationPermission;
 }

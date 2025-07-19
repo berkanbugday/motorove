@@ -16,6 +16,7 @@ import { FilterGroupMembershipInput } from './dto/filter-group-membership.input'
 import { GroupMembership } from './models/group-membership.model';
 import { Group } from 'src/groups/models/group.model';
 import { plainToClass } from 'class-transformer';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
 export class GroupMembershipsService {
@@ -227,6 +228,7 @@ export class GroupMembershipsService {
             title: 'Membership status updated',
             body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
             type: NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
+            channel: NotificationChannel.PUSH,
             data: JSON.stringify({
               groupId: updatedMembership.group.id,
               groupName: updatedMembership.group.name,
@@ -406,6 +408,7 @@ export class GroupMembershipsService {
           title: 'Membership status updated',
           body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newStatus}`,
           type: NotificationType.GROUP_MEMBERSHIP_STATUS_UPDATED,
+          channel: NotificationChannel.PUSH,
           data: JSON.stringify({
             groupId: updatedMembership.group.id,
             groupName: updatedMembership.group.name,

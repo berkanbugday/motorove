@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { ICreateNotifications } from '@motorove/shared';
 import { NotificationType } from '../../enums/models/notification-type.enum';
+import { NotificationChannel } from '../../enums/models/notification-channel.enum';
 
 @InputType()
 export class CreateNotificationsInput implements ICreateNotifications {
@@ -30,6 +31,11 @@ export class CreateNotificationsInput implements ICreateNotifications {
   @IsNotEmpty()
   @IsEnum(NotificationType)
   type: NotificationType;
+
+  @Field(() => NotificationChannel)
+  @IsNotEmpty()
+  @IsEnum(NotificationChannel)
+  channels: NotificationChannel;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

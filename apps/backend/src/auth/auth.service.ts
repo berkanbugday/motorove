@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { AuthResponse } from './models/auth-response.model';
 import { AuthUser } from './models/auth-user.model';
+import { NotificationPermission } from '../enums/models/notification-permission.enum';
 
 @Injectable()
 export class AuthService {
@@ -110,7 +111,8 @@ export class AuthService {
         lastName: user.lastName,
         email: user.email,
         hasCompletedSetup: user.hasCompletedSetup,
-        notificationPermission: user.notificationPermission,
+        notificationPermission:
+          user.notificationPermission as NotificationPermission,
       },
       session: data.session,
     };
@@ -166,7 +168,8 @@ export class AuthService {
           lastName: user.lastName,
           email: user.email,
           hasCompletedSetup: user.hasCompletedSetup,
-          notificationPermission: user.notificationPermission,
+          notificationPermission:
+            user.notificationPermission as NotificationPermission,
         },
         session: data.session,
       };
@@ -219,7 +222,8 @@ export class AuthService {
       lastName: user.lastName,
       email: user.email,
       hasCompletedSetup: user.hasCompletedSetup,
-      notificationPermission: user.notificationPermission,
+      notificationPermission:
+        user.notificationPermission as NotificationPermission,
     };
   }
 
