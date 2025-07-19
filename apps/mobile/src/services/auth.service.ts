@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import {apolloClient, resetApolloStore} from '@configs/apolloClientConfig';
+import {apolloClient} from '@configs/apolloClientConfig';
 import {useMutation} from '@apollo/client';
 import {
   SIGN_IN,
@@ -523,7 +523,7 @@ class AuthService {
         await this.saveAuthDataToEncryptedStorage(migratedState);
 
         // Clear from AsyncStorage after migration
-        await this.clearAsyncStorageAuthData();
+        await AsyncStorage.clear();
 
         // Setup background refresh if we have a valid token
         if (accessToken && expiresAt && expiresAt > Date.now() && parsedUser) {
@@ -682,43 +682,18 @@ class AuthService {
       this.clearBackgroundTokenRefresh();
 
       // Remove auth data from all storage sources
-      const authData = await EncryptedStorage.getItem(STORAGE_KEYS.AUTH_DATA);
-      if (authData) {
-        await EncryptedStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
-      }
-      const refreshToken = await EncryptedStorage.getItem(
-        STORAGE_KEYS.REFRESH_TOKEN,
-      );
-      if (refreshToken) {
-        await EncryptedStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-      }
+      await EncryptedStorage.clear();
 
       // Clear AsyncStorage items just to be thorough
-      await this.clearAsyncStorageAuthData();
+      await AsyncStorage.clear();
 
       // Reset Apollo client store
-      await resetApolloStore();
-
+      await apolloClient.clearStore();
       loggingService.info('Auth data cleared successfully');
     } catch (error) {
       loggingService.error('Error clearing auth data:', error);
       // Try the fallback method for AsyncStorage
-      await this.clearAsyncStorageAuthData();
-    }
-  }
-
-  // Clear auth data from AsyncStorage (for backward compatibility)
-  private async clearAsyncStorageAuthData(): Promise<void> {
-    try {
-      const keys = [
-        STORAGE_KEYS.USER,
-        STORAGE_KEYS.ACCESS_TOKEN,
-        STORAGE_KEYS.REFRESH_TOKEN,
-        STORAGE_KEYS.EXPIRES_AT,
-      ];
-      await AsyncStorage.multiRemove(keys);
-    } catch (error) {
-      loggingService.error('Error clearing AsyncStorage auth data:', error);
+      await AsyncStorage.clear();
     }
   }
 }

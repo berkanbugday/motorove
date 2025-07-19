@@ -226,8 +226,3 @@ export const apolloClient = new ApolloClient({
     },
   },
 });
-
-// Reset Apollo store (useful after logout)
-export const resetApolloStore = async () => {
-  await apolloClient.resetStore();
-};

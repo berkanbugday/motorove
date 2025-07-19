@@ -2,10 +2,6 @@ import React, {createContext, useContext, useEffect, useState} from 'react';
 import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
-import {
-  notificationService,
-  useRemoveDeviceToken,
-} from '@services/notification.service';
 
 // Default auth state
 const defaultAuthState: AuthState = {
@@ -48,7 +44,6 @@ interface AuthProviderProps {
 // Auth provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
-  const {removeDeviceToken} = useRemoveDeviceToken();
 
   // Load authentication state on component mount
   useEffect(() => {
@@ -130,20 +125,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   // Sign out
   const signOut = async (): Promise<void> => {
     try {
-      // Clean up notification service if user was logged in
-      if (authState.user && authState.user.id) {
-        try {
-          const token = await notificationService.service.getDeviceToken();
-          if (token) {
-            removeDeviceToken(authState.user.id, token);
-          }
-        } catch (tokenError) {
-          loggingService.error('Error clearing device token:', tokenError);
-        }
-      }
-
       await authService.signOut();
-      setAuthState({...defaultAuthState});
+      setAuthState(defaultAuthState);
     } catch (error) {
       loggingService.error('Error signing out:', error);
       throw error;

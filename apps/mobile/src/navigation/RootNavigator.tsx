@@ -5,7 +5,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {AuthNavigator} from './stacks/AuthNavigator';
 import {MainNavigator} from './stacks/MainNavigator';
-import {useFirstTimeCheck, useAuth} from './utils/navigationUtils';
+import {useFirstTimeCheck} from './utils/navigationUtils';
+import {useAuth} from '@contexts';
 import {RootStackParamList} from '../types/navigation.types';
 import {AccountSetupScreen} from '@screens/auth/AccountSetupScreen';
 
@@ -27,9 +28,10 @@ const linking: LinkingOptions<RootStackParamList> = {
  * Uses a NativeStackNavigator but hides all screen headers
  */
 export function RootNavigator() {
-  const {isAuthenticated, user} = useAuth();
+  const {user, accessToken} = useAuth();
   const {isFirstTime, isLoading: firstTimeLoading} = useFirstTimeCheck();
 
+  const isAuthenticated = Boolean(user) && Boolean(accessToken);
   // Show loading indicator when checking auth or first time status
   if (firstTimeLoading) {
     return (

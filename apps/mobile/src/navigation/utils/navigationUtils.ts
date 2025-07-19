@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useAuth as useAuthContext} from '@contexts';
 import {loggingService} from '@services/logging.service';
 // Storage key
 const FIRST_TIME_KEY = 'isFirstTime';
@@ -39,30 +38,3 @@ export const useFirstTimeCheck = () => {
 
   return {isFirstTime, isLoading, markAsNotFirstTime};
 };
-
-// Hook to handle authentication
-export function useAuth() {
-  // Use the context from our AuthContext
-  const authContext = useAuthContext();
-
-  // Create a memoized isAuthenticated value to prevent unnecessary rerenders
-  const isAuthenticated =
-    Boolean(authContext.user) && Boolean(authContext.accessToken);
-
-  // Debug log when auth state changes
-  useEffect(() => {
-    loggingService.info('Auth state in useAuth hook:', {
-      hasUser: Boolean(authContext.user),
-      hasToken: Boolean(authContext.accessToken),
-      isAuthenticated,
-    });
-  }, [authContext.user, authContext.accessToken, isAuthenticated]);
-
-  return {
-    isAuthenticated,
-    isLoading: authContext.isLoading,
-    user: authContext.user,
-    signin: authContext.signIn,
-    logout: authContext.signOut,
-  };
-}

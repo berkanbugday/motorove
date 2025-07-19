@@ -16,14 +16,14 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {createAuthSchemas, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius, commonStyles} from '@theme';
-import {useAuth} from '@navigation/utils/navigationUtils';
+import {useAuth} from '@contexts';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {useTranslation} from '@hooks/useTranslation';
 import {GraphQLFormattedError} from 'graphql';
 
 export const SigninScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const {signin} = useAuth();
+  const {signIn} = useAuth();
   const {height} = useWindowDimensions();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
@@ -49,7 +49,7 @@ export const SigninScreen = () => {
 
   const onSubmit = async (data: SigninFormValues) => {
     try {
-      await signin(data.email.trim(), data.password.trim());
+      await signIn(data.email.trim(), data.password.trim());
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);
     }
