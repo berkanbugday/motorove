@@ -34,21 +34,22 @@ export default {
     success: 'Başarılı',
     error: 'Hata',
     info: 'Bilgi',
+    try_again: 'Tekrar Dene',
   },
 
   // Main navigation items
   navigation: {
     home: 'Ana Sayfa',
+    search: 'Ara',
+    map: 'Harita',
+    groups: 'Gruplar',
+    more: 'Daha Fazla',
     profile: 'Profil',
     events: 'Etkinlikler',
-    groups: 'Gruplar',
     notifications: 'Bildirimler',
     settings: 'Ayarlar',
     create_post: 'Gönderi Oluştur',
-    search: 'Ara',
-    map: 'Harita',
     welcome: 'Hoş Geldiniz',
-    more: 'Daha Fazla',
     user_search: 'Kullanıcı Bul',
     garage: 'Garaj',
     following: 'Takip Edilenler',
@@ -599,6 +600,7 @@ export default {
     // General errors
     general: {
       something_wrong: 'Bir şeyler yanlış gitti. Lütfen tekrar deneyin.',
+      unexpected_error: 'Uygulama beklenmeyen bir hatayla karşılaştı.',
       default: 'Bir hata oluştu',
     },
     // Network errors

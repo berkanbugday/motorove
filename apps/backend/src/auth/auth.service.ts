@@ -68,7 +68,7 @@ export class AuthService {
           email: user.email,
           hasCompletedSetup: user.hasCompletedSetup,
         },
-        session: data.session || null,
+        session: data.session,
       };
     } catch (error) {
       if (
@@ -109,7 +109,7 @@ export class AuthService {
         email: user.email,
         hasCompletedSetup: user.hasCompletedSetup,
       },
-      session: data.session || null,
+      session: data.session,
     };
   }
 
@@ -164,7 +164,7 @@ export class AuthService {
           email: user.email,
           hasCompletedSetup: user.hasCompletedSetup,
         },
-        session: data.session || null,
+        session: data.session,
       };
     } catch (error: unknown) {
       let errorMessage = 'Token refresh failed';

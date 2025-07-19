@@ -34,21 +34,22 @@ export default {
     info: 'Info',
     complete: 'Complete',
     completing: 'Completing...',
+    try_again: 'Try Again',
   },
 
   // Main navigation items
   navigation: {
     home: 'Home',
+    search: 'Search',
+    map: 'Map',
+    groups: 'Groups',
+    more: 'More',
     profile: 'Profile',
     events: 'Events',
-    groups: 'Groups',
     notifications: 'Notifications',
     settings: 'Settings',
     create_post: 'Create Post',
-    search: 'Search',
-    map: 'Map',
     welcome: 'Welcome',
-    more: 'More',
     user_search: 'Find Users',
     garage: 'Garage',
     following: 'Following',
@@ -597,6 +598,7 @@ export default {
     // General errors
     general: {
       something_wrong: 'Something went wrong. Please try again.',
+      unexpected_error: 'The application has encountered an unexpected error.',
       default: 'An error occurred',
     },
     // Network errors

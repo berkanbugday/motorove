@@ -11,6 +11,7 @@ import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Icon, IconName} from '@components/Icon';
 import {colors} from '@theme/colors';
+import {useTranslation} from '@/hooks/useTranslation';
 
 /**
  * Custom Tab Bar component for bottom navigation
@@ -23,6 +24,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const insets = useSafeAreaInsets();
   const {width} = Dimensions.get('window');
   const tabWidth = width / state.routes.length;
+  const {t} = useTranslation();
 
   // Create animated values for each tab
   const animatedValues = useRef(
@@ -70,6 +72,23 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
     }
   };
 
+  const getTabBarLabel = (routeName: string) => {
+    switch (routeName) {
+      case 'HomeTab':
+        return t('navigation.home');
+      case 'SearchTab':
+        return t('navigation.search');
+      case 'MapTab':
+        return t('navigation.map');
+      case 'GroupsTab':
+        return t('navigation.groups');
+      case 'MoreTab':
+        return t('navigation.more');
+      default:
+        return t('navigation.home');
+    }
+  };
+
   return (
     <View
       style={[
@@ -104,7 +123,6 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
       {state.routes.map((route, index) => {
         const {options} = descriptors[route.key];
-        const label = options.tabBarLabel || options.title || route.name;
         const isFocused = state.index === index;
         const animatedValue = animatedValues[index];
         const badge = options.tabBarBadge;
@@ -186,7 +204,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
                   transform: [{scale}],
                 },
               ]}>
-              {(label as string).replace('Tab', '')}
+              {getTabBarLabel(route.name)}
             </Animated.Text>
           </TouchableOpacity>
         );

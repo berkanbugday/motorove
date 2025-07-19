@@ -162,10 +162,7 @@ class AuthService {
         throw errors[0];
       }
 
-      // Convert GraphQL response to our AuthResponse format
-      const authResponse = this.convertGraphQLAuthResponse(data.signUp);
-
-      return authResponse;
+      return data.signUp;
     } catch (error) {
       loggingService.error('Signup error:', error);
       throw error;
@@ -592,7 +589,7 @@ class AuthService {
     const {user, session} = graphQLResponse;
 
     // If session exists, convert expires_in to expires_at
-    let processedSession;
+    let processedSession = null;
     if (session) {
       // Handle expires_at if it's already provided
       if (session.expires_at) {
@@ -623,7 +620,7 @@ class AuthService {
 
     return {
       user: user,
-      session: processedSession || undefined,
+      session: processedSession,
     };
   }
 

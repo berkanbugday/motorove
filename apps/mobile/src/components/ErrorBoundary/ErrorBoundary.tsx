@@ -4,6 +4,8 @@ import {loggingService} from '@services/logging.service';
 import {errorService} from '@services/error.service';
 import {Body, Button, Title} from '@components';
 import {colors, spacing} from '@theme';
+import i18n from '@/i18n/i18n';
+
 interface Props {
   children: ReactNode;
   fallbackComponent?: ReactNode;
@@ -44,7 +46,7 @@ class ErrorBoundary extends Component<Props, State> {
     });
 
     // Show a toast with the error message
-    errorService.showErrorToast('An unexpected error has occurred');
+    errorService.showErrorToast(i18n.t('errors.general.something_wrong'));
 
     // Call optional onError callback
     if (this.props.onError) {
@@ -78,16 +80,16 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <Title align="center" color={colors.primary.main}>
-            Something went wrong
+            {i18n.t('errors.general.something_wrong')}
           </Title>
           <Body align="center" color={colors.neutral.grey}>
-            The application has encountered an unexpected error.
+            {i18n.t('errors.general.unexpected_error')}
           </Body>
           <Button
             onPress={this.resetError}
             variant="primary"
             shape="round"
-            title="Try Again"
+            title={i18n.t('common.try_again')}
           />
         </View>
       );
