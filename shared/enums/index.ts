@@ -16,3 +16,5 @@ export * from "./riding-style.enum";
 export * from "./equipment-type.enum";
 export * from "./social-media-platform.enum";
 export * from "./interest.enum";
+export * from "./notification-permission.enum";
+export * from "./notification-channel.enum";

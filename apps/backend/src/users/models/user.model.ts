@@ -16,6 +16,8 @@ import { Interest } from '../../enums/models/interest.enum';
 import { SocialMedia } from './social-media.model';
 import { EventParticipant } from '../../events/models/event-participant.model';
 import { EventInvitation } from '../../events/models/event-invitation.model';
+import { NotificationPermission } from '../../enums/models/notification-permission.enum';
+import { UserNotificationSetting } from './user-notification-setting.model';
 
 @ObjectType()
 export class User implements IUser {
@@ -111,4 +113,12 @@ export class User implements IUser {
 
   @Field(() => [EventInvitation], { nullable: true })
   createdEventInvitations?: EventInvitation[];
+
+  @Field(() => NotificationPermission, {
+    defaultValue: NotificationPermission.UNKNOWN,
+  })
+  notificationPermission: NotificationPermission;
+
+  @Field(() => [UserNotificationSetting], { nullable: true })
+  notificationSettings?: UserNotificationSetting[];
 }

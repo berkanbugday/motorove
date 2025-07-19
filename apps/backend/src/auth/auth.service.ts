@@ -67,6 +67,8 @@ export class AuthService {
           lastName: user.lastName,
           email: user.email,
           hasCompletedSetup: user.hasCompletedSetup,
+          notificationPermission:
+            user.notificationPermission as NotificationPermission,
         },
         session: data.session,
       };
@@ -108,6 +110,7 @@ export class AuthService {
         lastName: user.lastName,
         email: user.email,
         hasCompletedSetup: user.hasCompletedSetup,
+        notificationPermission: user.notificationPermission,
       },
       session: data.session,
     };
@@ -163,6 +166,7 @@ export class AuthService {
           lastName: user.lastName,
           email: user.email,
           hasCompletedSetup: user.hasCompletedSetup,
+          notificationPermission: user.notificationPermission,
         },
         session: data.session,
       };
@@ -215,6 +219,7 @@ export class AuthService {
       lastName: user.lastName,
       email: user.email,
       hasCompletedSetup: user.hasCompletedSetup,
+      notificationPermission: user.notificationPermission,
     };
   }
 

@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { NotificationPermission } from '../../enums/models/notification-permission.enum';
 
 @ObjectType()
 export class AuthUser {
@@ -16,4 +17,7 @@ export class AuthUser {
 
   @Field(() => Boolean, { defaultValue: false })
   hasCompletedSetup: boolean;
+
+  @Field()
+  notificationPermission: NotificationPermission;
 }

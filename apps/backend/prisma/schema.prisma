@@ -60,6 +60,17 @@ enum NotificationStatus {
   FAILED
 }
 
+enum NotificationPermission {
+  ALLOWED
+  BLOCKED
+  UNKNOWN
+}
+
+enum NotificationChannel {
+  PUSH
+  EMAIL
+}
+
 enum EventType {
   SOLO_RIDE
   GROUP_RIDE
@@ -219,6 +230,9 @@ model User {
   ridingStyles RidingStyle[] @default([])
   interests    Interest[]    @default([])
 
+  // Notification permission fields
+  notificationPermission NotificationPermission @default(UNKNOWN)
+
   // Relations
   createdGroups        Group[]           @relation("GroupCreatedBy")
   updatedGroups        Group[]           @relation("GroupUpdatedBy")
@@ -263,12 +277,34 @@ model User {
   // EventParticipant relations
   updatedEventParticipants EventParticipant[] @relation("EventParticipantUpdatedBy")
 
+  // Notification settings relations
+  notificationSettings UserNotificationSetting[]
+
   @@index([supabaseId])
   @@index([isActive])
   @@index([ridingStyles])
   @@index([gender])
   @@index([interests])
   @@index([cityId])
+  @@index([notificationPermission])
+}
+
+// User notification settings
+model UserNotificationSetting {
+  id               String              @id @default(uuid())
+  userId           String
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notificationType NotificationType
+  channel          NotificationChannel
+  isEnabled        Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@unique([userId, notificationType, channel])
+  @@index([userId])
+  @@index([notificationType])
+  @@index([channel])
+  @@index([isEnabled])
 }
 
 // New model for user garages
@@ -436,15 +472,16 @@ model GroupMembership {
 }
 
 model Notification {
-  id     String             @id @default(uuid())
-  title  String
-  body   String
-  type   NotificationType
-  data   Json?              @default("{}")
-  userId String
-  user   User               @relation(fields: [userId], references: [id])
-  status NotificationStatus @default(PENDING)
-  read   Boolean            @default(false)
+  id      String              @id @default(uuid())
+  title   String
+  body    String
+  type    NotificationType
+  channel NotificationChannel
+  data    Json?               @default("{}")
+  userId  String
+  user    User                @relation(fields: [userId], references: [id])
+  status  NotificationStatus  @default(PENDING)
+  read    Boolean             @default(false)
 
   // Base model fields
   createdById String
@@ -457,6 +494,7 @@ model Notification {
 
   @@index([userId])
   @@index([type])
+  @@index([channel])
   @@index([status])
   @@index([read])
   @@index([createdAt]) // Added index for filtering by creation date
