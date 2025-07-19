@@ -18,6 +18,7 @@ export * from './GroupEventBanner';
 export * from './GroupEventCard';
 export * from './GroupCard';
 export * from './LocationPermissionOverlay';
+export * from './NotificationPermissionOverlay';
 export * from './Checkbox';
 export * from './Chip';
 export * from './Typography';

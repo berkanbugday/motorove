@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
+import {NotificationPermissionOverlay} from '@components/NotificationPermissionOverlay';
 import {
   TopHeaderBar,
   Subtitle,
@@ -128,6 +129,8 @@ type Props = NativeStackScreenProps<TabParamList, 'HomeTab'>;
 
 export const HomeScreen = ({navigation}: Props) => {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
+  const [showNotificationPermission, setShowNotificationPermission] =
+    useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
@@ -212,6 +215,20 @@ export const HomeScreen = ({navigation}: Props) => {
 
   const handleDismissLocationPermission = () => {
     setShowLocationPermission(false);
+  };
+
+  const handleAllowNotificationAccess = () => {
+    // Request notification permission logic would go here
+    setShowNotificationPermission(false);
+  };
+
+  const handleDismissNotificationPermission = () => {
+    setShowNotificationPermission(false);
+  };
+
+  const handleOpenNotificationSettings = () => {
+    // Open device notification settings logic would go here
+    setShowNotificationPermission(false);
   };
 
   const onRefresh = useCallback(async () => {
@@ -579,6 +596,13 @@ export const HomeScreen = ({navigation}: Props) => {
           visible={showLocationPermission}
           onAllowPress={handleAllowLocationAccess}
           onDismiss={handleDismissLocationPermission}
+        />
+
+        <NotificationPermissionOverlay
+          visible={showNotificationPermission}
+          onAllowPress={handleAllowNotificationAccess}
+          onDismiss={handleDismissNotificationPermission}
+          onNotAllowPress={handleOpenNotificationSettings}
         />
 
         {/* Weather Widget with ghost effect when scrolling up */}
