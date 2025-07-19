@@ -3,7 +3,7 @@ import {StyleSheet, View, SafeAreaView, Image, ScrollView} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {useAuth} from '@navigation/utils/navigationUtils';
+
 import {
   Icon,
   AnimatedInput,
@@ -25,6 +25,7 @@ import {termsOfService, privacyPolicy} from '@constants/legalContent';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {GraphQLFormattedError} from 'graphql';
 import {useTranslation} from '@hooks/useTranslation';
+import authService from '@services/auth.service';
 
 export const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -32,10 +33,10 @@ export const SignupScreen = () => {
   const [userEmail, setUserEmail] = useState('');
   const termsBottomSheetRef = useRef<BottomSheetRef>(null);
   const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
-  const {signup} = useAuth();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
+  const {signUp} = authService;
 
   // Create validation schema with translations
   const {signupSchema} = createAuthSchemas(t);
@@ -44,6 +45,7 @@ export const SignupScreen = () => {
     control,
     handleSubmit,
     formState: {errors, isSubmitting},
+    reset,
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -69,7 +71,7 @@ export const SignupScreen = () => {
 
   const onSubmit = async (data: SignupFormValues) => {
     try {
-      const response = await signup(
+      const response = await signUp(
         data.firstName,
         data.lastName,
         data.email,
@@ -79,6 +81,7 @@ export const SignupScreen = () => {
       if (response.user) {
         setUserEmail(data.email);
         setSignupSuccess(true);
+        reset();
       }
     } catch (error) {
       await handleGraphQLError(error as GraphQLFormattedError);

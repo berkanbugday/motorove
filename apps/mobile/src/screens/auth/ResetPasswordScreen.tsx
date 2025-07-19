@@ -64,7 +64,6 @@ export const ResetPasswordScreen = () => {
     formValues: ResetPasswordFormValues,
   ): Promise<void> => {
     try {
-      // Use the new hook-based resetPassword function
       await resetPassword(formValues.email);
     } catch (error) {
       loggingService.error('Error in onSubmit:', error);

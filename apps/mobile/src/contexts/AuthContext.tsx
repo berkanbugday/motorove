@@ -19,12 +19,6 @@ const defaultAuthState: AuthState = {
 // Context type
 export interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<AuthResponse>;
-  signUp: (
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string,
-  ) => Promise<AuthResponse>;
   accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
@@ -34,9 +28,6 @@ export interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType>({
   ...defaultAuthState,
   signIn: async () => {
-    throw new Error('Not implemented');
-  },
-  signUp: async () => {
     throw new Error('Not implemented');
   },
   accountSetup: async () => {
@@ -100,60 +91,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       setAuthState(prevState => ({...prevState, isLoading: true}));
       const response = await authService.signIn(email, password);
 
-      // Ensure we're setting the state correctly after signin
-      const newState = {
-        user: response.user,
-        accessToken: response.session?.access_token || null,
-        refreshToken: response.session?.refresh_token || null,
-        expiresAt: response.session?.expires_at || null,
-        isLoading: false,
-      };
+      if (response.session) {
+        // Ensure we're setting the state correctly after signin
+        const newState = {
+          user: response.user,
+          accessToken: response.session?.access_token || null,
+          refreshToken: response.session?.refresh_token || null,
+          expiresAt: response.session?.expires_at || null,
+          isLoading: false,
+        };
 
-      loggingService.info('Setting auth state after signin:', {
-        hasUser: !!newState.user,
-        hasToken: !!newState.accessToken,
-      });
+        loggingService.info('Setting auth state after signin:', {
+          hasUser: !!newState.user,
+          hasToken: !!newState.accessToken,
+        });
 
-      setAuthState(newState);
-
-      return response;
-    } catch (error) {
-      setAuthState(prevState => ({...prevState, isLoading: false}));
-      throw error;
-    }
-  };
-
-  // Sign up
-  const signUp = async (
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string,
-  ): Promise<AuthResponse> => {
-    try {
-      setAuthState(prevState => ({...prevState, isLoading: true}));
-      const response = await authService.signUp(
-        firstName,
-        lastName,
-        email,
-        password,
-      );
-
-      // Ensure we're setting the state correctly after signup
-      const newState = {
-        user: response.user,
-        accessToken: response.session?.access_token || null,
-        refreshToken: response.session?.refresh_token || null,
-        expiresAt: response.session?.expires_at || null,
-        isLoading: false,
-      };
-
-      loggingService.info('Setting auth state after signup:', {
-        hasUser: !!newState.user,
-        hasToken: !!newState.accessToken,
-      });
-
-      setAuthState(newState);
+        setAuthState(newState);
+      }
 
       return response;
     } catch (error) {
@@ -210,7 +164,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       value={{
         ...authState,
         signIn,
-        signUp,
         accountSetup,
         signOut,
         loadAuthState,

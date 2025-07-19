@@ -614,6 +614,7 @@ export default {
       forbidden: 'You do not have permission to perform this action.',
       already_used: 'This email is already in use.',
       email_not_confirmed: 'Please confirm your email address.',
+      email_already_exists: 'This email address is already in use.',
     },
     // API errors
     api: {

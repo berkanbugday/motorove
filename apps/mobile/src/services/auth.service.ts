@@ -192,10 +192,10 @@ class AuthService {
 
       // Convert GraphQL response to our AuthResponse format
       const authResponse = this.convertGraphQLAuthResponse(data.signIn);
-      await this.saveAuthData(authResponse);
-
-      // Start background token refresh
-      this.setupBackgroundTokenRefresh(authResponse);
+      if (authResponse.session) {
+        await this.saveAuthData(authResponse);
+        this.setupBackgroundTokenRefresh(authResponse);
+      }
 
       return authResponse;
     } catch (error) {
@@ -314,7 +314,6 @@ class AuthService {
   // Internal refresh token implementation
   private async _refreshToken(): Promise<AuthResponse> {
     try {
-      loggingService.info('Starting token refresh process');
       const refreshToken = await EncryptedStorage.getItem(
         STORAGE_KEYS.REFRESH_TOKEN,
       );
@@ -726,64 +725,6 @@ class AuthService {
       await AsyncStorage.multiRemove(keys);
     } catch (error) {
       loggingService.error('Error clearing AsyncStorage auth data:', error);
-    }
-  }
-
-  // Debug method to check token validity and status
-  async debugTokenStatus(): Promise<void> {
-    try {
-      const encryptedAuthData = await EncryptedStorage.getItem(
-        STORAGE_KEYS.AUTH_DATA,
-      );
-
-      if (encryptedAuthData) {
-        const parsedData = JSON.parse(encryptedAuthData);
-        const now = Date.now();
-
-        // Check if we have valid tokens
-        const hasAccessToken = !!parsedData.accessToken;
-        const hasRefreshToken = !!parsedData.refreshToken;
-
-        // Check expiration
-        const expiresAt = parsedData.expiresAt;
-        const isExpired = expiresAt && expiresAt <= now;
-        const timeToExpire = expiresAt ? expiresAt - now : 0;
-
-        loggingService.info('Token Debug Information', {
-          hasAccessToken,
-          hasRefreshToken,
-          isExpired,
-          timeToExpire: isExpired
-            ? 'Already expired'
-            : `${Math.floor(timeToExpire / 1000)} seconds remaining`,
-          tokenFirstChars: hasAccessToken
-            ? parsedData.accessToken.substring(0, 10) + '...'
-            : 'No token',
-        });
-
-        // Force token refresh to get a new token
-        if (hasRefreshToken) {
-          try {
-            loggingService.info('Attempting force token refresh');
-            await this.refreshToken();
-            loggingService.info('Force token refresh successful');
-          } catch (error) {
-            loggingService.error('Force token refresh failed:', error);
-          }
-        }
-      } else {
-        loggingService.error('No auth data found in encrypted storage');
-
-        // Check AsyncStorage as fallback
-        const accessToken = await AsyncStorage.getItem(
-          STORAGE_KEYS.ACCESS_TOKEN,
-        );
-        loggingService.info('AsyncStorage fallback check:', {
-          hasToken: !!accessToken,
-        });
-      }
-    } catch (error) {
-      loggingService.error('Token debug check failed:', error);
     }
   }
 }

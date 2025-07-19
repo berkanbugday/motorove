@@ -36,37 +36,18 @@ class GraphQLErrorService {
           // Handle authentication errors
           errorType = ErrorType.AUTHORIZATION;
 
-          // Check for specific refresh token errors
-          if (
-            errorMessage &&
-            (errorMessage.includes('Invalid Refresh Token: Already Used') ||
-              errorMessage.includes('Invalid token'))
-          ) {
-            loggingService.error('Refresh token error, signing out user');
-            await errorService.handleError(error, errorType, {
-              fallbackMessage: i18n.t('errors.auth.session_expired'),
-              showToast: true,
-            });
-            await authService.signOut();
-            handled = true;
-            break;
-          }
-
-          // Attempt to refresh token if available
-          try {
-            await authService.refreshToken();
-            // Don't show an error toast if we successfully refreshed the token
-            return true;
-          } catch (refreshError) {
-            loggingService.error('Error refreshing token:', refreshError);
-            // If refresh fails, handle as a regular auth error
-            await errorService.handleError(error, errorType, {
-              fallbackMessage: i18n.t('errors.auth.session_expired'),
-            });
-            // Redirect to sign in or clear auth state
-            authService.signOut();
-            handled = true;
-          }
+          loggingService.error(errorMessage);
+          await errorService.handleError(error, errorType, {
+            fallbackMessage: errorMessage,
+            showToast: true,
+          });
+          await authService.signOut();
+          handled = true;
+          break;
+        case 'INVALID_REFRESH_TOKEN':
+          loggingService.error('Refresh token error, signing out user');
+          await authService.signOut();
+          handled = true;
           break;
         case 'FORBIDDEN':
           errorType = ErrorType.AUTHORIZATION;

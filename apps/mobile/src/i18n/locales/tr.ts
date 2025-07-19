@@ -618,6 +618,7 @@ export default {
       forbidden: 'Bu işlemi gerçekleştirme izniniz yok.',
       already_used: 'Bu e-posta zaten kullanımda.',
       email_not_confirmed: 'Lütfen e-posta adresinizi onaylayın.',
+      email_already_exists: 'Bu e-posta adresi zaten kullanımda.',
     },
     // API errors
     api: {

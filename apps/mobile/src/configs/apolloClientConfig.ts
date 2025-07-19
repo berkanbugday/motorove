@@ -77,15 +77,7 @@ const errorLink = onError(
         }
 
         // Handle authentication errors with automatic token refresh
-        if (extensions?.code === 'UNAUTHORIZED') {
-          // Skip token refresh for operations that are themselves refreshing tokens
-          if (operation.operationName === 'RefreshToken') {
-            loggingService.info(
-              'Skipping auth handling for refresh token operation',
-            );
-            return;
-          }
-
+        if (extensions?.code === 'UNAUTHENTICATED') {
           // Return a new observable for the refresh token flow
           return new Observable(observer => {
             // Attempt to refresh the token
@@ -105,74 +97,10 @@ const errorLink = onError(
               .catch(refreshError => {
                 loggingService.error('Token refresh failed:', refreshError);
 
-                const errorMessage =
-                  refreshError instanceof Error
-                    ? refreshError.message
-                    : String(refreshError);
+                // Clear auth if refresh token is invalid
+                authService.signOut();
 
-                let isUnrecoverableRefreshTokenError = false;
-
-                // Check if the error is an ApolloError with graphQLErrors
-                if (
-                  refreshError.graphQLErrors &&
-                  refreshError.graphQLErrors.length > 0
-                ) {
-                  const gqlError = refreshError.graphQLErrors[0];
-                  if (
-                    gqlError.message.includes('Token has expired') || // Refresh token itself expired
-                    gqlError.message.includes(
-                      'Invalid Refresh Token: Already Used',
-                    ) ||
-                    gqlError.message.includes('Invalid Refresh Token') || // General invalid from backend
-                    gqlError.message.includes('User not found') || // User associated with token not found
-                    (gqlError.extensions?.code === 'UNAUTHORIZED' &&
-                      gqlError.message.includes('Invalid token'))
-                  ) {
-                    isUnrecoverableRefreshTokenError = true;
-                  }
-                } else if (
-                  // Fallback for client-side errors from _refreshToken or direct network errors
-                  errorMessage.includes('No refresh token available') || // From authService._refreshToken
-                  errorMessage.includes('Invalid refresh token response') || // From authService._refreshToken
-                  // The following client-side checks in _refreshToken might also indicate unrecoverable states
-                  // if they echo what the server would say for a permanently bad token.
-                  errorMessage.includes('Token already used') ||
-                  errorMessage.includes('Invalid Refresh Token')
-                ) {
-                  isUnrecoverableRefreshTokenError = true;
-                }
-
-                if (isUnrecoverableRefreshTokenError) {
-                  loggingService.error(
-                    'Unrecoverable refresh token error detected during Apollo error handling. User will not be signed out automatically, but authenticated API calls will likely fail.',
-                    {
-                      errorMessage,
-                      originalError: err,
-                      refreshErrorDetail: refreshError,
-                    },
-                  );
-                  // User requested not to sign out automatically even on unrecoverable refresh token errors.
-                  authService.signOut().catch(e => {
-                    loggingService.error(
-                      'Error during sign out after unrecoverable refresh token error:',
-                      e,
-                    );
-                  });
-                } else {
-                  // For other errors (e.g., temporary network issue during refresh attempt),
-                  // log the error but do not sign out immediately.
-                  // Let the original error propagate; RetryLink might handle it.
-                  loggingService.warning(
-                    'Token refresh failed due to a potentially recoverable error. Not signing out immediately.',
-                    {
-                      errorMessage,
-                      originalError: err,
-                      refreshErrorDetail: refreshError,
-                    },
-                  );
-                }
-
-                // Forward the original error that triggered the refresh attempt
+                // Forward the original error
                 observer.error(err);
                 observer.complete();
               });

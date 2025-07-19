@@ -63,7 +63,6 @@ export function useAuth() {
     isLoading: authContext.isLoading,
     user: authContext.user,
     signin: authContext.signIn,
-    signup: authContext.signUp,
     logout: authContext.signOut,
   };
 }

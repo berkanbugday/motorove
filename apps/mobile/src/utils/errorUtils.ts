@@ -129,6 +129,17 @@ function humanizeErrorMessage(message: string): string {
     return i18n.t('errors.auth.invalid_credentials');
   }
 
+  if (
+    message.includes('Invalid Refresh Token: Already Used') ||
+    message.includes('Invalid token')
+  ) {
+    return i18n.t('errors.auth.session_expired');
+  }
+
+  if (message.includes('Email already exists')) {
+    return i18n.t('errors.auth.email_already_exists');
+  }
+
   if (message.includes('Email not confirmed')) {
     return i18n.t('errors.auth.email_not_confirmed');
   }
