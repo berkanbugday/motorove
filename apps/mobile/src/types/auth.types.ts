@@ -2,6 +2,8 @@
  * Authentication-related types and interfaces
  */
 
+import {NotificationPermission} from '@motorove/shared';
+
 /**
  * User entity interface
  */
@@ -12,6 +14,7 @@ export interface AuthUser {
   lastName?: string;
   avatar?: string;
   hasCompletedSetup?: boolean;
+  notificationPermission?: NotificationPermission;
 }
 
 /**
@@ -34,7 +37,6 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   expiresAt: number | null;
-  isLoading: boolean;
 }
 
 /**

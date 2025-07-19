@@ -13,7 +13,6 @@ const defaultAuthState: AuthState = {
   accessToken: null,
   refreshToken: null,
   expiresAt: null,
-  isLoading: true,
 };
 
 // Context type
@@ -59,7 +58,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   // Load authentication state
   const loadAuthState = async (): Promise<void> => {
     try {
-      setAuthState(prevState => ({...prevState, isLoading: true}));
       const state = await authService.getAuthState();
 
       // Log authentication state for debugging
@@ -69,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         expiresAt: state.expiresAt,
       });
 
-      setAuthState({...state, isLoading: false});
+      setAuthState({...state});
 
       // Setup token refresh if needed
       if (state.user && state.accessToken && state.expiresAt) {
@@ -78,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       }
     } catch (error) {
       loggingService.error('Error loading auth state:', error);
-      setAuthState({...defaultAuthState, isLoading: false});
+      setAuthState({...defaultAuthState});
     }
   };
 
@@ -88,7 +86,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     password: string,
   ): Promise<AuthResponse> => {
     try {
-      setAuthState(prevState => ({...prevState, isLoading: true}));
       const response = await authService.signIn(email, password);
 
       if (response.session) {
@@ -98,7 +95,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           accessToken: response.session?.access_token || null,
           refreshToken: response.session?.refresh_token || null,
           expiresAt: response.session?.expires_at || null,
-          isLoading: false,
         };
 
         loggingService.info('Setting auth state after signin:', {
@@ -111,7 +107,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       return response;
     } catch (error) {
-      setAuthState(prevState => ({...prevState, isLoading: false}));
       throw error;
     }
   };
@@ -129,15 +124,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       setAuthState(newState);
 
       await authService.saveAuthDataToEncryptedStorage(newState);
-    } catch (error) {
-      setAuthState(prevState => ({...prevState, isLoading: false}));
-    }
+    } catch (error) {}
   };
 
   // Sign out
   const signOut = async (): Promise<void> => {
     try {
-      setAuthState(prevState => ({...prevState, isLoading: true}));
       // Clean up notification service if user was logged in
       if (authState.user && authState.user.id) {
         try {
@@ -151,9 +143,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       }
 
       await authService.signOut();
-      setAuthState({...defaultAuthState, isLoading: false});
+      setAuthState({...defaultAuthState});
     } catch (error) {
-      setAuthState(prevState => ({...prevState, isLoading: false}));
       loggingService.error('Error signing out:', error);
       throw error;
     }

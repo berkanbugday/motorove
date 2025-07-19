@@ -72,4 +72,9 @@ export class SupabaseService {
 
     return { error };
   }
+
+  async deleteUser(userId: string) {
+    const { error } = await this.supabase.auth.admin.deleteUser(userId);
+    return { error };
+  }
 }

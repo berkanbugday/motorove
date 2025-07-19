@@ -437,7 +437,6 @@ class AuthService {
 
               return {
                 ...updatedParsedData,
-                isLoading: false,
               };
             }
 
@@ -459,7 +458,6 @@ class AuthService {
                 accessToken: null,
                 refreshToken: null,
                 expiresAt: null,
-                isLoading: false,
               };
             }
 
@@ -470,7 +468,6 @@ class AuthService {
               accessToken: parsedData.accessToken,
               refreshToken: parsedData.refreshToken,
               expiresAt: parsedData.expiresAt,
-              isLoading: false,
             };
           }
         }
@@ -498,7 +495,6 @@ class AuthService {
           accessToken: parsedData.accessToken,
           refreshToken: parsedData.refreshToken,
           expiresAt: parsedData.expiresAt,
-          isLoading: false,
         };
       }
 
@@ -521,7 +517,6 @@ class AuthService {
           accessToken,
           refreshToken,
           expiresAt,
-          isLoading: false,
         };
 
         // Migrate to encrypted storage
@@ -550,7 +545,6 @@ class AuthService {
         accessToken: null,
         refreshToken: null,
         expiresAt: null,
-        isLoading: false,
       };
     } catch (error) {
       loggingService.error('Error getting auth state:', error);
@@ -559,7 +553,6 @@ class AuthService {
         accessToken: null,
         refreshToken: null,
         expiresAt: null,
-        isLoading: false,
       };
     }
   }
@@ -655,9 +648,7 @@ class AuthService {
   }
 
   // Save auth data to encrypted storage
-  async saveAuthDataToEncryptedStorage(
-    authState: Omit<AuthState, 'isLoading'>,
-  ): Promise<void> {
+  async saveAuthDataToEncryptedStorage(authState: AuthState): Promise<void> {
     try {
       // Save the main auth data and refresh token atomically (as much as possible)
       const promises = [

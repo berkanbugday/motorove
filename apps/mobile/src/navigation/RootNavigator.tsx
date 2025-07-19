@@ -7,6 +7,7 @@ import {AuthNavigator} from './stacks/AuthNavigator';
 import {MainNavigator} from './stacks/MainNavigator';
 import {useFirstTimeCheck, useAuth} from './utils/navigationUtils';
 import {RootStackParamList} from '../types/navigation.types';
+import {AccountSetupScreen} from '@screens/auth/AccountSetupScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -45,26 +46,19 @@ export function RootNavigator() {
           // User is authenticated, decide whether to show main app or account setup
           !user?.hasCompletedSetup ? (
             <Stack.Screen
-              key="setup"
               name="Auth"
-              children={() => (
-                <AuthNavigator
-                  key="setup"
-                  isFirstTime={false}
-                  initialRoute="AccountSetup"
-                />
-              )}
+              component={AccountSetupScreen}
+              key="accountSetup"
             />
           ) : (
             <Stack.Screen key="main" name="Main" component={MainNavigator} />
           )
         ) : (
           // User is not authenticated, show auth flow
-          <Stack.Screen key="auth" name="Auth">
-            {props => (
-              <AuthNavigator key="auth" {...props} isFirstTime={isFirstTime} />
-            )}
-          </Stack.Screen>
+          <Stack.Screen
+            name="Auth"
+            component={() => <AuthNavigator isFirstTime={isFirstTime} />}
+          />
         )}
       </Stack.Navigator>
     </NavigationContainer>

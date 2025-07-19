@@ -9,6 +9,8 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { AuthResponse } from './models/auth-response.model';
 import { AuthUser } from './models/auth-user.model';
 import { NotificationPermission } from '../enums/models/notification-permission.enum';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
 export class AuthService {
@@ -17,12 +19,44 @@ export class AuthService {
     private prismaService: PrismaService,
   ) {}
 
+  private async createDefaultNotificationSettingsInTransaction(
+    prisma: any,
+    userId: string,
+  ): Promise<void> {
+    const notificationTypes = Object.values(NotificationType);
+
+    const defaultSettings: Array<{
+      userId: string;
+      notificationType: NotificationType;
+      channel: NotificationChannel;
+    }> = [];
+
+    for (const notificationType of notificationTypes) {
+      if (notificationType === NotificationType.SYSTEM) {
+        continue;
+      }
+
+      defaultSettings.push({
+        userId,
+        notificationType,
+        channel: NotificationChannel.PUSH,
+      });
+    }
+
+    // Create all notification settings within the transaction
+    await prisma.userNotificationSetting.createMany({
+      data: defaultSettings,
+    });
+  }
+
   async signUp(
     firstName: string,
     lastName: string,
     email: string,
     password: string,
   ): Promise<AuthResponse> {
+    let supabaseUser: any = null;
+
     try {
       // First, check if the email already exists in our database
       const existingUser = await this.prismaService.user.findUnique({
@@ -50,30 +84,57 @@ export class AuthService {
         throw new UnauthorizedException('User not created');
       }
 
-      // Create user in our database
-      const user = await this.prismaService.user.create({
-        data: {
-          firstName,
-          lastName,
-          email,
-          supabaseId: data.user.id,
-          avatar: 'users/avatars/default.png',
-        },
+      supabaseUser = data.user;
+
+      // Use a transaction for database operations
+      const result = await this.prismaService.$transaction(async (prisma) => {
+        // Create user in our database
+        const user = await prisma.user.create({
+          data: {
+            firstName,
+            lastName,
+            email,
+            supabaseId: supabaseUser.id,
+            avatar: 'users/avatars/default.png',
+          },
+        });
+
+        // Create default notification settings for the new user
+        await this.createDefaultNotificationSettingsInTransaction(
+          prisma,
+          user.id,
+        );
+
+        return user;
       });
 
       return {
         user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          hasCompletedSetup: user.hasCompletedSetup,
+          id: result.id,
+          firstName: result.firstName,
+          lastName: result.lastName,
+          email: result.email,
+          hasCompletedSetup: result.hasCompletedSetup,
           notificationPermission:
-            user.notificationPermission as NotificationPermission,
+            result.notificationPermission as NotificationPermission,
         },
         session: data.session,
       };
     } catch (error) {
+      // If we created a Supabase user but database operations failed,
+      // we should attempt to delete the Supabase user to maintain consistency
+      if (supabaseUser) {
+        try {
+          await this.supabaseService.deleteUser(supabaseUser.id);
+        } catch (deleteError) {
+          // Log the error but don't throw it, as the main error is more important
+          console.error(
+            'Failed to rollback Supabase user creation:',
+            deleteError,
+          );
+        }
+      }
+
       if (
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
