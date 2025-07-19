@@ -2,7 +2,7 @@ import {gql} from '@apollo/client';
 
 // Group fragment
 export const CREATE_GROUP_FRAGMENT = gql`
-  fragment CreateGroupFragment on Group {
+  fragment CreateGroupFragment on GroupDto {
     name
     description
     logo
@@ -21,7 +21,7 @@ export const CREATE_GROUP_FRAGMENT = gql`
 `;
 
 export const UPDATE_GROUP_FRAGMENT = gql`
-  fragment UpdateGroupFragment on Group {
+  fragment UpdateGroupFragment on GroupDto {
     id
     ...CreateGroupFragment
   }
@@ -30,7 +30,7 @@ export const UPDATE_GROUP_FRAGMENT = gql`
 
 // Group fragment
 export const GROUP_FRAGMENT = gql`
-  fragment GroupFragment on Group {
+  fragment GroupFragment on GroupDto {
     id
     name
     description
@@ -44,10 +44,7 @@ export const GROUP_FRAGMENT = gql`
     }
     privacy
     membersCapacity
-    tags {
-      id
-      value
-    }
+    tags
     memberships {
       id
       role
@@ -64,7 +61,7 @@ export const GROUP_FRAGMENT = gql`
 // Create group mutation
 export const CREATE_GROUP = gql`
   mutation CreateGroup($input: CreateGroupInput!) {
-    createGroup(createGroupInput: $input) {
+    createGroup(input: $input) {
       ...CreateGroupFragment
     }
   }
@@ -74,7 +71,7 @@ export const CREATE_GROUP = gql`
 // Update group mutation
 export const UPDATE_GROUP = gql`
   mutation UpdateGroup($input: UpdateGroupInput!) {
-    updateGroup(updateGroupInput: $input) {
+    updateGroup(input: $input) {
       ...UpdateGroupFragment
     }
   }

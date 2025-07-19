@@ -406,7 +406,7 @@ type Group {
 }
 
 type GroupDto {
-  city: String!
+  city: CityDto!
   cover: String
   createdAt: DateTime!
   description: String!
@@ -416,6 +416,7 @@ type GroupDto {
   logo: String
   membersCapacity: Int
   membersCount: Int
+  memberships: [GroupMembershipDto!]!
   name: String!
   privacy: GroupPrivacy!
   tags: [String!]!

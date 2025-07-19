@@ -1,9 +1,11 @@
 import {gql} from '@apollo/client';
+import {COMMENT_FRAGMENT} from './comment.graphql';
+import {GROUP_FRAGMENT} from './group.graphql';
+import {USER_FRAGMENT} from './user.graphql';
 
 export const POST_ADDRESS_FRAGMENT = gql`
-  fragment PostAddressFragment on PostAddress {
+  fragment PostAddressFragment on AddressDto {
     id
-    postId
     address
     language
     type
@@ -13,33 +15,32 @@ export const POST_ADDRESS_FRAGMENT = gql`
 `;
 
 export const POST_FRAGMENT = gql`
-  fragment PostFragment on Post {
+  fragment PostFragment on PostDto {
     id
     content
     images
-    latitude
-    longitude
-    group {
-      id
-      name
-    }
-    addresses {
-      ...PostAddressFragment
-    }
     likesCount
     commentsCount
     isLiked
     isSaved
-    createdAt
-    updatedAt
     createdBy {
-      id
-      firstName
-      lastName
-      avatar
+      ...UserFragment
+    }
+    createdAt
+    addresses {
+      ...PostAddressFragment
+    }
+    comments {
+      ...CommentFragment
+    }
+    group {
+      ...GroupFragment
     }
   }
   ${POST_ADDRESS_FRAGMENT}
+  ${COMMENT_FRAGMENT}
+  ${GROUP_FRAGMENT}
+  ${USER_FRAGMENT}
 `;
 
 export const CREATE_POST_FRAGMENT = gql`
@@ -97,7 +98,7 @@ export const GET_POST = gql`
 // Create post mutation
 export const CREATE_POST = gql`
   mutation CreatePost($input: CreatePostInput!) {
-    createPost(createPostInput: $input) {
+    createPost(input: $input) {
       ...CreatePostFragment
     }
   }
@@ -106,7 +107,7 @@ export const CREATE_POST = gql`
 
 export const UPDATE_POST = gql`
   mutation UpdatePost($input: UpdatePostInput!) {
-    updatePost(updatePostInput: $input) {
+    updatePost(input: $input) {
       ...UpdatePostFragment
     }
   }

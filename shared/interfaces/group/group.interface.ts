@@ -1,4 +1,6 @@
 import { GroupPrivacy } from "../../enums";
+import { ICity } from "../city/city.interface";
+import { GroupTag } from "../../enums";
 
 /**
  * Group Interface
@@ -10,28 +12,12 @@ export interface IGroup {
   description: string;
   logo?: string | null;
   cover?: string | null;
-  city: string;
+  city: ICity;
   privacy: GroupPrivacy;
-  tags: string[];
+  tags: GroupTag[];
   membersCapacity?: number | null;
   membersCount?: number | null;
   isMember?: boolean;
   isAdmin?: boolean;
   createdAt: Date | string;
-}
-
-/**
- * Group with related entities
- */
-export interface IGroupWithRelations extends IGroup {
-  createdBy?: {
-    id: string;
-    email: string;
-    firstName?: string | null;
-    lastName?: string | null;
-    avatar?: string | null;
-  };
-  isMember?: boolean;
-  isAdmin?: boolean;
-  membersCount?: number;
 }

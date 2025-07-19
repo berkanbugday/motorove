@@ -1,7 +1,7 @@
 import {gql} from '@apollo/client';
 
 export const COMMENT_FRAGMENT = gql`
-  fragment CommentFragment on Comment {
+  fragment CommentFragment on CommentDto {
     id
     content
     postId

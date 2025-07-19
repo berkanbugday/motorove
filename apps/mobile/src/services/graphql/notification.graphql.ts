@@ -70,8 +70,8 @@ export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
   }
 `;
 
-export const GET_NOTIFICATIONS_COUNT = gql`
-  query GetNotificationsCount($onlyUnread: Boolean) {
-    notificationsCount(onlyUnread: $onlyUnread)
+export const GET_COUNT = gql`
+  query Count {
+    count
   }
 `;

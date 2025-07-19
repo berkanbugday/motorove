@@ -25,7 +25,7 @@ export class NotificationsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => Number, { name: 'count' })
+  @Query(() => Number)
   async count(@CurrentUser() user: User): Promise<number> {
     return await this.notificationsService.count(user.id);
   }

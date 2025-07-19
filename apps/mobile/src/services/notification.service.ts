@@ -14,9 +14,9 @@ import {
   MARK_NOTIFICATION_AS_READ,
   MARK_ALL_NOTIFICATIONS_AS_READ,
   GET_NOTIFICATIONS,
-  GET_NOTIFICATIONS_COUNT,
   DELETE_NOTIFICATION,
   DELETE_ALL_NOTIFICATIONS,
+  GET_COUNT,
 } from './graphql/notification.graphql';
 import {INotification, ICreateDeviceToken} from '@motorove/shared/interfaces';
 import {useCallback, useState} from 'react';
@@ -523,10 +523,14 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
 };
 
 // Hook for getting notifications count
-export const useGetNotificationsCount = () => {
-  const {data, refetch, loading, error} = useQuery(GET_NOTIFICATIONS_COUNT);
+export const useGetCount = () => {
+  const {data, refetch, loading, error} = useQuery(GET_COUNT, {
+    onError: errorObj => {
+      loggingService.error('Error fetching count:', errorObj);
+    },
+  });
   return {
-    notificationsCount: data?.notificationsCount,
+    count: data?.count,
     refetch,
     loading,
     error,

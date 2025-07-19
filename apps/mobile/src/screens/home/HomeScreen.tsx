@@ -32,7 +32,7 @@ import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts/AuthContext';
-import {useGetNotificationsCount} from '@services/notification.service';
+import {useGetCount} from '@services/notification.service';
 import {useFocusEffect} from '@react-navigation/native';
 import {
   closeBottomSheet,
@@ -133,8 +133,7 @@ export const HomeScreen = ({navigation}: Props) => {
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const {user} = useAuth();
-  const {notificationsCount, refetch: refetchNotificationsCount} =
-    useGetNotificationsCount();
+  const {count: notificationsCount, refetch: refetchCount} = useGetCount();
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
   const {openBottomSheet} = useBottomSheet();
@@ -159,9 +158,9 @@ export const HomeScreen = ({navigation}: Props) => {
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      refetchNotificationsCount();
+      refetchCount();
       refetchPosts();
-    }, [refetchNotificationsCount, refetchPosts]),
+    }, [refetchCount, refetchPosts]),
   );
 
   // Track the scroll direction for animation
@@ -220,12 +219,12 @@ export const HomeScreen = ({navigation}: Props) => {
     try {
       // Change route on refresh
       rotateRecommendedRoute();
-      await refetchNotificationsCount();
+      await refetchCount();
       await refetchPosts();
     } finally {
       setRefreshing(false);
     }
-  }, [rotateRecommendedRoute, refetchNotificationsCount, refetchPosts]);
+  }, [rotateRecommendedRoute, refetchCount, refetchPosts]);
 
   // Set initial route
   useEffect(() => {
@@ -330,13 +329,7 @@ export const HomeScreen = ({navigation}: Props) => {
   // Create dropdown menu items for the feed posts
   const createPostDropdownItems = useCallback(
     (postId: string, isOwnPost: boolean): DropdownMenuItem[] => {
-      const items: DropdownMenuItem[] = [
-        // {
-        //   id: 'share',
-        //   label: 'Share',
-        //   icon: 'share',
-        // },
-      ];
+      const items: DropdownMenuItem[] = [];
 
       // Add edit and delete options if it's the user's own post
       if (isOwnPost) {

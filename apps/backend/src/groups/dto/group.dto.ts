@@ -4,11 +4,17 @@ import { GroupPrivacy } from '../../enums/models/group-privacy.enum';
 import {
   IsArray,
   IsBoolean,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
+import { CityDto } from '../../cities/dto/city.dto';
+import { Type } from 'class-transformer';
+import { GroupTag } from '../../enums/models/group-tag.enum';
+import { GroupMembershipDto } from 'src/group-memberships/dto/group-membership.dto';
 
 @ObjectType()
 export class GroupDto implements IGroup {
@@ -34,15 +40,18 @@ export class GroupDto implements IGroup {
   @IsString()
   cover: string | null;
 
-  @Field(() => String)
-  city: string;
+  @Field(() => CityDto)
+  @ValidateNested()
+  @Type(() => CityDto)
+  city: CityDto;
 
   @Field(() => GroupPrivacy)
   privacy: GroupPrivacy;
 
   @Field(() => [String])
   @IsArray()
-  tags: string[];
+  @IsEnum(GroupTag, { each: true })
+  tags: GroupTag[];
 
   @Field(() => Int, { nullable: true })
   @IsOptional()
@@ -66,4 +75,9 @@ export class GroupDto implements IGroup {
 
   @Field(() => Date)
   createdAt: Date;
+
+  @Field(() => [GroupMembershipDto])
+  @ValidateNested()
+  @Type(() => GroupMembershipDto)
+  memberships: GroupMembershipDto[];
 }
