@@ -1,16 +1,10 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
+import {View, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {Icon} from '@components/Icon';
 import {Body, Subtitle, useBottomSheet, LanguageSelector} from '@components';
-import {colors, spacing} from '@theme';
+import {colors, commonStyles, radius, spacing} from '@theme';
 import {useAuth} from '@contexts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from '@/hooks/useTranslation';
@@ -243,7 +237,7 @@ export const MoreScreen: React.FC = () => {
       title: '',
       items: [
         {
-          icon: <Icon name="sign-out" size={18} color={colors.neutral.black} />,
+          icon: <Icon name="sign-out" size={18} color={colors.primary.main} />,
           title: t('screens.more.sign_out'),
           onPress: () => {
             signOut();
@@ -254,61 +248,95 @@ export const MoreScreen: React.FC = () => {
     },
   ];
 
-  const renderMenuItem = (item: MenuItem) => (
-    <TouchableOpacity
-      key={item.title}
-      style={styles.menuItem}
-      onPress={item.onPress}>
-      <View style={styles.menuItemContent}>
-        {item.icon}
-        <Body style={styles.menuItemText}>{item.title}</Body>
-      </View>
-      {item.showRightIcon && (
-        <View style={styles.menuItemRight}>
-          {item.showBadge && <View style={styles.badge} />}
-          <Icon name="chevron-right" size={18} color={colors.neutral.grey} />
-        </View>
-      )}
-    </TouchableOpacity>
-  );
+  // Flatten menu sections into a single array for FlatList
+  const flatListData = menuSections.flatMap((section, sectionIndex) => {
+    const sectionItems = [];
 
-  const renderSection = (section: MenuSection, index: number) => (
-    <View key={section.title} style={[index > 0 && styles.sectionMargin]}>
-      <Subtitle weight="semiBold">{section.title}</Subtitle>
-      {section.items.map(renderMenuItem)}
-    </View>
-  );
+    // Add section header if title exists
+    sectionItems.push({
+      type: 'header',
+      title: section.title,
+      sectionIndex,
+    });
+
+    // Add menu items
+    section.items.forEach((item, itemIndex) => {
+      sectionItems.push({
+        type: 'item',
+        ...item,
+        sectionIndex,
+        itemIndex,
+      });
+    });
+
+    return sectionItems;
+  });
+
+  const renderItem = ({item, index}: {item: any; index: number}) => {
+    if (item.type === 'header') {
+      return (
+        <View
+          style={[styles.sectionHeader, index > 0 && {marginTop: spacing.xl}]}>
+          <Subtitle weight="semiBold">{item.title}</Subtitle>
+        </View>
+      );
+    }
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.menuItem,
+          index === flatListData.length - 1 && {borderBottomWidth: 0},
+        ]}
+        onPress={item.onPress}>
+        <View style={styles.menuItemContent}>
+          {item.icon}
+          <Body style={styles.menuItemText}>{item.title}</Body>
+        </View>
+        {item.showRightIcon && (
+          <View style={styles.menuItemRight}>
+            {item.showBadge && <View style={styles.badge} />}
+            <Icon name="chevron-right" size={18} />
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  const keyExtractor = (item: any, _index: number) => {
+    if (item.type === 'header') {
+      return `header-${item.sectionIndex}`;
+    }
+    return `item-${item.sectionIndex}-${item.itemIndex}`;
+  };
 
   return (
-    <SafeAreaView style={[styles.container, {paddingTop: insets.top}]}>
-      <ScrollView
-        style={styles.container}
+    <View style={[styles.container, {paddingTop: insets.top}]}>
+      <FlatList
+        data={flatListData}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          {paddingBottom: insets.bottom + 100},
-        ]}>
-        {menuSections.map(renderSection)}
-      </ScrollView>
-    </SafeAreaView>
+          {paddingBottom: insets.bottom + 70},
+        ]}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
-
   scrollContent: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
+    paddingTop: spacing.md,
   },
-
-  sectionMargin: {
-    marginTop: spacing.xl,
+  sectionHeader: {
+    marginBottom: spacing.sm,
   },
-
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -329,9 +357,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badge: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: spacing.sm,
+    height: spacing.sm,
+    borderRadius: radius.round,
     backgroundColor: colors.primary.main,
     marginRight: spacing.sm,
   },
