@@ -1,112 +1,83 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import {Language} from '@motorove/shared';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import {Icon} from '@components/Icon';
+import {Body} from '@components';
+import {colors, spacing} from '@theme';
 import {useTranslation} from '@/hooks/useTranslation';
+import {Language} from '@motorove/shared';
 
-interface LanguageSelectorProps {
-  containerStyle?: ViewStyle;
-  textStyle?: TextStyle;
-  buttonStyle?: ViewStyle;
-  selectedButtonStyle?: ViewStyle;
-  selectedTextStyle?: TextStyle;
+interface LanguageOption {
+  code: string;
+  name: string;
 }
 
-/**
- * LanguageSelector - A component to switch between supported languages
- */
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({
-  containerStyle,
-  textStyle,
-  buttonStyle,
-  selectedButtonStyle,
-  selectedTextStyle,
-}) => {
-  const {language, setLanguage, t} = useTranslation();
+interface LanguageSelectorProps {
+  onLanguageSelect?: (languageCode: string) => void;
+}
 
-  // Language labels
-  const languageLabels: Record<string, string> = {
-    en: 'English',
-    tr: 'Türkçe',
+export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+  onLanguageSelect,
+}) => {
+  const {t, language, setLanguage} = useTranslation();
+
+  const languageOptions: LanguageOption[] = [
+    {
+      code: Language.EN.toLowerCase(),
+      name: t('common.english'),
+    },
+    {
+      code: Language.TR.toLowerCase(),
+      name: t('common.turkish'),
+    },
+  ];
+
+  const handleLanguageSelect = async (languageCode: string) => {
+    try {
+      setLanguage(languageCode);
+      onLanguageSelect?.(languageCode);
+    } catch (error) {
+      console.error('Error setting language:', error);
+    }
   };
 
-  // Handle language change
-  const handleLanguageChange = (lang: string) => {
-    setLanguage(lang);
+  const renderLanguageOption = (option: LanguageOption) => {
+    const isSelected = language === option.code;
+
+    return (
+      <TouchableOpacity
+        key={option.code}
+        style={styles.languageOption}
+        onPress={() => handleLanguageSelect(option.code)}>
+        <View style={styles.languageInfo}>
+          <Body weight="semiBold">{option.name}</Body>
+        </View>
+        {isSelected && (
+          <Icon name="check-filled" size={20} color={colors.primary.main} />
+        )}
+      </TouchableOpacity>
+    );
   };
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      <Text style={[styles.title, textStyle]}>{t('settings.language')}</Text>
-      <View style={styles.buttonContainer}>
-        {Object.values(Language).map(lang => (
-          <TouchableOpacity
-            key={lang}
-            style={[
-              styles.languageButton,
-              buttonStyle,
-              language === lang.toLowerCase() && [
-                styles.selectedButton,
-                selectedButtonStyle,
-              ],
-            ]}
-            onPress={() => handleLanguageChange(lang.toLowerCase())}>
-            <Text
-              style={[
-                styles.buttonText,
-                textStyle,
-                language === lang.toLowerCase() && [
-                  styles.selectedText,
-                  selectedTextStyle,
-                ],
-              ]}>
-              {languageLabels[lang.toLowerCase()]}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+    <View style={styles.container}>
+      {languageOptions.map(renderLanguageOption)}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    flex: 1,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  buttonContainer: {
+  languageOption: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
   },
-  languageButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    marginRight: 8,
-  },
-  selectedButton: {
-    backgroundColor: '#007AFF',
-  },
-  buttonText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  selectedText: {
-    color: '#ffffff',
-    fontWeight: '600',
+  languageInfo: {
+    flex: 1,
   },
 });
-
-export default LanguageSelector;

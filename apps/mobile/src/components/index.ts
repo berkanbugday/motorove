@@ -36,6 +36,7 @@ export * from './Switch';
 export * from './GroupSelector';
 export * from './UserSelector';
 export * from './UserCard';
+export * from './LanguageSelector';
 // Skeleton components
 export * from './Skeleton';
 export * from './Skeleton/SkeletonGroup';

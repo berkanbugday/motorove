@@ -9,9 +9,8 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {Icon} from '@components/Icon';
-import {Body, Subtitle, Typography} from '@components/Typography';
-import {colors} from '@theme/colors';
-import {spacing} from '@theme/spacing';
+import {Body, Subtitle, useBottomSheet, LanguageSelector} from '@components';
+import {colors, spacing} from '@theme';
 import {useAuth} from '@contexts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from '@/hooks/useTranslation';
@@ -34,6 +33,7 @@ export const MoreScreen: React.FC = () => {
   const {signOut} = useAuth();
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
+  const {openBottomSheet, closeBottomSheet} = useBottomSheet();
 
   const handleProfilePress = () => {
     // Navigate to profile screen when implemented
@@ -46,6 +46,22 @@ export const MoreScreen: React.FC = () => {
 
   const handleNotificationsPress = () => {
     navigation.navigate('Notification');
+  };
+
+  const handleLanguagePress = () => {
+    openBottomSheet({
+      content: (
+        <LanguageSelector
+          onLanguageSelect={() => {
+            closeBottomSheet();
+          }}
+        />
+      ),
+      snapPoint: 'minimal',
+      title: t('screens.more.language_selection'),
+      showCloseButton: true,
+      closeButtonPosition: 'top-left',
+    });
   };
 
   const menuSections: MenuSection[] = [
@@ -143,10 +159,7 @@ export const MoreScreen: React.FC = () => {
             />
           ),
           title: t('screens.more.language'),
-          onPress: () => {
-            // Open privacy policy
-            // navigation.navigate('PrivacyPolicy');
-          },
+          onPress: handleLanguagePress,
           showRightIcon: true,
         },
         {
@@ -321,8 +334,5 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.primary.main,
     marginRight: spacing.sm,
-  },
-  languageSelectorContainer: {
-    marginTop: spacing.sm,
   },
 });

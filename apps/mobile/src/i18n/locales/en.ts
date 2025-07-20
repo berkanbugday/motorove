@@ -35,6 +35,8 @@ export default {
     complete: 'Complete',
     completing: 'Completing...',
     try_again: 'Try Again',
+    english: 'English',
+    turkish: 'Turkish',
   },
 
   // Main navigation items
@@ -471,6 +473,7 @@ export default {
       follow_requests: 'Follow Requests',
       settings: 'Settings',
       language: 'Language',
+      language_selection: 'Select Language',
       notifications: 'Notifications',
       privacy_settings: 'Privacy Settings',
       support_legal: 'Support & Legal',

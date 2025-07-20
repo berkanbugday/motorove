@@ -35,6 +35,8 @@ export default {
     error: 'Hata',
     info: 'Bilgi',
     try_again: 'Tekrar Dene',
+    english: 'İngilizce',
+    turkish: 'Türkçe',
   },
 
   // Main navigation items
@@ -472,6 +474,7 @@ export default {
       follow_requests: 'Takip İstekleri',
       settings: 'Ayarlar',
       language: 'Dil',
+      language_selection: 'Dil Seçin',
       notifications: 'Bildirimler',
       privacy_settings: 'Gizlilik Ayarları',
       support_legal: 'Destek ve Yasal Bilgiler',
