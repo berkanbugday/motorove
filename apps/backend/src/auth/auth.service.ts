@@ -95,7 +95,6 @@ export class AuthService {
             lastName,
             email,
             supabaseId: supabaseUser.id,
-            avatar: 'users/avatars/default.png',
           },
         });
 

@@ -50,7 +50,6 @@ export const LanguageProvider: React.FC<{children: ReactNode}> = ({
         } else {
           // No stored preference, detect device language and store it
           const deviceLang = getDeviceLanguage(DEFAULT_LANGUAGE);
-          console.log('deviceLang', deviceLang);
           setLanguageState(deviceLang);
           i18n.changeLanguage(deviceLang);
           await AsyncStorage.setItem(LANGUAGE_KEY, deviceLang);

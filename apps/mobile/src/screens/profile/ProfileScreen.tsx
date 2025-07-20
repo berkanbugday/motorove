@@ -6,14 +6,20 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  FlatList,
 } from 'react-native';
 import {useAuth} from '@contexts';
-import {colors, radius, spacing} from '@theme';
-import {Icon} from '@components/Icon';
-import {Tabs} from '@components/Tab';
-import {Chip} from '@components/Chip';
-import {Button} from '@components/Button';
-import {TopHeaderBar} from '@components/TopHeaderBar';
+import {colors, commonStyles, getShadow, radius, spacing} from '@theme';
+import {
+  Icon,
+  Tabs,
+  Chip,
+  Button,
+  TopHeaderBar,
+  BodySmall,
+  Title,
+} from '@components';
+import {useNavigation} from '@react-navigation/native';
 
 // Define the tabs for the profile content
 type ProfileTab = 'routes' | 'history' | 'groups';
@@ -24,11 +30,10 @@ type ProfileTab = 'routes' | 'history' | 'groups';
 export const ProfileScreen = () => {
   const {user, signOut} = useAuth();
   const [activeTab, setActiveTab] = useState<ProfileTab>('routes');
-
+  const navigation = useNavigation();
   // Mock profile data
   const profileData = {
-    name: 'Michael Thompson',
-    username: '@roadmaster_mike',
+    name: `${user?.firstName} ${user?.lastName}`,
     isPremium: true,
     location: 'San Francisco, CA',
     bio: 'Passionate motorcycle enthusiast exploring the West Coast. Adventure seeker and photography lover.',
@@ -132,17 +137,20 @@ export const ProfileScreen = () => {
       <TopHeaderBar
         title="Profile"
         showBackButton
+        onBackPress={() => navigation.goBack()}
         showShadow={false}
         containerStyle={styles.topHeaderBar}
       />
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <View style={styles.headerTop}>
-            <View style={styles.profileImageContainer}>
+            <View>
               <Image
-                source={{
-                  uri: user?.avatar || 'https://picsum.photos/id/1005/200/200',
-                }}
+                source={
+                  user?.avatar
+                    ? {uri: user?.avatar}
+                    : require('@assets/images/default_avatar.png')
+                }
                 style={styles.avatar}
               />
               <View style={styles.cameraIconContainer}>
@@ -158,38 +166,70 @@ export const ProfileScreen = () => {
               </View>
             </View>
             <View style={styles.profileHeader}>
-              <Text style={styles.userName}>{profileData.name}</Text>
-              <View style={styles.usernameContainer}>
-                <Text style={styles.userHandle}>{profileData.username}</Text>
+              <Title weight="bold" style={{marginBottom: spacing.xs}}>
+                {`${user?.firstName} ${user?.lastName}`}
+              </Title>
+              <View style={styles.locationContainer}>
+                <Icon name="map-pin" size={16} />
+                <BodySmall color={colors.neutral.grey}>
+                  {profileData.location}
+                </BodySmall>
               </View>
-              {profileData.isPremium && (
-                <Chip
-                  label="Premium"
-                  color="primary"
-                  size="small"
-                  leadingIcon="crown-filled"
-                  style={styles.premiumBadge}
-                  variant="filled"
-                  labelStyle={styles.premiumText}
-                />
-              )}
+              <FlatList
+                data={[
+                  {id: '1', label: profileData.riderType},
+                  {id: '2', label: 'Adventure Rider'},
+                  {id: '3', label: 'Sport Rider'},
+                ]}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={item => item.id}
+                renderItem={({item, index}) => (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}>
+                    <BodySmall
+                      style={{
+                        textDecorationLine: 'underline',
+                        paddingRight: spacing.sm,
+                      }}>
+                      {item.label}
+                    </BodySmall>
+                    {index < 2 && <View style={styles.dot} />}
+                  </View>
+                )}
+              />
             </View>
           </View>
 
-          <View style={styles.locationContainer}>
-            <Icon name="map-pin" size={16} color={colors.neutral.grey} />
-            <Text style={styles.locationText}>{profileData.location}</Text>
-          </View>
-
           <Text style={styles.bioText}>{profileData.bio}</Text>
-
-          <Chip
-            label={profileData.riderType}
-            color="secondary"
-            size="small"
-            variant="filled"
-          />
-
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: spacing.sm,
+              flexWrap: 'wrap',
+            }}>
+            <Chip
+              label={'Custom Motorcycles'}
+              color="secondary"
+              size="small"
+              variant="filled"
+            />
+            <Chip
+              label={profileData.riderType}
+              color="secondary"
+              size="small"
+              variant="filled"
+            />
+            <Chip
+              label={profileData.riderType}
+              color="secondary"
+              size="small"
+              variant="filled"
+            />
+          </View>
           <View style={styles.statsContainer}>
             <View style={styles.statItemRow}>
               <View style={styles.statItem}>
@@ -264,8 +304,7 @@ export const ProfileScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   topHeaderBar: {
     borderBottomWidth: 1,
@@ -283,13 +322,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: spacing.md,
   },
-  profileImageContainer: {
-    position: 'relative',
-  },
   avatar: {
     width: 100,
     height: 100,
-    borderRadius: 50,
+    borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
   cameraIconContainer: {
     position: 'absolute',
@@ -311,41 +349,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileHeader: {
+    flex: 1,
     marginBottom: spacing.sm,
-    marginLeft: spacing.sm,
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.neutral.black,
-    marginBottom: spacing.xs,
-  },
-  usernameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userHandle: {
-    fontSize: 16,
-    color: colors.neutral.grey,
-    marginRight: spacing.sm,
-  },
-  premiumBadge: {
-    marginTop: spacing.xs,
-    backgroundColor: colors.primary.light,
-  },
-  premiumText: {
-    fontWeight: 'bold',
-    fontSize: 10,
+    marginLeft: spacing.md,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  locationText: {
-    fontSize: 14,
-    color: colors.neutral.grey,
-    marginLeft: spacing.xs,
   },
   bioText: {
     fontSize: 14,
@@ -404,12 +414,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.white,
     borderRadius: 12,
     marginBottom: spacing.md,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...getShadow('medium'),
   },
   routeImage: {
     width: 100,
@@ -446,10 +451,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: spacing.xl,
   },
+  chipContainer: {
+    paddingHorizontal: spacing.sm,
+  },
+  chipWrapper: {
+    marginRight: spacing.sm,
+  },
   logoutContainer: {
     padding: spacing.md,
     alignItems: 'center',
     marginTop: spacing.md,
     marginBottom: spacing.xl,
+  },
+  dot: {
+    width: spacing.xs,
+    height: spacing.xs,
+    borderRadius: radius.round,
+    backgroundColor: colors.neutral.lightGrey,
+    marginRight: spacing.sm,
   },
 });
