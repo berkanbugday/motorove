@@ -9,12 +9,11 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {Icon} from '@components/Icon';
-import {Typography} from '@components/Typography';
+import {Body, Subtitle, Typography} from '@components/Typography';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
 import {useAuth} from '@contexts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import LanguageSelector from '@/components/LanguageSelector';
 import {useTranslation} from '@/hooks/useTranslation';
 
 type MenuSection = {
@@ -27,10 +26,11 @@ type MenuItem = {
   title: string;
   onPress: () => void;
   showBadge?: boolean;
+  showRightIcon?: boolean;
 };
 
 export const MoreScreen: React.FC = () => {
-  const navigation = useNavigation<MainScreenNavigationProp<'Notification'>>();
+  const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {signOut} = useAuth();
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
@@ -44,46 +44,44 @@ export const MoreScreen: React.FC = () => {
     navigation.navigate('CreateEvent');
   };
 
-  const handleSettingsPress = () => {
-    // Navigate to settings screen when implemented
-    // navigation.navigate('Settings');
-  };
-
   const handleNotificationsPress = () => {
     navigation.navigate('Notification');
   };
 
   const menuSections: MenuSection[] = [
     {
-      title: t('profile.settings'),
+      title: t('screens.more.general'),
       items: [
         {
           icon: (
-            <Icon name="user-filled" size={18} color={colors.neutral.black} />
+            <Icon
+              name="id-card-filled"
+              size={18}
+              color={colors.neutral.black}
+            />
           ),
-          title: t('profile.editProfile'),
+          title: t('screens.more.my_profile'),
           onPress: handleProfilePress,
+          showRightIcon: true,
         },
         {
           icon: (
-            <Icon name="bell-filled" size={18} color={colors.neutral.black} />
+            <Icon name="garage-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('navigation.notifications'),
+          title: t('screens.more.my_garage'),
           onPress: handleNotificationsPress,
           showBadge: false, // Set to true when you have unread notifications
+          showRightIcon: true,
         },
         {
           icon: (
-            <Icon name="gear-filled" size={18} color={colors.neutral.black} />
+            <Icon name="save-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('navigation.settings'),
-          onPress: handleSettingsPress,
+          title: t('screens.more.favorites'),
+          onPress: handleNotificationsPress,
+          showBadge: false, // Set to true when you have unread notifications
+          showRightIcon: true,
         },
-      ],
-    },
-    {
-      title: t('navigation.events'),
-      items: [
         {
           icon: (
             <Icon
@@ -92,50 +90,152 @@ export const MoreScreen: React.FC = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('events.create'),
+          title: t('screens.more.events'),
           onPress: handleCreateEventPress,
-        },
-        {
-          icon: (
-            <Icon name="clock-filled" size={18} color={colors.neutral.black} />
-          ),
-          title: t('events.upcoming'),
-          onPress: () => {
-            // Navigate to my events when implemented
-            // navigation.navigate('MyEvents');
-          },
+          showRightIcon: true,
         },
       ],
     },
     {
-      title: t('settings.account'),
+      title: t('screens.more.requests'),
       items: [
         {
           icon: (
-            <Icon name="lock-filled" size={18} color={colors.neutral.black} />
+            <Icon
+              name="list-check-filled"
+              size={18}
+              color={colors.neutral.black}
+            />
           ),
-          title: t('settings.privacyPolicy'),
+          title: t('screens.more.join_requests'),
+          onPress: () => {
+            // Navigate to my events when implemented
+            // navigation.navigate('MyEvents');
+          },
+          showRightIcon: true,
+        },
+        {
+          icon: (
+            <Icon
+              name="request-filled"
+              size={18}
+              color={colors.neutral.black}
+            />
+          ),
+          title: t('screens.more.follow_requests'),
+          onPress: () => {
+            // Navigate to my events when implemented
+            // navigation.navigate('MyEvents');
+          },
+          showRightIcon: true,
+        },
+      ],
+    },
+    {
+      title: t('screens.more.settings'),
+      items: [
+        {
+          icon: (
+            <Icon
+              name="language-filled"
+              size={18}
+              color={colors.neutral.black}
+            />
+          ),
+          title: t('screens.more.language'),
           onPress: () => {
             // Open privacy policy
             // navigation.navigate('PrivacyPolicy');
           },
+          showRightIcon: true,
         },
         {
           icon: (
-            <Icon name="earth-filled" size={18} color={colors.neutral.black} />
+            <Icon name="bell-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('settings.termsOfService'),
+          title: t('screens.more.notifications'),
           onPress: () => {
             // Open terms of service
             // navigation.navigate('TermsOfService');
           },
+          showRightIcon: true,
         },
         {
           icon: (
-            <Icon name="error-filled" size={18} color={colors.status.error} />
+            <Icon name="lock-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('auth.logout'),
-          onPress: signOut,
+          title: t('screens.more.privacy_settings'),
+          onPress: () => {
+            // Open terms of service
+            // navigation.navigate('TermsOfService');
+          },
+          showRightIcon: true,
+        },
+      ],
+    },
+    {
+      title: t('screens.more.support_legal'),
+      items: [
+        {
+          icon: (
+            <Icon
+              name="question-filled"
+              size={18}
+              color={colors.neutral.black}
+            />
+          ),
+          title: t('screens.more.contact_support'),
+          onPress: () => {
+            // Open privacy policy
+            // navigation.navigate('PrivacyPolicy');
+          },
+          showRightIcon: true,
+        },
+        {
+          icon: (
+            <Icon name="share-filled" size={18} color={colors.neutral.black} />
+          ),
+          title: t('screens.more.invite_friends'),
+          onPress: () => {
+            // Open terms of service
+            // navigation.navigate('TermsOfService');
+          },
+          showRightIcon: true,
+        },
+        {
+          icon: (
+            <Icon name="list-filled" size={18} color={colors.neutral.black} />
+          ),
+          title: t('screens.more.terms_of_service'),
+          onPress: () => {
+            // Open terms of service
+            // navigation.navigate('TermsOfService');
+          },
+          showRightIcon: true,
+        },
+        {
+          icon: (
+            <Icon name="file-filled" size={18} color={colors.neutral.black} />
+          ),
+          title: t('screens.more.privacy_policy'),
+          onPress: () => {
+            // Open terms of service
+            // navigation.navigate('TermsOfService');
+          },
+          showRightIcon: true,
+        },
+      ],
+    },
+    {
+      title: '',
+      items: [
+        {
+          icon: <Icon name="sign-out" size={18} color={colors.neutral.black} />,
+          title: t('screens.more.sign_out'),
+          onPress: () => {
+            signOut();
+          },
+          showRightIcon: false,
         },
       ],
     },
@@ -148,27 +248,20 @@ export const MoreScreen: React.FC = () => {
       onPress={item.onPress}>
       <View style={styles.menuItemContent}>
         {item.icon}
-        <Typography style={styles.menuItemText} variant="body">
-          {item.title}
-        </Typography>
+        <Body style={styles.menuItemText}>{item.title}</Body>
       </View>
-      <View style={styles.menuItemRight}>
-        {item.showBadge && <View style={styles.badge} />}
-        <Icon
-          name="chevron-down"
-          size={18}
-          color={colors.neutral.grey}
-          style={styles.chevron}
-        />
-      </View>
+      {item.showRightIcon && (
+        <View style={styles.menuItemRight}>
+          {item.showBadge && <View style={styles.badge} />}
+          <Icon name="chevron-right" size={18} color={colors.neutral.grey} />
+        </View>
+      )}
     </TouchableOpacity>
   );
 
   const renderSection = (section: MenuSection, index: number) => (
     <View key={section.title} style={[index > 0 && styles.sectionMargin]}>
-      <Typography variant="subtitle" weight="semiBold">
-        {section.title}
-      </Typography>
+      <Subtitle weight="semiBold">{section.title}</Subtitle>
       {section.items.map(renderMenuItem)}
     </View>
   );
@@ -183,16 +276,6 @@ export const MoreScreen: React.FC = () => {
           {paddingBottom: insets.bottom + 100},
         ]}>
         {menuSections.map(renderSection)}
-
-        {/* Language Selector */}
-        <View style={[styles.sectionMargin]}>
-          <Typography variant="subtitle" weight="semiBold">
-            {t('settings.language')}
-          </Typography>
-          <View style={styles.languageSelectorContainer}>
-            <LanguageSelector />
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -231,9 +314,6 @@ const styles = StyleSheet.create({
   menuItemRight: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  chevron: {
-    transform: [{rotate: '-90deg'}],
   },
   badge: {
     width: 8,

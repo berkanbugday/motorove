@@ -459,6 +459,28 @@ export default {
       add_maintenance_record: 'Bakım Kaydı Ekle',
       no_vehicles: 'Henüz araç eklenmemiş',
     },
+
+    // More screen
+    more: {
+      general: 'Genel',
+      my_profile: 'Profilim',
+      my_garage: 'Garajım',
+      favorites: 'Favorilerim',
+      events: 'Etkinlikler',
+      requests: 'İstekler',
+      join_requests: 'Katılım İstekleri',
+      follow_requests: 'Takip İstekleri',
+      settings: 'Ayarlar',
+      language: 'Dil',
+      notifications: 'Bildirimler',
+      privacy_settings: 'Gizlilik Ayarları',
+      support_legal: 'Destek ve Yasal Bilgiler',
+      contact_support: 'Destek Talebi',
+      terms_of_service: 'Kullanım Şartları',
+      privacy_policy: 'Gizlilik Politikası',
+      invite_friends: 'Arkadaşlarını Davet Et',
+      sign_out: 'Çıkış Yap',
+    },
   },
 
   // Components organized by component name

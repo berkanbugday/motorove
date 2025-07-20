@@ -15,6 +15,7 @@ import UserFilled from '@assets/icons/user-filled.svg';
 import Close from '@assets/icons/close.svg';
 import ChevronUp from '@assets/icons/chevron-up.svg';
 import ChevronDown from '@assets/icons/chevron-down.svg';
+import ChevronRight from '@assets/icons/chevron-right.svg';
 import Check from '@assets/icons/check.svg';
 import CheckFilled from '@assets/icons/check-filled.svg';
 import MapPin from '@assets/icons/map-pin.svg';
@@ -81,6 +82,17 @@ import Gear from '@assets/icons/gear.svg';
 import GearFilled from '@assets/icons/gear-filled.svg';
 import Camera from '@assets/icons/camera.svg';
 import CameraFilled from '@assets/icons/camera-filled.svg';
+import GarageFilled from '@assets/icons/garage-filled.svg';
+import RequestFilled from '@assets/icons/request-filled.svg';
+import IdCardFilled from '@assets/icons/id-card-filled.svg';
+import ListCheckFilled from '@assets/icons/list-check-filled.svg';
+import LanguageFilled from '@assets/icons/language-filled.svg';
+import ListFilled from '@assets/icons/list-filled.svg';
+import FileFilled from '@assets/icons/file-filled.svg';
+import SignOut from '@assets/icons/sign-out.svg';
+import QuestionFilled from '@assets/icons/question-filled.svg';
+import ShareFilled from '@assets/icons/share-filled.svg';
+
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
 import Cloudy from '@assets/icons/weather/cloudy.svg';
@@ -106,6 +118,7 @@ export type IconName =
   | 'close'
   | 'chevron-up'
   | 'chevron-down'
+  | 'chevron-right'
   | 'check'
   | 'check-filled'
   | 'map-pin'
@@ -179,7 +192,17 @@ export type IconName =
   | 'gear'
   | 'gear-filled'
   | 'camera'
-  | 'camera-filled';
+  | 'camera-filled'
+  | 'garage-filled'
+  | 'request-filled'
+  | 'id-card-filled'
+  | 'list-check-filled'
+  | 'language-filled'
+  | 'list-filled'
+  | 'file-filled'
+  | 'sign-out'
+  | 'question-filled'
+  | 'share-filled';
 
 interface IconProps {
   name: IconName;
@@ -228,6 +251,8 @@ export function Icon({
       return <ChevronUp {...commonProps} />;
     case 'chevron-down':
       return <ChevronDown {...commonProps} />;
+    case 'chevron-right':
+      return <ChevronRight {...commonProps} />;
     case 'check':
       return <Check {...commonProps} />;
     case 'check-filled':
@@ -376,6 +401,26 @@ export function Icon({
       return <Camera {...commonProps} />;
     case 'camera-filled':
       return <CameraFilled {...commonProps} />;
+    case 'garage-filled':
+      return <GarageFilled {...commonProps} />;
+    case 'request-filled':
+      return <RequestFilled {...commonProps} />;
+    case 'id-card-filled':
+      return <IdCardFilled {...commonProps} />;
+    case 'list-check-filled':
+      return <ListCheckFilled {...commonProps} />;
+    case 'language-filled':
+      return <LanguageFilled {...commonProps} />;
+    case 'list-filled':
+      return <ListFilled {...commonProps} />;
+    case 'file-filled':
+      return <FileFilled {...commonProps} />;
+    case 'sign-out':
+      return <SignOut {...commonProps} />;
+    case 'question-filled':
+      return <QuestionFilled {...commonProps} />;
+    case 'share-filled':
+      return <ShareFilled {...commonProps} />;
     default:
       return null;
   }

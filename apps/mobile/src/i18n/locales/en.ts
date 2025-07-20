@@ -457,6 +457,29 @@ export default {
       add_maintenance_record: 'Add Maintenance Record',
       no_vehicles: 'No vehicles added yet',
     },
+
+    // More screen
+    more: {
+      general: 'General',
+      account: 'Account',
+      my_profile: 'My Profile',
+      my_garage: 'My Garage',
+      favorites: 'Favorites',
+      events: 'Events',
+      requests: 'Requests',
+      join_requests: 'Join Requests',
+      follow_requests: 'Follow Requests',
+      settings: 'Settings',
+      language: 'Language',
+      notifications: 'Notifications',
+      privacy_settings: 'Privacy Settings',
+      support_legal: 'Support & Legal',
+      contact_support: 'Contact Support',
+      terms_of_service: 'Terms of Service',
+      privacy_policy: 'Privacy Policy',
+      invite_friends: 'Invite Friends',
+      sign_out: 'Sign Out',
+    },
   },
 
   // Components organized by component name
