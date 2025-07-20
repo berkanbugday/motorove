@@ -50,8 +50,8 @@ export type MainStackParamList = {
   GroupSearch: undefined;
   UserSearch: undefined;
   Notification: undefined;
+  Profile: undefined;
   // Add more screens here as your app grows
-  // Profile: {userId: string};
   // Settings: undefined;
 };
 

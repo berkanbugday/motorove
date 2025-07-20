@@ -13,6 +13,7 @@ import {
 import {UserSearchScreen} from '@screens/userSearch';
 import {CreateEventScreen} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
+import {ProfileScreen} from '@screens/profile';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -89,6 +90,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="Notification"
         component={NotificationScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

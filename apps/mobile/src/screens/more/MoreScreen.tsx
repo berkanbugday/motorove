@@ -22,17 +22,12 @@ type MenuItem = {
   showRightIcon?: boolean;
 };
 
-export const MoreScreen: React.FC = () => {
+export const MoreScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {signOut} = useAuth();
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
-
-  const handleProfilePress = () => {
-    // Navigate to profile screen when implemented
-    // navigation.navigate('Profile', {userId: user?.id});
-  };
 
   const handleCreateEventPress = () => {
     navigation.navigate('CreateEvent');
@@ -71,7 +66,9 @@ export const MoreScreen: React.FC = () => {
             />
           ),
           title: t('screens.more.my_profile'),
-          onPress: handleProfilePress,
+          onPress: () => {
+            navigation.navigate('Profile');
+          },
           showRightIcon: true,
         },
         {
@@ -161,10 +158,7 @@ export const MoreScreen: React.FC = () => {
             <Icon name="bell-filled" size={18} color={colors.neutral.black} />
           ),
           title: t('screens.more.notifications'),
-          onPress: () => {
-            // Open terms of service
-            // navigation.navigate('TermsOfService');
-          },
+          onPress: () => {},
           showRightIcon: true,
         },
         {

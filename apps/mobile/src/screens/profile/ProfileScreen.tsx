@@ -7,13 +7,13 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {useAuth} from '@contexts';
 import {colors, radius, spacing} from '@theme';
 import {Icon} from '@components/Icon';
 import {Tabs} from '@components/Tab';
 import {Chip} from '@components/Chip';
 import {Button} from '@components/Button';
+import {TopHeaderBar} from '@components/TopHeaderBar';
 
 // Define the tabs for the profile content
 type ProfileTab = 'routes' | 'history' | 'groups';
@@ -21,7 +21,7 @@ type ProfileTab = 'routes' | 'history' | 'groups';
 /**
  * Profile Screen - Shows user profile and account management
  */
-export const ProfileScreen: React.FC = () => {
+export const ProfileScreen = () => {
   const {user, signOut} = useAuth();
   const [activeTab, setActiveTab] = useState<ProfileTab>('routes');
 
@@ -128,7 +128,13 @@ export const ProfileScreen: React.FC = () => {
   ];
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
+      <TopHeaderBar
+        title="Profile"
+        showBackButton
+        showShadow={false}
+        containerStyle={styles.topHeaderBar}
+      />
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
           <View style={styles.headerTop}>
@@ -252,7 +258,7 @@ export const ProfileScreen: React.FC = () => {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -260,6 +266,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.white,
+  },
+  topHeaderBar: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
   },
   scrollView: {
     flex: 1,

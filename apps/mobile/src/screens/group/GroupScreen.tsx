@@ -9,7 +9,7 @@ import {GroupCard} from '@components/GroupCard';
 import {
   useGetJoinedGroups,
   useGetGroups,
-  GroupFilters,
+  IFilterGroup,
 } from '@services/group.service';
 import {Icon} from '@components/Icon';
 import {Body, Subtitle} from '@components/Typography';
