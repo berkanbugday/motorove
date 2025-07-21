@@ -23,7 +23,6 @@ export class GroupsService {
     skip?: number,
     query?: string,
     filters?: FilterGroupInput,
-    userId?: string,
     authToken?: string,
   ): Promise<GroupDto[]> {
     try {

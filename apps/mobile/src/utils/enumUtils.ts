@@ -18,7 +18,6 @@ import {
   EquipmentType,
   SocialMediaPlatform,
 } from '@motorove/shared';
-import {toPascalCase} from '@utils/stringUtils';
 import {DropdownItem} from '@components/Dropdown/types';
 import {i18n} from '@/i18n';
 

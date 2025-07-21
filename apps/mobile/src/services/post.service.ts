@@ -10,7 +10,7 @@ import {
   UNSAVE_POST,
   UPDATE_POST,
 } from './graphql/post.graphql';
-import {IPost, ICreatePost, IUpdatePost} from '@motorove/shared/interfaces';
+import {IPost, ICreatePost, IUpdatePost} from '@motorove/shared';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
@@ -42,9 +42,9 @@ export const useCreatePost = (onSuccess?: () => void) => {
   const createPost = async (input: ICreatePost) => {
     try {
       const result = await createPostMutation({
-        variables: {input: {...input, images: input.images ?? []}},
+        variables: {input},
       });
-      return result.data?.createPost;
+      return result.data?.create;
     } catch (err) {
       loggingService.error('Error in createPost:', err);
       // Error is already handled in onError callback

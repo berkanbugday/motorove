@@ -591,6 +591,11 @@ export default {
       no_results: 'Sonuç bulunamadı',
       max_items_reached: 'En fazla {{count}} öğe seçilebilir',
     },
+    selectLocationMap: {
+      selected_location: 'Seçilen Konum',
+      address_not_available: 'Adres bulunamadı',
+      tap_to_select: 'Konum seçmek için haritaya dokunun',
+    },
   },
 
   // Validation messages

@@ -34,24 +34,22 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useCreatePost} from '@services/post.service';
-import {
-  ICreatePost,
-  ICreateAddress,
-  IAddress,
-  Language,
-} from '@motorove/shared';
+import {ICreatePost, ICreateAddress, AddressType} from '@motorove/shared';
 import {useGetJoinedGroups} from '@services/group.service';
+import {useLanguage} from '@contexts/LanguageContext';
 
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
   const [postText, setPostText] = useState('');
-  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
-    null,
-  );
+  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>({
+    id: 1,
+    label: 'Public',
+    value: 'public',
+  });
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
-  const [addresses, setAddresses] = useState<ICreateAddress[]>([]);
+  const [location, setLocation] = useState<ICreateAddress[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     id: string;
     name: string;
@@ -67,7 +65,7 @@ export const CreatePostScreen = () => {
 
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
-
+  const {language} = useLanguage();
   // Use the createPost hook from PostService
   const {createPost, loading} = useCreatePost(() => {
     navigation.goBack();
@@ -146,15 +144,6 @@ export const CreatePostScreen = () => {
         </>
       ),
       snapPoint: 'full',
-      // onClose: () => {
-      //   if (selectedPrivacy?.value === 'group' && !selectedGroup?.id) {
-      //     setSelectedPrivacy({
-      //       id: 1,
-      //       label: 'Public',
-      //       value: 'public',
-      //     });
-      //   }
-      // },
     });
   };
 
@@ -214,28 +203,26 @@ export const CreatePostScreen = () => {
 
   const handleAddLocation = () => {
     // Open bottom sheet with map
-    // openBottomSheet({
-    //   title: 'Select Location',
-    //   content: (
-    //     <SelectLocationMap
-    //       initialLocation={location as IAddress}
-    //       onLocationSelect={selectedLocation => {
-    //         setLocation({
-    //           ...selectedLocation,
-    //           addresses: selectedLocation.addresses || [],
-    //         });
-    //         closeBottomSheet();
-    //       }}
-    //       onClose={() => {
-    //         setLocation({addresses: []});
-    //         closeBottomSheet();
-    //       }}
-    //     />
-    //   ),
-    //   snapPoint: 'full',
-    //   enableGestureControl: false,
-    //   closeButtonPosition: 'top-left',
-    // });
+    openBottomSheet({
+      title: 'Select Location',
+      content: (
+        <SelectLocationMap
+          initialAddress={location[0]}
+          addressType={AddressType.POST_LOCATION}
+          onLocationSelect={selectedLocation => {
+            setLocation(selectedLocation);
+            closeBottomSheet();
+          }}
+          onClose={() => {
+            setLocation([]);
+            closeBottomSheet();
+          }}
+        />
+      ),
+      snapPoint: 'full',
+      enableGestureControl: false,
+      closeButtonPosition: 'top-left',
+    });
   };
 
   const handlePost = async () => {
@@ -253,23 +240,17 @@ export const CreatePostScreen = () => {
       const imageData = selectedImages.map(img => img.base64 || img.uri);
 
       // Create post input data
-      // const createPostInput: ICreatePost = {
-      //   content: postText.trim(),
-      //   images: imageData.length > 0 ? imageData : undefined,
-      //   ...(location.latitude && location.longitude
-      //     ? {
-      //         latitude: location.latitude,
-      //         longitude: location.longitude,
-      //       }
-      //     : {}),
-      //   ...(selectedPrivacy?.value === 'group' && selectedGroup
-      //     ? {groupId: selectedGroup.id}
-      //     : {}),
-      //   addresses: location.addresses,
-      // };
+      const createPostInput: ICreatePost = {
+        content: postText.trim(),
+        images: imageData.length > 0 ? imageData : undefined,
+        addresses: location,
+        ...(selectedPrivacy?.value === 'group' && selectedGroup
+          ? {groupId: selectedGroup.id}
+          : {}),
+      };
 
       // Call the createPost function from the hook
-      // await createPost(createPostInput);
+      await createPost(createPostInput);
 
       // Toast is handled by the hook's onSuccess callback
     } catch (error) {
@@ -376,13 +357,13 @@ export const CreatePostScreen = () => {
               iconSize={18}
               onPress={handleAddLocation}
               textStyle={styles.actionButtonText}
-              // title={
-              //   location.addresses.length > 0
-              //     ? location.addresses.find(
-              //         address => address.language === Language.EN.toLowerCase(),
-              //       )?.address
-              //     : 'Add location'
-              // }
+              title={
+                location.length > 0
+                  ? location.find(
+                      address => address.language.toLowerCase() === language,
+                    )?.address
+                  : 'Add location'
+              }
             />
           </View>
         </ScrollView>

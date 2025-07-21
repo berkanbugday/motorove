@@ -79,7 +79,7 @@ export const UPDATE_GROUP = gql`
 `;
 
 export const GET_GROUPS = gql`
-  query GetGroups($limit: Int, $skip: Int, $filters: GroupFilterInput) {
+  query GetGroups($limit: Int, $skip: Int, $filters: FilterGroupInput) {
     groups(limit: $limit, skip: $skip, filters: $filters) {
       ...GroupFragment
     }
@@ -99,7 +99,7 @@ export const GET_GROUP = gql`
 
 // Get user groups query
 export const GET_JOINED_GROUPS = gql`
-  query GetJoinedGroups($limit: Int, $skip: Int, $filters: GroupFilterInput) {
+  query GetJoinedGroups($limit: Int, $skip: Int, $filters: FilterGroupInput) {
     joinedGroups(limit: $limit, skip: $skip, filters: $filters) {
       ...GroupFragment
     }

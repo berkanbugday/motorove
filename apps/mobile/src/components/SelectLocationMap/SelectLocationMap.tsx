@@ -10,28 +10,27 @@ import Geolocation from '@react-native-community/geolocation';
 import {RNMapMarkerType} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
-import {IAddress, AddressType, Language} from '@motorove/shared';
+import {AddressType, ICreateAddress} from '@motorove/shared';
+import {EnumUtils} from '@utils/enumUtils';
+import {useLanguage} from '@contexts/LanguageContext';
+import {useTranslation} from '@/hooks/useTranslation';
 
 interface SelectLocationMapProps {
-  onLocationSelect: (location: {
-    latitude?: number;
-    longitude?: number;
-    name?: string;
-    addresses?: IAddress[];
-  }) => void;
+  onLocationSelect: (addresses: ICreateAddress[]) => void;
   onClose: () => void;
-  initialLocation?: {
-    latitude?: number;
-    longitude?: number;
-    addresses?: IAddress[];
-  };
+  initialAddress?: ICreateAddress;
+  addressType: AddressType;
 }
 
 export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   onLocationSelect,
-  initialLocation,
+  initialAddress,
   onClose,
+  addressType,
 }) => {
+  const {language} = useLanguage();
+  const {t} = useTranslation();
+
   // Add map ref for animation
   const mapRef = useRef<any>(null);
 
@@ -46,7 +45,9 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [locationAddresses, setLocationAddresses] = useState<IAddress[]>([]);
+  const [locationAddresses, setLocationAddresses] = useState<ICreateAddress[]>(
+    [],
+  );
 
   // Function to animate to a specific location
   const animateToLocation = (latitude: number, longitude: number) => {
@@ -68,39 +69,29 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
   // Get user location on mount
   useEffect(() => {
-    if (initialLocation?.latitude && initialLocation?.longitude) {
+    if (initialAddress) {
       // Use the initial location if provided
       const newRegion = {
         ...DEFAULT_REGION,
-        latitude: initialLocation.latitude,
-        longitude: initialLocation.longitude,
+        latitude: initialAddress.latitude,
+        longitude: initialAddress.longitude,
         latitudeDelta: 0.01, // Zoom in closer for initial location
         longitudeDelta: 0.01,
       };
       setRegion(newRegion);
       setSelectedLocation({
-        latitude: initialLocation.latitude,
-        longitude: initialLocation.longitude,
+        latitude: initialAddress.latitude,
+        longitude: initialAddress.longitude,
       });
 
       // Animate to initial location after a short delay to ensure map is ready
       setTimeout(() => {
-        if (initialLocation.latitude && initialLocation.longitude) {
-          animateToLocation(
-            initialLocation.latitude,
-            initialLocation.longitude,
-          );
+        if (initialAddress.latitude && initialAddress.longitude) {
+          animateToLocation(initialAddress.latitude, initialAddress.longitude);
         }
       }, 500);
 
-      if (initialLocation.addresses && initialLocation.addresses.length > 0) {
-        setLocationAddresses(initialLocation.addresses);
-      } else {
-        fetchLocationDetails(
-          initialLocation.latitude,
-          initialLocation.longitude,
-        );
-      }
+      fetchLocationDetails(initialAddress.latitude, initialAddress.longitude);
     } else {
       // Otherwise, get the user's current location
       setIsLoading(true);
@@ -134,19 +125,19 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
         },
       );
     }
-  }, [initialLocation]);
+  }, [initialAddress]);
 
   // Fetch location name using reverse geocoding for both Turkish and English
   const fetchLocationDetails = async (latitude: number, longitude: number) => {
     try {
-      const languages = [Language.EN.toLowerCase(), Language.TR.toLowerCase()];
-      const addressPromises = languages.map(async language => {
+      const addressPromises = EnumUtils.getLanguages().map(async language => {
+        const languageCode = language.value.toLowerCase();
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${language}`,
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${languageCode}`,
           {
             headers: {
               Accept: 'application/json',
-              'User-Agent': 'Motorove Mobile App', // Nominatim requires a user agent
+              'User-Agent': 'Motorove',
             },
           },
         );
@@ -177,11 +168,11 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
           return {
             address: address || data.display_name,
-            language,
-            type: AddressType.POST_LOCATION,
+            language: language.value,
+            type: addressType,
             latitude,
             longitude,
-          } as IAddress;
+          } as ICreateAddress;
         }
 
         return null;
@@ -190,7 +181,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
       const addresses = await Promise.all(addressPromises);
       const validAddresses = addresses.filter(
         addr => addr !== null,
-      ) as IAddress[];
+      ) as ICreateAddress[];
       setLocationAddresses(validAddresses);
     } catch (error) {
       console.error('Error fetching location details:', error);
@@ -210,11 +201,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
   const handleSelectLocation = () => {
     if (selectedLocation) {
-      onLocationSelect({
-        latitude: selectedLocation.latitude,
-        longitude: selectedLocation.longitude,
-        addresses: locationAddresses,
-      });
+      onLocationSelect(locationAddresses);
     }
   };
 
@@ -235,11 +222,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
     setRegion(defaultRegion);
 
-    onLocationSelect({
-      latitude: undefined,
-      longitude: undefined,
-      addresses: [],
-    });
+    onLocationSelect([]);
     onClose();
   };
 
@@ -261,22 +244,12 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
   // Get the display address (prefer English, fallback to Turkish or first available)
   const getDisplayAddress = () => {
-    if (locationAddresses.length === 0) {
-      return 'Address not available';
-    }
-
-    const englishAddress = locationAddresses.find(
-      addr => addr.language === Language.EN.toLowerCase(),
+    const address = locationAddresses.find(
+      addr => addr.language.toLowerCase() === language,
     );
-    const turkishAddress = locationAddresses.find(
-      addr => addr.language === Language.TR.toLowerCase(),
-    );
-
     return (
-      englishAddress?.address ||
-      turkishAddress?.address ||
-      locationAddresses[0]?.address ||
-      'Address not available'
+      address?.address ||
+      t('components.selectLocationMap.address_not_available')
     );
   };
 
@@ -315,7 +288,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
           <>
             <View style={styles.locationInfo}>
               <Body weight="semiBold" style={styles.locationTitle}>
-                {'Selected Location'}
+                {t('components.selectLocationMap.selected_location')}
               </Body>
               <BodySmall style={styles.locationAddress} numberOfLines={2}>
                 {getDisplayAddress()}
@@ -324,14 +297,14 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
             <View style={styles.buttonContainerWrapper}>
               <View style={styles.buttonContainer}>
                 <Button
-                  title="Reset"
+                  title={t('common.reset')}
                   variant="outline"
                   shape="round"
                   onPress={handleResetLocation}
                   style={styles.cancelButton}
                 />
                 <Button
-                  title="Confirm"
+                  title={t('common.confirm')}
                   variant="dark"
                   shape="round"
                   onPress={handleSelectLocation}
@@ -345,7 +318,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
             align="center"
             color={colors.neutral.grey}
             style={styles.tapInstructions}>
-            Tap on the map to select a location
+            {t('components.selectLocationMap.tap_to_select')}
           </Body>
         )}
       </View>

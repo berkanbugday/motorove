@@ -13,7 +13,7 @@ import { CreateAddressInput } from '../../addresses/dto/create-address.input';
 
 @InputType()
 export class CreatePostInput implements ICreatePost {
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
   @IsString()
   content: string;
@@ -24,7 +24,7 @@ export class CreatePostInput implements ICreatePost {
   @IsString({ each: true })
   images?: string[];
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsUUID()
   groupId?: string;

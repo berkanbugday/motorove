@@ -589,6 +589,11 @@ export default {
       no_results: 'No results found',
       max_items_reached: 'Maximum {{count}} items can be selected',
     },
+    selectLocationMap: {
+      selected_location: 'Selected Location',
+      address_not_available: 'Address not available',
+      tap_to_select: 'Tap on the map to select a location',
+    },
   },
 
   // Validation messages
