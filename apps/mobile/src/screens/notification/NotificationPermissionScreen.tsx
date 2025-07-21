@@ -7,19 +7,48 @@ import LottieView from 'lottie-react-native';
 import {useUpdateNotificationPermission} from '@services/user.service';
 import {NotificationPermission} from '@motorove/shared';
 import {useAuth} from '@contexts/AuthContext';
+import {
+  notificationService,
+  useSaveDeviceToken,
+} from '@services/notification.service';
+import {loggingService} from '@services/logging.service';
+import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
 
 export const NotificationPermissionScreen = () => {
   const {t} = useTranslation();
   const {updateNotificationPermission} = useUpdateNotificationPermission();
-  const {updateNotificationPermission: updateNotificationPermissionAuth} =
+  const {user, updateNotificationPermission: updateNotificationPermissionAuth} =
     useAuth();
+  const {saveDeviceToken} = useSaveDeviceToken();
+  const {markAsNotFirstTime} = useFirstTimeCheck();
 
   const handleAllow = async () => {
-    const result = await updateNotificationPermission(
-      NotificationPermission.ALLOWED,
-    );
-    if (result) {
-      await updateNotificationPermissionAuth(NotificationPermission.ALLOWED);
+    try {
+      await notificationService.service.requestPermissions();
+      const token = await notificationService.service.getDeviceToken();
+      if (token && user?.id) {
+        const result = await saveDeviceToken({
+          userId: user.id,
+          token: token,
+          deviceType: notificationService.getDeviceType(),
+        });
+        if (result) {
+          const resultUpdate = await updateNotificationPermission(
+            NotificationPermission.ALLOWED,
+          );
+          if (resultUpdate) {
+            await updateNotificationPermissionAuth(
+              NotificationPermission.ALLOWED,
+            );
+            await markAsNotFirstTime();
+          }
+        }
+      }
+    } catch (notificationError) {
+      loggingService.error(
+        'Error requesting notification permissions:',
+        notificationError,
+      );
     }
   };
 

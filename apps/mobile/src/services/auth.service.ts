@@ -498,48 +498,6 @@ class AuthService {
         };
       }
 
-      // Fall back to AsyncStorage for backward compatibility
-      // This can be removed after a few app updates when all users have migrated
-      const user = await AsyncStorage.getItem(STORAGE_KEYS.USER);
-      const accessToken = await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-      const refreshToken = await AsyncStorage.getItem(
-        STORAGE_KEYS.REFRESH_TOKEN,
-      );
-      const expiresAtStr = await AsyncStorage.getItem(STORAGE_KEYS.EXPIRES_AT);
-
-      // If we have data in AsyncStorage, migrate it to EncryptedStorage
-      if (user || accessToken || refreshToken) {
-        const expiresAt = expiresAtStr ? parseInt(expiresAtStr, 10) : null;
-        const parsedUser = user ? JSON.parse(user) : null;
-
-        const migratedState = {
-          user: parsedUser,
-          accessToken,
-          refreshToken,
-          expiresAt,
-        };
-
-        // Migrate to encrypted storage
-        await this.saveAuthDataToEncryptedStorage(migratedState);
-
-        // Clear from AsyncStorage after migration
-        await AsyncStorage.clear();
-
-        // Setup background refresh if we have a valid token
-        if (accessToken && expiresAt && expiresAt > Date.now() && parsedUser) {
-          this.setupBackgroundTokenRefresh({
-            user: parsedUser,
-            session: {
-              access_token: accessToken,
-              refresh_token: refreshToken || '',
-              expires_at: expiresAt,
-            },
-          });
-        }
-
-        return migratedState;
-      }
-
       return {
         user: null,
         accessToken: null,
@@ -685,7 +643,7 @@ class AuthService {
       await EncryptedStorage.clear();
 
       // Clear AsyncStorage items just to be thorough
-      await AsyncStorage.clear();
+      // await AsyncStorage.clear();
 
       // Reset Apollo client store
       await apolloClient.clearStore();

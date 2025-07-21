@@ -84,7 +84,7 @@ export class NotificationsResolver {
   @Mutation(() => Boolean)
   async saveDeviceToken(
     @Args('input') input: CreateDeviceTokenInput,
-  ): Promise<string> {
+  ): Promise<boolean> {
     return await this.notificationsService.saveDeviceToken(
       input.userId,
       input.token,

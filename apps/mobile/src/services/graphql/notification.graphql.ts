@@ -41,8 +41,8 @@ export const DELETE_ALL_NOTIFICATIONS = gql`
 
 // Mutations
 export const SAVE_DEVICE_TOKEN = gql`
-  mutation SaveDeviceToken($input: DeviceTokenInput!) {
-    saveDeviceToken(deviceTokenInput: $input)
+  mutation SaveDeviceToken($input: CreateDeviceTokenInput!) {
+    saveDeviceToken(input: $input)
   }
 `;
 

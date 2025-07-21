@@ -144,6 +144,10 @@ function humanizeErrorMessage(message: string): string {
     return i18n.t('errors.auth.email_not_confirmed');
   }
 
+  if (message.includes('Network request failed')) {
+    return i18n.t('errors.network.check_connection');
+  }
+
   // Make first letter uppercase if it's not
   if (message.length > 0 && /[a-z]/.test(message[0])) {
     message = message.charAt(0).toUpperCase() + message.slice(1);

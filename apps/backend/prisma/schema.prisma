@@ -502,6 +502,7 @@ model Notification {
 }
 
 model DeviceToken {
+  id         String   @id @default(uuid())
   token      String
   type       String // 'ios' or 'android'
   userId     String
@@ -510,7 +511,7 @@ model DeviceToken {
   lastUsedAt DateTime @default(now())
   isActive   Boolean  @default(true)
 
-  @@id([token, userId])
+  @@unique([userId])
   @@index([userId])
   @@index([isActive])
   @@index([type])

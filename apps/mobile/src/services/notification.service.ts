@@ -102,7 +102,9 @@ class NotificationService {
       }
 
       // Get new token
-      await messaging().registerDeviceForRemoteMessages();
+      if (!messaging().isDeviceRegisteredForRemoteMessages) {
+        await messaging().registerDeviceForRemoteMessages();
+      }
       const token = await messaging().getToken();
       if (token) {
         this.deviceToken = token;

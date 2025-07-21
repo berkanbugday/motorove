@@ -164,9 +164,7 @@ async function getAccessToken(): Promise<string | null> {
       const parsedData = JSON.parse(encryptedAuthData);
       return parsedData.accessToken;
     }
-
-    // Fallback to AsyncStorage
-    return await AsyncStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+    return null;
   } catch (error) {
     loggingService.error('Error getting access token:', error);
     return null;

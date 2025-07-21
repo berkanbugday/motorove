@@ -324,15 +324,10 @@ export class NotificationsService {
     userId: string,
     deviceToken: string,
     deviceType: 'ios' | 'android',
-  ): Promise<string> {
+  ): Promise<boolean> {
     try {
       const savedDeviceToken = (await this.prisma.deviceToken.upsert({
-        where: {
-          token_userId: {
-            token: deviceToken,
-            userId,
-          },
-        },
+        where: { userId },
         update: {
           isActive: true,
           lastUsedAt: new Date(),
@@ -344,7 +339,7 @@ export class NotificationsService {
         },
       })) as unknown as DeviceToken;
 
-      return savedDeviceToken.token;
+      return !!savedDeviceToken;
     } catch (error) {
       this.logger.error(
         `Failed to save device token for user ${userId}`,
