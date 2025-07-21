@@ -1,34 +1,39 @@
 import React from 'react';
-import {View, StyleSheet} from 'react-native';
-import {useTranslation} from 'react-i18next';
-import {FullscreenOverlay} from '../FullscreenOverlay/FullscreenOverlay';
+import {View, StyleSheet, ScrollView} from 'react-native';
+import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, rs, radius, getShadow} from '@theme';
-import {Icon} from '../Icon';
-import {Body, BodySmall, Caption, Subtitle} from '../Typography';
-import {Button} from '../Button';
+import {Icon, Body, BodySmall, Caption, Subtitle, Button} from '@components';
 import LottieView from 'lottie-react-native';
+import {useUpdateNotificationPermission} from '@services/user.service';
+import {NotificationPermission} from '@motorove/shared';
+import {useAuth} from '@contexts/AuthContext';
 
-interface NotificationPermissionOverlayProps {
-  visible: boolean;
-  onAllowPress: () => void;
-  onDismiss: () => void;
-  onNotAllowPress?: () => void;
-}
-
-export function NotificationPermissionOverlay({
-  visible,
-  onAllowPress,
-  onDismiss,
-  onNotAllowPress,
-}: NotificationPermissionOverlayProps) {
+export const NotificationPermissionScreen = () => {
   const {t} = useTranslation();
+  const {updateNotificationPermission} = useUpdateNotificationPermission();
+  const {updateNotificationPermission: updateNotificationPermissionAuth} =
+    useAuth();
+
+  const handleAllow = async () => {
+    const result = await updateNotificationPermission(
+      NotificationPermission.ALLOWED,
+    );
+    if (result) {
+      await updateNotificationPermissionAuth(NotificationPermission.ALLOWED);
+    }
+  };
+
+  const handleNotAllow = async () => {
+    const result = await updateNotificationPermission(
+      NotificationPermission.BLOCKED,
+    );
+    if (result) {
+      await updateNotificationPermissionAuth(NotificationPermission.BLOCKED);
+    }
+  };
 
   return (
-    <FullscreenOverlay
-      animationType="slide"
-      visible={visible}
-      onDismiss={onDismiss}
-      contentContainerStyle={styles.overlayContent}>
+    <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.container}>
         {/* Hero Image */}
         <View style={styles.imageContainer}>
@@ -42,66 +47,56 @@ export function NotificationPermissionOverlay({
 
         {/* Content */}
         <Subtitle weight="bold" align="center" style={styles.title}>
-          {t('components.notificationPermissionOverlay.title')}
+          {t('screens.notificationPermission.title')}
         </Subtitle>
         <BodySmall align="center" style={styles.description}>
-          {t('components.notificationPermissionOverlay.description')}
+          {t('screens.notificationPermission.description')}
         </BodySmall>
 
         {/* Features */}
         <View style={styles.featuresContainer}>
           <FeatureItem
             icon="bell-filled"
-            title={t(
-              'components.notificationPermissionOverlay.features.event_title',
-            )}
-            text={t('components.notificationPermissionOverlay.features.events')}
+            title={t('screens.notificationPermission.event_title')}
+            text={t('screens.notificationPermission.events')}
           />
           <FeatureItem
             icon="comments-filled"
-            title={t(
-              'components.notificationPermissionOverlay.features.comment_title',
-            )}
-            text={t(
-              'components.notificationPermissionOverlay.features.comments',
-            )}
+            title={t('screens.notificationPermission.comment_title')}
+            text={t('screens.notificationPermission.comments')}
           />
           <FeatureItem
             icon="users-filled"
-            title={t(
-              'components.notificationPermissionOverlay.features.group_title',
-            )}
-            text={t('components.notificationPermissionOverlay.features.groups')}
+            title={t('screens.notificationPermission.group_title')}
+            text={t('screens.notificationPermission.groups')}
           />
         </View>
 
         {/* Buttons */}
         <Button
-          title={t(
-            'components.notificationPermissionOverlay.allow_notifications',
-          )}
+          title={t('screens.notificationPermission.allow_notifications')}
           variant="primary"
           shape="round"
-          onPress={onAllowPress}
+          onPress={handleAllow}
           style={styles.allowButton}
         />
 
         <Button
-          title={t('components.notificationPermissionOverlay.not_allow')}
+          title={t('screens.notificationPermission.not_allow')}
           variant="outline"
           shape="round"
-          onPress={onNotAllowPress}
+          onPress={handleNotAllow}
           style={styles.laterButton}
         />
 
         {/* Footer */}
         <Caption color={colors.neutral.grey} style={styles.footerText}>
-          {t('components.notificationPermissionOverlay.footer_text')}
+          {t('screens.notificationPermission.footer_text')}
         </Caption>
       </View>
-    </FullscreenOverlay>
+    </ScrollView>
   );
-}
+};
 
 interface FeatureItemProps {
   icon:
@@ -134,15 +129,21 @@ function FeatureItem({icon, title, text}: FeatureItemProps) {
 }
 
 const styles = StyleSheet.create({
-  overlayContent: {
-    maxWidth: 400,
-    overflow: 'hidden',
-    borderRadius: rs(16),
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.neutral.white,
+    minHeight: '100%',
   },
   container: {
     padding: spacing.md,
     alignItems: 'center',
     backgroundColor: colors.neutral.white,
+    maxWidth: 400,
+    width: '100%',
+    borderRadius: rs(16),
+    overflow: 'hidden',
   },
   imageContainer: {
     width: 80,

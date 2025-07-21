@@ -7,8 +7,10 @@ import {AuthNavigator} from './stacks/AuthNavigator';
 import {MainNavigator} from './stacks/MainNavigator';
 import {useFirstTimeCheck} from './utils/navigationUtils';
 import {useAuth} from '@contexts';
-import {RootStackParamList} from '../types/navigation.types';
+import {RootStackParamList} from '@navigation/types/navigationTypes';
 import {AccountSetupScreen} from '@screens/auth/AccountSetupScreen';
+import {NotificationPermission} from '@motorove/shared';
+import {NotificationPermissionScreen} from '@screens/notification/NotificationPermissionScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -52,15 +54,21 @@ export function RootNavigator() {
               component={AccountSetupScreen}
               key="accountSetup"
             />
+          ) : user?.notificationPermission ===
+            NotificationPermission.UNKNOWN ? (
+            <Stack.Screen
+              key="notificationPermission"
+              name="Auth"
+              component={NotificationPermissionScreen}
+            />
           ) : (
             <Stack.Screen key="main" name="Main" component={MainNavigator} />
           )
         ) : (
           // User is not authenticated, show auth flow
-          <Stack.Screen
-            name="Auth"
-            component={() => <AuthNavigator isFirstTime={isFirstTime} />}
-          />
+          <Stack.Screen name="Auth">
+            {props => <AuthNavigator {...props} isFirstTime={isFirstTime} />}
+          </Stack.Screen>
         )}
       </Stack.Navigator>
     </NavigationContainer>

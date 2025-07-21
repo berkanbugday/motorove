@@ -12,11 +12,12 @@ import {
   ICreateGroup,
   IUpdateGroup,
   IFilterGroup,
-} from '@motorove/shared/interfaces';
+  GroupMemberRole,
+  GroupPrivacy,
+} from '@motorove/shared';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback, useEffect} from 'react';
-import {GroupMemberRole, GroupPrivacy} from '@motorove/shared/enums';
 
 // Hook for creating a group
 export const useCreateGroup = (onSuccess?: () => void) => {

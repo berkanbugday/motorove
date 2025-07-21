@@ -2,6 +2,7 @@ import React, {createContext, useContext, useEffect, useState} from 'react';
 import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
+import {NotificationPermission} from '@motorove/shared';
 
 // Default auth state
 const defaultAuthState: AuthState = {
@@ -17,6 +18,9 @@ export interface AuthContextType extends AuthState {
   accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
+  updateNotificationPermission: (
+    permission: NotificationPermission,
+  ) => Promise<void>;
 }
 
 // Create the context
@@ -32,6 +36,9 @@ const AuthContext = createContext<AuthContextType>({
     throw new Error('Not implemented');
   },
   loadAuthState: async () => {
+    throw new Error('Not implemented');
+  },
+  updateNotificationPermission: async () => {
     throw new Error('Not implemented');
   },
 });
@@ -133,6 +140,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     }
   };
 
+  const updateNotificationPermission = async (
+    permission: NotificationPermission,
+  ): Promise<void> => {
+    try {
+      const newState: AuthState = {
+        ...authState,
+        user: {
+          ...authState.user!,
+          notificationPermission: permission,
+        },
+      };
+      setAuthState(newState);
+      await authService.saveAuthDataToEncryptedStorage(newState);
+    } catch (error) {
+      loggingService.error('Error updating notification permission:', error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -141,6 +167,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         accountSetup,
         signOut,
         loadAuthState,
+        updateNotificationPermission,
       }}>
       {children}
     </AuthContext.Provider>

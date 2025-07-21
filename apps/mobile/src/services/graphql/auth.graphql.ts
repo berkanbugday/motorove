@@ -18,6 +18,7 @@ export const AUTH_USER_FRAGMENT = gql`
     lastName
     email
     hasCompletedSetup
+    notificationPermission
   }
 `;
 
@@ -76,5 +77,14 @@ export const RESET_PASSWORD = gql`
 export const UPDATE_PASSWORD = gql`
   mutation UpdatePassword($input: UpdatePasswordInput!) {
     updatePassword(input: $input)
+  }
+`;
+
+// Update notification permission mutation
+export const UPDATE_NOTIFICATION_PERMISSION = gql`
+  mutation UpdateNotificationPermission(
+    $input: UpdateNotificationPermissionInput!
+  ) {
+    updateNotificationPermission(input: $input)
   }
 `;

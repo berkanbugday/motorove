@@ -135,6 +135,24 @@ export default {
       success_completed_account_setup: 'Profile setup completed successfully',
     },
 
+    notificationPermission: {
+      title: 'Stay Connected with Your Riding Community',
+      description:
+        'Allow notifications to stay informed about events, comments and activities in your motorcycle community.',
+      event_title: 'Events',
+      comment_title: 'Comments',
+      group_title: 'Groups',
+      events: 'Get notified about upcoming rides, meetups and events',
+      comments: 'Get notified when someone comments on your posts',
+      groups: 'Stay updated on group activities and updates',
+      allow_notifications: 'Allow Notifications',
+      not_allow: 'Not Allow',
+      footer_text:
+        'You can always change notification settings later in the app preferences',
+      success_update: 'Notification settings updated successfully',
+      update_failed: 'Notification settings update failed',
+    },
+
     // Home screen
     home: {
       welcome_message: 'Welcome to Motorove',
@@ -565,23 +583,6 @@ export default {
     multiSelect: {
       no_results: 'No results found',
       max_items_reached: 'Maximum {{count}} items can be selected',
-    },
-    notificationPermissionOverlay: {
-      title: 'Stay Connected with Your Riding Community',
-      description:
-        'Allow notifications to stay informed about events, comments and activities in your motorcycle community.',
-      features: {
-        event_title: 'Events',
-        comment_title: 'Comments',
-        group_title: 'Groups',
-        events: 'Get notified about upcoming rides, meetups and events',
-        comments: 'Get notified when someone comments on your posts',
-        groups: 'Stay updated on group activities and updates',
-      },
-      allow_notifications: 'Allow Notifications',
-      not_allow: 'Not Allow',
-      footer_text:
-        'You can always change notification settings later in the app preferences',
     },
   },
 

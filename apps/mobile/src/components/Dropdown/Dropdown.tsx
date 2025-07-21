@@ -18,8 +18,8 @@ import {
 } from './Dropdown.styles';
 import {DropdownItem, DropdownProps} from './types';
 import {colors} from '@theme';
-import {Icon} from '@components/Icon';
-import {useTranslation} from '../../hooks/useTranslation';
+import {Icon} from '@components';
+import {useTranslation} from '@hooks/useTranslation';
 
 const Dropdown: React.FC<DropdownProps> = ({
   data,

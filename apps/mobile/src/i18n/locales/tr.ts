@@ -136,6 +136,25 @@ export default {
       success_completed_account_setup: 'Profil ayarları başarıyla tamamlandı',
     },
 
+    notificationPermission: {
+      title: 'Sürüş Topluluğunuzla Bağlantıda Kalın',
+      description:
+        'Etkinlikler, yorumlar ve motosiklet topluluğunuzdaki aktivitelerden haberdar olmak için bildirimlere izin verin.',
+      event_title: 'Etkinlikler',
+      comment_title: 'Yorumlar',
+      group_title: 'Gruplar',
+      events:
+        'Yaklaşan sürüşler, buluşmalar ve etkinlikler hakkında bildirim alın',
+      comments: 'Birileri gönderilerinize yorum yaptığında bildirim alın',
+      groups: 'Motosiklet gruplarınızdaki güncellemelerden haberdar olun',
+      allow_notifications: 'Bildirimlere İzin Ver',
+      not_allow: 'Bildirimlere İzin Verme',
+      footer_text:
+        'Bildirim ayarlarını daha sonra uygulama tercihlerinden değiştirebilirsiniz',
+      success_update: 'Bildirim ayarları başarıyla güncellendi',
+      update_failed: 'Bildirim ayarları güncellenemedi',
+    },
+
     // Home screen
     home: {
       welcome_message: "Motorove'e Hoş Geldiniz",
@@ -566,24 +585,6 @@ export default {
     multiSelect: {
       no_results: 'Sonuç bulunamadı',
       max_items_reached: 'En fazla {{count}} öğe seçilebilir',
-    },
-    notificationPermissionOverlay: {
-      title: 'Sürüş Topluluğunuzla Bağlantıda Kalın',
-      description:
-        'Etkinlikler, yorumlar ve motosiklet topluluğunuzdaki aktivitelerden haberdar olmak için bildirimlere izin verin.',
-      features: {
-        event_title: 'Etkinlikler',
-        comment_title: 'Yorumlar',
-        group_title: 'Gruplar',
-        events:
-          'Yaklaşan sürüşler, buluşmalar ve etkinlikler hakkında bildirim alın',
-        comments: 'Birileri gönderilerinize yorum yaptığında bildirim alın',
-        groups: 'Motosiklet gruplarınızdaki güncellemelerden haberdar olun',
-      },
-      allow_notifications: 'Bildirimlere İzin Ver',
-      not_allow: 'Bildirimlere İzin Verme',
-      footer_text:
-        'Bildirim ayarlarını daha sonra uygulama tercihlerinden değiştirebilirsiniz',
     },
   },
 

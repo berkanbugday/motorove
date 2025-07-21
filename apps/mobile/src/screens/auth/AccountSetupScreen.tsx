@@ -38,10 +38,9 @@ import {useTranslation} from '@hooks/useTranslation';
 import {useAuth} from '@contexts/AuthContext';
 import {useGetCities} from '@services/city.service';
 import {EnumUtils} from '@utils/enumUtils';
-import {Gender, Interest, RidingStyle} from '@motorove/shared/enums';
+import {Gender, Interest, RidingStyle, IAccountSetup} from '@motorove/shared';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useAccountSetup} from '@services/user.service';
-import {IAccountSetup} from '@motorove/shared/interfaces';
 
 export const AccountSetupScreen = () => {
   const {height} = useWindowDimensions();

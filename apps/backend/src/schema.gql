@@ -565,6 +565,7 @@ type Mutation {
   update(input: UpdateAddressInput!): AddressDto!
   updateMemberRole(input: ChangeMemberRoleInput!): GroupMembershipDto!
   updateMemberStatus(input: UpdateMembershipStatusInput!): GroupMembershipDto!
+  updateNotificationPermission(input: UpdateNotificationPermissionInput!): Boolean!
   updatePassword(input: UpdatePasswordInput!): Boolean!
 }
 
@@ -826,6 +827,10 @@ input UpdateMembershipStatusInput {
   groupId: ID!
   status: InvitationStatus!
   userId: ID!
+}
+
+input UpdateNotificationPermissionInput {
+  notificationPermission: NotificationPermission!
 }
 
 input UpdatePasswordInput {

@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {TFunction} from 'i18next';
-import {Gender, Interest, RidingStyle} from '@motorove/shared/enums';
+import {Gender, Interest, RidingStyle} from '@motorove/shared';
 
 /**
  * Creates validation schemas with translated error messages
