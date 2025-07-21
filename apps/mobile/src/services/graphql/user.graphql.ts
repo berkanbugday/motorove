@@ -8,6 +8,10 @@ export const USER_FRAGMENT = gql`
     lastName
     email
     avatar
+    supabaseId
+    followerCount
+    followingCount
+    isFollowing
   }
 `;
 

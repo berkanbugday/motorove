@@ -13,7 +13,7 @@ export interface IPost {
   isSaved: boolean;
   createdBy: IUser;
   createdAt: Date;
-  addresses: IAddress[];
-  comments: IComment[];
-  group: IGroup;
+  addresses?: IAddress[];
+  comments?: IComment[];
+  group?: IGroup;
 }

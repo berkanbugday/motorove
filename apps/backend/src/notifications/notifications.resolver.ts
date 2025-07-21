@@ -32,7 +32,7 @@ export class NotificationsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
-  async createBulk(
+  async createBulkNotifications(
     @Args('input')
     input: CreateNotificationsInput,
     @CurrentUser() user: User,
@@ -42,7 +42,7 @@ export class NotificationsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => NotificationDto)
-  async create(
+  async createNotification(
     @Args('input')
     input: CreateNotificationInput,
     @CurrentUser() user: User,
@@ -73,7 +73,7 @@ export class NotificationsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => NotificationDto)
-  async delete(
+  async deleteNotification(
     @CurrentUser() user: User,
     @Args('id', { type: () => ID }) id: string,
   ): Promise<NotificationDto> {

@@ -17,16 +17,16 @@ export class UserDto implements IUser {
   declare id: string;
 
   @Field(() => String)
-  @IsEmail()
-  declare email: string;
-
-  @Field(() => String)
   @IsString()
   declare firstName: string;
 
   @Field(() => String)
   @IsString()
   declare lastName: string;
+
+  @Field(() => String)
+  @IsEmail()
+  declare email: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
@@ -36,18 +36,6 @@ export class UserDto implements IUser {
   @Field(() => String)
   @IsString()
   declare supabaseId: string;
-
-  @Field(() => Date)
-  @IsDate()
-  declare createdAt: Date;
-
-  @Field(() => Date)
-  @IsDate()
-  declare updatedAt: Date;
-
-  @Field(() => Boolean)
-  @IsBoolean()
-  declare isActive: boolean;
 
   @Field(() => Int, { nullable: true })
   @IsOptional()

@@ -121,9 +121,59 @@ input CreateAddressInput {
   type: AddressType!
 }
 
+input CreateCommentInput {
+  content: String!
+  parentId: ID
+  postId: String!
+}
+
 input CreateDeviceTokenInput {
   deviceType: String!
   token: String!
+}
+
+input CreateEventInput {
+  addresses: [CreateAddressInput!]
+  campingInfo: String
+  description: String!
+  difficultyLevel: String
+  endDateTime: DateTime
+  equipmentChecklist: String
+  eventType: String!
+  experienceLevel: String
+  images: [String!]
+  instructorInfo: String
+  invitedGroupIds: [String!]
+  invitedUserIds: [String!]
+  isPrivate: Boolean! = false
+  maxParticipants: Int
+  price: String
+  restStops: String
+  roadType: String
+  routeDescription: String
+  startDateTime: DateTime!
+  title: String!
+  topicsCovered: String
+}
+
+input CreateGroupInput {
+  cityId: String!
+  cover: String
+  description: String!
+  logo: String
+  membersCapacity: Int
+  name: String!
+  privacy: GroupPrivacy!
+  tags: [GroupTag!]!
+}
+
+input CreateNotificationInput {
+  body: String!
+  channel: NotificationChannel!
+  data: String
+  title: String!
+  type: NotificationType!
+  userId: String!
 }
 
 input CreateNotificationsInput {
@@ -133,6 +183,13 @@ input CreateNotificationsInput {
   title: String!
   type: NotificationType!
   userIds: [String!]!
+}
+
+input CreatePostInput {
+  addresses: [CreateAddressInput!]
+  content: String!
+  groupId: String
+  images: [String!]
 }
 
 """
@@ -539,34 +596,46 @@ type Motorcycle {
 type Mutation {
   accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddGroupMemberInput!): GroupMembershipDto!
-  create(input: CreateAddressInput!): AddressDto!
-  createBulk(input: CreateNotificationsInput!): Boolean!
-  delete(id: ID!): NotificationDto!
+  createAddress(input: CreateAddressInput!): AddressDto!
+  createBulkNotifications(input: CreateNotificationsInput!): Boolean!
+  createComment(input: CreateCommentInput!): CommentDto!
+  createEvent(input: CreateEventInput!): EventDto!
+  createGroup(input: CreateGroupInput!): GroupDto!
+  createNotification(input: CreateNotificationInput!): NotificationDto!
+  createPost(input: CreatePostInput!): PostDto!
   deleteAll: [NotificationDto!]!
-  follow(userId: ID!): UserFollowingDto!
-  join(id: ID!): EventDto!
-  leave(id: ID!): EventDto!
+  deleteNotification(id: ID!): NotificationDto!
+  followUser(userId: ID!): UserFollowingDto!
+  joinEvent(id: ID!): EventDto!
+  leaveEvent(id: ID!): EventDto!
   leaveGroup(input: LeaveGroupInput!): GroupMembershipDto!
   likePost(postId: ID!): PostInteractionDto!
   markAllAsRead: [NotificationDto!]!
   markAsRead(id: ID!): NotificationDto!
   refreshToken(token: String!): AuthResponse!
-  remove(id: String!): Boolean!
+  removeAddress(id: String!): Boolean!
+  removeComment(id: ID!): CommentDto!
   removeDeviceToken: Boolean!
+  removeEvent(id: ID!): EventDto!
   removeMember(input: RemoveGroupMemberInput!): GroupMembershipDto!
+  removePost(id: ID!): PostDto!
   resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
   signIn(input: SignInInput!): AuthResponse!
   signUp(input: SignUpInput!): AuthResponse!
-  unfollow(userId: ID!): UserFollowingDto!
+  unfollowUser(userId: ID!): UserFollowingDto!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
-  update(input: UpdateAddressInput!): AddressDto!
+  updateAddress(input: UpdateAddressInput!): AddressDto!
+  updateComment(input: UpdateCommentInput!): CommentDto!
+  updateEvent(input: UpdateEventInput!): EventDto!
+  updateGroup(input: UpdateGroupInput!): GroupDto!
   updateMemberRole(input: ChangeMemberRoleInput!): GroupMembershipDto!
   updateMemberStatus(input: UpdateMembershipStatusInput!): GroupMembershipDto!
   updateNotificationPermission(input: UpdateNotificationPermissionInput!): Boolean!
   updatePassword(input: UpdatePasswordInput!): Boolean!
+  updatePost(input: UpdatePostInput!): PostDto!
 }
 
 type Notification {
@@ -664,13 +733,13 @@ type Post {
 }
 
 type PostDto {
-  addresses: [AddressDto!]!
-  comments: [CommentDto!]!
+  addresses: [AddressDto!]
+  comments: [CommentDto!]
   commentsCount: Int!
   content: String!
   createdAt: DateTime!
   createdBy: UserDto!
-  group: GroupDto!
+  group: GroupDto
   id: ID!
   images: [String!]
   isLiked: Boolean!
@@ -823,6 +892,48 @@ input UpdateAddressInput {
   type: AddressType
 }
 
+input UpdateCommentInput {
+  content: String
+  id: ID!
+}
+
+input UpdateEventInput {
+  addresses: [CreateAddressInput!]
+  campingInfo: String
+  description: String
+  difficultyLevel: String
+  endDateTime: DateTime
+  equipmentChecklist: String
+  eventType: String
+  experienceLevel: String
+  id: String!
+  images: [String!]
+  instructorInfo: String
+  invitedGroupIds: [String!]
+  invitedUserIds: [String!]
+  isPrivate: Boolean = false
+  maxParticipants: Int
+  price: String
+  restStops: String
+  roadType: String
+  routeDescription: String
+  startDateTime: DateTime
+  title: String
+  topicsCovered: String
+}
+
+input UpdateGroupInput {
+  cityId: String
+  cover: String
+  description: String
+  id: ID!
+  logo: String
+  membersCapacity: Int
+  name: String
+  privacy: GroupPrivacy
+  tags: [GroupTag!]
+}
+
 input UpdateMembershipStatusInput {
   groupId: ID!
   status: InvitationStatus!
@@ -837,6 +948,14 @@ input UpdatePasswordInput {
   email: String!
   password: String!
   token: String!
+}
+
+input UpdatePostInput {
+  addresses: [CreateAddressInput!]
+  content: String
+  groupId: String
+  id: ID!
+  images: [String!]
 }
 
 type User {
@@ -877,17 +996,14 @@ type User {
 
 type UserDto {
   avatar: String
-  createdAt: DateTime!
   email: String!
   firstName: String!
   followerCount: Int
   followingCount: Int
   id: ID!
-  isActive: Boolean!
   isFollowing: Boolean
   lastName: String!
   supabaseId: String!
-  updatedAt: DateTime!
 }
 
 type UserFollowing {

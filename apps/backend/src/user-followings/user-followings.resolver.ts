@@ -41,7 +41,7 @@ export class UserFollowingsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => UserFollowingDto)
-  async follow(
+  async followUser(
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
   ): Promise<UserFollowingDto> {
@@ -50,7 +50,7 @@ export class UserFollowingsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => UserFollowingDto)
-  async unfollow(
+  async unfollowUser(
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
   ): Promise<UserFollowingDto> {

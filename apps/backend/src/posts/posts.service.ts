@@ -142,7 +142,7 @@ export class PostsService {
     return this.mapToDto(post, currentUserId, authToken);
   }
 
-  async create(
+  async createPost(
     input: CreatePostInput,
     userId: string,
     authToken?: string,
@@ -239,7 +239,7 @@ export class PostsService {
     return this.mapToDto(createdPost, userId, authToken);
   }
 
-  async update(
+  async updatePost(
     input: UpdatePostInput,
     userId: string,
     authToken?: string,
@@ -388,9 +388,9 @@ export class PostsService {
     return this.mapToDto(updatedPost, userId, authToken);
   }
 
-  async remove(
-    userId: string,
+  async removePost(
     id: string,
+    userId: string,
     authToken?: string,
   ): Promise<PostDto> {
     const post = (await this.prisma.post.findUnique({
@@ -723,6 +723,14 @@ export class PostsService {
           error instanceof Error ? error.message : 'Unknown error';
         console.error('Error getting signed URLs:', errorMessage);
       }
+    }
+
+    if (prismaPost.createdBy.avatar) {
+      prismaPost.createdBy.avatar = await this.storageService.getSignedUrl(
+        prismaPost.createdBy.avatar,
+        60,
+        authToken,
+      );
     }
 
     // For group data, if it exists, count the members

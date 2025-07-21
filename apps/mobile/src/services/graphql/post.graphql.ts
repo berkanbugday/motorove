@@ -2,7 +2,7 @@ import {gql} from '@apollo/client';
 import {COMMENT_FRAGMENT} from './comment.graphql';
 import {GROUP_FRAGMENT} from './group.graphql';
 import {USER_FRAGMENT} from './user.graphql';
-import {ADDRESS_FRAGMENT, CREATE_ADDRESS_FRAGMENT} from './address.graphql';
+import {ADDRESS_FRAGMENT} from './address.graphql';
 
 export const POST_FRAGMENT = gql`
   fragment PostFragment on PostDto {
@@ -31,26 +31,6 @@ export const POST_FRAGMENT = gql`
   ${GROUP_FRAGMENT}
   ${USER_FRAGMENT}
   ${ADDRESS_FRAGMENT}
-`;
-
-export const CREATE_POST_FRAGMENT = gql`
-  fragment CreatePostFragment on PostDto {
-    content
-    images
-    groupId
-    addresses {
-      ...CreateAddressFragment
-    }
-  }
-  ${CREATE_ADDRESS_FRAGMENT}
-`;
-
-export const UPDATE_POST_FRAGMENT = gql`
-  fragment UpdatePostFragment on PostDto {
-    id
-    ...CreatePostFragment
-  }
-  ${CREATE_POST_FRAGMENT}
 `;
 
 export const GET_POSTS = gql`
@@ -86,20 +66,20 @@ export const GET_POST = gql`
 // Create post mutation
 export const CREATE_POST = gql`
   mutation CreatePost($input: CreatePostInput!) {
-    create(input: $input) {
-      ...CreatePostFragment
+    createPost(input: $input) {
+      ...PostFragment
     }
   }
-  ${CREATE_POST_FRAGMENT}
+  ${POST_FRAGMENT}
 `;
 
 export const UPDATE_POST = gql`
   mutation UpdatePost($input: UpdatePostInput!) {
     updatePost(input: $input) {
-      ...UpdatePostFragment
+      ...PostFragment
     }
   }
-  ${UPDATE_POST_FRAGMENT}
+  ${POST_FRAGMENT}
 `;
 
 export const REMOVE_POST = gql`

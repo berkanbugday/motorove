@@ -428,7 +428,9 @@ export const HomeScreen = ({navigation}: Props) => {
 
   // Helper function to format avatar URL from API data
   const formatAvatarSource = useCallback((imageUrl?: string) => {
-    return imageUrl ? {uri: imageUrl} : undefined;
+    return imageUrl
+      ? {uri: imageUrl}
+      : require('../../assets/images/default_avatar.png');
   }, []);
 
   // Transform Post model to FeedCard props
@@ -492,7 +494,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
       return (
         <FeedCard
-          avatarSource={feedCardProps.avatarSource || {uri: ''}}
+          avatarSource={feedCardProps.avatarSource}
           userName={feedCardProps.userName}
           timeAgo={feedCardProps.timeAgo}
           labels={feedCardProps.labels}

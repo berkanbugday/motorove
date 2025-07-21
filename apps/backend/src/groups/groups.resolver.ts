@@ -76,7 +76,7 @@ export class GroupsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => GroupDto)
-  async create(
+  async createGroup(
     @Args('input') input: CreateGroupInput,
     @Context() context: GqlContext,
   ): Promise<GroupDto> {
@@ -89,7 +89,7 @@ export class GroupsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => GroupDto)
-  async update(
+  async updateGroup(
     @Args('input') input: UpdateGroupInput,
     @Context() context: GqlContext,
   ): Promise<GroupDto> {

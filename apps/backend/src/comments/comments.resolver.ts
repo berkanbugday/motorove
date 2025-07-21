@@ -33,7 +33,7 @@ export class CommentsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => CommentDto)
-  async create(
+  async createComment(
     @CurrentUser() user: User,
     @Args('input') input: CreateCommentInput,
   ) {
@@ -42,7 +42,7 @@ export class CommentsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => CommentDto)
-  async update(
+  async updateComment(
     @CurrentUser() user: User,
     @Args('input') input: UpdateCommentInput,
   ) {
@@ -51,7 +51,7 @@ export class CommentsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => CommentDto)
-  async remove(
+  async removeComment(
     @CurrentUser() user: User,
     @Args('id', { type: () => ID }) id: string,
   ) {

@@ -56,18 +56,18 @@ export class PostDto implements IPost {
   @IsDate()
   createdAt: Date;
 
-  @Field(() => [AddressDto])
+  @Field(() => [AddressDto], { nullable: true })
   @ValidateNested()
   @Type(() => AddressDto)
-  addresses: AddressDto[];
+  addresses?: AddressDto[];
 
-  @Field(() => [CommentDto])
+  @Field(() => [CommentDto], { nullable: true })
   @ValidateNested()
   @Type(() => CommentDto)
-  comments: CommentDto[];
+  comments?: CommentDto[];
 
-  @Field(() => GroupDto)
+  @Field(() => GroupDto, { nullable: true })
   @ValidateNested()
   @Type(() => GroupDto)
-  group: GroupDto;
+  group?: GroupDto;
 }

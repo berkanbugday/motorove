@@ -4,7 +4,6 @@ import {
   IsString,
   IsArray,
   IsOptional,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -26,7 +25,6 @@ export class CreatePostInput implements ICreatePost {
 
   @Field(() => String, { nullable: true })
   @IsOptional()
-  @IsUUID()
   groupId?: string;
 
   @Field(() => [CreateAddressInput], { nullable: true })

@@ -66,7 +66,7 @@ export class PostsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => PostDto)
-  async create(
+  async createPost(
     @Args('input') input: CreatePostInput,
     @Context() context: GqlContext,
   ): Promise<PostDto> {
@@ -74,12 +74,12 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.create(input, userId, authToken);
+    return await this.postsService.createPost(input, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => PostDto)
-  async update(
+  async updatePost(
     @Args('input') input: UpdatePostInput,
     @Context() context: GqlContext,
   ): Promise<PostDto> {
@@ -87,12 +87,12 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.update(input, userId, authToken);
+    return await this.postsService.updatePost(input, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => PostDto)
-  async remove(
+  async removePost(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
   ): Promise<PostDto> {
@@ -100,7 +100,7 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.remove(id, userId, authToken);
+    return await this.postsService.removePost(id, userId, authToken);
   }
 
   @UseGuards(JwtGuard)

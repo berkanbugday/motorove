@@ -56,7 +56,7 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => EventDto)
-  async create(
+  async createEvent(
     @Args('input') input: CreateEventInput,
     @Context() context: GqlContext,
   ) {
@@ -68,7 +68,7 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => EventDto)
-  async update(
+  async updateEvent(
     @Args('input') input: UpdateEventInput,
     @Context() context: GqlContext,
   ) {
@@ -80,7 +80,7 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => EventDto)
-  async remove(
+  async removeEvent(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
   ) {
@@ -90,7 +90,7 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => EventDto)
-  async join(
+  async joinEvent(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
   ) {
@@ -102,7 +102,7 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => EventDto)
-  async leave(
+  async leaveEvent(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
   ) {

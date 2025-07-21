@@ -9,8 +9,7 @@ export interface IUser {
   email: string;
   avatar?: string;
   supabaseId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  followerCount?: number;
+  followingCount?: number;
   isFollowing?: boolean;
-  isActive: boolean;
 }

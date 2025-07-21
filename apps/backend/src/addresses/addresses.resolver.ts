@@ -32,7 +32,7 @@ export class AddressesResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => AddressDto)
-  async create(
+  async createAddress(
     @Args('input') input: CreateAddressInput,
     @CurrentUser() user: User,
   ) {
@@ -41,7 +41,7 @@ export class AddressesResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => AddressDto)
-  async update(
+  async updateAddress(
     @Args('input') input: UpdateAddressInput,
     @CurrentUser() user: User,
   ) {
@@ -50,7 +50,7 @@ export class AddressesResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
-  async remove(@Args('id') id: string) {
+  async removeAddress(@Args('id') id: string) {
     return await this.addressesService.remove(id);
   }
 }

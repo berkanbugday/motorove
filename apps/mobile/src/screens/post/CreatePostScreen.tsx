@@ -242,11 +242,11 @@ export const CreatePostScreen = () => {
       // Create post input data
       const createPostInput: ICreatePost = {
         content: postText.trim(),
-        images: imageData.length > 0 ? imageData : undefined,
-        addresses: location,
+        images: imageData.length > 0 ? imageData : null,
+        addresses: location.length > 0 ? location : null,
         ...(selectedPrivacy?.value === 'group' && selectedGroup
           ? {groupId: selectedGroup.id}
-          : {}),
+          : {groupId: null}),
       };
 
       // Call the createPost function from the hook

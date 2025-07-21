@@ -1,32 +1,5 @@
 import {gql} from '@apollo/client';
-
-// Group fragment
-export const CREATE_GROUP_FRAGMENT = gql`
-  fragment CreateGroupFragment on GroupDto {
-    name
-    description
-    logo
-    cover
-    city {
-      id
-      value
-    }
-    privacy
-    membersCapacity
-    tags {
-      id
-      value
-    }
-  }
-`;
-
-export const UPDATE_GROUP_FRAGMENT = gql`
-  fragment UpdateGroupFragment on GroupDto {
-    id
-    ...CreateGroupFragment
-  }
-  ${CREATE_GROUP_FRAGMENT}
-`;
+import {CITY_FRAGMENT} from './city.graphql';
 
 // Group fragment
 export const GROUP_FRAGMENT = gql`
@@ -39,12 +12,13 @@ export const GROUP_FRAGMENT = gql`
     isMember
     isAdmin
     city {
-      id
-      value
+      ...CityFragment
     }
     privacy
     membersCapacity
+    membersCount
     tags
+    createdAt
     memberships {
       id
       role
@@ -56,26 +30,27 @@ export const GROUP_FRAGMENT = gql`
       }
     }
   }
+  ${CITY_FRAGMENT}
 `;
 
 // Create group mutation
 export const CREATE_GROUP = gql`
   mutation CreateGroup($input: CreateGroupInput!) {
     createGroup(input: $input) {
-      ...CreateGroupFragment
+      ...GroupFragment
     }
   }
-  ${CREATE_GROUP_FRAGMENT}
+  ${GROUP_FRAGMENT}
 `;
 
 // Update group mutation
 export const UPDATE_GROUP = gql`
   mutation UpdateGroup($input: UpdateGroupInput!) {
     updateGroup(input: $input) {
-      ...UpdateGroupFragment
+      ...GroupFragment
     }
   }
-  ${UPDATE_GROUP_FRAGMENT}
+  ${GROUP_FRAGMENT}
 `;
 
 export const GET_GROUPS = gql`
