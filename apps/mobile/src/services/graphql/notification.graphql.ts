@@ -2,7 +2,7 @@ import {gql} from '@apollo/client';
 
 // Notification fragments
 export const NOTIFICATION_FRAGMENT = gql`
-  fragment NotificationFragment on Notification {
+  fragment NotificationFragment on NotificationDto {
     id
     title
     body
@@ -11,7 +11,6 @@ export const NOTIFICATION_FRAGMENT = gql`
     status
     read
     createdAt
-    updatedAt
   }
 `;
 
