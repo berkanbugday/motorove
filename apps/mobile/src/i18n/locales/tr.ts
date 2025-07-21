@@ -412,23 +412,17 @@ export default {
 
     // Notifications screen
     notification: {
-      new_message: 'Yeni mesaj',
-      new_follower: 'Yeni takipçi',
-      event_invitation: 'Etkinlik daveti',
-      event_reminder: 'Etkinlik hatırlatıcısı',
-      group_invitation: 'Grup daveti',
-      post_like: 'Gönderi beğenisi',
-      post_comment: 'Gönderi yorumu',
-      mark_all_as_read: 'Tümünü okundu olarak işaretle',
-      no_notifications: 'Bildirim yok',
-      comment_reply: 'Yorum yanıtı',
-      mentioned_you: 'Sizi etiketledi',
-      request_accepted: 'İstek kabul edildi',
-      request_rejected: 'İstek reddedildi',
-      event_cancelled: 'Etkinlik iptal edildi',
-      event_updated: 'Etkinlik güncellendi',
-      new_group_post: 'Yeni grup gönderisi',
-      role_changed: 'Rol değiştirildi',
+      notification_deleted: 'Bildirim silindi',
+      delete_failed: 'Bildirim silinemedi. Lütfen tekrar deneyin.',
+      all_deleted: 'Tüm bildirimler silindi',
+      delete_all_failed: 'Tüm bildirimler silinemedi',
+      device_register_failed: 'Cihaz kaydedilemedi. Lütfen tekrar deneyin.',
+      device_unregister_failed:
+        'Cihaz kaydı kaldırılamadı. Lütfen tekrar deneyin.',
+      marked_as_read: 'Bildirim okundu olarak işaretlendi',
+      mark_read_failed: 'Bildirim okundu olarak işaretlenemedi',
+      all_marked_as_read: 'Tüm bildirimler okundu olarak işaretlendi',
+      mark_all_read_failed: 'Tüm bildirimler okundu olarak işaretlenemedi',
     },
 
     // Map screen

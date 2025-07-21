@@ -20,6 +20,7 @@ import {
 } from './graphql/notification.graphql';
 import {INotification, ICreateDeviceToken} from '@motorove/shared/interfaces';
 import {useCallback, useState} from 'react';
+import {useTranslation} from '@hooks/useTranslation';
 
 const DEVICE_TOKEN_KEY = 'fcm_token';
 
@@ -181,12 +182,16 @@ class NotificationService {
 
 // Hook for deleting notification
 export const useDeleteNotification = (onSuccess?: () => void) => {
-  // const [deleteNotificationMutation, {loading, error}] =
-  //   useMutation(DELETE_NOTIFICATION);
+  const {t} = useTranslation();
   const [deleteNotificationMutation, {loading, error}] = useMutation(
     DELETE_NOTIFICATION,
     {
       onCompleted: () => {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.notification.notification_deleted'),
+        });
         if (onSuccess) {
           onSuccess();
         }
@@ -195,10 +200,8 @@ export const useDeleteNotification = (onSuccess?: () => void) => {
         loggingService.error('Failed to delete notification:', errorObj);
         showToast({
           type: 'error',
-          text1: 'Error',
-          text2:
-            errorObj.message ||
-            'Failed to delete notification. Please try again.',
+          text1: t('common.error'),
+          text2: errorObj.message || t('screens.notification.delete_failed'),
         });
       },
     },
@@ -216,8 +219,8 @@ export const useDeleteNotification = (onSuccess?: () => void) => {
       loggingService.error('Error in deleteNotification:', err);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to delete notification',
+        text1: t('common.error'),
+        text2: t('screens.notification.delete_failed'),
       });
       // Error is already handled in onError callback
       return null;
@@ -233,13 +236,27 @@ export const useDeleteNotification = (onSuccess?: () => void) => {
 
 // Hook for deleting all notifications
 export const useDeleteAllNotifications = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [deleteAllNotificationsMutation, {loading, error}] = useMutation(
     DELETE_ALL_NOTIFICATIONS,
     {
       onCompleted: () => {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.notification.all_deleted'),
+        });
         if (onSuccess) {
           onSuccess();
         }
+      },
+      onError: errorObj => {
+        loggingService.error('Failed to delete all notifications:', errorObj);
+        showToast({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('screens.notification.delete_all_failed'),
+        });
       },
     },
   );
@@ -252,8 +269,8 @@ export const useDeleteAllNotifications = (onSuccess?: () => void) => {
       loggingService.error('Error in deleteAllNotifications:', err);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to delete all notifications',
+        text1: t('common.error'),
+        text2: t('screens.notification.delete_all_failed'),
       });
       return null;
     }
@@ -283,12 +300,6 @@ export const useSaveDeviceToken = (onSuccess?: () => void) => {
           'Failed to register device token with server:',
           errorObj,
         );
-        showToast({
-          type: 'error',
-          text1: 'Error',
-          text2:
-            errorObj.message || 'Failed to register device. Please try again.',
-        });
       },
     },
   );
@@ -332,13 +343,6 @@ export const useRemoveDeviceToken = (onSuccess?: () => void) => {
           'Failed to unregister device token from server:',
           errorObj,
         );
-        showToast({
-          type: 'error',
-          text1: 'Error',
-          text2:
-            errorObj.message ||
-            'Failed to unregister device. Please try again.',
-        });
       },
     },
   );
@@ -421,10 +425,16 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
 
 // Hook for marking notification as read
 export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [markAsReadMutation, {loading, error}] = useMutation(
     MARK_NOTIFICATION_AS_READ,
     {
       onCompleted: () => {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.notification.marked_as_read'),
+        });
         if (onSuccess) {
           onSuccess();
         }
@@ -433,10 +443,8 @@ export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
         loggingService.error('Failed to mark notification as read:', errorObj);
         showToast({
           type: 'error',
-          text1: 'Error',
-          text2:
-            errorObj.message ||
-            'Failed to update notification. Please try again.',
+          text1: t('common.error'),
+          text2: errorObj.message || t('screens.notification.mark_read_failed'),
         });
       },
     },
@@ -454,8 +462,8 @@ export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
       loggingService.error('Error in markNotificationAsRead:', err);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to mark notification as read',
+        text1: t('common.error'),
+        text2: t('screens.notification.mark_read_failed'),
       });
       return null;
     }
@@ -470,10 +478,16 @@ export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
 
 // Hook for marking all notifications as read
 export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [markAllAsReadMutation, {loading, error}] = useMutation(
     MARK_ALL_NOTIFICATIONS_AS_READ,
     {
       onCompleted: () => {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.notification.all_marked_as_read'),
+        });
         if (onSuccess) {
           onSuccess();
         }
@@ -485,8 +499,8 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
         );
         showToast({
           type: 'error',
-          text1: 'Error',
-          text2: 'Failed to mark all notifications as read',
+          text1: t('common.error'),
+          text2: t('screens.notification.mark_all_read_failed'),
         });
       },
     },
@@ -504,8 +518,8 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
       loggingService.error('Error in markAllNotificationsAsRead:', err);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to mark all notifications as read',
+        text1: t('common.error'),
+        text2: t('screens.notification.mark_all_read_failed'),
       });
       return null;
     }

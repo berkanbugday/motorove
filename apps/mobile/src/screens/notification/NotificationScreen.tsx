@@ -65,38 +65,18 @@ export const NotificationScreen = () => {
   } = useGetNotifications(10, 0);
 
   const {markAsRead} = useMarkNotificationAsRead(() => {
-    showToast({
-      type: 'success',
-      text1: 'Success',
-      text2: 'Notification marked as read',
-    });
     refetch();
   });
 
   const {deleteNotification} = useDeleteNotification(() => {
-    showToast({
-      type: 'success',
-      text1: 'Success',
-      text2: 'Notification deleted',
-    });
     refetch();
   });
 
   const {deleteAllNotifications} = useDeleteAllNotifications(() => {
-    showToast({
-      type: 'success',
-      text1: 'Success',
-      text2: 'All notifications deleted',
-    });
     refetch();
   });
 
   const {markAllAsRead} = useMarkAllNotificationsAsRead(() => {
-    showToast({
-      type: 'success',
-      text1: 'Success',
-      text2: 'All notifications marked as read',
-    });
     refetch();
   });
 

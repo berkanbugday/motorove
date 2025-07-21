@@ -409,23 +409,17 @@ export default {
 
     // Notifications screen
     notification: {
-      new_message: 'New message',
-      new_follower: 'New follower',
-      event_invitation: 'Event invitation',
-      event_reminder: 'Event reminder',
-      group_invitation: 'Group invitation',
-      post_like: 'Post like',
-      post_comment: 'Post comment',
-      mark_all_as_read: 'Mark all as read',
-      no_notifications: 'No notifications',
-      comment_reply: 'Comment reply',
-      mentioned_you: 'Mentioned you',
-      request_accepted: 'Request accepted',
-      request_rejected: 'Request rejected',
-      event_cancelled: 'Event cancelled',
-      event_updated: 'Event updated',
-      new_group_post: 'New group post',
-      role_changed: 'Role changed',
+      notification_deleted: 'Notification deleted',
+      delete_failed: 'Failed to delete notification. Please try again.',
+      all_deleted: 'All notifications deleted',
+      delete_all_failed: 'Failed to delete all notifications',
+      device_register_failed: 'Failed to register device. Please try again.',
+      device_unregister_failed:
+        'Failed to unregister device. Please try again.',
+      marked_as_read: 'Notification marked as read',
+      mark_read_failed: 'Failed to mark notification as read',
+      all_marked_as_read: 'All notifications marked as read',
+      mark_all_read_failed: 'Failed to mark all notifications as read',
     },
 
     // Map screen
