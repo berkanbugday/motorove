@@ -7,6 +7,7 @@ const FIRST_TIME_KEY = 'isFirstTime';
 // Check if this is the first time the user is opening the app
 export const useFirstTimeCheck = () => {
   const [isFirstTime, setIsFirstTime] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkFirstTimeUser = async () => {
@@ -14,9 +15,11 @@ export const useFirstTimeCheck = () => {
         // This is not sensitive data, so we can use AsyncStorage
         const value = await AsyncStorage.getItem(FIRST_TIME_KEY);
         setIsFirstTime(value === null); // If value is null, this is the first time
+        setIsLoading(false);
       } catch (error) {
         loggingService.error('Error checking first time status:', error);
         setIsFirstTime(true);
+        setIsLoading(false);
       }
     };
 
@@ -33,5 +36,5 @@ export const useFirstTimeCheck = () => {
     }
   };
 
-  return {isFirstTime, markAsNotFirstTime};
+  return {isFirstTime, isLoading, markAsNotFirstTime};
 };
