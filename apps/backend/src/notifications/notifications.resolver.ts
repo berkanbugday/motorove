@@ -83,10 +83,11 @@ export class NotificationsResolver {
   @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
   async saveDeviceToken(
+    @CurrentUser() user: User,
     @Args('input') input: CreateDeviceTokenInput,
   ): Promise<boolean> {
     return await this.notificationsService.saveDeviceToken(
-      input.userId,
+      user.id,
       input.token,
       input.deviceType as 'ios' | 'android',
     );
@@ -94,10 +95,7 @@ export class NotificationsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => Boolean)
-  async removeDeviceToken(
-    @Args('userId') userId: string,
-    @Args('token') token: string,
-  ): Promise<boolean> {
-    return await this.notificationsService.removeDeviceToken(userId, token);
+  async removeDeviceToken(@CurrentUser() user: User): Promise<boolean> {
+    return await this.notificationsService.removeDeviceToken(user.id);
   }
 }

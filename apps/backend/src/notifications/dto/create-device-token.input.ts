@@ -7,11 +7,6 @@ export class CreateDeviceTokenInput implements ICreateDeviceToken {
   @Field()
   @IsNotEmpty()
   @IsString()
-  userId: string;
-
-  @Field()
-  @IsNotEmpty()
-  @IsString()
   token: string;
 
   @Field()

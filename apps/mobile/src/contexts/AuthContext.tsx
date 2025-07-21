@@ -3,6 +3,12 @@ import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
 import {NotificationPermission} from '@motorove/shared';
+import {
+  notificationService,
+  useSaveDeviceToken,
+  useRemoveDeviceToken,
+} from '@services/notification.service';
+import {useUpdateNotificationPermission} from '@services/user.service';
 
 // Default auth state
 const defaultAuthState: AuthState = {
@@ -18,7 +24,7 @@ export interface AuthContextType extends AuthState {
   accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
-  updateNotificationPermission: (
+  updateNotificationPermissionState: (
     permission: NotificationPermission,
   ) => Promise<void>;
 }
@@ -38,7 +44,7 @@ const AuthContext = createContext<AuthContextType>({
   loadAuthState: async () => {
     throw new Error('Not implemented');
   },
-  updateNotificationPermission: async () => {
+  updateNotificationPermissionState: async () => {
     throw new Error('Not implemented');
   },
 });
@@ -51,7 +57,9 @@ interface AuthProviderProps {
 // Auth provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
-
+  const {saveDeviceToken} = useSaveDeviceToken();
+  const {removeDeviceToken} = useRemoveDeviceToken();
+  const {updateNotificationPermission} = useUpdateNotificationPermission();
   // Load authentication state on component mount
   useEffect(() => {
     loadAuthState();
@@ -104,6 +112,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           hasToken: !!newState.accessToken,
         });
 
+        if (
+          response.user?.id &&
+          response.user?.notificationPermission !==
+            NotificationPermission.UNKNOWN
+        ) {
+          const permission =
+            await notificationService.service.requestPermissions();
+          const token = await notificationService.service.getDeviceToken();
+          if (token && response.user?.id) {
+            const resultSaveDeviceToken = await saveDeviceToken({
+              token: token,
+              deviceType: notificationService.getDeviceType(),
+            });
+            if (resultSaveDeviceToken) {
+              if (permission) {
+                const resultUpdate = await updateNotificationPermission(
+                  NotificationPermission.ALLOWED,
+                );
+                if (resultUpdate) {
+                  await updateNotificationPermissionState(
+                    NotificationPermission.ALLOWED,
+                  );
+                }
+              } else {
+                const resultUpdate = await updateNotificationPermission(
+                  NotificationPermission.NOT_ALLOWED,
+                );
+                if (resultUpdate) {
+                  await updateNotificationPermissionState(
+                    NotificationPermission.NOT_ALLOWED,
+                  );
+                }
+              }
+            }
+          }
+        }
+
         setAuthState(newState);
       }
 
@@ -132,6 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   // Sign out
   const signOut = async (): Promise<void> => {
     try {
+      await removeDeviceToken();
       await authService.signOut();
       setAuthState(defaultAuthState);
     } catch (error) {
@@ -140,7 +186,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     }
   };
 
-  const updateNotificationPermission = async (
+  const updateNotificationPermissionState = async (
     permission: NotificationPermission,
   ): Promise<void> => {
     try {
@@ -167,7 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         accountSetup,
         signOut,
         loadAuthState,
-        updateNotificationPermission,
+        updateNotificationPermissionState,
       }}>
       {children}
     </AuthContext.Provider>

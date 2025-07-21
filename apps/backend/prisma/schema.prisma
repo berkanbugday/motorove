@@ -62,7 +62,7 @@ enum NotificationStatus {
 
 enum NotificationPermission {
   ALLOWED
-  BLOCKED
+  NOT_ALLOWED
   UNKNOWN
 }
 

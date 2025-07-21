@@ -4,6 +4,6 @@
  */
 export enum NotificationPermission {
   ALLOWED = "ALLOWED",
-  BLOCKED = "BLOCKED",
+  NOT_ALLOWED = "NOT_ALLOWED",
   UNKNOWN = "UNKNOWN",
 }

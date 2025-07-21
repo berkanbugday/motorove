@@ -349,16 +349,10 @@ export class NotificationsService {
     }
   }
 
-  async removeDeviceToken(
-    userId: string,
-    deviceToken: string,
-  ): Promise<boolean> {
+  async removeDeviceToken(userId: string): Promise<boolean> {
     try {
       const removedDeviceToken = (await this.prisma.deviceToken.updateMany({
-        where: {
-          userId,
-          token: deviceToken,
-        },
+        where: { userId },
         data: {
           isActive: false,
         },

@@ -47,8 +47,8 @@ export const SAVE_DEVICE_TOKEN = gql`
 `;
 
 export const REMOVE_DEVICE_TOKEN = gql`
-  mutation RemoveDeviceToken($userId: String!, $token: String!) {
-    removeDeviceToken(userId: $userId, token: $token)
+  mutation RemoveDeviceToken {
+    removeDeviceToken
   }
 `;
 

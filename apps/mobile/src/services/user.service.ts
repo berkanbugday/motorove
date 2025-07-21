@@ -163,11 +163,6 @@ export const useUpdateNotificationPermission = (onSuccess?: () => void) => {
     UPDATE_NOTIFICATION_PERMISSION,
     {
       onCompleted: _data => {
-        showToast({
-          type: 'success',
-          text1: t('common.success'),
-          text2: t('screens.notificationPermission.success_update'),
-        });
         if (onSuccess) {
           onSuccess();
         }

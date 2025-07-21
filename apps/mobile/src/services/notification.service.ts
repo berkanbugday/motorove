@@ -343,15 +343,9 @@ export const useRemoveDeviceToken = (onSuccess?: () => void) => {
     },
   );
 
-  const removeDeviceToken = async (userId: string, token: string) => {
+  const removeDeviceToken = async () => {
     try {
-      const result = await removeDeviceTokenMutation({
-        variables: {
-          userId,
-          token,
-        },
-      });
-
+      const result = await removeDeviceTokenMutation();
       if (result.data?.removeDeviceToken) {
         await NotificationService.getInstance().clearDeviceToken();
       }

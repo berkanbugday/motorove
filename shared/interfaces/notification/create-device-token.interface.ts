@@ -4,11 +4,6 @@
  */
 export interface ICreateDeviceToken {
   /**
-   * User ID associated with this device token
-   */
-  userId: string;
-
-  /**
    * The device token
    */
   token: string;

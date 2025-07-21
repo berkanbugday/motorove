@@ -123,7 +123,6 @@ input CreateAddressInput {
 input CreateDeviceTokenInput {
   deviceType: String!
   token: String!
-  userId: String!
 }
 
 input CreateNotificationsInput {
@@ -552,7 +551,7 @@ type Mutation {
   markAsRead(id: ID!): NotificationDto!
   refreshToken(token: String!): AuthResponse!
   remove(id: String!): Boolean!
-  removeDeviceToken(token: String!, userId: String!): Boolean!
+  removeDeviceToken: Boolean!
   removeMember(input: RemoveGroupMemberInput!): GroupMembershipDto!
   resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
@@ -608,7 +607,7 @@ type NotificationDto {
 """Permission for notifications"""
 enum NotificationPermission {
   ALLOWED
-  BLOCKED
+  NOT_ALLOWED
   UNKNOWN
 }
 

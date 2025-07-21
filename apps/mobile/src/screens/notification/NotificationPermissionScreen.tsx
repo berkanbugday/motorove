@@ -12,35 +12,41 @@ import {
   useSaveDeviceToken,
 } from '@services/notification.service';
 import {loggingService} from '@services/logging.service';
-import {useFirstTimeCheck} from '@navigation/utils/navigationUtils';
 
 export const NotificationPermissionScreen = () => {
   const {t} = useTranslation();
   const {updateNotificationPermission} = useUpdateNotificationPermission();
-  const {user, updateNotificationPermission: updateNotificationPermissionAuth} =
-    useAuth();
+  const {user, updateNotificationPermissionState} = useAuth();
   const {saveDeviceToken} = useSaveDeviceToken();
-  const {markAsNotFirstTime} = useFirstTimeCheck();
 
   const handleAllow = async () => {
     try {
-      await notificationService.service.requestPermissions();
+      const permission = await notificationService.service.requestPermissions();
       const token = await notificationService.service.getDeviceToken();
       if (token && user?.id) {
         const result = await saveDeviceToken({
-          userId: user.id,
           token: token,
           deviceType: notificationService.getDeviceType(),
         });
         if (result) {
-          const resultUpdate = await updateNotificationPermission(
-            NotificationPermission.ALLOWED,
-          );
-          if (resultUpdate) {
-            await updateNotificationPermissionAuth(
+          if (permission) {
+            const resultUpdate = await updateNotificationPermission(
               NotificationPermission.ALLOWED,
             );
-            await markAsNotFirstTime();
+            if (resultUpdate) {
+              await updateNotificationPermissionState(
+                NotificationPermission.ALLOWED,
+              );
+            }
+          } else {
+            const resultUpdate = await updateNotificationPermission(
+              NotificationPermission.NOT_ALLOWED,
+            );
+            if (resultUpdate) {
+              await updateNotificationPermissionState(
+                NotificationPermission.NOT_ALLOWED,
+              );
+            }
           }
         }
       }
@@ -53,11 +59,41 @@ export const NotificationPermissionScreen = () => {
   };
 
   const handleNotAllow = async () => {
-    const result = await updateNotificationPermission(
-      NotificationPermission.BLOCKED,
-    );
-    if (result) {
-      await updateNotificationPermissionAuth(NotificationPermission.BLOCKED);
+    try {
+      const permission = await notificationService.service.requestPermissions();
+      const token = await notificationService.service.getDeviceToken();
+      if (token && user?.id) {
+        const result = await saveDeviceToken({
+          token: token,
+          deviceType: notificationService.getDeviceType(),
+        });
+        if (result) {
+          if (permission) {
+            const resultUpdate = await updateNotificationPermission(
+              NotificationPermission.ALLOWED,
+            );
+            if (resultUpdate) {
+              await updateNotificationPermissionState(
+                NotificationPermission.ALLOWED,
+              );
+            }
+          } else {
+            const resultUpdate = await updateNotificationPermission(
+              NotificationPermission.NOT_ALLOWED,
+            );
+            if (resultUpdate) {
+              await updateNotificationPermissionState(
+                NotificationPermission.NOT_ALLOWED,
+              );
+            }
+          }
+        }
+      }
+    } catch (notificationError) {
+      loggingService.error(
+        'Error requesting notification permissions:',
+        notificationError,
+      );
     }
   };
 
