@@ -420,6 +420,17 @@ export default {
       mark_read_failed: 'Failed to mark notification as read',
       all_marked_as_read: 'All notifications marked as read',
       mark_all_read_failed: 'Failed to mark all notifications as read',
+      no_notifications_to_delete: 'No notifications to delete',
+      mark_read: 'Mark Read',
+      no_notifications: 'No notifications',
+      no_notifications_yet: "You don't have any notifications yet",
+      delete_notification_title: 'Delete Notification',
+      delete_notification_message:
+        'Are you sure you want to delete this notification? This action cannot be undone.',
+      delete_all_notifications_title: 'Delete All Notifications',
+      delete_all_notifications_message:
+        'Are you sure you want to delete all notifications? This action cannot be undone.',
+      delete_all: 'Delete All',
     },
 
     // Map screen

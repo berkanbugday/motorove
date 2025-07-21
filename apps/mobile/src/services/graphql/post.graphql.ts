@@ -44,7 +44,7 @@ export const POST_FRAGMENT = gql`
 `;
 
 export const CREATE_POST_FRAGMENT = gql`
-  fragment CreatePostFragment on Post {
+  fragment CreatePostFragment on PostDto {
     content
     images
     latitude
@@ -58,7 +58,7 @@ export const CREATE_POST_FRAGMENT = gql`
 `;
 
 export const UPDATE_POST_FRAGMENT = gql`
-  fragment UpdatePostFragment on Post {
+  fragment UpdatePostFragment on PostDto {
     id
     ...CreatePostFragment
   }

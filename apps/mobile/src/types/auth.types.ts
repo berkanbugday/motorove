@@ -12,7 +12,7 @@ export interface AuthUser {
   email: string;
   firstName?: string;
   lastName?: string;
-  avatar?: string;
+  avatar?: string | null;
   hasCompletedSetup?: boolean;
   notificationPermission?: NotificationPermission;
 }

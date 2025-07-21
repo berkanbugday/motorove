@@ -15,6 +15,9 @@ export class AuthUser {
   @Field()
   email: string;
 
+  @Field(() => String, { nullable: true })
+  avatar?: string | null;
+
   @Field(() => Boolean, { defaultValue: false })
   hasCompletedSetup: boolean;
 

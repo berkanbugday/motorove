@@ -13,12 +13,7 @@ import {
   FlatList,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {colors} from '../../theme/colors';
-import {spacing} from '../../theme/spacing';
-import {radius} from '../../theme/radius';
-import {typography} from '../../theme/typography';
-import {Icon} from '../../components/Icon';
-import {TopHeaderBar} from '@components/TopHeaderBar';
+import {colors, spacing, radius, typography} from '@theme';
 import {useAuth} from '@contexts/AuthContext';
 import {
   Button,
@@ -29,34 +24,34 @@ import {
   Body,
   showToast,
   SelectLocationMap,
+  Icon,
+  TopHeaderBar,
+  GroupCard,
+  openBottomSheet,
+  closeBottomSheet,
 } from '@components';
-import {GroupCard} from '@components/GroupCard';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useCreatePost} from '@services/post.service';
-import {CreatePostInput, PostAddressInput} from '../../types/models/post.model';
-import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
+import {
+  ICreatePost,
+  ICreateAddress,
+  IAddress,
+  Language,
+} from '@motorove/shared';
 import {useGetJoinedGroups} from '@services/group.service';
-import {Language} from '@motorove/shared';
 
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
   const [postText, setPostText] = useState('');
-  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>({
-    id: 1,
-    label: 'Public',
-    value: 'public',
-  });
+  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
+    null,
+  );
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [location, setLocation] = useState<{
-    latitude?: number;
-    longitude?: number;
-    addresses: PostAddressInput[];
-  }>({addresses: []});
+  const [addresses, setAddresses] = useState<ICreateAddress[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     id: string;
     name: string;
@@ -74,13 +69,9 @@ export const CreatePostScreen = () => {
   const insets = useSafeAreaInsets();
 
   // Use the createPost hook from PostService
-  const {createPost} = useCreatePost(() => {
+  const {createPost, loading} = useCreatePost(() => {
     navigation.goBack();
   });
-
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
 
   const handlePrivacyChange = (item: DropdownItem | null) => {
     setSelectedPrivacy(item);
@@ -137,8 +128,8 @@ export const CreatePostScreen = () => {
                   logoSource={item.logo ? {uri: item.logo} : null}
                   name={item.name}
                   location={item.city?.value}
-                  tags={item.tags?.map(tag => tag.value) || []}
-                  currentMembers={item.memberships?.length || 0}
+                  // tags={item.tags?.map(tag => tag.name) || []}
+                  currentMembers={item.membersCount || 0}
                   membersCapacity={item.membersCapacity || undefined}
                   privacy={item.privacy}
                   isMember={true}
@@ -223,28 +214,28 @@ export const CreatePostScreen = () => {
 
   const handleAddLocation = () => {
     // Open bottom sheet with map
-    openBottomSheet({
-      title: 'Select Location',
-      content: (
-        <SelectLocationMap
-          initialLocation={location}
-          onLocationSelect={selectedLocation => {
-            setLocation({
-              ...selectedLocation,
-              addresses: selectedLocation.addresses || [],
-            });
-            closeBottomSheet();
-          }}
-          onClose={() => {
-            setLocation({addresses: []});
-            closeBottomSheet();
-          }}
-        />
-      ),
-      snapPoint: 'full',
-      enableGestureControl: false,
-      closeButtonPosition: 'top-left',
-    });
+    // openBottomSheet({
+    //   title: 'Select Location',
+    //   content: (
+    //     <SelectLocationMap
+    //       initialLocation={location as IAddress}
+    //       onLocationSelect={selectedLocation => {
+    //         setLocation({
+    //           ...selectedLocation,
+    //           addresses: selectedLocation.addresses || [],
+    //         });
+    //         closeBottomSheet();
+    //       }}
+    //       onClose={() => {
+    //         setLocation({addresses: []});
+    //         closeBottomSheet();
+    //       }}
+    //     />
+    //   ),
+    //   snapPoint: 'full',
+    //   enableGestureControl: false,
+    //   closeButtonPosition: 'top-left',
+    // });
   };
 
   const handlePost = async () => {
@@ -258,36 +249,32 @@ export const CreatePostScreen = () => {
     }
 
     try {
-      setIsLoading(true);
-
       // Use base64 encoded images if available, otherwise fall back to URIs
       const imageData = selectedImages.map(img => img.base64 || img.uri);
 
       // Create post input data
-      const createPostInput: CreatePostInput = {
-        content: postText.trim(),
-        images: imageData.length > 0 ? imageData : undefined,
-        ...(location.latitude && location.longitude
-          ? {
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }
-          : {}),
-        ...(selectedPrivacy?.value === 'group' && selectedGroup
-          ? {groupId: selectedGroup.id}
-          : {}),
-        addresses: location.addresses,
-      };
+      // const createPostInput: ICreatePost = {
+      //   content: postText.trim(),
+      //   images: imageData.length > 0 ? imageData : undefined,
+      //   ...(location.latitude && location.longitude
+      //     ? {
+      //         latitude: location.latitude,
+      //         longitude: location.longitude,
+      //       }
+      //     : {}),
+      //   ...(selectedPrivacy?.value === 'group' && selectedGroup
+      //     ? {groupId: selectedGroup.id}
+      //     : {}),
+      //   addresses: location.addresses,
+      // };
 
       // Call the createPost function from the hook
-      await createPost(createPostInput);
+      // await createPost(createPostInput);
 
       // Toast is handled by the hook's onSuccess callback
     } catch (error) {
       loggingService.error('Error creating post:', error);
       // Error toast is already handled by the hook
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -297,7 +284,7 @@ export const CreatePostScreen = () => {
         title="Create Post"
         showBackButton
         showShadow={false}
-        onBackPress={handleGoBack}
+        onBackPress={() => navigation.goBack()}
         containerStyle={styles.topHeaderBar}
       />
       <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
@@ -305,7 +292,11 @@ export const CreatePostScreen = () => {
           {/* User Profile Section */}
           <View style={styles.profileSection}>
             <Image
-              source={{uri: 'https://picsum.photos/id/1005/100/100'}}
+              source={
+                user?.avatar
+                  ? {uri: user?.avatar}
+                  : require('@assets/images/default_avatar.png')
+              }
               style={styles.avatar as ImageStyle}
             />
             <View style={styles.profileInfo}>
@@ -319,7 +310,6 @@ export const CreatePostScreen = () => {
                 ]}
                 placeholder="Select privacy"
                 onSelect={handlePrivacyChange}
-                searchable={false}
                 selectedItem={selectedPrivacy}
                 containerStyle={styles.privacySelector}
                 inputStyle={styles.privacyInput}
@@ -386,33 +376,14 @@ export const CreatePostScreen = () => {
               iconSize={18}
               onPress={handleAddLocation}
               textStyle={styles.actionButtonText}
-              title={
-                location.addresses.length > 0
-                  ? location.addresses.find(
-                      address => address.language === Language.EN.toLowerCase(),
-                    )?.address
-                  : 'Add location'
-              }
+              // title={
+              //   location.addresses.length > 0
+              //     ? location.addresses.find(
+              //         address => address.language === Language.EN.toLowerCase(),
+              //       )?.address
+              //     : 'Add location'
+              // }
             />
-            {/* <Button
-              variant="text"
-              iconName="route"
-              iconColor={colors.neutral.black}
-              iconSize={18}
-              onPress={() => {}}
-              textStyle={styles.actionButtonText}
-              title="Add route"
-            />
-
-            <Button
-              variant="text"
-              iconName="users-filled"
-              iconColor={colors.neutral.black}
-              iconSize={18}
-              onPress={() => {}}
-              textStyle={styles.actionButtonText}
-              title="Tag people"
-            /> */}
           </View>
         </ScrollView>
 
@@ -424,9 +395,9 @@ export const CreatePostScreen = () => {
             shape="round"
             onPress={handlePost}
             title="Post"
-            loading={isLoading}
+            loading={loading}
             disabled={
-              isLoading ||
+              loading ||
               !postText.trim() ||
               (selectedPrivacy?.value === 'group' && !selectedGroup)
             }
@@ -454,7 +425,8 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.round,
-    backgroundColor: colors.secondary.light,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
   profileInfo: {
     width: '80%',

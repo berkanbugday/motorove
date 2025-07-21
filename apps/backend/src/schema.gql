@@ -52,6 +52,7 @@ type AuthResponse {
 }
 
 type AuthUser {
+  avatar: String
   email: String!
   firstName: String!
   hasCompletedSetup: Boolean!

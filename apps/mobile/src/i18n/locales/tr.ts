@@ -423,6 +423,17 @@ export default {
       mark_read_failed: 'Bildirim okundu olarak işaretlenemedi',
       all_marked_as_read: 'Tüm bildirimler okundu olarak işaretlendi',
       mark_all_read_failed: 'Tüm bildirimler okundu olarak işaretlenemedi',
+      no_notifications_to_delete: 'Silinecek bildirim yok',
+      mark_read: 'Okundu olarak işaretle',
+      no_notifications: 'Bildirim yok',
+      no_notifications_yet: 'Henüz hiç bildiriminiz yok',
+      delete_notification_title: 'Bildirim Sil',
+      delete_notification_message:
+        'Bu bildirimi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+      delete_all_notifications_title: 'Tüm Bildirimleri Sil',
+      delete_all_notifications_message:
+        'Tüm bildirimleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+      delete_all: 'Tümünü Sil',
     },
 
     // Map screen

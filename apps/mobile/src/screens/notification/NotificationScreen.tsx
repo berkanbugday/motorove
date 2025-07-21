@@ -32,6 +32,7 @@ import {
 import {relativeTime} from '@utils/dateUtils';
 import {useAuth} from '@contexts';
 import {INotification} from '@motorove/shared';
+import {useTranslation} from '@/hooks/useTranslation';
 
 /**
  * NotificationSkeleton - Skeleton component for notification items
@@ -56,6 +57,7 @@ const NotificationSkeleton = () => {
 export const NotificationScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {user} = useAuth();
+  const {t} = useTranslation();
   const {
     notifications: apiNotifications,
     loading,
@@ -139,14 +141,14 @@ export const NotificationScreen = () => {
     if (notifications.length === 0) {
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'No notifications to delete',
+        text1: t('common.error'),
+        text2: t('screens.notification.no_notifications_to_delete'),
       });
       return;
     } else {
       deleteAllConfirmationDialogRef.current?.open();
     }
-  }, [notifications.length, existingUnreadNotifications]);
+  }, [notifications.length, existingUnreadNotifications, t]);
 
   const confirmDeleteAllNotifications = useCallback(() => {
     deleteAllNotifications();
@@ -168,7 +170,7 @@ export const NotificationScreen = () => {
     // Actions for swipe gestures
     const rightActions: SwipeAction[] = [
       {
-        text: 'Delete',
+        text: t('common.delete'),
         icon: <Icon name="trash" size={24} color={colors.neutral.white} />,
         backgroundColor: colors.status.error,
         onPress: () => handleDeleteNotification(item.id),
@@ -178,7 +180,7 @@ export const NotificationScreen = () => {
 
     const leftActions: SwipeAction[] = [
       {
-        text: 'Mark Read',
+        text: t('screens.notification.mark_read'),
         icon: <Icon name="check" size={24} color={colors.neutral.white} />,
         backgroundColor: colors.status.success,
         onPress: () => handleMarkAsRead(item.id),
@@ -249,7 +251,7 @@ export const NotificationScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Notifications"
+        title={t('navigation.notifications')}
         showShadow={false}
         showBackButton
         onBackPress={() => navigation.goBack()}
@@ -290,9 +292,11 @@ export const NotificationScreen = () => {
           ) : (
             <View style={styles.emptyContainer}>
               <Icon name="bell" size={48} color={colors.neutral.lightGrey} />
-              <Subtitle style={styles.emptyText}>No notifications</Subtitle>
+              <Subtitle style={styles.emptyText}>
+                {t('screens.notification.no_notifications')}
+              </Subtitle>
               <Body color={colors.neutral.grey}>
-                You don't have any notifications yet
+                {t('screens.notification.no_notifications_yet')}
               </Body>
             </View>
           )
@@ -309,16 +313,16 @@ export const NotificationScreen = () => {
       {/* Delete single notification confirmation dialog */}
       <Dialog
         ref={deleteConfirmationDialogRef}
-        title="Delete Notification"
-        message="Are you sure you want to delete this notification? This action cannot be undone."
+        title={t('screens.notification.delete_notification_title')}
+        message={t('screens.notification.delete_notification_message')}
         variant="confirm"
         confirmButton={{
-          text: 'Delete',
+          text: t('common.delete'),
           onPress: confirmDeleteNotification,
           variant: 'primary',
         }}
         cancelButton={{
-          text: 'Cancel',
+          text: t('common.cancel'),
           variant: 'outline',
         }}
       />
@@ -326,16 +330,16 @@ export const NotificationScreen = () => {
       {/* Delete all notifications confirmation dialog */}
       <Dialog
         ref={deleteAllConfirmationDialogRef}
-        title="Delete All Notifications"
-        message="Are you sure you want to delete all notifications? This action cannot be undone."
+        title={t('screens.notification.delete_all_notifications_title')}
+        message={t('screens.notification.delete_all_notifications_message')}
         variant="confirm"
         confirmButton={{
-          text: 'Delete All',
+          text: t('screens.notification.delete_all'),
           onPress: confirmDeleteAllNotifications,
           variant: 'primary',
         }}
         cancelButton={{
-          text: 'Cancel',
+          text: t('common.cancel'),
           variant: 'outline',
         }}
       />

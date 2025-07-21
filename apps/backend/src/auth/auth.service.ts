@@ -11,12 +11,14 @@ import { AuthUser } from './models/auth-user.model';
 import { NotificationPermission } from '../enums/models/notification-permission.enum';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { StorageService } from '../core/storage/storage.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private supabaseService: SupabaseService,
     private prismaService: PrismaService,
+    private storageService: StorageService,
   ) {}
 
   private async createDefaultNotificationSettingsInTransaction(
@@ -164,12 +166,21 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
+    const avatar = user.avatar
+      ? await this.storageService.getSignedUrl(
+          user.avatar,
+          60,
+          data.session.access_token,
+        )
+      : null;
+
     return {
       user: {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        avatar: avatar ?? null,
         hasCompletedSetup: user.hasCompletedSetup,
         notificationPermission:
           user.notificationPermission as NotificationPermission,
@@ -221,12 +232,21 @@ export class AuthService {
         throw new UnauthorizedException('User not found');
       }
 
+      const avatar = user.avatar
+        ? await this.storageService.getSignedUrl(
+            user.avatar,
+            60,
+            data.session?.access_token,
+          )
+        : null;
+
       return {
         user: {
           id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
+          avatar: avatar ?? null,
           hasCompletedSetup: user.hasCompletedSetup,
           notificationPermission:
             user.notificationPermission as NotificationPermission,
