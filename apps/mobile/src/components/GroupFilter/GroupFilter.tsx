@@ -1,20 +1,24 @@
 import React, {useCallback, useState, useEffect} from 'react';
 import {StyleSheet, View, ScrollView, ActivityIndicator} from 'react-native';
-import {Button} from '@components/Button';
-import {Checkbox} from '@components/Checkbox';
-import {Subtitle} from '@components/Typography';
+import {
+  Button,
+  Checkbox,
+  Subtitle,
+  useBottomSheet,
+  Dropdown,
+  DropdownItem,
+  MultiSelect,
+  MultiSelectItem,
+} from '@components';
 import {colors, spacing} from '@theme';
-import {useBottomSheet} from '@components/BottomSheet/BottomSheetProvider';
 import {useGetCities} from '@services/city.service';
-import {useGetGroupTags} from '@services/group-tag.service';
-import Dropdown from '@components/Dropdown';
-import {DropdownItem} from '@components/Dropdown/types';
-import {Chip} from '@components/Chip';
-import {GroupFilters} from '@services/group.service';
+import {IFilterGroup, GroupPrivacy, GroupMemberRole} from '@motorove/shared';
+import {EnumUtils} from '@utils/enumUtils';
+import {useTranslation} from '@hooks/useTranslation';
 
 interface GroupFilterProps {
-  initialFilters: GroupFilters;
-  onApplyFilters: (filters: GroupFilters) => void;
+  initialFilters: IFilterGroup;
+  onApplyFilters: (filters: IFilterGroup) => void;
 }
 
 export const GroupFilter: React.FC<GroupFilterProps> = ({
@@ -22,9 +26,19 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
   onApplyFilters,
 }) => {
   const {closeBottomSheet} = useBottomSheet();
-  const [filters, setFilters] = useState<GroupFilters>(initialFilters);
+  const [filters, setFilters] = useState<IFilterGroup>(initialFilters);
   const {cities, loading: isCitiesLoading} = useGetCities();
-  const {groupTags, loading: isTagsLoading} = useGetGroupTags();
+  const {t} = useTranslation();
+
+  // Use GroupTag enum for tag options
+  const groupTagDropdownItems: MultiSelectItem[] = EnumUtils.getGroupTags();
+
+  // Convert selected tags to MultiSelectItem[]
+  const selectedTagItems: MultiSelectItem[] = (filters.tags ?? [])
+    .map(tagValue =>
+      groupTagDropdownItems.find(item => item.value === tagValue),
+    )
+    .filter(Boolean) as MultiSelectItem[];
 
   // Convert cities to dropdown format
   const cityDropdownItems: DropdownItem[] = cities.map(city => ({
@@ -34,8 +48,8 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
   }));
 
   // Find the selected city in dropdown items
-  const selectedCityItem = filters.city
-    ? cityDropdownItems.find(item => item.value === filters.city)
+  const selectedCityItem = filters.cityId
+    ? cityDropdownItems.find(item => item.value === filters.cityId)
     : null;
 
   // Reset to initial state when props change
@@ -46,45 +60,34 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
   const handleCitySelect = useCallback((city: DropdownItem | null) => {
     setFilters(prev => ({
       ...prev,
-      city: city ? city.value : null,
+      cityId: city ? city.value : null,
     }));
   }, []);
 
-  const handleTagToggle = useCallback((tagValue: string) => {
-    setFilters(prev => {
-      const tagIndex = prev.tags.indexOf(tagValue);
-      if (tagIndex >= 0) {
-        // Remove tag if already selected
-        return {
-          ...prev,
-          tags: prev.tags.filter(t => t !== tagValue),
-        };
-      } else {
-        // Add tag if not selected
-        return {
-          ...prev,
-          tags: [...prev.tags, tagValue],
-        };
-      }
-    });
+  // Remove handleTagToggle, add handleTagsChange
+  const handleTagsChange = useCallback((selectedItems: MultiSelectItem[]) => {
+    setFilters(prev => ({
+      ...prev,
+      tags:
+        selectedItems.length > 0
+          ? selectedItems.map(item => item.value as string)
+          : null,
+    }));
   }, []);
 
-  const handlePrivacyChange = useCallback(
-    (privacy: 'ALL' | 'PUBLIC' | 'PRIVATE') => {
-      setFilters(prev => ({
-        ...prev,
-        privacy,
-      }));
-    },
-    [],
-  );
+  const handlePrivacyChange = useCallback((privacy: GroupPrivacy) => {
+    setFilters(prev => ({
+      ...prev,
+      privacy,
+    }));
+  }, []);
 
   const handleReset = useCallback(() => {
-    const resetFilters: GroupFilters = {
-      city: null,
-      tags: [],
-      privacy: 'ALL',
-      role: 'ALL',
+    const resetFilters: IFilterGroup = {
+      cityId: null,
+      tags: null,
+      privacy: GroupPrivacy.ALL,
+      role: GroupMemberRole.ALL,
     };
     setFilters(resetFilters);
     onApplyFilters(resetFilters);
@@ -103,19 +106,19 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
         showsVerticalScrollIndicator={false}>
         {/* Location filter section */}
         <View style={styles.section}>
-          <Subtitle style={styles.sectionTitle}>Location</Subtitle>
+          <Subtitle style={styles.sectionTitle}>
+            {t('components.groupFilter.location')}
+          </Subtitle>
           {isCitiesLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" />
             </View>
           ) : (
             <Dropdown
-              label="Select City"
+              label={t('components.groupFilter.city')}
               data={cityDropdownItems}
               selectedItem={selectedCityItem}
               onSelect={handleCitySelect}
-              placeholder="Select a city"
-              searchable={true}
             />
           )}
         </View>
@@ -124,51 +127,42 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
 
         {/* Tags filter section */}
         <View style={styles.section}>
-          <Subtitle style={styles.sectionTitle}>Tags</Subtitle>
-          {isTagsLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" />
-            </View>
-          ) : (
-            <View style={styles.tagsContainer}>
-              {groupTags.map(tag => (
-                <Chip
-                  key={tag.id}
-                  variant={
-                    filters.tags.includes(tag.id) ? 'filled' : 'outlined'
-                  }
-                  color="dark"
-                  label={tag.value}
-                  onPress={() => handleTagToggle(tag.id)}
-                  style={styles.tagChip}
-                />
-              ))}
-            </View>
-          )}
+          <Subtitle style={styles.sectionTitle}>
+            {t('components.groupFilter.tags')}
+          </Subtitle>
+          <MultiSelect
+            label={t('components.groupFilter.group_tags')}
+            data={groupTagDropdownItems}
+            selectedItems={selectedTagItems}
+            onSelectionChange={handleTagsChange}
+            maxSelectedItems={3}
+          />
         </View>
 
         <View style={styles.divider} />
 
         {/* Privacy filter section */}
         <View style={styles.section}>
-          <Subtitle style={styles.sectionTitle}>Privacy</Subtitle>
+          <Subtitle style={styles.sectionTitle}>
+            {t('components.groupFilter.privacy_filter')}
+          </Subtitle>
           <View style={styles.radioGroup}>
             <Checkbox
-              label="All"
-              checked={filters.privacy === 'ALL'}
-              onToggle={() => handlePrivacyChange('ALL')}
+              label={t('enums.groupPrivacy.all')}
+              checked={filters.privacy === GroupPrivacy.ALL}
+              onToggle={() => handlePrivacyChange(GroupPrivacy.ALL)}
               variant="dark"
             />
             <Checkbox
-              label="Public"
-              checked={filters.privacy === 'PUBLIC'}
-              onToggle={() => handlePrivacyChange('PUBLIC')}
+              label={t('enums.groupPrivacy.public')}
+              checked={filters.privacy === GroupPrivacy.PUBLIC}
+              onToggle={() => handlePrivacyChange(GroupPrivacy.PUBLIC)}
               variant="dark"
             />
             <Checkbox
-              label="Private"
-              checked={filters.privacy === 'PRIVATE'}
-              onToggle={() => handlePrivacyChange('PRIVATE')}
+              label={t('enums.groupPrivacy.private')}
+              checked={filters.privacy === GroupPrivacy.PRIVATE}
+              onToggle={() => handlePrivacyChange(GroupPrivacy.PRIVATE)}
               variant="dark"
             />
           </View>
@@ -177,14 +171,14 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
 
       <View style={[styles.footer, {marginBottom: 10}]}>
         <Button
-          title="Reset"
+          title={t('common.reset')}
           variant="outline"
           shape="round"
           onPress={handleReset}
           style={styles.resetButton}
         />
         <Button
-          title="Apply Filters"
+          title={t('common.apply')}
           variant="dark"
           shape="round"
           onPress={handleApply}

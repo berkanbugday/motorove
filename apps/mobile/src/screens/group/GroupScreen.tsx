@@ -1,22 +1,21 @@
-import {TopHeaderBar} from '@components/TopHeaderBar';
-import {colors, spacing} from '@theme';
 import React, {useState, useCallback} from 'react';
 import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
-import {Tabs} from '@components/Tab';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
-import {GroupCard} from '@components/GroupCard';
+import {useGetJoinedGroups, useGetGroups} from '@services/group.service';
+import {colors, spacing} from '@theme';
 import {
-  useGetJoinedGroups,
-  useGetGroups,
-  IFilterGroup,
-} from '@services/group.service';
-import {Icon} from '@components/Icon';
-import {Body, Subtitle} from '@components/Typography';
-import {Button} from '@components/Button';
-import {useBottomSheet} from '@components/BottomSheet/BottomSheetProvider';
-import {GroupFilter} from './components/GroupFilter';
-import {SkeletonGroup} from '@components/Skeleton';
+  TopHeaderBar,
+  Body,
+  Subtitle,
+  Button,
+  Icon,
+  useBottomSheet,
+  Tabs,
+  GroupFilter,
+  GroupCard,
+  SkeletonGroup,
+} from '@components';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -78,7 +77,7 @@ export const GroupScreen = () => {
       content: (
         <GroupFilter
           initialFilters={currentFilters}
-          onApplyFilters={(filters: GroupFilters) => {
+          onApplyFilters={(filters: IFilterGroup) => {
             if (activeTab === 'joined') {
               applyJoinedGroupsFilters(filters);
             } else {

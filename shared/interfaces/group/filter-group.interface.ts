@@ -8,7 +8,7 @@ export interface IFilterGroup {
   /**
    * Optional city ID to filter by
    */
-  cityId?: string;
+  cityId?: string | null;
 
   /**
    * Optional privacy setting to filter by
@@ -18,7 +18,7 @@ export interface IFilterGroup {
   /**
    * Optional tag IDs to filter by
    */
-  tags?: string[];
+  tags?: string[] | null;
 
   /**
    * Optional role to filter by

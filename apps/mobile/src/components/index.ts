@@ -36,6 +36,7 @@ export * from './GroupSelector';
 export * from './UserSelector';
 export * from './UserCard';
 export * from './LanguageSelector';
+export * from './GroupFilter';
 // Skeleton components
 export * from './Skeleton';
 export * from './Skeleton/SkeletonGroup';
