@@ -1,5 +1,6 @@
 import {gql} from '@apollo/client';
 import {CITY_FRAGMENT} from './city.graphql';
+import {GROUP_MEMBERSHIP_FRAGMENT} from './group-membership.graphql';
 
 // Group fragment
 export const GROUP_FRAGMENT = gql`
@@ -20,16 +21,11 @@ export const GROUP_FRAGMENT = gql`
     tags
     createdAt
     memberships {
-      id
-      role
-      user {
-        id
-        firstName
-        lastName
-      }
+      ...GroupMembershipFragment
     }
   }
   ${CITY_FRAGMENT}
+  ${GROUP_MEMBERSHIP_FRAGMENT}
 `;
 
 // Create group mutation

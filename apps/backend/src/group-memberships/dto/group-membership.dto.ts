@@ -1,10 +1,10 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-import { Type } from 'class-transformer';
-import { IsDate, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { IsDate, IsEnum, IsUUID, ValidateNested } from 'class-validator';
 import { IGroupMembership } from '@motorove/shared';
 import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
+import { InvitationStatus } from '../../enums/models/invitation-status.enum';
 import { UserDto } from '../../users/dto/user.dto';
-import { GroupDto } from '../../groups/dto/group.dto';
+import { Type } from 'class-transformer';
 
 @ObjectType()
 export class GroupMembershipDto implements IGroupMembership {
@@ -12,19 +12,22 @@ export class GroupMembershipDto implements IGroupMembership {
   @IsUUID()
   id: string;
 
-  @Field(() => GroupDto)
-  @ValidateNested()
-  @Type(() => GroupDto)
-  group: Partial<GroupDto>;
+  @Field(() => ID)
+  @IsUUID()
+  groupId: string;
 
   @Field(() => UserDto)
   @ValidateNested()
   @Type(() => UserDto)
-  user: Partial<UserDto>;
+  user: UserDto;
 
   @Field(() => GroupMemberRole)
-  @IsString()
+  @IsEnum(GroupMemberRole)
   role: GroupMemberRole;
+
+  @Field(() => InvitationStatus)
+  @IsEnum(InvitationStatus)
+  status: InvitationStatus;
 
   @Field()
   @IsDate()

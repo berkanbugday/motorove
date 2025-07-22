@@ -1,6 +1,7 @@
 import { GroupPrivacy } from "../../enums";
 import { ICity } from "../city/city.interface";
 import { GroupTag } from "../../enums";
+import { IGroupMembership } from "../group-membership/group-membership.interface";
 
 /**
  * Group Interface
@@ -20,4 +21,5 @@ export interface IGroup {
   isMember?: boolean;
   isAdmin?: boolean;
   createdAt: Date | string;
+  memberships: IGroupMembership[];
 }

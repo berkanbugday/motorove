@@ -507,10 +507,11 @@ type GroupMembership {
 }
 
 type GroupMembershipDto {
-  group: GroupDto!
+  groupId: ID!
   id: ID!
   joinedAt: DateTime!
   role: GroupMemberRole!
+  status: InvitationStatus!
   user: UserDto!
 }
 

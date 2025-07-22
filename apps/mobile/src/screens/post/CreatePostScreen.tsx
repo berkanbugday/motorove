@@ -100,7 +100,7 @@ export const CreatePostScreen = () => {
       content: (
         <>
           {loadingGroups ? (
-            <ActivityIndicator size="large" color={colors.primary.main} />
+            <ActivityIndicator size="large" />
           ) : groupsError ? (
             <View style={styles.errorContainer}>
               <Icon name="error" size={24} color={colors.status.error} />

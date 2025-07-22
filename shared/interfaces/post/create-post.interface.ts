@@ -12,15 +12,15 @@ export interface ICreatePost {
   /**
    * Optional array of image URLs
    */
-  images?: string[];
+  images?: string[] | null;
 
   /**
    * Optional group ID
    */
-  groupId?: string;
+  groupId?: string | null;
 
   /**
    * Optional addresses related to the post
    */
-  addresses?: ICreateAddress[];
+  addresses?: ICreateAddress[] | null;
 }

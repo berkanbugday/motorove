@@ -11,7 +11,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import {colors, commonStyles, getShadow, radius, rh, spacing} from '@theme';
-import {TopHeaderBar} from '@components/TopHeaderBar';
 import {
   BodySmall,
   Caption,
@@ -30,10 +29,24 @@ import {
   MainStackParamList,
 } from '@navigation/types/navigationTypes';
 import {useGetGroup} from '@services/group.service';
-import {Icon, IconName} from '@components/Icon';
-import {Chip} from '@components/Chip';
-import {Button} from '@components/Button';
-import {FeedCard} from '@components/FeedCard';
+import {
+  Icon,
+  IconName,
+  TopHeaderBar,
+  Chip,
+  Button,
+  FeedCard,
+  BottomSheet,
+  BottomSheetRef,
+  GroupEventBanner,
+  PageIndicator,
+  showToast,
+  Dropdown,
+  Dialog,
+  DialogRef,
+  DropdownItem as ComponentDropdownItem,
+  DropdownItem,
+} from '@components';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
@@ -47,10 +60,7 @@ import {
 } from '@services/post.service';
 import {IPost, IGroup, Language, IAddress} from '@motorove/shared';
 import {relativeTime} from '@utils/dateUtils';
-import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {toPascalCase} from '@utils/stringUtils';
-import GroupEventBanner from '@components/GroupEventBanner/GroupEventBanner';
-import {PageIndicator, showToast} from '@components';
 import {useAuth} from '@contexts';
 import {
   useAddGroupMember,
@@ -58,13 +68,6 @@ import {
   useRemoveGroupMember,
   useLeaveGroup,
 } from '@services/group-membership.service';
-import Dialog, {DialogRef} from '@components/Dialog';
-import Dropdown from '@components/Dropdown';
-import {EnumUtils} from '@utils/enumUtils';
-import {
-  DropdownItem as ComponentDropdownItem,
-  DropdownItem,
-} from '@components/Dropdown/types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {AuthUser} from '@app-types/auth.types';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
@@ -73,7 +76,7 @@ type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 const formatAvatarSource = (imageUrl?: string) => {
   return imageUrl
     ? {uri: imageUrl}
-    : {uri: 'https://picsum.photos/id/1005/200/200'};
+    : require('@assets/images/default_avatar.png');
 };
 
 // Transform Post model to FeedCard props - matching HomeScreen implementation
@@ -102,7 +105,7 @@ const transformPostToFeedCard = (post: IPost) => {
   return {
     id: post.id,
     userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
-    avatarSource: formatAvatarSource(post.createdBy.avatar), // Use user avatar
+    avatarSource: formatAvatarSource(post.createdBy.avatar),
     timeAgo: relativeTime(post.createdAt),
     content: post.content,
     images,
@@ -339,9 +342,6 @@ export const GroupDetailScreen = () => {
   const [memberToRemove, setMemberToRemove] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<DropdownItem | null>(null);
 
-  // Get member roles from enum service
-  const {groupMemberRoles, loading: loadingRoles} = useEnumGroupMemberRoles();
-
   // Track which member row has actions visible
   const [activeMemberId, setActiveMemberId] = useState<string | null>(null);
 
@@ -458,13 +458,13 @@ export const GroupDetailScreen = () => {
     (member: any) => {
       setSelectedMember(member);
       // Find the current role in the dropdown items
-      const currentRole = memberRoles.find(
-        role => role.value.toUpperCase() === member.role.toUpperCase(),
+      const currentRole = members.find(
+        role => role.role.toUpperCase() === member.role.toUpperCase(),
       );
-      setSelectedRole(currentRole || null);
+      // setSelectedRole(currentRole || null);
       changeRoleDialogRef.current?.open();
     },
-    [memberRoles],
+    [members],
   );
 
   // Handle role change
@@ -833,7 +833,7 @@ export const GroupDetailScreen = () => {
 
   // Handle dropdown item select
   const handleDropdownMenuItemSelect = useCallback(
-    (item: DropdownMenuItem, _group: Group) => {
+    (item: DropdownMenuItem, _group: IGroup) => {
       switch (item.id) {
         case 'edit_group':
           navigateToScreen(navigation, 'EditGroup', {groupId});
@@ -860,7 +860,7 @@ export const GroupDetailScreen = () => {
   const handleRoleSelect = useCallback((item: ComponentDropdownItem | null) => {
     // Convert the component dropdown item to our enum dropdown item type
     if (item) {
-      const enumItem: EnumDropdownItem = {
+      const enumItem: DropdownItem = {
         id:
           typeof item.id === 'string'
             ? parseInt(item.id, 10)
@@ -876,7 +876,7 @@ export const GroupDetailScreen = () => {
 
   // Render feed post with comment navigation and dropdown menu (matching HomeScreen)
   const renderFeedPost = useCallback(
-    ({item}: {item: Post}) => {
+    ({item}: {item: IPost}) => {
       // Determine if this is the user's own post
       const isOwnPost = item.createdBy.id === user?.id;
       // Transform Post model to FeedCard props
@@ -918,7 +918,7 @@ export const GroupDetailScreen = () => {
   );
 
   // Feed keyExtractor
-  const feedKeyExtractor = useCallback((item: Post) => item.id, []);
+  const feedKeyExtractor = useCallback((item: IPost) => item.id, []);
 
   // Handle FlatList scroll event to update the current page
   const handleEventScroll = useCallback((event: any) => {
@@ -1016,7 +1016,7 @@ export const GroupDetailScreen = () => {
   if (loading) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color={colors.primary.main} />
+        <ActivityIndicator size="large" />
       </View>
     );
   }
@@ -1032,7 +1032,7 @@ export const GroupDetailScreen = () => {
           group?.isMember,
         )}
         onDropdownItemSelect={item =>
-          handleDropdownMenuItemSelect(item, group as Group)
+          handleDropdownMenuItemSelect(item, group as IGroup)
         }
       />
       <Animated.View
@@ -1127,7 +1127,7 @@ export const GroupDetailScreen = () => {
                 color="dark"
                 size="small"
                 key={index}
-                label={tag.value}
+                label={tag}
               />
             ))}
           </View>
@@ -1198,7 +1198,7 @@ export const GroupDetailScreen = () => {
               <Title weight="bold">Recent Posts</Title>
               {postsLoading ? (
                 <View style={styles.postsLoadingContainer}>
-                  <ActivityIndicator size="large" color={colors.primary.main} />
+                  <ActivityIndicator size="large" />
                 </View>
               ) : posts.length > 0 ? (
                 <FlatList
@@ -1233,17 +1233,10 @@ export const GroupDetailScreen = () => {
                 {members.length} people
               </Caption>
             </View>
-            {/* <Button
-              iconName="user-plus-filled"
-              iconSize={20}
-              variant="secondary"
-              shape="circle"
-              size="small"
-            /> */}
           </View>
         }>
         {loading ? (
-          <ActivityIndicator size="large" color={colors.primary.main} />
+          <ActivityIndicator size="large" />
         ) : (
           <FlatList
             data={members}
@@ -1295,15 +1288,14 @@ export const GroupDetailScreen = () => {
               {selectedMember.user.firstName} {selectedMember.user.lastName}
             </Subtitle>
 
-            {loadingRoles ? (
+            {loading ? (
               <ActivityIndicator size="small" color={colors.primary.main} />
             ) : (
               <Dropdown
                 label="Select Role"
-                data={memberRoles as ComponentDropdownItem[]}
-                selectedItem={selectedRole as ComponentDropdownItem}
+                data={members as unknown as DropdownItem[]}
+                selectedItem={selectedMember as ComponentDropdownItem}
                 onSelect={handleRoleSelect}
-                searchable={false}
               />
             )}
 

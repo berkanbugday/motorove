@@ -1,57 +1,19 @@
 import {gql} from '@apollo/client';
+import {USER_FRAGMENT} from './user.graphql';
 
 // GroupMembership fragment
 export const GROUP_MEMBERSHIP_FRAGMENT = gql`
-  fragment GroupMembershipFragment on GroupMembership {
+  fragment GroupMembershipFragment on GroupMembershipDto {
     id
     groupId
-    userId
-    role
-    joinedAt
     user {
-      id
-      name
-      email
-      phone
-      avatar
+      ...UserFragment
     }
-  }
-`;
-
-export const ADD_GROUP_MEMBER_FRAGMENT = gql`
-  fragment AddGroupMemberFragment on GroupMembership {
-    groupId
-    userId
-  }
-`;
-
-export const REMOVE_GROUP_MEMBER_FRAGMENT = gql`
-  fragment RemoveGroupMemberFragment on GroupMembership {
-    ...AddGroupMemberFragment
-  }
-  ${ADD_GROUP_MEMBER_FRAGMENT}
-`;
-
-export const LEAVE_GROUP_FRAGMENT = gql`
-  fragment LeaveGroupFragment on GroupMembership {
-    groupId
-  }
-`;
-
-export const CHANGE_MEMBER_ROLE_FRAGMENT = gql`
-  fragment ChangeMemberRoleFragment on GroupMembership {
-    groupId
-    userId
     role
-  }
-`;
-
-// GroupMembershipStatus fragment
-export const GROUP_MEMBERSHIP_STATUS_FRAGMENT = gql`
-  fragment GroupMembershipStatusFragment on GroupMembership {
-    id
     status
+    joinedAt
   }
+  ${USER_FRAGMENT}
 `;
 
 // Get all group memberships
@@ -103,40 +65,40 @@ export const GET_GROUP_MEMBERSHIP = gql`
 export const ADD_GROUP_MEMBER = gql`
   mutation AddGroupMember($input: AddGroupMemberInput!) {
     addGroupMember(addGroupMemberInput: $input) {
-      ...AddGroupMemberFragment
+      ...GroupMembershipFragment
     }
   }
-  ${ADD_GROUP_MEMBER_FRAGMENT}
+  ${GROUP_MEMBERSHIP_FRAGMENT}
 `;
 
 // Change a member's role
 export const CHANGE_MEMBER_ROLE = gql`
   mutation ChangeMemberRole($input: ChangeMemberRoleInput!) {
     changeMemberRole(changeMemberRoleInput: $input) {
-      ...ChangeMemberRoleFragment
+      ...GroupMembershipFragment
     }
   }
-  ${CHANGE_MEMBER_ROLE_FRAGMENT}
+  ${GROUP_MEMBERSHIP_FRAGMENT}
 `;
 
 // Remove a member from a group
 export const REMOVE_GROUP_MEMBER = gql`
   mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
     removeGroupMember(removeGroupMemberInput: $input) {
-      ...RemoveGroupMemberFragment
+      ...GroupMembershipFragment
     }
   }
-  ${REMOVE_GROUP_MEMBER_FRAGMENT}
+  ${GROUP_MEMBERSHIP_FRAGMENT}
 `;
 
 // Leave a group
 export const LEAVE_GROUP = gql`
   mutation LeaveGroup($input: LeaveGroupInput!) {
     leaveGroup(leaveGroupInput: $input) {
-      ...LeaveGroupFragment
+      ...GroupMembershipFragment
     }
   }
-  ${LEAVE_GROUP_FRAGMENT}
+  ${GROUP_MEMBERSHIP_FRAGMENT}
 `;
 
 export const UPDATE_GROUP_MEMBERSHIP_STATUS = gql`
@@ -144,8 +106,8 @@ export const UPDATE_GROUP_MEMBERSHIP_STATUS = gql`
     $input: UpdateGroupMembershipStatusInput!
   ) {
     updateGroupMembershipStatus(input: $input) {
-      ...GroupMembershipStatusFragment
+      ...GroupMembershipFragment
     }
   }
-  ${GROUP_MEMBERSHIP_STATUS_FRAGMENT}
+  ${GROUP_MEMBERSHIP_FRAGMENT}
 `;

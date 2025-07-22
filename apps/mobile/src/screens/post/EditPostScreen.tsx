@@ -146,7 +146,7 @@ export const EditPostScreen = () => {
       content: (
         <>
           {loadingGroups ? (
-            <ActivityIndicator size="large" color={colors.primary.main} />
+            <ActivityIndicator size="large" />
           ) : groupsError ? (
             <View style={styles.errorContainer}>
               <Icon name="error" size={24} color={colors.status.error} />
@@ -318,7 +318,7 @@ export const EditPostScreen = () => {
   if (loadingPost) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary.main} />
+        <ActivityIndicator size="large" />
       </View>
     );
   }

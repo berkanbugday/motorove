@@ -420,6 +420,23 @@ export class GroupsService {
           authToken,
         );
       }
+      if (group.memberships) {
+        group.memberships = await Promise.all(
+          group.memberships.map(async (membership) => ({
+            ...membership,
+            user: membership.user.avatar
+              ? {
+                  ...membership.user,
+                  avatar: await this.storageService.getSignedUrl(
+                    membership.user.avatar,
+                    60,
+                    authToken,
+                  ),
+                }
+              : membership.user,
+          })),
+        );
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';

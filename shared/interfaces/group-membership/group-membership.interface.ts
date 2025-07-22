@@ -1,5 +1,4 @@
-import { GroupMemberRole } from "../../enums";
-import { IGroup } from "../group/group.interface";
+import { GroupMemberRole, InvitationStatus } from "../../enums";
 import { IUser } from "../user/user.interface";
 
 /**
@@ -8,8 +7,9 @@ import { IUser } from "../user/user.interface";
  */
 export interface IGroupMembership {
   id: string;
-  group: Partial<IGroup>;
-  user: Partial<IUser>;
+  groupId: string;
+  user: IUser;
   role: GroupMemberRole;
-  joinedAt: Date | string;
+  status: InvitationStatus;
+  joinedAt: Date;
 }

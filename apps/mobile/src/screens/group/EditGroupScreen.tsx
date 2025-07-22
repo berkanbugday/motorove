@@ -351,7 +351,7 @@ export const EditGroupScreen: React.FC = () => {
   if (initialLoading || groupLoading) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color={colors.primary.main} />
+        <ActivityIndicator size="large" />
       </View>
     );
   }
