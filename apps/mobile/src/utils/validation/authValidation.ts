@@ -7,7 +7,7 @@ import {Gender, Interest, RidingStyle} from '@motorove/shared';
  * @param t Translation function
  * @returns Object containing all authentication validation schemas
  */
-export const createAuthSchemas = (t: TFunction) => {
+export const authSchemas = (t: TFunction) => {
   // Signin form schema
   const signinSchema = z.object({
     email: z
@@ -92,14 +92,14 @@ export const createAuthSchemas = (t: TFunction) => {
 
 // For backward compatibility, export the types
 export type SigninFormValues = z.infer<
-  ReturnType<typeof createAuthSchemas>['signinSchema']
+  ReturnType<typeof authSchemas>['signinSchema']
 >;
 export type ResetPasswordFormValues = z.infer<
-  ReturnType<typeof createAuthSchemas>['resetPasswordSchema']
+  ReturnType<typeof authSchemas>['resetPasswordSchema']
 >;
 export type SignupFormValues = z.infer<
-  ReturnType<typeof createAuthSchemas>['signupSchema']
+  ReturnType<typeof authSchemas>['signupSchema']
 >;
 export type AccountSetupFormValues = z.infer<
-  ReturnType<typeof createAuthSchemas>['accountSetupSchema']
+  ReturnType<typeof authSchemas>['accountSetupSchema']
 >;

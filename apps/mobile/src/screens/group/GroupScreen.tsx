@@ -16,6 +16,9 @@ import {
   GroupCard,
   SkeletonGroup,
 } from '@components';
+import {GroupPrivacy, IFilterGroup} from '@motorove/shared';
+import {EnumUtils} from '@utils/enumUtils';
+import {useTranslation} from '@hooks/useTranslation';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -26,6 +29,7 @@ export const GroupScreen = () => {
   const [refreshingAllGroups, setRefreshingAllGroups] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {openBottomSheet} = useBottomSheet();
+  const {t} = useTranslation();
 
   // Fetch joined groups with pagination
   const {
@@ -71,7 +75,7 @@ export const GroupScreen = () => {
       activeTab === 'joined' ? joinedGroupsFilters : allGroupsFilters;
 
     openBottomSheet({
-      title: 'Filter Groups',
+      title: t('screens.group.filter_groups'),
       closeButtonPosition: 'top-left',
       enableGestureControl: false,
       content: (
@@ -95,6 +99,7 @@ export const GroupScreen = () => {
     openBottomSheet,
     applyJoinedGroupsFilters,
     applyAllGroupsFilters,
+    t,
   ]);
 
   // Render skeleton loaders for groups
@@ -122,13 +127,13 @@ export const GroupScreen = () => {
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
           <Subtitle style={styles.emptyStateTitle}>
-            Oops! Something went wrong
+            {t('errors.general.something_wrong')}
           </Subtitle>
           <Body style={styles.emptyStateSubtitle}>
-            We couldn't load your groups. Please try again.
+            {t('screens.group.could_not_load_groups')}
           </Body>
           <Button
-            title="Try Again"
+            title={t('common.try_again')}
             variant="primary"
             shape="round"
             onPress={handleRefreshJoinedGroups}
@@ -141,13 +146,14 @@ export const GroupScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="users" size={48} />
-          <Subtitle style={styles.emptyStateTitle}>No Groups Yet</Subtitle>
+          <Subtitle style={styles.emptyStateTitle}>
+            {t('screens.group.no_groups_yet')}
+          </Subtitle>
           <Body style={styles.emptyStateSubtitle}>
-            Join or create groups to connect with other riders and participate
-            in events.
+            {t('screens.group.join_or_create_groups')}
           </Body>
           <Button
-            title="Try Again"
+            title={t('common.try_again')}
             variant="primary"
             shape="round"
             onPress={handleRefreshJoinedGroups}
@@ -165,9 +171,9 @@ export const GroupScreen = () => {
             logoSource={item.logo ? {uri: item.logo} : null}
             name={item.name}
             location={item.city.value}
-            tags={item.tags.map(tag => tag.value)}
-            currentMembers={item.memberships.length}
-            membersCapacity={item.membersCapacity || undefined}
+            tags={EnumUtils.convertGroupTags(item.tags)}
+            currentMembers={item.membersCount}
+            membersCapacity={item.membersCapacity}
             privacy={item.privacy}
             isMember={true}
             onPress={() =>
@@ -209,13 +215,13 @@ export const GroupScreen = () => {
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
           <Subtitle style={styles.emptyStateTitle}>
-            Oops! Something went wrong
+            {t('errors.general.something_wrong')}
           </Subtitle>
           <Body style={styles.emptyStateSubtitle}>
-            We couldn't load your groups. Please try again.
+            {t('screens.group.could_not_load_groups')}
           </Body>
           <Button
-            title="Try Again"
+            title={t('common.try_again')}
             variant="primary"
             shape="round"
             onPress={handleRefreshAllGroups}
@@ -228,13 +234,14 @@ export const GroupScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="users" size={48} />
-          <Subtitle style={styles.emptyStateTitle}>No Groups Yet</Subtitle>
+          <Subtitle style={styles.emptyStateTitle}>
+            {t('screens.group.no_groups_yet')}
+          </Subtitle>
           <Body style={styles.emptyStateSubtitle}>
-            Join or create groups to connect with other riders and participate
-            in events.
+            {t('screens.group.join_or_create_groups')}
           </Body>
           <Button
-            title="Try Again"
+            title={t('common.try_again')}
             variant="primary"
             shape="round"
             onPress={handleRefreshAllGroups}
@@ -252,9 +259,9 @@ export const GroupScreen = () => {
             logoSource={item.logo ? {uri: item.logo} : null}
             name={item.name}
             location={item.city.value}
-            tags={item.tags.map(tag => tag.value)}
-            currentMembers={item.memberships.length}
-            membersCapacity={item.membersCapacity || undefined}
+            tags={EnumUtils.convertGroupTags(item.tags)}
+            currentMembers={item.membersCount}
+            membersCapacity={item.membersCapacity}
             privacy={item.privacy}
             onPress={() =>
               navigation.navigate('GroupDetail', {groupId: item.id})
@@ -285,13 +292,15 @@ export const GroupScreen = () => {
   const getFilterBadgeCount = () => {
     let badgeCount = 0;
     if (activeTab === 'explore') {
-      badgeCount = allGroupsFilters.city ? 1 : 0;
-      badgeCount += allGroupsFilters.tags.length > 0 ? 1 : 0;
-      badgeCount += allGroupsFilters.privacy !== 'ALL' ? 1 : 0;
+      badgeCount = allGroupsFilters.cityId ? 1 : 0;
+      badgeCount +=
+        allGroupsFilters.tags && allGroupsFilters.tags.length > 0 ? 1 : 0;
+      badgeCount += allGroupsFilters.privacy !== GroupPrivacy.ALL ? 1 : 0;
     } else {
-      badgeCount = joinedGroupsFilters.city ? 1 : 0;
-      badgeCount += joinedGroupsFilters.tags.length > 0 ? 1 : 0;
-      badgeCount += joinedGroupsFilters.privacy !== 'ALL' ? 1 : 0;
+      badgeCount = joinedGroupsFilters.cityId ? 1 : 0;
+      badgeCount +=
+        joinedGroupsFilters.tags && joinedGroupsFilters.tags.length > 0 ? 1 : 0;
+      badgeCount += joinedGroupsFilters.privacy !== GroupPrivacy.ALL ? 1 : 0;
     }
     return badgeCount;
   };
@@ -299,12 +308,12 @@ export const GroupScreen = () => {
   const tabItems = [
     {
       key: 'joined',
-      label: 'Joined',
+      label: t('screens.group.joined'),
       content: <View style={styles.tabContent}>{renderJoinedGroups()}</View>,
     },
     {
       key: 'explore',
-      label: 'Explore',
+      label: t('screens.group.explore'),
       content: <View style={styles.tabContent}>{renderAllGroups()}</View>,
     },
   ];
@@ -312,7 +321,7 @@ export const GroupScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Groups"
+        title={t('navigation.groups')}
         showShadow={false}
         rightIconName="plus"
         onRightButtonPress={() => navigation.navigate('CreateGroup')}

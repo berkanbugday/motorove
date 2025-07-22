@@ -1,26 +1,24 @@
 import {StyleSheet} from 'react-native';
-import {colors, spacing, radius, getShadow} from '@theme';
+import {colors, spacing, radius} from '@theme';
 
 export const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.neutral.white,
     borderBottomWidth: 0.5,
     borderTopWidth: 0.5,
-    borderColor: colors.neutral.veryLightGrey,
+    borderColor: colors.secondary.main,
   },
   content: {
     flexDirection: 'row',
     padding: spacing.md,
   },
-  logoContainer: {
-    ...getShadow('small'),
-  },
   logo: {
     width: 70,
     height: 70,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
     borderRadius: radius.round,
     marginRight: spacing.md,
-    alignSelf: 'center',
   },
   infoContainer: {
     flex: 1,

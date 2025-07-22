@@ -32,10 +32,10 @@ export class CreateGroupInput implements ICreateGroup {
   @MaxLength(500, { message: 'Description cannot exceed 500 characters' })
   description: string;
 
-  @Field({ nullable: true })
+  @Field()
   @IsString()
-  @IsOptional()
-  logo?: string;
+  @IsNotEmpty({ message: 'Logo is required' })
+  logo: string;
 
   @Field({ nullable: true })
   @IsString()
@@ -61,8 +61,6 @@ export class CreateGroupInput implements ICreateGroup {
   @IsArray()
   @ArrayMinSize(1, { message: 'Please select at least 1 tag' })
   @ArrayMaxSize(3, { message: 'You can select up to 3 tags' })
+  @IsEnum(GroupTag, { each: true })
   tags: GroupTag[];
-
-  // Keep tagIds for backward compatibility with the interface
-  tagIds?: string[];
 }

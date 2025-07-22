@@ -160,7 +160,7 @@ input CreateGroupInput {
   cityId: String!
   cover: String
   description: String!
-  logo: String
+  logo: String!
   membersCapacity: Int
   name: String!
   privacy: GroupPrivacy!

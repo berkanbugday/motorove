@@ -17,6 +17,8 @@ export const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
     marginRight: spacing.sm,
   },
   headerInfo: {

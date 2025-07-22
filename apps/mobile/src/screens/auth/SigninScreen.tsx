@@ -14,7 +14,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Icon, AnimatedInput, Button, Body, TopHeaderBar} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {createAuthSchemas, SigninFormValues} from '@utils/validation';
+import {authSchemas, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useAuth} from '@contexts';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
@@ -29,7 +29,7 @@ export const SigninScreen = () => {
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
 
-  const {signinSchema} = createAuthSchemas(t);
+  const {signinSchema} = authSchemas(t);
 
   const {
     control,

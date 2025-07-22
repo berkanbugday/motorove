@@ -28,7 +28,7 @@ import {
 import {useForm, FormProvider} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
-  createAuthSchemas,
+  authSchemas,
   AccountSetupFormValues,
 } from '@utils/validation/authValidation';
 import {colors, fontSizes, spacing, radius, getShadow} from '@theme';
@@ -84,7 +84,7 @@ export const AccountSetupScreen = () => {
   }, [cities]);
 
   // Create validation schema with translations
-  const {accountSetupSchema} = createAuthSchemas(t);
+  const {accountSetupSchema} = authSchemas(t);
 
   const methods = useForm<AccountSetupFormValues>({
     resolver: zodResolver(accountSetupSchema),

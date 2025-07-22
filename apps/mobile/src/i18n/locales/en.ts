@@ -19,7 +19,9 @@ export default {
     select: 'Select',
     done: 'Done',
     create: 'Create',
+    creating: 'Creating...',
     update: 'Update',
+    uploading: 'Uploading...',
     submit: 'Submit',
     close: 'Close',
     add: 'Add',
@@ -277,12 +279,15 @@ export default {
 
     // Groups screens
     group: {
-      create: 'Create Group',
-      edit: 'Edit Group',
-      join: 'Join Group',
-      leave: 'Leave Group',
-      name: 'Group Name',
+      create_group: 'Create Group',
+      edit_group: 'Edit Group',
+      join_group: 'Join Group',
+      leave_group: 'Leave Group',
+      group_name: 'Group Name',
       description: 'Description',
+      city: 'City',
+      privacy: 'Privacy',
+      members_capacity: 'Members Capacity',
       members: 'Members',
       admins: 'Admins',
       moderators: 'Moderators',
@@ -311,8 +316,15 @@ export default {
       group_deleted: 'Group deleted successfully',
       join_request_sent: 'Join request sent',
       leave_group_confirmation: 'Are you sure you want to leave this group?',
-      upload_cover_photo: 'Upload Cover Photo',
-      upload_avatar: 'Upload Group Avatar',
+      upload_cover_photo: 'Upload cover image',
+      upload_logo: 'Upload logo',
+      filter_groups: 'Filter Groups',
+      could_not_load_groups: "We couldn't load your groups. Please try again.",
+      no_groups_yet: 'No Groups Yet',
+      join_or_create_groups:
+        'Join or create groups to connect with other riders and participate in events.',
+      joined: 'Joined',
+      explore: 'Explore',
       member_roles: {
         owner: 'Owner',
         admin: 'Admin',
@@ -329,6 +341,7 @@ export default {
       error_creating_group: 'Failed to create group. Please try again.',
       success_updated_group: 'Group updated successfully',
       error_updating_group: 'Failed to update group. Please try again.',
+      image_too_large: 'Image is too large (maximum size: 10MB)',
     },
 
     // Profile screens
@@ -655,6 +668,37 @@ export default {
     },
     agreeToTerms: {
       required: 'You must agree to the Terms of Service and Privacy Policy',
+    },
+    group: {
+      name: {
+        required: 'Group name is required',
+        min_length: 'Group name must be at least 3 characters',
+        max_length: 'Group name must be at most 100 characters',
+      },
+      description: {
+        required: 'Description is required',
+        min_length: 'Description must be at least 10 characters',
+        max_length: 'Description cannot exceed 500 characters',
+      },
+      city: {
+        required: 'City is required',
+        select: 'Please select a city',
+      },
+      privacy: {
+        required: 'Privacy is required',
+        select: 'Please select a privacy',
+      },
+      members_capacity: {
+        number: 'Members capacity must be a number',
+        positive: 'Members capacity must be a positive number',
+      },
+      tags: {
+        min: 'Please select at least 1 tag',
+        max: 'You can select up to 3 tags',
+      },
+      logo: {
+        required: 'Logo is required',
+      },
     },
   },
 

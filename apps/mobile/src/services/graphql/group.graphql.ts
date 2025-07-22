@@ -26,7 +26,6 @@ export const GROUP_FRAGMENT = gql`
         id
         firstName
         lastName
-        avatar
       }
     }
   }

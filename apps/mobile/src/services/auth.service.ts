@@ -311,6 +311,7 @@ class AuthService {
 
       if (!refreshToken) {
         loggingService.error('No refresh token found in storage');
+        await this.signOut();
         throw new Error('No refresh token available');
       }
 

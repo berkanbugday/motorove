@@ -9,6 +9,7 @@ import { FilterGroupInput } from './dto/filter-group.input';
 import { Group } from './models/group.model';
 import { GroupDto } from './dto/group.dto';
 import { plainToClass } from 'class-transformer';
+import { GroupPrivacy } from 'src/enums/models/group-privacy.enum';
 
 @Injectable()
 export class GroupsService {
@@ -23,11 +24,20 @@ export class GroupsService {
     skip?: number,
     query?: string,
     filters?: FilterGroupInput,
+    userId?: string,
     authToken?: string,
   ): Promise<GroupDto[]> {
     try {
       const whereClause: any = {
         isActive: true,
+        NOT: {
+          memberships: {
+            some: {
+              userId,
+              status: InvitationStatus.ACCEPTED,
+            },
+          },
+        },
       };
 
       // Add text search if provided
@@ -120,7 +130,7 @@ export class GroupsService {
       }
 
       // Add privacy filter if provided
-      if (filters?.privacy && filters.privacy !== 'ALL') {
+      if (filters?.privacy && filters.privacy !== GroupPrivacy.ALL) {
         whereClause.privacy = filters.privacy;
       }
 
@@ -223,19 +233,23 @@ export class GroupsService {
   ): Promise<GroupDto> {
     try {
       // Process images if they exist
-      const logoUrl = await this.storageService.processImageUpload(
-        input.logo,
-        'groups/logos',
-        `logo-${userId}`,
-        authToken,
-      );
+      const logoUrl = input.logo
+        ? await this.storageService.processImageUpload(
+            input.logo,
+            'groups/logos',
+            `logo-${userId}`,
+            authToken,
+          )
+        : null;
 
-      const coverUrl = await this.storageService.processImageUpload(
-        input.cover,
-        'groups/covers',
-        `cover-${userId}`,
-        authToken,
-      );
+      const coverUrl = input.cover
+        ? await this.storageService.processImageUpload(
+            input.cover,
+            'groups/covers',
+            `cover-${userId}`,
+            authToken,
+          )
+        : null;
 
       // Use explicit casting to handle type conflicts
       const prismaData: any = {
@@ -248,7 +262,7 @@ export class GroupsService {
         },
         privacy: input.privacy,
         membersCapacity: input.membersCapacity,
-        tags: input.tags, // Now directly using the enum array
+        tags: input.tags,
         createdBy: {
           connect: { id: userId },
         },
@@ -416,6 +430,8 @@ export class GroupsService {
       ...group,
       logo: logoUrl,
       cover: coverUrl,
+      membersCount: group.memberships.length,
+      membersCapacity: group.membersCapacity,
     });
   }
 }

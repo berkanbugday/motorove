@@ -30,6 +30,7 @@ export class GroupsResolver {
     @Args('filters', { type: () => FilterGroupInput, nullable: true })
     filters?: FilterGroupInput,
   ): Promise<GroupDto[]> {
+    const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.groupsService.findAll(
@@ -37,6 +38,7 @@ export class GroupsResolver {
       skip,
       query,
       filters,
+      userId,
       authToken,
     );
   }

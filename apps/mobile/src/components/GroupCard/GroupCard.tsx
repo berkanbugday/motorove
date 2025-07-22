@@ -56,12 +56,12 @@ export interface GroupCardProps {
   /**
    * Number of current members in the group
    */
-  currentMembers?: number;
+  currentMembers?: number | null;
 
   /**
    * Maximum number of members allowed in the group
    */
-  membersCapacity?: number;
+  membersCapacity?: number | null;
 
   /**
    * Privacy level of the group
@@ -220,9 +220,12 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       activeOpacity={0.8}>
       {renderBadge()}
       <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <Image source={logoSource || undefined} style={styles.logo} />
-        </View>
+        <Image
+          source={
+            logoSource || require('@assets/images/motorove_logo_dark.png')
+          }
+          style={styles.logo}
+        />
         <View style={styles.infoContainer}>
           <Typography variant="subtitle" weight="bold" numberOfLines={1}>
             {name}

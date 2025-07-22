@@ -18,7 +18,7 @@ export interface ICreateGroup {
   /**
    * Optional logo URL
    */
-  logo?: string | null;
+  logo: string;
 
   /**
    * Optional cover image URL

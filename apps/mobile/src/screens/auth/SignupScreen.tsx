@@ -19,7 +19,7 @@ import {
 import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {createAuthSchemas, SignupFormValues} from '@utils/validation';
+import {authSchemas, SignupFormValues} from '@utils/validation';
 import {colors, spacing, fontSizes, radius, commonStyles} from '@theme';
 import {termsOfService, privacyPolicy} from '@constants/legalContent';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
@@ -39,7 +39,7 @@ export const SignupScreen = () => {
   const {signUp} = authService;
 
   // Create validation schema with translations
-  const {signupSchema} = createAuthSchemas(t);
+  const {signupSchema} = authSchemas(t);
 
   const {
     control,

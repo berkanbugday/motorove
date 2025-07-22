@@ -1,46 +1,66 @@
 import {z} from 'zod';
+import {TFunction} from 'i18next';
 
-// Group creation form schema
-export const createGroupSchema = z.object({
-  name: z
-    .string({required_error: 'Group name is required'})
-    .nonempty('Group name is required')
-    .min(3, 'Group name must be at least 3 characters')
-    .max(100, 'Group name must be at most 100 characters'),
-  description: z
-    .string({required_error: 'Description is required'})
-    .min(10, 'Description must be at least 10 characters')
-    .max(500, 'Description cannot exceed 500 characters'),
-  city: z
-    .string({required_error: 'City is required'})
-    .nonempty('City is required')
-    .min(1, 'Please select a city'),
-  privacy: z
-    .string({required_error: 'Privacy setting is required'})
-    .nonempty('Privacy setting is required')
-    .min(1, 'Please select a privacy setting'),
-  membersCapacity: z
-    .string()
-    .transform(val => (val === '' ? null : val))
-    .refine(val => val === null || Number.isInteger(Number(val)), {
-      message: 'Members capacity must be a number',
-    })
-    .refine(val => val === null || Number(val) > 0, {
-      message: 'Members capacity must be a positive number',
-    })
-    .nullable()
-    .optional(),
-  tags: z
-    .array(z.string())
-    .min(1, 'Please select at least 1 tag')
-    .max(3, 'You can select up to 3 tags'),
-  logo: z.string().nullable().optional(),
-  cover: z.string().nullable().optional(),
-});
+/**
+ * Creates group validation schemas with translated error messages
+ * @param t Translation function
+ * @returns Object containing group validation schemas
+ */
+export const groupSchemas = (t: TFunction) => {
+  // Group creation form schema
+  const createGroupSchema = z.object({
+    name: z
+      .string({required_error: t('validation.group.name.required')})
+      .nonempty(t('validation.group.name.required'))
+      .min(3, t('validation.group.name.min_length'))
+      .max(100, t('validation.group.name.max_length')),
+    description: z
+      .string({required_error: t('validation.group.description.required')})
+      .nonempty(t('validation.group.description.required'))
+      .min(10, t('validation.group.description.min_length'))
+      .max(500, t('validation.group.description.max_length')),
+    city: z
+      .string({required_error: t('validation.group.city.required')})
+      .nonempty(t('validation.group.city.required'))
+      .min(1, t('validation.group.city.select')),
+    privacy: z
+      .string({required_error: t('validation.group.privacy.required')})
+      .nonempty(t('validation.group.privacy.required'))
+      .min(1, t('validation.group.privacy.select')),
+    membersCapacity: z
+      .string()
+      .transform(val => (val === '' ? null : val))
+      .refine(val => val === null || Number.isInteger(Number(val)), {
+        message: t('validation.group.members_capacity.number'),
+      })
+      .refine(val => val === null || Number(val) > 0, {
+        message: t('validation.group.members_capacity.positive'),
+      })
+      .nullable()
+      .optional(),
+    tags: z
+      .array(z.string())
+      .min(1, t('validation.group.tags.min'))
+      .max(3, t('validation.group.tags.max')),
+    logo: z
+      .string({required_error: t('validation.group.logo.required')})
+      .nonempty(t('validation.group.logo.required')),
+    cover: z.string().nullable().optional(),
+  });
 
-export const updateGroupSchema = createGroupSchema.extend({
-  id: z.string(),
-});
+  const updateGroupSchema = createGroupSchema.extend({
+    id: z.string(),
+  });
 
-export type CreateGroupFormValues = z.infer<typeof createGroupSchema>;
-export type UpdateGroupFormValues = z.infer<typeof updateGroupSchema>;
+  return {
+    createGroupSchema,
+    updateGroupSchema,
+  };
+};
+
+export type CreateGroupFormValues = z.infer<
+  ReturnType<typeof groupSchemas>['createGroupSchema']
+>;
+export type UpdateGroupFormValues = z.infer<
+  ReturnType<typeof groupSchemas>['updateGroupSchema']
+>;

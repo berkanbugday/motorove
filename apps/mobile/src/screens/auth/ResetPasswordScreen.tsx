@@ -19,7 +19,7 @@ import {
   Title,
   Body,
 } from '@components';
-import {ResetPasswordFormValues, createAuthSchemas} from '@utils/validation';
+import {ResetPasswordFormValues, authSchemas} from '@utils/validation';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors} from '@theme/colors';
@@ -42,7 +42,7 @@ export const ResetPasswordScreen = () => {
   });
 
   // Create validation schema with translations
-  const {resetPasswordSchema} = createAuthSchemas(t);
+  const {resetPasswordSchema} = authSchemas(t);
 
   const {
     control,

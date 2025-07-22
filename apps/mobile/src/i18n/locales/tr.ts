@@ -21,7 +21,9 @@ export default {
     select: 'Seç',
     done: 'Tamam',
     create: 'Oluştur',
+    creating: 'Oluşturuluyor...',
     update: 'Güncelle',
+    uploading: 'Yükleniyor...',
     submit: 'Gönder',
     close: 'Kapat',
     add: 'Ekle',
@@ -279,12 +281,15 @@ export default {
 
     // Groups screens
     group: {
-      create: 'Grup Oluştur',
-      edit: 'Grubu Düzenle',
-      join: 'Gruba Katıl',
-      leave: 'Gruptan Ayrıl',
-      name: 'Grup Adı',
+      create_group: 'Grup Oluştur',
+      edit_group: 'Grubu Düzenle',
+      join_group: 'Gruba Katıl',
+      leave_group: 'Gruptan Ayrıl',
+      group_name: 'Grup Adı',
       description: 'Açıklama',
+      city: 'Şehir',
+      privacy: 'Gizlilik',
+      members_capacity: 'Üye Kapasitesi',
       members: 'Üyeler',
       admins: 'Yöneticiler',
       moderators: 'Moderatörler',
@@ -314,8 +319,15 @@ export default {
       join_request_sent: 'Katılım isteği gönderildi',
       leave_group_confirmation:
         'Bu gruptan ayrılmak istediğinize emin misiniz?',
-      upload_cover_photo: 'Kapak Fotoğrafı Yükle',
-      upload_avatar: 'Grup Avatarı Yükle',
+      upload_cover_photo: 'Kapak fotoğrafı yükle',
+      upload_logo: 'Logo yükle',
+      filter_groups: 'Grupları Filtrele',
+      could_not_load_groups: 'Gruplar yüklenemedi. Lütfen tekrar deneyin.',
+      no_groups_yet: 'Henüz Grup Yok',
+      join_or_create_groups:
+        'Diğer motosikletçilerle bağlantı kurmak ve etkinliklere katılmak için gruplara katılın veya oluşturun.',
+      joined: 'Katıldıklarım',
+      explore: 'Keşfet',
       member_roles: {
         owner: 'Sahip',
         admin: 'Yönetici',
@@ -332,6 +344,7 @@ export default {
       error_creating_group: 'Grup oluşturulurken bir hata oluştu',
       success_updated_group: 'Grup başarıyla güncellendi',
       error_updating_group: 'Grup güncellenirken bir hata oluştu',
+      image_too_large: 'Resim çok büyük (maksimum boyut: 10MB)',
     },
 
     // Profile screens
@@ -657,6 +670,37 @@ export default {
     },
     agreeToTerms: {
       required: 'Kullanım Şartları ve Gizlilik Politikasını kabul etmelisiniz',
+    },
+    group: {
+      name: {
+        required: 'Grup adı gereklidir',
+        min_length: 'Grup adı en az 3 karakter olmalıdır',
+        max_length: 'Grup adı en fazla 100 karakter olabilir',
+      },
+      description: {
+        required: 'Açıklama gereklidir',
+        min_length: 'Açıklama en az 10 karakter olmalıdır',
+        max_length: 'Açıklama 500 karakteri geçemez',
+      },
+      city: {
+        required: 'Şehir gereklidir',
+        select: 'Lütfen bir şehir seçin',
+      },
+      privacy: {
+        required: 'Gizlilik gereklidir',
+        select: 'Lütfen bir gizlilik seçin',
+      },
+      members_capacity: {
+        number: 'Üye kapasitesi bir sayı olmalıdır',
+        positive: 'Üye kapasitesi pozitif bir sayı olmalıdır',
+      },
+      tags: {
+        min: 'Lütfen en az 1 etiket seçin',
+        max: 'En fazla 3 etiket seçebilirsiniz',
+      },
+      logo: {
+        required: 'Logo gereklidir',
+      },
     },
   },
 

@@ -141,6 +141,19 @@ export class EnumUtils {
     return this.getDropdownOptions(GroupTag, 'enums.groupTag');
   }
 
+  static convertGroupTags(tags: GroupTag[]): string[] {
+    let convertedTags: string[] = [];
+    tags.map(tag => {
+      const tagItem = this.getGroupTags().find(
+        t => t.value.toLowerCase() === tag.toLowerCase(),
+      );
+      if (tagItem) {
+        convertedTags.push(tagItem.label);
+      }
+    });
+    return convertedTags;
+  }
+
   static getGenderDropdownOptions(): DropdownItem[] {
     return this.getDropdownOptions(Gender, 'enums.gender');
   }

@@ -24,7 +24,7 @@ import {
 import {colors, spacing, radius, getShadow} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {
-  updateGroupSchema,
+  groupSchemas,
   UpdateGroupFormValues,
 } from '@utils/validation/groupValidation';
 import {loggingService} from '@services/logging.service';
@@ -36,6 +36,7 @@ import {
 } from '@services/group.service';
 import {useGetCities} from '@services/city.service';
 import {useGetGroupTags} from '@services/group-tag.service';
+import {useTranslation} from 'react-i18next';
 
 // Since we can't modify the navigationTypes file directly in this example,
 // define a local type for the route params
@@ -52,6 +53,7 @@ export const EditGroupScreen: React.FC = () => {
   const route =
     useRoute<RouteProp<{EditGroup: EditGroupParams}, 'EditGroup'>>();
   const {groupId} = route.params;
+  const {t} = useTranslation();
 
   const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
     null,
@@ -87,6 +89,9 @@ export const EditGroupScreen: React.FC = () => {
       }, 1000);
     });
 
+  // Get schemas with translations
+  const {updateGroupSchema} = groupSchemas(t);
+
   // Setup form with Zod validation
   const {
     control,
@@ -100,7 +105,7 @@ export const EditGroupScreen: React.FC = () => {
       id: '',
       name: '',
       description: '',
-      logo: null,
+      logo: '',
       cover: null,
       city: '',
       privacy: '',
@@ -221,7 +226,7 @@ export const EditGroupScreen: React.FC = () => {
         setLogo(asset.uri || '');
         setValue(
           'logo',
-          asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : null,
+          asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : '',
           {
             shouldValidate: true,
           },
@@ -393,7 +398,7 @@ export const EditGroupScreen: React.FC = () => {
                     variant="caption"
                     color={colors.neutral.grey}
                     style={styles.uploadText}>
-                    Upload logo
+                    Upload logo *
                   </Typography>
                 </View>
               )}
