@@ -16,8 +16,6 @@ import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { PostDto } from './dto/post.dto';
 import { AddressDto } from 'src/addresses/dto/address.dto';
-import { CommentDto } from 'src/comments/dto/comment.dto';
-import { GroupDto } from 'src/groups/dto/group.dto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { GroupMembership } from 'src/group-memberships/models/group-membership.model';
 import { PostInteractionDto } from './dto/post-interaction.dto';
@@ -47,26 +45,9 @@ export class PostsService {
           isActive: true,
         },
         include: {
-          createdBy: true,
-          updatedBy: true,
           group: true,
+          createdBy: true,
           addresses: true,
-          comments: {
-            where: { isActive: true, parentId: null },
-            include: {
-              createdBy: true,
-              updatedBy: true,
-              // replies: {
-              //   where: { isActive: true },
-              //   include: {
-              //     createdBy: true,
-              //     updatedBy: true,
-              //   },
-              //   orderBy: { createdAt: 'asc' },
-              // },
-            },
-            orderBy: { createdAt: 'desc' },
-          },
         },
         take: limit || undefined,
         skip: skip || undefined,
@@ -733,29 +714,11 @@ export class PostsService {
       );
     }
 
-    // For group data, if it exists, count the members
-    let groupWithMemberCount = null;
-    if (prismaPost.group) {
-      const groupMembersCount = await this.prisma.groupMembership.count({
-        where: {
-          groupId: prismaPost.group.id,
-          isActive: true,
-        },
-      });
-
-      // Create a new object with all group properties plus membersCount
-      groupWithMemberCount = {
-        ...(prismaPost.group as any),
-        membersCount: groupMembersCount,
-      };
-    }
-
     return {
       id: prismaPost.id,
       content: prismaPost.content,
       images: processedImages,
-      group: groupWithMemberCount as unknown as GroupDto,
-      comments: prismaPost.comments as unknown as CommentDto[],
+      groupName: prismaPost.group?.name,
       addresses: prismaPost.addresses as unknown as AddressDto[],
       likesCount,
       commentsCount,

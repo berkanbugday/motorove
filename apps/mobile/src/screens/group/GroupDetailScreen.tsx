@@ -1368,24 +1368,25 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Semi-transparent overlay
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   logoWrapper: {
     position: 'absolute',
     width: 100,
     height: 100,
-    top: 150, // Position from top
-    left: '50%', // Center horizontally
-    marginLeft: -50, // Offset by half the width
+    top: 150,
+    left: '50%',
+    marginLeft: -50,
     alignItems: 'center',
-    zIndex: 10, // Higher zIndex to ensure it's above other elements
+    zIndex: 10,
     ...getShadow('medium'),
   },
   logo: {
     width: 100,
     height: 100,
     borderRadius: radius.round,
-    backgroundColor: colors.neutral.white, // Add background color to ensure opacity
+    backgroundColor: colors.neutral.white,
+    ...getShadow('medium'),
   },
   scrollView: {
     flex: 1,

@@ -439,15 +439,10 @@ export const HomeScreen = ({navigation}: Props) => {
       // Create labels from post data
       const labels = [];
 
-      if (post.group) {
+      if (post.groupName) {
         labels.push({
           icon: 'users-filled' as IconName,
-          text: post.group.name,
-          onPress: () => {
-            navigateToScreen(navigation, 'GroupDetail', {
-              groupId: post.group?.id,
-            });
-          },
+          text: post.groupName,
         });
       }
 

@@ -1,7 +1,5 @@
 import { IUser } from "../user";
 import { IAddress } from "../address";
-import { IComment } from "../comment";
-import { IGroup } from "../group";
 
 export interface IPost {
   id: string;
@@ -13,7 +11,6 @@ export interface IPost {
   isSaved: boolean;
   createdBy: IUser;
   createdAt: Date;
+  groupName?: string;
   addresses?: IAddress[];
-  comments?: IComment[];
-  group?: IGroup;
 }

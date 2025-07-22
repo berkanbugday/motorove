@@ -12,9 +12,7 @@ import {
 import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
 import { AddressDto } from 'src/addresses/dto/address.dto';
-import { CommentDto } from 'src/comments/dto/comment.dto';
 import { IPost } from '@motorove/shared';
-import { GroupDto } from 'src/groups/dto/group.dto';
 
 @ObjectType()
 export class PostDto implements IPost {
@@ -56,18 +54,13 @@ export class PostDto implements IPost {
   @IsDate()
   createdAt: Date;
 
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  groupName?: string;
+
   @Field(() => [AddressDto], { nullable: true })
   @ValidateNested()
   @Type(() => AddressDto)
   addresses?: AddressDto[];
-
-  @Field(() => [CommentDto], { nullable: true })
-  @ValidateNested()
-  @Type(() => CommentDto)
-  comments?: CommentDto[];
-
-  @Field(() => GroupDto, { nullable: true })
-  @ValidateNested()
-  @Type(() => GroupDto)
-  group?: GroupDto;
 }

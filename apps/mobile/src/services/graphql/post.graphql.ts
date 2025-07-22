@@ -1,6 +1,4 @@
 import {gql} from '@apollo/client';
-import {COMMENT_FRAGMENT} from './comment.graphql';
-import {GROUP_FRAGMENT} from './group.graphql';
 import {USER_FRAGMENT} from './user.graphql';
 import {ADDRESS_FRAGMENT} from './address.graphql';
 
@@ -17,18 +15,11 @@ export const POST_FRAGMENT = gql`
       ...UserFragment
     }
     createdAt
+    groupName
     addresses {
       ...AddressFragment
     }
-    comments {
-      ...CommentFragment
-    }
-    group {
-      ...GroupFragment
-    }
   }
-  ${COMMENT_FRAGMENT}
-  ${GROUP_FRAGMENT}
   ${USER_FRAGMENT}
   ${ADDRESS_FRAGMENT}
 `;

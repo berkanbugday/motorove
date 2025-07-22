@@ -1,7 +1,6 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import {
   IsBoolean,
-  IsDate,
   IsEmail,
   IsInt,
   IsOptional,

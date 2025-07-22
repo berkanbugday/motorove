@@ -746,12 +746,11 @@ type Post {
 
 type PostDto {
   addresses: [AddressDto!]
-  comments: [CommentDto!]
   commentsCount: Int!
   content: String!
   createdAt: DateTime!
   createdBy: UserDto!
-  group: GroupDto
+  groupName: String
   id: ID!
   images: [String!]
   isLiked: Boolean!
