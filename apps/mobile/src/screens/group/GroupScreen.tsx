@@ -322,7 +322,7 @@ export const GroupScreen = () => {
         secondRightIconBadgeCount={getFilterBadgeCount()}
         onSecondRightButtonPress={handleFilterPress}
         leftIconName="search"
-        onLeftIconPress={() => navigation.navigate('GroupSearch')}
+        onLeftIconPress={() => navigation.navigate('SearchGroup')}
       />
       <Tabs
         items={tabItems}

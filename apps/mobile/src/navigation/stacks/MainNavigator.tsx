@@ -8,7 +8,7 @@ import {
   CreateGroupScreen,
   GroupDetailScreen,
   EditGroupScreen,
-  GroupSearchScreen,
+  SearchGroupScreen,
 } from '@screens/group';
 import {UserSearchScreen} from '@screens/userSearch';
 import {CreateEventScreen} from '@screens/event';
@@ -76,8 +76,8 @@ export function MainNavigator() {
       />
 
       <Stack.Screen
-        name="GroupSearch"
-        component={GroupSearchScreen}
+        name="SearchGroup"
+        component={SearchGroupScreen}
         options={{headerShown: false}}
       />
 

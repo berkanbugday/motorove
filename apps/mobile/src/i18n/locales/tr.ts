@@ -45,7 +45,7 @@ export default {
     search: 'Ara',
     map: 'Harita',
     groups: 'Gruplar',
-    more: 'Daha Fazla',
+    more: 'Menü',
     profile: 'Profil',
     events: 'Etkinlikler',
     notifications: 'Bildirimler',

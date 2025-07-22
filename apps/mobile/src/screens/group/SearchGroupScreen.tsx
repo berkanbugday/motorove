@@ -5,16 +5,17 @@ import {colors, spacing} from '@theme';
 import {Icon} from '@components/Icon';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
-import {useGetGroups, useSearchGroups, Group} from '@services/group.service';
+import {useGetGroups, useSearchGroups} from '@services/group.service';
 import {GroupCard} from '@components/GroupCard';
 import {Body} from '@components/Typography';
 import {AnimatedInput} from '@components/AnimatedInput';
+import {IGroup} from '@motorove/shared';
 
 /**
  * Group Search Screen - Allows users to search for groups by name
  */
-export const GroupSearchScreen = () => {
-  const navigation = useNavigation<MainScreenNavigationProp<'GroupSearch'>>();
+export const SearchGroupScreen = () => {
+  const navigation = useNavigation<MainScreenNavigationProp<'SearchGroup'>>();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -74,7 +75,7 @@ export const GroupSearchScreen = () => {
 
   // Render each group item
   const renderGroupItem = useCallback(
-    ({item}: {item: Group}) => {
+    ({item}: {item: IGroup}) => {
       return (
         <GroupCard
           logoSource={item.logo ? {uri: item.logo} : null}

@@ -45,7 +45,7 @@ export default {
     search: 'Search',
     map: 'Map',
     groups: 'Groups',
-    more: 'More',
+    more: 'Menu',
     profile: 'Profile',
     events: 'Events',
     notifications: 'Notifications',

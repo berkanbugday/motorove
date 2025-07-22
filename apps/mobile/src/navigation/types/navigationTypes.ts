@@ -48,7 +48,7 @@ export type MainStackParamList = {
   CreateEvent: undefined;
   GroupDetail: {groupId: string};
   EditGroup: {groupId: string};
-  GroupSearch: undefined;
+  SearchGroup: undefined;
   UserSearch: undefined;
   Notification: undefined;
   Profile: undefined;
