@@ -48,12 +48,7 @@ import {createEventSchema, CreateEventFormValues} from '@utils/validation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
-import {
-  useEnumEventTypes,
-  useEnumRoadTypes,
-  useEnumDifficultyLevels,
-  useEnumExperienceLevels,
-} from '@services/enum.service';
+import {EnumUtils} from '@utils/enumUtils';
 import {Language} from '@motorove/shared';
 
 export const CreateEventScreen: React.FC = () => {
@@ -109,10 +104,10 @@ export const CreateEventScreen: React.FC = () => {
   const [activeInviteTab, setActiveInviteTab] = useState<string>('users');
 
   // Enum hooks
-  const {eventTypes} = useEnumEventTypes();
-  const {roadTypes} = useEnumRoadTypes();
-  const {difficultyLevels} = useEnumDifficultyLevels();
-  const {experienceLevels} = useEnumExperienceLevels();
+  const eventTypes = EnumUtils.getEventTypes();
+  const roadTypes = EnumUtils.getRoadTypes();
+  const difficultyLevels = EnumUtils.getDifficultyLevels();
+  const experienceLevels = EnumUtils.getExperienceLevels();
 
   // Form setup with Zod validation
   const methods = useForm<CreateEventFormValues>({

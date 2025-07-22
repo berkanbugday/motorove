@@ -328,6 +328,10 @@ export default {
         rejected: 'Reddedildi',
         banned: 'Yasaklandı',
       },
+      success_created_group: 'Grup başarıyla oluşturuldu',
+      error_creating_group: 'Grup oluşturulurken bir hata oluştu',
+      success_updated_group: 'Grup başarıyla güncellendi',
+      error_updating_group: 'Grup güncellenirken bir hata oluştu',
     },
 
     // Profile screens

@@ -28,10 +28,10 @@ import {
   CreateGroupFormValues,
 } from '@utils/validation/groupValidation';
 import {loggingService} from '@services/logging.service';
-import {useEnumPrivacyOptions} from '@services/enum.service';
-import {useCreateGroup, CreateGroupInput} from '@services/group.service';
+import {useCreateGroup} from '@services/group.service';
 import {useGetCities} from '@services/city.service';
-import {useGetGroupTags} from '@services/group-tag.service';
+import {EnumUtils} from '@utils/enumUtils';
+import {ICreateGroup, GroupPrivacy, GroupTag} from '@motorove/shared';
 
 export const CreateGroupScreen: React.FC = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'CreateGroup'>>();
@@ -45,10 +45,10 @@ export const CreateGroupScreen: React.FC = () => {
   const [logo, setLogo] = useState<string | null>(null);
   const [cover, setCover] = useState<string | null>(null);
 
-  // Use enum service hooks
+  // Use enum utils and services
   const {cities, loading: citiesLoading} = useGetCities();
-  const {privacyOptions, loading: privacyLoading} = useEnumPrivacyOptions();
-  const {groupTags} = useGetGroupTags();
+  const privacyOptions = EnumUtils.getGroupPrivacyOptions();
+  const groupTags = EnumUtils.getGroupTags();
 
   // Use group service hook for creating a group
   const {createGroup, loading: createGroupLoading} = useCreateGroup(() => {
@@ -198,23 +198,17 @@ export const CreateGroupScreen: React.FC = () => {
   const onSubmit = async (data: CreateGroupFormValues) => {
     try {
       // Prepare form data for the group service
-      const createGroupInput: CreateGroupInput = {
+      const createGroupInput: ICreateGroup = {
         name: data.name,
         description: data.description,
         logo: data.logo,
         cover: data.cover,
-        city: {
-          id: selectedCity?.id as string,
-          value: selectedCity?.label as string,
-        },
-        privacy: selectedPrivacy?.value,
+        cityId: selectedCity?.id as string,
+        privacy: selectedPrivacy?.value as GroupPrivacy,
         membersCapacity: data.membersCapacity
           ? parseInt(data.membersCapacity, 10)
           : null,
-        tags: selectedTags.map(tag => ({
-          id: tag.id,
-          value: tag.value,
-        })),
+        tags: selectedTags.map(tag => tag.id as GroupTag),
       };
 
       // Call the group service createGroup method
@@ -307,7 +301,6 @@ export const CreateGroupScreen: React.FC = () => {
                 onSelect={item => {
                   handleCitySelect(item);
                 }}
-                searchable={true}
                 selectedItem={selectedCity}
                 error={errors.city?.message}
                 loading={citiesLoading}
@@ -321,10 +314,8 @@ export const CreateGroupScreen: React.FC = () => {
                 onSelect={item => {
                   handlePrivacySelect(item);
                 }}
-                searchable={false}
                 selectedItem={selectedPrivacy}
                 error={errors.privacy?.message}
-                loading={privacyLoading}
               />
 
               {/* Max Members */}
@@ -354,11 +345,13 @@ export const CreateGroupScreen: React.FC = () => {
                 {groupTags.map(tag => (
                   <Chip
                     key={tag.id}
-                    label={tag.value}
-                    onPress={() => handleTagToggle(tag)}
+                    label={tag.label}
+                    onPress={() =>
+                      handleTagToggle({id: tag.value, value: tag.label})
+                    }
                     size="medium"
                     variant={
-                      selectedTags.some(t => t.id === tag.id)
+                      selectedTags.some(t => t.id === tag.value)
                         ? 'filled'
                         : 'outlined'
                     }

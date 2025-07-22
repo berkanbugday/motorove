@@ -1,4 +1,4 @@
-import { GroupPrivacy } from "../../enums";
+import { GroupPrivacy, GroupTag } from "../../enums";
 
 /**
  * Create Group Interface
@@ -43,5 +43,5 @@ export interface ICreateGroup {
   /**
    * Optional tag IDs to associate with the group
    */
-  tagIds?: string[];
+  tags: GroupTag[];
 }

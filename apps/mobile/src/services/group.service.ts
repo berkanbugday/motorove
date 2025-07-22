@@ -18,15 +18,17 @@ import {
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback, useEffect} from 'react';
+import {useTranslation} from '@hooks/useTranslation';
 
 // Hook for creating a group
 export const useCreateGroup = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [createGroupMutation, {loading, error}] = useMutation(CREATE_GROUP, {
     onCompleted: _data => {
       showToast({
         type: 'success',
-        text1: 'Success',
-        text2: 'Group created successfully!',
+        text1: t('common.success'),
+        text2: t('screens.group.success_created_group'),
       });
 
       if (onSuccess) {
@@ -37,8 +39,8 @@ export const useCreateGroup = (onSuccess?: () => void) => {
       loggingService.error('Error creating group:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to create group. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.group.error_creating_group'),
       });
     },
   });
@@ -47,11 +49,7 @@ export const useCreateGroup = (onSuccess?: () => void) => {
     try {
       const result = await createGroupMutation({
         variables: {
-          input: {
-            ...input,
-            logo: input.logo ?? null,
-            cover: input.cover ?? null,
-          },
+          input,
         },
       });
       return result.data?.createGroup;
@@ -71,12 +69,13 @@ export const useCreateGroup = (onSuccess?: () => void) => {
 
 // Hook for updating a group
 export const useUpdateGroup = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [updateGroupMutation, {loading, error}] = useMutation(UPDATE_GROUP, {
     onCompleted: _data => {
       showToast({
         type: 'success',
-        text1: 'Success',
-        text2: 'Group updated successfully!',
+        text1: t('common.success'),
+        text2: t('screens.group.success_updated_group'),
       });
 
       if (onSuccess) {
@@ -87,8 +86,8 @@ export const useUpdateGroup = (onSuccess?: () => void) => {
       loggingService.error('Error updating group:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to update group. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.group.error_updating_group'),
       });
     },
   });
@@ -97,11 +96,7 @@ export const useUpdateGroup = (onSuccess?: () => void) => {
     try {
       const result = await updateGroupMutation({
         variables: {
-          input: {
-            ...input,
-            logo: input.logo ?? null,
-            cover: input.cover ?? null,
-          },
+          input,
         },
       });
       return result.data?.updateGroup;

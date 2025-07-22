@@ -60,11 +60,11 @@ import {
 } from '@services/group-membership.service';
 import Dialog, {DialogRef} from '@components/Dialog';
 import Dropdown from '@components/Dropdown';
+import {EnumUtils} from '@utils/enumUtils';
 import {
-  DropdownItem as EnumDropdownItem,
-  useEnumGroupMemberRoles,
-} from '@services/enum.service';
-import {DropdownItem as ComponentDropdownItem} from '@components/Dropdown/types';
+  DropdownItem as ComponentDropdownItem,
+  DropdownItem,
+} from '@components/Dropdown/types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {AuthUser} from '@app-types/auth.types';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
@@ -337,9 +337,7 @@ export const GroupDetailScreen = () => {
   // State for selected member and role
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [memberToRemove, setMemberToRemove] = useState<any>(null);
-  const [selectedRole, setSelectedRole] = useState<EnumDropdownItem | null>(
-    null,
-  );
+  const [selectedRole, setSelectedRole] = useState<DropdownItem | null>(null);
 
   // Get member roles from enum service
   const {groupMemberRoles, loading: loadingRoles} = useEnumGroupMemberRoles();

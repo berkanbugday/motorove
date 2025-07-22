@@ -28,7 +28,7 @@ import {
   UpdateGroupFormValues,
 } from '@utils/validation/groupValidation';
 import {loggingService} from '@services/logging.service';
-import {useEnumPrivacyOptions} from '@services/enum.service';
+import {EnumUtils} from '@utils/enumUtils';
 import {
   useUpdateGroup,
   UpdateGroupInput,
@@ -68,8 +68,8 @@ export const EditGroupScreen: React.FC = () => {
   const isDataLoadedRef = useRef(false);
   // Use service hooks
   const {cities, loading: citiesLoading} = useGetCities();
-  const {privacyOptions, loading: privacyLoading} = useEnumPrivacyOptions();
-  const {groupTags} = useGetGroupTags();
+  const privacyOptions = EnumUtils.getGroupPrivacyOptions();
+  const groupTags = EnumUtils.getGroupTags();
 
   // Get group data using the group service
   const {

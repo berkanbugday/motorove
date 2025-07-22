@@ -325,6 +325,10 @@ export default {
         rejected: 'Rejected',
         banned: 'Banned',
       },
+      success_created_group: 'Group created successfully',
+      error_creating_group: 'Failed to create group. Please try again.',
+      success_updated_group: 'Group updated successfully',
+      error_updating_group: 'Failed to update group. Please try again.',
     },
 
     // Profile screens
