@@ -64,6 +64,13 @@ export class EnumUtils {
     return this.getDropdownOptions(GroupPrivacy, 'enums.groupPrivacy');
   }
 
+  static convertGroupPrivacy(privacy: GroupPrivacy): string {
+    const privacyItem = this.getGroupPrivacyOptions().find(
+      t => t.value.toLowerCase() === privacy.toLowerCase(),
+    );
+    return privacyItem?.label || privacy;
+  }
+
   static getGroupMemberRoles(): DropdownItem[] {
     return this.getDropdownOptions(GroupMemberRole, 'enums.groupMemberRole');
   }

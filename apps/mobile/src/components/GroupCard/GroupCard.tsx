@@ -12,8 +12,9 @@ import {Button} from '../Button';
 import {Icon, IconName} from '../Icon';
 import {colors} from '@theme';
 import {styles} from './GroupCard.styles';
-import {toPascalCase} from '@utils/stringUtils';
 import {GroupPrivacy} from '@motorove/shared';
+import {EnumUtils} from '@utils/enumUtils';
+import {useTranslation} from '@hooks/useTranslation';
 
 export interface BadgeProps {
   /**
@@ -111,6 +112,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   style,
   isMember = true,
 }) => {
+  const {t} = useTranslation();
   const handlePress = () => {
     if (onPress) {
       onPress();
@@ -177,8 +179,8 @@ export const GroupCard: React.FC<GroupCardProps> = ({
 
   const renderMemberCount = () => {
     const memberText = membersCapacity
-      ? `${currentMembers} / ${membersCapacity} members`
-      : `${currentMembers} members`;
+      ? `${currentMembers} / ${membersCapacity} ${t('screens.group.member')}`
+      : `${currentMembers} ${t('screens.group.member')}`;
 
     return (
       <View style={styles.memberContainer}>
@@ -207,7 +209,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
           variant="caption"
           color={colors.neutral.darkGrey}
           style={styles.infoText}>
-          {toPascalCase(privacy)}
+          {EnumUtils.convertGroupPrivacy(privacy)}
         </Typography>
       </View>
     );
@@ -220,12 +222,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       activeOpacity={0.8}>
       {renderBadge()}
       <View style={styles.content}>
-        <Image
-          source={
-            logoSource || require('@assets/images/motorove_logo_dark.png')
-          }
-          style={styles.logo}
-        />
+        <Image source={logoSource || undefined} style={styles.logo} />
         <View style={styles.infoContainer}>
           <Typography variant="subtitle" weight="bold" numberOfLines={1}>
             {name}
@@ -249,7 +246,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
         <View style={styles.joinButtonContainer}>
           {!isMember ? (
             <Button
-              title="Join"
+              title={t('common.join')}
               variant="dark"
               size="small"
               shape="round"

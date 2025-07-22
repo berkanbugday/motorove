@@ -291,6 +291,7 @@ export default {
       privacy: 'Gizlilik',
       members_capacity: 'Üye Kapasitesi',
       members: 'Üyeler',
+      member: 'Üye',
       admins: 'Yöneticiler',
       moderators: 'Moderatörler',
       my_groups: 'Gruplarım',

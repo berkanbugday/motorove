@@ -6,7 +6,6 @@ import {useGetJoinedGroups, useGetGroups} from '@services/group.service';
 import {colors, spacing} from '@theme';
 import {
   TopHeaderBar,
-  Body,
   Subtitle,
   Button,
   Icon,
@@ -15,6 +14,8 @@ import {
   GroupFilter,
   GroupCard,
   SkeletonGroup,
+  Title,
+  BodySmall,
 } from '@components';
 import {GroupPrivacy, IFilterGroup} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
@@ -126,12 +127,12 @@ export const GroupScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
-          <Subtitle style={styles.emptyStateTitle}>
+          <Subtitle weight="bold">
             {t('errors.general.something_wrong')}
           </Subtitle>
-          <Body style={styles.emptyStateSubtitle}>
+          <BodySmall align="center">
             {t('screens.group.could_not_load_groups')}
-          </Body>
+          </BodySmall>
           <Button
             title={t('common.try_again')}
             variant="primary"
@@ -146,12 +147,10 @@ export const GroupScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="users" size={48} />
-          <Subtitle style={styles.emptyStateTitle}>
-            {t('screens.group.no_groups_yet')}
-          </Subtitle>
-          <Body style={styles.emptyStateSubtitle}>
+          <Title weight="bold">{t('screens.group.no_groups_yet')}</Title>
+          <BodySmall align="center">
             {t('screens.group.join_or_create_groups')}
-          </Body>
+          </BodySmall>
           <Button
             title={t('common.try_again')}
             variant="primary"
@@ -214,12 +213,12 @@ export const GroupScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
-          <Subtitle style={styles.emptyStateTitle}>
+          <Subtitle weight="bold">
             {t('errors.general.something_wrong')}
           </Subtitle>
-          <Body style={styles.emptyStateSubtitle}>
+          <BodySmall align="center">
             {t('screens.group.could_not_load_groups')}
-          </Body>
+          </BodySmall>
           <Button
             title={t('common.try_again')}
             variant="primary"
@@ -233,13 +232,11 @@ export const GroupScreen = () => {
     if (!allGroups || allGroups.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Icon name="users" size={48} />
-          <Subtitle style={styles.emptyStateTitle}>
-            {t('screens.group.no_groups_yet')}
-          </Subtitle>
-          <Body style={styles.emptyStateSubtitle}>
+          <Icon name="users-filled" size={48} />
+          <Subtitle weight="bold">{t('screens.group.no_groups_yet')}</Subtitle>
+          <BodySmall align="center">
             {t('screens.group.join_or_create_groups')}
-          </Body>
+          </BodySmall>
           <Button
             title={t('common.try_again')}
             variant="primary"
@@ -364,28 +361,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.neutral.black,
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
-  },
-  emptyStateSubtitle: {
-    fontSize: 14,
-    color: colors.neutral.grey,
-    textAlign: 'center',
-  },
-  exploreHeader: {
-    marginBottom: spacing.md,
-  },
-  exploreHeaderText: {
-    fontSize: 16,
-    color: colors.neutral.grey,
-  },
+
   loadingContainer: {
     flex: 1,
     paddingHorizontal: spacing.md,

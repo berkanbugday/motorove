@@ -64,14 +64,13 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
     }));
   }, []);
 
-  // Remove handleTagToggle, add handleTagsChange
   const handleTagsChange = useCallback((selectedItems: MultiSelectItem[]) => {
     setFilters(prev => ({
       ...prev,
       tags:
         selectedItems.length > 0
           ? selectedItems.map(item => item.value as string)
-          : null,
+          : [],
     }));
   }, []);
 
@@ -85,7 +84,7 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
   const handleReset = useCallback(() => {
     const resetFilters: IFilterGroup = {
       cityId: null,
-      tags: null,
+      tags: [],
       privacy: GroupPrivacy.ALL,
       role: GroupMemberRole.ALL,
     };
@@ -169,7 +168,7 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
         </View>
       </ScrollView>
 
-      <View style={[styles.footer, {marginBottom: 10}]}>
+      <View style={styles.buttonContainer}>
         <Button
           title={t('common.reset')}
           variant="outline"
@@ -216,13 +215,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary.light,
     marginVertical: spacing.sm,
   },
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+  buttonContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
-    backgroundColor: colors.neutral.white,
+    flexDirection: 'row',
   },
   resetButton: {
     flex: 1,
@@ -231,14 +230,6 @@ const styles = StyleSheet.create({
   applyButton: {
     flex: 1,
     marginLeft: spacing.sm,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  tagChip: {
-    marginBottom: spacing.xs,
   },
   loadingContainer: {
     height: 50,
