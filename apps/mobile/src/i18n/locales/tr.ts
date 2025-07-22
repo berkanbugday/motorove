@@ -348,6 +348,13 @@ export default {
       image_too_large: 'Resim çok büyük (maksimum boyut: 10MB)',
     },
 
+    // Search group screen
+    searchGroup: {
+      search_groups: 'Grupları Ara',
+      search_groups_by_name: 'Grup adına göre ara',
+      no_groups_found: 'Grup bulunamadı',
+    },
+
     // Profile screens
     profile: {
       edit_profile: 'Profili Düzenle',

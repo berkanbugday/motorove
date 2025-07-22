@@ -265,12 +265,9 @@ export class AuthService {
           errorMessage.includes('JWT claim') ||
           errorMessage.includes('JWT token')
         ) {
-          console.error('JWT validation error:', errorMessage);
           throw new UnauthorizedException('Invalid JWT token');
         }
       }
-
-      console.error('Token refresh error:', errorMessage);
 
       // Rethrow the error with appropriate message
       if (error instanceof UnauthorizedException) {

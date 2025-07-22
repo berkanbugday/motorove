@@ -10,12 +10,15 @@ import {GroupCard} from '@components/GroupCard';
 import {Body} from '@components/Typography';
 import {AnimatedInput} from '@components/AnimatedInput';
 import {IGroup} from '@motorove/shared';
+import {EnumUtils} from '@utils/enumUtils';
+import {useTranslation} from '@hooks/useTranslation';
 
 /**
  * Group Search Screen - Allows users to search for groups by name
  */
 export const SearchGroupScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'SearchGroup'>>();
+  const {t} = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -81,9 +84,9 @@ export const SearchGroupScreen = () => {
           logoSource={item.logo ? {uri: item.logo} : null}
           name={item.name}
           location={item.city.value}
-          tags={item.tags.map(tag => tag.value)}
-          currentMembers={item.memberships.length}
-          membersCapacity={item.membersCapacity || undefined}
+          tags={EnumUtils.convertGroupTags(item.tags)}
+          currentMembers={item.membersCount}
+          membersCapacity={item.membersCapacity}
           privacy={item.privacy}
           onPress={() => handleGroupPress(item.id)}
         />
@@ -103,8 +106,8 @@ export const SearchGroupScreen = () => {
         <Icon name="search" size={40} color={colors.neutral.lightGrey} />
         <Body color={colors.neutral.grey} style={styles.emptyText}>
           {debouncedQuery
-            ? 'No groups found matching your search'
-            : 'Search for groups by name'}
+            ? t('screens.searchGroup.no_groups_found')
+            : t('screens.searchGroup.search_groups_by_name')}
         </Body>
       </View>
     );
@@ -120,7 +123,7 @@ export const SearchGroupScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Search Groups"
+        title={t('screens.searchGroup.search_groups')}
         showBackButton
         showShadow={false}
         onBackPress={() => navigation.goBack()}
@@ -129,7 +132,7 @@ export const SearchGroupScreen = () => {
       <View style={styles.searchContainer}>
         <AnimatedInput
           shape="round"
-          placeholder="Search groups by name"
+          placeholder={t('screens.searchGroup.search_groups_by_name')}
           value={searchQuery}
           onChangeText={handleSearchQueryChange}
           icon={

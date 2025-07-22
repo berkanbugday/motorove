@@ -344,6 +344,13 @@ export default {
       image_too_large: 'Image is too large (maximum size: 10MB)',
     },
 
+    // Search group screen
+    searchGroup: {
+      search_groups: 'Search Groups',
+      search_groups_by_name: 'Search groups by name',
+      no_groups_found: 'No groups found',
+    },
+
     // Profile screens
     profile: {
       edit_profile: 'Edit Profile',

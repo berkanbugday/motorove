@@ -450,6 +450,9 @@ class AuthService {
               refreshError as Error,
             );
 
+            // Try to refresh the token again
+            await this.refreshToken();
+
             // If token is expired, return logged out state
             if (isTokenExpired) {
               // Force sign out if token is expired and refresh failed
