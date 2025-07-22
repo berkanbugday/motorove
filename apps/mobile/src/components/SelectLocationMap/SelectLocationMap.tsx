@@ -114,8 +114,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
           fetchLocationDetails(latitude, longitude);
           setIsLoading(false);
         },
-        error => {
-          console.log('Error getting location:', error);
+        () => {
           setIsLoading(false);
         },
         {

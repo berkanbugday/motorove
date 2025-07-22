@@ -88,7 +88,6 @@ const CITIES = [
 
 async function main() {
   // Seed cities
-  console.log('Seeding cities...');
   const existingCities = await prisma.city.findMany();
 
   // Only seed if no cities exist
@@ -104,12 +103,7 @@ async function main() {
         },
       });
     }
-    console.log(`Created ${cityEntries.length} cities`);
-  } else {
-    console.log(`Cities already exist, skipping seeding`);
   }
-
-  console.log(`Seeding finished.`);
 }
 
 main()

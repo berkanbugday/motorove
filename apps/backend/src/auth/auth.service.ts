@@ -169,7 +169,7 @@ export class AuthService {
     const avatar = user.avatar
       ? await this.storageService.getSignedUrl(
           user.avatar,
-          60,
+          3600,
           data.session.access_token,
         )
       : null;
@@ -180,7 +180,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        avatar: avatar ?? null,
+        avatar: avatar,
         hasCompletedSetup: user.hasCompletedSetup,
         notificationPermission:
           user.notificationPermission as NotificationPermission,
@@ -235,7 +235,7 @@ export class AuthService {
       const avatar = user.avatar
         ? await this.storageService.getSignedUrl(
             user.avatar,
-            60,
+            3600,
             data.session?.access_token,
           )
         : null;
@@ -246,7 +246,7 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          avatar: avatar ?? null,
+          avatar: avatar,
           hasCompletedSetup: user.hasCompletedSetup,
           notificationPermission:
             user.notificationPermission as NotificationPermission,

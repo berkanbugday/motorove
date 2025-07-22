@@ -143,7 +143,6 @@ export class UsersService {
   ): Promise<boolean> {
     try {
       // Process avatar if present and is base64
-      console.log('input', input);
       const avatarUrl = await this.storageService.processImageUpload(
         input.avatar,
         'users/avatars',
