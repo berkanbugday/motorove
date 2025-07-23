@@ -61,9 +61,9 @@ import {
   Language,
   IAddress,
   GroupMemberRole,
+  GroupPrivacy,
 } from '@motorove/shared';
 import {relativeTime} from '@utils/dateUtils';
-import {toPascalCase} from '@utils/stringUtils';
 import {useAuth} from '@contexts';
 import {
   useAddGroupMember,
@@ -73,6 +73,8 @@ import {
 } from '@services/group-membership.service';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {AuthUser} from '@app-types/auth.types';
+import {useTranslation} from '@hooks/useTranslation';
+import {EnumUtils} from '@utils/enumUtils';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
 const formatAvatarSource = (imageUrl?: string) => {
@@ -185,6 +187,7 @@ const MemberItem = React.memo(
     const [isActive, setIsActive] = useState(false);
     const actionAnimValue = useRef(new Animated.Value(-100)).current;
     const profileAnimValue = useRef(new Animated.Value(0)).current;
+    const {t} = useTranslation();
 
     // Animation function
     const animateActions = useCallback(
@@ -241,7 +244,7 @@ const MemberItem = React.memo(
                   variant="filled"
                   color="primary"
                   size="small"
-                  label={toPascalCase(item.role) || ''}
+                  label={t('enums.groupMemberRole.admin')}
                   style={styles.adminRole}
                 />
               )}
@@ -251,7 +254,7 @@ const MemberItem = React.memo(
                   variant="filled"
                   color="secondary"
                   size="small"
-                  label={toPascalCase(item.role) || ''}
+                  label={t('enums.groupMemberRole.member')}
                   style={styles.memberRole}
                 />
               )}
@@ -337,6 +340,7 @@ export const GroupDetailScreen = () => {
   const changeRoleDialogRef = useRef<DialogRef>(null);
   const removeMemberDialogRef = useRef<DialogRef>(null);
   const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
   // State for selected member and role
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [memberToRemove, setMemberToRemove] = useState<any>(null);
@@ -435,8 +439,8 @@ export const GroupDetailScreen = () => {
 
       // Mock success for now
       showToast({
-        text1: 'Success',
-        text2: 'Member removed successfully',
+        text1: t('common.success'),
+        text2: t('screens.group.remove_member'),
         type: 'success',
       });
 
@@ -446,25 +450,25 @@ export const GroupDetailScreen = () => {
     } catch (error) {
       loggingService.error('Error removing member', error);
       showToast({
-        text1: 'Error',
-        text2: 'Failed to remove member',
+        text1: t('common.error'),
+        text2: t('errors.general.something_wrong'),
         type: 'error',
       });
     }
-  }, [memberToRemove, groupId, refetchGroup]);
+  }, [memberToRemove, groupId, refetchGroup, removeGroupMember, t]);
 
   // Handle opening the change role dialog
   const handleOpenChangeRoleDialog = useCallback(
     (member: any) => {
       setSelectedMember(member);
       // Find the current role in the dropdown items
-      const currentRole = members.find(
-        role => role.role.toUpperCase() === member.role.toUpperCase(),
+      const currentRole = EnumUtils.getGroupMemberRoles().find(
+        role => role.value === member.role,
       );
-      // setSelectedRole(currentRole || null);
+      setSelectedRole(currentRole || null);
       changeRoleDialogRef.current?.open();
     },
-    [members],
+    [members, t],
   );
 
   // Handle role change
@@ -496,8 +500,8 @@ export const GroupDetailScreen = () => {
 
       // Mock success for now
       showToast({
-        text1: 'Success',
-        text2: 'Member role updated successfully',
+        text1: t('common.success'),
+        text2: t('screens.group.member_role_updated'),
         type: 'success',
       });
 
@@ -507,12 +511,19 @@ export const GroupDetailScreen = () => {
     } catch (error) {
       loggingService.error('Error changing member role', error);
       showToast({
-        text1: 'Error',
-        text2: 'Failed to update member role',
+        text1: t('common.error'),
+        text2: t('errors.general.something_wrong'),
         type: 'error',
       });
     }
-  }, [selectedMember, selectedRole, groupId, changeMemberRole, refetchGroup]);
+  }, [
+    selectedMember,
+    selectedRole,
+    groupId,
+    changeMemberRole,
+    refetchGroup,
+    t,
+  ]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -571,9 +582,9 @@ export const GroupDetailScreen = () => {
   );
 
   const renderDescription = () => {
-    const description = group?.description || 'No description available';
+    const description = group?.description || t('screens.group.no_description');
 
-    if (!description || description === 'No description available') {
+    if (!description || description === t('screens.group.no_description')) {
       return <BodySmall style={styles.description}>{description}</BodySmall>;
     }
 
@@ -582,7 +593,7 @@ export const GroupDetailScreen = () => {
         <TouchableOpacity onPress={toggleDescription}>
           <BodySmall style={styles.description}>{description}</BodySmall>
           <BodySmall align="center" weight="bold" color={colors.neutral.black}>
-            Show less
+            {t('screens.group.show_less')}
           </BodySmall>
         </TouchableOpacity>
       );
@@ -599,7 +610,7 @@ export const GroupDetailScreen = () => {
         <BodySmall style={styles.description}>{truncatedDescription}</BodySmall>
         {description.length > 100 && (
           <BodySmall align="center" weight="bold" color={colors.neutral.black}>
-            Read more
+            {t('screens.group.read_more')}
           </BodySmall>
         )}
       </TouchableOpacity>
@@ -654,12 +665,12 @@ export const GroupDetailScreen = () => {
         items.unshift(
           {
             id: 'edit',
-            label: 'Edit',
+            label: t('common.edit'),
             icon: 'pen',
           },
           {
             id: 'delete',
-            label: 'Delete',
+            label: t('common.delete'),
             icon: 'trash',
             isHighlighted: true,
           },
@@ -667,7 +678,7 @@ export const GroupDetailScreen = () => {
       } else {
         items.push({
           id: 'report',
-          label: 'Report',
+          label: t('screens.post.report_post'),
           icon: 'error',
           isHighlighted: true,
         });
@@ -675,7 +686,7 @@ export const GroupDetailScreen = () => {
 
       return items;
     },
-    [],
+    [t],
   );
 
   // Handle dropdown menu item selection for posts
@@ -711,30 +722,34 @@ export const GroupDetailScreen = () => {
       if (isAdmin) {
         items.push({
           id: 'edit_group',
-          label: 'Edit Group',
+          label: t('screens.group.edit_group'),
           icon: 'pen-filled',
         });
       }
 
       if (isMember) {
-        items.push({id: 'members', label: 'Members', icon: 'users-filled'});
+        items.push({
+          id: 'members',
+          label: t('screens.group.members'),
+          icon: 'users-filled',
+        });
         items.push({
           id: 'leave_group',
-          label: 'Leave Group',
+          label: t('screens.group.leave_group'),
           icon: 'users-slash-filled',
           isHighlighted: true,
         });
       } else {
         items.push({
           id: 'join_group',
-          label: 'Join Group',
+          label: t('screens.group.join_group'),
           icon: 'user-plus-filled',
         });
       }
 
       return items;
     },
-    [],
+    [t],
   );
 
   const handleJoinGroup = useCallback(
@@ -745,8 +760,8 @@ export const GroupDetailScreen = () => {
       ) {
         loggingService.info(`Group: ${groupId} is full. Cannot join.`);
         showToast({
-          text1: 'Warning',
-          text2: 'Group is full. Cannot join.',
+          text1: t('common.error'),
+          text2: t('screens.group.group_full'),
           type: 'warning',
         });
         return;
@@ -764,8 +779,8 @@ export const GroupDetailScreen = () => {
                 if (_group?.privacy === 'PUBLIC') {
                   loggingService.info(`Successfully joined group: ${groupId}`);
                   showToast({
-                    text1: 'Success',
-                    text2: 'You have successfully joined the group!',
+                    text1: t('common.success'),
+                    text2: t('screens.group.join_success'),
                     type: 'success',
                   });
                 } else {
@@ -773,8 +788,8 @@ export const GroupDetailScreen = () => {
                     `Successfully requested to join group: ${groupId}`,
                   );
                   showToast({
-                    text1: 'Success',
-                    text2: 'Request sent. Please wait for approval.',
+                    text1: t('common.success'),
+                    text2: t('screens.group.join_request_sent'),
                     type: 'success',
                   });
                 }
@@ -788,16 +803,16 @@ export const GroupDetailScreen = () => {
           } else {
             loggingService.error('Cannot join group: User not authenticated');
             showToast({
-              text1: 'Error',
-              text2: 'You must be logged in to join a group.',
+              text1: t('common.error'),
+              text2: t('errors.auth.unauthorized'),
               type: 'error',
             });
           }
         } catch (error) {
           loggingService.error(`Error joining group: ${groupId}`, error);
           showToast({
-            text1: 'Error',
-            text2: 'Failed to join the group. Please try again.',
+            text1: t('common.error'),
+            text2: t('errors.general.something_wrong'),
             type: 'error',
           });
         }
@@ -811,6 +826,7 @@ export const GroupDetailScreen = () => {
       group?.privacy,
       refetchGroup,
       user?.id,
+      t,
     ],
   );
 
@@ -1095,20 +1111,24 @@ export const GroupDetailScreen = () => {
               {group?.membersCapacity
                 ? ` / ${group?.membersCapacity}`
                 : ''}{' '}
-              members
+              {t('screens.group.member')}
             </Typography>
             <View style={styles.dot} />
             <View style={styles.lockContainer}>
               <Icon
                 name={
-                  group?.privacy === 'PUBLIC'
+                  group?.privacy === GroupPrivacy.PUBLIC
                     ? 'lock-open-filled'
                     : 'lock-filled'
                 }
                 size={18}
               />
               <Typography style={styles.infoText}>
-                {toPascalCase(group?.privacy || '')} Group
+                {
+                  EnumUtils.getGroupPrivacyOptions().find(
+                    option => option.value === group?.privacy,
+                  )?.label
+                }
               </Typography>
             </View>
           </View>
@@ -1116,12 +1136,12 @@ export const GroupDetailScreen = () => {
           <View style={styles.infoRow}>
             <Icon name="map-pin" size={18} />
             <Typography style={styles.infoText}>
-              {group?.city.value || 'No location'}
+              {group?.city.value || t('screens.group.no_location')}
             </Typography>
           </View>
 
           <View style={styles.tagsContainer}>
-            {group?.tags?.map((tag, index) => (
+            {EnumUtils.convertGroupTags(group?.tags || []).map((tag, index) => (
               <Chip
                 variant="outlined"
                 color="dark"
@@ -1165,7 +1185,9 @@ export const GroupDetailScreen = () => {
             {/* Upcoming Group Events Section */}
             <View style={styles.content}>
               <View style={styles.sectionHeaderContainer}>
-                <Title weight="bold">Upcoming Group Events</Title>
+                <Title weight="bold">
+                  {t('screens.group.upcoming_events')}
+                </Title>
               </View>
               <FlatList
                 ref={eventsListRef}
@@ -1195,7 +1217,7 @@ export const GroupDetailScreen = () => {
 
             {/* Recent Posts Section */}
             <View style={styles.content}>
-              <Title weight="bold">Recent Posts</Title>
+              <Title weight="bold">{t('screens.group.recent_posts')}</Title>
               {postsLoading ? (
                 <View style={styles.postsLoadingContainer}>
                   <ActivityIndicator size="large" />
@@ -1211,7 +1233,7 @@ export const GroupDetailScreen = () => {
               ) : (
                 <View style={styles.noPostsContainer}>
                   <Typography color={colors.neutral.grey}>
-                    No posts yet. Be the first to share something!
+                    {t('screens.group.no_posts_yet')}
                   </Typography>
                 </View>
               )}
@@ -1228,9 +1250,9 @@ export const GroupDetailScreen = () => {
         header={
           <View style={styles.membersHeader}>
             <View>
-              <Subtitle>Members</Subtitle>
+              <Subtitle>{t('screens.group.members')}</Subtitle>
               <Caption color={colors.neutral.grey}>
-                {members.length} people
+                {members.length} {t('screens.group.people')}
               </Caption>
             </View>
           </View>
@@ -1255,20 +1277,25 @@ export const GroupDetailScreen = () => {
         showCloseButton={true}
         enableGestureControl={false}
         closeButtonPosition="top-left"
-        header={<Subtitle align="center">Leave Group</Subtitle>}>
+        header={
+          <Subtitle align="center">{t('screens.group.leave_group')}</Subtitle>
+        }>
         <View style={styles.leaveGroupContent}>
           <BodySmall align="center">
-            Are you sure you want to leave "{group?.name}"?
+            {t('screens.group.leave_group_confirmation').replace(
+              '{0}',
+              group?.name || '',
+            )}
           </BodySmall>
           <View style={styles.leaveGroupButtonsContainer}>
             <Button
-              title="Cancel"
+              title={t('common.cancel')}
               variant="outline"
               onPress={() => leaveGroupBottomSheetRef.current?.close()}
               style={styles.leaveGroupButton}
             />
             <Button
-              title="Leave"
+              title={t('screens.group.leave_group')}
               variant="primary"
               textStyle={{color: colors.neutral.white}}
               onPress={confirmLeaveGroup}
@@ -1280,7 +1307,7 @@ export const GroupDetailScreen = () => {
 
       <Dialog
         ref={changeRoleDialogRef}
-        title="Change Member Role"
+        title={t('screens.group.change_role')}
         variant="custom">
         {selectedMember && (
           <View style={styles.changeRoleContent}>
@@ -1292,7 +1319,7 @@ export const GroupDetailScreen = () => {
               <ActivityIndicator size="small" color={colors.primary.main} />
             ) : (
               <Dropdown
-                label="Select Role"
+                label={t('screens.group.select_role')}
                 data={members as unknown as DropdownItem[]}
                 selectedItem={selectedMember as DropdownItem}
                 onSelect={handleRoleSelect}
@@ -1301,13 +1328,13 @@ export const GroupDetailScreen = () => {
 
             <View style={styles.dialogButtonsContainer}>
               <Button
-                title="Cancel"
+                title={t('common.cancel')}
                 variant="outline"
                 shape="round"
                 onPress={() => changeRoleDialogRef.current?.close()}
               />
               <Button
-                title="Change"
+                title={t('common.change')}
                 variant="primary"
                 shape="round"
                 textStyle={{color: colors.neutral.white}}
@@ -1321,20 +1348,22 @@ export const GroupDetailScreen = () => {
 
       <Dialog
         ref={removeMemberDialogRef}
-        title="Remove Member"
+        title={t('screens.group.remove_member')}
         message={
           memberToRemove
-            ? `Are you sure you want to remove ${memberToRemove.user.firstName} ${memberToRemove.user.lastName} from the group?`
-            : 'Are you sure you want to remove this member?'
+            ? t('screens.group.remove_member_confirmation', {
+                name: `${memberToRemove.user.firstName} ${memberToRemove.user.lastName}`,
+              })
+            : t('screens.group.remove_member_generic')
         }
         variant="confirm"
         confirmButton={{
-          text: 'Remove',
+          text: t('screens.group.remove'),
           variant: 'primary',
           onPress: handleRemoveMember,
         }}
         cancelButton={{
-          text: 'Cancel',
+          text: t('common.cancel'),
           variant: 'outline',
         }}
       />
