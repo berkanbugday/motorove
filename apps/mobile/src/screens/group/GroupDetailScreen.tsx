@@ -1280,24 +1280,27 @@ export const GroupDetailScreen = () => {
         header={
           <Subtitle align="center">{t('screens.group.leave_group')}</Subtitle>
         }>
-        <View style={styles.leaveGroupContent}>
-          <BodySmall align="center">
-            {t('screens.group.leave_group_confirmation').replace(
-              '{0}',
-              group?.name || '',
-            )}
-          </BodySmall>
+        <View style={styles.leaveGroupContainer}>
+          <View style={styles.leaveGroupContent}>
+            <BodySmall align="center">
+              {t('screens.group.leave_group_confirmation').replace(
+                '{0}',
+                group?.name || '',
+              )}
+            </BodySmall>
+          </View>
           <View style={styles.leaveGroupButtonsContainer}>
             <Button
               title={t('common.cancel')}
               variant="outline"
+              shape="round"
               onPress={() => leaveGroupBottomSheetRef.current?.close()}
-              style={styles.leaveGroupButton}
+              style={styles.cancelButton}
             />
             <Button
               title={t('screens.group.leave_group')}
               variant="primary"
-              textStyle={{color: colors.neutral.white}}
+              shape="round"
               onPress={confirmLeaveGroup}
               style={styles.leaveGroupButton}
             />
@@ -1316,7 +1319,7 @@ export const GroupDetailScreen = () => {
             </Subtitle>
 
             {loading ? (
-              <ActivityIndicator size="small" color={colors.primary.main} />
+              <ActivityIndicator size="small" />
             ) : (
               <Dropdown
                 label={t('screens.group.select_role')}
@@ -1572,16 +1575,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   leaveGroupContent: {
-    gap: spacing.xl,
-    paddingHorizontal: spacing.md,
+    flex: 1,
+  },
+  leaveGroupContainer: {
+    flex: 1,
   },
   leaveGroupButtonsContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.md,
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    // flex: 1,
+    marginRight: spacing.sm,
   },
   leaveGroupButton: {
-    flex: 1,
+    // flex: 1,
+    marginLeft: spacing.sm,
+    flexWrap: 'nowrap',
   },
   postsLoadingContainer: {
     paddingVertical: spacing.xl,

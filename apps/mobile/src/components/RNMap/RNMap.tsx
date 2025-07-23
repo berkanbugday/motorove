@@ -81,7 +81,7 @@ export const RNMap: React.FC<RNMapProps> = ({
   clusteringEnabled = false,
   clusteringRadius = 50,
   loadingIndicator = true,
-  loadingIndicatorColor = colors.primary.main,
+  loadingIndicatorColor = colors.neutral.black,
   showSearchBar = false,
   onSearchResultSelect,
   tags = [],
