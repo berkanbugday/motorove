@@ -2,12 +2,12 @@ import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   StyleSheet,
-  ScrollView,
   SafeAreaView,
   Image,
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -15,13 +15,15 @@ import {
   TopHeaderBar,
   AnimatedInput,
   Button,
-  Typography,
   Dropdown,
-  Chip,
   DropdownItem,
   showToast,
+  MultiSelectItem,
+  MultiSelect,
+  BodySmall,
+  Caption,
 } from '@components';
-import {colors, spacing, radius, getShadow} from '@theme';
+import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {
   groupSchemas,
@@ -29,70 +31,58 @@ import {
 } from '@utils/validation/groupValidation';
 import {loggingService} from '@services/logging.service';
 import {EnumUtils} from '@utils/enumUtils';
-import {
-  useUpdateGroup,
-  UpdateGroupInput,
-  useGetGroup,
-} from '@services/group.service';
+import {useUpdateGroup, useGetGroup} from '@services/group.service';
 import {useGetCities} from '@services/city.service';
-import {useGetGroupTags} from '@services/group-tag.service';
-import {useTranslation} from 'react-i18next';
+import {useTranslation} from '@hooks/useTranslation';
+import {GroupPrivacy, GroupTag, IUpdateGroup} from '@motorove/shared';
 
-// Since we can't modify the navigationTypes file directly in this example,
-// define a local type for the route params
 type EditGroupParams = {
   groupId: string;
 };
 
-// Note: Using Group type from the group service
-
-export const EditGroupScreen: React.FC = () => {
-  // We'll use 'any' for now to bypass the type checking, but in a real app
-  // you'd update the navigationTypes.ts file to include EditGroup
-  const navigation = useNavigation<any>();
+export const EditGroupScreen = () => {
+  const navigation = useNavigation();
   const route =
     useRoute<RouteProp<{EditGroup: EditGroupParams}, 'EditGroup'>>();
   const {groupId} = route.params;
   const {t} = useTranslation();
+  const formInitialized = useRef(false);
 
   const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
     null,
   );
   const [selectedCity, setSelectedCity] = useState<DropdownItem | null>(null);
-  const [selectedTags, setSelectedTags] = useState<
-    {id: string; value: string}[]
-  >([]);
+  const [selectedTags, setSelectedTags] = useState<MultiSelectItem[]>([]);
   const [logo, setLogo] = useState<string | null>(null);
   const [cover, setCover] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
 
-  // Track if data has been loaded to form
-  const isDataLoadedRef = useRef(false);
-  // Use service hooks
   const {cities, loading: citiesLoading} = useGetCities();
-  const privacyOptions = EnumUtils.getGroupPrivacyOptions();
+  const privacyOptions = EnumUtils.getGroupPrivacyOptions().filter(
+    option => option.value !== GroupPrivacy.ALL,
+  );
   const groupTags = EnumUtils.getGroupTags();
 
-  // Get group data using the group service
+  const tagOptions: MultiSelectItem[] = groupTags.map(tag => ({
+    id: tag.value,
+    label: tag.label,
+    value: tag.value,
+  }));
+
   const {
     group,
     loading: groupLoading,
     error: groupError,
   } = useGetGroup(groupId);
 
-  // Use group service hook for updating a group
   const {updateGroup: updateGroup, loading: updateGroupLoading} =
     useUpdateGroup(() => {
-      // On success callback
       setTimeout(() => {
         navigation.goBack();
       }, 1000);
     });
 
-  // Get schemas with translations
   const {updateGroupSchema} = groupSchemas(t);
 
-  // Setup form with Zod validation
   const {
     control,
     handleSubmit,
@@ -115,40 +105,36 @@ export const EditGroupScreen: React.FC = () => {
     mode: 'onChange',
   });
 
-  // Handle group fetch error
   useEffect(() => {
     if (groupError) {
       loggingService.error('Error fetching group data:', groupError);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to load group data',
+        text1: t('common.error'),
+        text2: t('error.group.fetch'),
       });
       navigation.goBack();
     }
-  }, [groupError, navigation]);
+  }, [groupError, navigation, t]);
 
-  // Populate form with existing group data only once when data is available
   useEffect(() => {
-    // Skip if data already loaded or still loading
-    if (isDataLoadedRef.current || groupLoading || !group) {
+    if (groupLoading || !group || formInitialized.current) {
       return;
     }
 
     try {
-      // Update form values in one go
       reset({
         id: groupId,
         name: group.name,
         description: group.description,
-        logo: group.logo,
-        cover: group.cover,
+        logo: group.logo || '',
+        cover: group.cover || '',
         city: group.city?.id || '',
         privacy: group.privacy || '',
         membersCapacity: group.membersCapacity
           ? group.membersCapacity.toString()
           : null,
-        tags: group.tags.map(tag => tag.id),
+        tags: group.tags,
       });
 
       // Set logo and cover preview
@@ -182,23 +168,18 @@ export const EditGroupScreen: React.FC = () => {
       if (group.tags && group.tags.length > 0) {
         setSelectedTags(
           group.tags.map(tag => ({
-            id: tag.id,
-            value: tag.value,
+            id: tag,
+            label: tagOptions.find(option => option.value === tag)?.label || '',
+            value: tag,
           })),
         );
       }
 
-      // Mark data as loaded to prevent further updates
-      isDataLoadedRef.current = true;
-      setInitialLoading(false);
+      formInitialized.current = true;
     } catch (error) {
       loggingService.error('Error populating form data:', error);
     }
-  }, [group, groupLoading, privacyOptions, reset]);
-
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
+  }, [group, groupId, groupLoading, privacyOptions, reset]);
 
   const handleSelectLogo = async () => {
     try {
@@ -216,8 +197,8 @@ export const EditGroupScreen: React.FC = () => {
         if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
           showToast({
             type: 'error',
-            text1: 'File too large',
-            text2: 'Please select an image smaller than 10MB',
+            text1: t('common.error'),
+            text2: t('screens.group.image_too_large'),
           });
           return;
         }
@@ -253,8 +234,8 @@ export const EditGroupScreen: React.FC = () => {
         if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
           showToast({
             type: 'error',
-            text1: 'File too large',
-            text2: 'Please select an image smaller than 10MB',
+            text1: t('common.error'),
+            text2: t('screens.group.image_too_large'),
           });
           return;
         }
@@ -274,32 +255,13 @@ export const EditGroupScreen: React.FC = () => {
     }
   };
 
-  const handleTagToggle = (tag: {id: string; value: string}) => {
-    if (selectedTags.some(t => t.id === tag.id)) {
-      const newTags = selectedTags.filter(t => t.id !== tag.id);
-      setSelectedTags(newTags);
-      setValue(
-        'tags',
-        newTags.map(t => t.id),
-        {shouldValidate: true},
-      );
-    } else {
-      if (selectedTags.length < 3) {
-        const newTags = [...selectedTags, tag];
-        setSelectedTags(newTags);
-        setValue(
-          'tags',
-          newTags.map(t => t.id),
-          {shouldValidate: true},
-        );
-      } else {
-        showToast({
-          type: 'warning',
-          text1: 'Limit Reached',
-          text2: 'You can select up to 3 tags',
-        });
-      }
-    }
+  const handleTagsChange = (items: MultiSelectItem[]) => {
+    setSelectedTags(items);
+    setValue(
+      'tags',
+      items.map(item => item.id.toString()),
+      {shouldValidate: true},
+    );
   };
 
   function handlePrivacySelect(item: DropdownItem | null) {
@@ -315,24 +277,18 @@ export const EditGroupScreen: React.FC = () => {
   const onSubmit = async (data: UpdateGroupFormValues) => {
     try {
       // Prepare form data for the group service
-      const updateGroupInput: UpdateGroupInput = {
-        id: data.id,
+      const updateGroupInput: IUpdateGroup = {
+        id: data.id || groupId,
         name: data.name,
         description: data.description,
         logo: data.logo,
         cover: data.cover,
-        city: {
-          id: selectedCity?.id as string,
-          value: selectedCity?.label as string,
-        },
-        privacy: selectedPrivacy?.value,
+        cityId: selectedCity?.id as string,
+        privacy: selectedPrivacy?.value as GroupPrivacy,
         membersCapacity: data.membersCapacity
           ? parseInt(data.membersCapacity, 10)
           : null,
-        tags: selectedTags.map(tag => ({
-          id: tag.id,
-          value: tag.value,
-        })),
+        tags: selectedTags.map(tag => tag.id.toString() as GroupTag),
       };
 
       // Call the group service updateGroup method
@@ -341,14 +297,13 @@ export const EditGroupScreen: React.FC = () => {
       loggingService.error('Error in onSubmit:', error);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to update group. Please try again.',
+        text1: t('common.error'),
+        text2: t('screens.group.error_updating_group'),
       });
     }
   };
 
-  // Show loading while fetching initial data
-  if (initialLoading || groupLoading) {
+  if (groupLoading) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" />
@@ -359,16 +314,19 @@ export const EditGroupScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Edit Group"
+        title={t('screens.group.edit_group')}
         showBackButton
         showShadow={false}
-        onBackPress={handleGoBack}
+        onBackPress={() => navigation.goBack()}
         containerStyle={styles.topHeaderBar}
       />
       <SafeAreaView style={styles.container}>
-        <ScrollView
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}>
+        <KeyboardAwareScrollView
+          snapToStart={true}
+          showsVerticalScrollIndicator={false}
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          keyboardShouldPersistTaps="handled">
           {/* Group Cover Image Selection - Moved to top */}
           <TouchableOpacity
             style={styles.coverContainer}
@@ -378,9 +336,9 @@ export const EditGroupScreen: React.FC = () => {
               <Image source={{uri: cover}} style={styles.cover} />
             ) : (
               <View style={styles.coverPlaceholder}>
-                <Typography variant="bodySmall" color={colors.neutral.grey}>
-                  Upload cover image
-                </Typography>
+                <BodySmall color={colors.neutral.grey}>
+                  {t('screens.group.upload_cover_photo')}
+                </BodySmall>
               </View>
             )}
           </TouchableOpacity>
@@ -394,144 +352,104 @@ export const EditGroupScreen: React.FC = () => {
                 <Image source={{uri: logo}} style={styles.logo} />
               ) : (
                 <View style={styles.placeholderContainer}>
-                  <Typography
-                    variant="caption"
-                    color={colors.neutral.grey}
-                    style={styles.uploadText}>
-                    Upload logo *
-                  </Typography>
+                  <Caption color={colors.neutral.grey} align="center">
+                    {t('screens.group.upload_logo')}
+                  </Caption>
                 </View>
               )}
             </TouchableOpacity>
+            {errors.logo && (
+              <Caption
+                color={colors.status.error}
+                style={{marginTop: spacing.xs}}
+                align="center">
+                {errors.logo.message}
+              </Caption>
+            )}
           </View>
-          <View style={styles.content}>
-            {/* Group Name */}
-            <View style={styles.formFields}>
-              <AnimatedInput
-                control={control}
-                name="name"
-                label="Group Name"
-                error={errors.name}
-              />
+          <View style={styles.formFields}>
+            <AnimatedInput
+              control={control}
+              name="name"
+              label={t('screens.group.group_name')}
+              error={errors.name}
+            />
 
-              {/* Group Description */}
-              <AnimatedInput
-                control={control}
-                name="description"
-                label="Description"
-                multiline
-                error={errors.description}
-              />
+            <AnimatedInput
+              control={control}
+              name="description"
+              label={t('screens.group.description')}
+              multiline
+              error={errors.description}
+            />
+            <MultiSelect
+              data={tagOptions}
+              label={t('screens.group.tags')}
+              selectedItems={selectedTags}
+              onSelectionChange={handleTagsChange}
+              maxSelectedItems={3}
+              error={errors.tags?.message}
+              maxHeight={200}
+            />
 
-              {/* City Dropdown */}
-              <Dropdown
-                data={cities.map(city => ({
-                  label: city.value,
-                  value: city.id,
-                  id: city.id,
-                }))}
-                label="City"
-                onSelect={item => {
-                  handleCitySelect(item);
-                }}
-                searchable={true}
-                selectedItem={selectedCity}
-                error={errors.city?.message}
-                loading={citiesLoading}
-              />
+            <Dropdown
+              data={cities.map(city => ({
+                label: city.value,
+                value: city.id,
+                id: city.id,
+              }))}
+              label={t('screens.group.city')}
+              onSelect={item => {
+                handleCitySelect(item);
+              }}
+              selectedItem={selectedCity}
+              error={errors.city?.message}
+              loading={citiesLoading}
+              showClearButton={false}
+            />
 
-              {/* Privacy Setting Dropdown */}
-              <Dropdown
-                data={privacyOptions}
-                label="Privacy"
-                placeholder="Select privacy"
-                onSelect={item => {
-                  handlePrivacySelect(item);
-                }}
-                searchable={false}
-                selectedItem={selectedPrivacy}
-                error={errors.privacy?.message}
-                loading={privacyLoading}
-              />
+            <Dropdown
+              data={privacyOptions}
+              label={t('screens.group.privacy')}
+              onSelect={item => {
+                handlePrivacySelect(item);
+              }}
+              selectedItem={selectedPrivacy}
+              error={errors.privacy?.message}
+              showClearButton={false}
+            />
 
-              {/* Max Members */}
-              <AnimatedInput
-                control={control}
-                name="membersCapacity"
-                label="Members Capacity (optional)"
-                error={errors.membersCapacity}
-                keyboardType="numeric"
-              />
-            </View>
-
-            {/* Tags Selection */}
-            <View style={styles.tagsSection}>
-              <Typography variant="bodySmall" style={styles.fieldLabel}>
-                Tags (Select up to 3)
-              </Typography>
-              {errors.tags && (
-                <Typography
-                  variant="caption"
-                  color={colors.status.error}
-                  style={styles.errorText}>
-                  {errors.tags.message}
-                </Typography>
-              )}
-              <View style={styles.tagsContainer}>
-                {groupTags.map(tag => (
-                  <Chip
-                    key={tag.id}
-                    label={tag.value}
-                    onPress={() => handleTagToggle(tag)}
-                    size="medium"
-                    variant={
-                      selectedTags.some(t => t.id === tag.id)
-                        ? 'filled'
-                        : 'outlined'
-                    }
-                    color="dark"
-                    style={styles.tagChip}
-                  />
-                ))}
-              </View>
-            </View>
+            <AnimatedInput
+              control={control}
+              name="membersCapacity"
+              label={t('screens.group.members_capacity')}
+              error={errors.membersCapacity}
+              keyboardType="numeric"
+            />
           </View>
-        </ScrollView>
-
-        {/* Update Button */}
-        <View style={styles.buttonContainer}>
-          <Button
-            title={updateGroupLoading ? 'Updating...' : 'Update Group'}
-            variant="dark"
-            size="medium"
-            shape="round"
-            onPress={handleSubmit(onSubmit)}
-            loading={updateGroupLoading}
-          />
-        </View>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
+      <View style={styles.buttonContainer}>
+        <Button
+          title={updateGroupLoading ? t('common.updating') : t('common.update')}
+          variant="dark"
+          size="medium"
+          shape="round"
+          onPress={handleSubmit(onSubmit)}
+          loading={updateGroupLoading}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
   },
   topHeaderBar: {
     borderBottomWidth: 1,
@@ -560,10 +478,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.sm,
   },
-  uploadText: {
-    marginTop: spacing.xs,
-    textAlign: 'center',
-  },
   coverContainer: {
     height: 150,
     overflow: 'hidden',
@@ -580,33 +494,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   formFields: {
-    marginTop: spacing.md,
     gap: spacing.lg,
-  },
-  fieldLabel: {
-    marginBottom: spacing.xs,
-    color: colors.neutral.darkGrey,
-  },
-  tagsSection: {
-    marginTop: spacing.lg,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: spacing.sm,
-  },
-  tagChip: {
-    marginRight: spacing.sm,
-    marginBottom: spacing.sm,
+    padding: spacing.md,
   },
   buttonContainer: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
-  },
-  errorText: {
-    marginBottom: spacing.xs,
   },
 });

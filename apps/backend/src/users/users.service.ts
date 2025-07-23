@@ -5,6 +5,7 @@ import { UserDto } from './dto/user.dto';
 import { UserFollowing } from '../user-followings/models/user-following.model';
 import { AccountSetupInput } from './dto/account-setup.input';
 import { StorageService } from '../core/storage/storage.service';
+import { CityDto } from '../cities/dto/city.dto';
 
 @Injectable()
 export class UsersService {
@@ -72,6 +73,7 @@ export class UsersService {
       lastName: user.lastName,
       avatar: user.avatar || undefined,
       isFollowing: followingIdsSet.has(user.id),
+      city: user.city as CityDto,
     }));
   }
 
@@ -89,6 +91,7 @@ export class UsersService {
       firstName: user.firstName,
       lastName: user.lastName,
       avatar: user.avatar || undefined,
+      city: user.city as CityDto,
     };
   }
 
@@ -133,6 +136,7 @@ export class UsersService {
       isFollowing: !!isFollowing,
       followerCount,
       followingCount,
+      city: user.city as CityDto,
     };
   }
 

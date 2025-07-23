@@ -45,8 +45,8 @@ export class User implements IUser {
   @Field(() => String, { nullable: true })
   cityId?: string;
 
-  @Field(() => City, { nullable: true })
-  city?: City;
+  @Field(() => City)
+  city: City;
 
   @Field(() => Date, { nullable: true })
   dateOfBirth?: Date;

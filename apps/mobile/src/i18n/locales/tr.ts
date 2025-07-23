@@ -61,7 +61,6 @@ export default {
     create_event: 'Etkinlik Oluştur',
     edit_event: 'Etkinlik Düzenle',
     event_details: 'Etkinlik Detayları',
-    create_group: 'Grup Oluştur',
     group_details: 'Grup Detayları',
     edit_profile: 'Profili Düzenle',
     post_details: 'Gönderi Detayları',

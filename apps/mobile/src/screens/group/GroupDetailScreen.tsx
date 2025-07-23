@@ -12,13 +12,6 @@ import {
 } from 'react-native';
 import {colors, commonStyles, getShadow, radius, rh, spacing} from '@theme';
 import {
-  BodySmall,
-  Caption,
-  Subtitle,
-  Title,
-  Typography,
-} from '@components/Typography';
-import {
   useNavigation,
   useRoute,
   RouteProp,
@@ -44,8 +37,12 @@ import {
   Dropdown,
   Dialog,
   DialogRef,
-  DropdownItem as ComponentDropdownItem,
   DropdownItem,
+  BodySmall,
+  Caption,
+  Subtitle,
+  Title,
+  Typography,
 } from '@components';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
@@ -58,7 +55,13 @@ import {
   useUnsavePost,
   useRemovePost,
 } from '@services/post.service';
-import {IPost, IGroup, Language, IAddress} from '@motorove/shared';
+import {
+  IPost,
+  IGroup,
+  Language,
+  IAddress,
+  GroupMemberRole,
+} from '@motorove/shared';
 import {relativeTime} from '@utils/dateUtils';
 import {toPascalCase} from '@utils/stringUtils';
 import {useAuth} from '@contexts';
@@ -72,16 +75,13 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {AuthUser} from '@app-types/auth.types';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
-// Helper function to format avatar URL from API data
 const formatAvatarSource = (imageUrl?: string) => {
   return imageUrl
     ? {uri: imageUrl}
     : require('@assets/images/default_avatar.png');
 };
 
-// Transform Post model to FeedCard props - matching HomeScreen implementation
 const transformPostToFeedCard = (post: IPost) => {
-  // Create labels from post data
   const labels = [];
 
   if (post.addresses && post.addresses.length > 0) {
@@ -118,7 +118,6 @@ const transformPostToFeedCard = (post: IPost) => {
   };
 };
 
-// Define event interface
 interface EventItem {
   id: string;
   day: string;
@@ -166,7 +165,6 @@ const upcomingEvents: EventItem[] = [
   },
 ];
 
-// Member item component with its own animation
 const MemberItem = React.memo(
   ({
     item,
@@ -238,7 +236,7 @@ const MemberItem = React.memo(
               {item.user.firstName} {item.user.lastName}
             </Typography>
             <View style={styles.memberRoleContainer}>
-              {item.role === 'ADMIN' && (
+              {item.role === GroupMemberRole.ADMIN && (
                 <Chip
                   variant="filled"
                   color="primary"
@@ -248,7 +246,7 @@ const MemberItem = React.memo(
                 />
               )}
 
-              {item.role === 'MEMBER' && (
+              {item.role === GroupMemberRole.MEMBER && (
                 <Chip
                   variant="filled"
                   color="secondary"
@@ -257,7 +255,9 @@ const MemberItem = React.memo(
                   style={styles.memberRole}
                 />
               )}
-              <Caption color={colors.neutral.grey}>İstanbul, Turkey</Caption>
+              <Caption color={colors.neutral.grey}>
+                {item.user.city?.value}
+              </Caption>
             </View>
           </View>
         </View>
@@ -857,7 +857,7 @@ export const GroupDetailScreen = () => {
   );
 
   // Handle role selection in dropdown
-  const handleRoleSelect = useCallback((item: ComponentDropdownItem | null) => {
+  const handleRoleSelect = useCallback((item: DropdownItem | null) => {
     // Convert the component dropdown item to our enum dropdown item type
     if (item) {
       const enumItem: DropdownItem = {
@@ -1294,7 +1294,7 @@ export const GroupDetailScreen = () => {
               <Dropdown
                 label="Select Role"
                 data={members as unknown as DropdownItem[]}
-                selectedItem={selectedMember as ComponentDropdownItem}
+                selectedItem={selectedMember as DropdownItem}
                 onSelect={handleRoleSelect}
               />
             )}

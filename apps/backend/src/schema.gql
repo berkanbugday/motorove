@@ -972,7 +972,7 @@ input UpdatePostInput {
 type User {
   avatar: String
   bio: String
-  city: City
+  city: City!
   cityId: String
   comments: [Comment!]
   createdAt: DateTime!
@@ -1007,6 +1007,7 @@ type User {
 
 type UserDto {
   avatar: String
+  city: CityDto
   email: String!
   firstName: String!
   followerCount: Int

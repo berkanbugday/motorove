@@ -4,10 +4,13 @@ import {
   IsEmail,
   IsInt,
   IsOptional,
+  ValidateNested,
   IsString,
   IsUUID,
 } from 'class-validator';
 import { IUser } from '@motorove/shared';
+import { CityDto } from 'src/cities/dto/city.dto';
+import { Type } from 'class-transformer';
 
 @ObjectType()
 export class UserDto implements IUser {
@@ -50,4 +53,9 @@ export class UserDto implements IUser {
   @IsOptional()
   @IsBoolean()
   isFollowing?: boolean;
+
+  @Field(() => CityDto, { nullable: true })
+  @ValidateNested()
+  @Type(() => CityDto)
+  city?: CityDto;
 }

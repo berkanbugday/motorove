@@ -54,7 +54,7 @@ export class GroupsService {
       }
 
       // Add privacy filter if provided
-      if (filters?.privacy && filters.privacy !== 'ALL') {
+      if (filters?.privacy && filters.privacy !== GroupPrivacy.ALL) {
         whereClause.privacy = filters.privacy;
       }
 
@@ -115,7 +115,7 @@ export class GroupsService {
           some: {
             userId,
             status: InvitationStatus.ACCEPTED,
-            ...(filters?.role && filters.role !== 'ALL'
+            ...(filters?.role && filters.role !== GroupMemberRole.ALL
               ? {
                   role: filters.role,
                 }
@@ -193,7 +193,11 @@ export class GroupsService {
               status: InvitationStatus.ACCEPTED,
             },
             include: {
-              user: true,
+              user: {
+                include: {
+                  city: true,
+                },
+              },
             },
           },
         },
@@ -336,42 +340,45 @@ export class GroupsService {
       // Extract update data from input
       const updateData = { ...input };
       const id = updateData.id;
-      // Use a separate variable instead of deleting
-      const updateDataWithoutId = { ...updateData };
-      delete (updateDataWithoutId as any).id;
+
+      delete (updateData as any).id;
 
       // Process images if provided
-      if (updateDataWithoutId.logo !== undefined) {
-        updateDataWithoutId.logo = await this.storageService.processImageUpload(
-          updateDataWithoutId.logo,
+      if (updateData.logo?.includes('base64')) {
+        updateData.logo = await this.storageService.processImageUpload(
+          updateData.logo,
           'groups/logos',
           `logo-${existingGroup.id}`,
           authToken,
         );
+      } else {
+        delete updateData.logo;
       }
 
-      if (updateDataWithoutId.cover !== undefined) {
-        updateDataWithoutId.cover =
-          await this.storageService.processImageUpload(
-            updateDataWithoutId.cover,
-            'groups/covers',
-            `cover-${existingGroup.id}`,
-            authToken,
-          );
+      if (updateData.cover?.includes('base64')) {
+        updateData.cover = await this.storageService.processImageUpload(
+          updateData.cover,
+          'groups/covers',
+          `cover-${existingGroup.id}`,
+          authToken,
+        );
+      } else {
+        delete updateData.cover;
       }
 
       // Build the update object
       const updateObject: any = {
-        ...updateDataWithoutId,
+        ...updateData,
         updatedBy: {
           connect: { id: userId },
         },
+        updatedAt: new Date(),
       };
 
       // Handle cityId separately
-      if (updateDataWithoutId.cityId) {
+      if (updateData.cityId) {
         updateObject.city = {
-          connect: { id: updateDataWithoutId.cityId },
+          connect: { id: updateData.cityId },
         };
         delete updateObject.cityId;
       }

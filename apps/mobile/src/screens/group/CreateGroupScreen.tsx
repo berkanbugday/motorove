@@ -33,7 +33,7 @@ import {useCreateGroup} from '@services/group.service';
 import {useGetCities} from '@services/city.service';
 import {EnumUtils} from '@utils/enumUtils';
 import {ICreateGroup, GroupPrivacy, GroupTag} from '@motorove/shared';
-import {useTranslation} from 'react-i18next';
+import {useTranslation} from '@hooks/useTranslation';
 
 export const CreateGroupScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -46,14 +46,12 @@ export const CreateGroupScreen: React.FC = () => {
   const [logo, setLogo] = useState<string | null>(null);
   const [cover, setCover] = useState<string | null>(null);
 
-  // Use enum utils and services
   const {cities, loading: citiesLoading} = useGetCities();
   const privacyOptions = EnumUtils.getGroupPrivacyOptions().filter(
     option => option.value !== GroupPrivacy.ALL,
   );
   const groupTags = EnumUtils.getGroupTags();
 
-  // Transform group tags to MultiSelectItem format
   const tagOptions: MultiSelectItem[] = groupTags.map(tag => ({
     id: tag.value,
     label: tag.label,

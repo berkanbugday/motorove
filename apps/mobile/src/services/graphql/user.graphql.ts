@@ -1,4 +1,5 @@
 import {gql} from '@apollo/client';
+import {CITY_FRAGMENT} from './city.graphql';
 
 // User fragment
 export const USER_FRAGMENT = gql`
@@ -12,7 +13,11 @@ export const USER_FRAGMENT = gql`
     followerCount
     followingCount
     isFollowing
+    city {
+      ...CityFragment
+    }
   }
+  ${CITY_FRAGMENT}
 `;
 
 // Queries
