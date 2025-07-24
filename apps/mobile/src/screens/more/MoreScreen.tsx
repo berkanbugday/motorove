@@ -116,8 +116,7 @@ export const MoreScreen = () => {
           ),
           title: t('screens.more.join_requests'),
           onPress: () => {
-            // Navigate to my events when implemented
-            // navigation.navigate('MyEvents');
+            navigation.navigate('JoinRequest');
           },
           showRightIcon: true,
         },

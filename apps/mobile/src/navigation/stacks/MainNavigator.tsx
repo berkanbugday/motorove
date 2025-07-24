@@ -9,6 +9,7 @@ import {
   GroupDetailScreen,
   EditGroupScreen,
   SearchGroupScreen,
+  JoinRequestScreen,
 } from '@screens/group';
 import {UserSearchScreen} from '@screens/userSearch';
 import {CreateEventScreen} from '@screens/event';
@@ -96,6 +97,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="JoinRequest"
+        component={JoinRequestScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

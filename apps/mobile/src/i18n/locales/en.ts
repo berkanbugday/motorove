@@ -41,6 +41,8 @@ export default {
     try_again: 'Try Again',
     english: 'English',
     turkish: 'Turkish',
+    accept: 'Accept',
+    reject: 'Reject',
   },
 
   // Main navigation items
@@ -350,6 +352,24 @@ export default {
       no_groups_found: 'No groups found',
     },
 
+    // Join Request screens
+    joinRequest: {
+      join_requests: 'Join Requests',
+      group_requests: 'Group Requests',
+      event_requests: 'Event Requests',
+      no_requests: 'No Pending Requests',
+      no_group_requests_yet:
+        'There are no pending group join requests at this time.',
+      no_event_requests_yet:
+        'There are no pending event join requests at this time.',
+      could_not_load_requests:
+        "We couldn't load join requests. Please try again.",
+      request_accepted: 'Request accepted successfully',
+      request_rejected: 'Request rejected successfully',
+      wants_to_join_group: 'wants to join this group',
+      wants_to_join_event: 'wants to join this event',
+    },
+
     // Profile screens
     profile: {
       edit_profile: 'Edit Profile',
@@ -444,7 +464,7 @@ export default {
       all_marked_as_read: 'All notifications marked as read',
       mark_all_read_failed: 'Failed to mark all notifications as read',
       no_notifications_to_delete: 'No notifications to delete',
-      mark_read: 'Mark Read',
+      mark_read: 'Read',
       no_notifications: 'No notifications',
       no_notifications_yet: "You don't have any notifications yet",
       delete_notification_title: 'Delete Notification',

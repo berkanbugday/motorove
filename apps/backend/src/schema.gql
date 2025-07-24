@@ -792,6 +792,7 @@ type Query {
   getLanguages: [EnumItem!]!
   getRoadTypes: [EnumItem!]!
   group(id: String!): GroupDto!
+  groupJoinRequests(limit: Int!, skip: Int!): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
   isFollowing(userId: ID!): Boolean!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!

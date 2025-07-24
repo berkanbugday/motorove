@@ -2,6 +2,9 @@ import {gql} from '@apollo/client';
 import {apolloClient} from '../configs/apolloClientConfig';
 import {CreateEventFormValues} from '@utils/validation';
 import {loggingService} from './logging.service';
+import {useTranslation} from 'react-i18next';
+import {useEffect, useState, useCallback} from 'react';
+import {showToast} from '@components';
 
 // Event fragments
 const EVENT_FRAGMENT = gql`
@@ -168,4 +171,81 @@ export const eventService = {
       return null;
     }
   },
+};
+
+// Hook to fetch event join requests
+export const useGetEventJoinRequests = () => {
+  const {t} = useTranslation();
+  const [hasMore] = useState(false);
+  const [joinRequests, setJoinRequests] = useState<any[]>([]);
+
+  // This would typically be a GraphQL query to fetch event join requests
+  // For now, we'll just return mock data since this API doesn't seem to exist yet
+
+  useEffect(() => {
+    // In a real implementation, this would be replaced with actual API calls
+    const mockRequests: any[] = [];
+    setJoinRequests(mockRequests);
+  }, []);
+
+  // Mock functions for accept/reject
+  const handleAccept = useCallback(
+    async (requestId: string) => {
+      try {
+        // Mock success response
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.joinRequest.request_accepted'),
+        });
+
+        // Update local state to remove this request
+        setJoinRequests(prev => prev.filter(item => item.id !== requestId));
+      } catch (error) {
+        loggingService.error('Error accepting join request:', error);
+      }
+    },
+    [t],
+  );
+
+  const handleReject = useCallback(
+    async (requestId: string) => {
+      try {
+        // Mock success response
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.joinRequest.request_rejected'),
+        });
+
+        // Update local state to remove this request
+        setJoinRequests(prev => prev.filter(item => item.id !== requestId));
+      } catch (error) {
+        loggingService.error('Error rejecting join request:', error);
+      }
+    },
+    [t],
+  );
+
+  // Mock refetch function
+  const refetch = useCallback(async () => {
+    // This would be a real refetch in a real implementation
+    return Promise.resolve();
+  }, []);
+
+  const loadMore = useCallback(async () => {
+    // This would be a real loadMore in a real implementation
+    return Promise.resolve();
+  }, []);
+
+  return {
+    joinRequests,
+    loading: false,
+    error: undefined,
+    refetch,
+    loadMore,
+    hasMore,
+    handleAccept,
+    handleReject,
+  };
 };

@@ -41,6 +41,8 @@ export default {
     try_again: 'Tekrar Dene',
     english: 'İngilizce',
     turkish: 'Türkçe',
+    accept: 'Kabul Et',
+    reject: 'Reddet',
   },
 
   // Main navigation items
@@ -348,6 +350,22 @@ export default {
       no_groups_found: 'Grup bulunamadı',
     },
 
+    // Join Request screens
+    joinRequest: {
+      join_requests: 'Katılım İstekleri',
+      group_requests: 'Grup İstekleri',
+      event_requests: 'Etkinlik İstekleri',
+      no_requests: 'Henüz İstek Yok',
+      no_group_requests_yet: 'Henüz grup katılım isteği yok.',
+      no_event_requests_yet: 'Henüz etkinlik katılım isteği yok.',
+      could_not_load_requests:
+        'Katılım istekleri yüklenemedi. Lütfen tekrar deneyin.',
+      request_accepted: 'Katılım isteği kabul edildi',
+      request_rejected: 'Katılım isteği reddedildi',
+      wants_to_join_group: 'bu gruba katılım istiyor',
+      wants_to_join_event: 'bu etkinliğe katılım istiyor',
+    },
+
     // Profile screens
     profile: {
       edit_profile: 'Profili Düzenle',
@@ -442,7 +460,7 @@ export default {
       all_marked_as_read: 'Tüm bildirimler okundu olarak işaretlendi',
       mark_all_read_failed: 'Tüm bildirimler okundu olarak işaretlenemedi',
       no_notifications_to_delete: 'Silinecek bildirim yok',
-      mark_read: 'Okundu olarak işaretle',
+      mark_read: 'Okundu',
       no_notifications: 'Bildirim yok',
       no_notifications_yet: 'Henüz hiç bildiriminiz yok',
       delete_notification_title: 'Bildirim Sil',

@@ -10,8 +10,10 @@ import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { NotificationsService } from '../notifications/notifications.service';
-// import { NotificationType } from '../enums/models/notification-type.enum';
-// import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { GroupMembershipDto } from './dto/group-membership.dto';
+import { plainToClass } from 'class-transformer';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
 export class GroupMembershipsService {
@@ -20,6 +22,24 @@ export class GroupMembershipsService {
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
   ) {}
+
+  async getGroupJoinRequests(
+    limit: number,
+    skip: number,
+  ): Promise<GroupMembershipDto[]> {
+    const groupJoinRequests = await this.prisma.groupMembership.findMany({
+      where: { status: InvitationStatus.PENDING },
+      skip,
+      take: limit,
+      include: {
+        user: true,
+      },
+    });
+
+    return groupJoinRequests.map((membership) =>
+      plainToClass(GroupMembershipDto, membership),
+    );
+  }
 
   async addMember(groupId: string, userId: string): Promise<boolean> {
     try {
@@ -218,24 +238,24 @@ export class GroupMembershipsService {
         },
       });
 
-      // if (updatedMembership.role === newRole) {
-      //   // Send notification to the user
-      //   await this.notificationsService.create(
-      //     {
-      //       userId,
-      //       title: 'Membership status updated',
-      //       body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
-      //       type: NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
-      //       channel: NotificationChannel.PUSH,
-      //       data: JSON.stringify({
-      //         groupId: updatedMembership.group.id,
-      //         groupName: updatedMembership.group.name,
-      //         role: newRole,
-      //       }),
-      //     },
-      //     userId,
-      //   );
-      // }
+      if (updatedMembership.role === newRole) {
+        // Send notification to the user
+        await this.notificationsService.create(
+          {
+            userId,
+            title: 'Membership status updated',
+            body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
+            type: NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
+            channel: NotificationChannel.PUSH,
+            data: JSON.stringify({
+              groupId: updatedMembership.group.id,
+              groupName: updatedMembership.group.name,
+              role: newRole,
+            }),
+          },
+          userId,
+        );
+      }
 
       return updatedMembership ? true : false;
     } catch (error) {
