@@ -11,7 +11,7 @@ input AccountSetupInput {
   ridingStyles: [RidingStyle!]
 }
 
-input AddGroupMemberInput {
+input AddMemberInput {
   groupId: ID!
   userId: ID!
 }
@@ -407,16 +407,7 @@ input FilterEventInput {
 input FilterGroupInput {
   cityId: String
   privacy: GroupPrivacy = ALL
-  role: GroupMemberRole = ALL
   tags: [GroupTag!]! = []
-}
-
-input FilterGroupMembershipInput {
-  groupId: String
-  isActive: Boolean
-  role: GroupMemberRole
-  status: InvitationStatus
-  userId: String
 }
 
 type Garage {
@@ -484,7 +475,6 @@ type GroupDto {
 """The role of a user in a group"""
 enum GroupMemberRole {
   ADMIN
-  ALL
   MEMBER
 }
 
@@ -583,10 +573,6 @@ enum Language {
   TR
 }
 
-input LeaveGroupInput {
-  groupId: String!
-}
-
 type Motorcycle {
   brand: String!
   createdAt: DateTime!
@@ -607,7 +593,7 @@ type Motorcycle {
 
 type Mutation {
   accountSetup(input: AccountSetupInput!): Boolean!
-  addMember(input: AddGroupMemberInput!): GroupMembershipDto!
+  addMember(input: AddMemberInput!): GroupMembershipDto!
   createAddress(input: CreateAddressInput!): AddressDto!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
   createComment(input: CreateCommentInput!): CommentDto!
@@ -620,7 +606,6 @@ type Mutation {
   followUser(userId: ID!): UserFollowingDto!
   joinEvent(id: ID!): EventDto!
   leaveEvent(id: ID!): EventDto!
-  leaveGroup(input: LeaveGroupInput!): GroupMembershipDto!
   likePost(postId: ID!): PostInteractionDto!
   markAllAsRead: [NotificationDto!]!
   markAsRead(id: ID!): NotificationDto!
@@ -629,7 +614,7 @@ type Mutation {
   removeComment(id: ID!): CommentDto!
   removeDeviceToken: Boolean!
   removeEvent(id: ID!): EventDto!
-  removeMember(input: RemoveGroupMemberInput!): GroupMembershipDto!
+  removeMember(input: RemoveMemberInput!): GroupMembershipDto!
   removePost(id: ID!): PostDto!
   resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
@@ -643,8 +628,8 @@ type Mutation {
   updateComment(input: UpdateCommentInput!): CommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
+  updateInvitationStatus(input: UpdateInvitationStatusInput!): GroupMembershipDto!
   updateMemberRole(input: ChangeMemberRoleInput!): GroupMembershipDto!
-  updateMemberStatus(input: UpdateMembershipStatusInput!): GroupMembershipDto!
   updateNotificationPermission(input: UpdateNotificationPermissionInput!): Boolean!
   updatePassword(input: UpdatePasswordInput!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
@@ -805,8 +790,6 @@ type Query {
   getLanguages: [EnumItem!]!
   getRoadTypes: [EnumItem!]!
   group(id: String!): GroupDto!
-  groupMembership(id: ID!): GroupMembershipDto!
-  groupMemberships(filters: FilterGroupMembershipInput): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
   isFollowing(userId: ID!): Boolean!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
@@ -819,7 +802,7 @@ type Query {
   users(limit: Int, query: String, skip: Int): [UserDto!]!
 }
 
-input RemoveGroupMemberInput {
+input RemoveMemberInput {
   groupId: ID!
   userId: ID!
 }
@@ -945,7 +928,7 @@ input UpdateGroupInput {
   tags: [GroupTag!]
 }
 
-input UpdateMembershipStatusInput {
+input UpdateInvitationStatusInput {
   groupId: ID!
   status: InvitationStatus!
   userId: ID!

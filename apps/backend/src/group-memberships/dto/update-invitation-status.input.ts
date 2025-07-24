@@ -1,12 +1,12 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IUpdateMembershipStatus } from '@motorove/shared';
+import { IUpdateInvitationStatus } from '@motorove/shared';
 import { InvitationStatus } from '../../enums/models/invitation-status.enum';
 import { BaseGroupMembershipInput } from './base-group-membership.input';
 
 @InputType()
-export class UpdateMembershipStatusInput
+export class UpdateInvitationStatusInput
   extends BaseGroupMembershipInput
-  implements IUpdateMembershipStatus
+  implements IUpdateInvitationStatus
 {
   @Field(() => InvitationStatus)
   status: InvitationStatus;

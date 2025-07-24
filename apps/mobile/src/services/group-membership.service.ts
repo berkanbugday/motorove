@@ -10,7 +10,6 @@ import {
   REMOVE_GROUP_MEMBER,
   LEAVE_GROUP,
   GROUP_MEMBERSHIP_FRAGMENT,
-  CHANGE_MEMBER_ROLE_FRAGMENT,
 } from './graphql/group-membership.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
@@ -84,7 +83,7 @@ export const useChangeMemberRole = () => {
               if (readField('id', memberRef) === changeMemberRole.id) {
                 return cache.writeFragment({
                   data: changeMemberRole,
-                  fragment: CHANGE_MEMBER_ROLE_FRAGMENT,
+                  fragment: GROUP_MEMBERSHIP_FRAGMENT,
                 });
               }
               return memberRef;
@@ -198,27 +197,3 @@ export const useLeaveGroup = () => {
     error,
   };
 };
-
-// Types for inputs
-export interface AddGroupMemberInput {
-  groupId: string;
-  userId: string;
-}
-
-export interface ChangeMemberRoleInput {
-  membershipId: string;
-  role: string;
-}
-
-export interface RemoveGroupMemberInput {
-  membershipId: string;
-}
-
-export interface UpdateGroupMembershipStatusInput {
-  membershipId: string;
-  status: string;
-}
-
-export interface LeaveGroupInput {
-  groupId: string;
-}

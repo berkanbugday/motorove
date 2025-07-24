@@ -57,20 +57,20 @@ export const GET_GROUPS = gql`
   ${GROUP_FRAGMENT}
 `;
 
-// Get group by ID query
-export const GET_GROUP = gql`
-  query GetGroup($id: String!) {
-    group(id: $id) {
+// Get user groups query
+export const GET_JOINED_GROUPS = gql`
+  query GetJoinedGroups($limit: Int, $skip: Int, $filters: FilterGroupInput) {
+    joinedGroups(limit: $limit, skip: $skip, filters: $filters) {
       ...GroupFragment
     }
   }
   ${GROUP_FRAGMENT}
 `;
 
-// Get user groups query
-export const GET_JOINED_GROUPS = gql`
-  query GetJoinedGroups($limit: Int, $skip: Int, $filters: FilterGroupInput) {
-    joinedGroups(limit: $limit, skip: $skip, filters: $filters) {
+// Get group by ID query
+export const GET_GROUP = gql`
+  query GetGroup($id: String!) {
+    group(id: $id) {
       ...GroupFragment
     }
   }

@@ -1,8 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from './models/user.model';
 import { UserDto } from './dto/user.dto';
-import { UserFollowing } from '../user-followings/models/user-following.model';
 import { AccountSetupInput } from './dto/account-setup.input';
 import { StorageService } from '../core/storage/storage.service';
 import { CityDto } from '../cities/dto/city.dto';
@@ -29,15 +27,7 @@ export class UsersService {
     }
 
     // Search for users by first or last name
-    const users = (await this.prisma.user.findMany({
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        avatar: true,
-        isActive: true,
-      },
+    const users = await this.prisma.user.findMany({
       where: {
         OR: [
           { firstName: { contains: searchQuery, mode: 'insensitive' } },
@@ -52,17 +42,20 @@ export class UsersService {
       take: limit,
       skip: skip,
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
-    })) as unknown as User[];
+      include: {
+        city: true,
+      },
+    });
 
     // Get all users that the current user is following
-    const userFollowings = (await this.prisma.userFollowing.findMany({
+    const userFollowings = await this.prisma.userFollowing.findMany({
       where: {
         followerId: currentUserId,
         followingId: {
           in: users.map((user) => user.id),
         },
       },
-    })) as unknown as UserFollowing[];
+    });
 
     // Create a set of following IDs for efficient lookup
     const followingIdsSet = new Set(userFollowings.map((uf) => uf.followingId));
@@ -78,9 +71,12 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<UserDto> {
-    const user = (await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id },
-    })) as unknown as User;
+      include: {
+        city: true,
+      },
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -96,37 +92,40 @@ export class UsersService {
   }
 
   async userProfile(userId: string, currentUserId: string): Promise<UserDto> {
-    const user = (await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
-    })) as unknown as User;
+      include: {
+        city: true,
+      },
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     // Check if current user is following the requested user
-    const isFollowing = (await this.prisma.userFollowing.findUnique({
+    const isFollowing = await this.prisma.userFollowing.findUnique({
       where: {
         followerId_followingId: {
           followerId: currentUserId,
           followingId: userId,
         },
       },
-    })) as unknown as UserFollowing;
+    });
 
     // Count followers
-    const followerCount = (await this.prisma.userFollowing.count({
+    const followerCount = await this.prisma.userFollowing.count({
       where: {
         followingId: userId,
       },
-    })) as unknown as number;
+    });
 
     // Count following
-    const followingCount = (await this.prisma.userFollowing.count({
+    const followingCount = await this.prisma.userFollowing.count({
       where: {
         followerId: userId,
       },
-    })) as unknown as number;
+    });
 
     return {
       ...user,

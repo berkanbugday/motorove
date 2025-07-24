@@ -1,8 +1,8 @@
 import { InputType } from '@nestjs/graphql';
 import { BaseGroupMembershipInput } from './base-group-membership.input';
-import { IRemoveGroupMember } from '@motorove/shared';
+import { IAddMember } from '@motorove/shared';
 
 @InputType()
-export class RemoveGroupMemberInput
+export class AddMemberInput
   extends BaseGroupMembershipInput
-  implements IRemoveGroupMember {}
+  implements IAddMember {}

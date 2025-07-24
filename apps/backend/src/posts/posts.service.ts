@@ -17,7 +17,6 @@ import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { PostDto } from './dto/post.dto';
 import { AddressDto } from 'src/addresses/dto/address.dto';
 import { UserDto } from 'src/users/dto/user.dto';
-import { GroupMembership } from 'src/group-memberships/models/group-membership.model';
 import { PostInteractionDto } from './dto/post-interaction.dto';
 
 @Injectable()
@@ -38,7 +37,7 @@ export class PostsService {
     authToken?: string,
   ): Promise<PostDto[]> {
     try {
-      const posts = (await this.prisma.post.findMany({
+      const posts = await this.prisma.post.findMany({
         where: {
           ...(groupId && { groupId }),
           ...(createdById && { createdById }),
@@ -52,7 +51,7 @@ export class PostsService {
         take: limit || undefined,
         skip: skip || undefined,
         orderBy: { createdAt: 'desc' },
-      })) as unknown as Post[];
+      });
 
       const postsWithGroupMembership = await Promise.all(
         posts.map(async (post) => {
@@ -60,7 +59,7 @@ export class PostsService {
             const isGroupMember = await this.prisma.groupMembership.findUnique({
               where: {
                 groupId_userId: {
-                  groupId: post.group.id!,
+                  groupId: post.group.id,
                   userId: currentUserId,
                 },
               },
@@ -74,7 +73,7 @@ export class PostsService {
               return null;
             }
           }
-          return this.mapToDto(post, currentUserId, authToken);
+          return this.mapToDto(post as Post, currentUserId, authToken);
         }),
       );
 
@@ -90,7 +89,7 @@ export class PostsService {
     currentUserId?: string,
     authToken?: string,
   ): Promise<PostDto> {
-    const post = (await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id },
       include: {
         createdBy: true,
@@ -114,13 +113,13 @@ export class PostsService {
           orderBy: { createdAt: 'desc' },
         },
       },
-    })) as unknown as Post;
+    });
 
     if (!post || !post.isActive) {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
 
-    return this.mapToDto(post, currentUserId, authToken);
+    return this.mapToDto(post as Post, currentUserId, authToken);
   }
 
   async createPost(
@@ -160,14 +159,14 @@ export class PostsService {
     // Add optional fields if they exist
     if (input.groupId) {
       // Check if user is a member of the group
-      const membership = (await this.prisma.groupMembership.findUnique({
+      const membership = await this.prisma.groupMembership.findUnique({
         where: {
           groupId_userId: {
             groupId: input.groupId,
             userId,
           },
         },
-      })) as unknown as GroupMembership;
+      });
 
       if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
         throw new ForbiddenException(
@@ -178,7 +177,7 @@ export class PostsService {
       postData.groupId = input.groupId;
     }
 
-    const createdPost = (await this.prisma.post.create({
+    const createdPost = await this.prisma.post.create({
       data: postData,
       include: {
         createdBy: true,
@@ -187,7 +186,7 @@ export class PostsService {
         addresses: true,
         comments: true,
       },
-    })) as unknown as Post;
+    });
 
     // Create addresses if provided
     if (input.addresses && input.addresses.length > 0) {
@@ -203,7 +202,7 @@ export class PostsService {
       });
 
       // Fetch the post again with addresses included
-      const postWithAddresses = (await this.prisma.post.findUnique({
+      const postWithAddresses = await this.prisma.post.findUnique({
         where: { id: createdPost.id },
         include: {
           createdBy: true,
@@ -212,12 +211,12 @@ export class PostsService {
           addresses: true,
           comments: true,
         },
-      })) as unknown as Post;
+      });
 
-      return this.mapToDto(postWithAddresses, userId, authToken);
+      return this.mapToDto(postWithAddresses as Post, userId, authToken);
     }
 
-    return this.mapToDto(createdPost, userId, authToken);
+    return this.mapToDto(createdPost as Post, userId, authToken);
   }
 
   async updatePost(
@@ -225,7 +224,7 @@ export class PostsService {
     userId: string,
     authToken?: string,
   ): Promise<PostDto> {
-    const post = (await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id: input.id },
       include: {
         createdBy: true,
@@ -240,7 +239,7 @@ export class PostsService {
           },
         },
       },
-    })) as unknown as Post;
+    });
 
     if (!post || !post.isActive) {
       throw new NotFoundException(`Post with ID ${input.id} not found`);
@@ -261,14 +260,14 @@ export class PostsService {
 
     // If trying to change the group, verify membership in the new group
     if (input.groupId) {
-      const membership = (await this.prisma.groupMembership.findUnique({
+      const membership = await this.prisma.groupMembership.findUnique({
         where: {
           groupId_userId: {
             groupId: input.groupId,
             userId,
           },
         },
-      })) as unknown as GroupMembership;
+      });
 
       if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
         throw new ForbiddenException(
@@ -318,7 +317,7 @@ export class PostsService {
       updateData.images = processedImages.filter(Boolean);
     }
 
-    const updatedPost = (await this.prisma.post.update({
+    const updatedPost = await this.prisma.post.update({
       where: { id: input.id },
       data: updateData,
       include: {
@@ -328,7 +327,7 @@ export class PostsService {
         addresses: true,
         comments: true,
       },
-    })) as unknown as Post;
+    });
 
     // Update addresses if provided
     // Delete existing addresses
@@ -352,7 +351,7 @@ export class PostsService {
       }
 
       // Fetch the post again with addresses included
-      const postWithAddresses = (await this.prisma.post.findUnique({
+      const postWithAddresses = await this.prisma.post.findUnique({
         where: { id: input.id },
         include: {
           createdBy: true,
@@ -361,12 +360,12 @@ export class PostsService {
           addresses: true,
           comments: true,
         },
-      })) as unknown as Post;
+      });
 
-      return this.mapToDto(postWithAddresses, userId, authToken);
+      return this.mapToDto(postWithAddresses as Post, userId, authToken);
     }
 
-    return this.mapToDto(updatedPost, userId, authToken);
+    return this.mapToDto(updatedPost as Post, userId, authToken);
   }
 
   async removePost(
@@ -374,7 +373,7 @@ export class PostsService {
     userId: string,
     authToken?: string,
   ): Promise<PostDto> {
-    const post = (await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id },
       include: {
         createdBy: true,
@@ -389,7 +388,7 @@ export class PostsService {
           },
         },
       },
-    })) as unknown as Post;
+    });
 
     if (!post || !post.isActive) {
       throw new NotFoundException(`Post with ID ${id} not found`);
@@ -408,7 +407,7 @@ export class PostsService {
       );
     }
 
-    const deletedPost = (await this.prisma.post.update({
+    const deletedPost = await this.prisma.post.update({
       where: { id },
       data: { isActive: false, updatedById: userId, updatedAt: new Date() },
       include: {
@@ -417,23 +416,23 @@ export class PostsService {
         group: true,
         comments: true,
       },
-    })) as unknown as Post;
+    });
 
-    return this.mapToDto(deletedPost, userId, authToken);
+    return this.mapToDto(deletedPost as Post, userId, authToken);
   }
 
   async likePost(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = (await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id: postId },
-    })) as unknown as Post;
+    });
 
     if (!post || !post.isActive) {
       throw new NotFoundException(`Post with ID ${postId} not found`);
     }
 
     // Check if user has already liked the post
-    const existingLike = (await this.prisma.postLike.findUnique({
+    const existingLike = await this.prisma.postLike.findUnique({
       where: {
         postId_userId: {
           postId,
@@ -444,14 +443,14 @@ export class PostsService {
         post: true,
         user: true,
       },
-    })) as unknown as PostLike;
+    });
 
     if (existingLike) {
-      return this.mapToInteractionDto(existingLike);
+      return this.mapToInteractionDto(existingLike as PostLike);
     }
 
     // Create the like
-    const newLike = (await this.prisma.postLike.create({
+    const newLike = await this.prisma.postLike.create({
       data: {
         postId,
         userId,
@@ -460,9 +459,9 @@ export class PostsService {
         post: true,
         user: true,
       },
-    })) as unknown as PostLike;
+    });
 
-    return this.mapToInteractionDto(newLike);
+    return this.mapToInteractionDto(newLike as PostLike);
   }
 
   async unlikePost(
@@ -470,53 +469,53 @@ export class PostsService {
     userId: string,
   ): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = (await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id: postId },
-    })) as unknown as Post;
+    });
 
     if (!post || !post.isActive) {
       throw new NotFoundException(`Post with ID ${postId} not found`);
     }
 
     // Check if user has liked the post
-    const existingLike = (await this.prisma.postLike.findUnique({
+    const existingLike = await this.prisma.postLike.findUnique({
       where: {
         postId_userId: {
           postId,
           userId,
         },
       },
-    })) as unknown as PostLike;
+    });
 
     if (!existingLike) {
       throw new NotFoundException(`Like not found`);
     }
 
     // Delete the like
-    const deletedLike = (await this.prisma.postLike.delete({
+    const deletedLike = await this.prisma.postLike.delete({
       where: {
         postId_userId: {
           postId,
           userId,
         },
       },
-    })) as unknown as PostLike;
+    });
 
-    return this.mapToInteractionDto(deletedLike);
+    return this.mapToInteractionDto(deletedLike as PostLike);
   }
 
   async savePost(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = (await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id: postId },
-    })) as unknown as Post;
+    });
 
     if (!post || !post.isActive) {
       throw new NotFoundException(`Post with ID ${postId} not found`);
     }
 
     // Check if user has already saved the post
-    const existingSave = (await this.prisma.postSave.findUnique({
+    const existingSave = await this.prisma.postSave.findUnique({
       where: {
         postId_userId: {
           postId,
@@ -527,14 +526,14 @@ export class PostsService {
         post: true,
         user: true,
       },
-    })) as unknown as PostSave;
+    });
 
     if (existingSave) {
-      return this.mapToInteractionDto(existingSave);
+      return this.mapToInteractionDto(existingSave as PostSave);
     }
 
     // Create the save
-    const newSave = (await this.prisma.postSave.create({
+    const newSave = await this.prisma.postSave.create({
       data: {
         postId,
         userId,
@@ -543,9 +542,9 @@ export class PostsService {
         post: true,
         user: true,
       },
-    })) as unknown as PostSave;
+    });
 
-    return this.mapToInteractionDto(newSave);
+    return this.mapToInteractionDto(newSave as PostSave);
   }
 
   async unsavePost(
@@ -553,39 +552,39 @@ export class PostsService {
     userId: string,
   ): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = (await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id: postId },
-    })) as unknown as Post;
+    });
 
     if (!post || !post.isActive) {
       throw new NotFoundException(`Post with ID ${postId} not found`);
     }
 
     // Check if user has saved the post
-    const existingSave = (await this.prisma.postSave.findUnique({
+    const existingSave = await this.prisma.postSave.findUnique({
       where: {
         postId_userId: {
           postId,
           userId,
         },
       },
-    })) as unknown as PostSave;
+    });
 
     if (!existingSave) {
       throw new NotFoundException(`Save not found`);
     }
 
     // Delete the save
-    const deletedSave = (await this.prisma.postSave.delete({
+    const deletedSave = await this.prisma.postSave.delete({
       where: {
         postId_userId: {
           postId,
           userId,
         },
       },
-    })) as unknown as PostSave;
+    });
 
-    return this.mapToInteractionDto(deletedSave);
+    return this.mapToInteractionDto(deletedSave as PostSave);
   }
 
   // Process base64 image and upload to Supabase storage
@@ -644,35 +643,35 @@ export class PostsService {
     currentUserId?: string,
     authToken?: string,
   ): Promise<PostDto> {
-    const likesCount = (await this.prisma.postLike.count({
+    const likesCount = await this.prisma.postLike.count({
       where: { postId: prismaPost.id },
-    })) as unknown as number;
+    });
 
-    const commentsCount = (await this.prisma.comment.count({
+    const commentsCount = await this.prisma.comment.count({
       where: { postId: prismaPost.id, parentId: null },
-    })) as unknown as number;
+    });
 
     let isLiked = false;
     let isSaved = false;
 
     if (currentUserId) {
-      const like = (await this.prisma.postLike.findUnique({
+      const like = await this.prisma.postLike.findUnique({
         where: {
           postId_userId: {
             postId: prismaPost.id,
             userId: currentUserId,
           },
         },
-      })) as unknown as PostLike;
+      });
 
-      const save = (await this.prisma.postSave.findUnique({
+      const save = await this.prisma.postSave.findUnique({
         where: {
           postId_userId: {
             postId: prismaPost.id,
             userId: currentUserId,
           },
         },
-      })) as unknown as PostSave;
+      });
 
       isLiked = !!like;
       isSaved = !!save;
@@ -719,12 +718,12 @@ export class PostsService {
       content: prismaPost.content,
       images: processedImages,
       groupName: prismaPost.group?.name,
-      addresses: prismaPost.addresses as unknown as AddressDto[],
+      addresses: prismaPost.addresses as AddressDto[],
       likesCount,
       commentsCount,
       isLiked,
       isSaved,
-      createdBy: prismaPost.createdBy as unknown as UserDto,
+      createdBy: prismaPost.createdBy as UserDto,
       createdAt: prismaPost.createdAt,
     } as PostDto;
   }

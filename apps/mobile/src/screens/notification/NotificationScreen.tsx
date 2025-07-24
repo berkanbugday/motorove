@@ -83,7 +83,7 @@ export const NotificationScreen = () => {
   });
 
   // Safe cast to our Notification type
-  const notifications = apiNotifications as unknown as readonly INotification[];
+  const notifications = apiNotifications as readonly INotification[];
 
   const [refreshing, setRefreshing] = useState(false);
   const [existingUnreadNotifications, setExistingUnreadNotifications] =

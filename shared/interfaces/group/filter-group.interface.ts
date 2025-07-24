@@ -19,9 +19,4 @@ export interface IFilterGroup {
    * Optional tag IDs to filter by
    */
   tags?: string[] | null;
-
-  /**
-   * Optional role to filter by
-   */
-  role?: GroupMemberRole;
 }

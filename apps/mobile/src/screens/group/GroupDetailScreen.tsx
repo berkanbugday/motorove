@@ -1323,7 +1323,7 @@ export const GroupDetailScreen = () => {
             ) : (
               <Dropdown
                 label={t('screens.group.select_role')}
-                data={members as unknown as DropdownItem[]}
+                data={members as DropdownItem[]}
                 selectedItem={selectedMember as DropdownItem}
                 onSelect={handleRoleSelect}
               />

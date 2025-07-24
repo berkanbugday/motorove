@@ -18,7 +18,7 @@ export class UserFollowingsService {
     limit?: number,
     skip?: number,
   ): Promise<UserFollowingDto[]> {
-    const followers = (await this.prisma.userFollowing.findMany({
+    const followers = await this.prisma.userFollowing.findMany({
       where: {
         followingId: userId,
       },
@@ -27,9 +27,11 @@ export class UserFollowingsService {
       },
       take: limit,
       skip: skip,
-    })) as unknown as UserFollowing[];
+    });
 
-    return await Promise.all(followers.map((f) => this.mapToDto(f)));
+    return await Promise.all(
+      followers.map((f) => this.mapToDto(f as UserFollowing)),
+    );
   }
 
   // Get users that the given userId is following with pagination
@@ -38,7 +40,7 @@ export class UserFollowingsService {
     limit?: number,
     skip?: number,
   ): Promise<UserFollowingDto[]> {
-    const following = (await this.prisma.userFollowing.findMany({
+    const following = await this.prisma.userFollowing.findMany({
       where: {
         followerId: userId,
       },
@@ -47,9 +49,11 @@ export class UserFollowingsService {
       },
       take: limit,
       skip: skip,
-    })) as unknown as UserFollowing[];
+    });
 
-    return await Promise.all(following.map((f) => this.mapToDto(f)));
+    return await Promise.all(
+      following.map((f) => this.mapToDto(f as UserFollowing)),
+    );
   }
 
   async follow(
@@ -72,21 +76,21 @@ export class UserFollowingsService {
     }
 
     // Check if already following
-    const existingFollow = (await this.prisma.userFollowing.findUnique({
+    const existingFollow = await this.prisma.userFollowing.findUnique({
       where: {
         followerId_followingId: {
           followerId: currentUserId,
           followingId: userIdToFollow,
         },
       },
-    })) as unknown as UserFollowing;
+    });
 
     if (existingFollow) {
       throw new ConflictException('Already following this user');
     }
 
     // Create follow relationship
-    const follow = (await this.prisma.userFollowing.create({
+    const follow = await this.prisma.userFollowing.create({
       data: {
         followerId: currentUserId,
         followingId: userIdToFollow,
@@ -95,9 +99,9 @@ export class UserFollowingsService {
         follower: true,
         following: true,
       },
-    })) as unknown as UserFollowing;
+    });
 
-    return this.mapToDto(follow);
+    return this.mapToDto(follow as UserFollowing);
   }
 
   async unfollow(
@@ -105,21 +109,21 @@ export class UserFollowingsService {
     userIdToUnfollow: string,
   ): Promise<UserFollowingDto> {
     // Check if relationship exists
-    const userFollowing = (await this.prisma.userFollowing.findUnique({
+    const userFollowing = await this.prisma.userFollowing.findUnique({
       where: {
         followerId_followingId: {
           followerId: currentUserId,
           followingId: userIdToUnfollow,
         },
       },
-    })) as unknown as UserFollowing;
+    });
 
     if (!userFollowing) {
       throw new NotFoundException('Not following this user');
     }
 
     // Delete the follow relationship
-    const deletedUserFollowing = (await this.prisma.userFollowing.delete({
+    const deletedUserFollowing = await this.prisma.userFollowing.delete({
       where: {
         id: userFollowing.id,
       },
@@ -127,20 +131,20 @@ export class UserFollowingsService {
         follower: true,
         following: true,
       },
-    })) as unknown as UserFollowing;
+    });
 
-    return this.mapToDto(deletedUserFollowing);
+    return this.mapToDto(deletedUserFollowing as UserFollowing);
   }
 
   async isFollowing(followerId: string, followingId: string): Promise<boolean> {
-    const follow = (await this.prisma.userFollowing.findUnique({
+    const follow = await this.prisma.userFollowing.findUnique({
       where: {
         followerId_followingId: {
           followerId,
           followingId,
         },
       },
-    })) as unknown as UserFollowing;
+    });
 
     return !!follow;
   }

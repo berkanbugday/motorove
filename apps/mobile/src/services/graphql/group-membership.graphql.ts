@@ -64,7 +64,7 @@ export const GET_GROUP_MEMBERSHIP = gql`
 // Add a member to a group
 export const ADD_GROUP_MEMBER = gql`
   mutation AddGroupMember($input: AddGroupMemberInput!) {
-    addGroupMember(addGroupMemberInput: $input) {
+    addGroupMember(input: $input) {
       ...GroupMembershipFragment
     }
   }
@@ -74,7 +74,7 @@ export const ADD_GROUP_MEMBER = gql`
 // Change a member's role
 export const CHANGE_MEMBER_ROLE = gql`
   mutation ChangeMemberRole($input: ChangeMemberRoleInput!) {
-    changeMemberRole(changeMemberRoleInput: $input) {
+    changeMemberRole(input: $input) {
       ...GroupMembershipFragment
     }
   }
@@ -84,7 +84,7 @@ export const CHANGE_MEMBER_ROLE = gql`
 // Remove a member from a group
 export const REMOVE_GROUP_MEMBER = gql`
   mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
-    removeGroupMember(removeGroupMemberInput: $input) {
+    removeGroupMember(input: $input) {
       ...GroupMembershipFragment
     }
   }
@@ -94,7 +94,7 @@ export const REMOVE_GROUP_MEMBER = gql`
 // Leave a group
 export const LEAVE_GROUP = gql`
   mutation LeaveGroup($input: LeaveGroupInput!) {
-    leaveGroup(leaveGroupInput: $input) {
+    leaveGroup(input: $input) {
       ...GroupMembershipFragment
     }
   }

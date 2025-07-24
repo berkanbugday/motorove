@@ -12,7 +12,6 @@ import {
   ICreateGroup,
   IUpdateGroup,
   IFilterGroup,
-  GroupMemberRole,
   GroupPrivacy,
 } from '@motorove/shared';
 import {loggingService} from './logging.service';
@@ -139,7 +138,6 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     cityId: undefined,
     tags: [],
     privacy: GroupPrivacy.ALL,
-    role: GroupMemberRole.ALL,
   });
 
   const {
@@ -246,7 +244,6 @@ export const useGetGroups = (limit = 20, skip = 0) => {
     cityId: undefined,
     tags: [],
     privacy: GroupPrivacy.ALL,
-    role: GroupMemberRole.ALL,
   });
 
   const {

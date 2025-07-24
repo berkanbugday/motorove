@@ -34,7 +34,7 @@ export class CommentsService {
         ...(filters?.createdById && { createdById: filters.createdById }),
       };
 
-      const comments = (await this.prisma.comment.findMany({
+      const comments = await this.prisma.comment.findMany({
         where,
         include: {
           createdBy: true,
@@ -52,10 +52,10 @@ export class CommentsService {
         orderBy: { createdAt: 'desc' },
         skip: skip || undefined,
         take: limit || undefined,
-      })) as unknown as Comment[];
+      });
 
       return await Promise.all(
-        comments.map((comment) => this.mapToDto(comment)),
+        comments.map((comment) => this.mapToDto(comment as Comment)),
       );
     } catch (error) {
       this.logger.error(`Failed to get comments for post ${postId}`, error);
@@ -65,7 +65,7 @@ export class CommentsService {
 
   async findOne(id: string): Promise<CommentDto> {
     try {
-      const comment = (await this.prisma.comment.findUnique({
+      const comment = await this.prisma.comment.findUnique({
         where: { id },
         include: {
           createdBy: true,
@@ -86,13 +86,13 @@ export class CommentsService {
             orderBy: { createdAt: 'asc' },
           },
         },
-      })) as unknown as Comment;
+      });
 
       if (!comment || !comment.isActive) {
         throw new NotFoundException(`Comment with ID ${id} not found`);
       }
 
-      return this.mapToDto(comment);
+      return this.mapToDto(comment as Comment);
     } catch (error) {
       this.logger.error(`Failed to get comment with ID ${id}`, error);
       throw error;
@@ -150,7 +150,7 @@ export class CommentsService {
         }
       }
 
-      const comment = (await this.prisma.comment.create({
+      const comment = await this.prisma.comment.create({
         data: {
           content: input.content,
           postId: input.postId,
@@ -165,9 +165,9 @@ export class CommentsService {
           parent: true,
           replies: true,
         },
-      })) as unknown as Comment;
+      });
 
-      return this.mapToDto(comment);
+      return this.mapToDto(comment as Comment);
     } catch (error) {
       this.logger.error(`Failed to create comment`, error);
       throw error;
@@ -176,7 +176,7 @@ export class CommentsService {
 
   async update(input: UpdateCommentInput, userId: string): Promise<CommentDto> {
     try {
-      const comment = (await this.prisma.comment.findUnique({
+      const comment = await this.prisma.comment.findUnique({
         where: { id: input.id },
         include: {
           createdBy: true,
@@ -195,7 +195,7 @@ export class CommentsService {
             },
           },
         },
-      })) as unknown as Comment;
+      });
 
       if (!comment || !comment.isActive) {
         throw new NotFoundException(`Comment with ID ${input.id} not found`);
@@ -215,7 +215,7 @@ export class CommentsService {
         );
       }
 
-      const updatedComment = (await this.prisma.comment.update({
+      const updatedComment = await this.prisma.comment.update({
         where: { id: input.id },
         data: {
           ...input,
@@ -228,9 +228,9 @@ export class CommentsService {
           parent: true,
           replies: true,
         },
-      })) as unknown as Comment;
+      });
 
-      return this.mapToDto(updatedComment);
+      return this.mapToDto(updatedComment as Comment);
     } catch (error) {
       this.logger.error(`Failed to update comment`, error);
       throw error;
@@ -239,7 +239,7 @@ export class CommentsService {
 
   async remove(id: string, userId: string): Promise<CommentDto> {
     try {
-      const comment = (await this.prisma.comment.findUnique({
+      const comment = await this.prisma.comment.findUnique({
         where: { id },
         include: {
           createdBy: true,
@@ -258,7 +258,7 @@ export class CommentsService {
             },
           },
         },
-      })) as unknown as Comment;
+      });
 
       if (!comment || !comment.isActive) {
         throw new NotFoundException(`Comment with ID ${id} not found`);
@@ -278,7 +278,7 @@ export class CommentsService {
         );
       }
 
-      const deletedComment = (await this.prisma.comment.update({
+      const deletedComment = await this.prisma.comment.update({
         where: { id },
         data: { isActive: false, updatedById: userId },
         include: {
@@ -288,9 +288,9 @@ export class CommentsService {
           parent: true,
           replies: true,
         },
-      })) as unknown as Comment;
+      });
 
-      return this.mapToDto(deletedComment);
+      return this.mapToDto(deletedComment as Comment);
     } catch (error) {
       this.logger.error(`Failed to delete comment`, error);
       throw error;

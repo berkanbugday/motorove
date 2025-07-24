@@ -11,8 +11,6 @@ import { FilterAddressInput } from './dto/filter-address.input';
 import { AddressType } from '../enums/models/address-type.enum';
 import { Language } from '../enums/models/language.enum';
 import { Address } from './models/address.model';
-import { Post } from 'src/posts/models/post.model';
-import { Event } from 'src/events/models/event.model';
 import { AddressDto } from './dto/address.dto';
 import { plainToClass } from 'class-transformer';
 
@@ -27,7 +25,7 @@ export class AddressesService {
     filters?: FilterAddressInput,
   ): Promise<AddressDto[]> {
     try {
-      const addresses = (await this.prisma.address.findMany({
+      const addresses = await this.prisma.address.findMany({
         take: limit || undefined,
         skip: skip || undefined,
         where: {
@@ -40,10 +38,10 @@ export class AddressesService {
           post: true,
           event: true,
         },
-      })) as unknown as Address[];
+      });
 
       return await Promise.all(
-        addresses.map((address) => this.mapToDto(address)),
+        addresses.map((address) => this.mapToDto(address as Address)),
       );
     } catch (error) {
       this.logger.error(`Failed to get addresses`, error);
@@ -53,19 +51,19 @@ export class AddressesService {
 
   async findOne(id: string): Promise<AddressDto> {
     try {
-      const address = (await this.prisma.address.findUnique({
+      const address = await this.prisma.address.findUnique({
         where: { id },
         include: {
           post: true,
           event: true,
         },
-      })) as unknown as Address;
+      });
 
       if (!address) {
         throw new NotFoundException(`Address with ID ${id} not found`);
       }
 
-      return this.mapToDto(address);
+      return this.mapToDto(address as Address);
     } catch (error) {
       this.logger.error(`Failed to get address with ID ${id}`, error);
       throw error;
@@ -89,9 +87,9 @@ export class AddressesService {
 
       // If creating for a post, check if user owns the post
       if (input.postId) {
-        const post = (await this.prisma.post.findUnique({
+        const post = await this.prisma.post.findUnique({
           where: { id: input.postId },
-        })) as unknown as Post;
+        });
 
         if (!post) {
           throw new NotFoundException(`Post with ID ${input.postId} not found`);
@@ -106,9 +104,9 @@ export class AddressesService {
 
       // If creating for an event, check if user owns the event
       if (input.eventId) {
-        const event = (await this.prisma.event.findUnique({
+        const event = await this.prisma.event.findUnique({
           where: { id: input.eventId },
-        })) as unknown as Event;
+        });
 
         if (!event) {
           throw new NotFoundException(
@@ -124,7 +122,7 @@ export class AddressesService {
       }
 
       // Create the address with type-safe handling of latitude and longitude
-      const createdAddress = (await this.prisma.address.create({
+      const createdAddress = await this.prisma.address.create({
         data: {
           address: input.address,
           language: input.language,
@@ -134,9 +132,9 @@ export class AddressesService {
           post: input.postId ? { connect: { id: input.postId } } : undefined,
           event: input.eventId ? { connect: { id: input.eventId } } : undefined,
         },
-      })) as unknown as Address;
+      });
 
-      return this.mapToDto(createdAddress);
+      return this.mapToDto(createdAddress as Address);
     } catch (error) {
       this.logger.error(`Failed to create address`, error);
       throw error;
@@ -146,13 +144,13 @@ export class AddressesService {
   async update(input: UpdateAddressInput, userId: string): Promise<AddressDto> {
     try {
       // First, find the address to check ownership
-      const address = (await this.prisma.address.findUnique({
+      const address = await this.prisma.address.findUnique({
         where: { id: input.id },
         include: {
           post: true,
           event: true,
         },
-      })) as unknown as Address;
+      });
 
       if (!address) {
         throw new NotFoundException(`Address with ID ${input.id} not found`);
@@ -209,12 +207,12 @@ export class AddressesService {
       }
 
       // Update the address with the constructed data object
-      const updatedAddress = (await this.prisma.address.update({
+      const updatedAddress = await this.prisma.address.update({
         where: { id: input.id },
         data: updateData,
-      })) as unknown as Address;
+      });
 
-      return this.mapToDto(updatedAddress);
+      return this.mapToDto(updatedAddress as Address);
     } catch (error) {
       this.logger.error(`Failed to update address`, error);
       throw error;
@@ -224,24 +222,24 @@ export class AddressesService {
   async remove(id: string): Promise<AddressDto> {
     try {
       // Find address to check permissions
-      const address = (await this.prisma.address.findUnique({
+      const address = await this.prisma.address.findUnique({
         where: { id },
         include: {
           post: true,
           event: true,
         },
-      })) as unknown as Address;
+      });
 
       if (!address) {
         throw new NotFoundException(`Address with ID ${id} not found`);
       }
 
       // Delete the address
-      const deletedAddress = (await this.prisma.address.delete({
+      const deletedAddress = await this.prisma.address.delete({
         where: { id },
-      })) as unknown as Address;
+      });
 
-      return this.mapToDto(deletedAddress);
+      return this.mapToDto(deletedAddress as Address);
     } catch (error) {
       this.logger.error(`Failed to delete address`, error);
       throw error;

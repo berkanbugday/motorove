@@ -16,7 +16,6 @@ import { ExperienceLevel } from '../enums/models/experience-level.enum';
 import { EventDto } from './dto/event.dto';
 import { Event } from './models/event.model';
 import { plainToClass } from 'class-transformer';
-import { Group } from 'src/groups/models/group.model';
 
 @Injectable()
 export class EventsService {
@@ -36,7 +35,7 @@ export class EventsService {
     try {
       const where = this.buildFilterQuery(filters);
 
-      const events = (await this.prisma.event.findMany({
+      const events = await this.prisma.event.findMany({
         where,
         include: {
           createdBy: true,
@@ -50,11 +49,13 @@ export class EventsService {
         },
         take: limit || undefined,
         skip: skip || undefined,
-      })) as unknown as Event[];
+      });
 
       // Map events to GraphQL format with additional fields
       return await Promise.all(
-        events.map((event) => this.mapToDto(event, currentUserId, authToken)),
+        events.map((event) =>
+          this.mapToDto(event as Event, currentUserId, authToken),
+        ),
       );
     } catch (error) {
       this.logger.error(`Failed to get events`, error);
@@ -68,7 +69,7 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
-      const event = (await this.prisma.event.findUnique({
+      const event = await this.prisma.event.findUnique({
         where: { id },
         include: {
           createdBy: true,
@@ -82,14 +83,14 @@ export class EventsService {
             },
           },
         },
-      })) as unknown as Event;
+      });
 
       if (!event || !event.isActive) {
         throw new NotFoundException(`Event with ID ${id} not found`);
       }
 
       // Map event to GraphQL format with additional fields
-      return this.mapToDto(event, currentUserId, authToken);
+      return this.mapToDto(event as Event, currentUserId, authToken);
     } catch (error) {
       this.logger.error(`Failed to get event with ID ${id}`, error);
       throw error;
@@ -142,7 +143,7 @@ export class EventsService {
         ).filter(Boolean) as string[];
       }
 
-      const event = (await this.prisma.event.create({
+      const event = await this.prisma.event.create({
         data: {
           title,
           description,
@@ -191,7 +192,7 @@ export class EventsService {
           addresses: true,
           invitedGroups: true,
         },
-      })) as unknown as Event;
+      });
 
       return this.mapToDto(event, userId, authToken);
     } catch (error) {
@@ -255,18 +256,18 @@ export class EventsService {
       }
 
       // First get the current event to handle group relationships properly
-      const currentEvent = (await this.prisma.event.findUnique({
+      const currentEvent = await this.prisma.event.findUnique({
         where: { id },
         include: {
           invitedGroups: true,
         },
-      })) as unknown as Event;
+      });
 
       if (!currentEvent) {
         throw new NotFoundException(`Event with id ${id} not found`);
       }
 
-      const event = (await this.prisma.event.update({
+      const event = await this.prisma.event.update({
         where: { id },
         data: {
           title,
@@ -307,9 +308,9 @@ export class EventsService {
           // Handle invited groups if provided
           invitedGroups: invitedGroupIds?.length
             ? {
-                disconnect: currentEvent.invitedGroups?.map((group: Group) => ({
+                disconnect: currentEvent.invitedGroups?.map((group) => ({
                   id: group.id,
-                })),
+                })) as { id: string }[],
                 connect: invitedGroupIds.map((id) => ({ id })),
               }
             : undefined,
@@ -321,9 +322,9 @@ export class EventsService {
           participants: true,
           invitedGroups: true,
         },
-      })) as unknown as Event;
+      });
 
-      return this.mapToDto(event, userId, authToken);
+      return this.mapToDto(event as Event, userId, authToken);
     } catch (error) {
       this.logger.error(`Failed to update event`, error);
       throw error;
@@ -332,7 +333,7 @@ export class EventsService {
 
   async remove(id: string, userId: string): Promise<boolean> {
     try {
-      const event = (await this.prisma.event.update({
+      const event = await this.prisma.event.update({
         where: { id },
         data: {
           isActive: false,
@@ -346,7 +347,7 @@ export class EventsService {
           addresses: true,
           invitedGroups: true,
         },
-      })) as unknown as Event;
+      });
 
       return event.isActive === false;
     } catch (error) {
@@ -420,7 +421,7 @@ export class EventsService {
     try {
       const now = new Date();
 
-      const events = (await this.prisma.event.findMany({
+      const events = await this.prisma.event.findMany({
         where: {
           startDateTime: {
             gte: now,
@@ -474,11 +475,11 @@ export class EventsService {
           addresses: true,
           invitedGroups: true,
         },
-      })) as unknown as Event[];
+      });
 
       // Map events to GraphQL format with additional fields
       return await Promise.all(
-        events.map((event) => this.mapToDto(event, userId, authToken)),
+        events.map((event) => this.mapToDto(event as Event, userId, authToken)),
       );
     } catch (error) {
       this.logger.error(`Failed to get upcoming events`, error);

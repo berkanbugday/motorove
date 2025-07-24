@@ -11,11 +11,11 @@ export class CitiesService {
 
   async findAll(): Promise<CityDto[]> {
     try {
-      const cities = (await this.prisma.city.findMany({
+      const cities = await this.prisma.city.findMany({
         orderBy: {
           value: 'asc',
         },
-      })) as unknown as City[];
+      });
 
       return await Promise.all(cities.map((c) => this.mapToDto(c)));
     } catch (error) {
@@ -26,9 +26,9 @@ export class CitiesService {
 
   async findOne(id: string): Promise<CityDto> {
     try {
-      const city = (await this.prisma.city.findUnique({
+      const city = await this.prisma.city.findUnique({
         where: { id },
-      })) as unknown as City;
+      });
 
       if (!city) {
         throw new NotFoundException('City not found');

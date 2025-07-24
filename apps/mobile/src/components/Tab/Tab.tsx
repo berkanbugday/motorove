@@ -509,7 +509,7 @@ const getIconColor = (
   disabled?: boolean,
 ): string => {
   if (disabled) {
-    return styles.disabledTab.opacity as unknown as string;
+    return styles.disabledTab.opacity as string;
   }
 
   return isActive
@@ -523,7 +523,7 @@ const getTextColor = (
   disabled?: boolean,
 ): string => {
   if (disabled) {
-    return styles.disabledTab.opacity as unknown as string;
+    return styles.disabledTab.opacity as string;
   }
 
   return isActive

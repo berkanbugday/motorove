@@ -12,7 +12,7 @@ import {
 } from '@components';
 import {colors, spacing} from '@theme';
 import {useGetCities} from '@services/city.service';
-import {IFilterGroup, GroupPrivacy, GroupMemberRole} from '@motorove/shared';
+import {IFilterGroup, GroupPrivacy} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useTranslation} from '@hooks/useTranslation';
 
@@ -86,7 +86,6 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
       cityId: null,
       tags: [],
       privacy: GroupPrivacy.ALL,
-      role: GroupMemberRole.ALL,
     };
     setFilters(resetFilters);
     onApplyFilters(resetFilters);

@@ -441,8 +441,8 @@ model Group {
   createdById String
   createdBy   User     @relation("GroupCreatedBy", fields: [createdById], references: [id])
   createdAt   DateTime @default(now())
-  updatedById String
-  updatedBy   User     @relation("GroupUpdatedBy", fields: [updatedById], references: [id])
+  updatedById String?
+  updatedBy   User?    @relation("GroupUpdatedBy", fields: [updatedById], references: [id])
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
 
@@ -469,8 +469,8 @@ model GroupMembership {
   createdById String
   createdBy   User     @relation("MembershipCreatedBy", fields: [createdById], references: [id])
   createdAt   DateTime @default(now())
-  updatedById String
-  updatedBy   User     @relation("MembershipUpdatedBy", fields: [updatedById], references: [id])
+  updatedById String?
+  updatedBy   User?    @relation("MembershipUpdatedBy", fields: [updatedById], references: [id])
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
 
@@ -498,8 +498,8 @@ model Notification {
   createdById String
   createdBy   User     @relation("NotificationCreatedBy", fields: [createdById], references: [id])
   createdAt   DateTime @default(now())
-  updatedById String
-  updatedBy   User     @relation("NotificationUpdatedBy", fields: [updatedById], references: [id])
+  updatedById String?
+  updatedBy   User?    @relation("NotificationUpdatedBy", fields: [updatedById], references: [id])
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
 

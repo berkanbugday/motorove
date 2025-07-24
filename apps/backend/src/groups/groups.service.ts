@@ -9,7 +9,8 @@ import { FilterGroupInput } from './dto/filter-group.input';
 import { Group } from './models/group.model';
 import { GroupDto } from './dto/group.dto';
 import { plainToClass } from 'class-transformer';
-import { GroupPrivacy } from 'src/enums/models/group-privacy.enum';
+import { GroupPrivacy } from '../enums/models/group-privacy.enum';
+import { GroupTag } from '../enums/models/group-tag.enum';
 
 @Injectable()
 export class GroupsService {
@@ -60,7 +61,7 @@ export class GroupsService {
 
       // Skip tag filtering for now since it's causing issues with the enum
 
-      const groups = (await this.prisma.group.findMany({
+      const groups = await this.prisma.group.findMany({
         where: whereClause,
         include: {
           createdBy: true,
@@ -79,7 +80,7 @@ export class GroupsService {
         orderBy: {
           createdAt: 'desc', // Show newest groups first
         },
-      })) as unknown as Group[];
+      });
 
       // Filter manually by tags if needed
       let filteredGroups = groups;
@@ -88,12 +89,16 @@ export class GroupsService {
           // Make sure both arrays exist
           if (!group.tags || !filters.tags) return false;
           // Check if any tag from filters exists in group tags
-          return group.tags.some((tag) => filters.tags!.includes(tag));
+          return group.tags.some((tag) =>
+            filters.tags!.includes(tag as GroupTag),
+          );
         });
       }
 
       return await Promise.all(
-        filteredGroups.map(async (group) => this.mapToDto(group, authToken)),
+        filteredGroups.map(async (group) =>
+          this.mapToDto(group as Group, authToken),
+        ),
       );
     } catch (error) {
       this.logger.error(`Failed to get groups`, error);
@@ -115,11 +120,6 @@ export class GroupsService {
           some: {
             userId,
             status: InvitationStatus.ACCEPTED,
-            ...(filters?.role && filters.role !== GroupMemberRole.ALL
-              ? {
-                  role: filters.role,
-                }
-              : {}),
           },
         },
       };
@@ -136,7 +136,7 @@ export class GroupsService {
 
       // Skip tag filtering for now since it's causing issues with the enum
 
-      const groups = (await this.prisma.group.findMany({
+      const groups = await this.prisma.group.findMany({
         where: whereClause,
         include: {
           createdBy: true,
@@ -155,7 +155,7 @@ export class GroupsService {
         orderBy: {
           createdAt: 'desc', // Show newest groups first
         },
-      })) as unknown as Group[];
+      });
 
       // Filter manually by tags if needed
       let filteredGroups = groups;
@@ -164,12 +164,16 @@ export class GroupsService {
           // Make sure both arrays exist
           if (!group.tags || !filters.tags) return false;
           // Check if any tag from filters exists in group tags
-          return group.tags.some((tag) => filters.tags!.includes(tag));
+          return group.tags.some((tag) =>
+            filters.tags!.includes(tag as GroupTag),
+          );
         });
       }
 
       return await Promise.all(
-        filteredGroups.map(async (group) => this.mapToDto(group, authToken)),
+        filteredGroups.map(async (group) =>
+          this.mapToDto(group as Group, authToken),
+        ),
       );
     } catch (error) {
       this.logger.error(`Failed to get joined groups`, error);
@@ -183,7 +187,7 @@ export class GroupsService {
     authToken?: string,
   ): Promise<GroupDto> {
     try {
-      const group = (await this.prisma.group.findUnique({
+      const group = await this.prisma.group.findUnique({
         where: { id, isActive: true },
         include: {
           createdBy: true,
@@ -201,13 +205,13 @@ export class GroupsService {
             },
           },
         },
-      })) as unknown as Group;
+      });
 
       if (!group) {
         throw new NotFoundException(`Group with ID ${id} not found`);
       }
 
-      const groupDto = await this.mapToDto(group, authToken);
+      const groupDto = await this.mapToDto(group as Group, authToken);
 
       // Check if the user is a member of the group
       const membership = group.memberships.find(
@@ -275,13 +279,13 @@ export class GroupsService {
         },
       };
 
-      const group = (await this.prisma.group.create({
+      const group = await this.prisma.group.create({
         data: prismaData,
         include: {
           createdBy: true,
           city: true,
         },
-      })) as unknown as Group;
+      });
 
       // Create an admin membership for the creator
       await this.prisma.groupMembership.create({
@@ -303,7 +307,7 @@ export class GroupsService {
         },
       });
 
-      return this.mapToDto(group, authToken);
+      return this.mapToDto(group as Group, authToken);
     } catch (error) {
       this.logger.error(`Failed to create group`, error);
       throw error;
@@ -317,7 +321,7 @@ export class GroupsService {
   ): Promise<GroupDto> {
     try {
       // Verify that the group exists
-      const existingGroup = (await this.prisma.group.findFirst({
+      const existingGroup = await this.prisma.group.findFirst({
         where: {
           id: input.id,
           isActive: true,
@@ -329,7 +333,7 @@ export class GroupsService {
             },
           },
         },
-      })) as unknown as Group;
+      });
 
       if (!existingGroup) {
         throw new NotFoundException(
@@ -383,7 +387,7 @@ export class GroupsService {
         delete updateObject.cityId;
       }
 
-      const updatedGroup = (await this.prisma.group.update({
+      const updatedGroup = await this.prisma.group.update({
         where: { id },
         data: updateObject,
         include: {
@@ -398,9 +402,9 @@ export class GroupsService {
             },
           },
         },
-      })) as unknown as Group;
+      });
 
-      return this.mapToDto(updatedGroup, authToken);
+      return this.mapToDto(updatedGroup as Group, authToken);
     } catch (error) {
       this.logger.error(`Failed to update group`, error);
       throw error;
