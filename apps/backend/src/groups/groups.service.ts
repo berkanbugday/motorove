@@ -232,12 +232,14 @@ export class GroupsService {
       const isAdmin = isMember && membership.role === GroupMemberRole.ADMIN;
       const isPendingMember =
         !!membership && membership.status === InvitationStatus.PENDING;
+      const isOwner = group.createdById === userId;
 
       return {
         ...groupDto,
         isMember,
         isAdmin,
         isPendingMember,
+        isOwner,
       };
     } catch (error) {
       this.logger.error(`Failed to get group with ID ${id}`, error);

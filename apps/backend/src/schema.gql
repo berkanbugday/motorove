@@ -463,6 +463,7 @@ type GroupDto {
   id: ID!
   isAdmin: Boolean
   isMember: Boolean
+  isOwner: Boolean
   isPendingMember: Boolean
   logo: String
   membersCapacity: Int

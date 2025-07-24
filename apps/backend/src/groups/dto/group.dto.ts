@@ -78,6 +78,11 @@ export class GroupDto implements IGroup {
   @IsBoolean()
   isPendingMember?: boolean;
 
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isOwner?: boolean;
+
   @Field(() => Date)
   createdAt: Date;
 

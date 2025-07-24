@@ -21,6 +21,7 @@ export interface IGroup {
   isMember?: boolean;
   isAdmin?: boolean;
   isPendingMember?: boolean;
+  isOwner?: boolean;
   createdAt: Date | string;
   memberships: IGroupMembership[];
 }

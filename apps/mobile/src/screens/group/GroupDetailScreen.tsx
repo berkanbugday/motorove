@@ -746,6 +746,22 @@ export const GroupDetailScreen = () => {
     [t],
   );
 
+  const handleLeaveGroup = useCallback(
+    async (_group: IGroup) => {
+      if (_group?.isOwner) {
+        showToast({
+          text1: t('common.warning'),
+          text2: t('screens.group.cannot_leave_group'),
+          type: 'warning',
+        });
+        return;
+      }
+
+      leaveGroupBottomSheetRef.current?.open('minimal');
+    },
+    [user],
+  );
+
   const handleJoinGroup = useCallback(
     async (_group: IGroup) => {
       if (_group?.isPendingMember) {
@@ -829,7 +845,7 @@ export const GroupDetailScreen = () => {
           membersBottomSheetRef.current?.open('full');
           break;
         case 'leave_group':
-          leaveGroupBottomSheetRef.current?.open('minimal');
+          handleLeaveGroup(_group);
           break;
         case 'join_group':
           handleJoinGroup(_group);

@@ -339,6 +339,8 @@ export default {
       view_profile: 'View Profile',
       success_left_group: 'You have successfully left the group!',
       group_pending: 'Your group invitation is pending.',
+      cannot_leave_group:
+        'You cannot leave the group because you are the owner.',
     },
 
     // Search group screen

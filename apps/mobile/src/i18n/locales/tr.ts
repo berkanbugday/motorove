@@ -339,6 +339,7 @@ export default {
       view_profile: 'Profili Görüntüle',
       success_left_group: 'Grubunuzdan başarıyla ayrıldınız!',
       group_pending: 'Gruba katılımınız onay bekliyor.',
+      cannot_leave_group: 'Grubun kurucusu olarak grubunuzdan ayrılamazsınız.',
     },
     // Search group screen
     searchGroup: {

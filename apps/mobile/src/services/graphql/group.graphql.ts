@@ -13,6 +13,7 @@ export const GROUP_FRAGMENT = gql`
     isMember
     isAdmin
     isPendingMember
+    isOwner
     city {
       ...CityFragment
     }
