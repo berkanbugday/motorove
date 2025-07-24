@@ -1021,6 +1021,7 @@ export const GroupDetailScreen = () => {
       <TopHeaderBar
         showBackButton
         backgroundColor="transparent"
+        containerStyle={styles.topHeaderBar}
         onBackPress={() => navigation.goBack()}
         dropdownMenuItems={groupDropdownMenuItems(
           group?.isAdmin,
@@ -1030,13 +1031,7 @@ export const GroupDetailScreen = () => {
           handleDropdownMenuItemSelect(item, group as IGroup)
         }
       />
-      <Animated.View
-        style={[
-          styles.imageContainer,
-          {
-            height: headerHeight,
-          },
-        ]}>
+      <Animated.View style={{height: headerHeight}}>
         <Image
           source={{uri: group?.cover || ''}}
           style={styles.cover}
@@ -1066,15 +1061,11 @@ export const GroupDetailScreen = () => {
       </Animated.View>
 
       <Animated.ScrollView
-        style={[styles.scrollView, {paddingTop: rh(110) + insets.top}]}
+        style={[styles.scrollView, {marginTop: rh(10) + insets.top}]}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16} // Ensures smooth scrolling
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            progressViewOffset={rh(110) + insets.top} // Offset to account for the header
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onScroll={Animated.event(
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
@@ -1364,12 +1355,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imageContainer: {
+  topHeaderBar: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: 150,
   },
   cover: {
     width: '100%',
