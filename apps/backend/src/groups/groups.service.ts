@@ -69,7 +69,9 @@ export class GroupsService {
           city: true,
           memberships: {
             where: {
-              status: InvitationStatus.ACCEPTED,
+              status: {
+                in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING],
+              },
               isActive: true,
             },
             include: {
@@ -222,7 +224,7 @@ export class GroupsService {
 
       // Check if the user is a member of the group
       const membership = group.memberships.find(
-        (membership) => membership.user.id === userId && membership.isActive,
+        (membership) => membership.user.id === userId,
       );
 
       const isMember =
@@ -468,7 +470,12 @@ export class GroupsService {
       ...group,
       logo: logoUrl,
       cover: coverUrl,
-      membersCount: group.memberships.length,
+      memberships: group.memberships.filter(
+        (membership) => membership.status === InvitationStatus.ACCEPTED,
+      ),
+      membersCount: group.memberships.filter(
+        (membership) => membership.status === InvitationStatus.ACCEPTED,
+      ).length,
       membersCapacity: group.membersCapacity,
     });
   }

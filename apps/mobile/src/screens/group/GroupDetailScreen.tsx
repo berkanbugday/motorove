@@ -760,7 +760,8 @@ export const GroupDetailScreen = () => {
 
       if (
         _group?.membersCapacity &&
-        _group?.memberships?.length >= _group?.membersCapacity
+        _group?.membersCount &&
+        _group?.membersCount >= _group?.membersCapacity
       ) {
         loggingService.info(`Group: ${groupId} is full. Cannot join.`);
         showToast({
@@ -791,7 +792,7 @@ export const GroupDetailScreen = () => {
       addMember,
       groupId,
       group?.membersCapacity,
-      group?.memberships,
+      group?.membersCount,
       group?.privacy,
       refetchGroup,
       user?.id,
@@ -1069,7 +1070,7 @@ export const GroupDetailScreen = () => {
           <View style={styles.infoRow}>
             <Icon name="users-filled" size={18} />
             <Typography style={styles.infoText}>
-              {group?.memberships?.length || 0}
+              {group?.membersCount || 0}
               {group?.membersCapacity
                 ? ` / ${group?.membersCapacity}`
                 : ''}{' '}
