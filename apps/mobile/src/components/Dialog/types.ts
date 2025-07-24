@@ -54,7 +54,7 @@ export interface DialogProps {
   closeOnBackdropPress?: boolean;
   closeOnButtonPress?: boolean;
   animationDuration?: number;
-
+  statusBarTranslucent?: boolean;
   // Accessibility
   testID?: string;
 }

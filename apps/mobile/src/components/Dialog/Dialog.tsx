@@ -63,6 +63,7 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
       closeOnBackdropPress = true,
       closeOnButtonPress = true,
       animationDuration = 300,
+      statusBarTranslucent = false,
 
       // Accessibility
       testID,
@@ -380,7 +381,7 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
         transparent
         animationType="none"
         onRequestClose={handleClose}
-        statusBarTranslucent
+        statusBarTranslucent={statusBarTranslucent}
         testID={testID}>
         <View style={styles.modalContainer}>
           <TouchableOpacity
