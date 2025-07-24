@@ -1,6 +1,5 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { GroupMembershipsService } from './group-memberships.service';
-import { GroupMembershipDto } from './dto/group-membership.dto';
 import { AddMemberInput } from './dto/add-member.input';
 import { ChangeMemberRoleInput } from './dto/change-member-role.input';
 import { RemoveMemberInput } from './dto/remove-member.input';
@@ -10,17 +9,15 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
 
-@Resolver(() => GroupMembershipDto)
+@Resolver(() => Boolean)
 export class GroupMembershipsResolver {
   constructor(
     private readonly groupMembershipsService: GroupMembershipsService,
   ) {}
 
   @UseGuards(JwtGuard)
-  @Mutation(() => GroupMembershipDto)
-  async addMember(
-    @Args('input') input: AddMemberInput,
-  ): Promise<GroupMembershipDto> {
+  @Mutation(() => Boolean)
+  async addMember(@Args('input') input: AddMemberInput): Promise<boolean> {
     return await this.groupMembershipsService.addMember(
       input.groupId,
       input.userId,
@@ -28,11 +25,11 @@ export class GroupMembershipsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => GroupMembershipDto)
+  @Mutation(() => Boolean)
   async removeMember(
     @Args('input') input: RemoveMemberInput,
     @CurrentUser() user: User,
-  ): Promise<GroupMembershipDto> {
+  ): Promise<boolean> {
     return await this.groupMembershipsService.removeMember(
       input.groupId,
       input.userId,
@@ -41,12 +38,12 @@ export class GroupMembershipsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => GroupMembershipDto)
-  async updateMemberRole(
+  @Mutation(() => Boolean)
+  async changeMemberRole(
     @Args('input') input: ChangeMemberRoleInput,
     @CurrentUser() user: User,
-  ): Promise<GroupMembershipDto> {
-    return await this.groupMembershipsService.updateMemberRole(
+  ): Promise<boolean> {
+    return await this.groupMembershipsService.changeMemberRole(
       input.groupId,
       input.userId,
       input.role,
@@ -55,11 +52,11 @@ export class GroupMembershipsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => GroupMembershipDto)
+  @Mutation(() => Boolean)
   async updateInvitationStatus(
     @Args('input') input: UpdateInvitationStatusInput,
     @CurrentUser() user: User,
-  ): Promise<GroupMembershipDto> {
+  ): Promise<boolean> {
     return await this.groupMembershipsService.updateInvitationStatus(
       input.groupId,
       input.userId,

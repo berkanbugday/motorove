@@ -36,6 +36,7 @@ export class GroupsService {
             some: {
               userId,
               status: InvitationStatus.ACCEPTED,
+              isActive: true,
             },
           },
         },
@@ -69,6 +70,7 @@ export class GroupsService {
           memberships: {
             where: {
               status: InvitationStatus.ACCEPTED,
+              isActive: true,
             },
             include: {
               user: true,
@@ -120,6 +122,7 @@ export class GroupsService {
           some: {
             userId,
             status: InvitationStatus.ACCEPTED,
+            isActive: true,
           },
         },
       };
@@ -144,6 +147,7 @@ export class GroupsService {
           memberships: {
             where: {
               status: InvitationStatus.ACCEPTED,
+              isActive: true,
             },
             include: {
               user: true,
@@ -194,7 +198,10 @@ export class GroupsService {
           city: true,
           memberships: {
             where: {
-              status: InvitationStatus.ACCEPTED,
+              status: {
+                in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING],
+              },
+              isActive: true,
             },
             include: {
               user: {
@@ -215,18 +222,20 @@ export class GroupsService {
 
       // Check if the user is a member of the group
       const membership = group.memberships.find(
-        (membership) =>
-          membership.user.id === userId &&
-          membership.status === InvitationStatus.ACCEPTED,
+        (membership) => membership.user.id === userId && membership.isActive,
       );
 
-      const isMember = !!membership;
+      const isMember =
+        !!membership && membership.status === InvitationStatus.ACCEPTED;
       const isAdmin = isMember && membership.role === GroupMemberRole.ADMIN;
+      const isPendingMember =
+        !!membership && membership.status === InvitationStatus.PENDING;
 
       return {
         ...groupDto,
         isMember,
         isAdmin,
+        isPendingMember,
       };
     } catch (error) {
       this.logger.error(`Failed to get group with ID ${id}`, error);
@@ -396,6 +405,7 @@ export class GroupsService {
           memberships: {
             where: {
               status: InvitationStatus.ACCEPTED,
+              isActive: true,
             },
             include: {
               user: true,
@@ -419,7 +429,7 @@ export class GroupsService {
       if (group.logo) {
         logoUrl = await this.storageService.getSignedUrl(
           group.logo,
-          60,
+          3600,
           authToken,
         );
       }
@@ -427,7 +437,7 @@ export class GroupsService {
       if (group.cover) {
         coverUrl = await this.storageService.getSignedUrl(
           group.cover,
-          60,
+          3600,
           authToken,
         );
       }
@@ -440,7 +450,7 @@ export class GroupsService {
                   ...membership.user,
                   avatar: await this.storageService.getSignedUrl(
                     membership.user.avatar,
-                    60,
+                    3600,
                     authToken,
                   ),
                 }

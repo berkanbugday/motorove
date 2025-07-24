@@ -225,7 +225,9 @@ export function TopHeaderBar({
 
         {/* Right section (optional buttons/icons) */}
         <View style={styles.rightSection}>
-          {dropdownMenuItems && onDropdownItemSelect ? (
+          {dropdownMenuItems &&
+          dropdownMenuItems.length > 0 &&
+          onDropdownItemSelect ? (
             <DropdownMenu
               items={dropdownMenuItems}
               onSelect={onDropdownItemSelect}

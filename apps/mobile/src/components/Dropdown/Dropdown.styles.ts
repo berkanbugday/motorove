@@ -1,5 +1,5 @@
 import {StyleSheet, Animated, TextStyle} from 'react-native';
-import {colors, fontSizes, radius, spacing} from '@theme';
+import {colors, fontSizes, getShadow, radius, spacing} from '@theme';
 
 export const createStyles = (props: {
   isOpen: boolean;
@@ -126,11 +126,7 @@ export const modalStyles = StyleSheet.create({
     borderColor: colors.neutral.lightGrey,
     borderRadius: 8,
     backgroundColor: colors.neutral.white,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    ...getShadow('small'),
   },
 });
 

@@ -691,7 +691,7 @@ export class PostsService {
             if (imageUrl && typeof imageUrl === 'string') {
               return await this.storageService.getSignedUrl(
                 imageUrl,
-                60,
+                3600,
                 authToken,
               );
             }
@@ -708,7 +708,7 @@ export class PostsService {
     if (prismaPost.createdBy.avatar) {
       prismaPost.createdBy.avatar = await this.storageService.getSignedUrl(
         prismaPost.createdBy.avatar,
-        60,
+        3600,
         authToken,
       );
     }

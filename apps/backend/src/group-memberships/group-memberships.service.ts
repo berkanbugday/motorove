@@ -11,9 +11,6 @@ import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { NotificationsService } from '../notifications/notifications.service';
 // import { NotificationType } from '../enums/models/notification-type.enum';
-import { GroupMembershipDto } from './dto/group-membership.dto';
-import { GroupMembership } from './models/group-membership.model';
-import { plainToClass } from 'class-transformer';
 // import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
@@ -24,10 +21,7 @@ export class GroupMembershipsService {
     private notificationsService: NotificationsService,
   ) {}
 
-  async addMember(
-    groupId: string,
-    userId: string,
-  ): Promise<GroupMembershipDto> {
+  async addMember(groupId: string, userId: string): Promise<boolean> {
     try {
       // Check if the group exists
       const group = await this.prisma.group.findUnique({
@@ -43,7 +37,7 @@ export class GroupMembershipsService {
 
       // Check if the user is already a member
       const existingMembership = group.memberships.find(
-        (m) => m.userId === userId,
+        (m) => m.userId === userId && m.isActive,
       );
 
       if (existingMembership) {
@@ -51,8 +45,26 @@ export class GroupMembershipsService {
       }
 
       // Add the user as a member
-      const membership = await this.prisma.groupMembership.create({
-        data: {
+      const membership = await this.prisma.groupMembership.upsert({
+        where: {
+          groupId_userId: {
+            groupId,
+            userId,
+          },
+        },
+        update: {
+          isActive: true,
+          role: GroupMemberRole.MEMBER,
+          status:
+            group.privacy === GroupPrivacy.PRIVATE
+              ? InvitationStatus.PENDING
+              : InvitationStatus.ACCEPTED,
+          updatedBy: {
+            connect: { id: userId },
+          },
+          updatedAt: new Date(),
+        },
+        create: {
           group: {
             connect: { id: groupId },
           },
@@ -74,7 +86,7 @@ export class GroupMembershipsService {
         },
       });
 
-      return this.mapToDto(membership as GroupMembership);
+      return membership ? true : false;
     } catch (error) {
       this.logger.error(`Failed to add member to group`, error);
       throw error;
@@ -85,7 +97,7 @@ export class GroupMembershipsService {
     groupId: string,
     userId: string,
     adminId: string,
-  ): Promise<GroupMembershipDto> {
+  ): Promise<boolean> {
     try {
       // Check if the group exists
       const group = await this.prisma.group.findUnique({
@@ -100,7 +112,10 @@ export class GroupMembershipsService {
       }
 
       const isAdmin = group.memberships.find(
-        (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
+        (m) =>
+          m.userId === adminId &&
+          m.role === GroupMemberRole.ADMIN &&
+          m.isActive,
       );
 
       if (isAdmin && isAdmin.userId === userId) {
@@ -110,7 +125,7 @@ export class GroupMembershipsService {
       }
 
       const membershipToDelete = group.memberships.find(
-        (m) => m.userId === userId,
+        (m) => m.userId === userId && m.isActive,
       );
 
       if (!membershipToDelete) {
@@ -120,32 +135,35 @@ export class GroupMembershipsService {
       }
 
       // Delete the membership
-      const deletedMembership = await this.prisma.groupMembership.delete({
+      const deletedMembership = await this.prisma.groupMembership.update({
         where: {
           groupId_userId: {
             groupId,
             userId,
           },
         },
-        include: {
-          group: true,
-          user: true,
+        data: {
+          isActive: false,
+          updatedBy: {
+            connect: { id: adminId },
+          },
+          updatedAt: new Date(),
         },
       });
 
-      return this.mapToDto(deletedMembership as GroupMembership);
+      return deletedMembership ? true : false;
     } catch (error) {
       this.logger.error(`Failed to remove member from group`, error);
       throw error;
     }
   }
 
-  async updateMemberRole(
+  async changeMemberRole(
     groupId: string,
     userId: string,
     newRole: GroupMemberRole,
     adminId: string,
-  ): Promise<GroupMembershipDto> {
+  ): Promise<boolean> {
     try {
       // Check if the group exists
       const group = await this.prisma.group.findUnique({
@@ -161,7 +179,10 @@ export class GroupMembershipsService {
 
       // Check if the admin user has admin rights
       const adminMembership = group.memberships.find(
-        (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
+        (m) =>
+          m.userId === adminId &&
+          m.role === GroupMemberRole.ADMIN &&
+          m.isActive,
       );
 
       if (!adminMembership) {
@@ -172,7 +193,7 @@ export class GroupMembershipsService {
 
       // Check if the member exists
       const membershipToUpdate = group.memberships.find(
-        (m) => m.userId === userId,
+        (m) => m.userId === userId && m.isActive,
       );
 
       if (!membershipToUpdate) {
@@ -221,7 +242,7 @@ export class GroupMembershipsService {
       //   );
       // }
 
-      return this.mapToDto(updatedMembership as GroupMembership);
+      return updatedMembership ? true : false;
     } catch (error) {
       this.logger.error(`Failed to update member role`, error);
       throw error;
@@ -233,7 +254,7 @@ export class GroupMembershipsService {
     userId: string,
     newStatus: InvitationStatus,
     adminId: string,
-  ): Promise<GroupMembershipDto> {
+  ): Promise<boolean> {
     try {
       // Check if the group exists
       const group = await this.prisma.group.findUnique({
@@ -249,7 +270,10 @@ export class GroupMembershipsService {
 
       // Check if the admin user has admin rights
       const adminMembership = group.memberships.find(
-        (m) => m.userId === adminId && m.role === GroupMemberRole.ADMIN,
+        (m) =>
+          m.userId === adminId &&
+          m.role === GroupMemberRole.ADMIN &&
+          m.isActive,
       );
 
       if (!adminMembership) {
@@ -260,7 +284,7 @@ export class GroupMembershipsService {
 
       // Check if the membership exists
       const membershipToUpdate = group.memberships.find(
-        (m) => m.userId === userId,
+        (m) => m.userId === userId && m.isActive,
       );
 
       if (!membershipToUpdate) {
@@ -308,17 +332,10 @@ export class GroupMembershipsService {
       //   userId,
       // );
 
-      return this.mapToDto(updatedMembership as GroupMembership);
+      return updatedMembership ? true : false;
     } catch (error) {
       this.logger.error(`Failed to update member status`, error);
       throw error;
     }
-  }
-
-  /**
-   * Maps a GroupMembership entity from the database to a GroupMembershipDto
-   */
-  private mapToDto(membership: GroupMembership): GroupMembershipDto {
-    return plainToClass(GroupMembershipDto, membership);
   }
 }

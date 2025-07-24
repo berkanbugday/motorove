@@ -520,7 +520,7 @@ export class EventsService {
               if (imageUrl && typeof imageUrl === 'string') {
                 return await this.storageService.getSignedUrl(
                   imageUrl,
-                  60,
+                  3600,
                   authToken,
                 );
               }

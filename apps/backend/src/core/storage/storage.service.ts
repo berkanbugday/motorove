@@ -115,7 +115,7 @@ export class StorageService {
    */
   async getSignedUrl(
     path: string,
-    expiresIn: number = 60,
+    expiresIn: number = 3600,
     authToken?: string,
   ): Promise<string> {
     // Get default supabase client

@@ -12,6 +12,7 @@ export const GROUP_FRAGMENT = gql`
     cover
     isMember
     isAdmin
+    isPendingMember
     city {
       ...CityFragment
     }

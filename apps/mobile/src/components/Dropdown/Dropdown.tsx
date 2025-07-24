@@ -76,6 +76,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   const updateModalPosition = () => {
     if (inputWrapperRef.current && isOpen) {
       inputWrapperRef.current.measureInWindow((x, y, width, height) => {
+        console.log('y', y);
+        console.log('height', height);
         // Adjust position based on device dimensions
         const windowHeight = Dimensions.get('window').height;
         const remainingSpace = windowHeight - y - height;

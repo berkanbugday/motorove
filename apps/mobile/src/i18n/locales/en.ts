@@ -3,6 +3,7 @@ export default {
   common: {
     ok: 'OK',
     cancel: 'Cancel',
+    change: 'Change',
     confirm: 'Confirm',
     back: 'Back',
     next: 'Next',
@@ -34,6 +35,7 @@ export default {
     success: 'Success',
     error: 'Error',
     info: 'Info',
+    warning: 'Warning',
     complete: 'Complete',
     completing: 'Completing...',
     try_again: 'Try Again',
@@ -296,7 +298,7 @@ export default {
       change_role: 'Change Role',
       join_requests: 'Join Requests',
       join_request_sent: 'Join request sent',
-      leave_group_confirmation: 'Are you sure you want to leave this group?',
+      leave_group_confirmation: 'Are you sure you want to leave {0} group?',
       upload_cover_photo: 'Upload cover image',
       upload_logo: 'Upload logo',
       filter_groups: 'Filter Groups',
@@ -318,15 +320,25 @@ export default {
       group_full: 'Group is full. Cannot join.',
       join_success: 'You have successfully joined the group!',
       people: 'people',
-      select_role: 'Select Role',
+      role: 'Role',
       remove_member_confirmation:
-        'Are you sure you want to remove {name} from the group?',
-      remove_member_generic: 'Are you sure you want to remove this member?',
+        'Are you sure you want to remove {0} from the group?',
+      remove_member_confirmation_generic:
+        'Are you sure you want to remove this member?',
       no_location: 'No location',
       recent_posts: 'Recent Posts',
       no_posts_yet: 'No posts yet.',
       upcoming_events: 'Upcoming Events',
       no_events_yet: 'No events yet.',
+      success_removed_member: 'Member removed successfully',
+      error_removing_member: 'Failed to remove member',
+      success_changed_role: 'Member role changed successfully',
+      error_changing_role: 'Failed to change member role',
+      success_updated_invitation_status:
+        'Invitation status updated successfully.',
+      view_profile: 'View Profile',
+      success_left_group: 'You have successfully left the group!',
+      group_pending: 'Your group invitation is pending.',
     },
 
     // Search group screen

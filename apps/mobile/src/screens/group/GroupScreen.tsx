@@ -333,7 +333,14 @@ export const GroupScreen = () => {
       <Tabs
         items={tabItems}
         selectedKey={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={key => {
+          setActiveTab(key);
+          if (key === 'explore') {
+            handleRefreshAllGroups();
+          } else {
+            handleRefreshJoinedGroups();
+          }
+        }}
         variant="pill"
         equalWidth
         contentContainerStyle={styles.tabContent}
@@ -362,6 +369,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: spacing.md,
+    paddingHorizontal: spacing.md,
   },
 
   loadingContainer: {

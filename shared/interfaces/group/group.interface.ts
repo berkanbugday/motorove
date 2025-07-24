@@ -20,6 +20,7 @@ export interface IGroup {
   membersCount?: number | null;
   isMember?: boolean;
   isAdmin?: boolean;
+  isPendingMember?: boolean;
   createdAt: Date | string;
   memberships: IGroupMembership[];
 }

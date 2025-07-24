@@ -125,6 +125,7 @@ function humanizeErrorMessage(message: string): string {
   message = message.replace(/^error:/i, '').trim();
   message = message.replace(/^exception:/i, '').trim();
 
+  console.log('message', message);
   if (message.includes('Invalid login credentials')) {
     return i18n.t('errors.auth.invalid_credentials');
   }
@@ -146,6 +147,10 @@ function humanizeErrorMessage(message: string): string {
 
   if (message.includes('Network request failed')) {
     return i18n.t('errors.network.check_connection');
+  }
+
+  if (message.includes('User is already a member of this group')) {
+    return i18n.t('errors.group.already_member');
   }
 
   // Make first letter uppercase if it's not

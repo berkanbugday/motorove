@@ -102,11 +102,6 @@ export class EnumUtils {
   static getLanguages(): DropdownItem[] {
     return this.getDropdownOptions(Language, 'enums.language');
   }
-
-  static getGenders(): DropdownItem[] {
-    return this.getDropdownOptions(Gender, 'enums.gender');
-  }
-
   static getRidingStyleDropdownOptions(): DropdownItem[] {
     return this.getDropdownOptions(RidingStyle, 'enums.ridingStyle');
   }
