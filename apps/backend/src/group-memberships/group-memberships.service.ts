@@ -111,14 +111,9 @@ export class GroupMembershipsService {
         throw new NotFoundException(`Group with ID ${groupId} not found`);
       }
 
-      const isAdmin = group.memberships.find(
-        (m) =>
-          m.userId === adminId &&
-          m.role === GroupMemberRole.ADMIN &&
-          m.isActive,
-      );
+      const isOwner = group.createdById === userId;
 
-      if (isAdmin && isAdmin.userId === userId) {
+      if (isOwner) {
         throw new ForbiddenException(
           'You cannot remove yourself from the group',
         );
