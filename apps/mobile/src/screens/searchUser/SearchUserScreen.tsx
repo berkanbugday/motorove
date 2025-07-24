@@ -8,12 +8,12 @@ import {useSearchUsers} from '@services/user.service';
 import {UserCard} from '@components/UserCard';
 import {Body} from '@components/Typography';
 import {AnimatedInput} from '@components/AnimatedInput';
-import {User} from '../../types';
+import {IUser} from '@motorove/shared';
 
 /**
  * User Search Screen - Allows users to search for other users and follow/unfollow them
  */
-export const UserSearchScreen = () => {
+export const SearchUserScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -68,7 +68,7 @@ export const UserSearchScreen = () => {
   }, [clearSearch]);
 
   // Render each user item
-  const renderUserItem = useCallback(({item}: {item: User}) => {
+  const renderUserItem = useCallback(({item}: {item: IUser}) => {
     return (
       <UserCard
         user={item}

@@ -496,7 +496,7 @@ export default {
     },
 
     // User search screen
-    userSearch: {
+    searchUser: {
       search_placeholder: 'Search by name or username',
       no_results: 'No users found',
       filters: 'Filters',

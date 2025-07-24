@@ -11,7 +11,7 @@ import {
   SearchGroupScreen,
   JoinRequestScreen,
 } from '@screens/group';
-import {UserSearchScreen} from '@screens/userSearch';
+import {SearchUserScreen} from '@screens/searchUser';
 import {CreateEventScreen} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 import {ProfileScreen} from '@screens/profile';
@@ -83,8 +83,8 @@ export function MainNavigator() {
       />
 
       <Stack.Screen
-        name="UserSearch"
-        component={UserSearchScreen}
+        name="SearchUser"
+        component={SearchUserScreen}
         options={{headerShown: false}}
       />
 

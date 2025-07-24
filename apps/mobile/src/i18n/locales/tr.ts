@@ -492,7 +492,7 @@ export default {
     },
 
     // User search screen
-    userSearch: {
+    searchUser: {
       search_placeholder: 'İsim veya kullanıcı adı ile ara',
       no_results: 'Kullanıcı bulunamadı',
       filters: 'Filtreler',

@@ -49,7 +49,7 @@ export type MainStackParamList = {
   GroupDetail: {groupId: string};
   EditGroup: {groupId: string};
   SearchGroup: undefined;
-  UserSearch: undefined;
+  SearchUser: undefined;
   Notification: undefined;
   Profile: {userId?: string};
   JoinRequest: undefined;

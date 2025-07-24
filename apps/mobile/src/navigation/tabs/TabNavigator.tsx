@@ -5,7 +5,7 @@ import {HomeScreen} from '@screens/home';
 import {MapScreen} from '@screens/map';
 import {MoreScreen} from '@screens/more';
 import {GroupScreen} from '@screens/group';
-import {UserSearchScreen} from '@screens/userSearch';
+import {SearchUserScreen} from '@screens/searchUser';
 import {TabParamList} from '../types/navigationTypes';
 import {CustomTabBar} from './CustomTabBar';
 
@@ -32,7 +32,7 @@ export const TabNavigator: React.FC<TabNavigatorProps> = ({
       })}
       tabBar={useCustomTabBar ? renderCustomTabBar : undefined}>
       <Tab.Screen name="HomeTab" component={HomeScreen} />
-      <Tab.Screen name="SearchTab" component={UserSearchScreen} />
+      <Tab.Screen name="SearchTab" component={SearchUserScreen} />
       <Tab.Screen name="MapTab" component={MapScreen} />
       <Tab.Screen name="GroupsTab" component={GroupScreen} />
       <Tab.Screen name="MoreTab" component={MoreScreen} />
