@@ -22,8 +22,8 @@ export const USER_FRAGMENT = gql`
 
 // Queries
 export const SEARCH_USERS = gql`
-  query SearchUsers($input: SearchUsersInput!) {
-    searchUsers(searchUsersInput: $input) {
+  query SearchUsers($query: String!, $limit: Int!, $skip: Int!) {
+    users(query: $query, limit: $limit, skip: $skip) {
       ...UserFragment
     }
   }

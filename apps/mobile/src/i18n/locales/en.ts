@@ -58,7 +58,7 @@ export default {
     settings: 'Settings',
     create_post: 'Create Post',
     welcome: 'Welcome',
-    user_search: 'Find Users',
+    search_user: 'Search User',
     garage: 'Garage',
     following: 'Following',
     followers: 'Followers',
@@ -497,7 +497,7 @@ export default {
 
     // User search screen
     searchUser: {
-      search_placeholder: 'Search by name or username',
+      search_placeholder: 'Search by name or last name',
       no_results: 'No users found',
       filters: 'Filters',
       near_me: 'Near Me',

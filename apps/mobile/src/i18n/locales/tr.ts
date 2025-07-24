@@ -58,7 +58,7 @@ export default {
     settings: 'Ayarlar',
     create_post: 'Gönderi Oluştur',
     welcome: 'Hoş Geldiniz',
-    user_search: 'Kullanıcı Bul',
+    search_user: 'Kullanıcı Ara',
     garage: 'Garaj',
     following: 'Takip Edilenler',
     followers: 'Takipçiler',
@@ -493,7 +493,7 @@ export default {
 
     // User search screen
     searchUser: {
-      search_placeholder: 'İsim veya kullanıcı adı ile ara',
+      search_placeholder: 'İsim veya soyisim ile ara',
       no_results: 'Kullanıcı bulunamadı',
       filters: 'Filtreler',
       near_me: 'Yakınımda',

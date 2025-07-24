@@ -48,19 +48,21 @@ export const useSearchUsers = (initialQuery = '') => {
 
         const {data} = await searchUsersQuery({
           variables: {
-            input: {query, limit: 20, skip: skipValue},
+            query,
+            limit: 20,
+            skip: skipValue,
           },
           fetchPolicy: 'network-only',
         });
 
-        if (data?.searchUsers) {
+        if (data?.users) {
           if (append) {
-            setUsers(prevUsers => [...prevUsers, ...data.searchUsers]);
+            setUsers(prevUsers => [...prevUsers, ...data.users]);
           } else {
-            setUsers(data.searchUsers);
+            setUsers(data.users);
           }
-          setHasMore(data.searchUsers.length === 20);
-          setSkip(skipValue + data.searchUsers.length);
+          setHasMore(data.users.length === 20);
+          setSkip(skipValue + data.users.length);
         }
       } catch (e) {
         loggingService.error('Error searching users:', e);

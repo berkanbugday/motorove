@@ -1,19 +1,17 @@
 import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, Keyboard, FlatList} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
-import {TopHeaderBar} from '@components/TopHeaderBar';
+import {TopHeaderBar, Icon, UserCard, Body, AnimatedInput} from '@components';
 import {colors, spacing} from '@theme';
-import {Icon} from '@components/Icon';
 import {useSearchUsers} from '@services/user.service';
-import {UserCard} from '@components/UserCard';
-import {Body} from '@components/Typography';
-import {AnimatedInput} from '@components/AnimatedInput';
 import {IUser} from '@motorove/shared';
+import {useTranslation} from '@/hooks/useTranslation';
 
 /**
  * User Search Screen - Allows users to search for other users and follow/unfollow them
  */
 export const SearchUserScreen = () => {
+  const {t} = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
@@ -91,8 +89,8 @@ export const SearchUserScreen = () => {
         <Icon name="search" size={40} color={colors.neutral.lightGrey} />
         <Body color={colors.neutral.grey} style={styles.emptyText}>
           {debouncedQuery
-            ? 'No users found matching your search'
-            : 'Search for users by name'}
+            ? t('screens.searchUser.no_results')
+            : t('screens.searchUser.search_placeholder')}
         </Body>
       </View>
     );
@@ -114,12 +112,12 @@ export const SearchUserScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TopHeaderBar title="Search Users" showShadow={false} />
+      <TopHeaderBar title={t('navigation.search_user')} showShadow={false} />
 
       <View style={styles.searchContainer}>
         <AnimatedInput
           shape="round"
-          placeholder="Search users by name"
+          placeholder={t('screens.searchUser.search_placeholder')}
           value={searchQuery}
           onChangeText={handleSearchQueryChange}
           icon={

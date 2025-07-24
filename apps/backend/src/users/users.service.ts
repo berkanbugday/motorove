@@ -32,7 +32,6 @@ export class UsersService {
         OR: [
           { firstName: { contains: searchQuery, mode: 'insensitive' } },
           { lastName: { contains: searchQuery, mode: 'insensitive' } },
-          { email: { contains: searchQuery, mode: 'insensitive' } },
         ],
         // Don't include the current user in search results
         id: { not: currentUserId },
