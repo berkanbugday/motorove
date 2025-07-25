@@ -48,6 +48,7 @@ import {
   useRemovePost,
 } from '@services/post.service';
 import {relativeTime} from '@utils/dateUtils';
+import {useTranslation} from '@hooks/useTranslation';
 
 // Route data
 const recommendedRoutes = [
@@ -127,6 +128,7 @@ const upcomingEvents: EventItem[] = [
 type Props = NativeStackScreenProps<TabParamList, 'HomeTab'>;
 
 export const HomeScreen = ({navigation}: Props) => {
+  const {t} = useTranslation();
   const [showLocationPermission, setShowLocationPermission] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
@@ -465,7 +467,7 @@ export const HomeScreen = ({navigation}: Props) => {
         id: post.id,
         userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
-        timeAgo: relativeTime(post.createdAt),
+        timeAgo: relativeTime(post.createdAt, t),
         content: post.content,
         images,
         likeCount: post.likesCount,
@@ -476,7 +478,7 @@ export const HomeScreen = ({navigation}: Props) => {
         labels,
       };
     },
-    [formatAvatarSource, navigation],
+    [formatAvatarSource, navigation, t],
   );
 
   // Render feed post with comment navigation and dropdown menu

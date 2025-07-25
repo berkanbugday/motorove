@@ -24,7 +24,4 @@ export class GroupMembership extends BaseModel {
 
   @Field(() => InvitationStatus)
   status: InvitationStatus;
-
-  @Field()
-  joinedAt: Date;
 }

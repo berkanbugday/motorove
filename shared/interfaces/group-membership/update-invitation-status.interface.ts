@@ -1,11 +1,15 @@
 import { InvitationStatus } from "../../enums";
-import { IBaseGroupMembership } from "./base-group-membership.interface";
 
 /**
  * Update Membership Status Interface
  * Used for updating a group membership status
  */
-export interface IUpdateInvitationStatus extends IBaseGroupMembership {
+export interface IUpdateInvitationStatus {
+  /**
+   * The new status to set for the membership
+   */
+  id: string;
+
   /**
    * The new status to set for the membership
    */

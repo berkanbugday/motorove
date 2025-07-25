@@ -5,13 +5,17 @@ import {USER_FRAGMENT} from './user.graphql';
 export const GROUP_MEMBERSHIP_FRAGMENT = gql`
   fragment GroupMembershipFragment on GroupMembershipDto {
     id
-    groupId
+    group {
+      id
+      name
+    }
     user {
       ...UserFragment
     }
     role
     status
-    joinedAt
+    createdAt
+    updatedAt
   }
   ${USER_FRAGMENT}
 `;
@@ -39,6 +43,17 @@ export const CHANGE_MEMBER_ROLE = gql`
 
 export const UPDATE_INVITATION_STATUS = gql`
   mutation UpdateInvitationStatus($input: UpdateInvitationStatusInput!) {
-    updateInvitationStatus(input: $input)
+    updateInvitationStatus(input: $input) {
+      status
+    }
   }
+`;
+
+export const GET_GROUP_JOIN_REQUESTS = gql`
+  query GetGroupJoinRequests($limit: Int, $skip: Int) {
+    groupJoinRequests(limit: $limit, skip: $skip) {
+      ...GroupMembershipFragment
+    }
+  }
+  ${GROUP_MEMBERSHIP_FRAGMENT}
 `;

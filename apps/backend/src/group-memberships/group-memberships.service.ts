@@ -12,8 +12,9 @@ import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { NotificationsService } from '../notifications/notifications.service';
 import { GroupMembershipDto } from './dto/group-membership.dto';
 import { plainToClass } from 'class-transformer';
-import { NotificationType } from '../enums/models/notification-type.enum';
-import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { StorageService } from '../core/storage/storage.service';
+// import { NotificationType } from '../enums/models/notification-type.enum';
+// import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
 export class GroupMembershipsService {
@@ -21,22 +22,56 @@ export class GroupMembershipsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
+    private storageService: StorageService,
   ) {}
 
-  async getGroupJoinRequests(
-    limit: number,
-    skip: number,
+  async groupJoinRequests(
+    limit?: number,
+    skip?: number,
+    userId?: string,
+    authToken?: string,
   ): Promise<GroupMembershipDto[]> {
     const groupJoinRequests = await this.prisma.groupMembership.findMany({
-      where: { status: InvitationStatus.PENDING },
-      skip,
-      take: limit,
+      where: {
+        status: InvitationStatus.PENDING,
+        isActive: true,
+        group: {
+          isActive: true,
+          memberships: {
+            some: { userId, isActive: true, role: GroupMemberRole.ADMIN },
+          },
+        },
+      },
+      skip: skip || undefined,
+      take: limit || undefined,
       include: {
         user: true,
+        group: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
-    return groupJoinRequests.map((membership) =>
+    const groupJoinRequestsWithSignedUrls = await Promise.all(
+      groupJoinRequests.map(async (membership) => ({
+        ...membership,
+        user: membership.user.avatar
+          ? {
+              ...membership.user,
+              avatar: await this.storageService.getSignedUrl(
+                membership.user.avatar,
+                3600,
+                authToken,
+              ),
+            }
+          : membership.user,
+      })),
+    );
+
+    return groupJoinRequestsWithSignedUrls.map((membership) =>
       plainToClass(GroupMembershipDto, membership),
     );
   }
@@ -99,6 +134,7 @@ export class GroupMembershipsService {
           createdBy: {
             connect: { id: userId },
           },
+          updatedAt: new Date(),
         },
         include: {
           group: true,
@@ -238,24 +274,24 @@ export class GroupMembershipsService {
         },
       });
 
-      if (updatedMembership.role === newRole) {
-        // Send notification to the user
-        await this.notificationsService.create(
-          {
-            userId,
-            title: 'Membership status updated',
-            body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
-            type: NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
-            channel: NotificationChannel.PUSH,
-            data: JSON.stringify({
-              groupId: updatedMembership.group.id,
-              groupName: updatedMembership.group.name,
-              role: newRole,
-            }),
-          },
-          userId,
-        );
-      }
+      // if (updatedMembership.role === newRole) {
+      //   // Send notification to the user
+      //   await this.notificationsService.create(
+      //     {
+      //       userId,
+      //       title: 'Membership status updated',
+      //       body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
+      //       type: NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
+      //       channel: NotificationChannel.PUSH,
+      //       data: JSON.stringify({
+      //         groupId: updatedMembership.group.id,
+      //         groupName: updatedMembership.group.name,
+      //         role: newRole,
+      //       }),
+      //     },
+      //     userId,
+      //   );
+      // }
 
       return updatedMembership ? true : false;
     } catch (error) {
@@ -265,68 +301,32 @@ export class GroupMembershipsService {
   }
 
   async updateInvitationStatus(
-    groupId: string,
-    userId: string,
+    id: string,
     newStatus: InvitationStatus,
     adminId: string,
-  ): Promise<boolean> {
+  ): Promise<GroupMembershipDto> {
     try {
       // Check if the group exists
-      const group = await this.prisma.group.findUnique({
-        where: { id: groupId, isActive: true },
-        include: {
-          memberships: true,
-        },
+      const membership = await this.prisma.groupMembership.findUnique({
+        where: { id, isActive: true },
       });
 
-      if (!group) {
-        throw new NotFoundException(`Group with ID ${groupId} not found`);
-      }
-
-      // Check if the admin user has admin rights
-      const adminMembership = group.memberships.find(
-        (m) =>
-          m.userId === adminId &&
-          m.role === GroupMemberRole.ADMIN &&
-          m.isActive,
-      );
-
-      if (!adminMembership) {
-        throw new ForbiddenException(
-          'You are not authorized to update membership status in this group',
-        );
-      }
-
-      // Check if the membership exists
-      const membershipToUpdate = group.memberships.find(
-        (m) => m.userId === userId && m.isActive,
-      );
-
-      if (!membershipToUpdate) {
-        throw new NotFoundException(
-          `Member with ID ${userId} not found in this group`,
-        );
+      if (!membership) {
+        throw new NotFoundException(`Membership with ID ${id} not found`);
       }
 
       // Update the membership status
       const updatedMembership = await this.prisma.groupMembership.update({
         where: {
-          groupId_userId: {
-            groupId,
-            userId,
-          },
-          status: InvitationStatus.PENDING,
+          id,
         },
         data: {
           status: newStatus,
+          isActive: newStatus === InvitationStatus.ACCEPTED,
           updatedBy: {
             connect: { id: adminId },
           },
           updatedAt: new Date(),
-        },
-        include: {
-          group: true,
-          user: true,
         },
       });
 
@@ -347,7 +347,7 @@ export class GroupMembershipsService {
       //   userId,
       // );
 
-      return updatedMembership ? true : false;
+      return plainToClass(GroupMembershipDto, updatedMembership);
     } catch (error) {
       this.logger.error(`Failed to update member status`, error);
       throw error;

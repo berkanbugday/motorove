@@ -1,6 +1,4 @@
-/**
- * Utility functions for date and time formatting
- */
+import {TFunction} from 'i18next';
 
 /**
  * Format a date for display in the UI
@@ -32,7 +30,7 @@ export function formatDate(date: Date): string {
  * @param date - The date to get relative time for
  * @returns A relative time string
  */
-export function relativeTime(timestamp: Date): string {
+export function relativeTime(timestamp: Date, t: TFunction): string {
   const now = new Date();
   const date = new Date(timestamp);
   const diffMs = now.getTime() - date.getTime();
@@ -43,30 +41,45 @@ export function relativeTime(timestamp: Date): string {
   if (diffMs > 0) {
     // Past
     if (Math.abs(diffDays) >= 1) {
-      return `${Math.abs(diffDays)} day${
-        Math.abs(diffDays) === 1 ? '' : 's'
-      } ago`;
+      return t('common.days_ago', {
+        count: Math.abs(diffDays),
+        day: Math.abs(diffDays) === 1 ? t('common.day') : t('common.days'),
+      });
     } else if (Math.abs(diffHours) >= 1) {
-      return `${Math.abs(diffHours)} hour${
-        Math.abs(diffHours) === 1 ? '' : 's'
-      } ago`;
+      return t('common.hours_ago', {
+        count: Math.abs(diffHours),
+        hour: Math.abs(diffHours) === 1 ? t('common.hour') : t('common.hours'),
+      });
     } else if (Math.abs(diffMinutes) >= 1) {
-      return `${Math.abs(diffMinutes)} minute${
-        Math.abs(diffMinutes) === 1 ? '' : 's'
-      } ago`;
+      return t('common.minutes_ago', {
+        count: Math.abs(diffMinutes),
+        minute:
+          Math.abs(diffMinutes) === 1
+            ? t('common.minute')
+            : t('common.minutes'),
+      });
     } else {
-      return 'just now';
+      return t('common.now');
     }
   } else {
     // Future
     if (diffDays >= 1) {
-      return `in ${diffDays} day${diffDays === 1 ? '' : 's'}`;
+      return t('common.days_in', {
+        count: diffDays,
+        day: diffDays === 1 ? t('common.day') : t('common.days'),
+      });
     } else if (diffHours >= 1) {
-      return `in ${diffHours} hour${diffHours === 1 ? '' : 's'}`;
+      return t('common.hours_in', {
+        count: diffHours,
+        hour: diffHours === 1 ? t('common.hour') : t('common.hours'),
+      });
     } else if (diffMinutes >= 1) {
-      return `in ${diffMinutes} minute${diffMinutes === 1 ? '' : 's'}`;
+      return t('common.minutes_in', {
+        count: diffMinutes,
+        minute: diffMinutes === 1 ? t('common.minute') : t('common.minutes'),
+      });
     } else {
-      return 'now';
+      return t('common.now');
     }
   }
 }

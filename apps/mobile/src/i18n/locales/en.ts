@@ -43,6 +43,19 @@ export default {
     turkish: 'Turkish',
     accept: 'Accept',
     reject: 'Reject',
+    days_in: '{{count}} {{day}} later',
+    hours_in: '{{count}} {{hour}} later',
+    minutes_in: '{{count}} {{minute}} later',
+    day: 'day',
+    days: 'days',
+    hour: 'hour',
+    hours: 'hours',
+    minute: 'minute',
+    minutes: 'minutes',
+    now: 'Now',
+    days_ago: '{{count}} {{day}} ago',
+    hours_ago: '{{count}} {{hour}} ago',
+    minutes_ago: '{{count}} {{minute}} ago',
   },
 
   // Main navigation items
@@ -300,7 +313,8 @@ export default {
       change_role: 'Change Role',
       join_requests: 'Join Requests',
       join_request_sent: 'Join request sent',
-      leave_group_confirmation: 'Are you sure you want to leave {0} group?',
+      leave_group_confirmation:
+        'Are you sure you want to leave {{groupName}} group?',
       upload_cover_photo: 'Upload cover image',
       upload_logo: 'Upload logo',
       filter_groups: 'Filter Groups',
@@ -324,7 +338,7 @@ export default {
       people: 'people',
       role: 'Role',
       remove_member_confirmation:
-        'Are you sure you want to remove {0} from the group?',
+        'Are you sure you want to remove {{memberName}} from the group?',
       remove_member_confirmation_generic:
         'Are you sure you want to remove this member?',
       no_location: 'No location',
@@ -366,8 +380,8 @@ export default {
         "We couldn't load join requests. Please try again.",
       request_accepted: 'Request accepted successfully',
       request_rejected: 'Request rejected successfully',
-      wants_to_join_group: 'wants to join this group',
-      wants_to_join_event: 'wants to join this event',
+      wants_to_join_group: 'wants to join this group.',
+      wants_to_join_event: 'wants to join this event.',
     },
 
     // Profile screens

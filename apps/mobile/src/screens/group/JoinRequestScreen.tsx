@@ -12,6 +12,7 @@ import {
   Title,
   BodySmall,
   JoinRequestCard,
+  SkeletonGroup,
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {useGetGroupJoinRequests} from '@services/group-membership.service';
@@ -34,7 +35,6 @@ export const JoinRequestScreen = () => {
     error: groupRequestsError,
     refetch: refetchGroupRequests,
     loadMore: loadMoreGroupRequests,
-    hasMore: hasMoreGroupRequests,
     handleAccept: acceptGroupRequest,
     handleReject: rejectGroupRequest,
   } = useGetGroupJoinRequests();
@@ -46,7 +46,6 @@ export const JoinRequestScreen = () => {
     error: eventRequestsError,
     refetch: refetchEventRequests,
     loadMore: loadMoreEventRequests,
-    hasMore: hasMoreEventRequests,
     handleAccept: acceptEventRequest,
     handleReject: rejectEventRequest,
   } = useGetEventJoinRequests();
@@ -65,6 +64,18 @@ export const JoinRequestScreen = () => {
     setRefreshingEventRequests(false);
   }, [refetchEventRequests]);
 
+  // Render skeleton loaders for groups
+  const renderGroupSkeletons = (count = 3) => {
+    return Array.from({length: count}).map((_, index) => (
+      <SkeletonGroup
+        key={`skeleton-${index}`}
+        preset="groupCard"
+        showShadow={false}
+        style={styles.skeletonItem}
+      />
+    ));
+  };
+
   // Render group requests list
   const renderGroupRequests = () => {
     if (
@@ -73,9 +84,7 @@ export const JoinRequestScreen = () => {
       !groupJoinRequests?.length
     ) {
       return (
-        <View style={styles.loadingContainer}>
-          {/* Show skeleton loaders here */}
-        </View>
+        <View style={styles.loadingContainer}>{renderGroupSkeletons()}</View>
       );
     }
 
@@ -83,7 +92,7 @@ export const JoinRequestScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
-          <Subtitle weight="bold">
+          <Subtitle weight="bold" align="center">
             {t('errors.general.something_wrong')}
           </Subtitle>
           <BodySmall align="center">
@@ -102,8 +111,10 @@ export const JoinRequestScreen = () => {
     if (!groupJoinRequests || groupJoinRequests.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Icon name="users" size={48} />
-          <Title weight="bold">{t('screens.joinRequest.no_requests')}</Title>
+          <Icon name="users-filled" size={48} />
+          <Title weight="bold" align="center">
+            {t('screens.joinRequest.no_requests')}
+          </Title>
           <BodySmall align="center">
             {t('screens.joinRequest.no_group_requests_yet')}
           </BodySmall>
@@ -118,17 +129,14 @@ export const JoinRequestScreen = () => {
         renderItem={({item}) => (
           <JoinRequestCard
             type="group"
-            avatarSource={
-              item.user.avatar ? {uri: item.user.avatar} : undefined
-            }
+            avatarSource={{uri: item.user.avatar}}
             name={`${item.user.firstName} ${item.user.lastName}`}
-            groupName={'Deneme'}
-            timeAgo={item.createdAt}
+            groupName={item.group.name}
+            timeAgo={item.updatedAt}
             onAccept={() => acceptGroupRequest(item.id)}
             onReject={() => rejectGroupRequest(item.id)}
           />
         )}
-        contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -138,13 +146,6 @@ export const JoinRequestScreen = () => {
         }
         onEndReached={loadMoreGroupRequests}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          groupRequestsLoading && hasMoreGroupRequests ? (
-            <View style={styles.footerLoader}>
-              {/* Show skeleton loader here */}
-            </View>
-          ) : null
-        }
       />
     );
   };
@@ -157,9 +158,7 @@ export const JoinRequestScreen = () => {
       !eventJoinRequests?.length
     ) {
       return (
-        <View style={styles.loadingContainer}>
-          {/* Show skeleton loaders here */}
-        </View>
+        <View style={styles.loadingContainer}>{renderGroupSkeletons()}</View>
       );
     }
 
@@ -167,7 +166,7 @@ export const JoinRequestScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
-          <Subtitle weight="bold">
+          <Subtitle weight="bold" align="center">
             {t('errors.general.something_wrong')}
           </Subtitle>
           <BodySmall align="center">
@@ -186,8 +185,10 @@ export const JoinRequestScreen = () => {
     if (!eventJoinRequests || eventJoinRequests.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Icon name="calendar" size={48} />
-          <Title weight="bold">{t('screens.joinRequest.no_requests')}</Title>
+          <Icon name="calendar-filled" size={48} />
+          <Title weight="bold" align="center">
+            {t('screens.joinRequest.no_requests')}
+          </Title>
           <BodySmall align="center">
             {t('screens.joinRequest.no_event_requests_yet')}
           </BodySmall>
@@ -212,7 +213,6 @@ export const JoinRequestScreen = () => {
             onReject={() => rejectEventRequest(item.id)}
           />
         )}
-        contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -222,13 +222,6 @@ export const JoinRequestScreen = () => {
         }
         onEndReached={loadMoreEventRequests}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          eventRequestsLoading && hasMoreEventRequests ? (
-            <View style={styles.footerLoader}>
-              {/* Show skeleton loader here */}
-            </View>
-          ) : null
-        }
       />
     );
   };
@@ -265,7 +258,7 @@ export const JoinRequestScreen = () => {
             handleRefreshGroupRequests();
           }
         }}
-        variant="pill"
+        variant="default"
         equalWidth
         contentContainerStyle={styles.tabContent}
         containerStyle={styles.tabContainer}
@@ -285,9 +278,6 @@ const styles = StyleSheet.create({
   tabContent: {
     flex: 1,
   },
-  listContainer: {
-    paddingBottom: spacing.xxxl,
-  },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -303,5 +293,10 @@ const styles = StyleSheet.create({
   footerLoader: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  skeletonItem: {
+    marginBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderColor: colors.neutral.veryLightGrey,
   },
 });

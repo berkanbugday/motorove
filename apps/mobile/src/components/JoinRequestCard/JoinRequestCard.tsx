@@ -1,10 +1,9 @@
 import React from 'react';
 import {View, StyleSheet, Image, ImageSourcePropType} from 'react-native';
 import {colors, spacing, radius} from '@theme';
-import {Typography} from '@components/Typography';
-import {Button} from '@components/Button';
-import {Icon} from '@components/Icon';
+import {Typography, Button, Icon} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
+import {relativeTime} from '@utils/dateUtils';
 
 export interface JoinRequestCardProps {
   /**
@@ -30,7 +29,7 @@ export interface JoinRequestCardProps {
   /**
    * Time when the request was created
    */
-  timeAgo: Date | string;
+  timeAgo: Date;
 
   /**
    * Handler for accepting the request
@@ -63,40 +62,6 @@ export const JoinRequestCard: React.FC<JoinRequestCardProps> = ({
 }) => {
   const {t} = useTranslation();
 
-  // Format the time ago string
-  const formatTimeAgo = () => {
-    if (!timeAgo) return '';
-
-    // Simple date formatting
-    const date = typeof timeAgo === 'string' ? new Date(timeAgo) : timeAgo;
-
-    try {
-      // Try to calculate a relative time string
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - date.getTime());
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      const diffHours = Math.floor(
-        (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-      );
-      const diffMinutes = Math.floor(
-        (diffTime % (1000 * 60 * 60)) / (1000 * 60),
-      );
-
-      if (diffDays > 0) {
-        return `${diffDays}d ago`;
-      } else if (diffHours > 0) {
-        return `${diffHours}h ago`;
-      } else if (diffMinutes > 0) {
-        return `${diffMinutes}m ago`;
-      } else {
-        return 'Just now';
-      }
-    } catch (e) {
-      // Fallback to basic date
-      return date.toLocaleDateString();
-    }
-  };
-
   return (
     <View style={[styles.container, style]}>
       <View style={styles.content}>
@@ -117,18 +82,19 @@ export const JoinRequestCard: React.FC<JoinRequestCardProps> = ({
               {name}
             </Typography>
             <Typography variant="caption" color={colors.neutral.darkGrey}>
-              {formatTimeAgo()}
+              {relativeTime(timeAgo, t)}
             </Typography>
           </View>
 
           <View style={styles.groupRow}>
             <Icon
-              name={type === 'group' ? 'users-filled' : 'calendar'}
+              name={type === 'group' ? 'users-filled' : 'calendar-filled'}
               size={14}
               color={colors.neutral.darkGrey}
             />
             <Typography
               variant="body"
+              weight="medium"
               color={colors.neutral.darkGrey}
               style={styles.groupText}
               numberOfLines={1}>
@@ -172,10 +138,8 @@ export const JoinRequestCard: React.FC<JoinRequestCardProps> = ({
 const styles = StyleSheet.create({
   container: {
     padding: spacing.md,
-    borderBottomWidth: 0.5,
-    borderTopWidth: 0.5,
+    borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
-    borderTopColor: colors.secondary.main,
   },
   content: {
     flexDirection: 'row',

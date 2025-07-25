@@ -23,7 +23,7 @@ import {useTranslation} from '@hooks/useTranslation';
 export const useCreateGroup = (onSuccess?: () => void) => {
   const {t} = useTranslation();
   const [createGroupMutation, {loading, error}] = useMutation(CREATE_GROUP, {
-    onCompleted: _data => {
+    onCompleted: () => {
       showToast({
         type: 'success',
         text1: t('common.success'),

@@ -5,6 +5,7 @@ import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
 import { InvitationStatus } from '../../enums/models/invitation-status.enum';
 import { UserDto } from '../../users/dto/user.dto';
 import { Type } from 'class-transformer';
+import { GroupDto } from '../../groups/dto/group.dto';
 
 @ObjectType()
 export class GroupMembershipDto implements IGroupMembership {
@@ -12,9 +13,10 @@ export class GroupMembershipDto implements IGroupMembership {
   @IsUUID()
   id: string;
 
-  @Field(() => ID)
-  @IsUUID()
-  groupId: string;
+  @Field(() => GroupDto, { nullable: true })
+  @ValidateNested()
+  @Type(() => GroupDto)
+  group?: GroupDto;
 
   @Field(() => UserDto)
   @ValidateNested()
@@ -31,5 +33,9 @@ export class GroupMembershipDto implements IGroupMembership {
 
   @Field()
   @IsDate()
-  joinedAt: Date;
+  createdAt: Date;
+
+  @Field()
+  @IsDate()
+  updatedAt: Date;
 }

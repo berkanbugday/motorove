@@ -43,6 +43,19 @@ export default {
     turkish: 'Türkçe',
     accept: 'Kabul Et',
     reject: 'Reddet',
+    days_in: '{{count}} {{day}} sonra',
+    hours_in: '{{count}} {{hour}} sonra',
+    minutes_in: '{{count}} {{minute}} sonra',
+    day: 'gün',
+    days: 'gün',
+    hour: 'saat',
+    hours: 'saat',
+    minute: 'dakika',
+    minutes: 'dakika',
+    now: 'Şimdi',
+    days_ago: '{{count}} {{day}} önce',
+    hours_ago: '{{count}} {{hour}} önce',
+    minutes_ago: '{{count}} {{minute}} önce',
   },
 
   // Main navigation items
@@ -301,7 +314,7 @@ export default {
       change_role: 'Rol Değiştir',
       join_request_sent: 'Katılım isteği gönderildi',
       leave_group_confirmation:
-        '{0} grubundan ayrılmak istediğinize emin misiniz?',
+        '{{groupName}} grubundan ayrılmak istediğinize emin misiniz?',
       upload_cover_photo: 'Kapak fotoğrafı yükle',
       upload_logo: 'Logo yükle',
       filter_groups: 'Grupları Filtrele',
@@ -325,7 +338,7 @@ export default {
       people: 'Kişi',
       role: 'Rol',
       remove_member_confirmation:
-        '{0} üyesini gruptan çıkarmak istediğinize emin misiniz?',
+        '{{memberName}} üyesini gruptan çıkarmak istediğinize emin misiniz?',
       remove_member_confirmation_generic:
         'Üyeyi gruptan çıkarmak istediğinize emin misiniz?',
       no_location: 'Konum yok',
@@ -362,8 +375,8 @@ export default {
         'Katılım istekleri yüklenemedi. Lütfen tekrar deneyin.',
       request_accepted: 'Katılım isteği kabul edildi',
       request_rejected: 'Katılım isteği reddedildi',
-      wants_to_join_group: 'bu gruba katılım istiyor',
-      wants_to_join_event: 'bu etkinliğe katılım istiyor',
+      wants_to_join_group: 'grubuna katılmak istiyor.',
+      wants_to_join_event: 'etkinliğine katılmak istiyor.',
     },
 
     // Profile screens

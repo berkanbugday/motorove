@@ -488,7 +488,6 @@ type GroupMembership {
   groupId: String!
   id: ID!
   isActive: Boolean!
-  joinedAt: DateTime!
   role: GroupMemberRole!
   status: InvitationStatus!
   updatedAt: DateTime!
@@ -499,11 +498,12 @@ type GroupMembership {
 }
 
 type GroupMembershipDto {
-  groupId: ID!
+  createdAt: DateTime!
+  group: GroupDto
   id: ID!
-  joinedAt: DateTime!
   role: GroupMemberRole!
   status: InvitationStatus!
+  updatedAt: DateTime!
   user: UserDto!
 }
 
@@ -631,7 +631,7 @@ type Mutation {
   updateComment(input: UpdateCommentInput!): CommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
-  updateInvitationStatus(input: UpdateInvitationStatusInput!): Boolean!
+  updateInvitationStatus(input: UpdateInvitationStatusInput!): GroupMembershipDto!
   updateNotificationPermission(input: UpdateNotificationPermissionInput!): Boolean!
   updatePassword(input: UpdatePasswordInput!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
@@ -792,7 +792,7 @@ type Query {
   getLanguages: [EnumItem!]!
   getRoadTypes: [EnumItem!]!
   group(id: String!): GroupDto!
-  groupJoinRequests(limit: Int!, skip: Int!): [GroupMembershipDto!]!
+  groupJoinRequests(limit: Int, skip: Int): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
   isFollowing(userId: ID!): Boolean!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
@@ -932,9 +932,8 @@ input UpdateGroupInput {
 }
 
 input UpdateInvitationStatusInput {
-  groupId: ID!
+  id: ID!
   status: InvitationStatus!
-  userId: ID!
 }
 
 input UpdateNotificationPermissionInput {

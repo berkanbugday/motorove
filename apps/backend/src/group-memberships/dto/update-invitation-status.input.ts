@@ -1,13 +1,15 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, ID } from '@nestjs/graphql';
 import { IUpdateInvitationStatus } from '@motorove/shared';
 import { InvitationStatus } from '../../enums/models/invitation-status.enum';
-import { BaseGroupMembershipInput } from './base-group-membership.input';
+import { IsEnum, IsUUID } from 'class-validator';
 
 @InputType()
-export class UpdateInvitationStatusInput
-  extends BaseGroupMembershipInput
-  implements IUpdateInvitationStatus
-{
+export class UpdateInvitationStatusInput implements IUpdateInvitationStatus {
+  @Field(() => ID)
+  @IsUUID()
+  id: string;
+
   @Field(() => InvitationStatus)
+  @IsEnum(InvitationStatus)
   status: InvitationStatus;
 }

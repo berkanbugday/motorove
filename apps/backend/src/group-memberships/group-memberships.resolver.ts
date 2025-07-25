@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args, Query, Int } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query, Int, Context } from '@nestjs/graphql';
 import { GroupMembershipsService } from './group-memberships.service';
 import { AddMemberInput } from './dto/add-member.input';
 import { ChangeMemberRoleInput } from './dto/change-member-role.input';
@@ -10,7 +10,14 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
 import { GroupMembershipDto } from './dto/group-membership.dto';
 
-@Resolver(() => Boolean)
+interface GqlContext {
+  req: Request & {
+    user: { id: string };
+    headers: { authorization?: string };
+  };
+}
+
+@Resolver(() => GroupMembershipDto)
 export class GroupMembershipsResolver {
   constructor(
     private readonly groupMembershipsService: GroupMembershipsService,
@@ -19,10 +26,19 @@ export class GroupMembershipsResolver {
   @UseGuards(JwtGuard)
   @Query(() => [GroupMembershipDto])
   async groupJoinRequests(
-    @Args('limit', { type: () => Int }) limit: number,
-    @Args('skip', { type: () => Int }) skip: number,
+    @Context() context: GqlContext,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<GroupMembershipDto[]> {
-    return await this.groupMembershipsService.getGroupJoinRequests(limit, skip);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return await this.groupMembershipsService.groupJoinRequests(
+      limit,
+      skip,
+      userId,
+      authToken,
+    );
   }
 
   @UseGuards(JwtGuard)
@@ -62,14 +78,13 @@ export class GroupMembershipsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => Boolean)
+  @Mutation(() => GroupMembershipDto)
   async updateInvitationStatus(
     @Args('input') input: UpdateInvitationStatusInput,
     @CurrentUser() user: User,
-  ): Promise<boolean> {
+  ): Promise<GroupMembershipDto> {
     return await this.groupMembershipsService.updateInvitationStatus(
-      input.groupId,
-      input.userId,
+      input.id,
       input.status,
       user.id,
     );

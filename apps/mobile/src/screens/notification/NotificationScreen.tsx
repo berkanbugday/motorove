@@ -226,7 +226,7 @@ export const NotificationScreen = () => {
               <View style={styles.timeContainer}>
                 <Icon name="clock" size={12} color={colors.neutral.grey} />
                 <Caption color={colors.neutral.grey} style={styles.infoText}>
-                  {relativeTime(item.createdAt)}
+                  {relativeTime(item.createdAt, t)}
                 </Caption>
               </View>
             </View>

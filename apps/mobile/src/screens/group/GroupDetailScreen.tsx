@@ -74,6 +74,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {AuthUser} from '@app-types/auth.types';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
+import {TFunction} from 'i18next';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
 const formatAvatarSource = (imageUrl?: string) => {
@@ -82,7 +83,7 @@ const formatAvatarSource = (imageUrl?: string) => {
     : require('@assets/images/default_avatar.png');
 };
 
-const transformPostToFeedCard = (post: IPost) => {
+const transformPostToFeedCard = (post: IPost, t: TFunction) => {
   const labels = [];
 
   if (post.addresses && post.addresses.length > 0) {
@@ -107,7 +108,7 @@ const transformPostToFeedCard = (post: IPost) => {
     id: post.id,
     userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
     avatarSource: formatAvatarSource(post.createdBy.avatar),
-    timeAgo: relativeTime(post.createdAt),
+    timeAgo: relativeTime(post.createdAt, t),
     content: post.content,
     images,
     likeCount: post.likesCount,
@@ -427,7 +428,11 @@ export const GroupDetailScreen = () => {
     refetchGroup?.() || refetchPosts?.();
   });
   const {changeMemberRole, loading: changeMemberRoleLoading} =
-    useChangeMemberRole();
+    useChangeMemberRole(() => {
+      // Close dialog and refresh data
+      changeRoleDialogRef.current?.close();
+      refetchGroup?.() || refetchPosts?.();
+    });
   const {removeMember, loading: removeMemberLoading} = useRemoveMember(() => {
     removeMemberDialogRef.current?.close();
     leaveGroupBottomSheetRef.current?.close();
@@ -503,9 +508,6 @@ export const GroupDetailScreen = () => {
           role: selectedRole.value as GroupMemberRole,
         });
       }
-      // Close dialog and refresh data
-      changeRoleDialogRef.current?.close();
-      refetchGroup && refetchGroup();
     } catch (error) {
       loggingService.error('Error changing member role', error);
       showToast({
@@ -875,7 +877,7 @@ export const GroupDetailScreen = () => {
       // Determine if this is the user's own post
       const isOwnPost = item.createdBy.id === user?.id;
       // Transform Post model to FeedCard props
-      const feedCardProps = transformPostToFeedCard(item);
+      const feedCardProps = transformPostToFeedCard(item, t);
 
       return (
         <FeedCard
@@ -1253,10 +1255,9 @@ export const GroupDetailScreen = () => {
         <View style={styles.leaveGroupContainer}>
           <View style={styles.leaveGroupContent}>
             <BodySmall align="center">
-              {t('screens.group.leave_group_confirmation').replace(
-                '{0}',
-                group?.name || '',
-              )}
+              {t('screens.group.leave_group_confirmation', {
+                groupName: group?.name || '',
+              })}
             </BodySmall>
           </View>
           <View style={styles.leaveGroupButtonsContainer}>
@@ -1324,10 +1325,9 @@ export const GroupDetailScreen = () => {
         title={t('screens.group.remove_member')}
         message={
           memberToRemove
-            ? t('screens.group.remove_member_confirmation').replace(
-                '{0}',
-                `${memberToRemove.user.firstName} ${memberToRemove.user.lastName}`,
-              )
+            ? t('screens.group.remove_member_confirmation', {
+                memberName: `${memberToRemove.user.firstName} ${memberToRemove.user.lastName}`,
+              })
             : t('screens.group.remove_member_confirmation_generic')
         }
         variant="confirm"

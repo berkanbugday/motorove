@@ -456,14 +456,13 @@ model Group {
 }
 
 model GroupMembership {
-  id       String           @id @default(uuid())
-  groupId  String
-  group    Group            @relation(fields: [groupId], references: [id])
-  userId   String
-  user     User             @relation("UserGroupMembership", fields: [userId], references: [id])
-  role     GroupMemberRole
-  status   InvitationStatus @default(PENDING)
-  joinedAt DateTime         @default(now())
+  id      String           @id @default(uuid())
+  groupId String
+  group   Group            @relation(fields: [groupId], references: [id])
+  userId  String
+  user    User             @relation("UserGroupMembership", fields: [userId], references: [id])
+  role    GroupMemberRole
+  status  InvitationStatus @default(PENDING)
 
   // Base model fields
   createdById String
