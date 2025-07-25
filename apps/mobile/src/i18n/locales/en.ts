@@ -756,6 +756,7 @@ export default {
       check_connection: 'Please check your internet connection and try again',
       timeout: 'The request timed out. Please try again.',
       offline: 'You are offline. Please check your connection and try again.',
+      no_internet_connection: 'No internet connection',
     },
     // Authentication errors
     auth: {

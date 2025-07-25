@@ -26,6 +26,7 @@ import BottomSheetProvider from '@components/BottomSheet/BottomSheetProvider';
 
 // Import i18n configuration
 import './src/i18n';
+import {useTranslation} from 'react-i18next';
 
 // Initialize Sentry if DSN is provided
 if (
@@ -46,6 +47,7 @@ if (
 
 function App(): React.JSX.Element {
   const [isStorageReady, setIsStorageReady] = useState(false);
+  const {t} = useTranslation();
 
   // Initialize services
   useEffect(() => {
@@ -100,7 +102,9 @@ function App(): React.JSX.Element {
       <GestureHandlerRootView style={{flex: 1}}>
         <ApolloProvider client={apolloClient}>
           <LanguageProvider>
-            <NetworkStatusBar />
+            <NetworkStatusBar
+              offlineMessage={t('errors.network.no_internet_connection')}
+            />
             <ToastMessage.Provider>
               <SafeAreaProvider>
                 <BottomSheetProvider.Provider>

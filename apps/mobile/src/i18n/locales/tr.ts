@@ -752,6 +752,7 @@ export default {
       timeout: 'İstek zaman aşımına uğradı. Lütfen tekrar deneyin.',
       offline:
         'Çevrimdışısınız. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+      no_internet_connection: 'İnternet bağlantısı yok',
     },
     // Authentication errors
     auth: {
