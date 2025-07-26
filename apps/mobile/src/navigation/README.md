@@ -19,7 +19,7 @@ RootNavigator
 │   └── ForgotPasswordScreen
 └── MainNavigator (when user is authenticated)
     └── HomeScreen
-    └── (More screens to be added)
+    └── (screens to be added)
 ```
 
 ## Best Practices

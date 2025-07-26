@@ -66,7 +66,7 @@ export default {
     search: 'Search',
     map: 'Map',
     groups: 'Groups',
-    more: 'Menu',
+    menu: 'Menu',
     profile: 'Profile',
     events: 'Events',
     notifications: 'Notifications',
@@ -542,8 +542,8 @@ export default {
       no_vehicles: 'No vehicles added yet',
     },
 
-    // More screen
-    more: {
+    // Menu screen
+    menu: {
       general: 'General',
       account: 'Account',
       my_profile: 'My Profile',

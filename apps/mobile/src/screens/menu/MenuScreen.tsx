@@ -22,7 +22,7 @@ type MenuItem = {
   showRightIcon?: boolean;
 };
 
-export const MoreScreen = () => {
+export const MenuScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {user, signOut} = useAuth();
   const insets = useSafeAreaInsets();
@@ -46,7 +46,7 @@ export const MoreScreen = () => {
         />
       ),
       snapPoint: 'minimal',
-      title: t('screens.more.language_selection'),
+      title: t('screens.menu.language_selection'),
       showCloseButton: true,
       closeButtonPosition: 'top-left',
     });
@@ -54,7 +54,7 @@ export const MoreScreen = () => {
 
   const menuSections: MenuSection[] = [
     {
-      title: t('screens.more.general'),
+      title: t('screens.menu.general'),
       items: [
         {
           icon: (
@@ -64,7 +64,7 @@ export const MoreScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.more.my_profile'),
+          title: t('screens.menu.my_profile'),
           onPress: () => {
             navigation.navigate('Profile', {
               userId: user?.id,
@@ -76,7 +76,7 @@ export const MoreScreen = () => {
           icon: (
             <Icon name="garage-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.more.my_garage'),
+          title: t('screens.menu.my_garage'),
           onPress: handleNotificationsPress,
           showBadge: false, // Set to true when you have unread notifications
           showRightIcon: true,
@@ -85,7 +85,7 @@ export const MoreScreen = () => {
           icon: (
             <Icon name="save-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.more.favorites'),
+          title: t('screens.menu.favorites'),
           onPress: handleNotificationsPress,
           showBadge: false, // Set to true when you have unread notifications
           showRightIcon: true,
@@ -98,14 +98,14 @@ export const MoreScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.more.events'),
+          title: t('screens.menu.events'),
           onPress: handleCreateEventPress,
           showRightIcon: true,
         },
       ],
     },
     {
-      title: t('screens.more.requests'),
+      title: t('screens.menu.requests'),
       items: [
         {
           icon: (
@@ -115,7 +115,7 @@ export const MoreScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.more.join_requests'),
+          title: t('screens.menu.join_requests'),
           onPress: () => {
             navigation.navigate('JoinRequest');
           },
@@ -129,7 +129,7 @@ export const MoreScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.more.follow_requests'),
+          title: t('screens.menu.follow_requests'),
           onPress: () => {
             // Navigate to my events when implemented
             // navigation.navigate('MyEvents');
@@ -139,7 +139,7 @@ export const MoreScreen = () => {
       ],
     },
     {
-      title: t('screens.more.settings'),
+      title: t('screens.menu.settings'),
       items: [
         {
           icon: (
@@ -149,7 +149,7 @@ export const MoreScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.more.language'),
+          title: t('screens.menu.language'),
           onPress: handleLanguagePress,
           showRightIcon: true,
         },
@@ -157,7 +157,7 @@ export const MoreScreen = () => {
           icon: (
             <Icon name="bell-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.more.notifications'),
+          title: t('screens.menu.notifications'),
           onPress: () => {},
           showRightIcon: true,
         },
@@ -165,7 +165,7 @@ export const MoreScreen = () => {
           icon: (
             <Icon name="lock-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.more.privacy_settings'),
+          title: t('screens.menu.privacy_settings'),
           onPress: () => {
             // Open terms of service
             // navigation.navigate('TermsOfService');
@@ -175,7 +175,7 @@ export const MoreScreen = () => {
       ],
     },
     {
-      title: t('screens.more.support_legal'),
+      title: t('screens.menu.support_legal'),
       items: [
         {
           icon: (
@@ -185,7 +185,7 @@ export const MoreScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.more.contact_support'),
+          title: t('screens.menu.contact_support'),
           onPress: () => {
             // Open privacy policy
             // navigation.navigate('PrivacyPolicy');
@@ -196,7 +196,7 @@ export const MoreScreen = () => {
           icon: (
             <Icon name="share-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.more.invite_friends'),
+          title: t('screens.menu.invite_friends'),
           onPress: () => {
             // Open terms of service
             // navigation.navigate('TermsOfService');
@@ -207,7 +207,7 @@ export const MoreScreen = () => {
           icon: (
             <Icon name="list-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.more.terms_of_service'),
+          title: t('screens.menu.terms_of_service'),
           onPress: () => {
             // Open terms of service
             // navigation.navigate('TermsOfService');
@@ -218,7 +218,7 @@ export const MoreScreen = () => {
           icon: (
             <Icon name="file-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.more.privacy_policy'),
+          title: t('screens.menu.privacy_policy'),
           onPress: () => {
             // Open terms of service
             // navigation.navigate('TermsOfService');
@@ -232,7 +232,7 @@ export const MoreScreen = () => {
       items: [
         {
           icon: <Icon name="sign-out" size={18} color={colors.primary.main} />,
-          title: t('screens.more.sign_out'),
+          title: t('screens.menu.sign_out'),
           onPress: () => {
             signOut();
           },

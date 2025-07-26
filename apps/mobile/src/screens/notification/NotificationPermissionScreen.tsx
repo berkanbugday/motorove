@@ -16,7 +16,7 @@ import {loggingService} from '@services/logging.service';
 export const NotificationPermissionScreen = () => {
   const {t} = useTranslation();
   const {updateUserSetting} = useUpdateUserSetting();
-  const {user, updateNotificationPermissionState} = useAuth();
+  const {user, updateNotificationPermission} = useAuth();
   const {saveDeviceToken} = useSaveDeviceToken();
 
   const handleAllow = async () => {
@@ -33,8 +33,11 @@ export const NotificationPermissionScreen = () => {
             const resultUpdate = await updateUserSetting({
               notificationPermission: NotificationPermission.ALLOWED,
             });
-            if (resultUpdate) {
-              await updateNotificationPermissionState(
+            if (
+              resultUpdate?.notificationPermission ===
+              NotificationPermission.ALLOWED
+            ) {
+              await updateNotificationPermission(
                 NotificationPermission.ALLOWED,
               );
             }
@@ -42,8 +45,11 @@ export const NotificationPermissionScreen = () => {
             const resultUpdate = await updateUserSetting({
               notificationPermission: NotificationPermission.NOT_ALLOWED,
             });
-            if (resultUpdate) {
-              await updateNotificationPermissionState(
+            if (
+              resultUpdate?.notificationPermission ===
+              NotificationPermission.NOT_ALLOWED
+            ) {
+              await updateNotificationPermission(
                 NotificationPermission.NOT_ALLOWED,
               );
             }
@@ -72,8 +78,11 @@ export const NotificationPermissionScreen = () => {
             const resultUpdate = await updateUserSetting({
               notificationPermission: NotificationPermission.ALLOWED,
             });
-            if (resultUpdate) {
-              await updateNotificationPermissionState(
+            if (
+              resultUpdate?.notificationPermission ===
+              NotificationPermission.ALLOWED
+            ) {
+              await updateNotificationPermission(
                 NotificationPermission.ALLOWED,
               );
             }
@@ -81,8 +90,11 @@ export const NotificationPermissionScreen = () => {
             const resultUpdate = await updateUserSetting({
               notificationPermission: NotificationPermission.NOT_ALLOWED,
             });
-            if (resultUpdate) {
-              await updateNotificationPermissionState(
+            if (
+              resultUpdate?.notificationPermission ===
+              NotificationPermission.NOT_ALLOWED
+            ) {
+              await updateNotificationPermission(
                 NotificationPermission.NOT_ALLOWED,
               );
             }

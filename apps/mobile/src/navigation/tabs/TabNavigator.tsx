@@ -3,7 +3,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {HomeScreen} from '@screens/home';
 import {MapScreen} from '@screens/map';
-import {MoreScreen} from '@screens/more';
+import {MenuScreen} from '@screens/menu';
 import {GroupScreen} from '@screens/group';
 import {SearchUserScreen} from '@screens/searchUser';
 import {TabParamList} from '../types/navigationTypes';
@@ -35,7 +35,7 @@ export const TabNavigator: React.FC<TabNavigatorProps> = ({
       <Tab.Screen name="SearchTab" component={SearchUserScreen} />
       <Tab.Screen name="MapTab" component={MapScreen} />
       <Tab.Screen name="GroupsTab" component={GroupScreen} />
-      <Tab.Screen name="MoreTab" component={MoreScreen} />
+      <Tab.Screen name="MenuTab" component={MenuScreen} />
     </Tab.Navigator>
   );
 };

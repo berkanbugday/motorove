@@ -24,7 +24,7 @@ export interface AuthContextType extends AuthState {
   accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
-  updateNotificationPermissionState: (
+  updateNotificationPermission: (
     permission: NotificationPermission,
   ) => Promise<void>;
 }
@@ -44,7 +44,7 @@ const AuthContext = createContext<AuthContextType>({
   loadAuthState: async () => {
     throw new Error('Not implemented');
   },
-  updateNotificationPermissionState: async () => {
+  updateNotificationPermission: async () => {
     throw new Error('Not implemented');
   },
 });
@@ -130,8 +130,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 const resultUpdate = await updateUserSetting({
                   notificationPermission: NotificationPermission.ALLOWED,
                 });
-                if (resultUpdate) {
-                  await updateNotificationPermissionState(
+                if (
+                  resultUpdate?.notificationPermission ===
+                  NotificationPermission.ALLOWED
+                ) {
+                  await updateNotificationPermission(
                     NotificationPermission.ALLOWED,
                   );
                 }
@@ -139,8 +142,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
                 const resultUpdate = await updateUserSetting({
                   notificationPermission: NotificationPermission.NOT_ALLOWED,
                 });
-                if (resultUpdate) {
-                  await updateNotificationPermissionState(
+                if (
+                  resultUpdate?.notificationPermission ===
+                  NotificationPermission.NOT_ALLOWED
+                ) {
+                  await updateNotificationPermission(
                     NotificationPermission.NOT_ALLOWED,
                   );
                 }
@@ -186,7 +192,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     }
   };
 
-  const updateNotificationPermissionState = async (
+  const updateNotificationPermission = async (
     permission: NotificationPermission,
   ): Promise<void> => {
     try {
@@ -213,7 +219,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         accountSetup,
         signOut,
         loadAuthState,
-        updateNotificationPermissionState,
+        updateNotificationPermission,
       }}>
       {children}
     </AuthContext.Provider>

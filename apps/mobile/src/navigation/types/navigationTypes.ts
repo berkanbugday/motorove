@@ -27,7 +27,7 @@ export type TabParamList = {
   SearchTab: undefined;
   MapTab: undefined;
   GroupsTab: undefined;
-  MoreTab: undefined;
+  MenuTab: undefined;
 };
 
 export type TabScreenNavigationProp<T extends keyof TabParamList> =
@@ -53,7 +53,6 @@ export type MainStackParamList = {
   Notification: undefined;
   Profile: {userId?: string};
   JoinRequest: undefined;
-  // Add more screens here as your app grows
   // Settings: undefined;
 };
 

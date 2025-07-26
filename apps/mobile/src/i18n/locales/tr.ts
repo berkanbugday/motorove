@@ -66,7 +66,7 @@ export default {
     search: 'Ara',
     map: 'Harita',
     groups: 'Gruplar',
-    more: 'Menü',
+    menu: 'Menü',
     profile: 'Profil',
     events: 'Etkinlikler',
     notifications: 'Bildirimler',
@@ -537,8 +537,8 @@ export default {
       no_vehicles: 'Henüz araç eklenmemiş',
     },
 
-    // More screen
-    more: {
+    // Menu screen
+    menu: {
       general: 'Genel',
       my_profile: 'Profilim',
       my_garage: 'Garajım',

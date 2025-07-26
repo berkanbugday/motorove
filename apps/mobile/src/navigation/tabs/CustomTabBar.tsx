@@ -65,7 +65,7 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
         return isFocused ? 'map-location' : 'map-location';
       case 'GroupsTab':
         return isFocused ? 'users' : 'users';
-      case 'MoreTab':
+      case 'MenuTab':
         return isFocused ? 'more-horizontal' : 'more-horizontal';
       default:
         return 'home';
@@ -82,8 +82,8 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
         return t('navigation.map');
       case 'GroupsTab':
         return t('navigation.groups');
-      case 'MoreTab':
-        return t('navigation.more');
+      case 'MenuTab':
+        return t('navigation.menu');
       default:
         return t('navigation.home');
     }
