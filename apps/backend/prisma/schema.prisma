@@ -287,9 +287,7 @@ model User {
 
   // EventParticipant relations
   updatedEventParticipants EventParticipant[] @relation("EventParticipantUpdatedBy")
-
-  // Notification settings relations
-  notificationSettings UserNotificationSetting[]
+  UserSetting              UserSetting?
 
   @@index([supabaseId])
   @@index([isActive])
@@ -298,24 +296,6 @@ model User {
   @@index([interests])
   @@index([cityId])
   @@index([notificationPermission])
-}
-
-// User notification settings
-model UserNotificationSetting {
-  id               String              @id @default(uuid())
-  userId           String
-  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notificationType NotificationType
-  channel          NotificationChannel
-  isEnabled        Boolean             @default(true)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-
-  @@unique([userId, notificationType, channel])
-  @@index([userId])
-  @@index([notificationType])
-  @@index([channel])
-  @@index([isEnabled])
 }
 
 // New model for user garages
@@ -637,17 +617,21 @@ model Address {
 
 // User following relationships
 model UserFollowing {
-  id          String   @id @default(uuid())
+  id          String           @id @default(uuid())
   followerId  String
-  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  follower    User             @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
   followingId String
-  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
+  following   User             @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime         @default(now())
+  status      InvitationStatus @default(PENDING)
+  isActive    Boolean          @default(true)
 
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
   @@index([createdAt])
+  @@index([status])
+  @@index([isActive])
 }
 
 // Event model
@@ -747,4 +731,23 @@ model EventInvitation {
   @@index([status])
   @@index([createdAt])
   @@index([isActive])
+}
+
+// User settings model
+model UserSetting {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Privacy settings
+  autoAcceptFollowers Boolean @default(false)
+
+  // Notification preferences
+  notificationPreferences Json? // Map of NotificationType to boolean
+
+  // Base model fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

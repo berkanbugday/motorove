@@ -56,6 +56,8 @@ export default {
     days_ago: '{{count}} {{day}} ago',
     hours_ago: '{{count}} {{hour}} ago',
     minutes_ago: '{{count}} {{minute}} ago',
+    follow: 'Follow',
+    unfollow: 'Unfollow',
   },
 
   // Main navigation items

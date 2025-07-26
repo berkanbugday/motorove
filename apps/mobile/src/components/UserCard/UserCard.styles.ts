@@ -1,9 +1,9 @@
 import {StyleSheet} from 'react-native';
-import {colors, spacing, radius, getShadow} from '@theme';
+import {colors, spacing, radius, commonStyles} from '@theme';
 
 export const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
     borderBottomWidth: 0.5,
     borderTopWidth: 0.5,
     borderColor: colors.neutral.veryLightGrey,
@@ -12,13 +12,12 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: spacing.sm,
   },
-  avatarContainer: {
-    ...getShadow('small'),
-  },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
     marginRight: spacing.md,
     alignSelf: 'center',
   },

@@ -4,6 +4,7 @@ import { UserDto } from './dto/user.dto';
 import { AccountSetupInput } from './dto/account-setup.input';
 import { StorageService } from '../core/storage/storage.service';
 import { CityDto } from '../cities/dto/city.dto';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +19,7 @@ export class UsersService {
     limit?: number,
     skip?: number,
     currentUserId?: string,
+    authToken?: string,
   ): Promise<UserDto[]> {
     const searchQuery = query?.trim();
 
@@ -43,30 +45,27 @@ export class UsersService {
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
       include: {
         city: true,
+        followers: true,
+        following: true,
       },
     });
 
-    // Get all users that the current user is following
-    const userFollowings = await this.prisma.userFollowing.findMany({
-      where: {
-        followerId: currentUserId,
-        followingId: {
-          in: users.map((user) => user.id),
-        },
-      },
-    });
+    const usersWithSignedUrls = await Promise.all(
+      users.map(async (user) => ({
+        ...user,
+        isFollowing: user.followers.some(
+          (follower) => follower.followerId === currentUserId,
+        ),
+        followerCount: user.followers.length,
+        followingCount: user.following.length,
+        city: user.city as CityDto,
+        avatar: user.avatar
+          ? await this.storageService.getSignedUrl(user.avatar, 3600, authToken)
+          : user.avatar,
+      })),
+    );
 
-    // Create a set of following IDs for efficient lookup
-    const followingIdsSet = new Set(userFollowings.map((uf) => uf.followingId));
-
-    return users.map((user) => ({
-      ...user,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      avatar: user.avatar || undefined,
-      isFollowing: followingIdsSet.has(user.id),
-      city: user.city as CityDto,
-    }));
+    return usersWithSignedUrls.map((user) => plainToClass(UserDto, user));
   }
 
   async findOne(id: string): Promise<UserDto> {
@@ -83,8 +82,6 @@ export class UsersService {
 
     return {
       ...user,
-      firstName: user.firstName,
-      lastName: user.lastName,
       avatar: user.avatar || undefined,
       city: user.city as CityDto,
     };

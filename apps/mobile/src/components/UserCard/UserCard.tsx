@@ -4,12 +4,13 @@ import {colors} from '@theme';
 import {Typography} from '@components/Typography';
 import {Button} from '@components/Button';
 import {Icon} from '@components/Icon';
-import {User} from '../../types';
 import {useFollowUser, useUnfollowUser} from '@services/follow.service';
 import {styles} from './UserCard.styles';
+import {IUser} from '@motorove/shared';
+import {useTranslation} from '@/hooks/useTranslation';
 
 interface UserCardProps {
-  user: User;
+  user: IUser;
   onPress?: () => void;
   onFollowStatusChange?: (isFollowing: boolean) => void;
   style?: any;
@@ -24,8 +25,7 @@ export const UserCard: React.FC<UserCardProps> = ({
   onFollowStatusChange,
   style,
 }) => {
-  // Use local state for immediate UI feedback and follow status
-  const [loading, setLoading] = useState<boolean>(false);
+  const {t} = useTranslation();
   const [isFollowing, setIsFollowing] = useState<boolean>(
     user.isFollowing || false,
   );
@@ -36,42 +36,47 @@ export const UserCard: React.FC<UserCardProps> = ({
   }, [user.isFollowing]);
 
   // Follow and unfollow mutations with callbacks to update local state
-  const {followUser} = useFollowUser((newStatus: boolean) => {
-    setIsFollowing(newStatus);
-    if (onFollowStatusChange) {
-      onFollowStatusChange(newStatus);
-    }
-    setLoading(false);
-  });
+  const {followUser, loading: followLoading} = useFollowUser(
+    (newStatus: boolean) => {
+      setIsFollowing(newStatus);
+      if (onFollowStatusChange) {
+        onFollowStatusChange(newStatus);
+      }
+    },
+  );
 
-  const {unfollowUser} = useUnfollowUser((newStatus: boolean) => {
-    setIsFollowing(newStatus);
-    if (onFollowStatusChange) {
-      onFollowStatusChange(newStatus);
-    }
-    setLoading(false);
-  });
+  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser(
+    (newStatus: boolean) => {
+      setIsFollowing(newStatus);
+      if (onFollowStatusChange) {
+        onFollowStatusChange(newStatus);
+      }
+    },
+  );
 
   const handleFollowPress = useCallback(async () => {
-    if (loading) {
+    if (followLoading) {
       return;
     }
 
     try {
-      setLoading(true);
-
-      // Perform the follow/unfollow operation
-      // The callbacks will handle updating the UI after the server responds
-      if (isFollowing) {
-        await unfollowUser(user.id);
-      } else {
-        await followUser(user.id);
-      }
+      await followUser(user.id);
     } catch (error) {
-      console.error('Error toggling follow status:', error);
-      setLoading(false);
+      console.error('Error following user:', error);
     }
-  }, [loading, isFollowing, user.id, followUser, unfollowUser]);
+  }, [user.id, followUser]);
+
+  const handleUnfollowPress = useCallback(async () => {
+    if (unfollowLoading) {
+      return;
+    }
+
+    try {
+      await unfollowUser(user.id);
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+    }
+  }, [user.id, unfollowUser]);
 
   return (
     <TouchableOpacity
@@ -80,18 +85,20 @@ export const UserCard: React.FC<UserCardProps> = ({
       activeOpacity={0.8}
       disabled={!onPress}>
       <View style={styles.content}>
-        <View style={styles.avatarContainer}>
-          <Image
-            source={user.avatar ? {uri: user.avatar} : undefined}
-            style={styles.avatar}
-          />
-        </View>
+        <Image
+          source={
+            user.avatar
+              ? {uri: user.avatar}
+              : require('@assets/images/default_avatar.png')
+          }
+          style={styles.avatar}
+        />
         <View style={styles.infoContainer}>
           <Typography variant="body" numberOfLines={1}>
             {user.firstName} {user.lastName}
           </Typography>
 
-          {user.location && (
+          {user.city && (
             <View style={styles.locationContainer}>
               <Icon name="map-pin" size={12} color={colors.neutral.grey} />
               <Typography
@@ -99,53 +106,30 @@ export const UserCard: React.FC<UserCardProps> = ({
                 color={colors.neutral.darkGrey}
                 style={styles.infoText}
                 numberOfLines={1}>
-                {user.location}
+                {user.city?.value}
               </Typography>
-            </View>
-          )}
-
-          {user.interests && user.interests.length > 0 && (
-            <View style={styles.tagsContainer}>
-              {user.interests.map((interest: string, index: number) => (
-                <React.Fragment key={interest}>
-                  <Typography
-                    variant="caption"
-                    color={colors.neutral.darkGrey}
-                    style={{
-                      textDecorationLine: 'underline',
-                    }}>
-                    {interest}
-                  </Typography>
-                  {index < (user.interests?.length || 0) - 1 && (
-                    <Typography
-                      variant="caption"
-                      color={colors.neutral.darkGrey}
-                      style={styles.tagSeparator}>
-                      •
-                    </Typography>
-                  )}
-                </React.Fragment>
-              ))}
             </View>
           )}
         </View>
         <View style={styles.buttonContainer}>
-          {!isFollowing ? (
+          {isFollowing ? (
             <Button
-              title="Follow"
+              title={t('common.unfollow')}
+              variant="secondary"
+              size="small"
+              onPress={handleUnfollowPress}
+              disabled={unfollowLoading}
+              loading={unfollowLoading}
+            />
+          ) : (
+            <Button
+              title={t('common.follow')}
               variant="dark"
               size="small"
               onPress={handleFollowPress}
-              disabled={loading}
-              loading={loading}
+              disabled={followLoading}
+              loading={followLoading}
             />
-          ) : (
-            <Typography
-              variant="caption"
-              color={colors.neutral.darkGrey}
-              style={styles.tagSeparator}>
-              Following
-            </Typography>
           )}
         </View>
       </View>

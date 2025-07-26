@@ -1,11 +1,9 @@
 import { Resolver, Query, Args, Context, Int, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { User } from './models/user.model';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { UsersService } from './users.service';
 import { Request } from 'express';
 import { UserDto } from './dto/user.dto';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { AccountSetupInput } from './dto/account-setup.input';
 import { UpdateNotificationPermissionInput } from './dto/update-notification-permission.input';
 
@@ -23,12 +21,21 @@ export class UsersResolver {
   @UseGuards(JwtGuard)
   @Query(() => [UserDto], { name: 'users' })
   async findAll(
-    @CurrentUser() user: User,
+    @Context() context: GqlContext,
     @Args('query', { type: () => String, nullable: true }) query?: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserDto[]> {
-    return await this.usersService.findAll(query, limit, skip, user.id);
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return await this.usersService.findAll(
+      query,
+      limit,
+      skip,
+      userId,
+      authToken,
+    );
   }
 
   @UseGuards(JwtGuard)

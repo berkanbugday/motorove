@@ -56,6 +56,8 @@ export default {
     days_ago: '{{count}} {{day}} önce',
     hours_ago: '{{count}} {{hour}} önce',
     minutes_ago: '{{count}} {{minute}} önce',
+    follow: 'Takip Et',
+    unfollow: 'Takibi Bırak',
   },
 
   // Main navigation items

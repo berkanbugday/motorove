@@ -30,7 +30,7 @@ export class UserFollowingsService {
     });
 
     return await Promise.all(
-      followers.map((f) => this.mapToDto(f as UserFollowing)),
+      followers.map((f) => this.mapToDto(f as unknown as UserFollowing)),
     );
   }
 
@@ -52,7 +52,7 @@ export class UserFollowingsService {
     });
 
     return await Promise.all(
-      following.map((f) => this.mapToDto(f as UserFollowing)),
+      following.map((f) => this.mapToDto(f as unknown as UserFollowing)),
     );
   }
 
@@ -101,7 +101,7 @@ export class UserFollowingsService {
       },
     });
 
-    return this.mapToDto(follow as UserFollowing);
+    return this.mapToDto(follow as unknown as UserFollowing);
   }
 
   async unfollow(
@@ -123,9 +123,12 @@ export class UserFollowingsService {
     }
 
     // Delete the follow relationship
-    const deletedUserFollowing = await this.prisma.userFollowing.delete({
+    const deletedUserFollowing = await this.prisma.userFollowing.update({
       where: {
         id: userFollowing.id,
+      },
+      data: {
+        isActive: false,
       },
       include: {
         follower: true,
@@ -133,7 +136,7 @@ export class UserFollowingsService {
       },
     });
 
-    return this.mapToDto(deletedUserFollowing as UserFollowing);
+    return this.mapToDto(deletedUserFollowing as unknown as UserFollowing);
   }
 
   async isFollowing(followerId: string, followingId: string): Promise<boolean> {
