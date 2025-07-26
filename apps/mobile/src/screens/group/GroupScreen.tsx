@@ -333,14 +333,7 @@ export const GroupScreen = () => {
       <Tabs
         items={tabItems}
         selectedKey={activeTab}
-        onTabChange={key => {
-          setActiveTab(key);
-          if (key === 'explore') {
-            handleRefreshAllGroups();
-          } else {
-            handleRefreshJoinedGroups();
-          }
-        }}
+        onTabChange={setActiveTab}
         variant="pill"
         equalWidth
         contentContainerStyle={styles.tabContent}

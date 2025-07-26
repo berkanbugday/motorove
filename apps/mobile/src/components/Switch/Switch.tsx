@@ -6,7 +6,7 @@ import {
   ViewStyle,
   Animated,
 } from 'react-native';
-import {colors, getShadow, radius} from '@theme';
+import {colors} from '@theme';
 import {Typography} from '../Typography';
 
 export interface SwitchProps {
@@ -185,9 +185,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.lightGrey,
   },
   textContent: {
     flex: 1,
@@ -208,7 +205,6 @@ const styles = StyleSheet.create({
   },
   thumb: {
     backgroundColor: colors.neutral.white,
-    ...getShadow('small'),
   },
 });
 

@@ -53,6 +53,8 @@ export type MainStackParamList = {
   Notification: undefined;
   Profile: {userId?: string};
   JoinRequest: undefined;
+  PrivacySetting: undefined;
+  NotificationSetting: undefined;
   // Settings: undefined;
 };
 

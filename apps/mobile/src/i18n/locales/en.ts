@@ -156,6 +156,10 @@ export default {
       success_completed_account_setup: 'Profile setup completed successfully',
     },
 
+    userSettings: {
+      update_failed: 'Settings updated failed',
+    },
+
     notificationPermission: {
       title: 'Stay Connected with Your Riding Community',
       description:
@@ -554,9 +558,8 @@ export default {
       join_requests: 'Join Requests',
       follow_requests: 'Follow Requests',
       settings: 'Settings',
-      language: 'Language',
-      language_selection: 'Select Language',
-      notifications: 'Notifications',
+      language_selection: 'Language Selection',
+      notification_settings: 'Notification Settings',
       privacy_settings: 'Privacy Settings',
       support_legal: 'Support & Legal',
       contact_support: 'Contact Support',
@@ -888,6 +891,23 @@ export default {
       admin: 'Admin',
       member: 'Member',
       all: 'All',
+    },
+    notificationType: {
+      system: 'System',
+      shared_post_in_group: 'Shared Post In Group',
+      post_like: 'Post Like',
+      post_comment: 'Post Comment',
+      post_save: 'Post Save',
+      user_follow_request: 'Follow Request',
+      user_follow_request_accepted: 'Follow Request Accepted',
+      new_follower: 'New Follower',
+      group_changed_info: 'Group Changed Info',
+      group_join_request: 'Group Join Request',
+      group_join_request_accepted: 'Group Join Request Accepted',
+      user_joined_group: 'User Joined Group',
+      user_leave_group: 'User Leave Group',
+      admin_removed_group_member: 'Admin Removed Group Member',
+      admin_changed_group_member_role: 'Admin Changed Group Member Role',
     },
   },
 };

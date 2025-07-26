@@ -422,7 +422,11 @@ const getTabStyle = (
   isActive: boolean,
   disabled?: boolean,
 ): ViewStyle[] => {
-  const tabStyles = [styles.tab, styles[`${size}Tab`], styles[`${variant}Tab`]];
+  const tabStyles: ViewStyle[] = [
+    styles.tab,
+    styles[`${size}Tab`],
+    styles[`${variant}Tab`],
+  ];
 
   if (isActive) {
     tabStyles.push(styles[`${variant}ActiveTab`]);
@@ -439,7 +443,7 @@ const getTabsContainerStyle = (
   variant: TabVariant,
   align: TabAlign,
 ): ViewStyle[] => {
-  const containerStyles = [styles.tabsContainer];
+  const containerStyles: ViewStyle[] = [styles.tabsContainer];
 
   containerStyles.push(styles[`${variant}Container`]);
   containerStyles.push(
@@ -478,7 +482,7 @@ const getIconStyle = (
 };
 
 const getIndicatorStyle = (variant: TabVariant): ViewStyle[] => {
-  const indicatorStyles = [styles.indicator];
+  const indicatorStyles: ViewStyle[] = [styles.indicator];
 
   if (variant === 'underlined') {
     indicatorStyles.push(styles.underlinedIndicator);
@@ -509,7 +513,7 @@ const getIconColor = (
   disabled?: boolean,
 ): string => {
   if (disabled) {
-    return styles.disabledTab.opacity as string;
+    return styles.disabledTab.opacity.toString();
   }
 
   return isActive
@@ -523,7 +527,7 @@ const getTextColor = (
   disabled?: boolean,
 ): string => {
   if (disabled) {
-    return styles.disabledTab.opacity as string;
+    return styles.disabledTab.opacity.toString();
   }
 
   return isActive

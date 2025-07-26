@@ -11,7 +11,6 @@ import {
   Interest,
   InvitationStatus,
   Language,
-  NotificationStatus,
   NotificationType,
   RidingStyle,
   RoadType,
@@ -125,13 +124,6 @@ export class EnumUtils {
     return this.getDropdownOptions(
       EventParticipantStatus,
       'enums.eventParticipantStatus',
-    );
-  }
-
-  static getNotificationStatuses(): DropdownItem[] {
-    return this.getDropdownOptions(
-      NotificationStatus,
-      'enums.notificationStatus',
     );
   }
 

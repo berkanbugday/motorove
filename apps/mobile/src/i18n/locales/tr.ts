@@ -156,6 +156,10 @@ export default {
       success_completed_account_setup: 'Profil ayarları başarıyla tamamlandı',
     },
 
+    userSettings: {
+      update_failed: 'Ayarlar güncellenemedi',
+    },
+
     notificationPermission: {
       title: 'Sürüş Topluluğunuzla Bağlantıda Kalın',
       description:
@@ -548,9 +552,8 @@ export default {
       join_requests: 'Katılım İstekleri',
       follow_requests: 'Takip İstekleri',
       settings: 'Ayarlar',
-      language: 'Dil',
-      language_selection: 'Dil Seçin',
-      notifications: 'Bildirimler',
+      language_selection: 'Dil Seçimi',
+      notification_settings: 'Bildirim Ayarları',
       privacy_settings: 'Gizlilik Ayarları',
       support_legal: 'Destek ve Yasal Bilgiler',
       contact_support: 'Destek Talebi',
@@ -558,6 +561,21 @@ export default {
       privacy_policy: 'Gizlilik Politikası',
       invite_friends: 'Arkadaşlarını Davet Et',
       sign_out: 'Çıkış Yap',
+    },
+
+    privacySetting: {
+      auto_accept_followers_label: 'Otomatik Takip',
+      auto_accept_followers_description:
+        'Yeni takipçileri otomatik olarak kabul et',
+    },
+
+    notificationSetting: {
+      general: 'Genel',
+      social: 'Sosyal',
+      groups: 'Gruplar',
+      rides: 'Sürüşler',
+      events: 'Etkinlikler',
+      maintenance: 'Bakım',
     },
   },
 
@@ -885,6 +903,23 @@ export default {
       admin: 'Yönetici',
       member: 'Üye',
       all: 'Tümü',
+    },
+    notificationType: {
+      system: 'Sistem',
+      shared_post_in_group: 'Grupta Paylaşılan Gönderi',
+      post_like: 'Gönderi Beğenildi',
+      post_comment: 'Gönderi Yorumlandı',
+      post_save: 'Gönderi Kaydedildi',
+      user_follow_request: 'Takip İsteği',
+      user_follow_request_accepted: 'Takip İsteği Kabul Edildi',
+      new_follower: 'Yeni Takipçi',
+      group_changed_info: 'Grup Bilgisi Değişti',
+      group_join_request: 'Gruba Katılma İsteği',
+      group_join_request_accepted: 'Gruba Katılma İsteği Kabul Edildi',
+      user_joined_group: 'Kullanıcı Gruba Katıldı',
+      user_leave_group: 'Kullanıcı Grupdan Ayrıldı',
+      admin_removed_group_member: 'Admin Grup Üyesini Sildi',
+      admin_changed_group_member_role: 'Admin Grup Üyesi Rolünü Değiştirdi',
     },
   },
 };

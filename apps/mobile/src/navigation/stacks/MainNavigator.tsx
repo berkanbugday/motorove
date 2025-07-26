@@ -15,6 +15,8 @@ import {SearchUserScreen} from '@screens/searchUser';
 import {CreateEventScreen} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 import {ProfileScreen} from '@screens/profile';
+import {PrivacySettingScreen} from '@screens/settings';
+import {NotificationSettingScreen} from '@screens/settings';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -103,6 +105,18 @@ export function MainNavigator() {
       <Stack.Screen
         name="JoinRequest"
         component={JoinRequestScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="PrivacySetting"
+        component={PrivacySettingScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="NotificationSetting"
+        component={NotificationSettingScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

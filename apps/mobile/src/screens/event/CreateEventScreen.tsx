@@ -40,7 +40,7 @@ import {
   Tabs,
 } from '@components';
 import Dialog from '@components/Dialog';
-import {colors, radius, spacing} from '@theme';
+import {colors, getShadow, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
 import {eventService} from '@services/event.service';
@@ -757,13 +757,15 @@ export const CreateEventScreen: React.FC = () => {
                 </Typography>
 
                 {/* Privacy Switch */}
-                <Switch
-                  value={isPrivate}
-                  onValueChange={togglePrivacy}
-                  label="Private Event"
-                  description="Only invited groups or users can join this event"
-                  style={{paddingVertical: spacing.md}}
-                />
+                <View style={styles.privacySwitchContainer}>
+                  <Switch
+                    value={isPrivate}
+                    onValueChange={togglePrivacy}
+                    label="Private Event"
+                    description="Only invited groups or users can join this event"
+                    style={{paddingVertical: spacing.md}}
+                  />
+                </View>
 
                 {/* Group/User Selectors for Private Events */}
                 {isPrivate && (
@@ -1280,6 +1282,11 @@ const styles = StyleSheet.create({
   },
   dateTimePicker: {
     marginBottom: spacing.xs,
+  },
+  privacySwitchContainer: {
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.lightGrey,
   },
   privateEventSection: {
     padding: spacing.md,

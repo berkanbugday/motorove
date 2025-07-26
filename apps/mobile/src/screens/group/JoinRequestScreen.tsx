@@ -250,14 +250,7 @@ export const JoinRequestScreen = () => {
       <Tabs
         items={tabItems}
         selectedKey={activeTab}
-        onTabChange={key => {
-          setActiveTab(key);
-          if (key === 'event') {
-            handleRefreshEventRequests();
-          } else {
-            handleRefreshGroupRequests();
-          }
-        }}
+        onTabChange={setActiveTab}
         variant="default"
         equalWidth
         contentContainerStyle={styles.tabContent}

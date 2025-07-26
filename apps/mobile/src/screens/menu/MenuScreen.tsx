@@ -77,7 +77,9 @@ export const MenuScreen = () => {
             <Icon name="garage-filled" size={18} color={colors.neutral.black} />
           ),
           title: t('screens.menu.my_garage'),
-          onPress: handleNotificationsPress,
+          onPress: () => {
+            navigation.navigate('Garage');
+          },
           showBadge: false, // Set to true when you have unread notifications
           showRightIcon: true,
         },
@@ -86,7 +88,9 @@ export const MenuScreen = () => {
             <Icon name="save-filled" size={18} color={colors.neutral.black} />
           ),
           title: t('screens.menu.favorites'),
-          onPress: handleNotificationsPress,
+          onPress: () => {
+            navigation.navigate('Favorites');
+          },
           showBadge: false, // Set to true when you have unread notifications
           showRightIcon: true,
         },
@@ -99,7 +103,9 @@ export const MenuScreen = () => {
             />
           ),
           title: t('screens.menu.events'),
-          onPress: handleCreateEventPress,
+          onPress: () => {
+            navigation.navigate('Events');
+          },
           showRightIcon: true,
         },
       ],
@@ -149,7 +155,7 @@ export const MenuScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.menu.language'),
+          title: t('screens.menu.language_selection'),
           onPress: handleLanguagePress,
           showRightIcon: true,
         },
@@ -157,8 +163,10 @@ export const MenuScreen = () => {
           icon: (
             <Icon name="bell-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.menu.notifications'),
-          onPress: () => {},
+          title: t('screens.menu.notification_settings'),
+          onPress: () => {
+            navigation.navigate('NotificationSetting');
+          },
           showRightIcon: true,
         },
         {
@@ -167,8 +175,7 @@ export const MenuScreen = () => {
           ),
           title: t('screens.menu.privacy_settings'),
           onPress: () => {
-            // Open terms of service
-            // navigation.navigate('TermsOfService');
+            navigation.navigate('PrivacySetting');
           },
           showRightIcon: true,
         },
