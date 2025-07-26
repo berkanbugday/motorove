@@ -580,6 +580,7 @@ export default {
       social: 'Social',
       groups: 'Groups',
       groups_admin: 'Groups Admin',
+      enable_all: 'Enable All',
     },
   },
 

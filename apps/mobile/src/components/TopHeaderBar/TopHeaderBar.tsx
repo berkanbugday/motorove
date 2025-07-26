@@ -85,6 +85,11 @@ export interface TopHeaderBarProps {
   dropdownMenuItems?: DropdownMenuItem[];
 
   /**
+   * Icon name for the dropdown menu trigger
+   */
+  dropdownMenuIcon?: IconName;
+
+  /**
    * Function to call when a dropdown menu item is selected
    */
   onDropdownItemSelect?: (item: DropdownMenuItem) => void;
@@ -145,6 +150,7 @@ export function TopHeaderBar({
   onSecondRightButtonPress,
   secondRightIconBadgeCount = 0,
   dropdownMenuItems,
+  dropdownMenuIcon = 'more-vertical' as IconName,
   onDropdownItemSelect,
   dropdownPosition = 'bottom',
   backgroundColor = colors.neutral.white,
@@ -232,7 +238,7 @@ export function TopHeaderBar({
               items={dropdownMenuItems}
               onSelect={onDropdownItemSelect}
               position={dropdownPosition}
-              triggerIcon="more-vertical"
+              triggerIcon={dropdownMenuIcon}
               triggerIconSize={20}
               triggerIconColor={textColor}
               containerStyle={styles.dropdownContainer}

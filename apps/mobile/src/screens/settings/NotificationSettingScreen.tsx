@@ -22,40 +22,21 @@ export const NotificationSettingScreen = () => {
   >(userSetting?.notificationPreferences);
 
   const handleNotificationPreferenceChange = async (
-    notificationType: NotificationType,
-    value: boolean,
+    notificationPreferences: Record<NotificationType, boolean>,
   ) => {
     try {
-      // Optimistically update the UI
-      const updatedPreferences = {
-        ...notificationPreferences,
-        [notificationType]: value,
-      };
-
-      setNotificationPreferences(
-        updatedPreferences as Record<NotificationType, boolean>,
-      );
-
       // Update the setting via API
       const result = await updateUserSetting({
-        notificationPreferences: updatedPreferences as Record<
-          NotificationType,
-          boolean
-        >,
+        notificationPreferences,
       });
 
-      if (!result?.notificationPreferences?.[notificationType] === value) {
+      if (!result?.notificationPreferences) {
         // Revert if the API call didn't return the expected value
-        loggingService.error(
-          `Failed to update notification preference for ${notificationType}`,
-        );
+        loggingService.error('Failed to update notification preference');
       }
     } catch (error) {
       // Revert the optimistic update on error
-      loggingService.error(
-        `Error updating notification preference for ${notificationType}:`,
-        error,
-      );
+      loggingService.error('Error updating notification preference:', error);
     }
   };
 
@@ -109,6 +90,25 @@ export const NotificationSettingScreen = () => {
         onBackPress={() => navigation.goBack()}
         showShadow={false}
         containerStyle={styles.topHeaderBar}
+        dropdownMenuIcon="more-horizontal"
+        dropdownMenuItems={[
+          {
+            label: t('screens.notificationSetting.enable_all'),
+          },
+        ]}
+        onDropdownItemSelect={() => {
+          const updatedPreferences = {} as Record<NotificationType, boolean>;
+
+          notificationGroups?.map(group => {
+            group.types.map(type => {
+              updatedPreferences[type] = true;
+            });
+          });
+
+          setNotificationPreferences(updatedPreferences);
+
+          handleNotificationPreferenceChange(updatedPreferences);
+        }}
       />
 
       <ScrollView
@@ -126,9 +126,15 @@ export const NotificationSettingScreen = () => {
                   <Switch
                     key={type}
                     value={notificationPreferences?.[type]}
-                    onValueChange={value =>
-                      handleNotificationPreferenceChange(type, value)
-                    }
+                    onValueChange={value => {
+                      const updatedPreferences = {
+                        ...notificationPreferences,
+                        [type]: value,
+                      } as Record<NotificationType, boolean>;
+                      setNotificationPreferences(updatedPreferences);
+
+                      handleNotificationPreferenceChange(updatedPreferences);
+                    }}
                     label={EnumUtils.convertNotificationType(type)}
                     activeColor={colors.neutral.black}
                     // disabled={updating || loading}

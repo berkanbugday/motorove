@@ -575,6 +575,7 @@ export default {
       social: 'Sosyal',
       groups: 'Gruplar',
       groups_admin: 'Grup Yöneticileri',
+      enable_all: 'Tümünü Aktifleştir',
     },
   },
 
