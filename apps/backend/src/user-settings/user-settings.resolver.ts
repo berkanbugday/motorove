@@ -13,7 +13,7 @@ export class UserSettingsResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => UserSettingDto, { name: 'userSetting' })
-  async findOneUserSetting(@CurrentUser() user: User): Promise<UserSettingDto> {
+  async findOne(@CurrentUser() user: User): Promise<UserSettingDto> {
     return await this.userSettingsService.findOne(user.id);
   }
 

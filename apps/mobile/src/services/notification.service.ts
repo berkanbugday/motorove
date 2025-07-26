@@ -1,8 +1,8 @@
 import {PermissionsAndroid, Platform} from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from '@react-native-firebase/app';
-import messaging from '@react-native-firebase/messaging';
+import {getApps, initializeApp, getApp} from '@react-native-firebase/app';
+import messaging, {getMessaging} from '@react-native-firebase/messaging';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
 import {useMutation, useQuery} from '@apollo/client';
 import {showToast} from '@components';
@@ -59,9 +59,9 @@ class NotificationService {
 
     try {
       // Check if Firebase is already initialized
-      if (!firebase.apps.length) {
+      if (!getApps().length) {
         // Use environment-based Firebase configuration
-        await firebase.initializeApp(getFirebaseConfig());
+        await initializeApp(getFirebaseConfig());
       }
 
       // Set up message handlers
@@ -75,10 +75,13 @@ class NotificationService {
 
   async requestPermissions(): Promise<boolean> {
     try {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
-      const authStatus = await messaging().requestPermission();
+      if (Platform.OS === 'android') {
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+      }
+      const messagingInstance = getMessaging(getApp());
+      const authStatus = await messagingInstance.requestPermission();
       return (
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL
@@ -103,10 +106,11 @@ class NotificationService {
       }
 
       // Get new token
-      if (!messaging().isDeviceRegisteredForRemoteMessages) {
-        await messaging().registerDeviceForRemoteMessages();
+      const messagingInstance = getMessaging(getApp());
+      if (!messagingInstance.isDeviceRegisteredForRemoteMessages) {
+        await messagingInstance.registerDeviceForRemoteMessages();
       }
-      const token = await messaging().getToken();
+      const token = await messagingInstance.getToken();
       if (token) {
         this.deviceToken = token;
         // Save token to storage
@@ -131,13 +135,15 @@ class NotificationService {
   }
 
   setupMessageHandlers(): void {
+    const messagingInstance = getMessaging(getApp());
+
     // Handle background messages
-    messaging().setBackgroundMessageHandler(async _remoteMessage => {
+    messagingInstance.setBackgroundMessageHandler(async _remoteMessage => {
       return Promise.resolve();
     });
 
     // Handle foreground messages
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    const unsubscribe = messagingInstance.onMessage(async remoteMessage => {
       showToast({
         type: 'info',
         text1: remoteMessage.notification?.title,

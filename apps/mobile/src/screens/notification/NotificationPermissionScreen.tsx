@@ -4,7 +4,7 @@ import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, rs, radius, getShadow} from '@theme';
 import {Icon, Body, BodySmall, Caption, Subtitle, Button} from '@components';
 import LottieView from 'lottie-react-native';
-import {useUpdateNotificationPermission} from '@services/user.service';
+import {useUpdateUserSetting} from '@services/user-setting.service';
 import {NotificationPermission} from '@motorove/shared';
 import {useAuth} from '@contexts/AuthContext';
 import {
@@ -15,7 +15,7 @@ import {loggingService} from '@services/logging.service';
 
 export const NotificationPermissionScreen = () => {
   const {t} = useTranslation();
-  const {updateNotificationPermission} = useUpdateNotificationPermission();
+  const {updateUserSetting} = useUpdateUserSetting();
   const {user, updateNotificationPermissionState} = useAuth();
   const {saveDeviceToken} = useSaveDeviceToken();
 
@@ -30,18 +30,18 @@ export const NotificationPermissionScreen = () => {
         });
         if (result) {
           if (permission) {
-            const resultUpdate = await updateNotificationPermission(
-              NotificationPermission.ALLOWED,
-            );
+            const resultUpdate = await updateUserSetting({
+              notificationPermission: NotificationPermission.ALLOWED,
+            });
             if (resultUpdate) {
               await updateNotificationPermissionState(
                 NotificationPermission.ALLOWED,
               );
             }
           } else {
-            const resultUpdate = await updateNotificationPermission(
-              NotificationPermission.NOT_ALLOWED,
-            );
+            const resultUpdate = await updateUserSetting({
+              notificationPermission: NotificationPermission.NOT_ALLOWED,
+            });
             if (resultUpdate) {
               await updateNotificationPermissionState(
                 NotificationPermission.NOT_ALLOWED,
@@ -69,18 +69,18 @@ export const NotificationPermissionScreen = () => {
         });
         if (result) {
           if (permission) {
-            const resultUpdate = await updateNotificationPermission(
-              NotificationPermission.ALLOWED,
-            );
+            const resultUpdate = await updateUserSetting({
+              notificationPermission: NotificationPermission.ALLOWED,
+            });
             if (resultUpdate) {
               await updateNotificationPermissionState(
                 NotificationPermission.ALLOWED,
               );
             }
           } else {
-            const resultUpdate = await updateNotificationPermission(
-              NotificationPermission.NOT_ALLOWED,
-            );
+            const resultUpdate = await updateUserSetting({
+              notificationPermission: NotificationPermission.NOT_ALLOWED,
+            });
             if (resultUpdate) {
               await updateNotificationPermissionState(
                 NotificationPermission.NOT_ALLOWED,

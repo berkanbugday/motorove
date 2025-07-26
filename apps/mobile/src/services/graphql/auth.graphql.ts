@@ -80,12 +80,3 @@ export const UPDATE_PASSWORD = gql`
     updatePassword(input: $input)
   }
 `;
-
-// Update notification permission mutation
-export const UPDATE_NOTIFICATION_PERMISSION = gql`
-  mutation UpdateNotificationPermission(
-    $input: UpdateNotificationPermissionInput!
-  ) {
-    updateNotificationPermission(input: $input)
-  }
-`;

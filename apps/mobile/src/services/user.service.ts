@@ -7,8 +7,6 @@ import {apolloClient} from '../configs/apolloClientConfig';
 import {GET_MY_FOLLOWING} from './graphql/follow.graphql';
 import {showToast} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
-import {UPDATE_NOTIFICATION_PERMISSION} from './graphql/auth.graphql';
-import {NotificationPermission} from '@motorove/shared';
 
 /**
  * Hook for searching users by name or email with pagination
@@ -158,56 +156,6 @@ export const useAccountSetup = (onSuccess?: () => void) => {
     error,
   };
 };
-
-export const useUpdateNotificationPermission = (onSuccess?: () => void) => {
-  const {t} = useTranslation();
-  const [updateNotificationPermissionMutation, {loading, error}] = useMutation(
-    UPDATE_NOTIFICATION_PERMISSION,
-    {
-      onCompleted: _data => {
-        if (onSuccess) {
-          onSuccess();
-        }
-      },
-      onError: errorObj => {
-        loggingService.error(
-          'Error updating notification permission:',
-          errorObj,
-        );
-        showToast({
-          type: 'error',
-          text1: t('common.error'),
-          text2:
-            errorObj.message ||
-            t('screens.notificationPermission.update_failed'),
-        });
-      },
-    },
-  );
-
-  const updateNotificationPermission = async (
-    notificationPermission: NotificationPermission,
-  ) => {
-    try {
-      const result = await updateNotificationPermissionMutation({
-        variables: {
-          input: {notificationPermission},
-        },
-      });
-      return result.data?.updateNotificationPermission;
-    } catch (err) {
-      loggingService.error('Error in updateNotificationPermission:', err);
-      return null;
-    }
-  };
-
-  return {
-    updateNotificationPermission,
-    loading,
-    error,
-  };
-};
-
 /**
  * User service for handling user-related operations
  */
@@ -269,7 +217,6 @@ export const userService = {
 export const UserService = {
   useSearchUsers,
   useAccountSetup,
-  useUpdateNotificationPermission,
 };
 
 export default UserService;

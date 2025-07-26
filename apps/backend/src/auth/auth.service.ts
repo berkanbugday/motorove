@@ -73,9 +73,13 @@ export class AuthService {
         });
 
         const notificationPreferences = {} as Record<NotificationType, boolean>;
-        Object.values(NotificationType).forEach((notificationType) => {
-          notificationPreferences[notificationType] = true;
-        });
+        Object.values(NotificationType)
+          .filter(
+            (notificationType) => notificationType !== NotificationType.SYSTEM,
+          )
+          .map((notificationType) => {
+            notificationPreferences[notificationType] = true;
+          });
 
         // Create default notification settings for the new user
         await prisma.userSetting.create({
@@ -139,6 +143,9 @@ export class AuthService {
     // Get user from our database
     const user = await this.prismaService.user.findUnique({
       where: { email },
+      include: {
+        userSetting: true,
+      },
     });
 
     if (!user) {
@@ -153,10 +160,6 @@ export class AuthService {
         )
       : null;
 
-    const userSetting = await this.prismaService.userSetting.findUnique({
-      where: { userId: user.id },
-    });
-
     return {
       user: {
         id: user.id,
@@ -165,8 +168,8 @@ export class AuthService {
         email: user.email,
         avatar: avatar,
         hasCompletedSetup: user.hasCompletedSetup,
-        notificationPermission:
-          userSetting?.notificationPermission as NotificationPermission,
+        notificationPermission: user.userSetting
+          ?.notificationPermission as NotificationPermission,
       },
       session: data.session,
     };

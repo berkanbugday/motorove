@@ -569,6 +569,11 @@ enum InvitationStatus {
   REJECTED
 }
 
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
 """Supported languages in the application"""
 enum Language {
   EN
@@ -632,9 +637,9 @@ type Mutation {
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
   updateInvitationStatus(input: UpdateInvitationStatusInput!): GroupMembershipDto!
-  updateNotificationPermission(input: UpdateNotificationPermissionInput!): Boolean!
   updatePassword(input: UpdatePasswordInput!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
+  updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
 }
 
 type Notification {
@@ -802,6 +807,7 @@ type Query {
   upcomingEvents: [EventDto!]!
   user(id: String!): UserDto!
   userProfile(id: String!): UserDto!
+  userSetting: UserSettingDto!
   users(limit: Int, query: String, skip: Int): [UserDto!]!
 }
 
@@ -936,10 +942,6 @@ input UpdateInvitationStatusInput {
   status: InvitationStatus!
 }
 
-input UpdateNotificationPermissionInput {
-  notificationPermission: NotificationPermission!
-}
-
 input UpdatePasswordInput {
   email: String!
   password: String!
@@ -952,6 +954,12 @@ input UpdatePostInput {
   groupId: String
   id: ID!
   images: [String!]
+}
+
+input UpdateUserSettingInput {
+  autoAcceptFollowers: Boolean
+  notificationPermission: NotificationPermission
+  notificationPreferences: JSON
 }
 
 type User {
@@ -977,8 +985,6 @@ type User {
   interests: [Interest!]
   isActive: Boolean!
   lastName: String!
-  notificationPermission: NotificationPermission!
-  notificationSettings: [UserNotificationSetting!]
   notifications: [Notification!]
   postLikes: [PostLike!]
   postSaves: [PostSave!]
@@ -988,6 +994,7 @@ type User {
   socialMediaProfiles: [SocialMedia!]
   supabaseId: String!
   updatedAt: DateTime!
+  userSetting: UserSetting
 }
 
 type UserDto {
@@ -1019,12 +1026,19 @@ type UserFollowingDto {
   id: ID!
 }
 
-type UserNotificationSetting {
-  channel: NotificationChannel!
+type UserSetting {
+  autoAcceptFollowers: Boolean!
   createdAt: DateTime!
   id: ID!
-  isEnabled: Boolean!
-  notificationType: NotificationType!
+  notificationPermission: NotificationPermission!
+  notificationPreferences: JSON
   updatedAt: DateTime!
-  userId: String!
+  user: User!
+  userId: ID!
+}
+
+type UserSettingDto {
+  autoAcceptFollowers: Boolean!
+  notificationPermission: NotificationPermission!
+  notificationPreferences: JSON
 }

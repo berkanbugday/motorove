@@ -32,31 +32,24 @@ export class UserSettingsService {
   ): Promise<UserSettingDto> {
     try {
       const existingSetting = await this.prisma.userSetting.findUnique({
-        where: { id: input.id },
+        where: { userId },
       });
 
       if (!existingSetting) {
-        throw new NotFoundException(
-          `User setting with ID ${input.id} not found`,
-        );
+        throw new NotFoundException(`User setting with ID ${userId} not found`);
       }
 
-      const updateData: any = { updatedById: userId, updatedAt: new Date() };
-      if (input.autoAcceptFollowers !== null)
-        updateData.autoAcceptFollowers = input.autoAcceptFollowers;
-      if (input.notificationPermission !== null)
-        updateData.notificationPermission = input.notificationPermission;
-      if (input.notificationPreferences !== null)
-        updateData.notificationPreferences = input.notificationPreferences;
-
       const userSetting = await this.prisma.userSetting.update({
-        where: { id: input.id },
-        data: updateData,
+        where: { userId },
+        data: {
+          ...input,
+          updatedAt: new Date(),
+        },
       });
 
       return plainToClass(UserSettingDto, userSetting);
     } catch (error) {
-      this.logger.error(`Failed to update user setting ${input.id}:`, error);
+      this.logger.error(`Failed to update user setting ${userId}:`, error);
       throw error;
     }
   }

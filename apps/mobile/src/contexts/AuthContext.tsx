@@ -8,7 +8,7 @@ import {
   useSaveDeviceToken,
   useRemoveDeviceToken,
 } from '@services/notification.service';
-import {useUpdateNotificationPermission} from '@services/user.service';
+import {useUpdateUserSetting} from '@services/user-setting.service';
 
 // Default auth state
 const defaultAuthState: AuthState = {
@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const {saveDeviceToken} = useSaveDeviceToken();
   const {removeDeviceToken} = useRemoveDeviceToken();
-  const {updateNotificationPermission} = useUpdateNotificationPermission();
+  const {updateUserSetting} = useUpdateUserSetting();
   // Load authentication state on component mount
   useEffect(() => {
     loadAuthState();
@@ -127,18 +127,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             });
             if (resultSaveDeviceToken) {
               if (permission) {
-                const resultUpdate = await updateNotificationPermission(
-                  NotificationPermission.ALLOWED,
-                );
+                const resultUpdate = await updateUserSetting({
+                  notificationPermission: NotificationPermission.ALLOWED,
+                });
                 if (resultUpdate) {
                   await updateNotificationPermissionState(
                     NotificationPermission.ALLOWED,
                   );
                 }
               } else {
-                const resultUpdate = await updateNotificationPermission(
-                  NotificationPermission.NOT_ALLOWED,
-                );
+                const resultUpdate = await updateUserSetting({
+                  notificationPermission: NotificationPermission.NOT_ALLOWED,
+                });
                 if (resultUpdate) {
                   await updateNotificationPermissionState(
                     NotificationPermission.NOT_ALLOWED,

@@ -6,10 +6,6 @@ import { NotificationPermission, NotificationType } from "../../enums";
  */
 export interface IUpdateUserSetting {
   /**
-   * ID to identify which user setting to update
-   */
-  id: string;
-  /**
    * Auto accept followers
    */
   autoAcceptFollowers?: boolean;
