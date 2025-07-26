@@ -9,14 +9,17 @@ import {
   GroupDetailScreen,
   EditGroupScreen,
   SearchGroupScreen,
-  JoinRequestScreen,
 } from '@screens/group';
 import {SearchUserScreen} from '@screens/searchUser';
 import {CreateEventScreen} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
-import {ProfileScreen} from '@screens/profile';
-import {PrivacySettingScreen} from '@screens/settings';
-import {NotificationSettingScreen} from '@screens/settings';
+import {
+  ProfileScreen,
+  PrivacySettingScreen,
+  NotificationSettingScreen,
+  FollowRequestScreen,
+  JoinRequestScreen,
+} from '@screens/menu';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -117,6 +120,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="NotificationSetting"
         component={NotificationSettingScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="FollowRequest"
+        component={FollowRequestScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

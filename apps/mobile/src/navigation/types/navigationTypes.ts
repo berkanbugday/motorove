@@ -55,7 +55,7 @@ export type MainStackParamList = {
   JoinRequest: undefined;
   PrivacySetting: undefined;
   NotificationSetting: undefined;
-  // Settings: undefined;
+  FollowRequest: undefined;
 };
 
 export type MainScreenNavigationProp<T extends keyof MainStackParamList> =

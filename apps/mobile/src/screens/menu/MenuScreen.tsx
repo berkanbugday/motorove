@@ -130,8 +130,7 @@ export const MenuScreen = () => {
           ),
           title: t('screens.menu.follow_requests'),
           onPress: () => {
-            // Navigate to my events when implemented
-            // navigation.navigate('MyEvents');
+            navigation.navigate('FollowRequest');
           },
           showRightIcon: true,
         },
