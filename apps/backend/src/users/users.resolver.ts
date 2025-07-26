@@ -5,7 +5,6 @@ import { UsersService } from './users.service';
 import { Request } from 'express';
 import { UserDto } from './dto/user.dto';
 import { AccountSetupInput } from './dto/account-setup.input';
-import { UpdateNotificationPermissionInput } from './dto/update-notification-permission.input';
 
 interface GqlContext {
   req: Request & {
@@ -64,18 +63,5 @@ export class UsersResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.usersService.accountSetup(input, userId, authToken);
-  }
-
-  @UseGuards(JwtGuard)
-  @Mutation(() => Boolean)
-  async updateNotificationPermission(
-    @Context() context: GqlContext,
-    @Args('input') input: UpdateNotificationPermissionInput,
-  ): Promise<boolean> {
-    const userId = context.req.user.id;
-    return await this.usersService.updateNotificationPermission(
-      userId,
-      input.notificationPermission,
-    );
   }
 }

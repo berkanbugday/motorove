@@ -241,9 +241,6 @@ model User {
   ridingStyles RidingStyle[] @default([])
   interests    Interest[]    @default([])
 
-  // Notification permission fields
-  notificationPermission NotificationPermission @default(UNKNOWN)
-
   // Relations
   createdGroups        Group[]           @relation("GroupCreatedBy")
   updatedGroups        Group[]           @relation("GroupUpdatedBy")
@@ -270,6 +267,7 @@ model User {
   updatedMotorcycles Motorcycle[] @relation("MotorcycleUpdatedBy")
   createdEquipment   Equipment[]  @relation("EquipmentCreatedBy")
   updatedEquipment   Equipment[]  @relation("EquipmentUpdatedBy")
+  userSetting        UserSetting?
 
   // Following system relations
   followers UserFollowing[] @relation("UserFollowers")
@@ -287,7 +285,6 @@ model User {
 
   // EventParticipant relations
   updatedEventParticipants EventParticipant[] @relation("EventParticipantUpdatedBy")
-  UserSetting              UserSetting?
 
   @@index([supabaseId])
   @@index([isActive])
@@ -295,7 +292,6 @@ model User {
   @@index([gender])
   @@index([interests])
   @@index([cityId])
-  @@index([notificationPermission])
 }
 
 // New model for user garages
@@ -742,6 +738,9 @@ model UserSetting {
   // Privacy settings
   autoAcceptFollowers Boolean @default(false)
 
+  // Notification permission fields
+  notificationPermission NotificationPermission @default(UNKNOWN)
+
   // Notification preferences
   notificationPreferences Json? // Map of NotificationType to boolean
 
@@ -750,4 +749,5 @@ model UserSetting {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+  @@index([notificationPermission])
 }

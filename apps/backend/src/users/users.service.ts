@@ -176,23 +176,4 @@ export class UsersService {
       throw error;
     }
   }
-
-  async updateNotificationPermission(
-    userId: string,
-    notificationPermission: any,
-  ): Promise<boolean> {
-    try {
-      const user = await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          notificationPermission,
-          updatedAt: new Date(),
-        },
-      });
-      return !!user;
-    } catch (error) {
-      this.logger.error(`Failed to update notification permission`, error);
-      throw error;
-    }
-  }
 }

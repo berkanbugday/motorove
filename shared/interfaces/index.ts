@@ -11,3 +11,4 @@ export * from "./address";
 export * from "./common";
 export * from "./event";
 export * from "./user-following";
+export * from "./user-setting";

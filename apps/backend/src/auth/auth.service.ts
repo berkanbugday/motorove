@@ -10,7 +10,6 @@ import { AuthResponse } from './models/auth-response.model';
 import { AuthUser } from './models/auth-user.model';
 import { NotificationPermission } from '../enums/models/notification-permission.enum';
 import { NotificationType } from '../enums/models/notification-type.enum';
-import { NotificationChannel } from '../enums/models/notification-channel.enum';
 import { StorageService } from '../core/storage/storage.service';
 
 @Injectable()
@@ -20,36 +19,6 @@ export class AuthService {
     private prismaService: PrismaService,
     private storageService: StorageService,
   ) {}
-
-  private async createDefaultNotificationSettingsInTransaction(
-    prisma: any,
-    userId: string,
-  ): Promise<void> {
-    const notificationTypes = Object.values(NotificationType);
-
-    const defaultSettings: Array<{
-      userId: string;
-      notificationType: NotificationType;
-      channel: NotificationChannel;
-    }> = [];
-
-    for (const notificationType of notificationTypes) {
-      if (notificationType === NotificationType.SYSTEM) {
-        continue;
-      }
-
-      defaultSettings.push({
-        userId,
-        notificationType,
-        channel: NotificationChannel.PUSH,
-      });
-    }
-
-    // Create all notification settings within the transaction
-    await prisma.userNotificationSetting.createMany({
-      data: defaultSettings,
-    });
-  }
 
   async signUp(
     firstName: string,
@@ -98,13 +67,23 @@ export class AuthService {
             email,
             supabaseId: supabaseUser.id,
           },
+          include: {
+            userSetting: true,
+          },
+        });
+
+        const notificationPreferences = {} as Record<NotificationType, boolean>;
+        Object.values(NotificationType).forEach((notificationType) => {
+          notificationPreferences[notificationType] = true;
         });
 
         // Create default notification settings for the new user
-        await this.createDefaultNotificationSettingsInTransaction(
-          prisma,
-          user.id,
-        );
+        await prisma.userSetting.create({
+          data: {
+            userId: user.id,
+            notificationPreferences: notificationPreferences,
+          },
+        });
 
         return user;
       });
@@ -116,8 +95,8 @@ export class AuthService {
           lastName: result.lastName,
           email: result.email,
           hasCompletedSetup: result.hasCompletedSetup,
-          notificationPermission:
-            result.notificationPermission as NotificationPermission,
+          notificationPermission: result.userSetting
+            ?.notificationPermission as NotificationPermission,
         },
         session: data.session,
       };
@@ -174,6 +153,10 @@ export class AuthService {
         )
       : null;
 
+    const userSetting = await this.prismaService.userSetting.findUnique({
+      where: { userId: user.id },
+    });
+
     return {
       user: {
         id: user.id,
@@ -183,7 +166,7 @@ export class AuthService {
         avatar: avatar,
         hasCompletedSetup: user.hasCompletedSetup,
         notificationPermission:
-          user.notificationPermission as NotificationPermission,
+          userSetting?.notificationPermission as NotificationPermission,
       },
       session: data.session,
     };
@@ -226,6 +209,9 @@ export class AuthService {
       // Get user from our database
       const user = await this.prismaService.user.findUnique({
         where: { supabaseId: data.user.id },
+        include: {
+          userSetting: true,
+        },
       });
 
       if (!user) {
@@ -248,8 +234,8 @@ export class AuthService {
           email: user.email,
           avatar: avatar,
           hasCompletedSetup: user.hasCompletedSetup,
-          notificationPermission:
-            user.notificationPermission as NotificationPermission,
+          notificationPermission: user.userSetting
+            ?.notificationPermission as NotificationPermission,
         },
         session: data.session,
       };
@@ -287,6 +273,9 @@ export class AuthService {
 
     const user = await this.prismaService.user.findUnique({
       where: { supabaseId: data.user.id },
+      include: {
+        userSetting: true,
+      },
     });
 
     if (!user) {
@@ -299,8 +288,8 @@ export class AuthService {
       lastName: user.lastName,
       email: user.email,
       hasCompletedSetup: user.hasCompletedSetup,
-      notificationPermission:
-        user.notificationPermission as NotificationPermission,
+      notificationPermission: user.userSetting
+        ?.notificationPermission as NotificationPermission,
     };
   }
 

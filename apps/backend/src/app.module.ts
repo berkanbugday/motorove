@@ -22,6 +22,7 @@ import { UserFollowingsModule } from './user-followings/user-followings.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { UserSettingsModule } from './user-settings/user-settings.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { AddressesModule } from './addresses/addresses.module';
     UsersModule,
     EventsModule,
     AddressesModule,
+    UserSettingsModule,
   ],
   controllers: [AppController],
   providers: [
