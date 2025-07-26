@@ -2,7 +2,7 @@ import React from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, radius} from '@theme';
-import {Switch, TopHeaderBar, Body, BodySmall} from '@components';
+import {Switch, TopHeaderBar, Subtitle} from '@components';
 import {
   useGetUserSetting,
   useUpdateUserSetting,
@@ -10,12 +10,16 @@ import {
 import {loggingService} from '@services/logging.service';
 import {useNavigation} from '@react-navigation/native';
 import {NotificationType} from '@motorove/shared';
+import {EnumUtils} from '@utils/enumUtils';
 
 export const NotificationSettingScreen = () => {
   const navigation = useNavigation();
   const {t} = useTranslation();
-  const {userSetting, loading} = useGetUserSetting();
-  const {updateUserSetting} = useUpdateUserSetting();
+  const {userSetting, refetch} = useGetUserSetting();
+  const {updateUserSetting} = useUpdateUserSetting(() => refetch());
+  const [notificationPreferences, setNotificationPreferences] = React.useState<
+    Record<NotificationType, boolean> | undefined
+  >(userSetting?.notificationPreferences);
 
   const handleNotificationPreferenceChange = async (
     notificationType: NotificationType,
@@ -24,32 +28,30 @@ export const NotificationSettingScreen = () => {
     try {
       // Optimistically update the UI
       const updatedPreferences = {
-        ...userSetting?.notificationPreferences,
+        ...notificationPreferences,
         [notificationType]: value,
       };
-      setNotificationPreferences(updatedPreferences);
+
+      setNotificationPreferences(
+        updatedPreferences as Record<NotificationType, boolean>,
+      );
 
       // Update the setting via API
       const result = await updateUserSetting({
-        notificationPreferences: updatedPreferences,
+        notificationPreferences: updatedPreferences as Record<
+          NotificationType,
+          boolean
+        >,
       });
 
       if (!result?.notificationPreferences?.[notificationType] === value) {
         // Revert if the API call didn't return the expected value
-        setNotificationPreferences(prev => ({
-          ...prev,
-          [notificationType]: !value,
-        }));
         loggingService.error(
           `Failed to update notification preference for ${notificationType}`,
         );
       }
     } catch (error) {
       // Revert the optimistic update on error
-      setNotificationPreferences(prev => ({
-        ...prev,
-        [notificationType]: !value,
-      }));
       loggingService.error(
         `Error updating notification preference for ${notificationType}:`,
         error,
@@ -60,53 +62,49 @@ export const NotificationSettingScreen = () => {
   // Group notification types for better organization
   const notificationGroups = [
     {
-      title: t('screens.notificationSetting.groups.general'),
-      types: [NotificationType.SYSTEM, NotificationType.NEW_MESSAGE],
+      title: t('screens.notificationSetting.general'),
+      types: [NotificationType.SYSTEM],
     },
     {
-      title: t('screens.notificationSetting.groups.social'),
-      types: [NotificationType.FRIEND_REQUEST],
-    },
-    {
-      title: t('screens.notificationSetting.groups.groups'),
+      title: t('screens.notificationSetting.posts'),
       types: [
-        NotificationType.GROUP_INVITE,
-        NotificationType.GROUP_JOIN,
-        NotificationType.GROUP_LEAVE,
-        NotificationType.GROUP_MEMBERSHIP_STATUS_UPDATED,
-        NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
-        NotificationType.GROUP_MEMBERSHIP_REMOVED,
-        NotificationType.GROUP_MEMBERSHIP_ADDED,
-        NotificationType.GROUP_MEMBERSHIP_REQUEST,
-        NotificationType.GROUP_MEMBERSHIP_REQUEST_ACCEPTED,
-        NotificationType.GROUP_MEMBERSHIP_REQUEST_REJECTED,
+        NotificationType.POST_LIKE,
+        NotificationType.POST_COMMENT,
+        NotificationType.POST_SAVE,
       ],
     },
     {
-      title: t('screens.notificationSetting.groups.rides'),
+      title: t('screens.notificationSetting.social'),
       types: [
-        NotificationType.RIDE_INVITATION,
-        NotificationType.RIDE_STARTED,
-        NotificationType.RIDE_COMPLETED,
+        NotificationType.USER_FOLLOW_REQUEST,
+        NotificationType.USER_FOLLOW_REQUEST_ACCEPTED,
+        NotificationType.NEW_FOLLOWER,
       ],
     },
     {
-      title: t('screens.notificationSetting.groups.events'),
+      title: t('screens.notificationSetting.groups'),
       types: [
-        NotificationType.EVENT_INVITATION,
-        NotificationType.EVENT_REMINDER,
+        NotificationType.SHARED_POST_IN_GROUP,
+        NotificationType.GROUP_JOIN_REQUEST_ACCEPTED,
+        NotificationType.USER_JOINED_GROUP,
       ],
     },
     {
-      title: t('screens.notificationSetting.groups.maintenance'),
-      types: [NotificationType.MAINTENANCE_REMINDER],
+      title: t('screens.notificationSetting.groups_admin'),
+      types: [
+        NotificationType.GROUP_CHANGED_INFO,
+        NotificationType.GROUP_JOIN_REQUEST,
+        NotificationType.USER_LEAVE_GROUP,
+        NotificationType.ADMIN_REMOVED_GROUP_MEMBER,
+        NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE,
+      ],
     },
   ];
 
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('screens.notificationSetting.title')}
+        title={t('screens.menu.notification_settings')}
         showBackButton
         onBackPress={() => navigation.goBack()}
         showShadow={false}
@@ -117,41 +115,23 @@ export const NotificationSettingScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {/* Header */}
-          <View style={styles.headerContainer}>
-            <Body weight="bold" style={styles.headerTitle}>
-              {t('screens.notificationSetting.header_title')}
-            </Body>
-            <BodySmall
-              color={colors.neutral.grey}
-              style={styles.headerDescription}>
-              {t('screens.notificationSetting.header_description')}
-            </BodySmall>
-          </View>
-
           {/* Notification Groups */}
           {notificationGroups.map((group, _groupIndex) => (
             <View key={group.title} style={styles.groupContainer}>
-              <Body weight="semiBold" style={styles.groupTitle}>
+              <Subtitle weight="bold" style={styles.groupTitle}>
                 {group.title}
-              </Body>
+              </Subtitle>
               <View style={styles.settingsContainer}>
-                {group.types.map((type, typeIndex) => (
+                {group.types.map(type => (
                   <Switch
                     key={type}
-                    value={notificationPreferences[type]}
+                    value={notificationPreferences?.[type]}
                     onValueChange={value =>
                       handleNotificationPreferenceChange(type, value)
                     }
-                    disabled={loading}
-                    label={getNotificationTypeLabel(type)}
-                    description={getNotificationTypeDescription(type)}
+                    label={EnumUtils.convertNotificationType(type)}
                     activeColor={colors.neutral.black}
-                    style={{
-                      ...styles.switchItem,
-                      ...(typeIndex === group.types.length - 1 &&
-                        styles.lastSwitchItem),
-                    }}
+                    // disabled={updating || loading}
                   />
                 ))}
               </View>
@@ -179,31 +159,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.md,
   },
-  headerContainer: {
-    marginBottom: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  headerTitle: {
-    marginBottom: spacing.xs,
-  },
-  headerDescription: {
-    lineHeight: 20,
-  },
   groupContainer: {
     marginBottom: spacing.lg,
   },
   groupTitle: {
     marginBottom: spacing.sm,
-    color: colors.neutral.darkGrey,
   },
   settingsContainer: {
     backgroundColor: colors.neutral.white,
     borderRadius: radius.md,
   },
-  switchItem: {
-    marginBottom: 0,
-  },
-  lastSwitchItem: {
-    borderBottomWidth: 0,
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

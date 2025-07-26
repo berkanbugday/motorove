@@ -10,7 +10,7 @@ import {colors} from '@theme';
 import {Typography} from '../Typography';
 
 export interface SwitchProps {
-  value: boolean;
+  value?: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
   size?: 'small' | 'medium' | 'large';
@@ -89,7 +89,7 @@ export const Switch: React.FC<SwitchProps> = ({
     outputRange: [inactiveColor, activeColor],
   });
 
-  const opacity = disabled ? 0.5 : 1;
+  const opacity = disabled ? 0.7 : 1;
 
   const hasText = label || description;
 
@@ -101,7 +101,7 @@ export const Switch: React.FC<SwitchProps> = ({
             {label && (
               <Typography
                 variant="body"
-                weight="semiBold"
+                weight="medium"
                 style={[styles.label, {opacity}]}>
                 {label}
               </Typography>

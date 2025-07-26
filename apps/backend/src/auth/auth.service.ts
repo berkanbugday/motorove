@@ -73,13 +73,9 @@ export class AuthService {
         });
 
         const notificationPreferences = {} as Record<NotificationType, boolean>;
-        Object.values(NotificationType)
-          .filter(
-            (notificationType) => notificationType !== NotificationType.SYSTEM,
-          )
-          .map((notificationType) => {
-            notificationPreferences[notificationType] = true;
-          });
+        Object.values(NotificationType).map((notificationType) => {
+          notificationPreferences[notificationType] = true;
+        });
 
         // Create default notification settings for the new user
         await prisma.userSetting.create({

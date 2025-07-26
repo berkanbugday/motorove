@@ -571,11 +571,10 @@ export default {
 
     notificationSetting: {
       general: 'Genel',
+      posts: 'Gönderiler',
       social: 'Sosyal',
       groups: 'Gruplar',
-      rides: 'Sürüşler',
-      events: 'Etkinlikler',
-      maintenance: 'Bakım',
+      groups_admin: 'Grup Yöneticileri',
     },
   },
 

@@ -28,13 +28,6 @@ export const MenuScreen = () => {
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
-  const handleCreateEventPress = () => {
-    navigation.navigate('CreateEvent');
-  };
-
-  const handleNotificationsPress = () => {
-    navigation.navigate('Notification');
-  };
 
   const handleLanguagePress = () => {
     openBottomSheet({
@@ -278,7 +271,7 @@ export const MenuScreen = () => {
       return (
         <View
           style={[styles.sectionHeader, index > 0 && {marginTop: spacing.xl}]}>
-          <Subtitle weight="semiBold">{item.title}</Subtitle>
+          <Subtitle weight="bold">{item.title}</Subtitle>
         </View>
       );
     }

@@ -131,6 +131,13 @@ export class EnumUtils {
     return this.getDropdownOptions(NotificationType, 'enums.notificationType');
   }
 
+  static convertNotificationType(notificationType: NotificationType): string {
+    const notificationTypeItem = this.getNotificationTypes().find(
+      t => t.value.toLowerCase() === notificationType.toLowerCase(),
+    );
+    return notificationTypeItem?.label || notificationType;
+  }
+
   static getGroupTags(): DropdownItem[] {
     return this.getDropdownOptions(GroupTag, 'enums.groupTag');
   }

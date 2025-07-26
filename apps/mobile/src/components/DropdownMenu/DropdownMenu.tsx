@@ -286,7 +286,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
                       ]}
                       onPress={() => handleSelect(item)}
                       disabled={item?.isDisabled}
-                      activeOpacity={item?.isDisabled ? 1 : 0.6}>
+                      activeOpacity={item?.isDisabled ? 1 : 0.7}>
                       {item?.icon && (
                         <Icon
                           name={item?.icon}

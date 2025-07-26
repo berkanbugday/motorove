@@ -568,6 +568,19 @@ export default {
       invite_friends: 'Invite Friends',
       sign_out: 'Sign Out',
     },
+
+    privacySetting: {
+      auto_accept_followers_label: 'Auto Accept Followers',
+      auto_accept_followers_description: 'Automatically accept new followers',
+    },
+
+    notificationSetting: {
+      general: 'General',
+      posts: 'Posts',
+      social: 'Social',
+      groups: 'Groups',
+      groups_admin: 'Groups Admin',
+    },
   },
 
   // Components organized by component name
