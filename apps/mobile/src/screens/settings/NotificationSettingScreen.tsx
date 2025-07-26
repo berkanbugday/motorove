@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, radius} from '@theme';
@@ -19,7 +19,13 @@ export const NotificationSettingScreen = () => {
   const {updateUserSetting} = useUpdateUserSetting(() => refetch());
   const [notificationPreferences, setNotificationPreferences] = React.useState<
     Record<NotificationType, boolean> | undefined
-  >(userSetting?.notificationPreferences);
+  >();
+
+  useEffect(() => {
+    if (userSetting) {
+      setNotificationPreferences(userSetting.notificationPreferences);
+    }
+  }, [userSetting]);
 
   const handleNotificationPreferenceChange = async (
     notificationPreferences: Record<NotificationType, boolean>,

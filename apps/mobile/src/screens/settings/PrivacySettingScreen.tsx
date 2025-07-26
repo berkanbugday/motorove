@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import {useTranslation} from '@hooks/useTranslation';
-import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
-import {Switch, TopHeaderBar, Body, BodySmall} from '@components';
+import {colors, spacing, radius} from '@theme';
+import {Switch, TopHeaderBar} from '@components';
 import {
   useGetUserSetting,
   useUpdateUserSetting,
@@ -18,9 +18,13 @@ export const PrivacySettingScreen = () => {
   const {updateUserSetting} = useUpdateUserSetting(() => refetch());
 
   // Local state for the auto accept followers setting
-  const [autoAcceptFollowers, setAutoAcceptFollowers] = useState<boolean>(
-    userSetting?.autoAcceptFollowers,
-  );
+  const [autoAcceptFollowers, setAutoAcceptFollowers] = useState<boolean>();
+
+  useEffect(() => {
+    if (userSetting) {
+      setAutoAcceptFollowers(userSetting.autoAcceptFollowers);
+    }
+  }, [userSetting]);
 
   const handleAutoAcceptFollowersChange = async (value: boolean) => {
     try {
