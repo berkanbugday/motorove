@@ -173,10 +173,6 @@ const styles = StyleSheet.create({
   },
   settingsContainer: {
     backgroundColor: colors.neutral.white,
-    borderRadius: radius.md,
-  },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: radius.sm,
   },
 });

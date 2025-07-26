@@ -571,7 +571,8 @@ export default {
 
     privacySetting: {
       auto_accept_followers_label: 'Auto Accept Followers',
-      auto_accept_followers_description: 'Automatically accept new followers',
+      auto_accept_followers_description:
+        'Automatically accept new followers follow requests',
     },
 
     notificationSetting: {

@@ -566,7 +566,7 @@ export default {
     privacySetting: {
       auto_accept_followers_label: 'Otomatik Takip',
       auto_accept_followers_description:
-        'Yeni takipçileri otomatik olarak kabul et',
+        'Yeni takipçilerin takip isteklerini otomatik olarak kabul et',
     },
 
     notificationSetting: {
