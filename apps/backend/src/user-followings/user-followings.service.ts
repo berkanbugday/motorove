@@ -117,6 +117,7 @@ export class UserFollowingsService {
           ? InvitationStatus.ACCEPTED
           : InvitationStatus.PENDING,
         isActive: true,
+        updatedAt: new Date(),
       },
       select: {
         status: true,
@@ -155,6 +156,7 @@ export class UserFollowingsService {
       },
       data: {
         isActive: false,
+        updatedAt: new Date(),
       },
     });
 
