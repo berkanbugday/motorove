@@ -387,8 +387,8 @@ export default {
         "We couldn't load join requests. Please try again.",
       request_accepted: 'Request accepted successfully',
       request_rejected: 'Request rejected successfully',
-      wants_to_join_group: 'wants to join this group.',
-      wants_to_join_event: 'wants to join this event.',
+      wants_to_join_group: 'wants to join group.',
+      wants_to_join_event: 'wants to join event.',
     },
 
     // Follow Request screens

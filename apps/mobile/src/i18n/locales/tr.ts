@@ -382,8 +382,8 @@ export default {
         'Katılım istekleri yüklenemedi. Lütfen tekrar deneyin.',
       request_accepted: 'Katılım isteği kabul edildi',
       request_rejected: 'Katılım isteği reddedildi',
-      wants_to_join_group: 'grubuna katılmak istiyor.',
-      wants_to_join_event: 'etkinliğine katılmak istiyor.',
+      wants_to_join_group: 'gruba katılmak istiyor.',
+      wants_to_join_event: 'etkinliğe katılmak istiyor.',
     },
 
     // Follow Request screens
