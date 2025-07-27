@@ -600,7 +600,6 @@ export const CreateEventScreen: React.FC = () => {
                 data={eventTypes}
                 label="Event Type"
                 onSelect={handleEventTypeSelect}
-                searchable={false}
                 placeholder=""
                 selectedItem={selectedEventType}
                 error={errors.eventType?.message}
@@ -866,7 +865,6 @@ export const CreateEventScreen: React.FC = () => {
                       data={roadTypes}
                       label="Road Type"
                       onSelect={handleRoadTypeSelect}
-                      searchable={false}
                       placeholder=""
                       selectedItem={selectedRoadType}
                       error={errors.roadType?.message}
@@ -877,7 +875,6 @@ export const CreateEventScreen: React.FC = () => {
                       data={difficultyLevels}
                       label="Difficulty Level"
                       onSelect={handleDifficultySelect}
-                      searchable={false}
                       placeholder=""
                       selectedItem={selectedDifficultyLevel}
                       error={errors.difficultyLevel?.message}
@@ -956,7 +953,6 @@ export const CreateEventScreen: React.FC = () => {
                       data={experienceLevels}
                       label="Experience Level"
                       onSelect={handleExperienceLevelSelect}
-                      searchable={false}
                       placeholder=""
                       selectedItem={selectedExperienceLevel}
                       error={errors.experienceLevel?.message}

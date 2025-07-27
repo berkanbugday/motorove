@@ -1,6 +1,13 @@
-import React, {useState, useCallback, useEffect} from 'react';
-import {View, StyleSheet, Keyboard, FlatList} from 'react-native';
-import {TopHeaderBar, Icon, UserCard, Body, AnimatedInput} from '@components';
+import React, {useState, useCallback, useEffect, useRef} from 'react';
+import {View, StyleSheet, Keyboard, FlatList, Animated} from 'react-native';
+import {
+  TopHeaderBar,
+  Icon,
+  UserCard,
+  Body,
+  AnimatedInput,
+  Button,
+} from '@components';
 import {colors, spacing} from '@theme';
 import {useSearchUsers} from '@services/user.service';
 import {IUser} from '@motorove/shared';
@@ -12,6 +19,36 @@ import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
 /**
  * User Search Screen - Allows users to search for other users and follow/unfollow them
  */
+const CancelButton = ({onPress}: {onPress: () => void}) => {
+  const translateX = useRef(new Animated.Value(50)).current;
+  const {t} = useTranslation();
+
+  useEffect(() => {
+    Animated.timing(translateX, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        {
+          transform: [{translateX}],
+        },
+        styles.cancelButtonContainer,
+      ]}>
+      <Button
+        title={t('common.cancel')}
+        onPress={onPress}
+        variant="text"
+        style={styles.cancelButton}
+      />
+    </Animated.View>
+  );
+};
+
 export const SearchUserScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'SearchUser'>>();
   const {t} = useTranslation();
@@ -131,18 +168,29 @@ export const SearchUserScreen = () => {
       <TopHeaderBar title={t('navigation.search_user')} showShadow={false} />
 
       <View style={styles.searchContainer}>
-        <AnimatedInput
-          shape="round"
-          placeholder={t('screens.searchUser.search_placeholder')}
-          value={searchQuery}
-          onChangeText={handleSearchQueryChange}
-          icon={
-            <Icon name="search" size={18} color={colors.neutral.lightGrey} />
-          }
-          iconPosition="left"
-          onClearSearch={handleClearSearch}
-          testID="user-search-input"
-        />
+        <View style={styles.searchInputWrapper}>
+          <View style={styles.searchInput}>
+            <AnimatedInput
+              shape="round"
+              placeholder={t('screens.searchUser.search_placeholder')}
+              value={searchQuery}
+              onChangeText={handleSearchQueryChange}
+              icon={
+                <Icon
+                  name="search"
+                  size={18}
+                  color={colors.neutral.lightGrey}
+                />
+              }
+              iconPosition="left"
+              onClearSearch={handleClearSearch}
+              testID="user-search-input"
+            />
+          </View>
+          {searchQuery.length > 0 && (
+            <CancelButton onPress={() => Keyboard.dismiss()} />
+          )}
+        </View>
       </View>
 
       <FlatList
@@ -168,6 +216,20 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: spacing.md,
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchInput: {
+    flex: 1,
+  },
+  cancelButtonContainer: {
+    marginLeft: spacing.sm,
+  },
+  cancelButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.xs,
   },
   listContainer: {
     paddingTop: spacing.md,

@@ -1,14 +1,17 @@
-import React, {useState, useCallback, useEffect} from 'react';
-import {View, StyleSheet, Keyboard, FlatList} from 'react-native';
-import {TopHeaderBar} from '@components/TopHeaderBar';
+import React, {useState, useCallback, useEffect, useRef} from 'react';
+import {View, StyleSheet, Keyboard, FlatList, Animated} from 'react-native';
+import {
+  TopHeaderBar,
+  Icon,
+  Button,
+  AnimatedInput,
+  GroupCard,
+  Body,
+} from '@components';
 import {colors, spacing} from '@theme';
-import {Icon} from '@components/Icon';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useGetGroups, useSearchGroups} from '@services/group.service';
-import {GroupCard} from '@components/GroupCard';
-import {Body} from '@components/Typography';
-import {AnimatedInput} from '@components/AnimatedInput';
 import {IGroup} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useTranslation} from '@hooks/useTranslation';
@@ -16,6 +19,36 @@ import {useTranslation} from '@hooks/useTranslation';
 /**
  * Group Search Screen - Allows users to search for groups by name
  */
+const CancelButton = ({onPress}: {onPress: () => void}) => {
+  const translateX = useRef(new Animated.Value(50)).current;
+  const {t} = useTranslation();
+
+  useEffect(() => {
+    Animated.timing(translateX, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        {
+          transform: [{translateX}],
+        },
+        styles.cancelButtonContainer,
+      ]}>
+      <Button
+        title={t('common.cancel')}
+        onPress={onPress}
+        variant="text"
+        style={styles.cancelButton}
+      />
+    </Animated.View>
+  );
+};
+
 export const SearchGroupScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'SearchGroup'>>();
   const {t} = useTranslation();
@@ -130,18 +163,29 @@ export const SearchGroupScreen = () => {
       />
 
       <View style={styles.searchContainer}>
-        <AnimatedInput
-          shape="round"
-          placeholder={t('screens.searchGroup.search_groups_by_name')}
-          value={searchQuery}
-          onChangeText={handleSearchQueryChange}
-          icon={
-            <Icon name="search" size={18} color={colors.neutral.lightGrey} />
-          }
-          iconPosition="left"
-          onClearSearch={handleClearSearch}
-          testID="group-search-input"
-        />
+        <View style={styles.searchInputWrapper}>
+          <View style={styles.searchInput}>
+            <AnimatedInput
+              shape="round"
+              placeholder={t('screens.searchGroup.search_groups_by_name')}
+              value={searchQuery}
+              onChangeText={handleSearchQueryChange}
+              icon={
+                <Icon
+                  name="search"
+                  size={18}
+                  color={colors.neutral.lightGrey}
+                />
+              }
+              iconPosition="left"
+              onClearSearch={handleClearSearch}
+              testID="group-search-input"
+            />
+          </View>
+          {searchQuery.length > 0 && (
+            <CancelButton onPress={() => Keyboard.dismiss()} />
+          )}
+        </View>
       </View>
 
       <FlatList
@@ -167,6 +211,20 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: spacing.md,
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  searchInput: {
+    flex: 1,
+  },
+  cancelButtonContainer: {
+    marginLeft: spacing.sm,
+  },
+  cancelButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.xs,
   },
   listContainer: {
     paddingTop: spacing.md,
