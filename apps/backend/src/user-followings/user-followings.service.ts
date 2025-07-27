@@ -9,9 +9,12 @@ import { UserFollowing } from './models/user-following.model';
 import { UserFollowingDto } from './dto/user-following.dto';
 import { InvitationStatus } from '../enums/models/invitation-status.enum';
 import { StorageService } from '../core/storage/storage.service';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class UserFollowingsService {
+  private readonly logger = new Logger(UserFollowingsService.name);
+
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
@@ -261,6 +264,60 @@ export class UserFollowingsService {
     });
 
     return InvitationStatus.REJECTED;
+  }
+
+  async updateInvitationStatus(
+    id: string,
+    newStatus: InvitationStatus,
+  ): Promise<UserFollowingDto> {
+    try {
+      // Check if the group exists
+      const userFollowing = await this.prisma.userFollowing.findUnique({
+        where: {
+          id,
+          isActive: true,
+          status: InvitationStatus.PENDING,
+        },
+      });
+
+      if (!userFollowing) {
+        throw new NotFoundException(`User following with ID ${id} not found`);
+      }
+
+      // Update the membership status
+      const updatedUserFollowing = await this.prisma.userFollowing.update({
+        where: {
+          id,
+        },
+        data: {
+          status: newStatus,
+          isActive: newStatus === InvitationStatus.ACCEPTED,
+          updatedAt: new Date(),
+        },
+      });
+
+      // Send notification to the user
+      // await this.notificationsService.create(
+      //   {
+      //     userId,
+      //     title: 'Membership status updated',
+      //     body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newStatus}`,
+      //     type: NotificationType.GROUP_MEMBERSHIP_STATUS_UPDATED,
+      //     channel: NotificationChannel.PUSH,
+      //     data: JSON.stringify({
+      //       groupId: updatedMembership.group.id,
+      //       groupName: updatedMembership.group.name,
+      //       status: newStatus,
+      //     }),
+      //   },
+      //   userId,
+      // );
+
+      return this.mapToDto(updatedUserFollowing as UserFollowing);
+    } catch (error) {
+      this.logger.error(`Failed to update member status`, error);
+      throw error;
+    }
   }
 
   private mapToDto(follow: UserFollowing): UserFollowingDto {

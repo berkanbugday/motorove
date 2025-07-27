@@ -636,9 +636,10 @@ type Mutation {
   updateComment(input: UpdateCommentInput!): CommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
-  updateInvitationStatus(input: UpdateInvitationStatusInput!): GroupMembershipDto!
+  updateGroupMembershipInvitationStatus(input: UpdateGroupMembershipInvitationStatusInput!): GroupMembershipDto!
   updatePassword(input: UpdatePasswordInput!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
+  updateUserFollowingInvitationStatus(input: UpdateUserFollowingInvitationStatusInput!): UserFollowingDto!
   updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
 }
 
@@ -933,7 +934,7 @@ input UpdateGroupInput {
   tags: [GroupTag!]
 }
 
-input UpdateInvitationStatusInput {
+input UpdateGroupMembershipInvitationStatusInput {
   id: ID!
   status: InvitationStatus!
 }
@@ -950,6 +951,11 @@ input UpdatePostInput {
   groupId: String
   id: ID!
   images: [String!]
+}
+
+input UpdateUserFollowingInvitationStatusInput {
+  id: ID!
+  status: InvitationStatus!
 }
 
 input UpdateUserSettingInput {

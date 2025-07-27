@@ -42,8 +42,10 @@ export const CHANGE_MEMBER_ROLE = gql`
 `;
 
 export const UPDATE_INVITATION_STATUS = gql`
-  mutation UpdateInvitationStatus($input: UpdateInvitationStatusInput!) {
-    updateInvitationStatus(input: $input) {
+  mutation UpdateInvitationStatus(
+    $input: UpdateGroupMembershipInvitationStatusInput!
+  ) {
+    updateGroupMembershipInvitationStatus(input: $input) {
       status
     }
   }

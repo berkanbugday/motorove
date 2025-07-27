@@ -40,3 +40,13 @@ export const UNFOLLOW_USER = gql`
     unfollowUser(userId: $userId)
   }
 `;
+
+export const UPDATE_INVITATION_STATUS = gql`
+  mutation UpdateInvitationStatus(
+    $input: UpdateUserFollowingInvitationStatusInput!
+  ) {
+    updateUserFollowingInvitationStatus(input: $input) {
+      status
+    }
+  }
+`;

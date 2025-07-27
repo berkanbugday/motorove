@@ -25,8 +25,14 @@ export const FollowRequestScreen = () => {
   const {t} = useTranslation();
 
   // Fetch follow requests
-  const {pendingFollowRequests, loading, error, refetch} =
-    usePendingFollowRequests();
+  const {
+    pendingFollowRequests,
+    loading,
+    error,
+    refetch,
+    handleAccept,
+    handleReject,
+  } = usePendingFollowRequests();
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
@@ -97,8 +103,8 @@ export const FollowRequestScreen = () => {
             name={`${item.follower?.firstName} ${item.follower?.lastName}`}
             city={item.follower?.city?.value}
             timeAgo={item.updatedAt}
-            onAccept={() => {}}
-            onReject={() => {}}
+            onAccept={() => handleAccept(item.id)}
+            onReject={() => handleReject(item.id)}
           />
         )}
         showsVerticalScrollIndicator={false}

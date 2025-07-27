@@ -226,7 +226,10 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
         // Refetch the join requests
         originalRefetch();
 
-        if (_data.updateInvitationStatus.status === InvitationStatus.ACCEPTED) {
+        if (
+          _data.updateGroupMembershipInvitationStatus.status ===
+          InvitationStatus.ACCEPTED
+        ) {
           showToast({
             type: 'success',
             text1: t('common.success'),

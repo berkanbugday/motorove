@@ -1,12 +1,27 @@
-import { Resolver, Mutation, Query, Args, Int, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Mutation,
+  Query,
+  Args,
+  Int,
+  ID,
+  Context,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
 import { UserFollowingsService } from './user-followings.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { UserDto } from 'src/users/dto/user.dto';
 import { UserFollowingDto } from './dto/user-following.dto';
 import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { UpdateUserFollowingInvitationStatusInput } from './dto/update-user-following-invitation-status.input';
+
+interface GqlContext {
+  req: Request & {
+    user: { id: string };
+    headers: { authorization?: string };
+  };
+}
 
 @Resolver(() => UserFollowingDto)
 export class UserFollowingsResolver {
@@ -15,42 +30,54 @@ export class UserFollowingsResolver {
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'followerUsers' })
   async findFollowerUsers(
+    @Context() context: GqlContext,
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.userFollowingsService.findFollowerUsers(
       userId,
       limit,
       skip,
+      authToken,
     );
   }
 
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'followingUsers' })
   async findFollowingUsers(
+    @Context() context: GqlContext,
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.userFollowingsService.findFollowingUsers(
       userId,
       limit,
       skip,
+      authToken,
     );
   }
 
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'pendingFollowRequests' })
   async findPendingFollowRequests(
-    @CurrentUser() user: User,
+    @Context() context: GqlContext,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.userFollowingsService.findPendingFollowRequests(
-      user.id,
+      userId,
       limit,
       skip,
+      authToken,
     );
   }
 
@@ -70,5 +97,16 @@ export class UserFollowingsResolver {
     @Args('userId', { type: () => ID }) userId: string,
   ): Promise<InvitationStatus> {
     return await this.userFollowingsService.unfollow(user.id, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => UserFollowingDto)
+  async updateUserFollowingInvitationStatus(
+    @Args('input') input: UpdateUserFollowingInvitationStatusInput,
+  ): Promise<UserFollowingDto> {
+    return await this.userFollowingsService.updateInvitationStatus(
+      input.id,
+      input.status,
+    );
   }
 }

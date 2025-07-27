@@ -4,7 +4,7 @@ import { InvitationStatus } from "../../enums";
  * Update Membership Status Interface
  * Used for updating a group membership status
  */
-export interface IUpdateInvitationStatus {
+export interface IUpdateGroupMembershipInvitationStatus {
   /**
    * The new status to set for the membership
    */
