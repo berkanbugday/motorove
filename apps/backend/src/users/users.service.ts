@@ -5,6 +5,7 @@ import { AccountSetupInput } from './dto/account-setup.input';
 import { StorageService } from '../core/storage/storage.service';
 import { CityDto } from '../cities/dto/city.dto';
 import { plainToClass } from 'class-transformer';
+import { InvitationStatus } from '@motorove/shared';
 
 @Injectable()
 export class UsersService {
@@ -45,20 +46,32 @@ export class UsersService {
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
       include: {
         city: true,
-        followers: true,
-        following: true,
+        followers: {
+          where: {
+            isActive: true,
+            status: {
+              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+            },
+          },
+        },
+        following: {
+          where: {
+            isActive: true,
+            status: {
+              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+            },
+          },
+        },
       },
     });
 
     const usersWithSignedUrls = await Promise.all(
       users.map(async (user) => ({
         ...user,
-        isFollowing: user.followers.some(
-          (follower) => follower.followerId === currentUserId,
-        ),
-        followerCount: user.followers.length,
-        followingCount: user.following.length,
         city: user.city as CityDto,
+        followingStatus: user.following.find(
+          (f) => f.followerId === currentUserId,
+        )?.status,
         avatar: user.avatar
           ? await this.storageService.getSignedUrl(user.avatar, 3600, authToken)
           : user.avatar,
@@ -87,11 +100,27 @@ export class UsersService {
     };
   }
 
-  async userProfile(userId: string, currentUserId: string): Promise<UserDto> {
+  async userProfile(userId: string): Promise<UserDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
         city: true,
+        followers: {
+          where: {
+            isActive: true,
+            status: {
+              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+            },
+          },
+        },
+        following: {
+          where: {
+            isActive: true,
+            status: {
+              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+            },
+          },
+        },
       },
     });
 
@@ -99,38 +128,11 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if current user is following the requested user
-    const isFollowing = await this.prisma.userFollowing.findUnique({
-      where: {
-        followerId_followingId: {
-          followerId: currentUserId,
-          followingId: userId,
-        },
-      },
-    });
-
-    // Count followers
-    const followerCount = await this.prisma.userFollowing.count({
-      where: {
-        followingId: userId,
-      },
-    });
-
-    // Count following
-    const followingCount = await this.prisma.userFollowing.count({
-      where: {
-        followerId: userId,
-      },
-    });
-
     return {
       ...user,
       firstName: user.firstName,
       lastName: user.lastName,
       avatar: user.avatar || undefined,
-      isFollowing: !!isFollowing,
-      followerCount,
-      followingCount,
       city: user.city as CityDto,
     };
   }

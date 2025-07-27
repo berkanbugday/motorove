@@ -2,57 +2,47 @@ import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import {
   IsBoolean,
   IsEmail,
-  IsInt,
   IsOptional,
   ValidateNested,
   IsString,
   IsUUID,
+  IsEnum,
 } from 'class-validator';
 import { IUser } from '@motorove/shared';
 import { CityDto } from 'src/cities/dto/city.dto';
 import { Type } from 'class-transformer';
+import { InvitationStatus } from '../../enums/models/invitation-status.enum';
 
 @ObjectType()
 export class UserDto implements IUser {
   @Field(() => ID)
   @IsUUID()
-  declare id: string;
+  id: string;
 
   @Field(() => String)
   @IsString()
-  declare firstName: string;
+  firstName: string;
 
   @Field(() => String)
   @IsString()
-  declare lastName: string;
+  lastName: string;
 
   @Field(() => String)
   @IsEmail()
-  declare email: string;
+  email: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  declare avatar?: string;
+  avatar?: string;
 
   @Field(() => String)
   @IsString()
-  declare supabaseId: string;
+  supabaseId: string;
 
-  @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsInt()
-  followerCount?: number;
-
-  @Field(() => Int, { nullable: true })
-  @IsOptional()
-  @IsInt()
-  followingCount?: number;
-
-  @Field(() => Boolean, { nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  isFollowing?: boolean;
+  @Field(() => InvitationStatus, { nullable: true })
+  @IsEnum(InvitationStatus)
+  followingStatus?: InvitationStatus;
 
   @Field(() => CityDto, { nullable: true })
   @ValidateNested()

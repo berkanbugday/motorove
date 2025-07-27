@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UserFollowing } from './models/user-following.model';
 import { UserFollowingDto } from './dto/user-following.dto';
+import { InvitationStatus } from '../enums/models/invitation-status.enum';
 
 @Injectable()
 export class UserFollowingsService {
@@ -57,21 +58,24 @@ export class UserFollowingsService {
   }
 
   async follow(
-    currentUserId: string,
-    userIdToFollow: string,
-  ): Promise<UserFollowingDto> {
+    followerId: string,
+    followingId: string,
+  ): Promise<InvitationStatus> {
     // Check if users exist
-    const [currentUser, userToFollow] = await Promise.all([
-      this.prisma.user.findUnique({ where: { id: currentUserId } }),
-      this.prisma.user.findUnique({ where: { id: userIdToFollow } }),
+    const [followerUser, followingUser] = await Promise.all([
+      await this.prisma.user.findUnique({ where: { id: followerId } }),
+      await this.prisma.user.findUnique({
+        where: { id: followingId },
+        include: { userSetting: true },
+      }),
     ]);
 
-    if (!currentUser || !userToFollow) {
+    if (!followerUser || !followingUser) {
       throw new NotFoundException('User not found');
     }
 
     // Prevent self-following
-    if (currentUserId === userIdToFollow) {
+    if (followerUser === followingUser) {
       throw new ConflictException('Cannot follow yourself');
     }
 
@@ -79,8 +83,12 @@ export class UserFollowingsService {
     const existingFollow = await this.prisma.userFollowing.findUnique({
       where: {
         followerId_followingId: {
-          followerId: currentUserId,
-          followingId: userIdToFollow,
+          followerId: followerId,
+          followingId: followingId,
+        },
+        isActive: true,
+        status: {
+          in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
         },
       },
     });
@@ -90,30 +98,48 @@ export class UserFollowingsService {
     }
 
     // Create follow relationship
-    const follow = await this.prisma.userFollowing.create({
-      data: {
-        followerId: currentUserId,
-        followingId: userIdToFollow,
+    const follow = await this.prisma.userFollowing.upsert({
+      where: {
+        followerId_followingId: {
+          followerId: followerId,
+          followingId: followingId,
+        },
       },
-      include: {
-        follower: true,
-        following: true,
+      create: {
+        followerId: followerId,
+        followingId: followingId,
+        status: followingUser.userSetting?.autoAcceptFollowers
+          ? InvitationStatus.ACCEPTED
+          : InvitationStatus.PENDING,
+      },
+      update: {
+        status: followingUser.userSetting?.autoAcceptFollowers
+          ? InvitationStatus.ACCEPTED
+          : InvitationStatus.PENDING,
+        isActive: true,
+      },
+      select: {
+        status: true,
       },
     });
 
-    return this.mapToDto(follow as unknown as UserFollowing);
+    return follow.status as InvitationStatus;
   }
 
   async unfollow(
-    currentUserId: string,
-    userIdToUnfollow: string,
-  ): Promise<UserFollowingDto> {
+    followerId: string,
+    followingId: string,
+  ): Promise<InvitationStatus> {
     // Check if relationship exists
     const userFollowing = await this.prisma.userFollowing.findUnique({
       where: {
         followerId_followingId: {
-          followerId: currentUserId,
-          followingId: userIdToUnfollow,
+          followerId: followerId,
+          followingId: followingId,
+        },
+        isActive: true,
+        status: {
+          in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
         },
       },
     });
@@ -123,33 +149,16 @@ export class UserFollowingsService {
     }
 
     // Delete the follow relationship
-    const deletedUserFollowing = await this.prisma.userFollowing.update({
+    await this.prisma.userFollowing.update({
       where: {
         id: userFollowing.id,
       },
       data: {
         isActive: false,
       },
-      include: {
-        follower: true,
-        following: true,
-      },
     });
 
-    return this.mapToDto(deletedUserFollowing as unknown as UserFollowing);
-  }
-
-  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
-    const follow = await this.prisma.userFollowing.findUnique({
-      where: {
-        followerId_followingId: {
-          followerId,
-          followingId,
-        },
-      },
-    });
-
-    return !!follow;
+    return InvitationStatus.REJECTED;
   }
 
   private mapToDto(follow: UserFollowing): UserFollowingDto {

@@ -6,6 +6,7 @@ import { UserFollowingsService } from './user-followings.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UserFollowingDto } from './dto/user-following.dto';
+import { InvitationStatus } from '../enums/models/invitation-status.enum';
 
 @Resolver(() => UserFollowingDto)
 export class UserFollowingsResolver {
@@ -40,29 +41,20 @@ export class UserFollowingsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => UserFollowingDto)
+  @Mutation(() => InvitationStatus)
   async followUser(
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
-  ): Promise<UserFollowingDto> {
+  ): Promise<InvitationStatus> {
     return await this.userFollowingsService.follow(user.id, userId);
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => UserFollowingDto)
+  @Mutation(() => InvitationStatus)
   async unfollowUser(
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
-  ): Promise<UserFollowingDto> {
+  ): Promise<InvitationStatus> {
     return await this.userFollowingsService.unfollow(user.id, userId);
-  }
-
-  @UseGuards(JwtGuard)
-  @Query(() => Boolean)
-  async isFollowing(
-    @CurrentUser() user: User,
-    @Args('userId', { type: () => ID }) userId: string,
-  ): Promise<boolean> {
-    return await this.userFollowingsService.isFollowing(user.id, userId);
   }
 }

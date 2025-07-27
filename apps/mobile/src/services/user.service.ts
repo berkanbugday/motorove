@@ -4,7 +4,6 @@ import {loggingService} from './logging.service';
 import {SEARCH_USERS, ACCOUNT_SETUP} from './graphql/user.graphql';
 import {useCallback, useEffect, useState} from 'react';
 import {apolloClient} from '../configs/apolloClientConfig';
-import {GET_MY_FOLLOWING} from './graphql/follow.graphql';
 import {showToast} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 
@@ -183,29 +182,6 @@ export const userService = {
       return data.searchUsers || [];
     } catch (error) {
       loggingService.error('Error in searchUsers:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Get users that the current user is following
-   * @param limit Maximum number of results to return
-   * @param skip Number of results to skip (for pagination)
-   * @returns Array of users the current user follows
-   */
-  async getMyFollowing(limit = 20, skip = 0): Promise<IUser[]> {
-    try {
-      const {data} = await apolloClient.query({
-        query: GET_MY_FOLLOWING,
-        variables: {
-          limit,
-          skip,
-        },
-        fetchPolicy: 'network-only',
-      });
-      return data.myFollowing || [];
-    } catch (error) {
-      loggingService.error('Error in getMyFollowing:', error);
       throw error;
     }
   },

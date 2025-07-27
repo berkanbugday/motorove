@@ -10,9 +10,7 @@ export const USER_FRAGMENT = gql`
     email
     avatar
     supabaseId
-    followerCount
-    followingCount
-    isFollowing
+    followingStatus
     city {
       ...CityFragment
     }

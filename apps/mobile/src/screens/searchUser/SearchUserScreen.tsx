@@ -1,19 +1,25 @@
 import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, Keyboard, FlatList} from 'react-native';
-import {useFocusEffect} from '@react-navigation/native';
 import {TopHeaderBar, Icon, UserCard, Body, AnimatedInput} from '@components';
 import {colors, spacing} from '@theme';
 import {useSearchUsers} from '@services/user.service';
 import {IUser} from '@motorove/shared';
 import {useTranslation} from '@/hooks/useTranslation';
+import {useNavigation} from '@react-navigation/native';
+import {MainScreenNavigationProp} from '@navigation/index';
+import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
 
 /**
  * User Search Screen - Allows users to search for other users and follow/unfollow them
  */
 export const SearchUserScreen = () => {
+  const navigation = useNavigation<MainScreenNavigationProp<'SearchUser'>>();
   const {t} = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const {followUser, loading: followLoading} = useFollowUser();
+  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser();
+  const [users, setUsers] = useState<IUser[]>([]);
 
   // Fetch users based on search query
   const {
@@ -25,18 +31,9 @@ export const SearchUserScreen = () => {
     clearSearch,
   } = useSearchUsers(debouncedQuery);
 
-  // Clear search when screen loses focus
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        // This runs when the screen is unfocused (exited)
-        setSearchQuery('');
-        setDebouncedQuery('');
-        clearSearch();
-      };
-    }, [clearSearch]),
-  );
-
+  useEffect(() => {
+    setUsers(searchResults);
+  }, [searchResults]);
   // Debounce search query to avoid too many API calls
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -66,17 +63,36 @@ export const SearchUserScreen = () => {
   }, [clearSearch]);
 
   // Render each user item
-  const renderUserItem = useCallback(({item}: {item: IUser}) => {
-    return (
-      <UserCard
-        user={item}
-        onPress={() => {
-          // Navigate to user profile when implemented
-          // navigation.navigate('UserProfile', {userId: item.id});
-        }}
-      />
-    );
-  }, []);
+  const renderUserItem = useCallback(
+    ({item}: {item: IUser}) => {
+      return (
+        <UserCard
+          user={item}
+          loading={followLoading || unfollowLoading}
+          onPress={() => {
+            navigation.navigate('Profile', {userId: item.id});
+          }}
+          handleFollowPress={async () => {
+            const status = await followUser(item.id);
+            setUsers(prevUsers =>
+              prevUsers.map(user =>
+                user.id === item.id ? {...user, followingStatus: status} : user,
+              ),
+            );
+          }}
+          handleUnfollowPress={async () => {
+            const status = await unfollowUser(item.id);
+            setUsers(prevUsers =>
+              prevUsers.map(user =>
+                user.id === item.id ? {...user, followingStatus: status} : user,
+              ),
+            );
+          }}
+        />
+      );
+    },
+    [followUser, unfollowUser, users],
+  );
 
   // Render empty state when no users match search query
   const renderEmptyList = useCallback(() => {
@@ -130,7 +146,7 @@ export const SearchUserScreen = () => {
       </View>
 
       <FlatList
-        data={searchResults}
+        data={users}
         renderItem={renderUserItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContainer}

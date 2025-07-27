@@ -58,6 +58,7 @@ export default {
     minutes_ago: '{{count}} {{minute}} ago',
     follow: 'Follow',
     unfollow: 'Unfollow',
+    pending_approval: 'Pending Approval',
   },
 
   // Main navigation items

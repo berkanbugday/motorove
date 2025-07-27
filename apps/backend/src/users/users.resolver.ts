@@ -45,12 +45,8 @@ export class UsersResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => UserDto)
-  async userProfile(
-    @Context() context: GqlContext,
-    @Args('id') id: string,
-  ): Promise<UserDto> {
-    const userId = context.req.user.id;
-    return await this.usersService.userProfile(id, userId);
+  async userProfile(@Args('id') id: string): Promise<UserDto> {
+    return await this.usersService.userProfile(id);
   }
 
   @UseGuards(JwtGuard)

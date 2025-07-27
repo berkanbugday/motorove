@@ -58,6 +58,7 @@ export default {
     minutes_ago: '{{count}} {{minute}} önce',
     follow: 'Takip Et',
     unfollow: 'Takibi Bırak',
+    pending_approval: 'Onay Bekliyor',
   },
 
   // Main navigation items

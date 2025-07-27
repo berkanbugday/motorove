@@ -77,7 +77,10 @@ export function Button({
 
   const getTextColor = () => {
     if (disabled || loading) {
-      return colors.neutral.lightGrey;
+      if (variant === 'primary' || variant === 'dark') {
+        return colors.neutral.white;
+      }
+      return colors.neutral.black;
     }
     if (variant === 'primary') {
       return colors.neutral.white;
@@ -120,7 +123,7 @@ export function Button({
 
   const renderContent = () => {
     if (loading) {
-      return <ActivityIndicator size="small" color={colors.neutral.white} />;
+      return <ActivityIndicator size="small" color={getTextColor()} />;
     }
 
     if (iconName && !title) {

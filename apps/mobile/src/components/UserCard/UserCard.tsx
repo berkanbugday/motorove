@@ -1,19 +1,20 @@
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Image, TouchableOpacity} from 'react-native';
 import {colors} from '@theme';
-import {Typography} from '@components/Typography';
+import {Caption, Typography} from '@components/Typography';
 import {Button} from '@components/Button';
 import {Icon} from '@components/Icon';
-import {useFollowUser, useUnfollowUser} from '@services/follow.service';
 import {styles} from './UserCard.styles';
-import {IUser} from '@motorove/shared';
+import {InvitationStatus, IUser} from '@motorove/shared';
 import {useTranslation} from '@/hooks/useTranslation';
 
 interface UserCardProps {
   user: IUser;
   onPress?: () => void;
-  onFollowStatusChange?: (isFollowing: boolean) => void;
+  handleFollowPress?: () => void;
+  handleUnfollowPress?: () => void;
   style?: any;
+  loading?: boolean;
 }
 
 /**
@@ -22,61 +23,18 @@ interface UserCardProps {
 export const UserCard: React.FC<UserCardProps> = ({
   user,
   onPress,
-  onFollowStatusChange,
+  handleFollowPress,
+  handleUnfollowPress,
   style,
+  loading,
 }) => {
   const {t} = useTranslation();
-  const [isFollowing, setIsFollowing] = useState<boolean>(
-    user.isFollowing || false,
-  );
+  const [followingStatus, setFollowingStatus] = useState<InvitationStatus>();
 
   // Update local state when user prop changes
   useEffect(() => {
-    setIsFollowing(user.isFollowing || false);
-  }, [user.isFollowing]);
-
-  // Follow and unfollow mutations with callbacks to update local state
-  const {followUser, loading: followLoading} = useFollowUser(
-    (newStatus: boolean) => {
-      setIsFollowing(newStatus);
-      if (onFollowStatusChange) {
-        onFollowStatusChange(newStatus);
-      }
-    },
-  );
-
-  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser(
-    (newStatus: boolean) => {
-      setIsFollowing(newStatus);
-      if (onFollowStatusChange) {
-        onFollowStatusChange(newStatus);
-      }
-    },
-  );
-
-  const handleFollowPress = useCallback(async () => {
-    if (followLoading) {
-      return;
-    }
-
-    try {
-      await followUser(user.id);
-    } catch (error) {
-      console.error('Error following user:', error);
-    }
-  }, [user.id, followUser]);
-
-  const handleUnfollowPress = useCallback(async () => {
-    if (unfollowLoading) {
-      return;
-    }
-
-    try {
-      await unfollowUser(user.id);
-    } catch (error) {
-      console.error('Error unfollowing user:', error);
-    }
-  }, [user.id, unfollowUser]);
+    setFollowingStatus(user.followingStatus);
+  }, [user.followingStatus]);
 
   return (
     <TouchableOpacity
@@ -112,23 +70,25 @@ export const UserCard: React.FC<UserCardProps> = ({
           )}
         </View>
         <View style={styles.buttonContainer}>
-          {isFollowing ? (
+          {followingStatus === InvitationStatus.ACCEPTED ? (
             <Button
               title={t('common.unfollow')}
               variant="secondary"
               size="small"
               onPress={handleUnfollowPress}
-              disabled={unfollowLoading}
-              loading={unfollowLoading}
+              disabled={loading}
+              loading={loading}
             />
+          ) : followingStatus === InvitationStatus.PENDING ? (
+            <Caption>{t('common.pending_approval')}</Caption>
           ) : (
             <Button
               title={t('common.follow')}
               variant="dark"
               size="small"
               onPress={handleFollowPress}
-              disabled={followLoading}
-              loading={followLoading}
+              disabled={loading}
+              loading={loading}
             />
           )}
         </View>
