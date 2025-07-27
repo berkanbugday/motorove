@@ -383,6 +383,11 @@ export const ToastProvider: React.FC<{children: React.ReactNode}> = ({
     };
   }, []);
 
+  // Define onHide as a separate callback to prevent issues with useInsertionEffect
+  const handleToastHide = useCallback(() => {
+    setVisible(false);
+  }, []);
+
   return (
     <ToastContext.Provider value={{showToast, hideToast}}>
       {children}
@@ -392,7 +397,7 @@ export const ToastProvider: React.FC<{children: React.ReactNode}> = ({
           text2={toast.text2}
           type={toast.type}
           onPress={toast.onPress}
-          onHide={() => setVisible(false)}
+          onHide={handleToastHide}
           position={toast.position || 'top'}
           topOffset={toast.topOffset}
           bottomOffset={toast.bottomOffset}
