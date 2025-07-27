@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, Image, ImageSourcePropType} from 'react-native';
+import {View, StyleSheet, Image} from 'react-native';
 import {colors, spacing, radius} from '@theme';
 import {Typography, Button, Icon} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
@@ -14,7 +14,7 @@ export interface JoinRequestCardProps {
   /**
    * User avatar image source
    */
-  avatarSource?: ImageSourcePropType;
+  avatarSource?: string;
 
   /**
    * Name of the user
@@ -67,7 +67,9 @@ export const JoinRequestCard: React.FC<JoinRequestCardProps> = ({
       <View style={styles.content}>
         <Image
           source={
-            avatarSource || require('../../assets/images/default_avatar.png')
+            avatarSource
+              ? {uri: avatarSource}
+              : require('../../assets/images/default_avatar.png')
           }
           style={styles.avatar}
         />
@@ -149,6 +151,8 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
     backgroundColor: colors.neutral.lightGrey,
   },
   infoContainer: {

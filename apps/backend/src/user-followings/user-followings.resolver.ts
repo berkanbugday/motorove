@@ -13,7 +13,7 @@ export class UserFollowingsResolver {
   constructor(private userFollowingsService: UserFollowingsService) {}
 
   @UseGuards(JwtGuard)
-  @Query(() => [UserDto], { name: 'followerUsers' })
+  @Query(() => [UserFollowingDto], { name: 'followerUsers' })
   async findFollowerUsers(
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
@@ -27,7 +27,7 @@ export class UserFollowingsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => [UserDto], { name: 'followingUsers' })
+  @Query(() => [UserFollowingDto], { name: 'followingUsers' })
   async findFollowingUsers(
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
@@ -35,6 +35,20 @@ export class UserFollowingsResolver {
   ): Promise<UserFollowingDto[]> {
     return await this.userFollowingsService.findFollowingUsers(
       userId,
+      limit,
+      skip,
+    );
+  }
+
+  @UseGuards(JwtGuard)
+  @Query(() => [UserFollowingDto], { name: 'pendingFollowRequests' })
+  async findPendingFollowRequests(
+    @CurrentUser() user: User,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+  ): Promise<UserFollowingDto[]> {
+    return await this.userFollowingsService.findPendingFollowRequests(
+      user.id,
       limit,
       skip,
     );

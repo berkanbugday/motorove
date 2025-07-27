@@ -129,7 +129,7 @@ export const JoinRequestScreen = () => {
         renderItem={({item}) => (
           <JoinRequestCard
             type="group"
-            avatarSource={{uri: item.user.avatar}}
+            avatarSource={item.user.avatar}
             name={`${item.user.firstName} ${item.user.lastName}`}
             groupName={item.group.name}
             timeAgo={item.updatedAt}
@@ -203,9 +203,7 @@ export const JoinRequestScreen = () => {
         renderItem={({item}) => (
           <JoinRequestCard
             type="event"
-            avatarSource={
-              item.user.avatar ? {uri: item.user.avatar} : undefined
-            }
+            avatarSource={item.user.avatar}
             name={`${item.user.firstName} ${item.user.lastName}`}
             groupName={item.event.title}
             timeAgo={item.createdAt}
@@ -244,8 +242,8 @@ export const JoinRequestScreen = () => {
       <TopHeaderBar
         title={t('screens.joinRequest.join_requests')}
         showShadow={false}
-        leftIconName="arrow-left"
-        onLeftIconPress={() => navigation.goBack()}
+        showBackButton
+        onBackPress={() => navigation.goBack()}
       />
       <Tabs
         items={tabItems}

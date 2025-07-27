@@ -1,4 +1,5 @@
 import { IUser } from "../user";
+import { InvitationStatus } from "../../enums/invitation-status.enum";
 
 /**
  * User Following Interface
@@ -13,15 +14,25 @@ export interface IUserFollowing {
   /**
    * User who is following
    */
-  follower: Partial<IUser>;
+  follower?: Partial<IUser>;
 
   /**
    * User who is being followed
    */
-  following: Partial<IUser>;
+  following?: Partial<IUser>;
 
   /**
    * Date and time the follow relationship was created
    */
   createdAt: Date;
+
+  /**
+   * Date and time the follow relationship was updated
+   */
+  updatedAt: Date;
+
+  /**
+   * Status of the follow relationship
+   */
+  status: InvitationStatus;
 }

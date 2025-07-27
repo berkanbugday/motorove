@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, Image, ImageSourcePropType} from 'react-native';
+import {View, StyleSheet, Image} from 'react-native';
 import {colors, spacing, radius} from '@theme';
 import {Typography, Button, Icon} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
@@ -9,7 +9,7 @@ export interface FollowRequestCardProps {
   /**
    * User avatar image source
    */
-  avatarSource?: ImageSourcePropType;
+  avatarSource?: string;
 
   /**
    * Name of the user
@@ -17,9 +17,9 @@ export interface FollowRequestCardProps {
   name: string;
 
   /**
-   * Username of the requester
+   * City of the requester
    */
-  username: string;
+  city?: string;
 
   /**
    * Time when the request was created
@@ -48,7 +48,7 @@ export interface FollowRequestCardProps {
 export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
   avatarSource,
   name,
-  username,
+  city,
   timeAgo,
   onAccept,
   onReject,
@@ -61,7 +61,9 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
       <View style={styles.content}>
         <Image
           source={
-            avatarSource || require('../../assets/images/default_avatar.png')
+            avatarSource
+              ? {uri: avatarSource}
+              : require('../../assets/images/default_avatar.png')
           }
           style={styles.avatar}
         />
@@ -80,19 +82,15 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
             </Typography>
           </View>
 
-          <View style={styles.usernameRow}>
-            <Icon
-              name="user-filled"
-              size={14}
-              color={colors.neutral.darkGrey}
-            />
+          <View style={styles.cityRow}>
+            <Icon name="map-pin" size={14} color={colors.neutral.darkGrey} />
             <Typography
               variant="body"
               weight="medium"
               color={colors.neutral.darkGrey}
-              style={styles.usernameText}
+              style={styles.cityText}
               numberOfLines={1}>
-              @{username}
+              {city}
             </Typography>
           </View>
 
@@ -100,7 +98,7 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
             variant="caption"
             color={colors.neutral.darkGrey}
             numberOfLines={2}>
-            {t('screens.followRequest.wants_to_follow_you')}
+            {t('screens.followRequest.wants_to_follow')}
           </Typography>
         </View>
       </View>
@@ -141,6 +139,8 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
     backgroundColor: colors.neutral.lightGrey,
   },
   infoContainer: {
@@ -158,12 +158,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: spacing.xs,
   },
-  usernameRow: {
+  cityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.xs / 2,
   },
-  usernameText: {
+  cityText: {
     marginLeft: spacing.xs / 2,
   },
   actionsContainer: {

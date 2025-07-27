@@ -8,30 +8,59 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { UserFollowing } from './models/user-following.model';
 import { UserFollowingDto } from './dto/user-following.dto';
 import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { StorageService } from '../core/storage/storage.service';
 
 @Injectable()
 export class UserFollowingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storageService: StorageService,
+  ) {}
 
   // Get users that follow the given userId with pagination
   async findFollowerUsers(
     userId: string,
     limit?: number,
     skip?: number,
+    authToken?: string,
   ): Promise<UserFollowingDto[]> {
     const followers = await this.prisma.userFollowing.findMany({
       where: {
         followingId: userId,
+        isActive: true,
+        status: {
+          in: [InvitationStatus.ACCEPTED],
+        },
       },
       include: {
-        follower: true,
+        follower: {
+          include: {
+            city: true,
+          },
+        },
       },
       take: limit,
       skip: skip,
     });
 
+    const usersWithSignedUrls = await Promise.all(
+      followers.map(async (follower) => ({
+        ...follower,
+        follower: {
+          ...follower.follower,
+          avatar: follower.follower.avatar
+            ? await this.storageService.getSignedUrl(
+                follower.follower.avatar,
+                3600,
+                authToken,
+              )
+            : follower.follower.avatar,
+        },
+      })),
+    );
+
     return await Promise.all(
-      followers.map((f) => this.mapToDto(f as unknown as UserFollowing)),
+      usersWithSignedUrls.map((f) => this.mapToDto(f as UserFollowing)),
     );
   }
 
@@ -40,20 +69,91 @@ export class UserFollowingsService {
     userId: string,
     limit?: number,
     skip?: number,
+    authToken?: string,
   ): Promise<UserFollowingDto[]> {
-    const following = await this.prisma.userFollowing.findMany({
+    const followings = await this.prisma.userFollowing.findMany({
       where: {
         followerId: userId,
+        isActive: true,
+        status: {
+          in: [InvitationStatus.ACCEPTED],
+        },
       },
       include: {
-        following: true,
+        following: {
+          include: {
+            city: true,
+          },
+        },
       },
       take: limit,
       skip: skip,
     });
 
+    const usersWithSignedUrls = await Promise.all(
+      followings.map(async (following) => ({
+        ...following,
+        following: {
+          ...following.following,
+          avatar: following.following.avatar
+            ? await this.storageService.getSignedUrl(
+                following.following.avatar,
+                3600,
+                authToken,
+              )
+            : following.following.avatar,
+        },
+      })),
+    );
+
     return await Promise.all(
-      following.map((f) => this.mapToDto(f as unknown as UserFollowing)),
+      usersWithSignedUrls.map((f) => this.mapToDto(f as UserFollowing)),
+    );
+  }
+
+  async findPendingFollowRequests(
+    userId: string,
+    limit?: number,
+    skip?: number,
+    authToken?: string,
+  ): Promise<UserFollowingDto[]> {
+    const pendingFollowRequests = await this.prisma.userFollowing.findMany({
+      where: {
+        followingId: userId,
+        isActive: true,
+        status: {
+          in: [InvitationStatus.PENDING],
+        },
+      },
+      include: {
+        follower: {
+          include: {
+            city: true,
+          },
+        },
+      },
+      take: limit,
+      skip: skip,
+    });
+
+    const usersWithSignedUrls = await Promise.all(
+      pendingFollowRequests.map(async (pendingFollowRequest) => ({
+        ...pendingFollowRequest,
+        follower: {
+          ...pendingFollowRequest.follower,
+          avatar: pendingFollowRequest.follower.avatar
+            ? await this.storageService.getSignedUrl(
+                pendingFollowRequest.follower.avatar,
+                3600,
+                authToken,
+              )
+            : pendingFollowRequest.follower.avatar,
+        },
+      })),
+    );
+
+    return await Promise.all(
+      usersWithSignedUrls.map((f) => this.mapToDto(f as UserFollowing)),
     );
   }
 
@@ -169,6 +269,8 @@ export class UserFollowingsService {
       follower: follow.follower as UserDto,
       following: follow.following as UserDto,
       createdAt: follow.createdAt,
+      updatedAt: follow.updatedAt,
+      status: follow.status,
     };
   }
 }

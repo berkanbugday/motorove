@@ -1,7 +1,12 @@
-import {useMutation} from '@apollo/client';
-import {FOLLOW_USER, UNFOLLOW_USER} from './graphql/user-following.graphql';
+import {useMutation, useQuery} from '@apollo/client';
+import {
+  GET_PENDING_FOLLOW_REQUESTS,
+  FOLLOW_USER,
+  UNFOLLOW_USER,
+} from './graphql/user-following.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
+import {IUserFollowing} from '@motorove/shared';
 
 // /**
 //  * Hook for getting current user's followers
@@ -227,6 +232,57 @@ import {showToast} from '@components';
 //     loading,
 //   };
 // };
+
+/**
+ * Hook for getting pending follow requests
+ * @param limit Optional number of pending follow requests to fetch (for pagination)
+ * @param skip Optional number of pending follow requests to skip (for pagination)
+ * @returns The pending follow requests list, loading state, error state, and refetch function
+ */
+export const usePendingFollowRequests = (limit?: number, skip?: number) => {
+  const {data, loading, error, refetch, fetchMore} = useQuery(
+    GET_PENDING_FOLLOW_REQUESTS,
+    {
+      variables: {limit, skip},
+      fetchPolicy: 'network-only',
+      onError: errorObj => {
+        loggingService.error(
+          'Error getting pending follow requests:',
+          errorObj,
+        );
+      },
+    },
+  );
+
+  const loadMore = (newSkip: number, newLimit?: number) => {
+    return fetchMore({
+      variables: {
+        skip: newSkip,
+        limit: newLimit || limit,
+      },
+      updateQuery: (prev, {fetchMoreResult}) => {
+        if (!fetchMoreResult) {
+          return prev;
+        }
+        return {
+          pendingFollowRequests: [
+            ...prev.pendingFollowRequests,
+            ...fetchMoreResult.pendingFollowRequests,
+          ],
+        };
+      },
+    });
+  };
+
+  return {
+    pendingFollowRequests:
+      (data?.pendingFollowRequests as IUserFollowing[]) || [],
+    loading,
+    error,
+    refetch,
+    loadMore,
+  };
+};
 
 /**
  * Hook for following a user

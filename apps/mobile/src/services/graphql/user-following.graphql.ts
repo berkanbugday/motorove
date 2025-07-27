@@ -12,52 +12,21 @@ export const USER_FOLLOWING_FRAGMENT = gql`
       ...UserFragment
     }
     createdAt
+    updatedAt
+    status
   }
   ${USER_FRAGMENT}
 `;
 
-// // Queries
-// export const GET_MY_FOLLOWERS = gql`
-//   query GetMyFollowers($limit: Int, $skip: Int) {
-//     myFollowers(limit: $limit, skip: $skip) {
-//       ...UserFragment
-//     }
-//   }
-//   ${USER_FRAGMENT}
-// `;
-
-// export const GET_MY_FOLLOWING = gql`
-//   query GetMyFollowing($limit: Int, $skip: Int) {
-//     myFollowing(limit: $limit, skip: $skip) {
-//       ...UserFragment
-//     }
-//   }
-//   ${USER_FRAGMENT}
-// `;
-
-// export const GET_USER_FOLLOWERS = gql`
-//   query GetUserFollowers($userId: ID!, $limit: Int, $skip: Int) {
-//     followerUsers(userId: $userId, limit: $limit, skip: $skip) {
-//       ...UserFragment
-//     }
-//   }
-//   ${USER_FRAGMENT}
-// `;
-
-// export const GET_USER_FOLLOWING = gql`
-//   query GetUserFollowing($userId: ID!, $limit: Int, $skip: Int) {
-//     followingUsers(userId: $userId, limit: $limit, skip: $skip) {
-//       ...UserFragment
-//     }
-//   }
-//   ${USER_FRAGMENT}
-// `;
-
-// export const CHECK_IS_FOLLOWING = gql`
-//   query CheckIsFollowing($userId: ID!) {
-//     isFollowing(userId: $userId)
-//   }
-// `;
+// Get pending follow requests query
+export const GET_PENDING_FOLLOW_REQUESTS = gql`
+  query GetPendingFollowRequests($limit: Int, $skip: Int) {
+    pendingFollowRequests(limit: $limit, skip: $skip) {
+      ...UserFollowingFragment
+    }
+  }
+  ${USER_FOLLOWING_FRAGMENT}
+`;
 
 // Mutations
 export const FOLLOW_USER = gql`

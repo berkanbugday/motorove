@@ -391,6 +391,19 @@ export default {
       wants_to_join_event: 'wants to join this event.',
     },
 
+    // Follow Request screens
+    followRequest: {
+      follow_requests: 'Follow Requests',
+      no_requests: 'No Pending Requests',
+      no_follow_requests_yet:
+        'There are no pending follow requests at this time.',
+      could_not_load_requests:
+        "We couldn't load follow requests. Please try again.",
+      request_accepted: 'Request accepted successfully',
+      request_rejected: 'Request rejected successfully',
+      wants_to_follow: 'wants to follow.',
+    },
+
     // Profile screens
     profile: {
       edit_profile: 'Edit Profile',

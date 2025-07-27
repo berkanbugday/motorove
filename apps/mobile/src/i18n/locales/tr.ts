@@ -386,6 +386,18 @@ export default {
       wants_to_join_event: 'etkinliğine katılmak istiyor.',
     },
 
+    // Follow Request screens
+    followRequest: {
+      follow_requests: 'Takip İstekleri',
+      no_requests: 'Henüz İstek Yok',
+      no_follow_requests_yet: 'Henüz takip isteği yok.',
+      could_not_load_requests:
+        'Takip istekleri yüklenemedi. Lütfen tekrar deneyin.',
+      request_accepted: 'Takip isteği kabul edildi',
+      request_rejected: 'Takip isteği reddedildi',
+      wants_to_follow: 'takip etmek istiyor.',
+    },
+
     // Profile screens
     profile: {
       edit_profile: 'Profili Düzenle',

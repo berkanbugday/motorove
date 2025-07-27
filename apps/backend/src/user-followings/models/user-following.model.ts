@@ -1,5 +1,6 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { User } from '../../users/models/user.model';
+import { InvitationStatus } from '../../enums/models/invitation-status.enum';
 
 @ObjectType()
 export class UserFollowing {
@@ -20,4 +21,13 @@ export class UserFollowing {
 
   @Field()
   createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
+
+  @Field()
+  status: InvitationStatus;
+
+  @Field()
+  isActive: boolean;
 }

@@ -13,7 +13,7 @@ import {
   SkeletonGroup,
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
-import {useUserFollowers} from '@services/user-following.service';
+import {usePendingFollowRequests} from '@services/user-following.service';
 import {FollowRequestCard} from '@components/FollowRequestCard/FollowRequestCard';
 
 /**
@@ -21,11 +21,12 @@ import {FollowRequestCard} from '@components/FollowRequestCard/FollowRequestCard
  */
 export const FollowRequestScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
-  const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
+  const navigation = useNavigation<MainScreenNavigationProp<'FollowRequest'>>();
   const {t} = useTranslation();
 
   // Fetch follow requests
-  const {followers, loading, error, refetch} = useUserFollowers('');
+  const {pendingFollowRequests, loading, error, refetch} =
+    usePendingFollowRequests();
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
@@ -48,7 +49,7 @@ export const FollowRequestScreen = () => {
 
   // Render follow requests list
   const renderFollowRequests = () => {
-    if (loading && !refreshing && !followers?.length) {
+    if (loading && !refreshing && !pendingFollowRequests?.length) {
       return <View style={styles.loadingContainer}>{renderSkeletons()}</View>;
     }
 
@@ -72,7 +73,7 @@ export const FollowRequestScreen = () => {
       );
     }
 
-    if (!followers || followers.length === 0) {
+    if (!pendingFollowRequests || pendingFollowRequests.length === 0) {
       return (
         <View style={styles.emptyState}>
           <Icon name="user-filled" size={48} />
@@ -88,16 +89,16 @@ export const FollowRequestScreen = () => {
 
     return (
       <FlatList
-        data={followers}
+        data={pendingFollowRequests}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <FollowRequestCard
-            avatarSource={item.avatar ? {uri: item.avatar} : undefined}
-            name={`${item.firstName} ${item.lastName}`}
-            username={'deneme'}
-            timeAgo={new Date()}
-            onAccept={() => handleAccept(item.id)}
-            onReject={() => handleReject(item.id)}
+            avatarSource={item.follower?.avatar}
+            name={`${item.follower?.firstName} ${item.follower?.lastName}`}
+            city={item.follower?.city?.value}
+            timeAgo={item.updatedAt}
+            onAccept={() => {}}
+            onReject={() => {}}
           />
         )}
         showsVerticalScrollIndicator={false}
@@ -115,8 +116,8 @@ export const FollowRequestScreen = () => {
       <TopHeaderBar
         title={t('screens.followRequest.follow_requests')}
         showShadow={false}
-        leftIconName="arrow-left"
-        onLeftIconPress={() => navigation.goBack()}
+        showBackButton
+        onBackPress={() => navigation.goBack()}
       />
       <View style={styles.content}>{renderFollowRequests()}</View>
     </View>
