@@ -468,7 +468,7 @@ type GroupDto {
   logo: String
   membersCapacity: Int
   membersCount: Int
-  memberships: [GroupMembershipDto!]!
+  memberships: [GroupMembershipDto!]
   name: String!
   privacy: GroupPrivacy!
   tags: [String!]!

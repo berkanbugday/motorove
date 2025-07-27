@@ -86,8 +86,8 @@ export class GroupDto implements IGroup {
   @Field(() => Date)
   createdAt: Date;
 
-  @Field(() => [GroupMembershipDto])
+  @Field(() => [GroupMembershipDto], { nullable: true })
   @ValidateNested()
   @Type(() => GroupMembershipDto)
-  memberships: GroupMembershipDto[];
+  memberships?: GroupMembershipDto[];
 }

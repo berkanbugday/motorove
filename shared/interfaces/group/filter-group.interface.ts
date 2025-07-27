@@ -1,4 +1,4 @@
-import { GroupMemberRole, GroupPrivacy } from "../../enums";
+import { GroupPrivacy, GroupTag } from "../../enums";
 
 /**
  * Filter Group Interface
@@ -18,5 +18,5 @@ export interface IFilterGroup {
   /**
    * Optional tag IDs to filter by
    */
-  tags?: string[] | null;
+  tags?: GroupTag[];
 }

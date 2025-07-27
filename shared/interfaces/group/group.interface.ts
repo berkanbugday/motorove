@@ -23,5 +23,5 @@ export interface IGroup {
   isPendingMember?: boolean;
   isOwner?: boolean;
   createdAt: Date | string;
-  memberships: IGroupMembership[];
+  memberships?: IGroupMembership[];
 }

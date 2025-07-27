@@ -5,7 +5,7 @@ import {
   CHANGE_MEMBER_ROLE,
   REMOVE_MEMBER,
   GROUP_MEMBERSHIP_FRAGMENT,
-  UPDATE_INVITATION_STATUS,
+  UPDATE_GROUP_MEMBERSHIP_INVITATION_STATUS,
   GET_GROUP_JOIN_REQUESTS,
 } from './graphql/group-membership.graphql';
 import {loggingService} from '@services/logging.service';
@@ -220,7 +220,7 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
 
   // Update invitation status mutation
   const [updateStatus, {loading: updateLoading}] = useMutation(
-    UPDATE_INVITATION_STATUS,
+    UPDATE_GROUP_MEMBERSHIP_INVITATION_STATUS,
     {
       onCompleted: _data => {
         // Refetch the join requests

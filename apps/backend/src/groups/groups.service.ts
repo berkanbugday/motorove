@@ -292,32 +292,36 @@ export class GroupsService {
         },
       };
 
-      const group = await this.prisma.group.create({
-        data: prismaData,
-        include: {
-          createdBy: true,
-          city: true,
-        },
-      });
+      const group = await this.prisma.$transaction(async (prisma) => {
+        const group = await prisma.group.create({
+          data: prismaData,
+          include: {
+            createdBy: true,
+            city: true,
+          },
+        });
 
-      // Create an admin membership for the creator
-      await this.prisma.groupMembership.create({
-        data: {
-          group: {
-            connect: { id: group.id },
+        // Create an admin membership for the creator
+        await prisma.groupMembership.create({
+          data: {
+            group: {
+              connect: { id: group.id },
+            },
+            user: {
+              connect: { id: userId },
+            },
+            role: GroupMemberRole.ADMIN,
+            status: InvitationStatus.ACCEPTED,
+            createdBy: {
+              connect: { id: userId },
+            },
+            updatedBy: {
+              connect: { id: userId },
+            },
           },
-          user: {
-            connect: { id: userId },
-          },
-          role: GroupMemberRole.ADMIN,
-          status: InvitationStatus.ACCEPTED,
-          createdBy: {
-            connect: { id: userId },
-          },
-          updatedBy: {
-            connect: { id: userId },
-          },
-        },
+        });
+
+        return group;
       });
 
       return this.mapToDto(group as Group, authToken);
@@ -472,10 +476,10 @@ export class GroupsService {
       ...group,
       logo: logoUrl,
       cover: coverUrl,
-      memberships: group.memberships.filter(
+      memberships: group?.memberships?.filter(
         (membership) => membership.status === InvitationStatus.ACCEPTED,
       ),
-      membersCount: group.memberships.filter(
+      membersCount: group?.memberships?.filter(
         (membership) => membership.status === InvitationStatus.ACCEPTED,
       ).length,
       membersCapacity: group.membersCapacity,

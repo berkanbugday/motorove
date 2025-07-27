@@ -7,3 +7,4 @@ export * from './comment.graphql';
 export * from './notification.graphql';
 export * from './user.graphql';
 export * from './user-following.graphql';
+export * from './user-setting.graphql';

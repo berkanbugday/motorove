@@ -135,7 +135,7 @@ export const useGetGroup = (id: string) => {
 export const useGetJoinedGroups = (limit = 20, skip = 0) => {
   const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState<IFilterGroup>({
-    cityId: undefined,
+    cityId: null,
     tags: [],
     privacy: GroupPrivacy.ALL,
   });

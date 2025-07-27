@@ -3,7 +3,7 @@ import {
   GET_PENDING_FOLLOW_REQUESTS,
   FOLLOW_USER,
   UNFOLLOW_USER,
-  UPDATE_INVITATION_STATUS,
+  UPDATE_USER_FOLLOWING_INVITATION_STATUS,
 } from './graphql/user-following.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
@@ -47,7 +47,7 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
   });
 
   const [updateStatus, {loading: updateLoading}] = useMutation(
-    UPDATE_INVITATION_STATUS,
+    UPDATE_USER_FOLLOWING_INVITATION_STATUS,
     {
       onCompleted: _data => {
         // Refetch the pending follow requests
