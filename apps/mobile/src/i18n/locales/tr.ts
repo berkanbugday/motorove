@@ -59,6 +59,7 @@ export default {
     follow: 'Takip Et',
     unfollow: 'Takibi Bırak',
     pending_approval: 'Onay Bekliyor',
+    not_now: 'Şimdi Değil',
   },
 
   // Main navigation items
@@ -684,6 +685,21 @@ export default {
       tags: 'Etiketler',
       group_tags: 'Grup Etiketleri',
       privacy_filter: 'Gizlilik',
+    },
+    locationPermissionOverlay: {
+      open_settings: 'Ayarları Aç',
+      location_permission_required: 'Lokasyon erişim izni gerekli',
+      please_enable_location_services_for_this_app_in_your_device_settings:
+        'Uygulama ayarlarınızda lokasyon servislerini etkinleştirin.',
+      title: 'Sürüş Deneyiminizi Geliştirin',
+      description:
+        'Motorove, konumunuzu kullanarak yakınınızdaki uyarıları, etkinlikleri ve motosiklet servislerini gösterir.',
+      show_nearby_warnings: 'Yakınındaki uyarılardan haberdar ol',
+      connect_with_nearby_riders: 'Yakınındaki sürücülerle bağlantı kur',
+      find_motorcycle_services: 'Motosiklet servislerini bul',
+      allow_location_access: 'Lokasyon Erişim İzni Ver',
+      footer_text:
+        'Lokasyon erişim izni ayarlarını daha sonra uygulama tercihlerinden değiştirebilirsiniz',
     },
   },
 

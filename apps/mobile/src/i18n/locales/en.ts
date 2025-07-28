@@ -59,6 +59,7 @@ export default {
     follow: 'Follow',
     unfollow: 'Unfollow',
     pending_approval: 'Pending Approval',
+    not_now: 'Not Now',
   },
 
   // Main navigation items
@@ -691,6 +692,21 @@ export default {
       tags: 'Tags',
       group_tags: 'Group Tags',
       privacy_filter: 'Privacy',
+    },
+    locationPermissionOverlay: {
+      open_settings: 'Open Settings',
+      location_permission_required: 'Location permission required',
+      please_enable_location_services_for_this_app_in_your_device_settings:
+        'Please enable location services for this app in your device settings.',
+      title: 'Enhance Your Riding Experience',
+      description:
+        'Motorove uses your location to show nearby warnings, events, and motorcycle services. Explore the events and connect with riders in your area.',
+      show_nearby_warnings: 'Show nearby warnings',
+      connect_with_nearby_riders: 'Connect with nearby riders',
+      find_motorcycle_services: 'Find motorcycle services',
+      allow_location_access: 'Allow Location Access',
+      footer_text:
+        'You can always change location settings later in the app preferences',
     },
   },
 

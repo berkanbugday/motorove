@@ -6,6 +6,7 @@ import {Icon} from '../Icon';
 import {Body, Caption, Title} from '../Typography';
 import {Button} from '../Button';
 import LottieView from 'lottie-react-native';
+import {useTranslation} from '@hooks/useTranslation';
 
 interface LocationPermissionOverlayProps {
   visible: boolean;
@@ -20,6 +21,7 @@ export function LocationPermissionOverlay({
   onDismiss,
   onOpenSettings,
 }: LocationPermissionOverlayProps) {
+  const {t} = useTranslation();
   return (
     <FullscreenOverlay
       animationType="slide"
@@ -27,12 +29,6 @@ export function LocationPermissionOverlay({
       onDismiss={onDismiss}
       contentContainerStyle={styles.overlayContent}>
       <View style={styles.container}>
-        {/* Header */}
-        {/* <View style={styles.header}>
-          <Icon name="map-pin" size={24} color={colors.neutral.black} />
-          <Subtitle style={styles.headerText}>Enable Location Access</Subtitle>
-        </View> */}
-
         {/* Hero Image */}
         <View style={styles.imageContainer}>
           <LottieView
@@ -44,23 +40,40 @@ export function LocationPermissionOverlay({
         </View>
 
         {/* Content */}
-        <Title style={styles.title}>Enhance Your Riding Experience</Title>
+        <Title style={styles.title}>
+          {t('components.locationPermissionOverlay.title')}
+        </Title>
         <Body color={colors.neutral.darkGrey} style={styles.description}>
-          Motorove uses your location to show nearby routes, rides, and
-          motorcycle services. Discover the best riding spots and connect with
-          local riders in your area.
+          {t('components.locationPermissionOverlay.description')}
         </Body>
 
         {/* Features */}
         <View style={styles.featuresContainer}>
-          <FeatureItem icon="route" text="Find the best local riding routes" />
-          <FeatureItem icon="comments" text="Connect with nearby riders" />
-          <FeatureItem icon="wrench" text="Locate motorcycle services" />
+          <FeatureItem
+            icon="error-filled"
+            text={t(
+              'components.locationPermissionOverlay.show_nearby_warnings',
+            )}
+          />
+          <FeatureItem
+            icon="comments-filled"
+            text={t(
+              'components.locationPermissionOverlay.connect_with_nearby_riders',
+            )}
+          />
+          <FeatureItem
+            icon="wrench-filled"
+            text={t(
+              'components.locationPermissionOverlay.find_motorcycle_services',
+            )}
+          />
         </View>
 
         {/* Buttons */}
         <Button
-          title="Allow Location Access"
+          title={t(
+            'components.locationPermissionOverlay.allow_location_access',
+          )}
           variant="primary"
           shape="round"
           onPress={onAllowPress}
@@ -69,7 +82,7 @@ export function LocationPermissionOverlay({
 
         {onOpenSettings && (
           <Button
-            title="Open Settings"
+            title={t('components.locationPermissionOverlay.open_settings')}
             variant="outline"
             shape="round"
             onPress={onOpenSettings}
@@ -78,7 +91,7 @@ export function LocationPermissionOverlay({
         )}
 
         <Button
-          title="Not Now"
+          title={t('common.not_now')}
           variant="text"
           shape="round"
           onPress={onDismiss}
@@ -87,7 +100,7 @@ export function LocationPermissionOverlay({
 
         {/* Footer */}
         <Caption color={colors.neutral.grey} style={styles.footerText}>
-          You can always change location settings later in the app preferences
+          {t('components.locationPermissionOverlay.footer_text')}
         </Caption>
       </View>
     </FullscreenOverlay>
@@ -102,7 +115,9 @@ interface FeatureItemProps {
     | 'comments'
     | 'comments-filled'
     | 'wrench'
-    | 'wrench-filled';
+    | 'wrench-filled'
+    | 'error-filled';
+
   text: string;
 }
 
