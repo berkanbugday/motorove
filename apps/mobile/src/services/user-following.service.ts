@@ -1,6 +1,6 @@
 import {useMutation, useQuery} from '@apollo/client';
 import {
-  GET_PENDING_FOLLOW_REQUESTS,
+  GET_FOLLOW_REQUESTS,
   FOLLOW_USER,
   UNFOLLOW_USER,
   UPDATE_USER_FOLLOWING_INVITATION_STATUS,
@@ -12,12 +12,12 @@ import {useTranslation} from '@hooks/useTranslation';
 import {useCallback, useState} from 'react';
 
 /**
- * Hook for getting pending follow requests
- * @param limit Optional number of pending follow requests to fetch (for pagination)
- * @param skip Optional number of pending follow requests to skip (for pagination)
- * @returns The pending follow requests list, loading state, error state, and refetch function
+ * Hook for getting follow requests
+ * @param limit Optional number of follow requests to fetch (for pagination)
+ * @param skip Optional number of follow requests to skip (for pagination)
+ * @returns The follow requests list, loading state, error state, and refetch function
  */
-export const usePendingFollowRequests = (limit?: number, skip?: number) => {
+export const useFollowRequests = (limit?: number, skip?: number) => {
   const {t} = useTranslation();
   const [hasMore, setHasMore] = useState(true);
 
@@ -27,7 +27,7 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
     error,
     refetch: originalRefetch,
     fetchMore,
-  } = useQuery(GET_PENDING_FOLLOW_REQUESTS, {
+  } = useQuery(GET_FOLLOW_REQUESTS, {
     variables: {
       limit: limit || undefined,
       skip: skip || undefined,
@@ -35,14 +35,14 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
     fetchPolicy: 'network-only',
     nextFetchPolicy: 'network-only',
     onCompleted: () => {
-      if (data?.pendingFollowRequests) {
-        if (data.pendingFollowRequests.length < (limit || 0)) {
+      if (data?.followRequests) {
+        if (data.followRequests.length < (limit || 0)) {
           setHasMore(false);
         }
       }
     },
     onError: errorObj => {
-      loggingService.error('Error fetching pending follow requests:', errorObj);
+      loggingService.error('Error fetching follow requests:', errorObj);
     },
   });
 
@@ -50,7 +50,7 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
     UPDATE_USER_FOLLOWING_INVITATION_STATUS,
     {
       onCompleted: _data => {
-        // Refetch the pending follow requests
+        // Refetch the follow requests
         originalRefetch();
 
         if (
@@ -95,7 +95,7 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
     try {
       const result = await fetchMore({
         variables: {
-          skip: data?.pendingFollowRequests?.length || 0,
+          skip: data?.followRequests?.length || 0,
           limit,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
@@ -104,22 +104,19 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
           }
 
           return {
-            pendingFollowRequests: [
-              ...prev.pendingFollowRequests,
-              ...fetchMoreResult.pendingFollowRequests,
+            followRequests: [
+              ...prev.followRequests,
+              ...fetchMoreResult.followRequests,
             ],
           };
         },
       });
 
-      if (result.data.pendingFollowRequests.length < (limit || 0)) {
+      if (result.data.followRequests.length < (limit || 0)) {
         setHasMore(false);
       }
     } catch (errorObj) {
-      loggingService.error(
-        'Error loading more pending follow requests:',
-        errorObj,
-      );
+      loggingService.error('Error loading more follow requests:', errorObj);
     }
   }, [fetchMore, hasMore, limit, loading]);
 
@@ -136,7 +133,7 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
           },
         });
       } catch (err) {
-        loggingService.error('Error accepting pending follow request:', err);
+        loggingService.error('Error accepting follow request:', err);
       }
     },
     [updateStatus, t],
@@ -155,15 +152,14 @@ export const usePendingFollowRequests = (limit?: number, skip?: number) => {
           },
         });
       } catch (err) {
-        loggingService.error('Error rejecting pending follow request:', err);
+        loggingService.error('Error rejecting follow request:', err);
       }
     },
     [updateStatus, t],
   );
 
   return {
-    pendingFollowRequests:
-      (data?.pendingFollowRequests as IUserFollowing[]) || [],
+    followRequests: (data?.followRequests as IUserFollowing[]) || [],
     loading: loading || updateLoading,
     error,
     refetch,

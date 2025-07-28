@@ -782,6 +782,7 @@ type Query {
   count: Float!
   event(id: ID!): EventDto!
   events(filters: FilterEventInput, limit: Int, skip: Int): [EventDto!]!
+  followRequests(limit: Int, skip: Int): [UserFollowingDto!]!
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
   followingUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
   getAddressTypes: [EnumItem!]!
@@ -798,7 +799,6 @@ type Query {
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
-  pendingFollowRequests(limit: Int, skip: Int): [UserFollowingDto!]!
   post(id: ID!): PostDto!
   posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [PostDto!]!
   upcomingEvents: [EventDto!]!

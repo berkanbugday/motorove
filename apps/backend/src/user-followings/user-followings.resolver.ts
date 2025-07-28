@@ -64,8 +64,8 @@ export class UserFollowingsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => [UserFollowingDto], { name: 'pendingFollowRequests' })
-  async findPendingFollowRequests(
+  @Query(() => [UserFollowingDto], { name: 'followRequests' })
+  async findFollowRequests(
     @Context() context: GqlContext,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
@@ -73,7 +73,7 @@ export class UserFollowingsResolver {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.userFollowingsService.findPendingFollowRequests(
+    return await this.userFollowingsService.findFollowRequests(
       userId,
       limit,
       skip,

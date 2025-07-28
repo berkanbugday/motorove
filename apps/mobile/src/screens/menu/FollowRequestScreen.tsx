@@ -13,7 +13,7 @@ import {
   SkeletonGroup,
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
-import {usePendingFollowRequests} from '@services/user-following.service';
+import {useFollowRequests} from '@services/user-following.service';
 import {FollowRequestCard} from '@components/FollowRequestCard/FollowRequestCard';
 
 /**
@@ -25,14 +25,8 @@ export const FollowRequestScreen = () => {
   const {t} = useTranslation();
 
   // Fetch follow requests
-  const {
-    pendingFollowRequests,
-    loading,
-    error,
-    refetch,
-    handleAccept,
-    handleReject,
-  } = usePendingFollowRequests();
+  const {followRequests, loading, error, refetch, handleAccept, handleReject} =
+    useFollowRequests();
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
@@ -55,7 +49,7 @@ export const FollowRequestScreen = () => {
 
   // Render follow requests list
   const renderFollowRequests = () => {
-    if (loading && !refreshing && !pendingFollowRequests?.length) {
+    if (loading && !refreshing && !followRequests?.length) {
       return <View style={styles.loadingContainer}>{renderSkeletons()}</View>;
     }
 
@@ -79,7 +73,7 @@ export const FollowRequestScreen = () => {
       );
     }
 
-    if (!pendingFollowRequests || pendingFollowRequests.length === 0) {
+    if (!followRequests || followRequests.length === 0) {
       return (
         <View style={styles.emptyState}>
           <Icon name="user-filled" size={48} />
@@ -95,7 +89,7 @@ export const FollowRequestScreen = () => {
 
     return (
       <FlatList
-        data={pendingFollowRequests}
+        data={followRequests}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <FollowRequestCard

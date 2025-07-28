@@ -114,13 +114,13 @@ export class UserFollowingsService {
     );
   }
 
-  async findPendingFollowRequests(
+  async findFollowRequests(
     userId: string,
     limit?: number,
     skip?: number,
     authToken?: string,
   ): Promise<UserFollowingDto[]> {
-    const pendingFollowRequests = await this.prisma.userFollowing.findMany({
+    const followRequests = await this.prisma.userFollowing.findMany({
       where: {
         followingId: userId,
         isActive: true,
@@ -140,17 +140,17 @@ export class UserFollowingsService {
     });
 
     const usersWithSignedUrls = await Promise.all(
-      pendingFollowRequests.map(async (pendingFollowRequest) => ({
-        ...pendingFollowRequest,
+      followRequests.map(async (followRequest) => ({
+        ...followRequest,
         follower: {
-          ...pendingFollowRequest.follower,
-          avatar: pendingFollowRequest.follower.avatar
+          ...followRequest.follower,
+          avatar: followRequest.follower.avatar
             ? await this.storageService.getSignedUrl(
-                pendingFollowRequest.follower.avatar,
+                followRequest.follower.avatar,
                 3600,
                 authToken,
               )
-            : pendingFollowRequest.follower.avatar,
+            : followRequest.follower.avatar,
         },
       })),
     );
@@ -291,7 +291,6 @@ export class UserFollowingsService {
         },
         data: {
           status: newStatus,
-          isActive: newStatus === InvitationStatus.ACCEPTED,
           updatedAt: new Date(),
         },
       });

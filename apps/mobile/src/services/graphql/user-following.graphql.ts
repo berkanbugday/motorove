@@ -18,10 +18,10 @@ export const USER_FOLLOWING_FRAGMENT = gql`
   ${USER_FRAGMENT}
 `;
 
-// Get pending follow requests query
-export const GET_PENDING_FOLLOW_REQUESTS = gql`
-  query GetPendingFollowRequests($limit: Int, $skip: Int) {
-    pendingFollowRequests(limit: $limit, skip: $skip) {
+// Get follow requests query
+export const GET_FOLLOW_REQUESTS = gql`
+  query GetFollowRequests($limit: Int, $skip: Int) {
+    followRequests(limit: $limit, skip: $skip) {
       ...UserFollowingFragment
     }
   }

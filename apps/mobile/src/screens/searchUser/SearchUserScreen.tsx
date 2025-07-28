@@ -70,6 +70,7 @@ export const SearchUserScreen = () => {
 
   useEffect(() => {
     setUsers(searchResults);
+    console.log('searchResults', searchResults);
   }, [searchResults]);
   // Debounce search query to avoid too many API calls
   useEffect(() => {
