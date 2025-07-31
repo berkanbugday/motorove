@@ -597,6 +597,9 @@ export default {
       groups: 'Groups',
       groups_admin: 'Groups Admin',
       enable_all: 'Enable All',
+      permission_description:
+        'Notification permission is required for notifications. Grant notification permission.',
+      open_settings: 'Open Settings',
     },
   },
 

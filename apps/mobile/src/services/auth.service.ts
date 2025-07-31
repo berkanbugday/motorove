@@ -651,7 +651,6 @@ class AuthService {
 
       // Reset Apollo client store
       await apolloClient.clearStore();
-      loggingService.info('Auth data cleared successfully');
     } catch (error) {
       loggingService.error('Error clearing auth data:', error);
       // Try the fallback method for AsyncStorage

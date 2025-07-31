@@ -2322,6 +2322,7 @@ DEPENDENCIES:
   - FirebaseCore
   - FirebaseCoreInternal
   - FirebaseInstallations
+  - FirebaseMessaging
   - fmt (from `../../../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../../../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - GoogleUtilities
@@ -2721,6 +2722,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: d15f5aa644c466e917569ac43b19cbf17975239a
 
-PODFILE CHECKSUM: bee9dff397d85f0df4836e99bfe971b82e29365c
+PODFILE CHECKSUM: 86021d917480fe5d5f7e2e3dcd6ba699b7b83ceb
 
 COCOAPODS: 1.16.2

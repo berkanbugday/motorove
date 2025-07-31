@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {ActivityIndicator, View} from 'react-native';
 import {NavigationContainer, LinkingOptions} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -31,7 +31,18 @@ const linking: LinkingOptions<RootStackParamList> = {
  */
 export function RootNavigator() {
   const {user, accessToken} = useAuth();
-  const {isFirstTime, isLoading: firstTimeLoading} = useFirstTimeCheck();
+  const {
+    checkFirstTimeUser,
+    isFirstTime,
+    isLoading: firstTimeLoading,
+  } = useFirstTimeCheck();
+
+  useEffect(() => {
+    async function init() {
+      await checkFirstTimeUser();
+    }
+    init();
+  }, [checkFirstTimeUser]);
 
   const isAuthenticated = Boolean(user) && Boolean(accessToken);
   // Show loading indicator when checking auth or first time status
@@ -46,7 +57,7 @@ export function RootNavigator() {
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        {isAuthenticated ? (
+        {isAuthenticated && !isFirstTime ? (
           // User is authenticated, decide whether to show main app or account setup
           !user?.hasCompletedSetup ? (
             <Stack.Screen

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {MainStackParamList} from '../types/navigationTypes';
@@ -20,6 +20,14 @@ import {
   FollowRequestScreen,
   JoinRequestScreen,
 } from '@screens/menu';
+import {
+  // notificationService,
+  // useSaveDeviceToken,
+  useRemoveDeviceToken,
+} from '@services/notification.service';
+import {useAuth} from '@contexts/AuthContext';
+import {NotificationPermission} from '@motorove/shared';
+import {useNotificationPermission} from '@hooks/useNotificationPermission';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -28,6 +36,31 @@ const Stack = createNativeStackNavigator<MainStackParamList>();
  * Contains the main app screens like Home, Profile, Settings, etc.
  */
 export function MainNavigator() {
+  const {updateNotificationPermission} = useAuth();
+  // const {saveDeviceToken} = useSaveDeviceToken();
+  const {removeDeviceToken} = useRemoveDeviceToken();
+  const {status, requestPermission} = useNotificationPermission();
+
+  useEffect(() => {
+    const init = async (): Promise<void> => {
+      console.log('status', status);
+      if (status === 'unavailable') {
+        requestPermission();
+      } else if (status !== 'requesting') {
+        if (status === 'granted') {
+          await requestPermission();
+        } else {
+          await updateNotificationPermission(
+            NotificationPermission.NOT_ALLOWED,
+          );
+          await removeDeviceToken();
+        }
+      }
+    };
+
+    init();
+  }, [status, requestPermission]);
+
   return (
     <Stack.Navigator
       initialRouteName="Tabs"

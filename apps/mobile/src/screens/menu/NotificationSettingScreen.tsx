@@ -2,7 +2,8 @@ import React, {useEffect} from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, radius} from '@theme';
-import {Switch, TopHeaderBar, Subtitle} from '@components';
+import {useNotificationPermission} from '@hooks/useNotificationPermission';
+import {Switch, TopHeaderBar, Subtitle, Button, BodySmall} from '@components';
 import {
   useGetUserSetting,
   useUpdateUserSetting,
@@ -15,6 +16,7 @@ import {EnumUtils} from '@utils/enumUtils';
 export const NotificationSettingScreen = () => {
   const navigation = useNavigation();
   const {t} = useTranslation();
+  const {isGranted, openSettings} = useNotificationPermission();
   const {userSetting, refetch} = useGetUserSetting();
   const {updateUserSetting} = useUpdateUserSetting(() => refetch());
   const [notificationPreferences, setNotificationPreferences] = React.useState<
@@ -28,12 +30,12 @@ export const NotificationSettingScreen = () => {
   }, [userSetting]);
 
   const handleNotificationPreferenceChange = async (
-    notificationPreferences: Record<NotificationType, boolean>,
+    updatedPreferences: Record<NotificationType, boolean>,
   ) => {
     try {
       // Update the setting via API
       const result = await updateUserSetting({
-        notificationPreferences,
+        notificationPreferences: updatedPreferences,
       });
 
       if (!result?.notificationPreferences) {
@@ -88,6 +90,24 @@ export const NotificationSettingScreen = () => {
     },
   ];
 
+  // Render different UI based on permission status
+  const renderPermissionRequired = () => {
+    return (
+      <View style={styles.permissionContainer}>
+        <BodySmall align="center" color={colors.neutral.grey}>
+          {t('screens.notificationSetting.permission_description')}
+        </BodySmall>
+        <Button
+          variant="text"
+          size="small"
+          textStyle={{color: colors.primary.main}}
+          onPress={openSettings}
+          title={t('screens.notificationSetting.open_settings')}
+        />
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <TopHeaderBar
@@ -96,12 +116,16 @@ export const NotificationSettingScreen = () => {
         onBackPress={() => navigation.goBack()}
         showShadow={false}
         containerStyle={styles.topHeaderBar}
-        dropdownMenuIcon="more-horizontal"
-        dropdownMenuItems={[
-          {
-            label: t('screens.notificationSetting.enable_all'),
-          },
-        ]}
+        dropdownMenuIcon={isGranted ? 'more-horizontal' : undefined}
+        dropdownMenuItems={
+          isGranted
+            ? [
+                {
+                  label: t('screens.notificationSetting.enable_all'),
+                },
+              ]
+            : []
+        }
         onDropdownItemSelect={() => {
           const updatedPreferences = {} as Record<NotificationType, boolean>;
 
@@ -121,6 +145,7 @@ export const NotificationSettingScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
+          {!isGranted && renderPermissionRequired()}
           {/* Notification Groups */}
           {notificationGroups.map((group, _groupIndex) => (
             <View key={group.title} style={styles.groupContainer}>
@@ -132,6 +157,7 @@ export const NotificationSettingScreen = () => {
                   <Switch
                     key={type}
                     value={notificationPreferences?.[type]}
+                    disabled={!isGranted}
                     onValueChange={value => {
                       const updatedPreferences = {
                         ...notificationPreferences,
@@ -143,7 +169,6 @@ export const NotificationSettingScreen = () => {
                     }}
                     label={EnumUtils.convertNotificationType(type)}
                     activeColor={colors.neutral.black}
-                    // disabled={updating || loading}
                   />
                 ))}
               </View>
@@ -180,5 +205,15 @@ const styles = StyleSheet.create({
   settingsContainer: {
     backgroundColor: colors.neutral.white,
     borderRadius: radius.sm,
+  },
+  // Permission screen styles
+  permissionContainer: {
+    flex: 1,
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.sm,
+    padding: spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
   },
 });

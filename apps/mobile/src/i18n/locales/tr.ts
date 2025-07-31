@@ -590,6 +590,9 @@ export default {
       groups: 'Gruplar',
       groups_admin: 'Grup Yöneticileri',
       enable_all: 'Tümünü Aktifleştir',
+      permission_description:
+        'Bildirimler için bildirim izni gereklidir. Bildirim izni verin.',
+      open_settings: 'Ayarları Aç',
     },
   },
 

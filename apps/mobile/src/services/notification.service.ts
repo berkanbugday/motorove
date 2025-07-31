@@ -107,9 +107,17 @@ class NotificationService {
 
       // Get new token
       const messagingInstance = getMessaging(getApp());
+
+      // For iOS, ensure device is registered for remote messages
       if (!messagingInstance.isDeviceRegisteredForRemoteMessages) {
         await messagingInstance.registerDeviceForRemoteMessages();
       }
+
+      // Wait a bit for APNS token to be available on iOS
+      if (Platform.OS === 'ios') {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
       const token = await messagingInstance.getToken();
       if (token) {
         this.deviceToken = token;

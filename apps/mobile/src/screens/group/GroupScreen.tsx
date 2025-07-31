@@ -20,6 +20,7 @@ import {
 import {GroupPrivacy, IFilterGroup} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useTranslation} from '@hooks/useTranslation';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -31,6 +32,7 @@ export const GroupScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {openBottomSheet} = useBottomSheet();
   const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
 
   // Fetch joined groups with pagination
   const {
@@ -180,7 +182,7 @@ export const GroupScreen = () => {
             }
           />
         )}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={{paddingBottom: insets.bottom + 70}}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -265,7 +267,7 @@ export const GroupScreen = () => {
             }
           />
         )}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={{paddingBottom: insets.bottom + 70}}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

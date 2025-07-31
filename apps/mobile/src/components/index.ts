@@ -38,6 +38,7 @@ export * from './UserCard';
 export * from './LanguageSelector';
 export * from './GroupFilter';
 export * from './JoinRequestCard';
+export * from './PermissionHandler';
 // Skeleton components
 export * from './Skeleton';
 export * from './Skeleton/SkeletonGroup';

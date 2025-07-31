@@ -3,11 +3,7 @@ import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
 import {NotificationPermission} from '@motorove/shared';
-import {
-  notificationService,
-  useSaveDeviceToken,
-  useRemoveDeviceToken,
-} from '@services/notification.service';
+import {useRemoveDeviceToken} from '@services/notification.service';
 import {useUpdateUserSetting} from '@services/user-setting.service';
 
 // Default auth state
@@ -57,7 +53,6 @@ interface AuthProviderProps {
 // Auth provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
-  const {saveDeviceToken} = useSaveDeviceToken();
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {updateUserSetting} = useUpdateUserSetting();
   // Load authentication state on component mount
@@ -69,14 +64,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const loadAuthState = async (): Promise<void> => {
     try {
       const state = await authService.getAuthState();
-
-      // Log authentication state for debugging
-      loggingService.info('Auth state loaded:', {
-        hasUser: !!state.user,
-        hasToken: !!state.accessToken,
-        expiresAt: state.expiresAt,
-      });
-
       setAuthState({...state});
 
       // Setup token refresh if needed
@@ -111,49 +98,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
           hasUser: !!newState.user,
           hasToken: !!newState.accessToken,
         });
-
-        if (
-          response.user?.id &&
-          response.user?.notificationPermission !==
-            NotificationPermission.UNKNOWN
-        ) {
-          const permission =
-            await notificationService.service.requestPermissions();
-          const token = await notificationService.service.getDeviceToken();
-          if (token && response.user?.id) {
-            const resultSaveDeviceToken = await saveDeviceToken({
-              token: token,
-              deviceType: notificationService.getDeviceType(),
-            });
-            if (resultSaveDeviceToken) {
-              if (permission) {
-                const resultUpdate = await updateUserSetting({
-                  notificationPermission: NotificationPermission.ALLOWED,
-                });
-                if (
-                  resultUpdate?.notificationPermission ===
-                  NotificationPermission.ALLOWED
-                ) {
-                  await updateNotificationPermission(
-                    NotificationPermission.ALLOWED,
-                  );
-                }
-              } else {
-                const resultUpdate = await updateUserSetting({
-                  notificationPermission: NotificationPermission.NOT_ALLOWED,
-                });
-                if (
-                  resultUpdate?.notificationPermission ===
-                  NotificationPermission.NOT_ALLOWED
-                ) {
-                  await updateNotificationPermission(
-                    NotificationPermission.NOT_ALLOWED,
-                  );
-                }
-              }
-            }
-          }
-        }
 
         setAuthState(newState);
       }
@@ -196,15 +140,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     permission: NotificationPermission,
   ): Promise<void> => {
     try {
-      const newState: AuthState = {
-        ...authState,
-        user: {
-          ...authState.user!,
-          notificationPermission: permission,
-        },
-      };
-      setAuthState(newState);
-      await authService.saveAuthDataToEncryptedStorage(newState);
+      const userSetting = await updateUserSetting({
+        notificationPermission: permission,
+      });
+
+      if (userSetting) {
+        const newState: AuthState = {
+          ...authState,
+          user: {
+            ...authState.user!,
+            notificationPermission: permission,
+          },
+        };
+        setAuthState(newState);
+        await authService.saveAuthDataToEncryptedStorage(newState);
+      }
     } catch (error) {
       loggingService.error('Error updating notification permission:', error);
       throw error;

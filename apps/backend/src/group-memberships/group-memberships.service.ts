@@ -13,8 +13,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { GroupMembershipDto } from './dto/group-membership.dto';
 import { plainToClass } from 'class-transformer';
 import { StorageService } from '../core/storage/storage.service';
-// import { NotificationType } from '../enums/models/notification-type.enum';
-// import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
 export class GroupMembershipsService {
@@ -274,24 +274,24 @@ export class GroupMembershipsService {
         },
       });
 
-      // if (updatedMembership.role === newRole) {
-      //   // Send notification to the user
-      //   await this.notificationsService.create(
-      //     {
-      //       userId,
-      //       title: 'Membership status updated',
-      //       body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
-      //       type: NotificationType.GROUP_MEMBERSHIP_ROLE_UPDATED,
-      //       channel: NotificationChannel.PUSH,
-      //       data: JSON.stringify({
-      //         groupId: updatedMembership.group.id,
-      //         groupName: updatedMembership.group.name,
-      //         role: newRole,
-      //       }),
-      //     },
-      //     userId,
-      //   );
-      // }
+      if (updatedMembership.role === newRole) {
+        // Send notification to the user
+        await this.notificationsService.create(
+          {
+            userId,
+            title: 'Membership status updated',
+            body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
+            type: NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE,
+            channel: NotificationChannel.PUSH,
+            data: JSON.stringify({
+              groupId: updatedMembership.group.id,
+              groupName: updatedMembership.group.name,
+              role: newRole,
+            }),
+          },
+          userId,
+        );
+      }
 
       return updatedMembership ? true : false;
     } catch (error) {

@@ -23,6 +23,7 @@ import {notificationService} from '@services/notification.service';
 import ToastMessage from '@components/ToastMessage';
 import NetworkStatusBar from '@components/NetworkAware';
 import BottomSheetProvider from '@components/BottomSheet/BottomSheetProvider';
+import NotificationPermissionHandler from '@components/PermissionHandler/NotificationPermissionHandler';
 
 // Import i18n configuration
 import './src/i18n';
@@ -105,6 +106,7 @@ function App(): React.JSX.Element {
             <NetworkStatusBar
               offlineMessage={t('errors.network.no_internet_connection')}
             />
+            <NotificationPermissionHandler />
             <ToastMessage.Provider>
               <SafeAreaProvider>
                 <BottomSheetProvider.Provider>

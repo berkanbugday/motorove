@@ -4,58 +4,17 @@ import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, rs, radius, getShadow} from '@theme';
 import {Icon, Body, BodySmall, Caption, Subtitle, Button} from '@components';
 import LottieView from 'lottie-react-native';
-import {useUpdateUserSetting} from '@services/user-setting.service';
-import {NotificationPermission} from '@motorove/shared';
-import {useAuth} from '@contexts/AuthContext';
-import {
-  notificationService,
-  useSaveDeviceToken,
-} from '@services/notification.service';
+import {useNotificationPermission} from '@hooks/useNotificationPermission';
 import {loggingService} from '@services/logging.service';
 
 export const NotificationPermissionScreen = () => {
   const {t} = useTranslation();
-  const {updateUserSetting} = useUpdateUserSetting();
-  const {user, updateNotificationPermission} = useAuth();
-  const {saveDeviceToken} = useSaveDeviceToken();
+  const {isBlocked, requestPermission} = useNotificationPermission();
 
   const handleAllow = async () => {
     try {
-      const permission = await notificationService.service.requestPermissions();
-      const token = await notificationService.service.getDeviceToken();
-      if (token && user?.id) {
-        const result = await saveDeviceToken({
-          token: token,
-          deviceType: notificationService.getDeviceType(),
-        });
-        if (result) {
-          if (permission) {
-            const resultUpdate = await updateUserSetting({
-              notificationPermission: NotificationPermission.ALLOWED,
-            });
-            if (
-              resultUpdate?.notificationPermission ===
-              NotificationPermission.ALLOWED
-            ) {
-              await updateNotificationPermission(
-                NotificationPermission.ALLOWED,
-              );
-            }
-          } else {
-            const resultUpdate = await updateUserSetting({
-              notificationPermission: NotificationPermission.NOT_ALLOWED,
-            });
-            if (
-              resultUpdate?.notificationPermission ===
-              NotificationPermission.NOT_ALLOWED
-            ) {
-              await updateNotificationPermission(
-                NotificationPermission.NOT_ALLOWED,
-              );
-            }
-          }
-        }
-      }
+      const permissionGranted = await requestPermission();
+      loggingService.info(`Permission request result: ${permissionGranted}`);
     } catch (notificationError) {
       loggingService.error(
         'Error requesting notification permissions:',
@@ -66,44 +25,12 @@ export const NotificationPermissionScreen = () => {
 
   const handleNotAllow = async () => {
     try {
-      const permission = await notificationService.service.requestPermissions();
-      const token = await notificationService.service.getDeviceToken();
-      if (token && user?.id) {
-        const result = await saveDeviceToken({
-          token: token,
-          deviceType: notificationService.getDeviceType(),
-        });
-        if (result) {
-          if (permission) {
-            const resultUpdate = await updateUserSetting({
-              notificationPermission: NotificationPermission.ALLOWED,
-            });
-            if (
-              resultUpdate?.notificationPermission ===
-              NotificationPermission.ALLOWED
-            ) {
-              await updateNotificationPermission(
-                NotificationPermission.ALLOWED,
-              );
-            }
-          } else {
-            const resultUpdate = await updateUserSetting({
-              notificationPermission: NotificationPermission.NOT_ALLOWED,
-            });
-            if (
-              resultUpdate?.notificationPermission ===
-              NotificationPermission.NOT_ALLOWED
-            ) {
-              await updateNotificationPermission(
-                NotificationPermission.NOT_ALLOWED,
-              );
-            }
-          }
-        }
-      }
+      // User explicitly doesn't want notifications
+      const permissionGranted = await requestPermission();
+      loggingService.info(`Permission request result: ${permissionGranted}`);
     } catch (notificationError) {
       loggingService.error(
-        'Error requesting notification permissions:',
+        'Error updating notification preference:',
         notificationError,
       );
     }
@@ -151,7 +78,11 @@ export const NotificationPermissionScreen = () => {
 
         {/* Buttons */}
         <Button
-          title={t('screens.notificationPermission.allow_notifications')}
+          title={
+            isBlocked
+              ? t('screens.notificationPermission.open_settings')
+              : t('screens.notificationPermission.allow_notifications')
+          }
           variant="primary"
           shape="round"
           onPress={handleAllow}
