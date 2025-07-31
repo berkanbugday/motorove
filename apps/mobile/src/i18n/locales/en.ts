@@ -698,9 +698,6 @@ export default {
     },
     locationPermissionOverlay: {
       open_settings: 'Open Settings',
-      location_permission_required: 'Location permission required',
-      please_enable_location_services_for_this_app_in_your_device_settings:
-        'Please enable location services for this app in your device settings.',
       title: 'Enhance Your Riding Experience',
       description:
         'Motorove uses your location to show nearby warnings, events, and motorcycle services. Explore the events and connect with riders in your area.',

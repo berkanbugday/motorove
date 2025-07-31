@@ -1,14 +1,7 @@
 import {useEffect, useState, useCallback, useRef} from 'react';
-import {
-  Alert,
-  Linking,
-  Platform,
-  PermissionsAndroid,
-  AppState,
-} from 'react-native';
+import {Linking, Platform, PermissionsAndroid, AppState} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {loggingService} from '@services/logging.service';
-import {useTranslation} from '@hooks/useTranslation';
 
 type LocationPermissionStatus =
   | 'granted'
@@ -32,25 +25,12 @@ export const useLocationPermission = () => {
   const appState = useRef(AppState.currentState);
   const [permissionRequestCount, setPermissionRequestCount] = useState(0);
   const isMountedRef = useRef(false);
-  const {t} = useTranslation();
 
   /**
    * Open app settings if permission is blocked
    */
   const openSettings = useCallback(() => {
-    Alert.alert(
-      t('components.locationPermissionOverlay.location_permission_required'),
-      t(
-        'components.locationPermissionOverlay.please_enable_location_services_for_this_app_in_your_device_settings',
-      ),
-      [
-        {text: t('common.cancel'), style: 'cancel'},
-        {
-          text: t('components.locationPermissionOverlay.open_settings'),
-          onPress: () => Linking.openSettings(),
-        },
-      ],
-    );
+    Linking.openSettings();
   }, []);
 
   /**

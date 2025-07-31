@@ -18,38 +18,44 @@ export const RNMapControls: React.FC<RNMapControlsProps> = ({
 }) => {
   return (
     <View style={styles.controlButtonsContainer}>
-      <Button
-        onPress={onZoomIn}
-        variant="primary"
-        shape="circle"
-        size="small"
-        style={styles.zoomButton}
-        iconName="plus"
-        iconSize={16}
-        iconColor={colors.neutral.black}
-        testID="map-zoom-in-button"
-      />
-      <Button
-        onPress={onZoomOut}
-        variant="primary"
-        shape="circle"
-        size="small"
-        style={styles.zoomButton}
-        iconName="minus"
-        iconSize={16}
-        iconColor={colors.neutral.black}
-        testID="map-zoom-out-button"
-      />
-      <Button
-        onPress={userLocationAvailable ? onCenterUser : onReopenOverlay}
-        variant="dark"
-        shape="circle"
-        size="small"
-        iconName="user-location"
-        iconSize={16}
-        style={styles.recenterButton}
-        testID="map-location-button"
-      />
+      {onZoomIn && (
+        <Button
+          onPress={onZoomIn}
+          variant="primary"
+          shape="circle"
+          size="small"
+          style={styles.zoomButton}
+          iconName="plus"
+          iconSize={16}
+          iconColor={colors.neutral.black}
+          testID="map-zoom-in-button"
+        />
+      )}
+      {onZoomOut && (
+        <Button
+          onPress={onZoomOut}
+          variant="primary"
+          shape="circle"
+          size="small"
+          style={styles.zoomButton}
+          iconName="minus"
+          iconSize={16}
+          iconColor={colors.neutral.black}
+          testID="map-zoom-out-button"
+        />
+      )}
+      {onCenterUser && (
+        <Button
+          onPress={userLocationAvailable ? onCenterUser : onReopenOverlay}
+          variant="dark"
+          shape="circle"
+          size="small"
+          iconName="user-location"
+          iconSize={16}
+          style={styles.recenterButton}
+          testID="map-location-button"
+        />
+      )}
     </View>
   );
 };

@@ -691,9 +691,6 @@ export default {
     },
     locationPermissionOverlay: {
       open_settings: 'Ayarları Aç',
-      location_permission_required: 'Lokasyon erişim izni gerekli',
-      please_enable_location_services_for_this_app_in_your_device_settings:
-        'Uygulama ayarlarınızda lokasyon servislerini etkinleştirin.',
       title: 'Sürüş Deneyiminizi Geliştirin',
       description:
         'Motorove, konumunuzu kullanarak yakınınızdaki uyarıları, etkinlikleri ve motosiklet servislerini gösterir.',

@@ -75,7 +75,7 @@ export const RNMap: React.FC<RNMapProps> = ({
   rotateEnabled = true,
   scrollEnabled = true,
   pitchEnabled = false,
-  toolbarEnabled = true,
+  toolbarEnabled = false,
   showsBuildings = true,
   style,
   clusteringEnabled = false,
@@ -404,14 +404,18 @@ export const RNMap: React.FC<RNMapProps> = ({
             region={followUserLocation ? undefined : region}
             mapType={mapType}
             customMapStyle={customMapStyle}
-            showsUserLocation={true}
-            followsUserLocation={followUserLocation && status === 'granted'}
+            showsUserLocation={
+              showUserLocation && isMapLoaded && status === 'granted'
+            }
+            followsUserLocation={
+              followUserLocation && isMapLoaded && status === 'granted'
+            }
             showsCompass={showCompass}
             showsScale={showScale}
             showsBuildings={showsBuildings}
             showsIndoors={showIndoors}
             zoomEnabled={zoomEnabled}
-            zoomControlEnabled={zoomControlEnabled}
+            zoomControlEnabled={false}
             rotateEnabled={rotateEnabled}
             scrollEnabled={scrollEnabled}
             pitchEnabled={pitchEnabled}
@@ -525,7 +529,7 @@ export const RNMap: React.FC<RNMapProps> = ({
               <RNMapControls
                 onZoomIn={handleZoomIn}
                 onZoomOut={handleZoomOut}
-                onCenterUser={handleCenterUser}
+                onCenterUser={isMapLoaded ? handleCenterUser : undefined}
                 userLocationAvailable={!!userLocation}
                 onReopenOverlay={handleReopenOverlay}
               />
