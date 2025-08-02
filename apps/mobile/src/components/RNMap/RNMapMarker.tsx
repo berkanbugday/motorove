@@ -25,7 +25,10 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
 
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
-  const handleSelect = () => {
+  const handlePress = (event: any) => {
+    // Prevent event from bubbling up to map onPress (Android fix)
+    event.stopPropagation && event.stopPropagation();
+
     // First scale down
     Animated.spring(scaleAnim, {
       toValue: 1.5,
@@ -69,7 +72,7 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
       opacity={opacity}
       zIndex={zIndex}
       rotation={rotation}
-      onSelect={handleSelect}
+      onPress={handlePress}
       onDeselect={handleDeselect}
       tracksViewChanges={false}>
       {icon && <View style={styles.iconContainer}>{icon}</View>}
