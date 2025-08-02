@@ -343,6 +343,62 @@ export const RNMap: React.FC<RNMapProps> = ({
     }
   }, [onLoadMarkerPress, refreshMapState]);
 
+  // Create a single stable callback that finds marker by ID to prevent re-renders
+  const handleMarkerSelectById = useCallback(
+    (markerId: string | number) => {
+      const marker = visibleMarkers.find(m => m.id === markerId);
+      if (marker) {
+        onMarkerSelect?.(marker);
+        setIsShowLoadMarkerButton(false);
+      }
+    },
+    [onMarkerSelect, visibleMarkers],
+  );
+
+  const handleMarkerDeselect = useCallback(() => {
+    onMarkerDeselect?.();
+    setIsShowLoadMarkerButton(true);
+  }, [onMarkerDeselect]);
+
+  // Create stable callback references for each marker using a Map
+  const markerCallbacksRef = useRef(new Map());
+  const getStableMarkerCallback = useCallback(
+    (markerId: string | number) => {
+      if (!markerCallbacksRef.current.has(markerId)) {
+        // Create a stable callback that doesn't capture the marker in closure
+        markerCallbacksRef.current.set(markerId, () =>
+          handleMarkerSelectById(markerId),
+        );
+      }
+      return markerCallbacksRef.current.get(markerId);
+    },
+    [handleMarkerSelectById],
+  );
+
+  // Clean up callbacks for markers that are no longer visible
+  useEffect(() => {
+    const visibleMarkerIds = new Set(visibleMarkers.map(m => m.id));
+    const callbackKeys = Array.from(markerCallbacksRef.current.keys());
+    callbackKeys.forEach(key => {
+      if (!visibleMarkerIds.has(key)) {
+        markerCallbacksRef.current.delete(key);
+      }
+    });
+  }, [visibleMarkers]);
+
+  const handleClusterMarkerSelect = useCallback(
+    (clusterMarker: any) => {
+      onMarkerSelect?.(clusterMarker);
+      setIsShowLoadMarkerButton(false);
+    },
+    [onMarkerSelect],
+  );
+
+  const handleClusterMarkerDeselect = useCallback(() => {
+    onMarkerDeselect?.();
+    setIsShowLoadMarkerButton(true);
+  }, [onMarkerDeselect]);
+
   // Update map center when region changes
   useEffect(() => {
     if (region) {
@@ -407,6 +463,7 @@ export const RNMap: React.FC<RNMapProps> = ({
             showsUserLocation={
               showUserLocation && isMapLoaded && status === 'granted'
             }
+            showsMyLocationButton={false}
             followsUserLocation={
               followUserLocation && isMapLoaded && status === 'granted'
             }
@@ -460,28 +517,16 @@ export const RNMap: React.FC<RNMapProps> = ({
               <RNMapCluster
                 markers={visibleMarkers}
                 radius={clusteringRadius}
-                onMarkerSelect={clusterMarker => {
-                  onMarkerSelect?.(clusterMarker);
-                  setIsShowLoadMarkerButton(false);
-                }}
-                onMarkerDeselect={() => {
-                  onMarkerDeselect?.();
-                  setIsShowLoadMarkerButton(true);
-                }}
+                onMarkerSelect={handleClusterMarkerSelect}
+                onMarkerDeselect={handleClusterMarkerDeselect}
               />
             ) : (
               visibleMarkers.map(marker => (
                 <RNMapMarker
                   key={`marker-${marker.id}`}
                   marker={marker}
-                  onSelect={() => {
-                    onMarkerSelect?.(marker);
-                    setIsShowLoadMarkerButton(false);
-                  }}
-                  onDeselect={() => {
-                    onMarkerDeselect?.();
-                    setIsShowLoadMarkerButton(true);
-                  }}
+                  onSelect={getStableMarkerCallback(marker.id)}
+                  onDeselect={handleMarkerDeselect}
                   mapRef={mapRef}
                 />
               ))

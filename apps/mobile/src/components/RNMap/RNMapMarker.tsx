@@ -1,12 +1,13 @@
-import React, {useRef} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {StyleSheet, View, Animated} from 'react-native';
 import {Marker} from 'react-native-maps';
 import {RNMapMarkerProps} from './types';
 
 /**
  * A component to display individual markers on the map
+ * Optimized to prevent unnecessary re-renders on Android
  */
-export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
+const RNMapMarkerComponent: React.FC<RNMapMarkerProps> = ({
   marker,
   onSelect,
   onDeselect,
@@ -23,13 +24,15 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
     rotation = 0,
   } = marker;
 
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  // Memoize animation value to prevent recreation on every render
+  const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
 
-  const handlePress = (event: any) => {
+  // Stable event handlers - only recreate if dependencies actually change
+  const handlePress = useCallback((event: any) => {
     // Prevent event from bubbling up to map onPress (Android fix)
     event.stopPropagation && event.stopPropagation();
 
-    // First scale down
+    // First scale up
     Animated.spring(scaleAnim, {
       toValue: 1.5,
       friction: 5,
@@ -51,9 +54,9 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
     }
 
     onSelect?.();
-  };
+  }, [coordinate.latitude, coordinate.longitude, mapRef, onSelect, scaleAnim]);
 
-  const handleDeselect = () => {
+  const handleDeselect = useCallback(() => {
     Animated.spring(scaleAnim, {
       toValue: 0.8,
       friction: 5,
@@ -62,7 +65,15 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
     }).start();
 
     onDeselect?.();
-  };
+  }, [onDeselect, scaleAnim]);
+
+  // Memoize animated style to prevent recreation
+  const animatedImageStyle = useMemo(() => ([
+    styles.image,
+    {
+      transform: [{scale: scaleAnim}],
+    },
+  ]), [scaleAnim]);
 
   return (
     <Marker
@@ -80,18 +91,17 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
         <View style={styles.imageContainer}>
           <Animated.Image
             source={image}
-            style={[
-              styles.image,
-              {
-                transform: [{scale: scaleAnim}],
-              },
-            ]}
+            style={animatedImageStyle}
           />
         </View>
       )}
     </Marker>
   );
 };
+
+// Use simple React.memo without custom comparison for better performance
+// This will do a shallow comparison of all props
+export const RNMapMarker = React.memo(RNMapMarkerComponent);
 
 const styles = StyleSheet.create({
   iconContainer: {
