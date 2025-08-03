@@ -1,16 +1,14 @@
-import React, {useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
-  Dimensions,
-  ViewToken,
+  ScrollView,
 } from 'react-native';
 import {colors, spacing, radius, typography, getShadow} from '../../theme';
-import {Text as TextIcon} from 'react-native';
+import {useBottomSheet} from '../BottomSheet/BottomSheetProvider';
 
 export interface RNMapMarkerCardItem {
   id: string;
@@ -27,7 +25,7 @@ export interface RNMapMarkerCardItem {
 
 interface RNMapMarkerCardProps {
   /**
-   * The list of properties to display in the carousel
+   * The list of properties to display
    */
   items: RNMapMarkerCardItem[];
 
@@ -57,7 +55,7 @@ interface RNMapMarkerCardProps {
   onCardChange?: (index: number) => void;
 
   /**
-   * Tab bar height for proper positioning
+   * Tab bar height for proper positioning (not used in bottom sheet)
    */
   tabBarHeight?: number;
 }
@@ -84,291 +82,513 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
   onFavoritePress,
   onClosePress,
   selectedIndex = 0,
-  onCardChange,
-  tabBarHeight = 60,
+  onCardChange: _onCardChange,
 }) => {
-  const flatListRef = useRef<FlatList>(null);
-  const {width: screenWidth} = Dimensions.get('window');
-  const cardWidth = screenWidth - spacing.lg * 2;
+  const {openBottomSheet, closeBottomSheet} = useBottomSheet();
+  const hasOpenedRef = useRef(false);
 
-  // Scroll to the selected index when it changes
-  React.useEffect(() => {
-    if (flatListRef.current && items.length > 0) {
-      flatListRef.current.scrollToIndex({
-        index: selectedIndex,
-        animated: true,
-        viewPosition: 0.5,
+  // Open bottom sheet when items are available
+  useEffect(() => {
+    if (items && items.length > 0 && !hasOpenedRef.current) {
+      hasOpenedRef.current = true;
+      const selectedItem = items[selectedIndex] || items[0];
+      const nearbyItems = items.filter((_, index) => index !== selectedIndex);
+
+      openBottomSheet({
+        content: (
+          <BottomSheetContent
+            selectedItem={selectedItem}
+            nearbyItems={nearbyItems}
+            onCardPress={onCardPress}
+            onFavoritePress={onFavoritePress}
+          />
+        ),
+        snapPoint: 'partial',
+        showCloseButton: true,
+        closeButtonPosition: 'top-left',
+        onClose: () => {
+          hasOpenedRef.current = false;
+          onClosePress?.();
+        },
+        closeOnBackdropPress: true,
+        showBackdrop: true,
+        backDropOpacity: 0.3,
       });
     }
-  }, [selectedIndex, items.length]);
+  }, [
+    items,
+    selectedIndex,
+    openBottomSheet,
+    onCardPress,
+    onFavoritePress,
+    onClosePress,
+  ]);
 
-  const handleViewableItemsChanged = React.useCallback(
-    (info: {viewableItems: ViewToken[]; changed: ViewToken[]}) => {
-      if (
-        info.viewableItems.length > 0 &&
-        onCardChange &&
-        info.viewableItems[0].index !== null
-      ) {
-        onCardChange(info.viewableItems[0].index);
-      }
-    },
-    [onCardChange],
-  );
+  // Update bottom sheet content when selected index changes
+  useEffect(() => {
+    if (items && items.length > 0 && hasOpenedRef.current) {
+      const selectedItem = items[selectedIndex] || items[0];
+      const nearbyItems = items.filter((_, index) => index !== selectedIndex);
 
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50,
-  };
-
-  const renderCard = ({item}: {item: RNMapMarkerCardItem}) => {
-    return (
-      <TouchableOpacity
-        style={[
-          styles.card,
-          {
-            width: cardWidth,
-          },
-        ]}
-        onPress={() => onCardPress && onCardPress(item)}
-        activeOpacity={0.9}>
-        {/* Card Image */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={{uri: item.images[0]}}
-            style={styles.image}
-            resizeMode="cover"
+      openBottomSheet({
+        content: (
+          <BottomSheetContent
+            selectedItem={selectedItem}
+            nearbyItems={nearbyItems}
+            onCardPress={onCardPress}
+            onFavoritePress={onFavoritePress}
           />
+        ),
+        snapPoint: 'partial',
+        showCloseButton: true,
+        closeButtonPosition: 'header-right',
+        onClose: () => {
+          hasOpenedRef.current = false;
+          onClosePress?.();
+        },
+        closeOnBackdropPress: true,
+        showBackdrop: true,
+        backDropOpacity: 0.3,
+      });
+    }
+  }, [
+    selectedIndex,
+    items,
+    openBottomSheet,
+    onCardPress,
+    onFavoritePress,
+    onClosePress,
+  ]);
 
-          {/* Guest Favorite Label */}
-          {item.isGuestFavorite && (
-            <View
-              style={[
-                styles.guestFavoriteContainer,
-                {backgroundColor: colors.neutral.white},
-              ]}>
-              <Text
-                style={[
-                  styles.guestFavoriteText,
-                  {color: colors.neutral.black},
-                ]}>
-                Guest favorite
-              </Text>
-            </View>
-          )}
+  // Close bottom sheet when component unmounts or items become empty
+  useEffect(() => {
+    return () => {
+      if (hasOpenedRef.current) {
+        closeBottomSheet();
+        hasOpenedRef.current = false;
+      }
+    };
+  }, [closeBottomSheet]);
 
-          {/* Controls Container */}
-          <View style={styles.controlsContainer}>
-            {/* Favorite Button */}
-            <TouchableOpacity
-              style={[
-                styles.iconButton,
-                {backgroundColor: colors.neutral.white},
-              ]}
-              onPress={() => onFavoritePress && onFavoritePress(item)}>
-              <TextIcon
-                style={{
-                  color: item.isFavorite
-                    ? colors.status.error
-                    : colors.neutral.black,
-                  fontSize: 18,
-                }}>
-                {item.isFavorite ? '♥' : '♡'}
-              </TextIcon>
-            </TouchableOpacity>
+  useEffect(() => {
+    if (!items || items.length === 0) {
+      if (hasOpenedRef.current) {
+        closeBottomSheet();
+        hasOpenedRef.current = false;
+      }
+    }
+  }, [items, closeBottomSheet]);
 
-            {/* Close Button */}
-            <TouchableOpacity
-              style={[
-                styles.iconButton,
-                {backgroundColor: colors.neutral.white},
-              ]}
-              onPress={onClosePress}>
-              <TextIcon style={{color: colors.neutral.black, fontSize: 18}}>
-                ✕
-              </TextIcon>
-            </TouchableOpacity>
-          </View>
-        </View>
+  return null; // Component now uses BottomSheet instead of rendering directly
+};
 
-        {/* Card Content */}
-        <View style={styles.content}>
-          {/* Location and Rating Row */}
-          <View style={styles.headerRow}>
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.location,
-                {
-                  color: colors.neutral.black,
-                  fontSize: typography.bodySmall.fontSize,
-                  fontWeight: getFontWeight(typography.subtitle.fontWeight),
-                },
-              ]}>
-              {item.location}
-            </Text>
-            <View style={styles.ratingContainer}>
-              <TextIcon style={{color: colors.neutral.black, fontSize: 14}}>
-                ★
-              </TextIcon>
-              <Text
-                style={[
-                  styles.rating,
-                  {
-                    color: colors.neutral.black,
-                    fontSize: typography.bodySmall.fontSize,
-                    fontWeight: getFontWeight(typography.bodySmall.fontWeight),
-                  },
-                ]}>
-                {item.rating.toFixed(1)}
-              </Text>
-            </View>
-          </View>
+// Bottom sheet content component
+interface BottomSheetContentProps {
+  selectedItem: RNMapMarkerCardItem;
+  nearbyItems: RNMapMarkerCardItem[];
+  onCardPress?: (item: RNMapMarkerCardItem) => void;
+  onFavoritePress?: (item: RNMapMarkerCardItem) => void;
+}
 
-          {/* Price and Date Row */}
-          <View style={styles.footerRow}>
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.dates,
-                {
-                  color: colors.neutral.grey,
-                  fontSize: typography.bodySmall.fontSize,
-                  fontWeight: getFontWeight(typography.bodySmall.fontWeight),
-                },
-              ]}>
-              {item.dates}
-            </Text>
-            <View style={styles.priceContainer}>
-              <Text
-                style={[
-                  styles.price,
-                  {
-                    color: colors.neutral.black,
-                    fontSize: typography.body.fontSize,
-                    fontWeight: getFontWeight(typography.title.fontWeight),
-                  },
-                ]}>
-                ${item.price}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
+const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
+  selectedItem,
+  nearbyItems,
+  onCardPress,
+  onFavoritePress,
+}) => {
+  // Format business type and rating
+  const businessType = selectedItem.title.includes('Repair')
+    ? 'Repair Shop'
+    : selectedItem.title.includes('Dealer')
+    ? 'Dealer'
+    : 'Washing Station';
+
+  // Mock data for demonstration - in real app this would come from selectedItem
+  const phoneNumber = '+1 (555) 123-4567';
+  const address = '123 Motorcycle Avenue';
+  const distance = '5.2 km away';
+  const reviewCount = 120;
+  const openHours = '8:00 AM - 6:00 PM';
+
+  const handleCallPress = () => {
+    console.log('Call pressed:', phoneNumber);
+    // In real app: Linking.openURL(`tel:${phoneNumber}`);
   };
 
-  if (!items || items.length === 0) {
-    return null;
-  }
+  const handleDirectionsPress = () => {
+    console.log('Get directions pressed');
+    // In real app: Open maps app with coordinates
+  };
+
+  const handleSaveToFavorites = () => {
+    console.log('Save to favorites pressed');
+    onFavoritePress?.(selectedItem);
+  };
 
   return (
-    <View style={[styles.container, {bottom: tabBarHeight}]}>
-      <FlatList
-        ref={flatListRef}
-        data={items}
-        renderItem={renderCard}
-        keyExtractor={item => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        pagingEnabled
-        decelerationRate="fast"
-        snapToInterval={cardWidth + spacing.sm}
-        snapToAlignment="center"
-        contentContainerStyle={{
-          paddingHorizontal: spacing.lg,
-          gap: spacing.sm,
-        }}
-        onViewableItemsChanged={handleViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-      />
-    </View>
+    <ScrollView
+      style={styles.bottomSheetContainer}
+      showsVerticalScrollIndicator={false}>
+      {/* Main repair shop card matching the image design */}
+      <View style={styles.repairShopCard}>
+        {/* Header with business name */}
+        <View style={styles.cardHeader}>
+          <Text style={styles.businessName} numberOfLines={2}>
+            {selectedItem.title}
+          </Text>
+        </View>
+
+        {/* Business type with rating */}
+        <View style={styles.businessTypeRow}>
+          <Text style={styles.businessType}>{businessType}</Text>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.starIcon}>⭐</Text>
+            <Text style={styles.ratingText}>
+              {selectedItem.rating.toFixed(1)}
+            </Text>
+            <Text style={styles.reviewCount}>({reviewCount})</Text>
+          </View>
+        </View>
+
+        {/* Address and distance */}
+        <View style={styles.addressRow}>
+          <Text style={styles.addressIcon}>📍</Text>
+          <View style={styles.addressInfo}>
+            <Text style={styles.addressText}>{address}</Text>
+            <Text style={styles.distanceText}>{distance}</Text>
+          </View>
+        </View>
+
+        {/* Phone number */}
+        <TouchableOpacity style={styles.phoneRow} onPress={handleCallPress}>
+          <Text style={styles.phoneIcon}>📞</Text>
+          <Text style={styles.phoneNumber}>{phoneNumber}</Text>
+          <Text style={styles.tapToCallText}>Tap to call</Text>
+        </TouchableOpacity>
+
+        {/* Open hours */}
+        <View style={styles.hoursRow}>
+          <Text style={styles.clockIcon}>🕐</Text>
+          <View style={styles.hoursInfo}>
+            <Text style={styles.openTodayText}>Open today</Text>
+            <Text style={styles.hoursText}>{openHours}</Text>
+          </View>
+        </View>
+
+        {/* Action buttons */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={styles.directionsButton}
+            onPress={handleDirectionsPress}>
+            <Text style={styles.directionsIcon}>🧭</Text>
+            <Text style={styles.directionsText}>Get Directions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.callButton} onPress={handleCallPress}>
+            <Text style={styles.callIcon}>📞</Text>
+            <Text style={styles.callText}>Call Now</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Save to favorites button */}
+        <TouchableOpacity
+          style={styles.saveToFavoritesButton}
+          onPress={handleSaveToFavorites}>
+          <Text style={styles.heartIcon}>🤍</Text>
+          <Text style={styles.saveToFavoritesText}>Save to Favorites</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Nearby places section */}
+      {nearbyItems.length > 0 && (
+        <View style={styles.nearbySection}>
+          <Text style={styles.nearbySectionTitle}>Nearby places</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.nearbyScrollContainer}>
+            {nearbyItems.map(item => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.nearbyCard}
+                onPress={() => onCardPress?.(item)}
+                activeOpacity={0.8}>
+                <Image
+                  source={{
+                    uri:
+                      item.images && item.images.length > 0
+                        ? item.images[0]
+                        : 'https://via.placeholder.com/160x100?text=No+Image',
+                  }}
+                  style={styles.nearbyImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.nearbyCardContent}>
+                  <Text style={styles.nearbyTitle} numberOfLines={1}>
+                    {item.title}
+                  </Text>
+                  <Text style={styles.nearbyLocation} numberOfLines={1}>
+                    {item.location}
+                  </Text>
+                  <View style={styles.nearbyFooter}>
+                    <View style={styles.nearbyRating}>
+                      <Text style={styles.nearbyStarIcon}>⭐</Text>
+                      <Text style={styles.nearbyRatingText}>
+                        {item.rating.toFixed(1)}
+                      </Text>
+                    </View>
+                    <Text style={styles.nearbyPrice}>
+                      {item.price} {item.currency}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    zIndex: 999,
-    ...getShadow('small'),
+  bottomSheetContainer: {
+    flex: 1,
   },
-  card: {
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
+  // New repair shop card styles matching the image design
+  repairShopCard: {
     backgroundColor: colors.neutral.white,
     borderRadius: radius.md,
-    ...getShadow('small'),
   },
-  imageContainer: {
-    height: 120,
-    position: 'relative',
+  cardHeader: {
+    marginBottom: spacing.sm,
   },
-  image: {
-    width: '100%',
-    height: '100%',
+  businessName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.neutral.black,
+    lineHeight: 28,
   },
-  guestFavoriteContainer: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 20,
-  },
-  guestFavoriteText: {
-    fontWeight: '600',
-    fontSize: 12,
-  },
-  controlsContainer: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    flexDirection: 'row',
-    gap: 8,
-  },
-  iconButton: {
-    padding: 6,
-    width: 32,
-    height: 32,
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  content: {
-    padding: 10,
-  },
-  headerRow: {
+  businessTypeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: spacing.md,
   },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  location: {
-    flex: 1,
-    fontWeight: '600',
+  businessType: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.neutral.grey,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 4,
   },
-  rating: {
+  starIcon: {
+    fontSize: 16,
+  },
+  ratingText: {
+    fontSize: 16,
     fontWeight: '600',
+    color: colors.neutral.black,
   },
-  dates: {
+  reviewCount: {
+    fontSize: 16,
+    color: colors.neutral.grey,
+    marginLeft: 2,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing.md,
+  },
+  addressIcon: {
+    fontSize: 16,
+    marginRight: spacing.sm,
+    marginTop: 2,
+  },
+  addressInfo: {
     flex: 1,
-    marginRight: 8,
   },
-  priceContainer: {
+  addressText: {
+    fontSize: 16,
+    color: colors.neutral.black,
+    fontWeight: '500',
+    lineHeight: 20,
+  },
+  distanceText: {
+    fontSize: 14,
+    color: colors.neutral.grey,
+    marginTop: 2,
+  },
+  phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
-  price: {
+  phoneIcon: {
+    fontSize: 16,
+    marginRight: spacing.sm,
+  },
+  phoneNumber: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '500',
+    flex: 1,
+  },
+  tapToCallText: {
+    fontSize: 14,
+    color: colors.neutral.grey,
+  },
+  hoursRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: spacing.lg,
+  },
+  clockIcon: {
+    fontSize: 16,
+    marginRight: spacing.sm,
+    marginTop: 2,
+  },
+  hoursInfo: {
+    flex: 1,
+  },
+  openTodayText: {
+    fontSize: 16,
+    color: colors.neutral.black,
+    fontWeight: '500',
+    lineHeight: 20,
+  },
+  hoursText: {
+    fontSize: 14,
+    color: colors.neutral.grey,
+    marginTop: 2,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  directionsButton: {
+    flex: 1,
+    backgroundColor: colors.neutral.black,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    gap: spacing.xs,
+  },
+  directionsIcon: {
+    fontSize: 16,
+  },
+  directionsText: {
+    color: colors.neutral.white,
+    fontSize: 16,
     fontWeight: '600',
+  },
+  callButton: {
+    flex: 1,
+    backgroundColor: '#34C759',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    gap: spacing.xs,
+  },
+  callIcon: {
+    fontSize: 16,
+  },
+  callText: {
+    color: colors.neutral.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveToFavoritesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.lightGrey,
+    backgroundColor: colors.neutral.white,
+    marginBottom: spacing.md,
+  },
+  heartIcon: {
+    fontSize: 18,
+    marginRight: spacing.sm,
+  },
+  saveToFavoritesText: {
+    fontSize: 16,
+    color: colors.neutral.black,
+    fontWeight: '500',
+  },
+  // Existing nearby section styles
+  nearbySection: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  nearbySectionTitle: {
+    fontSize: typography.subtitle.fontSize,
+    fontWeight: getFontWeight(typography.subtitle.fontWeight),
+    color: colors.neutral.black,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.md,
+  },
+  nearbyScrollContainer: {
+    paddingLeft: spacing.md,
+    paddingRight: spacing.md,
+  },
+  nearbyCard: {
+    width: 160,
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.sm,
+    marginRight: spacing.sm,
+    overflow: 'hidden',
+    ...getShadow('small'),
+  },
+  nearbyImage: {
+    width: '100%',
+    height: 100,
+  },
+  nearbyCardContent: {
+    padding: spacing.sm,
+  },
+  nearbyTitle: {
+    fontSize: typography.bodySmall.fontSize,
+    fontWeight: getFontWeight(typography.bodySmall.fontWeight),
+    color: colors.neutral.black,
+    marginBottom: 2,
+  },
+  nearbyLocation: {
+    fontSize: typography.caption.fontSize,
+    color: colors.neutral.grey,
+    marginBottom: spacing.xs,
+  },
+  nearbyFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  nearbyRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  nearbyStarIcon: {
+    color: '#FFD700',
+    fontSize: 12,
+  },
+  nearbyRatingText: {
+    fontSize: typography.caption.fontSize,
+    color: colors.neutral.black,
+  },
+  nearbyPrice: {
+    fontSize: typography.bodySmall.fontSize,
+    fontWeight: getFontWeight(typography.bodySmall.fontWeight),
+    color: colors.neutral.black,
   },
 });

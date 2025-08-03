@@ -28,33 +28,23 @@ const RNMapMarkerComponent: React.FC<RNMapMarkerProps> = ({
   const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
 
   // Stable event handlers - only recreate if dependencies actually change
-  const handlePress = useCallback((event: any) => {
-    // Prevent event from bubbling up to map onPress (Android fix)
-    event.stopPropagation && event.stopPropagation();
+  const handlePress = useCallback(
+    (event: any) => {
+      // Prevent event from bubbling up to map onPress (Android fix)
+      event.stopPropagation && event.stopPropagation();
 
-    // First scale up
-    Animated.spring(scaleAnim, {
-      toValue: 1.5,
-      friction: 5,
-      tension: 40,
-      useNativeDriver: true,
-    }).start();
+      // First scale up
+      Animated.spring(scaleAnim, {
+        toValue: 1.5,
+        friction: 5,
+        tension: 40,
+        useNativeDriver: true,
+      }).start();
 
-    // Center map on marker
-    if (mapRef?.current) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: coordinate.latitude,
-          longitude: coordinate.longitude,
-          latitudeDelta: 1, // Zoom in closer
-          longitudeDelta: 1,
-        },
-        500,
-      );
-    }
-
-    onSelect?.();
-  }, [coordinate.latitude, coordinate.longitude, mapRef, onSelect, scaleAnim]);
+      onSelect?.();
+    },
+    [coordinate.latitude, coordinate.longitude, mapRef, onSelect, scaleAnim],
+  );
 
   const handleDeselect = useCallback(() => {
     Animated.spring(scaleAnim, {
@@ -68,12 +58,15 @@ const RNMapMarkerComponent: React.FC<RNMapMarkerProps> = ({
   }, [onDeselect, scaleAnim]);
 
   // Memoize animated style to prevent recreation
-  const animatedImageStyle = useMemo(() => ([
-    styles.image,
-    {
-      transform: [{scale: scaleAnim}],
-    },
-  ]), [scaleAnim]);
+  const animatedImageStyle = useMemo(
+    () => [
+      styles.image,
+      {
+        transform: [{scale: scaleAnim}],
+      },
+    ],
+    [scaleAnim],
+  );
 
   return (
     <Marker
@@ -89,10 +82,7 @@ const RNMapMarkerComponent: React.FC<RNMapMarkerProps> = ({
       {icon && <View style={styles.iconContainer}>{icon}</View>}
       {image && (
         <View style={styles.imageContainer}>
-          <Animated.Image
-            source={image}
-            style={animatedImageStyle}
-          />
+          <Animated.Image source={image} style={animatedImageStyle} />
         </View>
       )}
     </Marker>

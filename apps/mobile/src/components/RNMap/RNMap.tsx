@@ -347,7 +347,16 @@ export const RNMap: React.FC<RNMapProps> = ({
   const handleMarkerSelectById = useCallback(
     (markerId: string | number) => {
       const marker = visibleMarkers.find(m => m.id === markerId);
-      if (marker) {
+      if (marker && mapRef.current) {
+        // Animate to marker location
+        const newRegion = {
+          latitude: marker.coordinate.latitude - 0.02,
+          longitude: marker.coordinate.longitude,
+          latitudeDelta: 0.1, // Zoom in closer to the marker
+          longitudeDelta: 0.1,
+        };
+        mapRef.current.animateToRegion(newRegion, 500);
+
         onMarkerSelect?.(marker);
         setIsShowLoadMarkerButton(false);
       }
