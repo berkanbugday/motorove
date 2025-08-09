@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect, useCallback} from 'react';
+import React, {useRef, useState, useEffect, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -415,6 +415,69 @@ export const RNMap: React.FC<RNMapProps> = ({
     }
   }, [region, setMapCenter]);
 
+  // Memoized markers rendering to prevent unnecessary re-renders
+  const memoizedMarkers = useMemo(() => {
+    if (clusteringEnabled) {
+      return (
+        <RNMapCluster
+          markers={visibleMarkers}
+          radius={clusteringRadius}
+          onMarkerSelect={handleClusterMarkerSelect}
+          onMarkerDeselect={handleClusterMarkerDeselect}
+        />
+      );
+    }
+
+    return visibleMarkers.map(marker => (
+      <RNMapMarker
+        key={`marker-${marker.id}`}
+        marker={marker}
+        onSelect={getStableMarkerCallback(marker.id)}
+        onDeselect={handleMarkerDeselect}
+        mapRef={mapRef}
+      />
+    ));
+  }, [
+    clusteringEnabled,
+    visibleMarkers,
+    clusteringRadius,
+    handleClusterMarkerSelect,
+    handleClusterMarkerDeselect,
+    getStableMarkerCallback,
+    handleMarkerDeselect,
+    mapRef,
+  ]);
+
+  // Memoized polylines rendering
+  const memoizedPolylines = useMemo(() => {
+    return polylines.map((polyline: RNMapPolyline) => (
+      <Polyline
+        key={`polyline-${polyline.id}`}
+        coordinates={polyline.coordinates}
+        strokeWidth={polyline.strokeWidth || 2}
+        strokeColor={polyline.strokeColor || colors.primary.main}
+        lineCap={polyline.lineCap || 'round'}
+        lineJoin={polyline.lineJoin || 'round'}
+        geodesic={polyline.geodesic}
+        lineDashPattern={polyline.lineDashPattern}
+      />
+    ));
+  }, [polylines]);
+
+  // Memoized circles rendering
+  const memoizedCircles = useMemo(() => {
+    return circles.map((circle: RNMapCircle) => (
+      <Circle
+        key={`circle-${circle.id}`}
+        center={circle.center}
+        radius={circle.radius}
+        fillColor={circle.fillColor || 'rgba(0, 0, 255, 0.1)'}
+        strokeColor={circle.strokeColor || colors.primary.main}
+        strokeWidth={circle.strokeWidth || 1}
+      />
+    ));
+  }, [circles]);
+
   // Render tags above map
   const renderTags = () => {
     if (tags.length === 0) {
@@ -496,50 +559,13 @@ export const RNMap: React.FC<RNMapProps> = ({
             onTouchMove={handleMapMoveStart}
             onTouchEnd={handleMapMoveEnd}>
             {/* Render polylines */}
-            {polylines.map((polyline: RNMapPolyline) => (
-              <Polyline
-                key={`polyline-${polyline.id}`}
-                coordinates={polyline.coordinates}
-                strokeWidth={polyline.strokeWidth || 2}
-                strokeColor={polyline.strokeColor || colors.primary.main}
-                lineCap={polyline.lineCap || 'round'}
-                lineJoin={polyline.lineJoin || 'round'}
-                geodesic={polyline.geodesic}
-                lineDashPattern={polyline.lineDashPattern}
-              />
-            ))}
+            {memoizedPolylines}
 
             {/* Render circles */}
-            {circles.map((circle: RNMapCircle) => (
-              <Circle
-                key={`circle-${circle.id}`}
-                center={circle.center}
-                radius={circle.radius}
-                fillColor={circle.fillColor || 'rgba(0, 0, 255, 0.1)'}
-                strokeColor={circle.strokeColor || colors.primary.main}
-                strokeWidth={circle.strokeWidth || 1}
-              />
-            ))}
+            {memoizedCircles}
 
             {/* Render markers with clustering if enabled */}
-            {clusteringEnabled ? (
-              <RNMapCluster
-                markers={visibleMarkers}
-                radius={clusteringRadius}
-                onMarkerSelect={handleClusterMarkerSelect}
-                onMarkerDeselect={handleClusterMarkerDeselect}
-              />
-            ) : (
-              visibleMarkers.map(marker => (
-                <RNMapMarker
-                  key={`marker-${marker.id}`}
-                  marker={marker}
-                  onSelect={getStableMarkerCallback(marker.id)}
-                  onDeselect={handleMarkerDeselect}
-                  mapRef={mapRef}
-                />
-              ))
-            )}
+            {memoizedMarkers}
 
             {/* Render additional children */}
             {children}

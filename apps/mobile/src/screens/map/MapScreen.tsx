@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback} from 'react';
+import React, {useState, useCallback} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {RNMap, RNMapMarkerCard, RNMapMarkerCardItem} from '@components/RNMap';
 import {RNMapMarkerType, RNMapSearchResult} from '@components/RNMap/types';
@@ -11,45 +11,43 @@ import {useMapMarkerCards} from '../../hooks';
 
 export const MapScreen = () => {
   const insets = useSafeAreaInsets();
-  // Create an enhanced version of markers with more info using useMemo
-  const enhancedMarkers = useMemo(() => {
-    return allMarkers.map(marker => {
-      // Get marker type based on icon
-      const markerType =
-        marker.icon === 'wrench-filled'
-          ? 'Repair Shop'
-          : marker.icon === 'shop'
-          ? 'Dealer'
-          : 'Washing Station';
+  // Create an enhanced version of markers with more info
+  const enhancedMarkers = allMarkers.map(marker => {
+    // Get marker type based on icon
+    const markerType =
+      marker.icon === 'wrench-filled'
+        ? 'Repair Shop'
+        : marker.icon === 'shop'
+        ? 'Dealer'
+        : 'Washing Station';
 
-      // Convert to RNMap marker format
-      return {
-        id: marker.id,
-        coordinate: {
-          latitude: marker.coordinates[1],
-          longitude: marker.coordinates[0],
-        },
-        title: `${markerType} #${marker.id.split('-').pop()}`,
-        description: `Located in ${
-          marker.coordinates[1] > 40.8 && marker.coordinates[1] < 41.2
-            ? 'Istanbul'
-            : 'Turkey Mainland'
-        }`,
-        pinColor:
-          marker.icon === 'wrench-filled'
-            ? '#FF5722'
-            : marker.icon === 'shop'
-            ? '#2196F3'
-            : '#4CAF50',
-        image: marker.image,
-        imageSelected: marker.imageSelected,
-        metadata: {
-          type: markerType,
-          originalData: marker,
-        },
-      };
-    });
-  }, []);
+    // Convert to RNMap marker format
+    return {
+      id: marker.id,
+      coordinate: {
+        latitude: marker.coordinates[1],
+        longitude: marker.coordinates[0],
+      },
+      title: `${markerType} #${marker.id.split('-').pop()}`,
+      description: `Located in ${
+        marker.coordinates[1] > 40.8 && marker.coordinates[1] < 41.2
+          ? 'Istanbul'
+          : 'Turkey Mainland'
+      }`,
+      pinColor:
+        marker.icon === 'wrench-filled'
+          ? '#FF5722'
+          : marker.icon === 'shop'
+          ? '#2196F3'
+          : '#4CAF50',
+      image: marker.image,
+      imageSelected: marker.imageSelected,
+      metadata: {
+        type: markerType,
+        originalData: marker,
+      },
+    };
+  });
 
   const [markers, setMarkers] = useState<RNMapMarkerType[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<RNMapMarkerType | null>(
