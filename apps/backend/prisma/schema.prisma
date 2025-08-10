@@ -101,11 +101,22 @@ enum EventParticipantStatus {
   LEFT
 }
 
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 enum AddressType {
   POST_LOCATION
   EVENT_MEETING_POINT
   EVENT_START_LOCATION
   EVENT_FINISH_LOCATION
+  BUSINESS_LOCATION
 }
 
 enum Language {
@@ -182,6 +193,75 @@ enum Interest {
   MOUNTAIN_ROADS
   COASTAL_RIDES
   CROSS_BORDER_TRIPS
+}
+
+enum BusinessCategory {
+  // Sales & Dealership
+  SALES
+  DEALERSHIP
+  USED_DEALER
+  
+  // Service & Repair
+  REPAIR
+  MAINTENANCE
+  
+  // Specialized Services
+  ENGINE_REPAIR
+  ENGINE_REBUILDING
+  ELECTRICAL_REPAIR
+  TIRE_SERVICE
+  OIL_CHANGE
+  BATTERY_SERVICE
+  BRAKE_SERVICE
+  SUSPENSION_REPAIR
+  TRANSMISSION_REPAIR
+  
+  // Parts & Accessories
+  PARTS_STORE
+  ACCESSORIES
+  
+  // Protective Gear & Apparel
+  PROTECTIVE_GEAR
+  
+  // Specialized Equipment
+  EXHAUST_SYSTEMS
+  ELECTRONICS
+  LIGHTING
+  INTERCOMS
+  
+  // Services
+  RENTAL
+  TOWING
+  PARKING
+  STORAGE
+  
+  // Customization & Modification
+  CUSTOMIZATION
+  RESTORATION
+  
+  // Inspection & Certification
+  INSPECTION
+  
+  // Financial Services
+  FINANCING
+  INSURANCE
+  TRADE_IN
+  
+  // Specialized Vehicles
+  ELECTRIC_MOTORCYCLES
+  SCOOTERS
+  ATV
+  
+  // Cleaning & Detailing
+  DETAILED_CLEANING
+  
+  // Training & Education
+  TRAINING
+  
+  // Other Services
+  TRANSPORT_SHIPPING
+  TOURS
+  OTHER
 }
 
 // Add new GroupTag enum
@@ -586,25 +666,78 @@ model PostSave {
 model Address {
   id        String      @id @default(uuid())
   address   String
+  country   String?
   language  Language // Change from String to Language enum
   type      AddressType
   latitude  Float
   longitude Float
 
-  // Relations - one address belongs to either a post or an event
+  // Relations - one address belongs to either a post, an event, or a business
   post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId String?
 
   event   Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId String?
 
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String?
+
   @@unique([postId, language, type]) // Ensure unique addresses per post/language/type
   @@unique([eventId, language, type]) // Ensure unique addresses per event/language/type
+  @@unique([businessId, language, type]) // Ensure unique addresses per business/language/type
   @@index([postId])
   @@index([eventId])
+  @@index([businessId])
   @@index([language])
   @@index([type])
+  @@index([country])
   @@index([latitude, longitude]) // Added for geospatial queries
+}
+
+// Business model
+model Business {
+  id            String             @id @default(uuid())
+  name          String
+  mainCategory  BusinessCategory
+  subCategories BusinessCategory[]
+  phoneNumber   String?
+  verified      Boolean            @default(false)
+
+  // Relations
+  addresses     Address[]
+  descriptions  BusinessDescription[]
+  workingHours  WorkingHour[]
+
+  // Base model fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  @@index([name])
+  @@index([mainCategory])
+  @@index([verified])
+  @@index([isActive])
+}
+
+// Business description model for multi-language support
+model BusinessDescription {
+  id          String   @id @default(uuid())
+  description String   @db.Text
+  language    Language
+
+  // Relations
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+
+  // Base model fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  @@unique([businessId, language]) // Ensure unique description per business/language
+  @@index([businessId])
+  @@index([language])
+  @@index([isActive])
 }
 
 // User following relationships
@@ -747,4 +880,27 @@ model UserSetting {
 
   @@index([userId])
   @@index([notificationPermission])
+}
+
+// Working hours model for businesses
+model WorkingHour {
+  id        String    @id @default(uuid())
+  dayOfWeek DayOfWeek
+  startHour String?   // Format: "09:00" or null if closed
+  endHour   String?   // Format: "18:00" or null if closed
+  isOpen24h Boolean   @default(false)
+
+  // Relations
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+
+  // Base model fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  @@unique([businessId, dayOfWeek])
+  @@index([businessId])
+  @@index([dayOfWeek])
+  @@index([isActive])
 }
