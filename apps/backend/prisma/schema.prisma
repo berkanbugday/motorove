@@ -200,11 +200,11 @@ enum BusinessCategory {
   SALES
   DEALERSHIP
   USED_DEALER
-  
+
   // Service & Repair
   REPAIR
   MAINTENANCE
-  
+
   // Specialized Services
   ENGINE_REPAIR
   ENGINE_REBUILDING
@@ -215,49 +215,49 @@ enum BusinessCategory {
   BRAKE_SERVICE
   SUSPENSION_REPAIR
   TRANSMISSION_REPAIR
-  
+
   // Parts & Accessories
   PARTS_STORE
   ACCESSORIES
-  
+
   // Protective Gear & Apparel
   PROTECTIVE_GEAR
-  
+
   // Specialized Equipment
   EXHAUST_SYSTEMS
   ELECTRONICS
   LIGHTING
   INTERCOMS
-  
+
   // Services
   RENTAL
   TOWING
   PARKING
   STORAGE
-  
+
   // Customization & Modification
   CUSTOMIZATION
   RESTORATION
-  
+
   // Inspection & Certification
   INSPECTION
-  
+
   // Financial Services
   FINANCING
   INSURANCE
   TRADE_IN
-  
+
   // Specialized Vehicles
   ELECTRIC_MOTORCYCLES
   SCOOTERS
   ATV
-  
+
   // Cleaning & Detailing
   DETAILED_CLEANING
-  
+
   // Training & Education
   TRAINING
-  
+
   // Other Services
   TRANSPORT_SHIPPING
   TOURS
@@ -680,7 +680,7 @@ model Address {
   eventId String?
 
   business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String?
+  businessId String?   @unique
 
   @@unique([postId, language, type]) // Ensure unique addresses per post/language/type
   @@unique([eventId, language, type]) // Ensure unique addresses per event/language/type
@@ -700,13 +700,13 @@ model Business {
   name          String
   mainCategory  BusinessCategory
   subCategories BusinessCategory[]
-  phoneNumber   String?
+  phoneNumber   String
   verified      Boolean            @default(false)
 
   // Relations
-  addresses     Address[]
-  descriptions  BusinessDescription[]
-  workingHours  WorkingHour[]
+  address      Address?
+  descriptions BusinessDescription[]
+  workingHours WorkingHour[]
 
   // Base model fields
   createdAt DateTime @default(now())
@@ -730,13 +730,32 @@ model BusinessDescription {
   businessId String
 
   // Base model fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isActive  Boolean  @default(true)
+  isActive Boolean @default(true)
 
   @@unique([businessId, language]) // Ensure unique description per business/language
   @@index([businessId])
   @@index([language])
+  @@index([isActive])
+}
+
+// Working hours model for businesses
+model WorkingHour {
+  id        String    @id @default(uuid())
+  dayOfWeek DayOfWeek
+  startHour String? // Format: "09:00" or null if closed
+  endHour   String? // Format: "18:00" or null if closed
+  isOpen24h Boolean   @default(false)
+
+  // Relations
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+
+  // Base model fields
+  isActive Boolean @default(true)
+
+  @@unique([businessId, dayOfWeek])
+  @@index([businessId])
+  @@index([dayOfWeek])
   @@index([isActive])
 }
 
@@ -880,27 +899,4 @@ model UserSetting {
 
   @@index([userId])
   @@index([notificationPermission])
-}
-
-// Working hours model for businesses
-model WorkingHour {
-  id        String    @id @default(uuid())
-  dayOfWeek DayOfWeek
-  startHour String?   // Format: "09:00" or null if closed
-  endHour   String?   // Format: "18:00" or null if closed
-  isOpen24h Boolean   @default(false)
-
-  // Relations
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String
-
-  // Base model fields
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isActive  Boolean  @default(true)
-
-  @@unique([businessId, dayOfWeek])
-  @@index([businessId])
-  @@index([dayOfWeek])
-  @@index([isActive])
 }

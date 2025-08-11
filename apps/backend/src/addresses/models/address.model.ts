@@ -35,4 +35,10 @@ export class Address {
 
   @Field(() => String, { nullable: true })
   eventId?: string;
+
+  @Field(() => String, { nullable: true })
+  country?: string;
+
+  @Field(() => String, { nullable: true })
+  businessId?: string;
 }

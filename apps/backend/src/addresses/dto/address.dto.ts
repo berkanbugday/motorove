@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsString,
   IsUUID,
+  IsOptional,
 } from 'class-validator';
 
 @ObjectType()
@@ -22,6 +23,11 @@ export class AddressDto implements IAddress {
   @IsString()
   @IsNotEmpty()
   address: string;
+
+  @Field(() => String)
+  @IsString()
+  @IsOptional()
+  country?: string;
 
   @Field(() => Language)
   @IsEnum(Language)

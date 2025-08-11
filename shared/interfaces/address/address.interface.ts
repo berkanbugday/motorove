@@ -1,6 +1,4 @@
 import { AddressType, Language } from "../../enums";
-import { IEvent } from "../event/event.interface";
-import { IPost } from "../post/post.interface";
 
 /**
  * Address Interface
@@ -9,10 +7,9 @@ import { IPost } from "../post/post.interface";
 export interface IAddress {
   id: string;
   address: string;
+  country?: string | null;
   language: Language;
   type: AddressType;
   latitude: number;
   longitude: number;
-  postId?: string | null;
-  eventId?: string | null;
 }
