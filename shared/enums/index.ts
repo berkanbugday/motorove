@@ -1,4 +1,6 @@
 export * from "./address-type.enum";
+export * from "./business-category.enum";
+export * from "./day-of-week.enum";
 export * from "./difficulty-level.enum";
 export * from "./event-participant-status.enum";
 export * from "./event-type.enum";
