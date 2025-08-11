@@ -5,7 +5,7 @@ import {
   CHANGE_MEMBER_ROLE,
   REMOVE_MEMBER,
   GROUP_MEMBERSHIP_FRAGMENT,
-  UPDATE_GROUP_MEMBERSHIP_INVITATION_STATUS,
+  UPDATE_GROUP_MEMBERSHIP_APPROVAL_STATUS,
   GET_GROUP_JOIN_REQUESTS,
 } from './graphql/group-membership.graphql';
 import {loggingService} from '@services/logging.service';
@@ -15,7 +15,7 @@ import {
   IAddMember,
   IChangeMemberRole,
   IRemoveMember,
-  InvitationStatus,
+  ApprovalStatus,
 } from '@motorove/shared';
 
 // Hook to add a member to a group
@@ -218,17 +218,17 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
     },
   });
 
-  // Update invitation status mutation
+  // Update approval status mutation
   const [updateStatus, {loading: updateLoading}] = useMutation(
-    UPDATE_GROUP_MEMBERSHIP_INVITATION_STATUS,
+    UPDATE_GROUP_MEMBERSHIP_APPROVAL_STATUS,
     {
       onCompleted: _data => {
         // Refetch the join requests
         originalRefetch();
 
         if (
-          _data.updateGroupMembershipInvitationStatus.status ===
-          InvitationStatus.ACCEPTED
+          _data.updateGroupMembershipApprovalStatus.status ===
+          ApprovalStatus.ACCEPTED
         ) {
           showToast({
             type: 'success',
@@ -244,7 +244,7 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
         }
       },
       onError: errorObj => {
-        loggingService.error('Error updating invitation status:', errorObj);
+        loggingService.error('Error updating approval status:', errorObj);
         showToast({
           type: 'error',
           text1: t('common.error'),
@@ -301,7 +301,7 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
           variables: {
             input: {
               id,
-              status: InvitationStatus.ACCEPTED,
+              status: ApprovalStatus.ACCEPTED,
             },
           },
         });
@@ -320,7 +320,7 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
           variables: {
             input: {
               id,
-              status: InvitationStatus.REJECTED,
+              status: ApprovalStatus.REJECTED,
             },
           },
         });

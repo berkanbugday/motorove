@@ -1,5 +1,5 @@
 import { IBase } from "../common/base.interface";
-import { InvitationStatus } from "../../enums";
+import { ApprovalStatus } from "../../enums";
 import { IEvent } from "./event.interface";
 import { IUser } from "../user/user.interface";
 
@@ -10,7 +10,7 @@ import { IUser } from "../user/user.interface";
 export interface IEventInvitation extends IBase {
   eventId: string;
   inviteeId: string;
-  status: InvitationStatus;
+  status: ApprovalStatus;
   event?: IEvent;
   invitee?: IUser;
 }

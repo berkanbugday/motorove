@@ -358,8 +358,7 @@ export default {
       error_removing_member: 'Failed to remove member',
       success_changed_role: 'Member role changed successfully',
       error_changing_role: 'Failed to change member role',
-      success_updated_invitation_status:
-        'Invitation status updated successfully.',
+      success_updated_approval_status: 'Approval status updated successfully.',
       view_profile: 'View Profile',
       success_left_group: 'You have successfully left the group!',
       group_pending: 'Your group invitation is pending.',

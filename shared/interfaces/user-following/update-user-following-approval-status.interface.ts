@@ -1,10 +1,10 @@
-import { InvitationStatus } from "../../enums";
+import { ApprovalStatus } from "../../enums";
 
 /**
  * Update Membership Status Interface
  * Used for updating a group membership status
  */
-export interface IUpdateUserFollowingInvitationStatus {
+export interface IUpdateUserFollowingApprovalStatus {
   /**
    * The new status to set for the membership
    */
@@ -13,5 +13,5 @@ export interface IUpdateUserFollowingInvitationStatus {
   /**
    * The new status to set for the membership
    */
-  status: InvitationStatus;
+  status: ApprovalStatus;
 }

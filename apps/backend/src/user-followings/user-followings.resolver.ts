@@ -13,8 +13,8 @@ import { User } from '../users/models/user.model';
 import { UserFollowingsService } from './user-followings.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { UserFollowingDto } from './dto/user-following.dto';
-import { InvitationStatus } from '../enums/models/invitation-status.enum';
-import { UpdateUserFollowingInvitationStatusInput } from './dto/update-user-following-invitation-status.input';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
+import { UpdateUserFollowingApprovalStatusInput } from './dto/update-user-following-approval-status.input';
 
 interface GqlContext {
   req: Request & {
@@ -82,29 +82,29 @@ export class UserFollowingsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => InvitationStatus)
+  @Mutation(() => ApprovalStatus)
   async followUser(
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
-  ): Promise<InvitationStatus> {
+  ): Promise<ApprovalStatus> {
     return await this.userFollowingsService.follow(user.id, userId);
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => InvitationStatus)
+  @Mutation(() => ApprovalStatus)
   async unfollowUser(
     @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
-  ): Promise<InvitationStatus> {
+  ): Promise<ApprovalStatus> {
     return await this.userFollowingsService.unfollow(user.id, userId);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => UserFollowingDto)
-  async updateUserFollowingInvitationStatus(
-    @Args('input') input: UpdateUserFollowingInvitationStatusInput,
+  async updateUserFollowingApprovalStatus(
+    @Args('input') input: UpdateUserFollowingApprovalStatusInput,
   ): Promise<UserFollowingDto> {
-    return await this.userFollowingsService.updateInvitationStatus(
+    return await this.userFollowingsService.updateApprovalStatus(
       input.id,
       input.status,
     );

@@ -9,7 +9,7 @@ import {
   GroupPrivacy,
   GroupTag,
   Interest,
-  InvitationStatus,
+  ApprovalStatus,
   Language,
   NotificationType,
   RidingStyle,
@@ -74,8 +74,8 @@ export class EnumUtils {
     return this.getDropdownOptions(GroupMemberRole, 'enums.groupMemberRole');
   }
 
-  static getInvitationStatuses(): DropdownItem[] {
-    return this.getDropdownOptions(InvitationStatus, 'enums.invitationStatus');
+  static getApprovalStatuses(): DropdownItem[] {
+    return this.getDropdownOptions(ApprovalStatus, 'enums.approvalStatus');
   }
 
   static getEventTypes(): DropdownItem[] {

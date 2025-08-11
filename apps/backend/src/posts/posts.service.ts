@@ -12,7 +12,7 @@ import { Post } from './models/post.model';
 import { PostLike } from './models/post-like.model';
 import { PostSave } from './models/post-save.model';
 import { StorageService } from '../core/storage/storage.service';
-import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { PostDto } from './dto/post.dto';
 import { AddressDto } from 'src/addresses/dto/address.dto';
@@ -67,7 +67,7 @@ export class PostsService {
 
             if (
               (!isGroupMember ||
-                isGroupMember.status !== InvitationStatus.ACCEPTED) &&
+                isGroupMember.status !== ApprovalStatus.ACCEPTED) &&
               post.createdById !== currentUserId
             ) {
               return null;
@@ -168,7 +168,7 @@ export class PostsService {
         },
       });
 
-      if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
+      if (!membership || membership.status !== ApprovalStatus.ACCEPTED) {
         throw new ForbiddenException(
           'You must be an approved member of the group to create a post',
         );
@@ -233,7 +233,7 @@ export class PostsService {
             memberships: {
               where: {
                 userId,
-                status: InvitationStatus.ACCEPTED,
+                status: ApprovalStatus.ACCEPTED,
               },
             },
           },
@@ -269,7 +269,7 @@ export class PostsService {
         },
       });
 
-      if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
+      if (!membership || membership.status !== ApprovalStatus.ACCEPTED) {
         throw new ForbiddenException(
           'You must be an approved member of the group to move a post to that group',
         );
@@ -382,7 +382,7 @@ export class PostsService {
             memberships: {
               where: {
                 userId,
-                status: InvitationStatus.ACCEPTED,
+                status: ApprovalStatus.ACCEPTED,
               },
             },
           },

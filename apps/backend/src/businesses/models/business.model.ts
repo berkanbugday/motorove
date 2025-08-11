@@ -3,6 +3,7 @@ import { BusinessCategory } from '../../enums/models/business-category.enum';
 import { BusinessDescriptionDto } from '../dto/business-description.dto';
 import { WorkingHourDto } from '../dto/working-hour.dto';
 import { Address } from '../../addresses/models/address.model';
+import { ApprovalStatus } from '../../enums/models/approval-status.enum';
 
 @ObjectType()
 export class Business {
@@ -26,6 +27,9 @@ export class Business {
 
   @Field(() => Address)
   address: Address;
+
+  @Field(() => ApprovalStatus)
+  status: ApprovalStatus;
 
   @Field(() => [BusinessDescriptionDto])
   descriptions: BusinessDescriptionDto[];

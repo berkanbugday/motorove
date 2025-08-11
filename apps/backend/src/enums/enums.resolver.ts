@@ -1,7 +1,7 @@
 import { Resolver, Query, ObjectType, Field } from '@nestjs/graphql';
 import { GroupPrivacy } from './models/group-privacy.enum';
 import { GroupMemberRole } from './models/group-member-role.enum';
-import { InvitationStatus } from './models/invitation-status.enum';
+import { ApprovalStatus } from './models/approval-status.enum';
 import { EventType } from './models/event-type.enum';
 import { RoadType } from './models/road-type.enum';
 import { DifficultyLevel } from './models/difficulty-level.enum';
@@ -34,8 +34,8 @@ export class EnumsResolver {
   }
 
   @Query(() => [EnumItem])
-  getInvitationStatuses() {
-    return Object.entries(InvitationStatus).map(([key, value]) => ({
+  getApprovalStatuses() {
+    return Object.entries(ApprovalStatus).map(([key, value]) => ({
       key,
       value,
     }));

@@ -5,7 +5,7 @@ import { AccountSetupInput } from './dto/account-setup.input';
 import { StorageService } from '../core/storage/storage.service';
 import { CityDto } from '../cities/dto/city.dto';
 import { plainToClass } from 'class-transformer';
-import { InvitationStatus } from '@motorove/shared';
+import { ApprovalStatus } from '@motorove/shared';
 
 @Injectable()
 export class UsersService {
@@ -50,7 +50,7 @@ export class UsersService {
           where: {
             isActive: true,
             status: {
-              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+              in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
             },
           },
         },
@@ -58,7 +58,7 @@ export class UsersService {
           where: {
             isActive: true,
             status: {
-              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+              in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
             },
           },
         },
@@ -109,7 +109,7 @@ export class UsersService {
           where: {
             isActive: true,
             status: {
-              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+              in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
             },
           },
         },
@@ -117,7 +117,7 @@ export class UsersService {
           where: {
             isActive: true,
             status: {
-              in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+              in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
             },
           },
         },

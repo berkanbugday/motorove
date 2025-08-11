@@ -1,5 +1,5 @@
 import { ICity } from "../city/city.interface";
-import { InvitationStatus } from "../../enums/invitation-status.enum";
+import { ApprovalStatus } from "../../enums/approval-status.enum";
 
 /**
  * User Interface
@@ -12,6 +12,6 @@ export interface IUser {
   email: string;
   avatar?: string;
   supabaseId: string;
-  followingStatus?: InvitationStatus;
+  followingStatus?: ApprovalStatus;
   city?: ICity;
 }

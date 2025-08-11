@@ -4,7 +4,7 @@ import { CreateGroupInput } from './dto/create-group.input';
 import { UpdateGroupInput } from './dto/update-group.input';
 import { StorageService } from '../core/storage/storage.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
-import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { FilterGroupInput } from './dto/filter-group.input';
 import { Group } from './models/group.model';
 import { GroupDto } from './dto/group.dto';
@@ -35,7 +35,7 @@ export class GroupsService {
           memberships: {
             some: {
               userId,
-              status: InvitationStatus.ACCEPTED,
+              status: ApprovalStatus.ACCEPTED,
               isActive: true,
             },
           },
@@ -70,7 +70,7 @@ export class GroupsService {
           memberships: {
             where: {
               status: {
-                in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING],
+                in: [ApprovalStatus.ACCEPTED, ApprovalStatus.PENDING],
               },
               isActive: true,
             },
@@ -123,7 +123,7 @@ export class GroupsService {
         memberships: {
           some: {
             userId,
-            status: InvitationStatus.ACCEPTED,
+            status: ApprovalStatus.ACCEPTED,
             isActive: true,
           },
         },
@@ -148,7 +148,7 @@ export class GroupsService {
           city: true,
           memberships: {
             where: {
-              status: InvitationStatus.ACCEPTED,
+              status: ApprovalStatus.ACCEPTED,
               isActive: true,
             },
             include: {
@@ -201,7 +201,7 @@ export class GroupsService {
           memberships: {
             where: {
               status: {
-                in: [InvitationStatus.ACCEPTED, InvitationStatus.PENDING],
+                in: [ApprovalStatus.ACCEPTED, ApprovalStatus.PENDING],
               },
               isActive: true,
             },
@@ -228,10 +228,10 @@ export class GroupsService {
       );
 
       const isMember =
-        !!membership && membership.status === InvitationStatus.ACCEPTED;
+        !!membership && membership.status === ApprovalStatus.ACCEPTED;
       const isAdmin = isMember && membership.role === GroupMemberRole.ADMIN;
       const isPendingMember =
-        !!membership && membership.status === InvitationStatus.PENDING;
+        !!membership && membership.status === ApprovalStatus.PENDING;
       const isOwner = group.createdById === userId;
 
       return {
@@ -311,7 +311,7 @@ export class GroupsService {
               connect: { id: userId },
             },
             role: GroupMemberRole.ADMIN,
-            status: InvitationStatus.ACCEPTED,
+            status: ApprovalStatus.ACCEPTED,
             createdBy: {
               connect: { id: userId },
             },
@@ -346,7 +346,7 @@ export class GroupsService {
             some: {
               userId,
               role: GroupMemberRole.ADMIN,
-              status: InvitationStatus.ACCEPTED,
+              status: ApprovalStatus.ACCEPTED,
             },
           },
         },
@@ -412,7 +412,7 @@ export class GroupsService {
           city: true,
           memberships: {
             where: {
-              status: InvitationStatus.ACCEPTED,
+              status: ApprovalStatus.ACCEPTED,
               isActive: true,
             },
             include: {
@@ -477,10 +477,10 @@ export class GroupsService {
       logo: logoUrl,
       cover: coverUrl,
       memberships: group?.memberships?.filter(
-        (membership) => membership.status === InvitationStatus.ACCEPTED,
+        (membership) => membership.status === ApprovalStatus.ACCEPTED,
       ),
       membersCount: group?.memberships?.filter(
-        (membership) => membership.status === InvitationStatus.ACCEPTED,
+        (membership) => membership.status === ApprovalStatus.ACCEPTED,
       ).length,
       membersCapacity: group.membersCapacity,
     });

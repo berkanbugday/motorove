@@ -5,7 +5,7 @@ import {Caption, Typography} from '@components/Typography';
 import {Button} from '@components/Button';
 import {Icon} from '@components/Icon';
 import {styles} from './UserCard.styles';
-import {InvitationStatus, IUser} from '@motorove/shared';
+import {ApprovalStatus, IUser} from '@motorove/shared';
 import {useTranslation} from '@/hooks/useTranslation';
 
 interface UserCardProps {
@@ -29,7 +29,7 @@ export const UserCard: React.FC<UserCardProps> = ({
   loading,
 }) => {
   const {t} = useTranslation();
-  const [followingStatus, setFollowingStatus] = useState<InvitationStatus>();
+  const [followingStatus, setFollowingStatus] = useState<ApprovalStatus>();
 
   // Update local state when user prop changes
   useEffect(() => {
@@ -70,7 +70,7 @@ export const UserCard: React.FC<UserCardProps> = ({
           )}
         </View>
         <View style={styles.buttonContainer}>
-          {followingStatus === InvitationStatus.ACCEPTED ? (
+          {followingStatus === ApprovalStatus.ACCEPTED ? (
             <Button
               title={t('common.unfollow')}
               variant="secondary"
@@ -79,7 +79,7 @@ export const UserCard: React.FC<UserCardProps> = ({
               disabled={loading}
               loading={loading}
             />
-          ) : followingStatus === InvitationStatus.PENDING ? (
+          ) : followingStatus === ApprovalStatus.PENDING ? (
             <Caption>{t('common.pending_approval')}</Caption>
           ) : (
             <Button

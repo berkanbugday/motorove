@@ -2,7 +2,7 @@ import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { IsDate, IsEnum, IsUUID, ValidateNested } from 'class-validator';
 import { IGroupMembership } from '@motorove/shared';
 import { GroupMemberRole } from '../../enums/models/group-member-role.enum';
-import { InvitationStatus } from '../../enums/models/invitation-status.enum';
+import { ApprovalStatus } from '../../enums/models/approval-status.enum';
 import { UserDto } from '../../users/dto/user.dto';
 import { Type } from 'class-transformer';
 import { GroupDto } from '../../groups/dto/group.dto';
@@ -27,9 +27,9 @@ export class GroupMembershipDto implements IGroupMembership {
   @IsEnum(GroupMemberRole)
   role: GroupMemberRole;
 
-  @Field(() => InvitationStatus)
-  @IsEnum(InvitationStatus)
-  status: InvitationStatus;
+  @Field(() => ApprovalStatus)
+  @IsEnum(ApprovalStatus)
+  status: ApprovalStatus;
 
   @Field()
   @IsDate()

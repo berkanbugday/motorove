@@ -1,5 +1,5 @@
 import { IUser } from "../user";
-import { InvitationStatus } from "../../enums/invitation-status.enum";
+import { ApprovalStatus } from "../../enums/approval-status.enum";
 
 /**
  * User Following Interface
@@ -34,5 +34,5 @@ export interface IUserFollowing {
   /**
    * Status of the follow relationship
    */
-  status: InvitationStatus;
+  status: ApprovalStatus;
 }

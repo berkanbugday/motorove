@@ -358,7 +358,7 @@ export default {
       error_removing_member: 'Üye silinirken bir hata oluştu',
       success_changed_role: 'Üye rolü başarıyla değiştirildi',
       error_changing_role: 'Üye rolü değiştirilirken bir hata oluştu',
-      success_updated_invitation_status: 'Davet durumu başarıyla güncellendi.',
+      success_updated_approval_status: 'Onay durumu başarıyla güncellendi.',
       view_profile: 'Profili Görüntüle',
       success_left_group: 'Grubunuzdan başarıyla ayrıldınız!',
       group_pending: 'Gruba katılımınız onay bekliyor.',

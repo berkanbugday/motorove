@@ -3,7 +3,7 @@ import { GroupMembershipsService } from './group-memberships.service';
 import { AddMemberInput } from './dto/add-member.input';
 import { ChangeMemberRoleInput } from './dto/change-member-role.input';
 import { RemoveMemberInput } from './dto/remove-member.input';
-import { UpdateGroupMembershipInvitationStatusInput } from './dto/update-group-membership-invitation-status.input';
+import { UpdateGroupMembershipApprovalStatusInput } from './dto/update-group-membership-approval-status.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -79,11 +79,11 @@ export class GroupMembershipsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => GroupMembershipDto)
-  async updateGroupMembershipInvitationStatus(
-    @Args('input') input: UpdateGroupMembershipInvitationStatusInput,
+  async updateGroupMembershipApprovalStatus(
+    @Args('input') input: UpdateGroupMembershipApprovalStatusInput,
     @CurrentUser() user: User,
   ): Promise<GroupMembershipDto> {
-    return await this.groupMembershipsService.updateInvitationStatus(
+    return await this.groupMembershipsService.updateApprovalStatus(
       input.id,
       input.status,
       user.id,

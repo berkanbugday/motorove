@@ -11,7 +11,7 @@ import {
 import { IUser } from '@motorove/shared';
 import { CityDto } from 'src/cities/dto/city.dto';
 import { Type } from 'class-transformer';
-import { InvitationStatus } from '../../enums/models/invitation-status.enum';
+import { ApprovalStatus } from '../../enums/models/approval-status.enum';
 
 @ObjectType()
 export class UserDto implements IUser {
@@ -40,9 +40,9 @@ export class UserDto implements IUser {
   @IsString()
   supabaseId: string;
 
-  @Field(() => InvitationStatus, { nullable: true })
-  @IsEnum(InvitationStatus)
-  followingStatus?: InvitationStatus;
+  @Field(() => ApprovalStatus, { nullable: true })
+  @IsEnum(ApprovalStatus)
+  followingStatus?: ApprovalStatus;
 
   @Field(() => CityDto, { nullable: true })
   @ValidateNested()

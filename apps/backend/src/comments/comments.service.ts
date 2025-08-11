@@ -9,7 +9,7 @@ import { CreateCommentInput } from './dto/create-comment.input';
 import { UpdateCommentInput } from './dto/update-comment.input';
 import { Comment } from './models/comment.model';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
-import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { FilterCommentInput } from './dto/filter-comment.input';
 import { GroupMembership } from '../group-memberships/models/group-membership.model';
 import { CommentDto } from './dto/comment.dto';
@@ -124,7 +124,7 @@ export class CommentsService {
           },
         });
 
-        if (!membership || membership.status !== InvitationStatus.ACCEPTED) {
+        if (!membership || membership.status !== ApprovalStatus.ACCEPTED) {
           throw new ForbiddenException(
             'You must be an approved member of the group to comment on a post',
           );
@@ -187,7 +187,7 @@ export class CommentsService {
                   memberships: {
                     where: {
                       userId,
-                      status: InvitationStatus.ACCEPTED,
+                      status: ApprovalStatus.ACCEPTED,
                     },
                   },
                 },
@@ -250,7 +250,7 @@ export class CommentsService {
                   memberships: {
                     where: {
                       userId,
-                      status: InvitationStatus.ACCEPTED,
+                      status: ApprovalStatus.ACCEPTED,
                     },
                   },
                 },

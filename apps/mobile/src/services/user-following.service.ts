@@ -3,11 +3,11 @@ import {
   GET_FOLLOW_REQUESTS,
   FOLLOW_USER,
   UNFOLLOW_USER,
-  UPDATE_USER_FOLLOWING_INVITATION_STATUS,
+  UPDATE_USER_FOLLOWING_APPROVAL_STATUS,
 } from './graphql/user-following.graphql';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
-import {InvitationStatus, IUserFollowing} from '@motorove/shared';
+import {ApprovalStatus, IUserFollowing} from '@motorove/shared';
 import {useTranslation} from '@hooks/useTranslation';
 import {useCallback, useState} from 'react';
 
@@ -47,15 +47,15 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
   });
 
   const [updateStatus, {loading: updateLoading}] = useMutation(
-    UPDATE_USER_FOLLOWING_INVITATION_STATUS,
+    UPDATE_USER_FOLLOWING_APPROVAL_STATUS,
     {
       onCompleted: _data => {
         // Refetch the follow requests
         originalRefetch();
 
         if (
-          _data.updateUserFollowingInvitationStatus.status ===
-          InvitationStatus.ACCEPTED
+          _data.updateUserFollowingApprovalStatus.status ===
+          ApprovalStatus.ACCEPTED
         ) {
           showToast({
             type: 'success',
@@ -71,7 +71,7 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
         }
       },
       onError: errorObj => {
-        loggingService.error('Error updating invitation status:', errorObj);
+        loggingService.error('Error updating approval status:', errorObj);
         showToast({
           type: 'error',
           text1: t('common.error'),
@@ -128,7 +128,7 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
           variables: {
             input: {
               id,
-              status: InvitationStatus.ACCEPTED,
+              status: ApprovalStatus.ACCEPTED,
             },
           },
         });
@@ -147,7 +147,7 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
           variables: {
             input: {
               id,
-              status: InvitationStatus.REJECTED,
+              status: ApprovalStatus.REJECTED,
             },
           },
         });

@@ -41,11 +41,11 @@ export const CHANGE_MEMBER_ROLE = gql`
   }
 `;
 
-export const UPDATE_GROUP_MEMBERSHIP_INVITATION_STATUS = gql`
-  mutation UpdateGroupMembershipInvitationStatus(
-    $input: UpdateGroupMembershipInvitationStatusInput!
+export const UPDATE_GROUP_MEMBERSHIP_APPROVAL_STATUS = gql`
+  mutation UpdateGroupMembershipApprovalStatus(
+    $input: UpdateGroupMembershipApprovalStatusInput!
   ) {
-    updateGroupMembershipInvitationStatus(input: $input) {
+    updateGroupMembershipApprovalStatus(input: $input) {
       status
     }
   }

@@ -41,11 +41,11 @@ export const UNFOLLOW_USER = gql`
   }
 `;
 
-export const UPDATE_USER_FOLLOWING_INVITATION_STATUS = gql`
-  mutation UpdateUserFollowingInvitationStatus(
-    $input: UpdateUserFollowingInvitationStatusInput!
+export const UPDATE_USER_FOLLOWING_APPROVAL_STATUS = gql`
+  mutation UpdateUserFollowingApprovalStatus(
+    $input: UpdateUserFollowingApprovalStatusInput!
   ) {
-    updateUserFollowingInvitationStatus(input: $input) {
+    updateUserFollowingApprovalStatus(input: $input) {
       status
     }
   }

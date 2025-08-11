@@ -8,7 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
-import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { NotificationsService } from '../notifications/notifications.service';
 import { GroupMembershipDto } from './dto/group-membership.dto';
 import { plainToClass } from 'class-transformer';
@@ -33,7 +33,7 @@ export class GroupMembershipsService {
   ): Promise<GroupMembershipDto[]> {
     const groupJoinRequests = await this.prisma.groupMembership.findMany({
       where: {
-        status: InvitationStatus.PENDING,
+        status: ApprovalStatus.PENDING,
         isActive: true,
         group: {
           isActive: true,
@@ -112,8 +112,8 @@ export class GroupMembershipsService {
           role: GroupMemberRole.MEMBER,
           status:
             group.privacy === GroupPrivacy.PRIVATE
-              ? InvitationStatus.PENDING
-              : InvitationStatus.ACCEPTED,
+              ? ApprovalStatus.PENDING
+              : ApprovalStatus.ACCEPTED,
           updatedBy: {
             connect: { id: userId },
           },
@@ -129,8 +129,8 @@ export class GroupMembershipsService {
           role: GroupMemberRole.MEMBER,
           status:
             group.privacy === GroupPrivacy.PRIVATE
-              ? InvitationStatus.PENDING
-              : InvitationStatus.ACCEPTED,
+              ? ApprovalStatus.PENDING
+              : ApprovalStatus.ACCEPTED,
           createdBy: {
             connect: { id: userId },
           },
@@ -300,9 +300,9 @@ export class GroupMembershipsService {
     }
   }
 
-  async updateInvitationStatus(
+  async updateApprovalStatus(
     id: string,
-    newStatus: InvitationStatus,
+    newStatus: ApprovalStatus,
     adminId: string,
   ): Promise<GroupMembershipDto> {
     try {
@@ -322,7 +322,7 @@ export class GroupMembershipsService {
         },
         data: {
           status: newStatus,
-          isActive: newStatus === InvitationStatus.ACCEPTED,
+          isActive: newStatus === ApprovalStatus.ACCEPTED,
           updatedBy: {
             connect: { id: adminId },
           },

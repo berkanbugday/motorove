@@ -24,7 +24,7 @@ enum GroupMemberRole {
   MEMBER
 }
 
-enum InvitationStatus {
+enum ApprovalStatus {
   PENDING
   ACCEPTED
   REJECTED
@@ -514,7 +514,7 @@ model GroupMembership {
   userId  String
   user    User             @relation("UserGroupMembership", fields: [userId], references: [id])
   role    GroupMemberRole
-  status  InvitationStatus @default(PENDING)
+  status  ApprovalStatus @default(PENDING)
 
   // Base model fields
   createdById String
@@ -696,12 +696,13 @@ model Address {
 
 // Business model
 model Business {
-  id            String             @id @default(uuid())
-  name          String
-  mainCategory  BusinessCategory
-  subCategories BusinessCategory[]
-  phoneNumber   String
-  verified      Boolean            @default(false)
+  id             String             @id @default(uuid())
+  name           String
+  mainCategory   BusinessCategory
+  subCategories  BusinessCategory[]
+  phoneNumber    String
+  verified       Boolean            @default(false)
+  status ApprovalStatus @default(PENDING)
 
   // Relations
   address      Address?
@@ -716,6 +717,7 @@ model Business {
   @@index([name])
   @@index([mainCategory])
   @@index([verified])
+  @@index([status])
   @@index([isActive])
 }
 
@@ -768,7 +770,7 @@ model UserFollowing {
   following   User             @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  status      InvitationStatus @default(PENDING)
+  status      ApprovalStatus @default(PENDING)
   isActive    Boolean          @default(true)
 
   @@unique([followerId, followingId])
@@ -858,7 +860,7 @@ model EventInvitation {
   event     Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   inviteeId String
   invitee   User             @relation("ReceivedInvitations", fields: [inviteeId], references: [id], onDelete: Cascade)
-  status    InvitationStatus @default(PENDING)
+  status    ApprovalStatus @default(PENDING)
 
   // Base model fields
   createdById String

@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UserFollowing } from './models/user-following.model';
 import { UserFollowingDto } from './dto/user-following.dto';
-import { InvitationStatus } from '../enums/models/invitation-status.enum';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { StorageService } from '../core/storage/storage.service';
 import { Logger } from '@nestjs/common';
 
@@ -32,7 +32,7 @@ export class UserFollowingsService {
         followingId: userId,
         isActive: true,
         status: {
-          in: [InvitationStatus.ACCEPTED],
+          in: [ApprovalStatus.ACCEPTED],
         },
       },
       include: {
@@ -79,7 +79,7 @@ export class UserFollowingsService {
         followerId: userId,
         isActive: true,
         status: {
-          in: [InvitationStatus.ACCEPTED],
+          in: [ApprovalStatus.ACCEPTED],
         },
       },
       include: {
@@ -125,7 +125,7 @@ export class UserFollowingsService {
         followingId: userId,
         isActive: true,
         status: {
-          in: [InvitationStatus.PENDING],
+          in: [ApprovalStatus.PENDING],
         },
       },
       include: {
@@ -163,7 +163,7 @@ export class UserFollowingsService {
   async follow(
     followerId: string,
     followingId: string,
-  ): Promise<InvitationStatus> {
+  ): Promise<ApprovalStatus> {
     // Check if users exist
     const [followerUser, followingUser] = await Promise.all([
       await this.prisma.user.findUnique({ where: { id: followerId } }),
@@ -191,7 +191,7 @@ export class UserFollowingsService {
         },
         isActive: true,
         status: {
-          in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+          in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
         },
       },
     });
@@ -212,13 +212,13 @@ export class UserFollowingsService {
         followerId: followerId,
         followingId: followingId,
         status: followingUser.userSetting?.autoAcceptFollowers
-          ? InvitationStatus.ACCEPTED
-          : InvitationStatus.PENDING,
+          ? ApprovalStatus.ACCEPTED
+          : ApprovalStatus.PENDING,
       },
       update: {
         status: followingUser.userSetting?.autoAcceptFollowers
-          ? InvitationStatus.ACCEPTED
-          : InvitationStatus.PENDING,
+          ? ApprovalStatus.ACCEPTED
+          : ApprovalStatus.PENDING,
         isActive: true,
         updatedAt: new Date(),
       },
@@ -227,13 +227,13 @@ export class UserFollowingsService {
       },
     });
 
-    return follow.status as InvitationStatus;
+    return follow.status as ApprovalStatus;
   }
 
   async unfollow(
     followerId: string,
     followingId: string,
-  ): Promise<InvitationStatus> {
+  ): Promise<ApprovalStatus> {
     // Check if relationship exists
     const userFollowing = await this.prisma.userFollowing.findUnique({
       where: {
@@ -243,7 +243,7 @@ export class UserFollowingsService {
         },
         isActive: true,
         status: {
-          in: [InvitationStatus.PENDING, InvitationStatus.ACCEPTED],
+          in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
         },
       },
     });
@@ -263,12 +263,12 @@ export class UserFollowingsService {
       },
     });
 
-    return InvitationStatus.REJECTED;
+    return ApprovalStatus.REJECTED;
   }
 
-  async updateInvitationStatus(
+  async updateApprovalStatus(
     id: string,
-    newStatus: InvitationStatus,
+    newStatus: ApprovalStatus,
   ): Promise<UserFollowingDto> {
     try {
       // Check if the group exists
@@ -276,7 +276,7 @@ export class UserFollowingsService {
         where: {
           id,
           isActive: true,
-          status: InvitationStatus.PENDING,
+          status: ApprovalStatus.PENDING,
         },
       });
 

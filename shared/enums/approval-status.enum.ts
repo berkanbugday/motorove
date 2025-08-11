@@ -1,8 +1,8 @@
 /**
- * Invitation Status Enum
- * Status of invitations
+ * Approval Status Enum
+ * Status of approvals
  */
-export enum InvitationStatus {
+export enum ApprovalStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
   REJECTED = "REJECTED",
