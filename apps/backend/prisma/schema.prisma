@@ -508,13 +508,13 @@ model Group {
 }
 
 model GroupMembership {
-  id      String           @id @default(uuid())
+  id      String          @id @default(uuid())
   groupId String
-  group   Group            @relation(fields: [groupId], references: [id])
+  group   Group           @relation(fields: [groupId], references: [id])
   userId  String
-  user    User             @relation("UserGroupMembership", fields: [userId], references: [id])
+  user    User            @relation("UserGroupMembership", fields: [userId], references: [id])
   role    GroupMemberRole
-  status  ApprovalStatus @default(PENDING)
+  status  ApprovalStatus  @default(PENDING)
 
   // Base model fields
   createdById String
@@ -696,13 +696,14 @@ model Address {
 
 // Business model
 model Business {
-  id             String             @id @default(uuid())
-  name           String
-  mainCategory   BusinessCategory
-  subCategories  BusinessCategory[]
-  phoneNumber    String
-  verified       Boolean            @default(false)
-  status ApprovalStatus @default(PENDING)
+  id            String             @id @default(uuid())
+  name          String
+  mainCategory  BusinessCategory
+  subCategories BusinessCategory[]
+  areaCode      String?
+  phoneNumber   String
+  verified      Boolean            @default(false)
+  status        ApprovalStatus     @default(PENDING)
 
   // Relations
   address      Address?
@@ -763,15 +764,15 @@ model WorkingHour {
 
 // User following relationships
 model UserFollowing {
-  id          String           @id @default(uuid())
+  id          String         @id @default(uuid())
   followerId  String
-  follower    User             @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  follower    User           @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
   followingId String
-  following   User             @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  following   User           @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   status      ApprovalStatus @default(PENDING)
-  isActive    Boolean          @default(true)
+  isActive    Boolean        @default(true)
 
   @@unique([followerId, followingId])
   @@index([followerId])
@@ -855,11 +856,11 @@ model EventParticipant {
 
 // Event invitation model
 model EventInvitation {
-  id        String           @id @default(uuid())
+  id        String         @id @default(uuid())
   eventId   String
-  event     Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event     Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
   inviteeId String
-  invitee   User             @relation("ReceivedInvitations", fields: [inviteeId], references: [id], onDelete: Cascade)
+  invitee   User           @relation("ReceivedInvitations", fields: [inviteeId], references: [id], onDelete: Cascade)
   status    ApprovalStatus @default(PENDING)
 
   // Base model fields
