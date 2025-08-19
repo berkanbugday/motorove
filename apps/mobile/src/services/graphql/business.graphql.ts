@@ -47,8 +47,8 @@ export const BUSINESS_FRAGMENT = gql`
 
 // Get all businesses query
 export const GET_BUSINESSES = gql`
-  query GetBusinesses($limit: Int, $skip: Int) {
-    businesses(limit: $limit, skip: $skip) {
+  query GetBusinesses {
+    businesses {
       ...BusinessFragment
     }
   }
@@ -67,8 +67,8 @@ export const GET_BUSINESS = gql`
 
 // Search businesses by name
 export const SEARCH_BUSINESSES = gql`
-  query SearchBusinesses($query: String!, $limit: Int, $skip: Int) {
-    businesses(query: $query, limit: $limit, skip: $skip) {
+  query SearchBusinesses($query: String!) {
+    businesses(query: $query) {
       ...BusinessFragment
     }
   }

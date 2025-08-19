@@ -7,7 +7,7 @@ import { DayOfWeek } from "../../enums";
 export interface IWorkingHour {
   id: string;
   dayOfWeek: DayOfWeek;
-  startHour: string;
-  endHour: string;
+  startHour?: string;
+  endHour?: string;
   isOpen24h: boolean;
 }

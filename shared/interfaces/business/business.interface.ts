@@ -12,6 +12,7 @@ export interface IBusiness {
   name: string;
   mainCategory: BusinessCategory;
   subCategories: BusinessCategory[];
+  areaCode: string;
   phoneNumber: string;
   descriptions: IBusinessDescription[];
   workingHours: IWorkingHour[];

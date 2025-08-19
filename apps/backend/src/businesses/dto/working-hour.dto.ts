@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   IsString,
   IsUUID,
+  IsOptional,
 } from 'class-validator';
 
 @ObjectType()
@@ -21,12 +22,14 @@ export class WorkingHourDto implements IWorkingHour {
   @IsEnum(DayOfWeek)
   dayOfWeek: DayOfWeek;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
+  @IsOptional()
   startHour: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
+  @IsOptional()
   endHour: string;
 
   @Field(() => Boolean)

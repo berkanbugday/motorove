@@ -18,6 +18,8 @@ input AddMemberInput {
 
 type Address {
   address: String!
+  businessId: String
+  country: String
   event: Event
   eventId: String
   id: ID!
@@ -31,6 +33,7 @@ type Address {
 
 type AddressDto {
   address: String!
+  country: String!
   id: ID!
   language: Language!
   latitude: Float!
@@ -40,10 +43,17 @@ type AddressDto {
 
 """The types of addresses that can be associated with a post or event"""
 enum AddressType {
+  BUSINESS_LOCATION
   EVENT_FINISH_LOCATION
   EVENT_MEETING_POINT
   EVENT_START_LOCATION
   POST_LOCATION
+}
+
+enum ApprovalStatus {
+  ACCEPTED
+  PENDING
+  REJECTED
 }
 
 type AuthResponse {
@@ -59,6 +69,67 @@ type AuthUser {
   id: ID!
   lastName: String!
   notificationPermission: NotificationPermission!
+}
+
+"""Categories for motorcycle-related businesses"""
+enum BusinessCategory {
+  ACCESSORIES
+  ATV
+  BATTERY_SERVICE
+  BRAKE_SERVICE
+  CUSTOMIZATION
+  DEALERSHIP
+  DETAILED_CLEANING
+  ELECTRICAL_REPAIR
+  ELECTRIC_MOTORCYCLES
+  ELECTRONICS
+  ENGINE_REBUILDING
+  ENGINE_REPAIR
+  EXHAUST_SYSTEMS
+  FINANCING
+  INSPECTION
+  INSURANCE
+  INTERCOMS
+  LIGHTING
+  MAINTENANCE
+  OIL_CHANGE
+  OTHER
+  PARKING
+  PARTS_STORE
+  PROTECTIVE_GEAR
+  RENTAL
+  REPAIR
+  RESTORATION
+  SALES
+  SCOOTERS
+  STORAGE
+  SUSPENSION_REPAIR
+  TIRE_SERVICE
+  TOURS
+  TOWING
+  TRADE_IN
+  TRAINING
+  TRANSMISSION_REPAIR
+  TRANSPORT_SHIPPING
+  USED_DEALER
+}
+
+type BusinessDescriptionDto {
+  description: String!
+  id: ID!
+  language: Language!
+}
+
+type BusinessDto {
+  address: AddressDto!
+  areaCode: String!
+  descriptions: [BusinessDescriptionDto!]!
+  id: ID!
+  mainCategory: BusinessCategory!
+  name: String!
+  phoneNumber: String!
+  subCategories: [BusinessCategory!]!
+  workingHours: [WorkingHourDto!]!
 }
 
 input ChangeMemberRoleInput {
@@ -196,6 +267,17 @@ input CreatePostInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+"""Days of the week for business hours and scheduling"""
+enum DayOfWeek {
+  FRIDAY
+  MONDAY
+  SATURDAY
+  SUNDAY
+  THURSDAY
+  TUESDAY
+  WEDNESDAY
+}
 
 """Difficulty level for motorcycle rides"""
 enum DifficultyLevel {
@@ -563,12 +645,6 @@ enum Interest {
   VINTAGE_MOTORCYCLES
 }
 
-enum ApprovalStatus {
-  ACCEPTED
-  PENDING
-  REJECTED
-}
-
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -775,6 +851,8 @@ type PostSave {
 type Query {
   address(id: ID!): AddressDto!
   addresses(filters: FilterAddressInput, limit: Int, skip: Int): [AddressDto!]!
+  business(id: String!): BusinessDto!
+  businesses: [BusinessDto!]!
   cities: [CityDto!]!
   city(id: ID!): CityDto!
   comment(id: ID!): CommentDto!
@@ -786,12 +864,12 @@ type Query {
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
   followingUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
   getAddressTypes: [EnumItem!]!
+  getApprovalStatuses: [EnumItem!]!
   getDifficultyLevels: [EnumItem!]!
   getEventTypes: [EnumItem!]!
   getExperienceLevels: [EnumItem!]!
   getGroupMemberRoles: [EnumItem!]!
   getGroupPrivacyOptions: [EnumItem!]!
-  getApprovalStatuses: [EnumItem!]!
   getLanguages: [EnumItem!]!
   getRoadTypes: [EnumItem!]!
   group(id: String!): GroupDto!
@@ -1046,4 +1124,12 @@ type UserSettingDto {
   autoAcceptFollowers: Boolean!
   notificationPermission: NotificationPermission!
   notificationPreferences: JSON
+}
+
+type WorkingHourDto {
+  dayOfWeek: DayOfWeek!
+  endHour: String
+  id: ID!
+  isOpen24h: Boolean!
+  startHour: String
 }

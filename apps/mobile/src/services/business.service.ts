@@ -33,7 +33,7 @@ interface IFilterBusiness {
 }
 
 // Hook for getting all businesses
-export const useGetBusinesses = (limit = 20, skip = 0) => {
+export const useGetBusinesses = () => {
   const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState<IFilterBusiness>({
     mainCategory: undefined,
@@ -47,11 +47,6 @@ export const useGetBusinesses = (limit = 20, skip = 0) => {
     refetch: originalRefetch,
     fetchMore,
   } = useQuery(GET_BUSINESSES, {
-    variables: {
-      limit,
-      skip,
-      filters,
-    },
     onError: errorObj => {
       loggingService.error('Error fetching all businesses:', errorObj);
     },
@@ -70,11 +65,6 @@ export const useGetBusinesses = (limit = 20, skip = 0) => {
 
     try {
       const result = await fetchMore({
-        variables: {
-          skip: data?.businesses?.length || 0,
-          limit,
-          filters,
-        },
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
             return prev;
@@ -86,13 +76,13 @@ export const useGetBusinesses = (limit = 20, skip = 0) => {
         },
       });
 
-      if (result.data.businesses.length < limit) {
+      if (result.data.businesses.length === 0) {
         setHasMore(false);
       }
     } catch (errorObj) {
       loggingService.error('Error loading more businesses:', errorObj);
     }
-  }, [data?.businesses?.length, fetchMore, hasMore, limit, loading, filters]);
+  }, [data?.businesses?.length, fetchMore, hasMore, loading]);
 
   // Apply filters and reset pagination
   const applyFilters = useCallback((newFilters: IFilterBusiness) => {
@@ -102,12 +92,8 @@ export const useGetBusinesses = (limit = 20, skip = 0) => {
 
   // Refetch when filters change
   useEffect(() => {
-    originalRefetch({
-      limit,
-      skip: 0,
-      filters,
-    });
-  }, [filters, limit, originalRefetch]);
+    originalRefetch();
+  }, [filters, originalRefetch]);
 
   return {
     businesses: (data?.businesses as IBusiness[]) || [],
@@ -122,7 +108,7 @@ export const useGetBusinesses = (limit = 20, skip = 0) => {
 };
 
 // Hook for searching businesses by name
-export const useSearchBusinesses = (query: string, limit = 20, skip = 0) => {
+export const useSearchBusinesses = (query: string) => {
   const [hasMore, setHasMore] = useState(true);
   const {
     data,
@@ -131,7 +117,7 @@ export const useSearchBusinesses = (query: string, limit = 20, skip = 0) => {
     refetch: originalRefetch,
     fetchMore,
   } = useQuery(SEARCH_BUSINESSES, {
-    variables: {query, limit, skip},
+    variables: {query},
     skip: !query || query.trim() === '',
     onError: errorObj => {
       loggingService.error('Error searching businesses:', errorObj);
@@ -151,11 +137,7 @@ export const useSearchBusinesses = (query: string, limit = 20, skip = 0) => {
 
     try {
       const result = await fetchMore({
-        variables: {
-          query,
-          skip: data?.businesses?.length || 0,
-          limit,
-        },
+        variables: {query},
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
             return prev;
@@ -167,13 +149,13 @@ export const useSearchBusinesses = (query: string, limit = 20, skip = 0) => {
         },
       });
 
-      if (result.data.businesses.length < limit) {
+      if (result.data.businesses.length === 0) {
         setHasMore(false);
       }
     } catch (errorObj) {
       loggingService.error('Error loading more search results:', errorObj);
     }
-  }, [data?.businesses?.length, fetchMore, hasMore, limit, loading, query]);
+  }, [data?.businesses?.length, fetchMore, hasMore, loading, query]);
 
   return {
     businesses: (data?.businesses as IBusiness[]) || [],
