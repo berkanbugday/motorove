@@ -186,8 +186,7 @@ export const MenuScreen = () => {
           ),
           title: t('screens.menu.contact_support'),
           onPress: () => {
-            // Open privacy policy
-            // navigation.navigate('PrivacyPolicy');
+            navigation.navigate('Support');
           },
           showRightIcon: true,
         },

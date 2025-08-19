@@ -19,6 +19,7 @@ import {
   NotificationSettingScreen,
   FollowRequestScreen,
   JoinRequestScreen,
+  SupportScreen,
 } from '@screens/menu';
 import {
   // notificationService,
@@ -159,6 +160,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="FollowRequest"
         component={FollowRequestScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Support"
+        component={SupportScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

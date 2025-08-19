@@ -583,6 +583,34 @@ export default {
       sign_out: 'Sign Out',
     },
 
+    support: {
+      title: 'Contact Support',
+      heading: 'How can we help you?',
+      description:
+        "Fill out this form to contact our support team. We'll respond as soon as possible.",
+      category: 'Issue Category',
+      technical_support: 'Technical Support',
+      account_issues: 'Account Issues',
+      feedback: 'Feedback',
+      other: 'Other',
+      subject: 'Subject',
+      subject_placeholder: 'Brief description of your issue',
+      subject_required: 'Subject is required',
+      message: 'Message',
+      message_placeholder: 'Please provide details about your issue',
+      message_required: 'Message is required',
+      message_too_short: 'Message is too short (minimum 10 characters)',
+      email: 'Email Address',
+      email_placeholder: 'Your email address for response',
+      email_required: 'Email is required',
+      invalid_email: 'Please enter a valid email address',
+      submit: 'Submit Request',
+      success_title: 'Request Submitted',
+      success_message:
+        "Your support request has been submitted successfully. We'll get back to you soon.",
+      submission_error: 'Failed to submit support request. Please try again.',
+    },
+
     privacySetting: {
       auto_accept_followers_label: 'Auto Accept Followers',
       auto_accept_followers_description:

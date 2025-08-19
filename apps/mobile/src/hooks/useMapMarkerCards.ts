@@ -65,8 +65,12 @@ export const useMapMarkerCards = () => {
       // Filter markers within radius and convert to card format
       const cardsData = markers
         .filter(m => {
-          if (m.id === selectedMarkerId) {return true;} // Always include selected marker
-          if (!m.coordinate) {return false;}
+          if (m.id === selectedMarkerId) {
+            return true;
+          } // Always include selected marker
+          if (!m.coordinate) {
+            return false;
+          }
 
           const distance = calculateDistance(
             selectedCoord.latitude,
@@ -81,23 +85,25 @@ export const useMapMarkerCards = () => {
           // Create a card with more detailed info
           return {
             id: m.id?.toString() || '',
-            images: [`https://picsum.photos/seed/${m.id}/200/300`],
+            images: m.metadata?.originalData?.images || [],
             title: m.title || 'Unknown Location',
             location: m.description || 'Unknown Location',
-            rating:
-              m.metadata?.rating ||
-              parseFloat((Math.random() * (5 - 3) + 3).toFixed(2)),
-            dates: m.metadata?.dateRange || 'Available Now',
-            price: m.metadata?.price || Math.floor(Math.random() * 100) + 50,
+            rating: m.metadata?.rating || m.metadata?.originalData?.rating || 0,
+            dates: m.metadata?.dateRange || '',
+            price: m.metadata?.price || 0,
             currency: 'USD',
             isFavorite: m.metadata?.isFavorite || false,
-            isGuestFavorite: m.metadata?.isGuestFavorite || Math.random() > 0.7,
+            isGuestFavorite: m.metadata?.isGuestFavorite || false,
           } as RNMapMarkerCardItem;
         })
         .sort((a, b) => {
           // Ensure the selected marker is first in the list
-          if (a.id === selectedMarkerId?.toString()) {return -1;}
-          if (b.id === selectedMarkerId?.toString()) {return 1;}
+          if (a.id === selectedMarkerId?.toString()) {
+            return -1;
+          }
+          if (b.id === selectedMarkerId?.toString()) {
+            return 1;
+          }
           return 0;
         });
 
@@ -160,7 +166,9 @@ export const useMapMarkerCards = () => {
   // Get the current region to focus on selected card
   const getRegionForSelectedCard = useCallback((): Region | null => {
     const selectedCard = markerCards[selectedCardIndex];
-    if (!selectedCard) {return null;}
+    if (!selectedCard) {
+      return null;
+    }
 
     // This would need the actual coordinate from the original marker
     // For now, return null as we don't have direct access to coordinates here

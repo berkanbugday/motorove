@@ -577,6 +577,34 @@ export default {
       sign_out: 'Çıkış Yap',
     },
 
+    support: {
+      title: 'Destek Talebi',
+      heading: 'Size nasıl yardımcı olabiliriz?',
+      description:
+        'Destek ekibimizle iletişime geçmek için bu formu doldurun. En kısa sürede size yanıt vereceğiz.',
+      category: 'Sorun Kategorisi',
+      technical_support: 'Teknik Destek',
+      account_issues: 'Hesap Sorunları',
+      feedback: 'Geri Bildirim',
+      other: 'Diğer',
+      subject: 'Konu',
+      subject_placeholder: 'Sorununuzun kısa açıklaması',
+      subject_required: 'Konu gereklidir',
+      message: 'Mesaj',
+      message_placeholder: 'Lütfen sorununuz hakkında detay verin',
+      message_required: 'Mesaj gereklidir',
+      message_too_short: 'Mesaj çok kısa (en az 10 karakter)',
+      email: 'E-posta Adresi',
+      email_placeholder: 'Yanıt için e-posta adresiniz',
+      email_required: 'E-posta gereklidir',
+      invalid_email: 'Lütfen geçerli bir e-posta adresi girin',
+      submit: 'İstek Gönder',
+      success_title: 'İstek Gönderildi',
+      success_message:
+        'Destek talebiniz başarıyla gönderildi. En kısa sürede size geri dönüş yapacağız.',
+      submission_error: 'Destek talebi gönderilemedi. Lütfen tekrar deneyin.',
+    },
+
     privacySetting: {
       auto_accept_followers_label: 'Otomatik Takip',
       auto_accept_followers_description:

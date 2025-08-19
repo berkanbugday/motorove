@@ -196,19 +196,102 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   onCardPress,
   onFavoritePress,
 }) => {
-  // Format business type and rating
-  const businessType = selectedItem.title.includes('Repair')
-    ? 'Repair Shop'
-    : selectedItem.title.includes('Dealer')
-    ? 'Dealer'
-    : 'Washing Station';
+  // Get original business data from metadata if available
+  const businessData = selectedItem.metadata?.originalData;
 
-  // Mock data for demonstration - in real app this would come from selectedItem
-  const phoneNumber = '+1 (555) 123-4567';
-  const address = '123 Motorcycle Avenue';
-  const distance = '5.2 km away';
-  const reviewCount = 120;
-  const openHours = '8:00 AM - 6:00 PM';
+  // Debug log to check business data structure
+  console.log('Business data in card:', JSON.stringify(businessData));
+
+  // Format business type based on original data or fallback to title content
+  const businessType = businessData?.mainCategory
+    ? businessData.mainCategory === 'REPAIR' ||
+      businessData.mainCategory === 'MAINTENANCE'
+      ? 'Repair Shop'
+      : businessData.mainCategory === 'DEALERSHIP' ||
+        businessData.mainCategory === 'SALES'
+      ? 'Dealer'
+      : businessData.mainCategory === 'DETAILED_CLEANING'
+      ? 'Washing Station'
+      : 'Business'
+    : 'Business';
+
+  // Get actual data from business object
+  let phoneNumber =
+    businessData?.areaCode && businessData?.phoneNumber
+      ? `${businessData.areaCode} ${businessData.phoneNumber}`
+      : 'Not available';
+
+  const address =
+    businessData?.address?.address ||
+    selectedItem.location ||
+    'Address not available';
+  // Distance calculation would typically come from a geolocation service
+  // For now use a calculated value based on real coordinates if available
+  const distance = businessData?.distance
+    ? `${businessData.distance.toFixed(1)} km away`
+    : businessData?.address?.latitude && businessData?.address?.longitude
+    ? 'Based on your location' // Would calculate using user's coordinates
+    : 'Distance unknown';
+  // Get review count from business data or default to "New" for businesses without reviews
+  const reviewCount = businessData?.reviews?.length || 0;
+  const hasReviews = reviewCount > 0;
+
+  // Format working hours if available from business data
+  let openHours = 'Hours not provided';
+  let isOpenNow = false;
+  if (businessData?.workingHours && businessData.workingHours.length > 0) {
+    const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
+    // Convert to DayOfWeek enum (0 = MONDAY, 6 = SUNDAY in the enum, but 0 = Sunday, 6 = Saturday in JS)
+    const dayOfWeek = today === 0 ? 6 : today - 1; // Convert JS day to enum day
+
+    const todayHours = businessData.workingHours.find(
+      (h: {
+        dayOfWeek: number;
+        isOpen24h?: boolean;
+        startHour?: string;
+        endHour?: string;
+      }) => h.dayOfWeek === dayOfWeek,
+    );
+
+    if (todayHours) {
+      if (todayHours.isOpen24h) {
+        openHours = 'Open 24h';
+        isOpenNow = true;
+      } else if (todayHours.startHour && todayHours.endHour) {
+        openHours = `${todayHours.startHour} - ${todayHours.endHour}`;
+
+        // Check if business is open now
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinutes = now.getMinutes();
+
+        // Parse business hours (assuming format like "09:00" or "9:00")
+        const startTimeParts = todayHours.startHour
+          .split(':')
+          .map((part: string) => parseInt(part, 10));
+        const endTimeParts = todayHours.endHour
+          .split(':')
+          .map((part: string) => parseInt(part, 10));
+
+        const startHour = startTimeParts[0];
+        const startMinutes = startTimeParts[1] || 0;
+        const endHour = endTimeParts[0];
+        const endMinutes = endTimeParts[1] || 0;
+
+        // Calculate current time in minutes since midnight
+        const currentTimeInMinutes = currentHour * 60 + currentMinutes;
+        const startTimeInMinutes = startHour * 60 + startMinutes;
+        const endTimeInMinutes = endHour * 60 + endMinutes;
+
+        isOpenNow =
+          currentTimeInMinutes >= startTimeInMinutes &&
+          currentTimeInMinutes <= endTimeInMinutes;
+      } else {
+        openHours = 'Closed today';
+        isOpenNow = false;
+      }
+    }
+  }
 
   const handleCallPress = () => {
     console.log('Call pressed:', phoneNumber);
@@ -242,11 +325,19 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         <View style={styles.businessTypeRow}>
           <Text style={styles.businessType}>{businessType}</Text>
           <View style={styles.ratingContainer}>
-            <Text style={styles.starIcon}>⭐</Text>
-            <Text style={styles.ratingText}>
-              {selectedItem.rating.toFixed(1)}
-            </Text>
-            <Text style={styles.reviewCount}>({reviewCount})</Text>
+            {hasReviews ? (
+              <>
+                <Text style={styles.starIcon}>⭐</Text>
+                <Text style={styles.ratingText}>
+                  {(businessData?.rating || selectedItem.rating || 0).toFixed(
+                    1,
+                  )}
+                </Text>
+                <Text style={styles.reviewCount}>({reviewCount})</Text>
+              </>
+            ) : (
+              <Text style={styles.reviewCount}>New business</Text>
+            )}
           </View>
         </View>
 
@@ -263,14 +354,28 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         <TouchableOpacity style={styles.phoneRow} onPress={handleCallPress}>
           <Text style={styles.phoneIcon}>📞</Text>
           <Text style={styles.phoneNumber}>{phoneNumber}</Text>
-          <Text style={styles.tapToCallText}>Tap to call</Text>
+          <Text style={styles.tapToCallText}>
+            {phoneNumber !== 'Not available'
+              ? 'Tap to call'
+              : 'No phone number'}
+          </Text>
         </TouchableOpacity>
 
         {/* Open hours */}
         <View style={styles.hoursRow}>
           <Text style={styles.clockIcon}>🕐</Text>
           <View style={styles.hoursInfo}>
-            <Text style={styles.openTodayText}>Open today</Text>
+            <Text
+              style={[
+                styles.openTodayText,
+                {
+                  color: isOpenNow
+                    ? colors.status.success
+                    : colors.neutral.black,
+                },
+              ]}>
+              {isOpenNow ? 'Open now' : 'Closed now'}
+            </Text>
             <Text style={styles.hoursText}>{openHours}</Text>
           </View>
         </View>
@@ -293,15 +398,25 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         <TouchableOpacity
           style={styles.saveToFavoritesButton}
           onPress={handleSaveToFavorites}>
-          <Text style={styles.heartIcon}>🤍</Text>
-          <Text style={styles.saveToFavoritesText}>Save to Favorites</Text>
+          <Text style={styles.heartIcon}>
+            {selectedItem.isFavorite ? '❤️' : '🤍'}
+          </Text>
+          <Text style={styles.saveToFavoritesText}>
+            {selectedItem.isFavorite
+              ? 'Remove from Favorites'
+              : 'Save to Favorites'}
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Nearby places section */}
       {nearbyItems.length > 0 && (
         <View style={styles.nearbySection}>
-          <Text style={styles.nearbySectionTitle}>Nearby places</Text>
+          <Text style={styles.nearbySectionTitle}>
+            {nearbyItems.length === 1
+              ? '1 nearby place'
+              : `${nearbyItems.length} nearby places`}
+          </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -315,9 +430,10 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                 <Image
                   source={{
                     uri:
-                      item.images && item.images.length > 0
+                      item.metadata?.originalData?.images?.[0] ||
+                      (item.images && item.images.length > 0
                         ? item.images[0]
-                        : 'https://via.placeholder.com/160x100?text=No+Image',
+                        : 'https://via.placeholder.com/160x100?text=No+Image'),
                   }}
                   style={styles.nearbyImage}
                   resizeMode="cover"
@@ -330,15 +446,29 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                     {item.location}
                   </Text>
                   <View style={styles.nearbyFooter}>
-                    <View style={styles.nearbyRating}>
-                      <Text style={styles.nearbyStarIcon}>⭐</Text>
-                      <Text style={styles.nearbyRatingText}>
-                        {item.rating.toFixed(1)}
+                    {item.metadata?.originalData?.rating || item.rating ? (
+                      <View style={styles.nearbyRating}>
+                        <Text style={styles.nearbyStarIcon}>⭐</Text>
+                        <Text style={styles.nearbyRatingText}>
+                          {(
+                            item.metadata?.originalData?.rating || item.rating
+                          ).toFixed(1)}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.nearbyRating}>
+                        <Text style={styles.nearbyRatingText}>New</Text>
+                      </View>
+                    )}
+                    {item.metadata?.originalData?.mainCategory && (
+                      <Text style={styles.nearbyPrice}>
+                        {item.metadata.originalData.mainCategory.charAt(0) +
+                          item.metadata.originalData.mainCategory
+                            .slice(1)
+                            .toLowerCase()
+                            .replace('_', ' ')}
                       </Text>
-                    </View>
-                    <Text style={styles.nearbyPrice}>
-                      {item.price} {item.currency}
-                    </Text>
+                    )}
                   </View>
                 </View>
               </TouchableOpacity>

@@ -1,53 +1,17 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {RNMap, RNMapMarkerCard, RNMapMarkerCardItem} from '@components/RNMap';
-import {RNMapMarkerType, RNMapSearchResult} from '@components/RNMap/types';
+import {RNMapMarkerType} from '@components/RNMap/types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-// Import the Turkey markers
-import {allMarkers} from './turkeyMarkers';
-import {loggingService} from '@services/logging.service';
-// Import the new hook - use correct path
 import {useMapMarkerCards} from '../../hooks';
+import {BusinessService} from '@services/business.service';
+import {BusinessCategory} from '@motorove/shared';
 
 export const MapScreen = () => {
   const insets = useSafeAreaInsets();
-  // Create an enhanced version of markers with more info
-  const enhancedMarkers = allMarkers.map(marker => {
-    // Get marker type based on icon
-    const markerType =
-      marker.icon === 'wrench-filled'
-        ? 'Repair Shop'
-        : marker.icon === 'shop'
-        ? 'Dealer'
-        : 'Washing Station';
 
-    // Convert to RNMap marker format
-    return {
-      id: marker.id,
-      coordinate: {
-        latitude: marker.coordinates[1],
-        longitude: marker.coordinates[0],
-      },
-      title: `${markerType} #${marker.id.split('-').pop()}`,
-      description: `Located in ${
-        marker.coordinates[1] > 40.8 && marker.coordinates[1] < 41.2
-          ? 'Istanbul'
-          : 'Turkey Mainland'
-      }`,
-      pinColor:
-        marker.icon === 'wrench-filled'
-          ? '#FF5722'
-          : marker.icon === 'shop'
-          ? '#2196F3'
-          : '#4CAF50',
-      image: marker.image,
-      imageSelected: marker.imageSelected,
-      metadata: {
-        type: markerType,
-        originalData: marker,
-      },
-    };
-  });
+  // Use the business service to get business data
+  const {businesses, loading, refetch} = BusinessService.useGetBusinesses();
 
   const [markers, setMarkers] = useState<RNMapMarkerType[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<RNMapMarkerType | null>(
@@ -64,17 +28,43 @@ export const MapScreen = () => {
     handleCardChange,
   } = useMapMarkerCards();
 
+  // Convert businesses to map markers
+  const convertBusinessesToMarkers = useCallback(() => {
+    if (!businesses || businesses.length === 0) {
+      return [];
+    }
+
+    return businesses
+      .map(business => {
+        return {
+          id: business.id,
+          coordinate: {
+            latitude: business.address?.latitude || 0,
+            longitude: business.address?.longitude || 0,
+          },
+          title: business.name,
+          description: business.address?.address || 'No address provided',
+          image: require('@assets/images/pin.png'),
+        };
+      })
+      .filter(
+        marker =>
+          // Filter out markers with invalid coordinates
+          marker.coordinate.latitude !== 0 && marker.coordinate.longitude !== 0,
+      );
+  }, [businesses]);
+
   // Handler for loading markers
   const handleLoadMarkers = useCallback(() => {
-    loggingService.info('Loading markers...');
-    setMarkers(enhancedMarkers);
-  }, [enhancedMarkers]);
+    const businessMarkers = convertBusinessesToMarkers();
+    setMarkers(businessMarkers);
+  }, [convertBusinessesToMarkers]);
 
   // Handler for when a marker is pressed
   const handleMarkerSelect = useCallback(
     (marker: RNMapMarkerType) => {
-      loggingService.info(`Marker ${marker.id} pressed`);
-
+      // Get the original business data from the marker
+      const businessData = marker.metadata?.originalData;
       // Create info for this marker, adapted for RNMapMarkerCard
       const info: RNMapMarkerType = {
         id: marker.id?.toString() || '',
@@ -86,35 +76,47 @@ export const MapScreen = () => {
         icon: marker.icon,
         metadata: {
           type: marker.metadata?.type,
-          originalData: marker,
+          // Pass the original business data, not just the marker
+          originalData: businessData || marker,
         },
       };
+
+      // Debug to see what data is available
+      console.log('Selected business data:', businessData);
 
       setSelectedMarker(info);
 
       // Show cards for this marker using our hook
-      showCardsForMarker(markers, marker.id || '', 50);
+      // Create marker cards with business data
+      // Add business data to all markers to ensure it's available in the card
+      const updatedMarkers = markers.map(m => {
+        if (m.id === marker.id) {
+          return {
+            ...m,
+            metadata: {
+              ...m.metadata,
+              originalData: marker.metadata?.originalData,
+            },
+          };
+        }
+        return m;
+      });
+      // Use the custom hook to convert markers to card items
+      showCardsForMarker(updatedMarkers, marker.id || '', 50);
     },
     [markers, showCardsForMarker],
   );
 
-  const handleMapPress = useCallback(
-    (event: any) => {
-      loggingService.info('Map pressed at', event.nativeEvent.coordinate);
-      // Hide the marker info card when clicking elsewhere on the map
-      setSelectedMarker(null);
-      hideCards();
-    },
-    [hideCards],
-  );
+  const handleMapPress = useCallback(() => {
+    // Hide the marker info card when clicking elsewhere on the map
+    setSelectedMarker(null);
+    hideCards();
+  }, [hideCards]);
 
-  const handleSearchResultSelect = useCallback((result: RNMapSearchResult) => {
-    loggingService.info(`Search result selected: ${result.name}`);
-  }, []);
+  const handleSearchResultSelect = useCallback(() => {}, []);
 
   const handleCardPress = useCallback(
     (item: RNMapMarkerCardItem) => {
-      loggingService.info(`Card pressed for marker ${item.id}`);
       // Find the corresponding map marker
       const mapMarker = markers.find(m => m.id?.toString() === item.id);
 
@@ -128,7 +130,6 @@ export const MapScreen = () => {
 
   const handleFavoritePress = useCallback(
     (item: RNMapMarkerCardItem) => {
-      loggingService.info(`Favorite pressed for marker ${item.id}`);
       // Toggle favorite state using our hook
       toggleFavorite(item.id);
     },
@@ -139,6 +140,13 @@ export const MapScreen = () => {
     setSelectedMarker(null);
     hideCards();
   }, [hideCards]);
+
+  // Load markers when businesses data is available
+  useEffect(() => {
+    if (!loading && businesses && businesses.length > 0) {
+      handleLoadMarkers();
+    }
+  }, [businesses, loading, handleLoadMarkers]);
 
   return (
     <View style={styles.container}>
@@ -157,9 +165,9 @@ export const MapScreen = () => {
         onSearchResultSelect={handleSearchResultSelect}
         markerRadiusKm={50}
         maxVisibleMarkers={1000}
-        loadingIndicator={true}
+        loadingIndicator={loading}
         showLoadMarkerButton={true}
-        onLoadMarkerPress={handleLoadMarkers}
+        onLoadMarkerPress={refetch}
       />
 
       {/* Use RNMapMarkerCard to display the selected marker and nearby markers */}

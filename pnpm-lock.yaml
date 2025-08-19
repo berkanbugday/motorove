@@ -250,6 +250,9 @@ importers:
       react-native-date-picker:
         specifier: 5.0.12
         version: 5.0.12(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0)
+      react-native-device-info:
+        specifier: ^14.0.4
+        version: 14.0.4(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))
       react-native-encrypted-storage:
         specifier: 4.0.3
         version: 4.0.3(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0)
@@ -6635,6 +6638,11 @@ packages:
     peerDependencies:
       react: '>= 17.0.1'
       react-native: '>= 0.64.3'
+
+  react-native-device-info@14.0.4:
+    resolution: {integrity: sha512-NX0wMAknSDBeFnEnSFQ8kkAcQrFHrG4Cl0mVjoD+0++iaKrOupiGpBXqs8xR0SeJyPC5zpdPl4h/SaBGly6UxA==}
+    peerDependencies:
+      react-native: '*'
 
   react-native-encrypted-storage@4.0.3:
     resolution: {integrity: sha512-0pJA4Aj2S1PIJEbU7pN/Qvf7JIJx3hFywx+i+bLHtgK0/6Zryf1V2xVsWcrD50dfiu3jY1eN2gesQ5osGxE7jA==}
@@ -15677,6 +15685,10 @@ snapshots:
   react-native-date-picker@5.0.12(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0):
     dependencies:
       react: 19.0.0
+      react-native: 0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0)
+
+  react-native-device-info@14.0.4(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0)):
+    dependencies:
       react-native: 0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0)
 
   react-native-encrypted-storage@4.0.3(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0):
