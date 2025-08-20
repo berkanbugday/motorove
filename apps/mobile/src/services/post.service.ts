@@ -14,15 +14,17 @@ import {IPost, ICreatePost, IUpdatePost} from '@motorove/shared';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
+import useTranslation from '@/hooks/useTranslation';
 
 // Hook for creating a post
 export const useCreatePost = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [createPostMutation, {loading, error}] = useMutation(CREATE_POST, {
     onCompleted: _data => {
       showToast({
         type: 'success',
-        text1: 'Success',
-        text2: 'Post created successfully!',
+        text1: t('common.success'),
+        text2: t('screens.post.post_created'),
       });
 
       if (onSuccess) {
@@ -33,8 +35,8 @@ export const useCreatePost = (onSuccess?: () => void) => {
       loggingService.error('Error creating post:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to create post. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.post.post_created_failed'),
       });
     },
   });
@@ -61,12 +63,13 @@ export const useCreatePost = (onSuccess?: () => void) => {
 
 // Hook for updating a post
 export const useUpdatePost = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [updatePostMutation, {loading, error}] = useMutation(UPDATE_POST, {
     onCompleted: _data => {
       showToast({
         type: 'success',
-        text1: 'Success',
-        text2: 'Post updated successfully!',
+        text1: t('common.success'),
+        text2: t('screens.post.post_updated'),
       });
 
       if (onSuccess) {
@@ -77,8 +80,8 @@ export const useUpdatePost = (onSuccess?: () => void) => {
       loggingService.error('Error updating post:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to update post. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.post.post_updated_failed'),
       });
     },
   });
@@ -105,12 +108,13 @@ export const useUpdatePost = (onSuccess?: () => void) => {
 
 // Hook for removing a post
 export const useRemovePost = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [removePostMutation, {loading, error}] = useMutation(REMOVE_POST, {
     onCompleted: _data => {
       showToast({
         type: 'success',
-        text1: 'Success',
-        text2: 'Post removed successfully!',
+        text1: t('common.success'),
+        text2: t('screens.post.post_deleted'),
       });
 
       if (onSuccess) {
@@ -121,8 +125,8 @@ export const useRemovePost = (onSuccess?: () => void) => {
       loggingService.error('Error removing post:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to remove post. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.post.post_deleted_failed'),
       });
     },
   });
@@ -250,13 +254,14 @@ export const useGetPosts = (
 
 // Hook for liking a post
 export const useLikePost = () => {
+  const {t} = useTranslation();
   const [likePostMutation, {loading, error}] = useMutation(LIKE_POST, {
     onError: errorObj => {
       loggingService.error('Error liking post:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to like post. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('errors.general.something_wrong'),
       });
     },
   });
@@ -308,13 +313,14 @@ export const useLikePost = () => {
 
 // Hook for unliking a post
 export const useUnlikePost = () => {
+  const {t} = useTranslation();
   const [unlikePostMutation, {loading, error}] = useMutation(UNLIKE_POST, {
     onError: errorObj => {
       loggingService.error('Error unliking post:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to unlike post. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('errors.general.something_wrong'),
       });
     },
   });
@@ -368,13 +374,14 @@ export const useUnlikePost = () => {
 
 // Hook for saving a post
 export const useSavePost = () => {
+  const {t} = useTranslation();
   const [savePostMutation, {loading, error}] = useMutation(SAVE_POST, {
     onError: errorObj => {
       loggingService.error('Error saving post:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to save post. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('errors.general.something_wrong'),
       });
     },
   });
@@ -423,13 +430,14 @@ export const useSavePost = () => {
 
 // Hook for unsaving a post
 export const useUnsavePost = () => {
+  const {t} = useTranslation();
   const [unsavePostMutation, {loading, error}] = useMutation(UNSAVE_POST, {
     onError: errorObj => {
       loggingService.error('Error unsaving post:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to unsave post. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('errors.general.something_wrong'),
       });
     },
   });

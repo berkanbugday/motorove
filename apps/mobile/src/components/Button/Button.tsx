@@ -59,6 +59,7 @@ export function Button({
     size === 'small' && styles.smallButton,
     size === 'medium' && styles.mediumButton,
     size === 'large' && styles.largeButton,
+    disabled && styles.disabledButton,
     style,
   ];
 
@@ -276,5 +277,8 @@ const styles = StyleSheet.create({
   bottomIconContainer: {
     marginHorizontal: 0,
     marginTop: spacing.xs,
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
 });

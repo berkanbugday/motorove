@@ -108,7 +108,7 @@ export function WelcomeScreen(): React.JSX.Element {
   const carouselItems: CarouselItem[] = [
     {
       id: 1,
-      titleKey: 'navigation.welcome',
+      titleKey: 'screens.welcome.welcome',
       textKey: 'screens.welcome.slides.discover_community',
       color: '#2E64E5',
     },

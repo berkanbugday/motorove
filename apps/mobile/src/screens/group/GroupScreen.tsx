@@ -320,7 +320,7 @@ export const GroupScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('navigation.groups')}
+        title={t('bottomTabs.groups')}
         showShadow={false}
         rightIconName="plus"
         onRightButtonPress={() => navigation.navigate('CreateGroup')}

@@ -184,9 +184,19 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
       ref,
       () => ({
         open: handleOpen,
-        close: handleClose,
+        close: () => {
+          Keyboard.dismiss();
+          translateY.value = withTiming(SCREEN_HEIGHT, {duration: 300});
+          backdropOpacity.value = withTiming(0, {duration: 300});
+          active.value = false;
+          setCurrentSnapPoint('closed');
+
+          setTimeout(() => {
+            setIsVisible(false);
+          }, 300);
+        },
       }),
-      [handleOpen, handleClose],
+      [handleOpen],
     );
 
     // Measure content height when layout changes

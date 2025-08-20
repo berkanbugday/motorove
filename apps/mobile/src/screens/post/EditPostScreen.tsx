@@ -36,15 +36,23 @@ import {PostAddressInput, UpdatePostInput} from '../../types/models/post.model';
 import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
+import {GroupPrivacy} from '@motorove/shared';
+import {useTranslation} from '@hooks/useTranslation';
+import {EnumUtils} from '@utils/enumUtils';
 
 export const EditPostScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<MainStackParamList, 'EditPost'>>();
   const {postId} = route.params;
+  const {t} = useTranslation();
+
+  const privacyOptions = EnumUtils.getGroupPrivacyOptions().filter(
+    option => option.value !== GroupPrivacy.ALL,
+  );
 
   const [postText, setPostText] = useState('');
   const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
-    null,
+    privacyOptions.find(option => option.value === GroupPrivacy.PUBLIC) || null,
   );
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
@@ -95,21 +103,26 @@ export const EditPostScreen = () => {
 
       // Set privacy and group if post is in a group
       if (post.group) {
-        setSelectedPrivacy({
-          id: 2,
-          label: 'Group',
-          value: 'group',
-        });
+        // Find the group option in privacyOptions
+        const groupOption = privacyOptions.find(
+          option => option.value === GroupPrivacy.PRIVATE,
+        );
+        if (groupOption) {
+          setSelectedPrivacy(groupOption);
+        }
+
         setSelectedGroup({
           id: post.group.id,
           name: post.group.name,
         });
       } else {
-        setSelectedPrivacy({
-          id: 1,
-          label: 'Public',
-          value: 'public',
-        });
+        // Find the public option in privacyOptions
+        const publicOption = privacyOptions.find(
+          option => option.value === GroupPrivacy.PUBLIC,
+        );
+        if (publicOption) {
+          setSelectedPrivacy(publicOption);
+        }
       }
 
       // Set images if available
@@ -131,7 +144,7 @@ export const EditPostScreen = () => {
     setSelectedPrivacy(item);
 
     // If group is selected, open the group selection bottom sheet
-    if (item?.value === 'group') {
+    if (item?.value === GroupPrivacy.PRIVATE) {
       openGroupSelectionBottomSheet();
     } else {
       // If other privacy option is selected, clear the selected group
@@ -141,7 +154,7 @@ export const EditPostScreen = () => {
 
   const openGroupSelectionBottomSheet = () => {
     openBottomSheet({
-      title: 'Select Group',
+      title: t('screens.post.select_group'),
       closeButtonPosition: 'top-left',
       content: (
         <>
@@ -150,9 +163,9 @@ export const EditPostScreen = () => {
           ) : groupsError ? (
             <View style={styles.errorContainer}>
               <Icon name="error" size={24} color={colors.status.error} />
-              <Body>Failed to load groups. Please try again.</Body>
+              <Body>{t('screens.group.could_not_load_groups')}</Body>
               <Button
-                title="Retry"
+                title={t('common.try_again')}
                 variant="primary"
                 onPress={() => refetchJoinedGroups()}
                 size="small"
@@ -161,7 +174,7 @@ export const EditPostScreen = () => {
           ) : joinedGroups.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Icon name="users" size={24} color={colors.neutral.grey} />
-              <Body>You haven't joined any groups yet</Body>
+              <Body>{t('screens.post.no_groups_joined')}</Body>
             </View>
           ) : (
             <FlatList
@@ -197,8 +210,8 @@ export const EditPostScreen = () => {
     if (selectedImages.length >= 3) {
       showToast({
         type: 'error',
-        text1: 'Limit Reached',
-        text2: 'You can select a maximum of 3 images',
+        text1: t('screens.post.limit_reached'),
+        text2: t('screens.post.max_images_message'),
       });
       return;
     }
@@ -218,8 +231,8 @@ export const EditPostScreen = () => {
         if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
           showToast({
             type: 'error',
-            text1: 'File too large',
-            text2: 'Please select an image smaller than 10MB',
+            text1: t('screens.post.file_too_large'),
+            text2: t('screens.post.image_size_limit'),
           });
           return;
         }
@@ -237,8 +250,8 @@ export const EditPostScreen = () => {
       loggingService.error('Error selecting image:', error);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to select image. Please try again.',
+        text1: t('common.error'),
+        text2: t('screens.accountSetup.failed_to_select_image'),
       });
     }
   };
@@ -250,10 +263,9 @@ export const EditPostScreen = () => {
   const handleAddLocation = () => {
     // Open bottom sheet with map
     openBottomSheet({
-      title: 'Select Location',
+      title: t('screens.post.select_location'),
       content: (
         <SelectLocationMap
-          initialLocation={location}
           onLocationSelect={selectedLocation => {
             setLocation({
               ...selectedLocation,
@@ -274,8 +286,8 @@ export const EditPostScreen = () => {
     if (!postText.trim()) {
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Please enter some content for your post',
+        text1: t('common.error'),
+        text2: t('screens.post.enter_content'),
       });
       return;
     }
@@ -297,7 +309,7 @@ export const EditPostScreen = () => {
               longitude: location.longitude,
             }
           : {latitude: null, longitude: null}),
-        ...(selectedPrivacy?.value === 'group' && selectedGroup
+        ...(selectedPrivacy?.value === GroupPrivacy.PRIVATE && selectedGroup
           ? {groupId: selectedGroup.id}
           : {groupId: null}),
         addresses: location.addresses,
@@ -326,7 +338,7 @@ export const EditPostScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Edit Post"
+        title={t('screens.post.edit')}
         showBackButton
         showShadow={false}
         onBackPress={handleGoBack}
@@ -345,35 +357,32 @@ export const EditPostScreen = () => {
                 {user?.firstName} {user?.lastName}
               </Subtitle>
               <Dropdown
-                data={[
-                  {id: 1, label: 'Public', value: 'public'},
-                  {id: 2, label: 'Group', value: 'group'},
-                ]}
-                placeholder="Select privacy"
+                data={privacyOptions}
+                placeholder={t('screens.post.select_privacy')}
                 onSelect={handlePrivacyChange}
-                searchable={false}
                 selectedItem={selectedPrivacy}
                 containerStyle={styles.privacySelector}
                 inputStyle={styles.privacyInput}
               />
 
-              {selectedPrivacy?.value === 'group' && selectedGroup && (
-                <Chip
-                  label={selectedGroup.name}
-                  leadingIcon="users-filled"
-                  size="small"
-                  variant="filled"
-                  color="secondary"
-                  onPress={openGroupSelectionBottomSheet}
-                />
-              )}
+              {selectedPrivacy?.value === GroupPrivacy.PRIVATE &&
+                selectedGroup && (
+                  <Chip
+                    label={selectedGroup.name}
+                    leadingIcon="users-filled"
+                    size="small"
+                    variant="filled"
+                    color="secondary"
+                    onPress={openGroupSelectionBottomSheet}
+                  />
+                )}
             </View>
           </View>
 
           {/* Post Input Field */}
           <TextInput
             style={styles.postInput as TextStyle}
-            placeholder="What's on your mind?"
+            placeholder={t('screens.post.whats_on_your_mind')}
             placeholderTextColor={colors.neutral.grey}
             multiline
             value={postText}
@@ -423,29 +432,28 @@ export const EditPostScreen = () => {
                   ? location.addresses.find(
                       address => address.language === 'en',
                     )?.address
-                  : 'Add location'
+                  : t('screens.post.add_location')
               }
             />
           </View>
         </ScrollView>
-
-        {/* Update Button */}
-        <View style={styles.postButtonContainer}>
-          <Button
-            variant="dark"
-            size="medium"
-            shape="round"
-            onPress={handleUpdate}
-            title="Update"
-            loading={isLoading}
-            disabled={
-              isLoading ||
-              !postText.trim() ||
-              (selectedPrivacy?.value === 'group' && !selectedGroup)
-            }
-          />
-        </View>
       </SafeAreaView>
+      {/* Update Button */}
+      <View style={styles.postButtonContainer}>
+        <Button
+          variant="dark"
+          size="medium"
+          shape="round"
+          onPress={handleUpdate}
+          title={t('common.update')}
+          loading={isLoading}
+          disabled={
+            isLoading ||
+            !postText.trim() ||
+            (selectedPrivacy?.value === GroupPrivacy.PRIVATE && !selectedGroup)
+          }
+        />
+      </View>
     </View>
   );
 };
@@ -544,9 +552,9 @@ const styles = StyleSheet.create({
     ...(typography.bodySmall as TextStyle),
   },
   postButtonContainer: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
   },

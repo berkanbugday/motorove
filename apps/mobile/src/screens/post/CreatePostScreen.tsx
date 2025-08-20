@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   View,
   TextInput,
@@ -11,6 +11,8 @@ import {
   TextStyle,
   ActivityIndicator,
   FlatList,
+  BackHandler,
+  Platform,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {colors, spacing, radius, typography} from '@theme';
@@ -34,18 +36,29 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useCreatePost} from '@services/post.service';
-import {ICreatePost, ICreateAddress, AddressType} from '@motorove/shared';
+import {
+  ICreatePost,
+  ICreateAddress,
+  AddressType,
+  GroupPrivacy,
+} from '@motorove/shared';
 import {useGetJoinedGroups} from '@services/group.service';
 import {useLanguage} from '@contexts/LanguageContext';
+import {useTranslation} from '@hooks/useTranslation';
+import {EnumUtils} from '@utils/enumUtils';
 
 export const CreatePostScreen = () => {
   const navigation = useNavigation();
+  const {t} = useTranslation();
   const [postText, setPostText] = useState('');
-  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>({
-    id: 1,
-    label: 'Public',
-    value: 'public',
-  });
+
+  const privacyOptions = EnumUtils.getGroupPrivacyOptions().filter(
+    option => option.value !== GroupPrivacy.ALL,
+  );
+
+  const [selectedPrivacy, setSelectedPrivacy] = useState<DropdownItem | null>(
+    privacyOptions.find(option => option.value === GroupPrivacy.PUBLIC) || null,
+  );
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
@@ -71,11 +84,29 @@ export const CreatePostScreen = () => {
     navigation.goBack();
   });
 
+  // Set navigation options to disable iOS swipe back gesture when dirty
+  useLayoutEffect(() => {
+    if (Platform.OS === 'ios') {
+      closeBottomSheet();
+    }
+
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          closeBottomSheet();
+          return false; // Allow default behavior
+        },
+      );
+      return () => backHandler.remove();
+    }
+  }, [navigation]);
+
   const handlePrivacyChange = (item: DropdownItem | null) => {
     setSelectedPrivacy(item);
 
     // If group is selected, open the group selection bottom sheet
-    if (item?.value === 'group') {
+    if (item?.value === GroupPrivacy.PRIVATE) {
       openGroupSelectionBottomSheet();
     } else {
       // If other privacy option is selected, clear the selected group
@@ -86,7 +117,7 @@ export const CreatePostScreen = () => {
   useEffect(() => {
     if (
       !loadingGroups &&
-      selectedPrivacy?.value === 'group' &&
+      selectedPrivacy?.value === GroupPrivacy.PRIVATE &&
       !selectedGroup
     ) {
       openGroupSelectionBottomSheet();
@@ -95,8 +126,9 @@ export const CreatePostScreen = () => {
 
   const openGroupSelectionBottomSheet = () => {
     openBottomSheet({
-      title: 'Select Group',
+      title: t('screens.post.select_group'),
       closeButtonPosition: 'top-left',
+      closeOnBackdropPress: false,
       content: (
         <>
           {loadingGroups ? (
@@ -104,7 +136,7 @@ export const CreatePostScreen = () => {
           ) : groupsError ? (
             <View style={styles.errorContainer}>
               <Icon name="error" size={24} color={colors.status.error} />
-              <Body>Failed to load groups. Please try again.</Body>
+              <Body>{t('screens.group.could_not_load_groups')}</Body>
               <Button
                 title="Retry"
                 variant="primary"
@@ -115,7 +147,7 @@ export const CreatePostScreen = () => {
           ) : joinedGroups.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Icon name="users" size={24} color={colors.neutral.grey} />
-              <Body>You haven't joined any groups yet</Body>
+              <Body>{t('screens.post.no_groups_joined')}</Body>
             </View>
           ) : (
             <FlatList
@@ -144,6 +176,15 @@ export const CreatePostScreen = () => {
         </>
       ),
       snapPoint: 'full',
+      onClose: () => {
+        if (!selectedGroup) {
+          setSelectedPrivacy(
+            privacyOptions.find(
+              option => option.value === GroupPrivacy.PUBLIC,
+            ) || null,
+          );
+        }
+      },
     });
   };
 
@@ -151,8 +192,8 @@ export const CreatePostScreen = () => {
     if (selectedImages.length >= 3) {
       showToast({
         type: 'error',
-        text1: 'Limit Reached',
-        text2: 'You can select a maximum of 3 images',
+        text1: t('screens.post.limit_reached'),
+        text2: t('screens.post.max_images_message'),
       });
       return;
     }
@@ -172,8 +213,8 @@ export const CreatePostScreen = () => {
         if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
           showToast({
             type: 'error',
-            text1: 'File too large',
-            text2: 'Please select an image smaller than 10MB',
+            text1: t('screens.post.file_too_large'),
+            text2: t('screens.post.image_size_limit'),
           });
           return;
         }
@@ -191,8 +232,8 @@ export const CreatePostScreen = () => {
       loggingService.error('Error selecting image:', error);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to select image. Please try again.',
+        text1: t('common.error'),
+        text2: t('screens.accountSetup.failed_to_select_image'),
       });
     }
   };
@@ -204,7 +245,7 @@ export const CreatePostScreen = () => {
   const handleAddLocation = () => {
     // Open bottom sheet with map
     openBottomSheet({
-      title: 'Select Location',
+      title: t('screens.post.select_location'),
       content: (
         <SelectLocationMap
           initialAddress={location[0]}
@@ -229,8 +270,8 @@ export const CreatePostScreen = () => {
     if (!postText.trim()) {
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Please enter some content for your post',
+        text1: t('common.error'),
+        text2: t('screens.post.enter_content'),
       });
       return;
     }
@@ -244,7 +285,7 @@ export const CreatePostScreen = () => {
         content: postText.trim(),
         images: imageData.length > 0 ? imageData : null,
         addresses: location.length > 0 ? location : null,
-        ...(selectedPrivacy?.value === 'group' && selectedGroup
+        ...(selectedPrivacy?.value === GroupPrivacy.PRIVATE && selectedGroup
           ? {groupId: selectedGroup.id}
           : {groupId: null}),
       };
@@ -262,7 +303,7 @@ export const CreatePostScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Create Post"
+        title={t('screens.post.create_post')}
         showBackButton
         showShadow={false}
         onBackPress={() => navigation.goBack()}
@@ -285,34 +326,33 @@ export const CreatePostScreen = () => {
                 {user?.firstName} {user?.lastName}
               </Subtitle>
               <Dropdown
-                data={[
-                  {id: 1, label: 'Public', value: 'public'},
-                  {id: 2, label: 'Group', value: 'group'},
-                ]}
-                placeholder="Select privacy"
+                data={privacyOptions}
+                placeholder={t('screens.post.select_privacy')}
                 onSelect={handlePrivacyChange}
+                showClearButton={false}
                 selectedItem={selectedPrivacy}
                 containerStyle={styles.privacySelector}
                 inputStyle={styles.privacyInput}
               />
 
-              {selectedPrivacy?.value === 'group' && selectedGroup && (
-                <Chip
-                  label={selectedGroup.name}
-                  leadingIcon="users-filled"
-                  size="small"
-                  variant="filled"
-                  color="secondary"
-                  onPress={openGroupSelectionBottomSheet}
-                />
-              )}
+              {selectedPrivacy?.value === GroupPrivacy.PRIVATE &&
+                selectedGroup && (
+                  <Chip
+                    label={selectedGroup.name}
+                    leadingIcon="users-filled"
+                    size="small"
+                    variant="filled"
+                    color="secondary"
+                    onPress={openGroupSelectionBottomSheet}
+                  />
+                )}
             </View>
           </View>
 
           {/* Post Input Field */}
           <TextInput
             style={styles.postInput as TextStyle}
-            placeholder="What's on your mind?"
+            placeholder={t('screens.post.what_do_you_want_to_write')}
             placeholderTextColor={colors.neutral.grey}
             multiline
             value={postText}
@@ -362,29 +402,28 @@ export const CreatePostScreen = () => {
                   ? location.find(
                       address => address.language.toLowerCase() === language,
                     )?.address
-                  : 'Add location'
+                  : t('screens.post.add_location')
               }
             />
           </View>
         </ScrollView>
-
-        {/* Post Button */}
-        <View style={styles.postButtonContainer}>
-          <Button
-            variant="dark"
-            size="medium"
-            shape="round"
-            onPress={handlePost}
-            title="Post"
-            loading={loading}
-            disabled={
-              loading ||
-              !postText.trim() ||
-              (selectedPrivacy?.value === 'group' && !selectedGroup)
-            }
-          />
-        </View>
       </SafeAreaView>
+      {/* Post Button */}
+      <View style={styles.postButtonContainer}>
+        <Button
+          variant="dark"
+          size="medium"
+          shape="round"
+          onPress={handlePost}
+          title={t('common.submit')}
+          loading={loading}
+          disabled={
+            loading ||
+            !postText.trim() ||
+            (selectedPrivacy?.value === GroupPrivacy.PRIVATE && !selectedGroup)
+          }
+        />
+      </View>
     </View>
   );
 };
@@ -478,9 +517,9 @@ const styles = StyleSheet.create({
     ...(typography.bodySmall as TextStyle),
   },
   postButtonContainer: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
   },

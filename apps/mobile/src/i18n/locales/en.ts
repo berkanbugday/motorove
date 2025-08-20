@@ -61,36 +61,20 @@ export default {
     not_now: 'Not Now',
   },
 
-  // Main navigation items
-  navigation: {
+  // Bottom tabs navigation items
+  bottomTabs: {
     home: 'Home',
     search: 'Search',
     map: 'Map',
     groups: 'Groups',
     menu: 'Menu',
-    profile: 'Profile',
-    events: 'Events',
-    notifications: 'Notifications',
-    settings: 'Settings',
-    create_post: 'Create Post',
-    welcome: 'Welcome',
-    search_user: 'Search User',
-    garage: 'Garage',
-    following: 'Following',
-    followers: 'Followers',
-    create_event: 'Create Event',
-    edit_event: 'Edit Event',
-    event_details: 'Event Details',
-    create_group: 'Create Group',
-    group_details: 'Group Details',
-    edit_profile: 'Edit Profile',
-    post_details: 'Post Details',
   },
 
   // Screens organized by directory structure
   screens: {
     // Welcome screen
     welcome: {
+      welcome: 'Welcome',
       sign_in: 'Sign In',
       sign_up: 'Sign Up',
       slides: {
@@ -197,17 +181,13 @@ export default {
 
     // Posts screens
     post: {
-      create: 'Create Post',
-      edit: 'Edit Post',
-      delete: 'Delete Post',
-      title: 'Title',
-      content: 'Content',
-      location: 'Location',
-      category: 'Category',
-      upload_images: 'Upload Images',
+      create_post: 'Create Post',
       post_created: 'Post created successfully',
+      post_created_failed: 'Post creation failed. Please try again.',
       post_updated: 'Post updated successfully',
+      post_updated_failed: 'Post update failed. Please try again.',
       post_deleted: 'Post deleted successfully',
+      post_deleted_failed: 'Post deletion failed. Please try again.',
       write_comment: 'Write a comment...',
       comments: 'Comments',
       likes: 'Likes',
@@ -230,6 +210,16 @@ export default {
       private_post: 'Private',
       hashtags: 'Hashtags',
       mention_someone: 'Mention Someone',
+      select_group: 'Select Group',
+      no_groups_joined: "You haven't joined any groups yet",
+      add_location: 'Add location',
+      limit_reached: 'Limit Reached',
+      max_images_message: 'You can select a maximum of 3 images',
+      file_too_large: 'File too large',
+      image_size_limit: 'Please select an image smaller than 10MB',
+      enter_content: 'Please enter some content for your post',
+      what_do_you_want_to_write: 'What do you want to write?',
+      select_privacy: 'Select Privacy',
     },
 
     // Events screens
@@ -485,6 +475,7 @@ export default {
 
     // Notifications screen
     notification: {
+      notifications: 'Notifications',
       notification_deleted: 'Notification deleted',
       delete_failed: 'Failed to delete notification. Please try again.',
       all_deleted: 'All notifications deleted',
@@ -530,6 +521,7 @@ export default {
 
     // User search screen
     searchUser: {
+      search_user: 'Search User',
       search_placeholder: 'Search by name or last name',
       no_results: 'No users found',
       filters: 'Filters',

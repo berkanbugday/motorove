@@ -61,35 +61,20 @@ export default {
     not_now: 'Şimdi Değil',
   },
 
-  // Main navigation items
-  navigation: {
+  // Bottom tabs navigation items
+  bottomTabs: {
     home: 'Ana Sayfa',
     search: 'Ara',
     map: 'Harita',
     groups: 'Gruplar',
     menu: 'Menü',
-    profile: 'Profil',
-    events: 'Etkinlikler',
-    notifications: 'Bildirimler',
-    settings: 'Ayarlar',
-    create_post: 'Gönderi Oluştur',
-    welcome: 'Hoş Geldiniz',
-    search_user: 'Kullanıcı Ara',
-    garage: 'Garaj',
-    following: 'Takip Edilenler',
-    followers: 'Takipçiler',
-    create_event: 'Etkinlik Oluştur',
-    edit_event: 'Etkinlik Düzenle',
-    event_details: 'Etkinlik Detayları',
-    group_details: 'Grup Detayları',
-    edit_profile: 'Profili Düzenle',
-    post_details: 'Gönderi Detayları',
   },
 
   // Screens organized by directory structure
   screens: {
     // Welcome screen
     welcome: {
+      welcome: 'Hoş Geldiniz',
       sign_in: 'Giriş Yap',
       sign_up: 'Kayıt Ol',
       slides: {
@@ -198,17 +183,13 @@ export default {
 
     // Posts screens
     post: {
-      create: 'Gönderi Oluştur',
-      edit: 'Gönderi Düzenle',
-      delete: 'Gönderi Sil',
-      title: 'Başlık',
-      content: 'İçerik',
-      location: 'Konum',
-      category: 'Kategori',
-      upload_images: 'Fotoğraf Yükle',
+      create_post: 'Gönderi Oluştur',
       post_created: 'Gönderi başarıyla oluşturuldu',
+      post_created_failed: 'Gönderi oluşturulamadı. Lütfen tekrar deneyin.',
       post_updated: 'Gönderi başarıyla güncellendi',
+      post_updated_failed: 'Gönderi güncellenemedi. Lütfen tekrar deneyin.',
       post_deleted: 'Gönderi başarıyla silindi',
+      post_deleted_failed: 'Gönderi silinemedi. Lütfen tekrar deneyin.',
       write_comment: 'Yorum yaz...',
       comments: 'Yorumlar',
       likes: 'Beğeniler',
@@ -231,6 +212,16 @@ export default {
       private_post: 'Özel',
       hashtags: 'Etiketler',
       mention_someone: 'Birini Etiketle',
+      select_group: 'Grup Seç',
+      no_groups_joined: 'Henüz hiçbir gruba katılmadınız',
+      add_location: 'Konum Ekle',
+      limit_reached: 'Limit Aşıldı',
+      max_images_message: 'En fazla 3 resim seçebilirsiniz',
+      file_too_large: 'Dosya çok büyük',
+      image_size_limit: "Lütfen 10MB'dan küçük bir resim seçin",
+      enter_content: 'Lütfen gönderiniz için içerik girin',
+      what_do_you_want_to_write: 'Neler yazmak istersin?',
+      select_privacy: 'Gizlilik Seç',
     },
 
     // Events screens
@@ -480,6 +471,7 @@ export default {
 
     // Notifications screen
     notification: {
+      notifications: 'Bildirimler',
       notification_deleted: 'Bildirim silindi',
       delete_failed: 'Bildirim silinemedi. Lütfen tekrar deneyin.',
       all_deleted: 'Tüm bildirimler silindi',
@@ -525,6 +517,7 @@ export default {
 
     // User search screen
     searchUser: {
+      search_user: 'Kullanıcı Ara',
       search_placeholder: 'İsim veya soyisim ile ara',
       no_results: 'Kullanıcı bulunamadı',
       filters: 'Filtreler',

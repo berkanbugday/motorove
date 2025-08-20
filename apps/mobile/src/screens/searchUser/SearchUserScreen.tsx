@@ -165,7 +165,10 @@ export const SearchUserScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TopHeaderBar title={t('navigation.search_user')} showShadow={false} />
+      <TopHeaderBar
+        title={t('screens.searchUser.search_user')}
+        showShadow={false}
+      />
 
       <View style={styles.searchContainer}>
         <View style={styles.searchInputWrapper}>

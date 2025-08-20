@@ -251,7 +251,7 @@ export const NotificationScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('navigation.notifications')}
+        title={t('screens.notification.notifications')}
         showShadow={false}
         showBackButton
         onBackPress={() => navigation.goBack()}

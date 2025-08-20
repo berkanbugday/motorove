@@ -75,17 +75,17 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
   const getTabBarLabel = (routeName: string) => {
     switch (routeName) {
       case 'HomeTab':
-        return t('navigation.home');
+        return t('bottomTabs.home');
       case 'SearchTab':
-        return t('navigation.search');
+        return t('bottomTabs.search');
       case 'MapTab':
-        return t('navigation.map');
+        return t('bottomTabs.map');
       case 'GroupsTab':
-        return t('navigation.groups');
+        return t('bottomTabs.groups');
       case 'MenuTab':
-        return t('navigation.menu');
+        return t('bottomTabs.menu');
       default:
-        return t('navigation.home');
+        return t('bottomTabs.home');
     }
   };
 
