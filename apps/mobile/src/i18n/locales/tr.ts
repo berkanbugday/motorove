@@ -975,5 +975,13 @@ export default {
       admin_removed_group_member: 'Admin Grup Üyesini Sildi',
       admin_changed_group_member_role: 'Admin Grup Üyesi Rolünü Değiştirdi',
     },
+    supportCategory: {
+      account: 'Hesap Sorunu',
+      technical: 'Teknik Destek',
+      feedback: 'Geri Bildirim',
+      feature_request: 'Yeni Özellik İsteği',
+      bug_report: 'Hata Raporu',
+      other: 'Diğer',
+    },
   },
 };

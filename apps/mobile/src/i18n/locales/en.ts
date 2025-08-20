@@ -976,5 +976,13 @@ export default {
       admin_removed_group_member: 'Admin Removed Group Member',
       admin_changed_group_member_role: 'Admin Changed Group Member Role',
     },
+    supportCategory: {
+      account: 'Account Issue',
+      technical: 'Technical Support',
+      feedback: 'Feedback',
+      feature_request: 'New Feature Request',
+      bug_report: 'Bug Report',
+      other: 'Other',
+    },
   },
 };
