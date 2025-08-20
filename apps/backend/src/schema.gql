@@ -886,6 +886,7 @@ type Query {
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
   post(id: ID!): PostDto!
+  postLikedUsers(postId: ID!): [UserDto!]!
   posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [PostDto!]!
   upcomingEvents: [EventDto!]!
   user(id: String!): UserDto!

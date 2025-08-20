@@ -491,6 +491,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
       return (
         <FeedCard
+          id={item.id}
           avatarSource={feedCardProps.avatarSource}
           userName={feedCardProps.userName}
           timeAgo={feedCardProps.timeAgo}

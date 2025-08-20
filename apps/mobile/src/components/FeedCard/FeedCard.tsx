@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   View,
   Image,
@@ -21,6 +21,10 @@ import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {useTranslation} from '@hooks/useTranslation';
 
 export interface FeedCardProps {
+  /**
+   * Post ID
+   */
+  id: string;
   /**
    * User avatar image source
    */
@@ -116,6 +120,11 @@ export interface FeedCardProps {
   onMorePress?: () => void;
 
   /**
+   * Handler for when the likes count is pressed to show liked users
+   */
+  onLikesPress?: (postId: string) => void;
+
+  /**
    * Dropdown menu items for the card
    */
   dropdownMenu?: DropdownMenuItem[];
@@ -174,6 +183,7 @@ const {width: screenWidth} = Dimensions.get('window');
 const FeedCard: React.FC<FeedCardProps> = props => {
   const {t} = useTranslation();
   const {
+    id,
     avatarSource,
     userName,
     timeAgo,
@@ -192,6 +202,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     onCommentPress,
     onSavePress,
     onMorePress,
+    onLikesPress,
     dropdownMenu,
     onDropdownSelect,
     style,
@@ -251,6 +262,12 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     // Call the original onLikePress handler
     if (onLikePress) {
       onLikePress();
+    }
+  };
+
+  const handleLikesPress = () => {
+    if (onLikesPress) {
+      onLikesPress(id);
     }
   };
 
@@ -336,10 +353,6 @@ const FeedCard: React.FC<FeedCardProps> = props => {
         </View>
       </View>
     );
-  };
-
-  const showLikedUsers = () => {
-    console.log('showLikedUsers');
   };
 
   const renderCard = () => (
@@ -472,7 +485,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
             </Animated.View>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={showLikedUsers}
+            onPress={handleLikesPress}
             style={actionBarDisabled && {opacity: 0.8}}
             disabled={actionBarDisabled}>
             <Typography
