@@ -138,7 +138,7 @@ export const CreatePostScreen = () => {
               <Icon name="error" size={24} color={colors.status.error} />
               <Body>{t('screens.group.could_not_load_groups')}</Body>
               <Button
-                title="Retry"
+                title={t('common.try_again')}
                 variant="primary"
                 onPress={() => refetchJoinedGroups()}
                 size="small"
