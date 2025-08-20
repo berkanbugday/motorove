@@ -14,46 +14,41 @@ import {colors, commonStyles, spacing} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useTranslation} from '@hooks/useTranslation';
-import {supportService} from '@services/support.service';
+import {useCreateSupportRequest} from '@services/support.service';
 import {useForm} from 'react-hook-form';
-import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {SupportCategory} from '@motorove/shared';
+import {loggingService} from '@services/logging.service';
+import {
+  supportSchemas,
+  SupportFormValues,
+} from '@utils/validation/supportValidation';
+import {EnumUtils} from '@utils/enumUtils';
 
-// Support request categories
-type SupportCategory = 'technical' | 'account' | 'feedback' | 'other';
-
-// Create schema for form validation
-const supportFormSchema = z.object({
-  category: z.string().min(1),
-  subject: z.string().min(1),
-  message: z.string().min(1).min(10),
-});
-
-type SupportFormValues = z.infer<typeof supportFormSchema>;
+// Get schema with translations
 
 export const SupportScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Support'>>();
   const {t} = useTranslation();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem | null>(
     null,
   );
 
-  const categoryOptions: DropdownItem[] = [
-    {
-      id: 'technical',
-      label: t('screens.support.technical_support'),
-      value: 'technical',
+  const {createSupportRequest, loading: isLoading} = useCreateSupportRequest(
+    () => {
+      // On success callback
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
     },
-    {
-      id: 'account',
-      label: t('screens.support.account_issues'),
-      value: 'account',
-    },
-    {id: 'feedback', label: t('screens.support.feedback'), value: 'feedback'},
-    {id: 'other', label: t('screens.support.other'), value: 'other'},
-  ];
+  );
+
+  // Get support categories from the shared enum
+  const categoryOptions = EnumUtils.getSupportCategories();
+
+  // Get schema with translations
+  const {supportRequestSchema} = supportSchemas(t);
 
   // Setup form with React Hook Form and zod validation
   const {
@@ -62,9 +57,9 @@ export const SupportScreen = () => {
     formState: {errors},
     setValue,
   } = useForm<SupportFormValues>({
-    resolver: zodResolver(supportFormSchema),
+    resolver: zodResolver(supportRequestSchema),
     defaultValues: {
-      category: 'technical',
+      category: SupportCategory.OTHER,
       subject: '',
       message: '',
     },
@@ -77,28 +72,24 @@ export const SupportScreen = () => {
   };
 
   const onSubmit = async (data: SupportFormValues) => {
-    setIsLoading(true);
     try {
-      // Send support request with form data
-      await supportService.sendSupportRequest({
+      // Prepare form data for the support request
+      const supportRequestInput = {
         category: data.category as SupportCategory,
         subject: data.subject,
         message: data.message,
-      });
-      showToast({
-        type: 'success',
-        text1: t('screens.support.success_title'),
-        text2: t('screens.support.success_message'),
-      });
-      navigation.goBack();
+        deviceInfo: {}, // This will be populated by the service
+      };
+
+      // Call the createSupportRequest method
+      await createSupportRequest(supportRequestInput);
     } catch (error) {
+      loggingService.error('Error submitting support request:', error);
       showToast({
         type: 'error',
         text1: t('common.error'),
         text2: t('screens.support.submission_error'),
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 

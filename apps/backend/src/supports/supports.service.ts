@@ -4,8 +4,8 @@ import { CreateSupportRequestInput } from './dto/create-support-request.input';
 import { SupportRequest } from './models/support-request.model';
 
 @Injectable()
-export class SupportService {
-  private readonly logger = new Logger(SupportService.name);
+export class SupportsService {
+  private readonly logger = new Logger(SupportsService.name);
   constructor(private prisma: PrismaService) {}
 
   async createSupportRequest(

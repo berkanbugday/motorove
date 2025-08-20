@@ -1998,6 +1998,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNDeviceInfo (14.0.4):
+    - React-Core
   - RNFBApp (22.2.0):
     - Firebase/CoreOnly (= 11.12.0)
     - React-Core
@@ -2402,6 +2404,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
+  - RNDeviceInfo (from `../../../node_modules/react-native-device-info`)
   - "RNFBApp (from `../../../node_modules/@react-native-firebase/app`)"
   - "RNFBInAppMessaging (from `../../../node_modules/@react-native-firebase/in-app-messaging`)"
   - "RNFBMessaging (from `../../../node_modules/@react-native-firebase/messaging`)"
@@ -2592,6 +2595,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon"
   RNCAsyncStorage:
     :path: "../../../node_modules/@react-native-async-storage/async-storage"
+  RNDeviceInfo:
+    :path: "../../../node_modules/react-native-device-info"
   RNFBApp:
     :path: "../../../node_modules/@react-native-firebase/app"
   RNFBInAppMessaging:
@@ -2708,6 +2713,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 56af652dbd9ffd95a2c4d47eee9f054e892151ac
   ReactCommon: aa48e4fddbc6a0afa19dca39a1b6016c150b5db4
   RNCAsyncStorage: 39c42c1e478e1f5166d1db52b5055e090e85ad66
+  RNDeviceInfo: d863506092aef7e7af3a1c350c913d867d795047
   RNFBApp: 2b2bb0f17eb6732e2e90d9c57bfde443cd7fc681
   RNFBInAppMessaging: cbe171c23ef01c05a68f359b416a97cdc36579f9
   RNFBMessaging: 4627e84e9e363953357dd122543e4223c49e6bc1

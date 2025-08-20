@@ -24,7 +24,7 @@ import { EventsModule } from './events/events.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { UserSettingsModule } from './user-settings/user-settings.module';
 import { BusinessesModule } from './businesses/businesses.module';
-import { SupportModule } from './support/support.module';
+import { SupportsModule } from './supports/supports.module';
 
 @Module({
   imports: [
@@ -76,7 +76,7 @@ import { SupportModule } from './support/support.module';
     AddressesModule,
     UserSettingsModule,
     BusinessesModule,
-    SupportModule,
+    SupportsModule,
   ],
   controllers: [AppController],
   providers: [

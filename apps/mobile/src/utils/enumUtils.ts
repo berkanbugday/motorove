@@ -16,6 +16,7 @@ import {
   RoadType,
   EquipmentType,
   SocialMediaPlatform,
+  SupportCategory,
 } from '@motorove/shared';
 import {DropdownItem} from '@components/Dropdown/types';
 import {i18n} from '@/i18n';
@@ -157,5 +158,9 @@ export class EnumUtils {
 
   static getGenderDropdownOptions(): DropdownItem[] {
     return this.getDropdownOptions(Gender, 'enums.gender');
+  }
+
+  static getSupportCategories(): DropdownItem[] {
+    return this.getDropdownOptions(SupportCategory, 'enums.supportCategory');
   }
 }

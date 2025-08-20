@@ -1,5 +1,5 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { SupportService } from './support.service';
+import { SupportsService } from './supports.service';
 import { SupportRequest } from './models/support-request.model';
 import { CreateSupportRequestInput } from './dto/create-support-request.input';
 import { UseGuards } from '@nestjs/common';
@@ -8,8 +8,8 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
 
 @Resolver(() => SupportRequest)
-export class SupportResolver {
-  constructor(private readonly supportService: SupportService) {}
+export class SupportsResolver {
+  constructor(private readonly supportsService: SupportsService) {}
 
   @Mutation(() => Boolean)
   @UseGuards(JwtGuard)
@@ -17,6 +17,6 @@ export class SupportResolver {
     @Args('input') input: CreateSupportRequestInput,
     @CurrentUser() user: User,
   ): Promise<boolean> {
-    return this.supportService.createSupportRequest(input, user.id);
+    return this.supportsService.createSupportRequest(input, user.id);
   }
 }
