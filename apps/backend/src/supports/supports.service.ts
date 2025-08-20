@@ -15,10 +15,7 @@ export class SupportsService {
     try {
       const supportRequest = (await this.prisma.supportRequest.create({
         data: {
-          category: input.category,
-          subject: input.subject,
-          message: input.message,
-          deviceInfo: input.deviceInfo,
+          ...input,
           createdById: userId,
         },
       })) as SupportRequest;

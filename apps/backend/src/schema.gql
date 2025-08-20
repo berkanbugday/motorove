@@ -265,7 +265,7 @@ input CreatePostInput {
 
 input CreateSupportRequestInput {
   category: SupportCategory!
-  deviceInfo: JSONObject!
+  deviceInfo: JSON!
   message: String!
   subject: String!
 }
@@ -656,11 +656,6 @@ enum Interest {
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
-
-"""
-The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSONObject
 
 """Supported languages in the application"""
 enum Language {

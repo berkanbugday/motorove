@@ -10,22 +10,21 @@ import {ICreateSupportRequest} from '@motorove/shared';
 /**
  * Get device information for troubleshooting
  */
-const getDeviceInfo = (): object => {
+const getDeviceInfo = (): Record<string, string> => {
   try {
-    return {
-      platform: Platform.OS,
-      platformVersion: Platform.Version,
-      brand: DeviceInfo.getBrand(),
-      model: DeviceInfo.getModel(),
-      appVersion: DeviceInfo.getVersion(),
-      buildNumber: DeviceInfo.getBuildNumber(),
+    const deviceInfo = {
+      platform: Platform.OS.toString(),
+      platformVersion: Platform.Version.toString(),
+      brand: DeviceInfo.getBrand().toString(),
+      model: DeviceInfo.getModel().toString(),
+      appVersion: DeviceInfo.getVersion().toString(),
+      buildNumber: DeviceInfo.getBuildNumber().toString(),
     };
+
+    return deviceInfo;
   } catch (error) {
     loggingService.error('Error getting device info:', error);
-    return {
-      platform: Platform.OS,
-      platformVersion: Platform.Version,
-    };
+    return {} as Record<string, string>;
   }
 };
 
@@ -62,16 +61,14 @@ export const useCreateSupportRequest = (onSuccess?: () => void) => {
     },
   );
 
-  const createSupportRequest = async (requestData: ICreateSupportRequest) => {
+  const createSupportRequest = async (input: ICreateSupportRequest) => {
     try {
-      const input = {
-        ...requestData,
-        deviceInfo: getDeviceInfo(),
-      };
-
       const result = await createSupportRequestMutation({
         variables: {
-          input,
+          input: {
+            ...input,
+            deviceInfo: getDeviceInfo(),
+          },
         },
       });
 

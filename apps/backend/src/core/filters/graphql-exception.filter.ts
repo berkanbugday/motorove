@@ -16,7 +16,6 @@ interface GqlContext {
     user?: {
       id: string;
       email?: string;
-      username?: string;
     };
   };
   operation?: {
@@ -50,7 +49,6 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       this.sentryService.setUser({
         id: request.user.id,
         email: request.user.email,
-        username: request.user.username,
       });
     }
 
@@ -140,7 +138,6 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
         safeContext.user = {
           id: context.req.user.id,
           email: context.req.user.email,
-          username: context.req.user.username,
         };
       }
 

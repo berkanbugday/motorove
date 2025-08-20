@@ -5,5 +5,5 @@ export interface SupportRequest extends IBase {
   category: SupportCategory;
   subject: string;
   message: string;
-  deviceInfo: Record<string, any>;
+  deviceInfo: Record<string, string>;
 }

@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { BaseModel } from '../../core/models/base.model';
 import { SupportCategory } from '../../enums/models/support-category.enum';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import { GraphQLJSON } from 'graphql-type-json';
 
 @ObjectType()
 export class SupportRequest extends BaseModel {
@@ -14,6 +14,6 @@ export class SupportRequest extends BaseModel {
   @Field()
   message: string;
 
-  @Field(() => GraphQLJSONObject)
-  deviceInfo: Record<string, any>;
+  @Field(() => GraphQLJSON)
+  deviceInfo: Record<string, string>;
 }
