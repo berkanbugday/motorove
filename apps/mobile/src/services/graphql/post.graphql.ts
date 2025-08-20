@@ -78,7 +78,6 @@ export const REMOVE_POST = gql`
 export const LIKE_POST = gql`
   mutation LikePost($postId: ID!) {
     likePost(postId: $postId) {
-      id
       postId
     }
   }
@@ -86,14 +85,15 @@ export const LIKE_POST = gql`
 
 export const UNLIKE_POST = gql`
   mutation UnlikePost($postId: ID!) {
-    unlikePost(postId: $postId)
+    unlikePost(postId: $postId) {
+      postId
+    }
   }
 `;
 
 export const SAVE_POST = gql`
   mutation SavePost($postId: ID!) {
     savePost(postId: $postId) {
-      id
       postId
     }
   }
@@ -101,6 +101,8 @@ export const SAVE_POST = gql`
 
 export const UNSAVE_POST = gql`
   mutation UnsavePost($postId: ID!) {
-    unsavePost(postId: $postId)
+    unsavePost(postId: $postId) {
+      postId
+    }
   }
 `;

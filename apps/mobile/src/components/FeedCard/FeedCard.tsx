@@ -338,6 +338,10 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     );
   };
 
+  const showLikedUsers = () => {
+    console.log('showLikedUsers');
+  };
+
   const renderCard = () => (
     <View style={[styles.container, style]} onLayout={handleLayout}>
       {/* Card Header */}
@@ -454,24 +458,31 @@ const FeedCard: React.FC<FeedCardProps> = props => {
       {/* Action Bar */}
       <View style={styles.actionBar}>
         {/* Like Button */}
-        <TouchableOpacity
-          onPress={handleLikePress}
-          style={[styles.actionButton, actionBarDisabled && {opacity: 0.8}]}
-          disabled={actionBarDisabled}>
-          <Animated.View style={{transform: [{scale: likeAnimatedValue}]}}>
-            <Icon
-              name={isLiked ? 'like-filled' : 'like'}
-              size={20}
+        <View style={styles.actionButton}>
+          <TouchableOpacity
+            onPress={handleLikePress}
+            style={actionBarDisabled && {opacity: 0.8}}
+            disabled={actionBarDisabled}>
+            <Animated.View style={{transform: [{scale: likeAnimatedValue}]}}>
+              <Icon
+                name={isLiked ? 'like-filled' : 'like'}
+                size={20}
+                color={isLiked ? colors.primary.main : colors.neutral.grey}
+              />
+            </Animated.View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={showLikedUsers}
+            style={actionBarDisabled && {opacity: 0.8}}
+            disabled={actionBarDisabled}>
+            <Typography
+              variant="caption"
               color={isLiked ? colors.primary.main : colors.neutral.grey}
-            />
-          </Animated.View>
-          <Typography
-            variant="caption"
-            color={isLiked ? colors.primary.main : colors.neutral.grey}
-            style={styles.actionText}>
-            {likeCount} {t('components.feedCard.likes')}
-          </Typography>
-        </TouchableOpacity>
+              style={styles.actionText}>
+              {likeCount} {t('components.feedCard.likes')}
+            </Typography>
+          </TouchableOpacity>
+        </View>
 
         {/* Comment Button */}
         <TouchableOpacity

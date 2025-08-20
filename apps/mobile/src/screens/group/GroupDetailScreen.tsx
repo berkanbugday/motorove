@@ -1397,6 +1397,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   infoContainer: {
+    paddingTop: rh(30),
     alignItems: 'center',
     gap: spacing.sm,
   },

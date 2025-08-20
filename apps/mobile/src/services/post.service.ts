@@ -272,7 +272,7 @@ export const useLikePost = () => {
         variables: {postId},
         optimisticResponse: {
           likePost: {
-            __typename: 'Post',
+            __typename: 'PostDto',
             id: postId,
             postId: postId,
             isLiked: true,
@@ -281,7 +281,7 @@ export const useLikePost = () => {
         },
         update: cache => {
           // Find all normalized Post objects that match this id
-          const cacheId = cache.identify({__typename: 'Post', id: postId});
+          const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
             // Update the cache directly with the optimistic values
@@ -331,7 +331,7 @@ export const useUnlikePost = () => {
         variables: {postId},
         optimisticResponse: {
           unlikePost: {
-            __typename: 'Post',
+            __typename: 'PostDto',
             id: postId,
             postId: postId,
             isLiked: false,
@@ -340,7 +340,7 @@ export const useUnlikePost = () => {
         },
         update: cache => {
           // Find all normalized Post objects that match this id
-          const cacheId = cache.identify({__typename: 'Post', id: postId});
+          const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
             // Update the cache directly with the optimistic values
@@ -392,7 +392,7 @@ export const useSavePost = () => {
         variables: {postId},
         optimisticResponse: {
           savePost: {
-            __typename: 'Post',
+            __typename: 'PostDto',
             id: postId,
             postId: postId,
             isSaved: true,
@@ -400,7 +400,7 @@ export const useSavePost = () => {
         },
         update: cache => {
           // Find all normalized Post objects that match this id
-          const cacheId = cache.identify({__typename: 'Post', id: postId});
+          const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
             // Update the cache directly with the optimistic values
@@ -448,7 +448,7 @@ export const useUnsavePost = () => {
         variables: {postId},
         optimisticResponse: {
           unsavePost: {
-            __typename: 'Post',
+            __typename: 'PostDto',
             id: postId,
             postId: postId,
             isSaved: false,
@@ -456,7 +456,7 @@ export const useUnsavePost = () => {
         },
         update: cache => {
           // Find all normalized Post objects that match this id
-          const cacheId = cache.identify({__typename: 'Post', id: postId});
+          const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
             // Update the cache directly with the optimistic values
