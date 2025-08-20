@@ -265,7 +265,7 @@ input CreatePostInput {
 
 input CreateSupportRequestInput {
   category: SupportCategory!
-  deviceInfo: JSON!
+  deviceInfo: JSON
   message: String!
   subject: String!
 }

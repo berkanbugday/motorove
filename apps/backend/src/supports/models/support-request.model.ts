@@ -14,6 +14,6 @@ export class SupportRequest extends BaseModel {
   @Field()
   message: string;
 
-  @Field(() => GraphQLJSON)
-  deviceInfo: Record<string, string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  deviceInfo?: Record<string, string>;
 }

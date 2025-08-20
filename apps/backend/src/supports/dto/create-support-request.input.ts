@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { GraphQLJSON } from 'graphql-type-json';
 import { SupportCategory } from '../../enums/models/support-category.enum';
 import { ICreateSupportRequest } from '@motorove/shared';
@@ -21,7 +21,7 @@ export class CreateSupportRequestInput implements ICreateSupportRequest {
   @IsNotEmpty()
   message: string;
 
-  @Field(() => GraphQLJSON)
-  @IsNotEmpty()
-  deviceInfo: Record<string, string>;
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  deviceInfo?: Record<string, string>;
 }

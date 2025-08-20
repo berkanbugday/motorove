@@ -4,5 +4,5 @@ export interface ICreateSupportRequest {
   category: SupportCategory;
   subject: string;
   message: string;
-  deviceInfo: Record<string, string>;
+  deviceInfo?: Record<string, string>;
 }

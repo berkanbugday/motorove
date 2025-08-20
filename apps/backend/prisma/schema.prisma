@@ -922,7 +922,7 @@ model SupportRequest {
   category   SupportCategory
   subject    String
   message    String
-  deviceInfo Json
+  deviceInfo Json?
 
   // Base model fields
   createdById String

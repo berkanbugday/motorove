@@ -78,7 +78,7 @@ export const SupportScreen = () => {
         category: data.category as SupportCategory,
         subject: data.subject,
         message: data.message,
-        deviceInfo: {}, // This will be populated by the service
+        deviceInfo: {},
       };
 
       // Call the createSupportRequest method
@@ -167,11 +167,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
   },
-  scrollContent: {
-    flexGrow: 1,
-  },
+
   content: {
-    flex: 1,
     padding: spacing.md,
   },
   screenTitle: {
