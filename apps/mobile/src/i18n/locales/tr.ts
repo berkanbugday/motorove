@@ -184,6 +184,7 @@ export default {
     // Posts screens
     post: {
       create_post: 'Gönderi Oluştur',
+      edit_post: 'Gönderi Düzenle',
       post_created: 'Gönderi başarıyla oluşturuldu',
       post_created_failed: 'Gönderi oluşturulamadı. Lütfen tekrar deneyin.',
       post_updated: 'Gönderi başarıyla güncellendi',

@@ -96,22 +96,6 @@ export class PostsService {
         updatedBy: true,
         group: true,
         addresses: true,
-        comments: {
-          where: { isActive: true, parentId: null },
-          include: {
-            createdBy: true,
-            updatedBy: true,
-            // replies: {
-            //   where: { isActive: true },
-            //   include: {
-            //     createdBy: true,
-            //     updatedBy: true,
-            //   },
-            //   orderBy: { createdAt: 'asc' },
-            // },
-          },
-          orderBy: { createdAt: 'desc' },
-        },
       },
     });
 
@@ -184,7 +168,6 @@ export class PostsService {
         updatedBy: true,
         group: true,
         addresses: true,
-        comments: true,
       },
     });
 
@@ -209,7 +192,6 @@ export class PostsService {
           updatedBy: true,
           group: true,
           addresses: true,
-          comments: true,
         },
       });
 
@@ -325,7 +307,6 @@ export class PostsService {
         updatedBy: true,
         group: true,
         addresses: true,
-        comments: true,
       },
     });
 
@@ -358,7 +339,6 @@ export class PostsService {
           updatedBy: true,
           group: true,
           addresses: true,
-          comments: true,
         },
       });
 
@@ -414,7 +394,6 @@ export class PostsService {
         createdBy: true,
         updatedBy: true,
         group: true,
-        comments: true,
       },
     });
 
@@ -717,6 +696,7 @@ export class PostsService {
       id: prismaPost.id,
       content: prismaPost.content,
       images: processedImages,
+      groupId: prismaPost.group?.id,
       groupName: prismaPost.group?.name,
       addresses: prismaPost.addresses as AddressDto[],
       likesCount,

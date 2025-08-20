@@ -441,10 +441,10 @@ export const HomeScreen = ({navigation}: Props) => {
       // Create labels from post data
       const labels = [];
 
-      if (post.groupName) {
+      if (post.groupId) {
         labels.push({
           icon: 'users-filled' as IconName,
-          text: post.groupName,
+          text: post.groupName || '',
         });
       }
 

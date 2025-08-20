@@ -15,6 +15,7 @@ export const POST_FRAGMENT = gql`
       ...UserFragment
     }
     createdAt
+    groupId
     groupName
     addresses {
       ...AddressFragment
@@ -42,13 +43,6 @@ export const GET_POST = gql`
   query GetPost($id: ID!) {
     post(id: $id) {
       ...PostFragment
-      comments {
-        id
-        content
-        createdAt
-        updatedAt
-        createdById
-      }
     }
   }
   ${POST_FRAGMENT}

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   View,
   TextInput,
@@ -11,11 +11,11 @@ import {
   TextStyle,
   ActivityIndicator,
   FlatList,
+  BackHandler,
+  Platform,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {colors, spacing, radius, typography} from '@theme';
-import {Icon} from '@components/Icon';
-import {TopHeaderBar} from '@components/TopHeaderBar';
 import {useAuth} from '@contexts/AuthContext';
 import {
   Button,
@@ -23,20 +23,23 @@ import {
   DropdownItem,
   Dropdown,
   Subtitle,
-  SelectLocationMap,
   Body,
   showToast,
+  SelectLocationMap,
+  Icon,
+  TopHeaderBar,
+  GroupCard,
+  openBottomSheet,
+  closeBottomSheet,
 } from '@components';
-import {GroupCard} from '@components/GroupCard';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useUpdatePost, useGetPost} from '@services/post.service';
-import {PostAddressInput, UpdatePostInput} from '../../types/models/post.model';
-import {openBottomSheet, closeBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
-import {GroupPrivacy} from '@motorove/shared';
+import {ICreateAddress, AddressType, GroupPrivacy} from '@motorove/shared';
+import {useLanguage} from '@contexts/LanguageContext';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
 
@@ -57,12 +60,7 @@ export const EditPostScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [location, setLocation] = useState<{
-    latitude?: number;
-    longitude?: number;
-    addresses: PostAddressInput[];
-  }>({addresses: []});
+  const [location, setLocation] = useState<ICreateAddress[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     id: string;
     name: string;
@@ -81,11 +79,30 @@ export const EditPostScreen = () => {
 
   const {user} = useAuth();
   const insets = useSafeAreaInsets();
+  const {language} = useLanguage();
 
   // Use the updatePost hook from PostService
-  const {updatePost} = useUpdatePost(() => {
+  const {updatePost, loading: isLoading} = useUpdatePost(() => {
     navigation.goBack();
   });
+
+  // Set navigation options to disable iOS swipe back gesture when dirty
+  useLayoutEffect(() => {
+    if (Platform.OS === 'ios') {
+      closeBottomSheet();
+    }
+
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          closeBottomSheet();
+          return false; // Allow default behavior
+        },
+      );
+      return () => backHandler.remove();
+    }
+  }, [navigation]);
 
   // Initialize form with post data when it loads
   useEffect(() => {
@@ -93,16 +110,17 @@ export const EditPostScreen = () => {
       setPostText(post.content || '');
 
       // Set location if available
-      if (post.latitude && post.longitude) {
-        setLocation({
-          latitude: post.latitude,
-          longitude: post.longitude,
-          addresses: post.addresses || [],
+      if (post.addresses && post.addresses.length > 0) {
+        // Remove __typename, id property from addresses
+        const cleanAddresses = post.addresses.map(addr => {
+          const {__typename, id, ...cleanAddr} = addr;
+          return cleanAddr;
         });
+        setLocation(cleanAddresses);
       }
 
       // Set privacy and group if post is in a group
-      if (post.group) {
+      if (post.groupId) {
         // Find the group option in privacyOptions
         const groupOption = privacyOptions.find(
           option => option.value === GroupPrivacy.PRIVATE,
@@ -112,8 +130,8 @@ export const EditPostScreen = () => {
         }
 
         setSelectedGroup({
-          id: post.group.id,
-          name: post.group.name,
+          id: post.groupId || '',
+          name: post.groupName || '',
         });
       } else {
         // Find the public option in privacyOptions
@@ -152,10 +170,21 @@ export const EditPostScreen = () => {
     }
   };
 
+  useEffect(() => {
+    if (
+      !loadingGroups &&
+      selectedPrivacy?.value === GroupPrivacy.PRIVATE &&
+      !selectedGroup
+    ) {
+      openGroupSelectionBottomSheet();
+    }
+  }, [loadingGroups, selectedPrivacy, selectedGroup]);
+
   const openGroupSelectionBottomSheet = () => {
     openBottomSheet({
       title: t('screens.post.select_group'),
       closeButtonPosition: 'top-left',
+      closeOnBackdropPress: false,
       content: (
         <>
           {loadingGroups ? (
@@ -165,7 +194,7 @@ export const EditPostScreen = () => {
               <Icon name="error" size={24} color={colors.status.error} />
               <Body>{t('screens.group.could_not_load_groups')}</Body>
               <Button
-                title={t('common.try_again')}
+                title="Retry"
                 variant="primary"
                 onPress={() => refetchJoinedGroups()}
                 size="small"
@@ -185,8 +214,8 @@ export const EditPostScreen = () => {
                   logoSource={item.logo ? {uri: item.logo} : null}
                   name={item.name}
                   location={item.city?.value}
-                  tags={item.tags?.map(tag => tag.value) || []}
-                  currentMembers={item.memberships?.length || 0}
+                  // tags={item.tags?.map(tag => tag.name) || []}
+                  currentMembers={item.membersCount || 0}
                   membersCapacity={item.membersCapacity || undefined}
                   privacy={item.privacy}
                   isMember={true}
@@ -203,6 +232,15 @@ export const EditPostScreen = () => {
         </>
       ),
       snapPoint: 'full',
+      onClose: () => {
+        if (!selectedGroup) {
+          setSelectedPrivacy(
+            privacyOptions.find(
+              option => option.value === GroupPrivacy.PUBLIC,
+            ) || null,
+          );
+        }
+      },
     });
   };
 
@@ -266,14 +304,16 @@ export const EditPostScreen = () => {
       title: t('screens.post.select_location'),
       content: (
         <SelectLocationMap
+          initialAddress={location[0]}
+          addressType={AddressType.POST_LOCATION}
           onLocationSelect={selectedLocation => {
-            setLocation({
-              ...selectedLocation,
-              addresses: selectedLocation.addresses || [],
-            });
+            setLocation(selectedLocation);
             closeBottomSheet();
           }}
-          onClose={() => closeBottomSheet()}
+          onClose={() => {
+            setLocation([]);
+            closeBottomSheet();
+          }}
         />
       ),
       snapPoint: 'full',
@@ -293,26 +333,18 @@ export const EditPostScreen = () => {
     }
 
     try {
-      setIsLoading(true);
-
       // Use base64 encoded images if available, otherwise fall back to URIs
       const imageData = selectedImages.map(img => img.base64 || img.uri);
 
       // Create update post input data
-      const updatePostInput: UpdatePostInput = {
+      const updatePostInput = {
         id: postId,
         content: postText.trim(),
-        images: imageData.length > 0 ? imageData : undefined,
-        ...(location.latitude && location.longitude
-          ? {
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }
-          : {latitude: null, longitude: null}),
+        images: imageData.length > 0 ? imageData : null,
+        addresses: location.length > 0 ? location : null,
         ...(selectedPrivacy?.value === GroupPrivacy.PRIVATE && selectedGroup
           ? {groupId: selectedGroup.id}
           : {groupId: null}),
-        addresses: location.addresses,
       };
 
       // Call the updatePost function from the hook
@@ -322,8 +354,6 @@ export const EditPostScreen = () => {
     } catch (error) {
       loggingService.error('Error updating post:', error);
       // Error toast is already handled by the hook
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -338,7 +368,7 @@ export const EditPostScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('screens.post.edit')}
+        title={t('screens.post.edit_post')}
         showBackButton
         showShadow={false}
         onBackPress={handleGoBack}
@@ -349,7 +379,11 @@ export const EditPostScreen = () => {
           {/* User Profile Section */}
           <View style={styles.profileSection}>
             <Image
-              source={{uri: 'https://picsum.photos/id/1005/100/100'}}
+              source={
+                user?.avatar
+                  ? {uri: user?.avatar}
+                  : require('@assets/images/default_avatar.png')
+              }
               style={styles.avatar as ImageStyle}
             />
             <View style={styles.profileInfo}>
@@ -360,6 +394,7 @@ export const EditPostScreen = () => {
                 data={privacyOptions}
                 placeholder={t('screens.post.select_privacy')}
                 onSelect={handlePrivacyChange}
+                showClearButton={false}
                 selectedItem={selectedPrivacy}
                 containerStyle={styles.privacySelector}
                 inputStyle={styles.privacyInput}
@@ -382,7 +417,7 @@ export const EditPostScreen = () => {
           {/* Post Input Field */}
           <TextInput
             style={styles.postInput as TextStyle}
-            placeholder={t('screens.post.whats_on_your_mind')}
+            placeholder={t('screens.post.what_do_you_want_to_write')}
             placeholderTextColor={colors.neutral.grey}
             multiline
             value={postText}
@@ -428,9 +463,9 @@ export const EditPostScreen = () => {
               onPress={handleAddLocation}
               textStyle={styles.actionButtonText}
               title={
-                location.addresses.length > 0
-                  ? location.addresses.find(
-                      address => address.language === 'en',
+                location.length > 0
+                  ? location.find(
+                      address => address.language.toLowerCase() === language,
                     )?.address
                   : t('screens.post.add_location')
               }
@@ -445,7 +480,7 @@ export const EditPostScreen = () => {
           size="medium"
           shape="round"
           onPress={handleUpdate}
-          title={t('common.update')}
+          title={t('common.submit')}
           loading={isLoading}
           disabled={
             isLoading ||
@@ -471,7 +506,7 @@ const styles = StyleSheet.create({
   },
   topHeaderBar: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.secondary.light,
+    borderBottomColor: colors.secondary.main,
   },
   profileSection: {
     flexDirection: 'row',
@@ -481,7 +516,8 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: radius.round,
-    backgroundColor: colors.secondary.light,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
   profileInfo: {
     width: '80%',
@@ -545,7 +581,7 @@ const styles = StyleSheet.create({
   },
   actionButtonsContainer: {
     borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
+    borderTopColor: colors.secondary.light,
     alignItems: 'flex-start',
   },
   actionButtonText: {

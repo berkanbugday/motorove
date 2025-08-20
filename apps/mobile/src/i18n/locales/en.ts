@@ -182,6 +182,7 @@ export default {
     // Posts screens
     post: {
       create_post: 'Create Post',
+      edit_post: 'Edit Post',
       post_created: 'Post created successfully',
       post_created_failed: 'Post creation failed. Please try again.',
       post_updated: 'Post updated successfully',

@@ -1,6 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Group } from '../../groups/models/group.model';
-import { Comment } from '../../comments/models/comment.model';
 import { BaseModel } from '../../core/models/base.model';
 import { Address } from '../../addresses/models/address.model';
 import { PostLike } from './post-like.model';
@@ -19,9 +18,6 @@ export class Post extends BaseModel {
 
   @Field({ nullable: true })
   groupId?: string;
-
-  @Field(() => [Comment], { nullable: true })
-  comments?: Comment[];
 
   @Field(() => [PostLike], { nullable: true })
   likes?: PostLike[];

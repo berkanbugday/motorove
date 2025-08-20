@@ -800,7 +800,6 @@ enum NotificationType {
 
 type Post {
   addresses: [Address!]
-  comments: [Comment!]
   content: String!
   createdAt: DateTime!
   createdBy: User!
@@ -823,6 +822,7 @@ type PostDto {
   content: String!
   createdAt: DateTime!
   createdBy: UserDto!
+  groupId: String
   groupName: String
   id: ID!
   images: [String!]

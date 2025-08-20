@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
-import { AddressDto } from 'src/addresses/dto/address.dto';
+import { AddressDto } from '../../addresses/dto/address.dto';
 import { IPost } from '@motorove/shared';
 
 @ObjectType()
@@ -53,6 +53,11 @@ export class PostDto implements IPost {
   @Field()
   @IsDate()
   createdAt: Date;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  groupId?: string;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

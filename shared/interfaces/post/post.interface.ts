@@ -11,6 +11,7 @@ export interface IPost {
   isSaved: boolean;
   createdBy: IUser;
   createdAt: Date;
+  groupId?: string;
   groupName?: string;
   addresses?: IAddress[];
 }
