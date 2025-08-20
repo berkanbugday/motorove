@@ -42,7 +42,7 @@ export const useCreateSupportRequest = (onSuccess?: () => void) => {
         showToast({
           type: 'success',
           text1: t('common.success'),
-          text2: t('screens.support.request_created_successfully'),
+          text2: t('screens.support.success_created_support_request'),
         });
 
         if (onSuccess) {
@@ -55,7 +55,8 @@ export const useCreateSupportRequest = (onSuccess?: () => void) => {
           type: 'error',
           text1: t('common.error'),
           text2:
-            errorObj.message || t('screens.support.error_creating_request'),
+            errorObj.message ||
+            t('screens.support.error_creating_support_request'),
         });
       },
     },

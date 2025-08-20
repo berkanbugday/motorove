@@ -184,7 +184,7 @@ export const MenuScreen = () => {
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.menu.contact_support'),
+          title: t('screens.menu.support_request'),
           onPress: () => {
             navigation.navigate('Support');
           },

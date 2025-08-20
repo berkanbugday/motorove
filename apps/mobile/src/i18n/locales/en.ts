@@ -29,7 +29,6 @@ export default {
     remove: 'Remove',
     yes: 'Yes',
     no: 'No',
-    required: 'Required',
     optional: 'Optional',
     and: 'and',
     success: 'Success',
@@ -576,7 +575,7 @@ export default {
       notification_settings: 'Notification Settings',
       privacy_settings: 'Privacy Settings',
       support_legal: 'Support & Legal',
-      contact_support: 'Contact Support',
+      support_request: 'Support Request',
       terms_of_service: 'Terms of Service',
       privacy_policy: 'Privacy Policy',
       invite_friends: 'Invite Friends',
@@ -584,31 +583,14 @@ export default {
     },
 
     support: {
-      title: 'Contact Support',
       heading: 'How can we help you?',
       description:
-        "Fill out this form to contact our support team. We'll respond as soon as possible.",
-      category: 'Issue Category',
-      technical_support: 'Technical Support',
-      account_issues: 'Account Issues',
-      feedback: 'Feedback',
-      other: 'Other',
+        "Fill out this form to contact our support team. We'll help you as soon as possible.",
+      category: 'Category',
       subject: 'Subject',
-      subject_placeholder: 'Brief description of your issue',
-      subject_required: 'Subject is required',
       message: 'Message',
-      message_placeholder: 'Please provide details about your issue',
-      message_required: 'Message is required',
-      message_too_short: 'Message is too short (minimum 10 characters)',
-      email: 'Email Address',
-      email_placeholder: 'Your email address for response',
-      email_required: 'Email is required',
-      invalid_email: 'Please enter a valid email address',
-      submit: 'Submit Request',
-      success_title: 'Request Submitted',
-      success_message:
-        "Your support request has been submitted successfully. We'll get back to you soon.",
-      submission_error: 'Failed to submit support request. Please try again.',
+      success_created_support_request: 'Support request created successfully',
+      error_creating_support_request: 'Failed to create support request',
     },
 
     privacySetting: {
@@ -739,6 +721,19 @@ export default {
 
   // Validation messages
   validation: {
+    support: {
+      category: {
+        required: 'Category is required',
+        select: 'Please select a category',
+      },
+      subject: {
+        required: 'Subject is required',
+      },
+      message: {
+        required: 'Message is required',
+        min_length: 'Message must be at least 10 characters',
+      },
+    },
     email: {
       required: 'Email is required',
       invalid: 'Email is invalid',

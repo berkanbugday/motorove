@@ -59,7 +59,7 @@ export const SupportScreen = () => {
   } = useForm<SupportFormValues>({
     resolver: zodResolver(supportRequestSchema),
     defaultValues: {
-      category: SupportCategory.OTHER,
+      category: '',
       subject: '',
       message: '',
     },
@@ -96,7 +96,7 @@ export const SupportScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('screens.support.title')}
+        title={t('screens.menu.support_request')}
         showBackButton
         showShadow={false}
         onBackPress={() => navigation.goBack()}
@@ -147,7 +147,7 @@ export const SupportScreen = () => {
       </SafeAreaView>
       <View style={styles.buttonContainer}>
         <Button
-          title={t('screens.support.submit')}
+          title={t('common.submit')}
           variant="dark"
           size="medium"
           shape="round"

@@ -31,7 +31,6 @@ export default {
     remove: 'Kaldır',
     yes: 'Evet',
     no: 'Hayır',
-    required: 'Zorunlu',
     optional: 'İsteğe Bağlı',
     and: 've',
     success: 'Başarılı',
@@ -570,7 +569,7 @@ export default {
       notification_settings: 'Bildirim Ayarları',
       privacy_settings: 'Gizlilik Ayarları',
       support_legal: 'Destek ve Yasal Bilgiler',
-      contact_support: 'Destek Talebi',
+      support_request: 'Destek Talebi',
       terms_of_service: 'Kullanım Şartları',
       privacy_policy: 'Gizlilik Politikası',
       invite_friends: 'Arkadaşlarını Davet Et',
@@ -578,31 +577,16 @@ export default {
     },
 
     support: {
-      title: 'Destek Talebi',
       heading: 'Size nasıl yardımcı olabiliriz?',
       description:
-        'Destek ekibimizle iletişime geçmek için bu formu doldurun. En kısa sürede size yanıt vereceğiz.',
-      category: 'Sorun Kategorisi',
-      technical_support: 'Teknik Destek',
-      account_issues: 'Hesap Sorunları',
-      feedback: 'Geri Bildirim',
-      other: 'Diğer',
+        'Destek ekibimizle iletişime geçmek için bu formu doldurun. En kısa sürede size yardımcı olacağız.',
+      category: 'Kategori',
       subject: 'Konu',
-      subject_placeholder: 'Sorununuzun kısa açıklaması',
-      subject_required: 'Konu gereklidir',
       message: 'Mesaj',
-      message_placeholder: 'Lütfen sorununuz hakkında detay verin',
-      message_required: 'Mesaj gereklidir',
-      message_too_short: 'Mesaj çok kısa (en az 10 karakter)',
-      email: 'E-posta Adresi',
-      email_placeholder: 'Yanıt için e-posta adresiniz',
-      email_required: 'E-posta gereklidir',
-      invalid_email: 'Lütfen geçerli bir e-posta adresi girin',
-      submit: 'İstek Gönder',
-      success_title: 'İstek Gönderildi',
-      success_message:
-        'Destek talebiniz başarıyla gönderildi. En kısa sürede size geri dönüş yapacağız.',
-      submission_error: 'Destek talebi gönderilemedi. Lütfen tekrar deneyin.',
+      success_created_support_request:
+        'Destek talebiniz başarıyla oluşturuldu.',
+      error_creating_support_request:
+        'Destek talebi oluşturulurken hata oluştu.',
     },
 
     privacySetting: {
@@ -733,6 +717,19 @@ export default {
 
   // Validation messages
   validation: {
+    support: {
+      category: {
+        required: 'Kategori gereklidir',
+        select: 'Lütfen bir kategori seçin',
+      },
+      subject: {
+        required: 'Konu gereklidir',
+      },
+      message: {
+        required: 'Mesaj gereklidir',
+        min_length: 'Mesaj en az 10 karakter olmalıdır',
+      },
+    },
     email: {
       required: 'E-posta gereklidir',
       invalid: 'Geçersiz e-posta',
