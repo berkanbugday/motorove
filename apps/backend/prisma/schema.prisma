@@ -295,6 +295,15 @@ enum GroupTag {
   YOUNG_RIDERS
 }
 
+enum SupportCategory {
+  ACCOUNT
+  TECHNICAL
+  FEEDBACK
+  FEATURE_REQUEST
+  BUG_REPORT
+  OTHER
+}
+
 // Models
 model User {
   id                String   @id @default(uuid())
@@ -347,7 +356,11 @@ model User {
 
   // Following system relations
   followers UserFollowing[] @relation("UserFollowers")
-  following UserFollowing[] @relation("UserFollowing")
+
+  // Support requests
+  supportRequests        SupportRequest[]
+  updatedSupportRequests SupportRequest[] @relation("SupportRequestUpdatedBy")
+  following              UserFollowing[]  @relation("UserFollowing")
 
   // Event relations
   createdEvents       Event[]            @relation("EventCreatedBy")
@@ -902,4 +915,25 @@ model UserSetting {
 
   @@index([userId])
   @@index([notificationPermission])
+}
+
+model SupportRequest {
+  id         String          @id @default(uuid())
+  category   SupportCategory
+  subject    String
+  message    String
+  deviceInfo Json
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation(name: "SupportRequestUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([category])
+  @@index([createdById])
+  @@index([isActive])
 }

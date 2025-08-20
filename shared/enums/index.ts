@@ -20,3 +20,4 @@ export * from "./social-media-platform.enum";
 export * from "./interest.enum";
 export * from "./notification-permission.enum";
 export * from "./notification-channel.enum";
+export * from "./support-category.enum";

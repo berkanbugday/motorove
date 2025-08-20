@@ -263,6 +263,13 @@ input CreatePostInput {
   images: [String!]
 }
 
+input CreateSupportRequestInput {
+  category: SupportCategory!
+  deviceInfo: JSONObject!
+  message: String!
+  subject: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -650,6 +657,11 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
 """Supported languages in the application"""
 enum Language {
   EN
@@ -685,6 +697,7 @@ type Mutation {
   createGroup(input: CreateGroupInput!): GroupDto!
   createNotification(input: CreateNotificationInput!): NotificationDto!
   createPost(input: CreatePostInput!): PostDto!
+  createSupportRequest(input: CreateSupportRequestInput!): Boolean!
   deleteAll: [NotificationDto!]!
   deleteNotification(id: ID!): NotificationDto!
   followUser(userId: ID!): ApprovalStatus!
@@ -957,6 +970,16 @@ enum SocialMediaPlatform {
   TIKTOK
   TWITTER
   YOUTUBE
+}
+
+"""Different categories of support requests"""
+enum SupportCategory {
+  ACCOUNT
+  BUG_REPORT
+  FEATURE_REQUEST
+  FEEDBACK
+  OTHER
+  TECHNICAL
 }
 
 input UpdateAddressInput {
