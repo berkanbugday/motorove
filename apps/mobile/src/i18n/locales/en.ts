@@ -59,6 +59,7 @@ export default {
     unfollow: 'Unfollow',
     pending_approval: 'Pending Approval',
     not_now: 'Not Now',
+    view_all: 'View All',
   },
 
   // Bottom tabs navigation items
@@ -177,6 +178,11 @@ export default {
       suggested_users: 'Suggested Users',
       recent_activity: 'Recent Activity',
       view_all: 'View All',
+      hello: 'Hello,',
+      recommended_route_of_the_week: 'Recommended Route of the Week',
+      upcoming_events: 'Upcoming Events',
+      shared_posts: 'Shared Posts',
+      no_posts_found: 'No posts found',
     },
 
     // Posts screens
@@ -189,28 +195,12 @@ export default {
       post_updated_failed: 'Post update failed. Please try again.',
       post_deleted: 'Post deleted successfully',
       post_deleted_failed: 'Post deletion failed. Please try again.',
-      write_comment: 'Write a comment...',
-      comments: 'Comments',
-      likes: 'Likes',
-      no_comments: 'No comments yet',
-      add_comment: 'Add Comment',
-      share_post: 'Share',
-      report_post: 'Report',
+      report_post: 'Report Post',
       delete_confirmation: 'Are you sure you want to delete this post?',
-      edit_comment: 'Edit Comment',
-      delete_comment: 'Delete Comment',
-      reply_to_comment: 'Reply',
-      show_replies: 'Show Replies',
-      hide_replies: 'Hide Replies',
-      attach_photo: 'Attach Photo',
-      remove_photo: 'Remove Photo',
+      delete_post: 'Delete Post',
+      delete_post_confirmation:
+        'Are you sure you want to delete this post? This action cannot be undone.',
       select_location: 'Select Location',
-      post_visibility: 'Post Visibility',
-      public: 'Public',
-      friends_only: 'Friends Only',
-      private_post: 'Private',
-      hashtags: 'Hashtags',
-      mention_someone: 'Mention Someone',
       select_group: 'Select Group',
       no_groups_joined: "You haven't joined any groups yet",
       add_location: 'Add location',
@@ -225,7 +215,7 @@ export default {
 
     // Events screens
     event: {
-      create: 'Create Event',
+      create_event: 'Create Event',
       edit: 'Edit Event',
       join: 'Join Event',
       leave: 'Leave Event',
@@ -607,6 +597,13 @@ export default {
 
   // Components organized by component name
   components: {
+    feedCard: {
+      likes: 'Likes',
+      comments: 'Comments',
+      save: 'Save',
+      saved: 'Saved',
+      view_route: 'View Route',
+    },
     animatedInput: {
       optional: 'Optional',
     },

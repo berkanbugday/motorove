@@ -18,6 +18,7 @@ import {styles} from './FeedCard.styles';
 import {Button, Chip, Icon} from '@components';
 import {IconName} from '@components/Icon';
 import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
+import {useTranslation} from '@hooks/useTranslation';
 
 export interface FeedCardProps {
   /**
@@ -170,36 +171,38 @@ const {width: screenWidth} = Dimensions.get('window');
 /**
  * A reusable card component for feed items.
  */
-const FeedCard: React.FC<FeedCardProps> = ({
-  avatarSource,
-  userName,
-  timeAgo,
-  labels = [],
-  content,
-  images,
-  routeTitle,
-  onPress,
-  onRoutePress,
-  likeCount = 0,
-  commentCount = 0,
-  isLiked = false,
-  isCommented = false,
-  isSaved = false,
-  onLikePress,
-  onCommentPress,
-  onSavePress,
-  onMorePress,
-  dropdownMenu,
-  onDropdownSelect,
-  style,
-  contentStyle,
-  imageStyle,
-  overlayProps = {
-    color: colors.neutral.black,
-    opacity: 0.3,
-  },
-  actionBarDisabled = false,
-}) => {
+const FeedCard: React.FC<FeedCardProps> = props => {
+  const {t} = useTranslation();
+  const {
+    avatarSource,
+    userName,
+    timeAgo,
+    labels = [],
+    content,
+    images,
+    routeTitle,
+    onPress,
+    onRoutePress,
+    likeCount = 0,
+    commentCount = 0,
+    isLiked = false,
+    isCommented = false,
+    isSaved = false,
+    onLikePress,
+    onCommentPress,
+    onSavePress,
+    onMorePress,
+    dropdownMenu,
+    onDropdownSelect,
+    style,
+    contentStyle,
+    imageStyle,
+    overlayProps = {
+      color: colors.neutral.black,
+      opacity: 0.3,
+    },
+    actionBarDisabled = false,
+  } = props;
   const [activeSlide, setActiveSlide] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
   const carouselRef = useRef(null);
@@ -438,7 +441,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
             {routeTitle}
           </Typography>
           <Button
-            title="View Route"
+            title={t('components.feedCard.view_route')}
             variant="primary"
             shape="round"
             size="small"
@@ -466,7 +469,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
             variant="caption"
             color={isLiked ? colors.primary.main : colors.neutral.grey}
             style={styles.actionText}>
-            {likeCount}
+            {likeCount} {t('components.feedCard.likes')}
           </Typography>
         </TouchableOpacity>
 
@@ -484,7 +487,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
             variant="caption"
             color={isCommented ? colors.primary.main : colors.neutral.grey}
             style={styles.actionText}>
-            {commentCount}
+            {commentCount} {t('components.feedCard.comments')}
           </Typography>
         </TouchableOpacity>
 
@@ -511,7 +514,9 @@ const FeedCard: React.FC<FeedCardProps> = ({
             variant="caption"
             color={isSaved ? colors.primary.main : colors.neutral.grey}
             style={styles.actionText}>
-            {isSaved ? 'Saved' : 'Save'}
+            {isSaved
+              ? t('components.feedCard.saved')
+              : t('components.feedCard.save')}
           </Typography>
         </TouchableOpacity>
       </View>

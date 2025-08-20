@@ -59,6 +59,7 @@ export default {
     unfollow: 'Takibi Bırak',
     pending_approval: 'Onay Bekliyor',
     not_now: 'Şimdi Değil',
+    view_all: 'Tümünü Gör',
   },
 
   // Bottom tabs navigation items
@@ -179,6 +180,11 @@ export default {
       suggested_users: 'Önerilen Kullanıcılar',
       recent_activity: 'Son Aktiviteler',
       view_all: 'Tümünü Gör',
+      hello: 'Merhaba,',
+      recommended_route_of_the_week: 'Haftanın Önerilen Rotası',
+      upcoming_events: 'Yaklaşan Etkinlikler',
+      shared_posts: 'Paylaşılan Gönderiler',
+      no_posts_found: 'Gönderi bulunamadı',
     },
 
     // Posts screens
@@ -191,28 +197,12 @@ export default {
       post_updated_failed: 'Gönderi güncellenemedi. Lütfen tekrar deneyin.',
       post_deleted: 'Gönderi başarıyla silindi',
       post_deleted_failed: 'Gönderi silinemedi. Lütfen tekrar deneyin.',
-      write_comment: 'Yorum yaz...',
-      comments: 'Yorumlar',
-      likes: 'Beğeniler',
-      no_comments: 'Henüz yorum yok',
-      add_comment: 'Yorum Ekle',
-      share_post: 'Paylaş',
       report_post: 'Şikayet Et',
       delete_confirmation: 'Bu gönderiyi silmek istediğinize emin misiniz?',
-      edit_comment: 'Yorumu Düzenle',
-      delete_comment: 'Yorumu Sil',
-      reply_to_comment: 'Yanıtla',
-      show_replies: 'Yanıtları Göster',
-      hide_replies: 'Yanıtları Gizle',
-      attach_photo: 'Fotoğraf Ekle',
-      remove_photo: 'Fotoğrafı Kaldır',
+      delete_post: 'Gönderi Sil',
+      delete_post_confirmation:
+        'Bu gönderiyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
       select_location: 'Konum Seç',
-      post_visibility: 'Gönderi Görünürlüğü',
-      public: 'Herkese Açık',
-      friends_only: 'Sadece Arkadaşlar',
-      private_post: 'Özel',
-      hashtags: 'Etiketler',
-      mention_someone: 'Birini Etiketle',
       select_group: 'Grup Seç',
       no_groups_joined: 'Henüz hiçbir gruba katılmadınız',
       add_location: 'Konum Ekle',
@@ -227,7 +217,7 @@ export default {
 
     // Events screens
     event: {
-      create: 'Etkinlik Oluştur',
+      create_event: 'Etkinlik Oluştur',
       edit: 'Etkinlik Düzenle',
       join: 'Katıl',
       leave: 'Ayrıl',
@@ -604,6 +594,13 @@ export default {
 
   // Components organized by component name
   components: {
+    feedCard: {
+      likes: 'Beğeni',
+      comments: 'Yorum',
+      save: 'Kaydet',
+      saved: 'Kaydedildi',
+      view_route: 'Rotayı Görüntüle',
+    },
     animatedInput: {
       optional: 'Opsiyonel',
     },

@@ -34,11 +34,12 @@ import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts/AuthContext';
 import {useGetCount} from '@services/notification.service';
 import {useFocusEffect} from '@react-navigation/native';
+import {useLanguage} from '@contexts/LanguageContext';
 import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, Language} from '@motorove/shared';
+import {IPost} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -136,10 +137,10 @@ export const HomeScreen = ({navigation}: Props) => {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const {user} = useAuth();
   const {count: notificationsCount, refetch: refetchCount} = useGetCount();
+  const {language} = useLanguage();
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
   const {openBottomSheet} = useBottomSheet();
-
   // Use the real API hook for posts"
   const {
     posts,
@@ -338,12 +339,12 @@ export const HomeScreen = ({navigation}: Props) => {
         items.unshift(
           {
             id: 'edit',
-            label: 'Edit',
+            label: t('common.edit'),
             icon: 'pen',
           },
           {
             id: 'delete',
-            label: 'Delete',
+            label: t('common.delete'),
             icon: 'trash',
             isHighlighted: true,
           },
@@ -351,7 +352,7 @@ export const HomeScreen = ({navigation}: Props) => {
       } else {
         items.push({
           id: 'report',
-          label: 'Report',
+          label: t('screens.post.report_post'),
           icon: 'error',
           isHighlighted: true,
         });
@@ -380,15 +381,12 @@ export const HomeScreen = ({navigation}: Props) => {
           loggingService.info(`Delete post: ${postId}`);
           // Show confirmation dialog before deleting
           openBottomSheet({
-            title: 'Delete Post',
+            title: t('screens.post.delete_post'),
             closeButtonPosition: 'top-left',
             enableGestureControl: false,
             content: (
               <View>
-                <Body>
-                  Are you sure you want to delete this post? This action cannot
-                  be undone.
-                </Body>
+                <Body>{t('screens.post.delete_post_confirmation')}</Body>
                 <View
                   style={{
                     flexDirection: 'row',
@@ -398,13 +396,13 @@ export const HomeScreen = ({navigation}: Props) => {
                     paddingBottom: spacing.lg,
                   }}>
                   <Button
-                    title="Cancel"
+                    title={t('common.cancel')}
                     variant="outline"
                     onPress={() => closeBottomSheet()}
                     style={{width: '50%'}}
                   />
                   <Button
-                    title="Delete"
+                    title={t('common.delete')}
                     variant="primary"
                     onPress={() => {
                       removePost(postId);
@@ -452,8 +450,10 @@ export const HomeScreen = ({navigation}: Props) => {
         labels.push({
           icon: 'map-pin' as IconName,
           text:
-            post.addresses?.find(address => address.language === Language.EN)
-              ?.address || 'Location',
+            post.addresses?.find(
+              address =>
+                address.language.toLowerCase() === language.toLowerCase(),
+            )?.address || '',
         });
       }
 
@@ -524,13 +524,13 @@ export const HomeScreen = ({navigation}: Props) => {
   // Handle showing create options bottom sheet
   const handleShowCreateOptions = useCallback(() => {
     openBottomSheet({
-      title: 'Create',
+      title: t('common.create'),
       closeButtonPosition: 'top-left',
       enableGestureControl: false,
       content: (
         <View style={styles.createOptionsContainer}>
           <Button
-            title="Create Post"
+            title={t('screens.post.create_post')}
             iconName="pen"
             iconPosition="left"
             variant="text"
@@ -541,7 +541,7 @@ export const HomeScreen = ({navigation}: Props) => {
           />
           <View style={styles.divider} />
           <Button
-            title="Create Event"
+            title={t('screens.event.create_event')}
             iconName="calendar"
             iconPosition="left"
             variant="text"
@@ -559,7 +559,7 @@ export const HomeScreen = ({navigation}: Props) => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Hi there 👋🏻"
+        title={t('screens.home.hello')}
         subtitle={`${user?.firstName || ''} ${user?.lastName || ''}`}
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
@@ -629,7 +629,7 @@ export const HomeScreen = ({navigation}: Props) => {
             {/* Recommended Routes Section */}
             <View style={styles.sectionContainer}>
               <Subtitle weight="bold" style={styles.sectionTitle}>
-                Recommended Route of the Week
+                {t('screens.home.recommended_route_of_the_week')}
               </Subtitle>
               <FullImageCard
                 title={currentRoute.title}
@@ -645,12 +645,12 @@ export const HomeScreen = ({navigation}: Props) => {
             <View style={styles.sectionContainer}>
               <View style={styles.sectionHeaderContainer}>
                 <Subtitle weight="bold" style={styles.sectionTitle}>
-                  Upcoming Group Events
+                  {t('screens.home.upcoming_events')}
                 </Subtitle>
                 <Button
                   variant="text"
                   onPress={() => loggingService.info('View all')}
-                  title="View all"
+                  title={t('common.view_all')}
                 />
               </View>
               <FlatList
@@ -681,7 +681,7 @@ export const HomeScreen = ({navigation}: Props) => {
             {/* Posts Section with FlatList */}
             <View style={[styles.sectionContainer]}>
               <Subtitle weight="bold" style={styles.sectionTitle}>
-                Shared Posts
+                {t('screens.home.shared_posts')}
               </Subtitle>
 
               <View style={styles.postsContainer}>
@@ -707,7 +707,7 @@ export const HomeScreen = ({navigation}: Props) => {
                       </View>
                     ) : (
                       <View style={styles.emptyContainer}>
-                        <Body>No posts found</Body>
+                        <Body>{t('screens.home.no_posts_found')}</Body>
                       </View>
                     )
                   }
