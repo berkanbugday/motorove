@@ -58,6 +58,7 @@ export default {
     follow: 'Follow',
     unfollow: 'Unfollow',
     pending_approval: 'Pending Approval',
+    following: 'Following',
     not_now: 'Not Now',
     view_all: 'View All',
   },

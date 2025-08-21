@@ -51,7 +51,6 @@ import {
 } from '@services/post.service';
 import {relativeTime} from '@utils/dateUtils';
 import {useTranslation} from '@hooks/useTranslation';
-import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
 
 // Route data
 const recommendedRoutes = [
@@ -143,8 +142,6 @@ export const HomeScreen = ({navigation}: Props) => {
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
   const {openBottomSheet} = useBottomSheet();
-  const {followUser, loading: followLoading} = useFollowUser();
-  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser();
   // Use the real API hook for posts"
   const {
     posts,
@@ -368,32 +365,21 @@ export const HomeScreen = ({navigation}: Props) => {
   );
 
   // Render each user item
-  const renderUserItem = useCallback(
-    ({item}: {item: IUser}) => {
-      return (
-        <UserCard
-          user={item}
-          loading={followLoading || unfollowLoading}
-          onPress={() => {
-            if (item.id !== user?.id) {
-              closeBottomSheet();
-              navigateToScreen(navigation, 'Profile', {userId: item.id});
-            }
-          }}
-          handleFollowPress={async () => {
-            const status = await followUser(item.id);
-            item.followingStatus = status;
-          }}
-          handleUnfollowPress={async () => {
-            const status = await unfollowUser(item.id);
-            item.followingStatus = status;
-          }}
-          isOwnProfile={item.id === user?.id}
-        />
-      );
-    },
-    [followUser, unfollowUser],
-  );
+  const renderUserItem = useCallback(({item}: {item: IUser}) => {
+    return (
+      <UserCard
+        user={item}
+        onPress={() => {
+          if (item.id !== user?.id) {
+            closeBottomSheet();
+            navigateToScreen(navigation, 'Profile', {userId: item.id});
+          }
+        }}
+        showFollowButton={false}
+        showUnfollowButton={false}
+      />
+    );
+  }, []);
 
   // Show liked users in bottom sheet with current user first
   const handleLikesPress = useCallback(

@@ -15,6 +15,7 @@ import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
 import useTranslation from '@/hooks/useTranslation';
+import {useAuth} from '@contexts/AuthContext';
 
 // Hook for creating a post
 export const useCreatePost = (onSuccess?: () => void) => {
@@ -255,6 +256,7 @@ export const useGetPosts = (
 // Hook for liking a post
 export const useLikePost = () => {
   const {t} = useTranslation();
+  const {user} = useAuth();
   const [likePostMutation, {loading, error}] = useMutation(LIKE_POST, {
     onError: errorObj => {
       loggingService.error('Error liking post:', errorObj);
@@ -268,6 +270,12 @@ export const useLikePost = () => {
 
   const likePost = async (postId: string) => {
     try {
+      // Make sure we have the current user
+      if (!user) {
+        loggingService.error('Cannot like post: User not authenticated');
+        return null;
+      }
+
       const result = await likePostMutation({
         variables: {postId},
         optimisticResponse: {
@@ -291,6 +299,26 @@ export const useLikePost = () => {
                 isLiked: () => true,
                 likesCount: (existingCount = 0) =>
                   (existingCount as number) + 1,
+                likedUsers: (existingUsers = []) => {
+                  // Cast to array type since Apollo cache returns unknown
+                  const usersArray = existingUsers as Array<{__ref: string}>;
+
+                  // Check if user is already in the likedUsers array
+                  const userExists = usersArray.some(
+                    likedUser => likedUser.__ref === `UserDto:${user.id}`,
+                  );
+
+                  // If user is already in the array, return the existing array
+                  if (userExists) {
+                    return usersArray;
+                  }
+
+                  // Add the current user to the likedUsers array
+                  return [
+                    ...usersArray,
+                    {__ref: `UserDto:${user.id}`},
+                  ];
+                },
               },
             });
           }
@@ -314,6 +342,7 @@ export const useLikePost = () => {
 // Hook for unliking a post
 export const useUnlikePost = () => {
   const {t} = useTranslation();
+  const {user} = useAuth();
   const [unlikePostMutation, {loading, error}] = useMutation(UNLIKE_POST, {
     onError: errorObj => {
       loggingService.error('Error unliking post:', errorObj);
@@ -327,6 +356,12 @@ export const useUnlikePost = () => {
 
   const unlikePost = async (postId: string) => {
     try {
+      // Make sure we have the current user
+      if (!user) {
+        loggingService.error('Cannot unlike post: User not authenticated');
+        return null;
+      }
+
       const result = await unlikePostMutation({
         variables: {postId},
         optimisticResponse: {
@@ -351,6 +386,15 @@ export const useUnlikePost = () => {
                 likesCount: (existingCount = 0) => {
                   const currentCount = existingCount as number;
                   return Math.max(0, currentCount - 1); // Avoid negative counts
+                },
+                likedUsers: (existingUsers = []) => {
+                  // Cast to array type since Apollo cache returns unknown
+                  const usersArray = existingUsers as Array<{__ref: string}>;
+
+                  // Remove the current user from the likedUsers array
+                  return usersArray.filter(
+                    likedUser => likedUser.__ref !== `UserDto:${user.id}`,
+                  );
                 },
               },
             });

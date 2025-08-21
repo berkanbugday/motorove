@@ -58,6 +58,7 @@ export default {
     follow: 'Takip Et',
     unfollow: 'Takibi Bırak',
     pending_approval: 'Onay Bekliyor',
+    following: 'Takip Ediliyor',
     not_now: 'Şimdi Değil',
     view_all: 'Tümünü Gör',
   },
