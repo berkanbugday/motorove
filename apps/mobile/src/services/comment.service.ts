@@ -14,17 +14,19 @@ import {
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
+import {useTranslation} from '@/i18n';
 
 // Hook for creating a comment
 export const useCreateComment = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [createCommentMutation, {loading, error}] = useMutation(
     CREATE_COMMENT,
     {
       onCompleted: _data => {
         showToast({
           type: 'success',
-          text1: 'Success',
-          text2: 'Comment created successfully!',
+          text1: t('common.success'),
+          text2: t('screens.comment.comment_created'),
         });
 
         if (onSuccess) {
@@ -35,9 +37,9 @@ export const useCreateComment = (onSuccess?: () => void) => {
         loggingService.error('Error creating comment:', errorObj);
         showToast({
           type: 'error',
-          text1: 'Error',
+          text1: t('common.error'),
           text2:
-            errorObj.message || 'Failed to create comment. Please try again.',
+            errorObj.message || t('screens.comment.error_creating_comment'),
         });
       },
     },
@@ -86,14 +88,15 @@ export const useCreateComment = (onSuccess?: () => void) => {
 
 // Hook for updating a comment
 export const useUpdateComment = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [updateCommentMutation, {loading, error}] = useMutation(
     UPDATE_COMMENT,
     {
       onCompleted: _data => {
         showToast({
           type: 'success',
-          text1: 'Success',
-          text2: 'Comment updated successfully!',
+          text1: t('common.success'),
+          text2: t('screens.comment.comment_updated'),
         });
 
         if (onSuccess) {
@@ -104,9 +107,9 @@ export const useUpdateComment = (onSuccess?: () => void) => {
         loggingService.error('Error updating comment:', errorObj);
         showToast({
           type: 'error',
-          text1: 'Error',
+          text1: t('common.error'),
           text2:
-            errorObj.message || 'Failed to update comment. Please try again.',
+            errorObj.message || t('screens.comment.error_updating_comment'),
         });
       },
     },
@@ -134,14 +137,15 @@ export const useUpdateComment = (onSuccess?: () => void) => {
 
 // Hook for removing a comment
 export const useRemoveComment = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [removeCommentMutation, {loading, error}] = useMutation(
     REMOVE_COMMENT,
     {
       onCompleted: _data => {
         showToast({
           type: 'success',
-          text1: 'Success',
-          text2: 'Comment removed successfully!',
+          text1: t('common.success'),
+          text2: t('screens.comment.comment_removed'),
         });
 
         if (onSuccess) {
@@ -152,9 +156,9 @@ export const useRemoveComment = (onSuccess?: () => void) => {
         loggingService.error('Error removing comment:', errorObj);
         showToast({
           type: 'error',
-          text1: 'Error',
+          text1: t('common.error'),
           text2:
-            errorObj.message || 'Failed to remove comment. Please try again.',
+            errorObj.message || t('screens.comment.error_removing_comment'),
         });
       },
     },

@@ -193,7 +193,6 @@ export default {
     post: {
       create_post: 'Gönderi Oluştur',
       edit_post: 'Gönderi Düzenle',
-      comments: 'Yorumlar',
       like_failed: 'Beğeni başarısız oldu. Lütfen tekrar deneyin.',
       unlike_failed: 'Beğeni kaldırma başarısız oldu. Lütfen tekrar deneyin.',
       save_failed: 'Kaydetme başarısız oldu. Lütfen tekrar deneyin.',
@@ -219,11 +218,21 @@ export default {
       enter_content: 'Lütfen gönderiniz için içerik girin',
       what_do_you_want_to_write: 'Neler yazmak istersin?',
       select_privacy: 'Gizlilik Seç',
+    },
+
+    comment: {
+      comments: 'Yorumlar',
       post_not_found: 'Gönderi bulunamadı',
       no_comments_yet: 'Henüz yorum yok',
       delete_comment: 'Yorumu Sil',
       delete_comment_confirmation:
         'Bu yorumu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+      comment_created: 'Yorum başarıyla oluşturuldu!',
+      comment_updated: 'Yorum başarıyla güncellendi!',
+      comment_removed: 'Yorum başarıyla kaldırıldı!',
+      error_creating_comment: 'Yorum oluşturulamadı. Lütfen tekrar deneyin.',
+      error_updating_comment: 'Yorum güncellenemedi. Lütfen tekrar deneyin.',
+      error_removing_comment: 'Yorum kaldırılamadı. Lütfen tekrar deneyin.',
     },
 
     // Events screens

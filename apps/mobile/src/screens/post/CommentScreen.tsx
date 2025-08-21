@@ -268,6 +268,9 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
             comment={commentItem}
             style={style}
             actionBarActive={false}
+            onPressAvatar={() =>
+              navigation.navigate('Profile', {userId: commentItem.userId})
+            }
           />
         );
       }
@@ -323,7 +326,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     return (
       <View style={styles.container}>
         <TopHeaderBar
-          title={t('screens.post.comments')}
+          title={t('screens.comment.comments')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
@@ -361,7 +364,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     return (
       <View style={[styles.container, styles.center]}>
         <Typography variant="subtitle">
-          {t('screens.post.post_not_found')}
+          {t('screens.comment.post_not_found')}
         </Typography>
       </View>
     );
@@ -370,7 +373,9 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={`${t('screens.post.comments')} (${post?.comments?.length || 0})`}
+        title={`${t('screens.comment.comments')} (${
+          post?.comments?.length || 0
+        })`}
         showBackButton
         showShadow={false}
         onBackPress={() => navigation.goBack()}
@@ -384,7 +389,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         ListHeaderComponent={renderFeedPost(post)}
         ListEmptyComponent={
           <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
-            {t('screens.post.no_comments_yet')}{' '}
+            {t('screens.comment.no_comments_yet')}{' '}
           </Body>
         }
         contentContainerStyle={styles.listContent}
@@ -404,8 +409,8 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       <Dialog
         variant="confirm"
         visible={deleteDialogVisible}
-        title={t('screens.post.delete_comment')}
-        message={t('screens.post.delete_comment_confirmation')}
+        title={t('screens.comment.delete_comment')}
+        message={t('screens.comment.delete_comment_confirmation')}
         confirmButton={{
           text: t('common.delete'),
           variant: 'primary',

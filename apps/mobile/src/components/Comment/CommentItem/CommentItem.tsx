@@ -16,6 +16,7 @@ interface CommentItemProps {
   comment: Comment;
   onLikePress?: (commentId: string) => void;
   onReplyPress?: (comment: Comment) => void;
+  onPressAvatar?: (userId: string) => void;
   style?: StyleProp<ViewStyle>;
   isReply?: boolean;
   actionBarActive?: boolean;
@@ -25,6 +26,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   comment,
   onLikePress,
   onReplyPress,
+  onPressAvatar,
   style,
   isReply = false,
   actionBarActive = true,
@@ -43,9 +45,18 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
   return (
     <View style={[styles.container, isReply && styles.replyContainer, style]}>
-      <Image source={comment.avatarSource} style={styles.avatar} />
+      <TouchableOpacity
+        disabled={!onPressAvatar}
+        activeOpacity={0.6}
+        onPress={() => onPressAvatar?.(comment.userId)}>
+        <Image source={comment.avatarSource} style={styles.avatar} />
+      </TouchableOpacity>
       <View style={styles.contentContainer}>
-        <View style={styles.header}>
+        <TouchableOpacity
+          disabled={!onPressAvatar}
+          activeOpacity={0.6}
+          onPress={() => onPressAvatar?.(comment.userId)}
+          style={styles.header}>
           <Typography variant="bodySmall" weight="semiBold">
             {comment.userName}
           </Typography>
@@ -55,7 +66,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             style={styles.timeAgo}>
             {comment.timeAgo}
           </Typography>
-        </View>
+        </TouchableOpacity>
 
         <Typography variant="body" style={styles.content}>
           {comment.content}
