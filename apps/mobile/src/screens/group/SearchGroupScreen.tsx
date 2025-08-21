@@ -8,7 +8,7 @@ import {
   GroupCard,
   Body,
 } from '@components';
-import {colors, spacing} from '@theme';
+import {colors, commonStyles, spacing} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useGetGroups, useSearchGroups} from '@services/group.service';
@@ -206,8 +206,7 @@ export const SearchGroupScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   searchContainer: {
     paddingHorizontal: spacing.md,

@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   FlatList,
 } from 'react-native';
-import {colors, spacing, radius} from '@theme';
+import {colors, spacing, radius, commonStyles} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {
@@ -349,8 +349,7 @@ export const NotificationScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   topHeaderBar: {
     borderBottomWidth: 1,

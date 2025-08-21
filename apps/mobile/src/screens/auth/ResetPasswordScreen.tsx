@@ -27,6 +27,7 @@ import {spacing} from '@theme/spacing';
 import {useResetPassword} from '@services/auth.service';
 import {loggingService} from '@services/logging.service';
 import {useTranslation} from '@hooks/useTranslation';
+import {commonStyles} from '@theme/commonStyles';
 
 export const ResetPasswordScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -134,8 +135,7 @@ export const ResetPasswordScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   keyboardView: {
     flex: 1,

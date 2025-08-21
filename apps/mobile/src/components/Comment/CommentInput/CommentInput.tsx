@@ -14,6 +14,7 @@ import {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {colors, spacing, radius} from '@theme';
 import {Typography, Icon} from '@components';
+import {useTranslation} from '@hooks/useTranslation';
 
 interface CommentInputProps {
   onSubmit: (text: string) => void;
@@ -29,7 +30,7 @@ interface CommentInputProps {
 
 const CommentInput: React.FC<CommentInputProps> = ({
   onSubmit,
-  placeholder = 'Add a comment...',
+  placeholder,
   style,
   replyingTo,
   onCancelReply,
@@ -40,6 +41,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 }) => {
   const [text, setText] = useState(initialValue);
   const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
 
   // Update text when initialValue changes (for editing mode)
   useEffect(() => {
@@ -73,10 +75,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
           <View style={styles.replyingContainer}>
             <Typography variant="caption" color={colors.neutral.grey}>
               {editing ? (
-                'Editing comment'
+                t('components.comment.editing_comment')
               ) : (
                 <>
-                  Replying to{' '}
+                  {t('components.comment.replying_to')}{' '}
                   <Typography variant="caption" weight="bold">
                     {replyingTo}
                   </Typography>
@@ -95,7 +97,11 @@ const CommentInput: React.FC<CommentInputProps> = ({
             value={text}
             onChangeText={setText}
             style={styles.input}
-            placeholder={editing ? 'Edit your comment...' : placeholder}
+            placeholder={
+              editing
+                ? t('components.comment.edit_your_comment')
+                : placeholder || t('components.comment.add_comment')
+            }
             multiline
             maxLength={500}
             editable={!isLoading}

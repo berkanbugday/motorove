@@ -193,6 +193,7 @@ export default {
     post: {
       create_post: 'Gönderi Oluştur',
       edit_post: 'Gönderi Düzenle',
+      comments: 'Yorumlar',
       post_created: 'Gönderi başarıyla oluşturuldu',
       post_created_failed: 'Gönderi oluşturulamadı. Lütfen tekrar deneyin.',
       post_updated: 'Gönderi başarıyla güncellendi',
@@ -704,6 +705,12 @@ export default {
       allow_location_access: 'Lokasyon Erişim İzni Ver',
       footer_text:
         'Lokasyon erişim izni ayarlarını daha sonra uygulama tercihlerinden değiştirebilirsiniz',
+    },
+    comment: {
+      add_comment: 'Yorum ekle...',
+      edit_your_comment: 'Yorumu düzenle...',
+      editing_comment: 'Yorum düzenleniyor',
+      replying_to: 'Yanıt veriliyor',
     },
   },
 

@@ -3,7 +3,7 @@ import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useGetJoinedGroups, useGetGroups} from '@services/group.service';
-import {colors, spacing} from '@theme';
+import {colors, commonStyles, spacing} from '@theme';
 import {
   TopHeaderBar,
   Subtitle,
@@ -347,8 +347,7 @@ export const GroupScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   tabContainer: {
     flex: 1,

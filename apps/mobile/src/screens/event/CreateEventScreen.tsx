@@ -40,7 +40,7 @@ import {
   Tabs,
 } from '@components';
 import Dialog from '@components/Dialog';
-import {colors, getShadow, radius, spacing} from '@theme';
+import {colors, commonStyles, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
 import {eventService} from '@services/event.service';
@@ -1249,8 +1249,7 @@ export const CreateEventScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   wizardContainer: {
     flex: 1,

@@ -31,7 +31,14 @@ import {
   authSchemas,
   AccountSetupFormValues,
 } from '@utils/validation/authValidation';
-import {colors, fontSizes, spacing, radius, getShadow} from '@theme';
+import {
+  colors,
+  fontSizes,
+  spacing,
+  radius,
+  getShadow,
+  commonStyles,
+} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useTranslation} from '@hooks/useTranslation';
@@ -476,8 +483,7 @@ export const AccountSetupScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   scrollContent: {
     flexGrow: 1,

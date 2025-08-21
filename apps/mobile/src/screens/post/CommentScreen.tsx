@@ -1,11 +1,5 @@
 import React, {useState, useEffect, useCallback, useRef} from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  FlatList,
-} from 'react-native';
+import {View, StyleSheet, ScrollView, FlatList} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
 import {colors, spacing} from '@theme';
@@ -23,6 +17,7 @@ import {
   SkeletonGroup,
 } from '@components';
 import {IComment} from '@motorove/shared';
+import {Comment} from '@components/Comment/comments';
 import {
   useCreateComment,
   useGetPost,
@@ -36,71 +31,9 @@ import {useTranslation} from '@hooks/useTranslation';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
-// Comment interface for UI components
-interface CommentUI {
-  id: string;
-  userId: string;
-  userName: string;
-  avatarSource: any;
-  content: string;
-  timeAgo: string;
-  likeCount: number;
-  replyCount: number;
-  isLiked: boolean;
-  parentId?: string;
-}
-
-// Define styles at the top to avoid 'used before declaration' errors
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
-  },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listContent: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xl,
-  },
-  commentContainer: {
-    marginBottom: spacing.md,
-  },
-  repliesContainer: {
-    marginLeft: spacing.lg,
-    marginTop: spacing.xs,
-  },
-  replyContainer: {
-    marginBottom: spacing.xs,
-  },
-  replyWithBorder: {
-    borderLeftWidth: 1,
-    borderLeftColor: colors.neutral.lightGrey,
-    paddingLeft: spacing.sm,
-  },
-  replyItem: {
-    marginBottom: spacing.xs,
-  },
-  swipeableContainer: {
-    backgroundColor: colors.neutral.white,
-    borderRadius: 8,
-    marginBottom: spacing.sm,
-  },
-  skeletonPost: {
-    marginBottom: spacing.md,
-  },
-  skeletonComment: {
-    marginBottom: spacing.sm,
-  },
-});
-
+// Using the Comment interface from components
 export const CommentScreen = ({navigation, route: {params}}: Props) => {
   const {t} = useTranslation();
-  const [replyingTo, setReplyingTo] = useState<{
-    id: string;
-    userName: string;
-  } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [editingComment, setEditingComment] = useState<{
     id: string;
@@ -168,18 +101,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     });
   };
 
-  const handleReplyToComment = (comment: CommentUI) => {
-    setReplyingTo({
-      id: comment.id,
-      userName: comment.userName,
-    });
-  };
-
-  const handleCancelReply = () => {
-    setReplyingTo(null);
-  };
-
-  const handleEditComment = (comment: CommentUI) => {
+  const handleEditComment = (comment: Comment) => {
     setEditingComment({
       id: comment.id,
       content: comment.content,
@@ -233,17 +155,13 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       await createComment({
         content: text,
         postId: params.postId,
-        parentId: replyingTo?.id,
       });
-
-      // Reset the reply state
-      setReplyingTo(null);
     } catch (error) {
       console.error('Error submitting comment:', error);
     }
   };
 
-  const mapCommentForUI = (comment: IComment): CommentUI => {
+  const mapCommentForUI = (comment: IComment): Comment => {
     const userName = comment.createdBy?.firstName
       ? `${comment.createdBy.firstName} ${comment.createdBy.lastName || ''}`
       : 'Unknown User';
@@ -258,17 +176,17 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       content: comment.content,
       timeAgo: relativeTime(comment.createdAt, t),
       likeCount: 0,
-      replyCount: comment.replies?.length || 0,
+      replyCount: 0, // Adding required property
       isLiked: false,
     };
   };
 
-  const isCommentOwner = (comment: CommentUI): boolean => {
+  const isCommentOwner = (comment: Comment): boolean => {
     return user?.id === comment.userId;
   };
 
   const renderCommentWithSwipeable = useCallback(
-    (commentItem: CommentUI, isReply: boolean = false, style: any = {}) => {
+    (commentItem: Comment, style: any = {}) => {
       const isOwner = isCommentOwner(commentItem);
 
       // If user is not the owner, render regular comment without swipeable
@@ -277,8 +195,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           <CommentItem
             comment={commentItem}
             onLikePress={handleLikeComment}
-            onReplyPress={handleReplyToComment}
-            isReply={isReply}
             style={style}
             actionBarActive={false}
           />
@@ -308,8 +224,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           <CommentItem
             comment={commentItem}
             onLikePress={handleLikeComment}
-            onReplyPress={handleReplyToComment}
-            isReply={isReply}
             style={style}
             actionBarActive={false}
           />
@@ -318,7 +232,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     },
     [
       handleLikeComment,
-      handleReplyToComment,
       handleEditComment,
       handleDeleteComment,
       isCommentOwner,
@@ -329,49 +242,13 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 
   const renderItem = useCallback(
     ({item}: {item: IComment}) => {
-      // Only render top-level comments (no parentId)
-      if (item.parentId) {
-        return null;
-      }
-
       const isLastComment =
         item.id === post?.comments?.[post.comments.length - 1]?.id;
-      const lastReplyId = item.replies?.[item.replies.length - 1]?.id;
       const mappedComment = mapCommentForUI(item);
 
       return (
-        <View
-          style={[
-            styles.commentContainer,
-            isLastComment && {marginBottom: spacing.xxxl},
-          ]}>
+        <View style={[isLastComment && {marginBottom: spacing.xxxl}]}>
           {renderCommentWithSwipeable(mappedComment)}
-
-          {/* Render replies */}
-          {item.replies && item.replies.length > 0 && (
-            <View style={styles.repliesContainer}>
-              {item.replies.map(reply => {
-                // Type assertion to handle partial IComment objects
-                const mappedReply = mapCommentForUI(reply as IComment);
-                const isLastReply = reply.id === lastReplyId;
-
-                return (
-                  <View
-                    key={reply.id}
-                    style={[
-                      styles.replyContainer,
-                      !isLastReply && styles.replyWithBorder,
-                    ]}>
-                    {renderCommentWithSwipeable(
-                      mappedReply,
-                      true,
-                      styles.replyItem,
-                    )}
-                  </View>
-                );
-              })}
-            </View>
-          )}
         </View>
       );
     },
@@ -454,32 +331,41 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       <TopHeaderBar
         title={`${t('screens.post.comments')} (${post?.comments?.length || 0})`}
         showBackButton
+        showShadow={false}
         onBackPress={() => navigation.goBack()}
+        containerStyle={styles.topHeaderBar}
       />
       {!post?.comments || post?.comments?.length === 0 ? (
-        <ScrollView
-          style={[styles.listContent, {flex: 1}]}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }>
-          <FeedCard
-            userName={mappedPost.userName}
-            avatarSource={mappedPost.avatarSource}
-            timeAgo={mappedPost.timeAgo}
-            content={mappedPost.content}
-            images={mappedPost.images}
-            likeCount={mappedPost.likeCount}
-            commentCount={mappedPost.commentCount}
-            isLiked={mappedPost.isLiked}
-            isSaved={mappedPost.isSaved}
-            isCommented={mappedPost.isCommented}
-            labels={mappedPost.labels}
-            actionBarDisabled={true}
-          />
-          <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
-            {t('screens.post.no_comments_yet')}
-          </Body>
-        </ScrollView>
+        <FlatList
+          data={post?.comments}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={
+            <FeedCard
+              userName={mappedPost.userName}
+              avatarSource={mappedPost.avatarSource}
+              timeAgo={mappedPost.timeAgo}
+              content={mappedPost.content}
+              images={mappedPost.images}
+              likeCount={mappedPost.likeCount}
+              commentCount={post?.comments?.length || 0}
+              isLiked={mappedPost.isLiked}
+              isSaved={mappedPost.isSaved}
+              isCommented={mappedPost.isCommented}
+              labels={mappedPost.labels}
+              actionBarDisabled={true}
+            />
+          }
+          ListEmptyComponent={
+            <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
+              {t('screens.post.no_comments_yet')}{' '}
+            </Body>
+          }
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
       ) : (
         <FlatList
           data={post?.comments}
@@ -505,16 +391,10 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          onEndReached={() => {
-            console.log('onEndReached');
-          }}
-          onEndReachedThreshold={0.5}
         />
       )}
       <CommentInput
         onSubmit={handleSubmitComment}
-        replyingTo={replyingTo?.userName}
-        onCancelReply={handleCancelReply}
         isLoading={createLoading || updateLoading || removeLoading}
         initialValue={editingComment?.content || ''}
         editing={Boolean(editingComment)}
@@ -540,3 +420,32 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     </View>
   );
 };
+
+// Define styles at the top to avoid 'used before declaration' errors
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.secondary.light,
+  },
+  topHeaderBar: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+  },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listContent: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  swipeableContainer: {
+    backgroundColor: colors.secondary.light,
+  },
+  skeletonPost: {
+    marginBottom: spacing.md,
+  },
+  skeletonComment: {
+    marginBottom: spacing.sm,
+  },
+});

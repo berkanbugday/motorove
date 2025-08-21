@@ -15,7 +15,7 @@ import {
   Platform,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {colors, spacing, radius, typography} from '@theme';
+import {colors, spacing, radius, typography, commonStyles} from '@theme';
 import {useAuth} from '@contexts/AuthContext';
 import {
   Button,
@@ -495,8 +495,7 @@ export const EditPostScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   loadingContainer: {
     flex: 1,

@@ -8,7 +8,7 @@ import {
   AnimatedInput,
   Button,
 } from '@components';
-import {colors, spacing} from '@theme';
+import {colors, commonStyles, spacing} from '@theme';
 import {useSearchUsers} from '@services/user.service';
 import {IUser} from '@motorove/shared';
 import {useTranslation} from '@/hooks/useTranslation';
@@ -214,8 +214,7 @@ export const SearchUserScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   searchContainer: {
     paddingHorizontal: spacing.md,

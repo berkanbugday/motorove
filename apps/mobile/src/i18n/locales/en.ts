@@ -191,6 +191,7 @@ export default {
     post: {
       create_post: 'Create Post',
       edit_post: 'Edit Post',
+      comments: 'Comments',
       post_created: 'Post created successfully',
       post_created_failed: 'Post creation failed. Please try again.',
       post_updated: 'Post updated successfully',
@@ -707,6 +708,12 @@ export default {
       allow_location_access: 'Allow Location Access',
       footer_text:
         'You can always change location settings later in the app preferences',
+    },
+    comment: {
+      add_comment: 'Add a comment...',
+      edit_your_comment: 'Edit your comment...',
+      editing_comment: 'Editing comment',
+      replying_to: 'Replying to',
     },
   },
 

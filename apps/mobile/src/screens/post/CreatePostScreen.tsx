@@ -15,7 +15,7 @@ import {
   Platform,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {colors, spacing, radius, typography} from '@theme';
+import {colors, spacing, radius, typography, commonStyles} from '@theme';
 import {useAuth} from '@contexts/AuthContext';
 import {
   Button,
@@ -430,8 +430,7 @@ export const CreatePostScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: colors.neutral.white,
+    ...commonStyles.container,
   },
   topHeaderBar: {
     borderBottomWidth: 1,
