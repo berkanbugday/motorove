@@ -2,7 +2,7 @@ import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {View, StyleSheet, ScrollView, FlatList} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
-import {colors, spacing} from '@theme';
+import {colors, getShadow, spacing} from '@theme';
 import {
   Typography,
   FeedCard,
@@ -16,7 +16,7 @@ import {
   Dialog,
   SkeletonGroup,
 } from '@components';
-import {IComment} from '@motorove/shared';
+import {IComment, IPost} from '@motorove/shared';
 import {Comment} from '@components/Comment/comments';
 import {
   useCreateComment,
@@ -28,12 +28,14 @@ import {useAuth} from '@contexts/AuthContext';
 import {IconName} from '@components/Icon';
 import {relativeTime} from '@utils/dateUtils';
 import {useTranslation} from '@hooks/useTranslation';
+import {useLanguage} from '@contexts/LanguageContext';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
 // Using the Comment interface from components
 export const CommentScreen = ({navigation, route: {params}}: Props) => {
   const {t} = useTranslation();
+  const {language} = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
   const [editingComment, setEditingComment] = useState<{
     id: string;
@@ -90,16 +92,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       setRefreshing(false);
     }
   }, [refetchPost]);
-
-  const handleLikeComment = async () => {
-    // In a real implementation, you would call a like/unlike API
-    // For now, we'll just show a toast
-    showToast({
-      type: 'info',
-      text1: t('common.info'),
-      text2: t('screens.post.like_not_implemented'),
-    });
-  };
 
   const handleEditComment = (comment: Comment) => {
     setEditingComment({
@@ -161,6 +153,88 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     }
   };
 
+  // Helper function to format avatar URL from API data
+  const formatAvatarSource = useCallback((imageUrl?: string) => {
+    return imageUrl
+      ? {uri: imageUrl}
+      : require('../../assets/images/default_avatar.png');
+  }, []);
+
+  // Transform Post model to FeedCard props
+  const transformPostToFeedCard = useCallback(
+    (postData: IPost) => {
+      // Create labels from post data
+      const labels = [];
+
+      if (postData.groupId) {
+        labels.push({
+          icon: 'users-filled' as IconName,
+          text: postData.groupName || '',
+        });
+      }
+
+      if (postData.addresses && postData.addresses.length > 0) {
+        labels.push({
+          icon: 'map-pin' as IconName,
+          text:
+            postData.addresses?.find(
+              address =>
+                address.language.toLowerCase() === language.toLowerCase(),
+            )?.address || '',
+        });
+      }
+
+      // Transform images from string URLs to objects with URI
+      const images =
+        postData.images && postData.images.length > 0
+          ? postData.images.map((img: string) => ({uri: img}))
+          : undefined;
+
+      return {
+        id: postData.id,
+        userName: `${postData.createdBy.firstName} ${postData.createdBy.lastName}`,
+        avatarSource: formatAvatarSource(postData.createdBy.avatar),
+        timeAgo: relativeTime(postData.createdAt, t),
+        content: postData.content,
+        images,
+        likeCount: postData.likesCount,
+        commentCount: postData.commentsCount,
+        isSaved: postData.isSaved,
+        isLiked: postData.isLiked,
+        isCommented: false, // This might not be available in the API
+        labels,
+      };
+    },
+    [formatAvatarSource, navigation, t],
+  );
+
+  // Render feed post with comment navigation and dropdown menu
+  const renderFeedPost = useCallback(
+    (item: IPost) => {
+      // Transform Post model to FeedCard props
+      const feedCardProps = transformPostToFeedCard(item);
+
+      return (
+        <FeedCard
+          avatarSource={feedCardProps.avatarSource}
+          userName={feedCardProps.userName}
+          timeAgo={feedCardProps.timeAgo}
+          labels={feedCardProps.labels}
+          content={feedCardProps.content}
+          images={feedCardProps.images}
+          likeCount={feedCardProps.likeCount}
+          commentCount={feedCardProps.commentCount}
+          isSaved={feedCardProps.isSaved}
+          isLiked={feedCardProps.isLiked}
+          isCommented={feedCardProps.isCommented}
+          actionBarDisabled
+          style={styles.feedCard}
+        />
+      );
+    },
+    [user, transformPostToFeedCard],
+  );
+
   const mapCommentForUI = (comment: IComment): Comment => {
     const userName = comment.createdBy?.firstName
       ? `${comment.createdBy.firstName} ${comment.createdBy.lastName || ''}`
@@ -170,9 +244,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       id: comment.id,
       userId: comment.createdBy?.id || '',
       userName: userName.trim(),
-      avatarSource: comment.createdBy?.avatar
-        ? {uri: comment.createdBy.avatar}
-        : {uri: 'https://picsum.photos/id/1005/100/100'},
+      avatarSource: formatAvatarSource(comment.createdBy?.avatar),
       content: comment.content,
       timeAgo: relativeTime(comment.createdAt, t),
       likeCount: 0,
@@ -194,7 +266,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         return (
           <CommentItem
             comment={commentItem}
-            onLikePress={handleLikeComment}
             style={style}
             actionBarActive={false}
           />
@@ -223,21 +294,13 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
           contentContainerStyle={styles.swipeableContainer}>
           <CommentItem
             comment={commentItem}
-            onLikePress={handleLikeComment}
             style={style}
             actionBarActive={false}
           />
         </SwipeableItem>
       );
     },
-    [
-      handleLikeComment,
-      handleEditComment,
-      handleDeleteComment,
-      isCommentOwner,
-      params.postId,
-      t,
-    ],
+    [handleEditComment, handleDeleteComment, isCommentOwner, params.postId, t],
   );
 
   const renderItem = useCallback(
@@ -252,13 +315,11 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         </View>
       );
     },
-    [post, renderCommentWithSwipeable, mapCommentForUI],
+    [post, renderCommentWithSwipeable, mapCommentForUI, t],
   );
 
-  const loading = postLoading;
-
   // Render skeleton loaders when loading
-  if (loading) {
+  if (postLoading) {
     return (
       <View style={styles.container}>
         <TopHeaderBar
@@ -299,32 +360,12 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   if (!post) {
     return (
       <View style={[styles.container, styles.center]}>
-        <Typography variant="subtitle">Post not found</Typography>
+        <Typography variant="subtitle">
+          {t('screens.post.post_not_found')}
+        </Typography>
       </View>
     );
   }
-
-  // Map the post data to the format expected by FeedCard
-  const mappedPost = {
-    userName: post.createdBy
-      ? `${post.createdBy.firstName} ${post.createdBy.lastName || ''}`.trim()
-      : 'Unknown User',
-    avatarSource: post.createdBy?.avatar
-      ? {uri: post.createdBy.avatar}
-      : {uri: 'https://picsum.photos/id/1005/100/100'},
-    timeAgo: relativeTime(post.createdAt, t),
-    content: post.content,
-    images: post.images ? post.images.map((img: string) => ({uri: img})) : [],
-    likeCount: post.likesCount || 0,
-    commentCount: post.commentsCount || 0,
-    isLiked: post.isLiked || false,
-    isSaved: post.isSaved || false,
-    isCommented: false,
-    labels:
-      post.groupId && post.groupName
-        ? [{icon: 'users' as IconName, text: post.groupName}]
-        : [],
-  };
 
   return (
     <View style={styles.container}>
@@ -335,64 +376,23 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         onBackPress={() => navigation.goBack()}
         containerStyle={styles.topHeaderBar}
       />
-      {!post?.comments || post?.comments?.length === 0 ? (
-        <FlatList
-          data={post?.comments}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          ListHeaderComponent={
-            <FeedCard
-              userName={mappedPost.userName}
-              avatarSource={mappedPost.avatarSource}
-              timeAgo={mappedPost.timeAgo}
-              content={mappedPost.content}
-              images={mappedPost.images}
-              likeCount={mappedPost.likeCount}
-              commentCount={post?.comments?.length || 0}
-              isLiked={mappedPost.isLiked}
-              isSaved={mappedPost.isSaved}
-              isCommented={mappedPost.isCommented}
-              labels={mappedPost.labels}
-              actionBarDisabled={true}
-            />
-          }
-          ListEmptyComponent={
-            <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
-              {t('screens.post.no_comments_yet')}{' '}
-            </Body>
-          }
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
-      ) : (
-        <FlatList
-          data={post?.comments}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          ListHeaderComponent={
-            <FeedCard
-              userName={mappedPost.userName}
-              avatarSource={mappedPost.avatarSource}
-              timeAgo={mappedPost.timeAgo}
-              content={mappedPost.content}
-              images={mappedPost.images}
-              likeCount={mappedPost.likeCount}
-              commentCount={post?.comments?.length || 0}
-              isLiked={mappedPost.isLiked}
-              isSaved={mappedPost.isSaved}
-              isCommented={mappedPost.isCommented}
-              labels={mappedPost.labels}
-              actionBarDisabled={true}
-            />
-          }
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
-      )}
+
+      <FlatList
+        data={post?.comments}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        ListHeaderComponent={renderFeedPost(post)}
+        ListEmptyComponent={
+          <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
+            {t('screens.post.no_comments_yet')}{' '}
+          </Body>
+        }
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
+
       <CommentInput
         onSubmit={handleSubmitComment}
         isLoading={createLoading || updateLoading || removeLoading}
@@ -425,7 +425,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.secondary.light,
+    backgroundColor: colors.neutral.white,
   },
   topHeaderBar: {
     borderBottomWidth: 1,
@@ -437,15 +437,20 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xl,
   },
   swipeableContainer: {
-    backgroundColor: colors.secondary.light,
+    backgroundColor: colors.neutral.white,
   },
   skeletonPost: {
     marginBottom: spacing.md,
   },
   skeletonComment: {
     marginBottom: spacing.sm,
+  },
+  feedCard: {
+    ...getShadow('none'),
+    borderBottomWidth: 1,
+    borderRadius: 0,
+    borderBottomColor: colors.secondary.main,
   },
 });

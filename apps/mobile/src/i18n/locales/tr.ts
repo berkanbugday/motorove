@@ -194,6 +194,10 @@ export default {
       create_post: 'Gönderi Oluştur',
       edit_post: 'Gönderi Düzenle',
       comments: 'Yorumlar',
+      like_failed: 'Beğeni başarısız oldu. Lütfen tekrar deneyin.',
+      unlike_failed: 'Beğeni kaldırma başarısız oldu. Lütfen tekrar deneyin.',
+      save_failed: 'Kaydetme başarısız oldu. Lütfen tekrar deneyin.',
+      unsave_failed: 'Kaydetme kaldırma başarısız oldu. Lütfen tekrar deneyin.',
       post_created: 'Gönderi başarıyla oluşturuldu',
       post_created_failed: 'Gönderi oluşturulamadı. Lütfen tekrar deneyin.',
       post_updated: 'Gönderi başarıyla güncellendi',
@@ -215,6 +219,11 @@ export default {
       enter_content: 'Lütfen gönderiniz için içerik girin',
       what_do_you_want_to_write: 'Neler yazmak istersin?',
       select_privacy: 'Gizlilik Seç',
+      post_not_found: 'Gönderi bulunamadı',
+      no_comments_yet: 'Henüz yorum yok',
+      delete_comment: 'Yorumu Sil',
+      delete_comment_confirmation:
+        'Bu yorumu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
     },
 
     // Events screens

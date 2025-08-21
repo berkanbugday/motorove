@@ -760,6 +760,20 @@ export class PostsService {
       );
     }
 
+    if (prismaPost.comments?.length) {
+      await Promise.all(
+        prismaPost.comments.map(async (comment) => {
+          if (comment.createdBy.avatar) {
+            comment.createdBy.avatar = await this.storageService.getSignedUrl(
+              comment.createdBy.avatar,
+              3600,
+              authToken,
+            );
+          }
+        }),
+      );
+    }
+
     return {
       id: prismaPost.id,
       content: prismaPost.content,

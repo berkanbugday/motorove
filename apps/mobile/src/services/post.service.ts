@@ -263,7 +263,7 @@ export const useLikePost = () => {
       showToast({
         type: 'error',
         text1: t('common.error'),
-        text2: errorObj.message || t('errors.general.something_wrong'),
+        text2: errorObj.message || t('screens.post.like_failed'),
       });
     },
   });
@@ -314,10 +314,7 @@ export const useLikePost = () => {
                   }
 
                   // Add the current user to the likedUsers array
-                  return [
-                    ...usersArray,
-                    {__ref: `UserDto:${user.id}`},
-                  ];
+                  return [...usersArray, {__ref: `UserDto:${user.id}`}];
                 },
               },
             });
@@ -349,7 +346,7 @@ export const useUnlikePost = () => {
       showToast({
         type: 'error',
         text1: t('common.error'),
-        text2: errorObj.message || t('errors.general.something_wrong'),
+        text2: errorObj.message || t('screens.post.unlike_failed'),
       });
     },
   });
@@ -425,7 +422,7 @@ export const useSavePost = () => {
       showToast({
         type: 'error',
         text1: t('common.error'),
-        text2: errorObj.message || t('errors.general.something_wrong'),
+        text2: errorObj.message || t('screens.post.save_failed'),
       });
     },
   });
@@ -481,7 +478,7 @@ export const useUnsavePost = () => {
       showToast({
         type: 'error',
         text1: t('common.error'),
-        text2: errorObj.message || t('errors.general.something_wrong'),
+        text2: errorObj.message || t('screens.post.unsave_failed'),
       });
     },
   });

@@ -192,6 +192,10 @@ export default {
       create_post: 'Create Post',
       edit_post: 'Edit Post',
       comments: 'Comments',
+      like_failed: 'Like failed. Please try again.',
+      unlike_failed: 'Unlike failed. Please try again.',
+      save_failed: 'Save failed. Please try again.',
+      unsave_failed: 'Unsave failed. Please try again.',
       post_created: 'Post created successfully',
       post_created_failed: 'Post creation failed. Please try again.',
       post_updated: 'Post updated successfully',
@@ -213,6 +217,11 @@ export default {
       enter_content: 'Please enter some content for your post',
       what_do_you_want_to_write: 'What do you want to write?',
       select_privacy: 'Select Privacy',
+      post_not_found: 'Post not found',
+      no_comments_yet: 'No comments yet',
+      delete_comment: 'Delete Comment',
+      delete_comment_confirmation:
+        'Are you sure you want to delete this comment? This action cannot be undone.',
     },
 
     // Events screens

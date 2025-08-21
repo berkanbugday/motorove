@@ -118,6 +118,8 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     marginRight: spacing.xs,
     marginTop: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
   contentContainer: {
     flex: 1,
