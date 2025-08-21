@@ -407,6 +407,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
       {/* Content */}
       {content && (
         <Typography variant="body" style={[styles.content, contentStyle]}>
+          {/* Filter both English and Turkish profanity */}
           {profanityFilterService.filterText(content)}
         </Typography>
       )}

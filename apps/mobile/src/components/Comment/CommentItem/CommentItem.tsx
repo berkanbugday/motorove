@@ -70,6 +70,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
         </TouchableOpacity>
 
         <Typography variant="body" style={styles.content}>
+          {/* Filter both English and Turkish profanity */}
           {profanityFilterService.filterText(comment.content)}
         </Typography>
 

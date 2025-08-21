@@ -1,4 +1,5 @@
 import Filter from 'leo-profanity';
+import {turkishProfanityWords} from '../utils/turkish-profanity';
 
 /**
  * Service for filtering profanity in text content
@@ -15,13 +16,24 @@ class ProfanityFilterService {
 
   /**
    * Initialize the filter with default dictionary
+   * @private
    */
-  initialize(): void {
-    if (!this.initialized) {
-      // Initialize with the default English dictionary
-      Filter.loadDictionary();
-      this.initialized = true;
-    }
+  private initialize(): void {
+    // Initialize with the default English dictionary
+    Filter.loadDictionary();
+
+    // Add Turkish profanity words
+    this.initializeTurkishDictionary();
+
+    this.initialized = true;
+  }
+
+  /**
+   * Initialize Turkish dictionary
+   */
+  private initializeTurkishDictionary(): void {
+    // Add Turkish profanity words to the filter
+    Filter.add(turkishProfanityWords);
   }
 
   /**
@@ -75,6 +87,31 @@ class ProfanityFilterService {
       return [];
     }
     return Filter.list(text);
+  }
+
+  /**
+   * Add custom Turkish words to the profanity list
+   * @param words Array of Turkish words to add to the profanity list
+   */
+  addTurkishWords(words: string[]): void {
+    // Convert words to lowercase for better matching
+    const lowerCaseWords = words.map(word => word.toLowerCase());
+    Filter.add(lowerCaseWords);
+  }
+
+  /**
+   * Check if text contains Turkish profanity
+   * This method is optimized for Turkish text
+   * @param text Text to check
+   * @returns True if text contains profanity, false otherwise
+   */
+  containsTurkishProfanity(text: string): boolean {
+    if (!text) {
+      return false;
+    }
+    // Convert to lowercase for better matching with Turkish characters
+    const lowerCaseText = text.toLowerCase();
+    return Filter.check(lowerCaseText);
   }
 }
 
