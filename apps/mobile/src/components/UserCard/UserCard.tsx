@@ -29,8 +29,8 @@ export const UserCard: React.FC<UserCardProps> = ({
   handleUnfollowPress,
   style,
   loading,
-  showFollowButton,
-  showUnfollowButton,
+  showFollowButton = true,
+  showUnfollowButton = true,
 }) => {
   const {t} = useTranslation();
   const [followingStatus, setFollowingStatus] = useState<ApprovalStatus>();
