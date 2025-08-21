@@ -21,7 +21,6 @@ export function errorToMessage(
   if (typeof error === 'string') {
     return error;
   }
-
   // Handle GraphQL errors
   if (error.graphQLErrors && error.graphQLErrors.length > 0) {
     return extractGraphQLErrorMessage(error.graphQLErrors[0]);
@@ -125,7 +124,6 @@ function humanizeErrorMessage(message: string): string {
   message = message.replace(/^error:/i, '').trim();
   message = message.replace(/^exception:/i, '').trim();
 
-  console.log('message', message);
   if (message.includes('Invalid login credentials')) {
     return i18n.t('errors.auth.invalid_credentials');
   }

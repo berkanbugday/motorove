@@ -106,12 +106,3 @@ export const UNSAVE_POST = gql`
     }
   }
 `;
-
-export const GET_POST_LIKED_USERS = gql`
-  query GetPostLikedUsers($postId: ID!) {
-    postLikedUsers(postId: $postId) {
-      ...UserFragment
-    }
-  }
-  ${USER_FRAGMENT}
-`;

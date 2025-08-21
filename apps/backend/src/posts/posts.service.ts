@@ -18,7 +18,6 @@ import { PostDto } from './dto/post.dto';
 import { AddressDto } from 'src/addresses/dto/address.dto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
-import { User } from 'src/users/models/user.model';
 
 @Injectable()
 export class PostsService {
@@ -718,78 +717,5 @@ export class PostsService {
       userId: prismaInteraction.userId,
       createdAt: prismaInteraction.createdAt,
     };
-  }
-
-  async findPostLikedUsers(
-    postId: string,
-    currentUserId: string,
-    authToken?: string,
-  ): Promise<UserDto[]> {
-    // Check if post exists and is active
-    const post = await this.prisma.post.findUnique({
-      where: { id: postId, isActive: true },
-    });
-
-    if (!post) {
-      throw new NotFoundException(`Post with ID ${postId} not found`);
-    }
-
-    // Find all users who liked the post
-    const likedUsers = await this.prisma.postLike.findMany({
-      where: { postId, user: { isActive: true } },
-      include: {
-        user: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    // Map to UserDto and get following status
-    return await Promise.all(
-      likedUsers.map(async (like) => {
-        const user = like.user as User;
-
-        // Get signed URL for avatar if exists
-        let avatar = user.avatar;
-        if (avatar && authToken) {
-          try {
-            avatar = await this.storageService.getSignedUrl(
-              avatar,
-              3600,
-              authToken,
-            );
-          } catch (error) {
-            this.logger.error(
-              `Error getting signed URL for avatar: ${error.message}`,
-            );
-          }
-        }
-
-        // Check following status
-        let followingStatus: ApprovalStatus | undefined = undefined;
-        if (currentUserId) {
-          const following = await this.prisma.userFollowing.findUnique({
-            where: {
-              followerId_followingId: {
-                followerId: currentUserId,
-                followingId: user.id,
-              },
-              isActive: true,
-              follower: { isActive: true },
-              following: { isActive: true },
-            },
-          });
-
-          if (following) {
-            followingStatus = following.status as ApprovalStatus;
-          }
-        }
-
-        return {
-          ...user,
-          avatar,
-          followingStatus,
-        } as UserDto;
-      }),
-    );
   }
 }

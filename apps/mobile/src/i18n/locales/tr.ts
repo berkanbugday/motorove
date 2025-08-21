@@ -185,7 +185,6 @@ export default {
       upcoming_events: 'Yaklaşan Etkinlikler',
       shared_posts: 'Paylaşılan Gönderiler',
       no_posts_found: 'Gönderi bulunamadı',
-      post_liked_users: 'Gönderiyi Beğenen Kullanıcılar',
       no_likes_yet: 'Henüz beğeni yok',
     },
 

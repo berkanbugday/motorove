@@ -183,7 +183,6 @@ export default {
       upcoming_events: 'Upcoming Events',
       shared_posts: 'Shared Posts',
       no_posts_found: 'No posts found',
-      post_liked_users: 'Post Liked Users',
       no_likes_yet: 'No likes yet',
     },
 

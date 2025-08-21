@@ -7,7 +7,6 @@ import {
 } from '@apollo/client';
 import {setContext} from '@apollo/client/link/context';
 import {onError} from '@apollo/client/link/error';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {AppConfig} from './appConfig';
 import {AUTH_STORAGE_KEYS} from '../types/auth.types';

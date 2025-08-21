@@ -19,7 +19,6 @@ import {
   FeedCard,
   Body,
   SkeletonGroup,
-  UserCard,
 } from '@components';
 import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
@@ -33,7 +32,6 @@ import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts/AuthContext';
-import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
 import {useGetCount} from '@services/notification.service';
 import {useFocusEffect} from '@react-navigation/native';
 import {useLanguage} from '@contexts/LanguageContext';
@@ -41,7 +39,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, IUser} from '@motorove/shared';
+import {IPost} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -49,7 +47,6 @@ import {
   useSavePost,
   useUnsavePost,
   useRemovePost,
-  useGetPostLikedUsers,
 } from '@services/post.service';
 import {relativeTime} from '@utils/dateUtils';
 import {useTranslation} from '@hooks/useTranslation';
@@ -138,8 +135,6 @@ export const HomeScreen = ({navigation}: Props) => {
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const [currentPostId, setCurrentPostId] = useState<string | null>(null);
-  const [users, setUsers] = useState<IUser[]>([]);
   const {user} = useAuth();
   const {count: notificationsCount, refetch: refetchCount} = useGetCount();
   const {language} = useLanguage();
@@ -163,13 +158,6 @@ export const HomeScreen = ({navigation}: Props) => {
   // Add hook for post deletion
   const {removePost} = useRemovePost();
 
-  // Add hooks for liked users
-  const {followUser, loading: followLoading} = useFollowUser();
-  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser();
-  const {users: likedUsers, loading: likedUsersLoading} = useGetPostLikedUsers(
-    currentPostId || '',
-  );
-
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
@@ -181,11 +169,6 @@ export const HomeScreen = ({navigation}: Props) => {
   // Track the scroll direction for animation
   const isScrollingUp = useRef(false);
   const previousScrollY = useRef(0);
-
-  // Set users initially and only when currentPostId changes
-  useEffect(() => {
-    setUsers(likedUsers);
-  }, [currentPostId]);
 
   // Modified animation approach for ghosting when scrolling up
   const bannerOpacity = scrollY.interpolate({
@@ -380,100 +363,16 @@ export const HomeScreen = ({navigation}: Props) => {
     [],
   );
 
-  // Component to render the list of users who liked the post
-  const LikedUsersContent = useCallback(() => {
-    if (likedUsersLoading) {
-      return (
-        <View style={{padding: 20, alignItems: 'center'}}>
-          <Body>{t('common.loading')}</Body>
-        </View>
-      );
-    }
-
-    if (!users || users.length === 0) {
-      return (
-        <View style={{padding: 20, alignItems: 'center'}}>
-          <Body>{t('screens.home.no_likes_yet')}</Body>
-        </View>
-      );
-    }
-
-    return (
-      <FlatList
-        data={users}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <UserCard
-            key={item.id}
-            user={item}
-            loading={followLoading || unfollowLoading}
-            onPress={() => {
-              closeBottomSheet();
-              navigateToScreen(navigation, 'Profile', {userId: item.id});
-            }}
-            handleFollowPress={async () => {
-              const status = await followUser(item.id);
-              setUsers(prevUsers =>
-                prevUsers.map(user =>
-                  user.id === item.id
-                    ? {...user, followingStatus: status}
-                    : user,
-                ),
-              );
-            }}
-            handleUnfollowPress={async () => {
-              const status = await unfollowUser(item.id);
-              setUsers(prevUsers =>
-                prevUsers.map(user =>
-                  user.id === item.id
-                    ? {...user, followingStatus: status}
-                    : user,
-                ),
-              );
-            }}
-          />
-        )}
-        style={{maxHeight: 400}}
-      />
-    );
-  }, [
-    users,
-    likedUsersLoading,
-    followLoading,
-    unfollowLoading,
-    t,
-    navigation,
-    followUser,
-    unfollowUser,
-  ]);
-
   // Show liked users in bottom sheet
   const handleLikesPress = useCallback(
-    (postId: string) => {
-      if (postId) {
-        setCurrentPostId(postId);
-        openBottomSheet({
-          content: <LikedUsersContent />,
-          snapPoint: 'full',
-          title: t('screens.home.post_liked_users'),
-          onClose: () => {
-            setCurrentPostId(null);
-          },
-          showCloseButton: true,
-          closeButtonPosition: 'top-left',
-        });
-      }
-    },
-    [openBottomSheet, t, LikedUsersContent, currentPostId],
+    (postId: string) => {},
+    [openBottomSheet, t],
   );
 
   // Handle dropdown menu item selection
   const handleDropdownSelect = useCallback(
     (item: DropdownMenuItem, postId: string) => {
       switch (item.id) {
-        case 'share':
-          loggingService.info(`Share post: ${postId}`);
-          break;
         case 'report':
           loggingService.info(`Report post: ${postId}`);
           break;
@@ -595,7 +494,6 @@ export const HomeScreen = ({navigation}: Props) => {
 
       return (
         <FeedCard
-          id={item.id}
           avatarSource={feedCardProps.avatarSource}
           userName={feedCardProps.userName}
           timeAgo={feedCardProps.timeAgo}

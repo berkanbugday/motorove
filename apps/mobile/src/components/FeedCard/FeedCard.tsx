@@ -22,10 +22,6 @@ import {useTranslation} from '@hooks/useTranslation';
 
 export interface FeedCardProps {
   /**
-   * Post ID
-   */
-  id: string;
-  /**
    * User avatar image source
    */
   avatarSource: ImageSourcePropType;
@@ -122,7 +118,7 @@ export interface FeedCardProps {
   /**
    * Handler for when the likes count is pressed to show liked users
    */
-  onLikesPress?: (postId: string) => void;
+  onLikesPress?: () => void;
 
   /**
    * Dropdown menu items for the card
@@ -183,7 +179,6 @@ const {width: screenWidth} = Dimensions.get('window');
 const FeedCard: React.FC<FeedCardProps> = props => {
   const {t} = useTranslation();
   const {
-    id,
     avatarSource,
     userName,
     timeAgo,
@@ -267,7 +262,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
 
   const handleLikesPress = () => {
     if (onLikesPress) {
-      onLikesPress(id);
+      onLikesPress();
     }
   };
 

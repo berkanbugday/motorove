@@ -15,7 +15,6 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Request } from 'express';
 import { PostDto } from './dto/post.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
-import { UserDto } from '../users/dto/user.dto';
 
 interface GqlContext {
   req: Request & {
@@ -142,22 +141,5 @@ export class PostsResolver {
   ): Promise<PostInteractionDto> {
     const userId = context.req.user.id;
     return await this.postsService.unsavePost(postId, userId);
-  }
-
-  @UseGuards(JwtGuard)
-  @Query(() => [UserDto], { name: 'postLikedUsers' })
-  async findPostLikedUsers(
-    @Args('postId', { type: () => ID }) postId: string,
-    @Context() context: GqlContext,
-  ): Promise<UserDto[]> {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-
-    return await this.postsService.findPostLikedUsers(
-      postId,
-      userId,
-      authToken,
-    );
   }
 }

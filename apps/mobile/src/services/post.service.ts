@@ -3,7 +3,6 @@ import {
   CREATE_POST,
   GET_POST,
   GET_POSTS,
-  GET_POST_LIKED_USERS,
   LIKE_POST,
   REMOVE_POST,
   SAVE_POST,
@@ -11,7 +10,7 @@ import {
   UNSAVE_POST,
   UPDATE_POST,
 } from './graphql/post.graphql';
-import {IPost, ICreatePost, IUpdatePost, IUser} from '@motorove/shared';
+import {IPost, ICreatePost, IUpdatePost} from '@motorove/shared';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
@@ -485,26 +484,6 @@ export const useUnsavePost = () => {
   };
 };
 
-// Hook for getting users who liked a post
-export const useGetPostLikedUsers = (postId: string) => {
-  const {data, loading, error, refetch} = useQuery(GET_POST_LIKED_USERS, {
-    variables: {
-      postId,
-    },
-    skip: !postId,
-    onError: errorObj => {
-      loggingService.error('Error fetching liked users:', errorObj);
-    },
-  });
-
-  return {
-    users: (data?.postLikedUsers as IUser[]) || [],
-    loading,
-    error,
-    refetch,
-  };
-};
-
 // Export as PostService object
 export const PostService = {
   useCreatePost,
@@ -516,7 +495,6 @@ export const PostService = {
   useUnlikePost,
   useSavePost,
   useUnsavePost,
-  useGetPostLikedUsers,
 };
 
 export default PostService;
