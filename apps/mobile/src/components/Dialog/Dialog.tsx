@@ -63,7 +63,7 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
       closeOnBackdropPress = true,
       closeOnButtonPress = true,
       animationDuration = 300,
-      statusBarTranslucent = false,
+      statusBarTranslucent = true,
 
       // Accessibility
       testID,

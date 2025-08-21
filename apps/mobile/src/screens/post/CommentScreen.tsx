@@ -13,8 +13,8 @@ import {
   Body,
   SwipeableItem,
   Icon,
-  Dialog,
   SkeletonGroup,
+  Button,
 } from '@components';
 import {IComment, IPost} from '@motorove/shared';
 import {Comment} from '@components/Comment/comments';
@@ -29,6 +29,10 @@ import {IconName} from '@components/Icon';
 import {relativeTime} from '@utils/dateUtils';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
+import {
+  closeBottomSheet,
+  useBottomSheet,
+} from '@components/BottomSheet/BottomSheetProvider';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
@@ -36,12 +40,12 @@ type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 export const CommentScreen = ({navigation, route: {params}}: Props) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
+  const {openBottomSheet} = useBottomSheet();
   const [refreshing, setRefreshing] = useState(false);
   const [editingComment, setEditingComment] = useState<{
     id: string;
     content: string;
   } | null>(null);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const commentToDelete = useRef<{id: string; postId: string} | null>(null);
 
   // Get current user
@@ -106,7 +110,41 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 
   const handleDeleteComment = (commentId: string, postId: string) => {
     commentToDelete.current = {id: commentId, postId};
-    setDeleteDialogVisible(true);
+    openBottomSheet({
+      title: t('screens.comment.delete_comment'),
+      closeButtonPosition: 'top-left',
+      enableGestureControl: false,
+      content: (
+        <View>
+          <Body>{t('screens.comment.delete_comment_confirmation')}</Body>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: spacing.md,
+              paddingTop: spacing.lg,
+              paddingBottom: spacing.lg,
+            }}>
+            <Button
+              title={t('common.cancel')}
+              variant="outline"
+              onPress={() => closeBottomSheet()}
+              style={{width: '50%'}}
+            />
+            <Button
+              title={t('common.delete')}
+              variant="primary"
+              onPress={() => {
+                confirmDeleteComment();
+                closeBottomSheet();
+              }}
+              style={{width: '50%'}}
+            />
+          </View>
+        </View>
+      ),
+      snapPoint: 'minimal',
+    });
   };
 
   const confirmDeleteComment = async () => {
@@ -404,23 +442,6 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         initialValue={editingComment?.content || ''}
         editing={Boolean(editingComment)}
         onCancelEdit={handleCancelEdit}
-      />
-
-      <Dialog
-        variant="confirm"
-        visible={deleteDialogVisible}
-        title={t('screens.comment.delete_comment')}
-        message={t('screens.comment.delete_comment_confirmation')}
-        confirmButton={{
-          text: t('common.delete'),
-          variant: 'primary',
-          onPress: confirmDeleteComment,
-        }}
-        cancelButton={{
-          text: t('common.cancel'),
-          variant: 'outline',
-        }}
-        onClose={() => setDeleteDialogVisible(false)}
       />
     </View>
   );

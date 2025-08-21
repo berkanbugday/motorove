@@ -234,7 +234,14 @@ const MemberItem = React.memo(
         onPress={handlePress}
         activeOpacity={0.8}>
         <View style={styles.memberLeftContent}>
-          <Image source={{uri: item.user.avatar}} style={styles.memberAvatar} />
+          <Image
+            source={
+              item.user.avatar
+                ? {uri: item.user.avatar}
+                : require('@assets/images/default_avatar.png')
+            }
+            style={styles.memberAvatar}
+          />
           <View style={styles.memberInfo}>
             <Typography weight="medium">
               {item.user.firstName} {item.user.lastName}
@@ -1283,7 +1290,8 @@ export const GroupDetailScreen = () => {
       <Dialog
         ref={changeRoleDialogRef}
         title={t('screens.group.change_role')}
-        variant="custom">
+        variant="custom"
+        statusBarTranslucent={false}>
         {selectedMember && (
           <View style={styles.changeRoleContent}>
             <Subtitle weight="bold" align="center">
@@ -1507,7 +1515,9 @@ const styles = StyleSheet.create({
   memberAvatar: {
     width: 48,
     height: 48,
-    borderRadius: radius.round,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
     marginRight: spacing.sm,
   },
   memberInfo: {

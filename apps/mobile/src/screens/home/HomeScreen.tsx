@@ -414,11 +414,9 @@ export const HomeScreen = ({navigation}: Props) => {
     (item: DropdownMenuItem, postId: string) => {
       switch (item.id) {
         case 'edit':
-          loggingService.info(`Edit post: ${postId}`);
           navigateToScreen(navigation, 'EditPost', {postId});
           break;
         case 'delete':
-          loggingService.info(`Delete post: ${postId}`);
           // Show confirmation dialog before deleting
           openBottomSheet({
             title: t('screens.post.delete_post'),
