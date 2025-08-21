@@ -1,6 +1,5 @@
-import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
 import {
-  IsBoolean,
   IsEmail,
   IsOptional,
   ValidateNested,

@@ -49,7 +49,11 @@ export class PostsService {
           addresses: true,
           likes: {
             include: {
-              user: true,
+              user: {
+                include: {
+                  city: true,
+                },
+              },
             },
           },
         },
@@ -142,7 +146,11 @@ export class PostsService {
         addresses: true,
         likes: {
           include: {
-            user: true,
+            user: {
+              include: {
+                city: true,
+              },
+            },
           },
         },
       },
