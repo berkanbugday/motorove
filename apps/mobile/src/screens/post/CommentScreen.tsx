@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
-import {colors, commonStyles, spacing} from '@theme';
+import {colors, spacing} from '@theme';
 import {
   Typography,
   FeedCard,
@@ -22,9 +22,8 @@ import {
   Dialog,
   SkeletonGroup,
 } from '@components';
-import {Comment} from '../../types/models/post.model';
+import {IComment} from '@motorove/shared';
 import {
-  useGetComments,
   useCreateComment,
   useGetPost,
   useUpdateComment,
@@ -33,6 +32,7 @@ import {
 import {useAuth} from '@contexts/AuthContext';
 import {IconName} from '@components/Icon';
 import {relativeTime} from '@utils/dateUtils';
+import {useTranslation} from '@hooks/useTranslation';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
 
@@ -50,7 +50,53 @@ interface CommentUI {
   parentId?: string;
 }
 
+// Define styles at the top to avoid 'used before declaration' errors
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.neutral.white,
+  },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listContent: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xl,
+  },
+  commentContainer: {
+    marginBottom: spacing.md,
+  },
+  repliesContainer: {
+    marginLeft: spacing.lg,
+    marginTop: spacing.xs,
+  },
+  replyContainer: {
+    marginBottom: spacing.xs,
+  },
+  replyWithBorder: {
+    borderLeftWidth: 1,
+    borderLeftColor: colors.neutral.lightGrey,
+    paddingLeft: spacing.sm,
+  },
+  replyItem: {
+    marginBottom: spacing.xs,
+  },
+  swipeableContainer: {
+    backgroundColor: colors.neutral.white,
+    borderRadius: 8,
+    marginBottom: spacing.sm,
+  },
+  skeletonPost: {
+    marginBottom: spacing.md,
+  },
+  skeletonComment: {
+    marginBottom: spacing.sm,
+  },
+});
+
 export const CommentScreen = ({navigation, route: {params}}: Props) => {
+  const {t} = useTranslation();
   const [replyingTo, setReplyingTo] = useState<{
     id: string;
     userName: string;
@@ -71,32 +117,25 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     post,
     loading: postLoading,
     error: postError,
+    refetch: refetchPost,
   } = useGetPost(params.postId);
-
-  // Get comments for the post
-  const {
-    comments,
-    loading: commentsLoading,
-    error: commentsError,
-    refetch: refetchComments,
-  } = useGetComments(params.postId);
 
   // Mutations for comments
   const {createComment, loading: createLoading} = useCreateComment(() => {
     // Refetch comments after creating a new one
-    refetchComments();
+    refetchPost();
   });
 
   const {updateComment, loading: updateLoading} = useUpdateComment(() => {
     // Refetch comments after updating
-    refetchComments();
+    refetchPost();
     // Reset editing state
     setEditingComment(null);
   });
 
   const {removeComment, loading: removeLoading} = useRemoveComment(() => {
     // Refetch comments after removing
-    refetchComments();
+    refetchPost();
   });
 
   useEffect(() => {
@@ -108,32 +147,24 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         text2: 'Failed to load post. Please try again.',
       });
     }
-
-    if (commentsError) {
-      showToast({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to load comments. Please try again.',
-      });
-    }
-  }, [postError, commentsError]);
+  }, [postError]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refetchComments();
+      await refetchPost();
     } finally {
       setRefreshing(false);
     }
-  }, [refetchComments]);
+  }, [refetchPost]);
 
   const handleLikeComment = async () => {
     // In a real implementation, you would call a like/unlike API
     // For now, we'll just show a toast
     showToast({
       type: 'info',
-      text1: 'Info',
-      text2: 'Like functionality not implemented yet',
+      text1: t('common.info'),
+      text2: t('screens.post.like_not_implemented'),
     });
   };
 
@@ -212,7 +243,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     }
   };
 
-  const mapCommentForUI = (comment: Comment): CommentUI => {
+  const mapCommentForUI = (comment: IComment): CommentUI => {
     const userName = comment.createdBy?.firstName
       ? `${comment.createdBy.firstName} ${comment.createdBy.lastName || ''}`
       : 'Unknown User';
@@ -225,11 +256,10 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         ? {uri: comment.createdBy.avatar}
         : {uri: 'https://picsum.photos/id/1005/100/100'},
       content: comment.content,
-      timeAgo: relativeTime(comment.createdAt),
-      likeCount: 0, // This would come from the API in a real implementation
+      timeAgo: relativeTime(comment.createdAt, t),
+      likeCount: 0,
       replyCount: comment.replies?.length || 0,
-      isLiked: false, // This would come from the API in a real implementation
-      parentId: comment.parentId,
+      isLiked: false,
     };
   };
 
@@ -237,104 +267,125 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     return user?.id === comment.userId;
   };
 
-  const renderCommentWithSwipeable = (
-    commentItem: CommentUI,
-    isReply: boolean = false,
-    style: any = {},
-  ) => {
-    const isOwner = isCommentOwner(commentItem);
+  const renderCommentWithSwipeable = useCallback(
+    (commentItem: CommentUI, isReply: boolean = false, style: any = {}) => {
+      const isOwner = isCommentOwner(commentItem);
 
-    // If user is not the owner, render regular comment without swipeable
-    if (!isOwner) {
+      // If user is not the owner, render regular comment without swipeable
+      if (!isOwner) {
+        return (
+          <CommentItem
+            comment={commentItem}
+            onLikePress={handleLikeComment}
+            onReplyPress={handleReplyToComment}
+            isReply={isReply}
+            style={style}
+            actionBarActive={false}
+          />
+        );
+      }
+
+      // For comment owners, render with swipeable actions
       return (
-        <CommentItem
-          comment={commentItem}
-          onLikePress={handleLikeComment}
-          onReplyPress={handleReplyToComment}
-          isReply={isReply}
-          style={style}
-          actionBarActive={false}
-        />
+        <SwipeableItem
+          rightActions={[
+            {
+              text: t('common.edit'),
+              icon: <Icon name="pen" color={colors.neutral.white} size={20} />,
+              backgroundColor: colors.status.success,
+              onPress: () => handleEditComment(commentItem),
+            },
+            {
+              text: t('common.delete'),
+              icon: (
+                <Icon name="trash" color={colors.neutral.white} size={20} />
+              ),
+              backgroundColor: colors.status.error,
+              onPress: () => handleDeleteComment(commentItem.id, params.postId),
+            },
+          ]}
+          contentContainerStyle={styles.swipeableContainer}>
+          <CommentItem
+            comment={commentItem}
+            onLikePress={handleLikeComment}
+            onReplyPress={handleReplyToComment}
+            isReply={isReply}
+            style={style}
+            actionBarActive={false}
+          />
+        </SwipeableItem>
       );
-    }
+    },
+    [
+      handleLikeComment,
+      handleReplyToComment,
+      handleEditComment,
+      handleDeleteComment,
+      isCommentOwner,
+      params.postId,
+      t,
+    ],
+  );
 
-    // For comment owners, render with swipeable actions
-    return (
-      <SwipeableItem
-        rightActions={[
-          {
-            text: 'Edit',
-            icon: <Icon name="pen" color={colors.neutral.white} size={20} />,
-            backgroundColor: colors.status.success,
-            onPress: () => handleEditComment(commentItem),
-          },
-          {
-            text: 'Delete',
-            icon: <Icon name="trash" color={colors.neutral.white} size={20} />,
-            backgroundColor: colors.status.error,
-            onPress: () => handleDeleteComment(commentItem.id, params.postId),
-          },
-        ]}
-        contentContainerStyle={styles.swipeableContainer}>
-        <CommentItem
-          comment={commentItem}
-          onLikePress={handleLikeComment}
-          onReplyPress={handleReplyToComment}
-          isReply={isReply}
-          style={style}
-          actionBarActive={false}
-        />
-      </SwipeableItem>
-    );
-  };
+  const renderItem = useCallback(
+    ({item}: {item: IComment}) => {
+      // Only render top-level comments (no parentId)
+      if (item.parentId) {
+        return null;
+      }
 
-  const renderItem = ({item}: {item: Comment}) => {
-    // Only render top-level comments (no parentId)
-    if (item.parentId) {
-      return null;
-    }
+      const isLastComment =
+        item.id === post?.comments?.[post.comments.length - 1]?.id;
+      const lastReplyId = item.replies?.[item.replies.length - 1]?.id;
+      const mappedComment = mapCommentForUI(item);
 
-    const isLastComment = item.id === comments?.[comments.length - 1]?.id;
-    const lastReplyId = item.replies?.[item.replies.length - 1]?.id;
-    const mappedComment = mapCommentForUI(item);
+      return (
+        <View
+          style={[
+            styles.commentContainer,
+            isLastComment && {marginBottom: spacing.xxxl},
+          ]}>
+          {renderCommentWithSwipeable(mappedComment)}
 
-    return (
-      <View>
-        {renderCommentWithSwipeable(
-          mappedComment,
-          false,
-          isLastComment && item.replies?.length === 0
-            ? {borderBottomWidth: 0}
-            : {},
-        )}
-        {item.replies &&
-          item.replies.length > 0 &&
-          item.replies.map(reply => {
-            const mappedReply = mapCommentForUI(reply);
-            return (
-              <View key={reply.id}>
-                {renderCommentWithSwipeable(
-                  mappedReply,
-                  true,
-                  isLastComment && lastReplyId === reply.id
-                    ? {borderBottomWidth: 0}
-                    : {},
-                )}
-              </View>
-            );
-          })}
-      </View>
-    );
-  };
+          {/* Render replies */}
+          {item.replies && item.replies.length > 0 && (
+            <View style={styles.repliesContainer}>
+              {item.replies.map(reply => {
+                // Type assertion to handle partial IComment objects
+                const mappedReply = mapCommentForUI(reply as IComment);
+                const isLastReply = reply.id === lastReplyId;
 
-  const loading = postLoading || commentsLoading;
+                return (
+                  <View
+                    key={reply.id}
+                    style={[
+                      styles.replyContainer,
+                      !isLastReply && styles.replyWithBorder,
+                    ]}>
+                    {renderCommentWithSwipeable(
+                      mappedReply,
+                      true,
+                      styles.replyItem,
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      );
+    },
+    [post, renderCommentWithSwipeable, mapCommentForUI],
+  );
+
+  const loading = postLoading;
 
   // Render skeleton loaders when loading
   if (loading) {
     return (
       <View style={styles.container}>
         <TopHeaderBar
-          title="Comments"
+          title={t('screens.post.comments')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
@@ -384,27 +435,28 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     avatarSource: post.createdBy?.avatar
       ? {uri: post.createdBy.avatar}
       : {uri: 'https://picsum.photos/id/1005/100/100'},
-    timeAgo: relativeTime(post.createdAt),
+    timeAgo: relativeTime(post.createdAt, t),
     content: post.content,
-    images: post.images ? post.images.map(img => ({uri: img})) : [],
+    images: post.images ? post.images.map((img: string) => ({uri: img})) : [],
     likeCount: post.likesCount || 0,
     commentCount: post.commentsCount || 0,
     isLiked: post.isLiked || false,
     isSaved: post.isSaved || false,
     isCommented: false,
-    labels: post.group
-      ? [{icon: 'users' as IconName, text: post.group.name}]
-      : [],
+    labels:
+      post.groupId && post.groupName
+        ? [{icon: 'users' as IconName, text: post.groupName}]
+        : [],
   };
 
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={`Comments (${comments?.length || 0})`}
+        title={`${t('screens.post.comments')} (${post?.comments?.length || 0})`}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
-      {!comments || comments.length === 0 ? (
+      {!post?.comments || post?.comments?.length === 0 ? (
         <ScrollView
           style={[styles.listContent, {flex: 1}]}
           refreshControl={
@@ -425,12 +477,12 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
             actionBarDisabled={true}
           />
           <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
-            No comments yet. Be the first to comment!
+            {t('screens.post.no_comments_yet')}
           </Body>
         </ScrollView>
       ) : (
         <FlatList
-          data={comments}
+          data={post?.comments}
           renderItem={renderItem}
           keyExtractor={item => item.id}
           ListHeaderComponent={
@@ -441,7 +493,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
               content={mappedPost.content}
               images={mappedPost.images}
               likeCount={mappedPost.likeCount}
-              commentCount={comments.length}
+              commentCount={post?.comments?.length || 0}
               isLiked={mappedPost.isLiked}
               isSaved={mappedPost.isSaved}
               isCommented={mappedPost.isCommented}
@@ -472,15 +524,15 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       <Dialog
         variant="confirm"
         visible={deleteDialogVisible}
-        title="Delete Comment"
-        message="Are you sure you want to delete this comment?"
+        title={t('screens.post.delete_comment')}
+        message={t('screens.post.delete_comment_confirmation')}
         confirmButton={{
-          text: 'Delete',
+          text: t('common.delete'),
           variant: 'primary',
           onPress: confirmDeleteComment,
         }}
         cancelButton={{
-          text: 'Cancel',
+          text: t('common.cancel'),
           variant: 'outline',
         }}
         onClose={() => setDeleteDialogVisible(false)}
@@ -488,26 +540,3 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    ...commonStyles.container,
-  },
-  center: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listContent: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-  },
-  swipeableContainer: {
-    backgroundColor: colors.secondary.light,
-  },
-  skeletonPost: {
-    marginBottom: spacing.lg,
-  },
-  skeletonComment: {
-    marginBottom: spacing.md,
-  },
-});

@@ -49,7 +49,7 @@ export const GET_COMMENT = gql`
 
 export const CREATE_COMMENT = gql`
   mutation CreateComment($input: CreateCommentInput!) {
-    createComment(createCommentInput: $input) {
+    createComment(input: $input) {
       ...CommentFragment
     }
   }
@@ -58,7 +58,7 @@ export const CREATE_COMMENT = gql`
 
 export const UPDATE_COMMENT = gql`
   mutation UpdateComment($input: UpdateCommentInput!) {
-    updateComment(updateCommentInput: $input) {
+    updateComment(input: $input) {
       ...CommentFragment
     }
   }

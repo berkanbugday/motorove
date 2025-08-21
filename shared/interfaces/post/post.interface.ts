@@ -1,5 +1,6 @@
 import { IUser } from "../user";
 import { IAddress } from "../address";
+import { IComment } from "../comment";
 
 export interface IPost {
   id: string;
@@ -15,4 +16,5 @@ export interface IPost {
   groupName?: string;
   addresses?: IAddress[];
   likedUsers?: IUser[];
+  comments?: IComment[];
 }

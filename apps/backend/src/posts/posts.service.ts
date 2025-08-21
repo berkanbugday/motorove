@@ -18,6 +18,7 @@ import { PostDto } from './dto/post.dto';
 import { AddressDto } from '../addresses/dto/address.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
+import { CommentDto } from '../comments/dto/comment.dto';
 
 @Injectable()
 export class PostsService {
@@ -140,9 +141,8 @@ export class PostsService {
     const post = await this.prisma.post.findUnique({
       where: { id },
       include: {
-        createdBy: true,
-        updatedBy: true,
         group: true,
+        createdBy: true,
         addresses: true,
         likes: {
           include: {
@@ -151,6 +151,17 @@ export class PostsService {
                 city: true,
               },
             },
+          },
+        },
+        comments: {
+          where: {
+            isActive: true,
+          },
+          include: {
+            createdBy: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
           },
         },
       },
@@ -684,7 +695,7 @@ export class PostsService {
     });
 
     const commentsCount = await this.prisma.comment.count({
-      where: { postId: prismaPost.id, parentId: null },
+      where: { postId: prismaPost.id, parentId: null, isActive: true },
     });
 
     let isLiked = false;
@@ -763,6 +774,8 @@ export class PostsService {
       createdBy: prismaPost.createdBy as UserDto,
       createdAt: prismaPost.createdAt,
       likedUsers: prismaPost.likes?.map((like) => like.user) || [],
+      comments:
+        prismaPost.comments?.map((comment) => comment as CommentDto) || [],
     } as PostDto;
   }
 

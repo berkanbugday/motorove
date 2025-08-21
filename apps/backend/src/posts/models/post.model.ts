@@ -4,6 +4,7 @@ import { BaseModel } from '../../core/models/base.model';
 import { Address } from '../../addresses/models/address.model';
 import { PostLike } from './post-like.model';
 import { PostSave } from './post-save.model';
+import { Comment } from '../../comments/models/comment.model';
 
 @ObjectType()
 export class Post extends BaseModel {
@@ -27,4 +28,7 @@ export class Post extends BaseModel {
 
   @Field(() => [Address], { nullable: true })
   addresses?: Address[];
+
+  @Field(() => [Comment], { nullable: true })
+  comments?: Comment[];
 }

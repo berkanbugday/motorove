@@ -30,7 +30,7 @@ export function formatDate(date: Date): string {
  * @param date - The date to get relative time for
  * @returns A relative time string
  */
-export function relativeTime(timestamp: Date, t: TFunction): string {
+export function relativeTime(timestamp: Date | string, t: TFunction): string {
   const now = new Date();
   const date = new Date(timestamp);
   const diffMs = now.getTime() - date.getTime();

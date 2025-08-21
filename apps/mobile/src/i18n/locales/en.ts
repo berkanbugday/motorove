@@ -197,7 +197,6 @@ export default {
       post_updated_failed: 'Post update failed. Please try again.',
       post_deleted: 'Post deleted successfully',
       post_deleted_failed: 'Post deletion failed. Please try again.',
-      report_post: 'Report Post',
       delete_confirmation: 'Are you sure you want to delete this post?',
       delete_post: 'Delete Post',
       delete_post_confirmation:

@@ -199,7 +199,6 @@ export default {
       post_updated_failed: 'Gönderi güncellenemedi. Lütfen tekrar deneyin.',
       post_deleted: 'Gönderi başarıyla silindi',
       post_deleted_failed: 'Gönderi silinemedi. Lütfen tekrar deneyin.',
-      report_post: 'Şikayet Et',
       delete_confirmation: 'Bu gönderiyi silmek istediğinize emin misiniz?',
       delete_post: 'Gönderi Sil',
       delete_post_confirmation:

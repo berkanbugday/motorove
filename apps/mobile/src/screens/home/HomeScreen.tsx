@@ -350,13 +350,6 @@ export const HomeScreen = ({navigation}: Props) => {
             isHighlighted: true,
           },
         );
-      } else {
-        items.push({
-          id: 'report',
-          label: t('screens.post.report_post'),
-          icon: 'error',
-          isHighlighted: true,
-        });
       }
 
       return items;
@@ -420,9 +413,6 @@ export const HomeScreen = ({navigation}: Props) => {
   const handleDropdownSelect = useCallback(
     (item: DropdownMenuItem, postId: string) => {
       switch (item.id) {
-        case 'report':
-          loggingService.info(`Report post: ${postId}`);
-          break;
         case 'edit':
           loggingService.info(`Edit post: ${postId}`);
           navigateToScreen(navigation, 'EditPost', {postId});

@@ -800,6 +800,7 @@ enum NotificationType {
 
 type Post {
   addresses: [Address!]
+  comments: [Comment!]
   content: String!
   createdAt: DateTime!
   createdBy: User!
@@ -818,6 +819,7 @@ type Post {
 
 type PostDto {
   addresses: [AddressDto!]
+  comments: [CommentDto!]
   commentsCount: Int!
   content: String!
   createdAt: DateTime!
