@@ -366,7 +366,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
         </View>
 
         {/* More Button or Dropdown Menu */}
-        {dropdownMenu && onDropdownSelect ? (
+        {dropdownMenu && dropdownMenu.length > 0 && onDropdownSelect ? (
           <DropdownMenu
             items={dropdownMenu}
             onSelect={handleDropdownSelect}

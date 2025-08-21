@@ -157,7 +157,9 @@ export const HomeScreen = ({navigation}: Props) => {
   const {unsavePost} = useUnsavePost();
 
   // Add hook for post deletion
-  const {removePost} = useRemovePost();
+  const {removePost} = useRemovePost(() => {
+    refetchPosts();
+  });
 
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
@@ -445,7 +447,6 @@ export const HomeScreen = ({navigation}: Props) => {
                     onPress={() => {
                       removePost(postId);
                       closeBottomSheet();
-                      refetchPosts();
                     }}
                     style={{width: '50%'}}
                   />

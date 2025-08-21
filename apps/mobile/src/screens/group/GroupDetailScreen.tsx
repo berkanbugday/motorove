@@ -11,12 +11,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import {colors, getShadow, radius, rh, spacing} from '@theme';
-import {
-  useNavigation,
-  useRoute,
-  RouteProp,
-  useFocusEffect,
-} from '@react-navigation/native';
+import {useNavigation, RouteProp} from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import {
   MainScreenNavigationProp,
   MainStackParamList,
@@ -43,6 +39,8 @@ import {
   Subtitle,
   Title,
   Typography,
+  UserCard,
+  Body,
 } from '@components';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {DropdownMenuItem} from '@components/DropdownMenu';
@@ -58,13 +56,13 @@ import {
 import {
   IPost,
   IGroup,
-  Language,
-  IAddress,
   GroupMemberRole,
   GroupPrivacy,
+  IUser,
 } from '@motorove/shared';
 import {relativeTime} from '@utils/dateUtils';
 import {useAuth} from '@contexts';
+import {useLanguage} from '@contexts/LanguageContext';
 import {
   useAddMember,
   useChangeMemberRole,
@@ -74,8 +72,16 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {AuthUser} from '@app-types/auth.types';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
-import {TFunction} from 'i18next';
+import {
+  closeBottomSheet,
+  openBottomSheet,
+} from '@components/BottomSheet/BottomSheetProvider';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
+
+type Props = {
+  route: GroupDetailScreenRouteProp;
+  navigation: MainScreenNavigationProp<'GroupDetail'>;
+};
 
 const formatAvatarSource = (imageUrl?: string) => {
   return imageUrl
@@ -83,42 +89,7 @@ const formatAvatarSource = (imageUrl?: string) => {
     : require('@assets/images/default_avatar.png');
 };
 
-const transformPostToFeedCard = (post: IPost, t: TFunction) => {
-  const labels = [];
-
-  if (post.addresses && post.addresses.length > 0) {
-    const addressText = post.addresses?.find(
-      (address: IAddress) => address.language === Language.EN,
-    )?.address;
-    if (addressText) {
-      labels.push({
-        icon: 'map-pin' as IconName,
-        text: addressText,
-      });
-    }
-  }
-
-  // Transform images from string URLs to objects with URI
-  const images =
-    post.images && post.images.length > 0
-      ? post.images.map((img: string) => ({uri: img}))
-      : undefined;
-
-  return {
-    id: post.id,
-    userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
-    avatarSource: formatAvatarSource(post.createdBy.avatar),
-    timeAgo: relativeTime(post.createdAt, t),
-    content: post.content,
-    images,
-    likeCount: post.likesCount,
-    commentCount: post.commentsCount,
-    isSaved: post.isSaved,
-    isLiked: post.isLiked,
-    isCommented: false, // This might not be available in the API
-    labels,
-  };
-};
+// This function will be defined inside the component
 
 interface EventItem {
   id: string;
@@ -340,10 +311,11 @@ const MemberItem = React.memo(
 /**
  * GroupDetail Screen - Displays detailed information about a specific group
  */
-export const GroupDetailScreen = () => {
-  const navigation = useNavigation<MainScreenNavigationProp<'GroupDetail'>>();
-  const route = useRoute<GroupDetailScreenRouteProp>();
+export const GroupDetailScreen = ({route, navigation}: Props) => {
   const {groupId} = route.params;
+  const {t} = useTranslation();
+  const {user} = useAuth();
+  const {language} = useLanguage();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const membersBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -353,7 +325,6 @@ export const GroupDetailScreen = () => {
   const changeRoleDialogRef = useRef<DialogRef>(null);
   const removeMemberDialogRef = useRef<DialogRef>(null);
   const insets = useSafeAreaInsets();
-  const {t} = useTranslation();
   // State for selected member and role
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [memberToRemove, setMemberToRemove] = useState<any>(null);
@@ -406,8 +377,8 @@ export const GroupDetailScreen = () => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refetchGroup?.();
-      await refetchPosts?.();
+      await refetchGroup();
+      await refetchPosts();
     } finally {
       setRefreshing(false);
     }
@@ -416,7 +387,6 @@ export const GroupDetailScreen = () => {
   // Fetch group members
   const members = group?.memberships || [];
 
-  const {user} = useAuth();
   const {addMember} = useAddMember(() => {
     if (group?.privacy === GroupPrivacy.PUBLIC) {
       showToast({
@@ -432,18 +402,18 @@ export const GroupDetailScreen = () => {
       });
     }
     // Refresh the group data
-    refetchGroup?.() || refetchPosts?.();
+    refetchGroup() || refetchPosts();
   });
   const {changeMemberRole, loading: changeMemberRoleLoading} =
     useChangeMemberRole(() => {
       // Close dialog and refresh data
       changeRoleDialogRef.current?.close();
-      refetchGroup?.() || refetchPosts?.();
+      refetchGroup() || refetchPosts();
     });
   const {removeMember, loading: removeMemberLoading} = useRemoveMember(() => {
     removeMemberDialogRef.current?.close();
     leaveGroupBottomSheetRef.current?.close();
-    refetchGroup?.() || refetchPosts?.();
+    refetchGroup() || refetchPosts();
   });
 
   // Post interaction hooks
@@ -451,7 +421,9 @@ export const GroupDetailScreen = () => {
   const {unlikePost} = useUnlikePost();
   const {savePost} = useSavePost();
   const {unsavePost} = useUnsavePost();
-  const {removePost} = useRemovePost();
+  const {removePost} = useRemovePost(() => {
+    refetchPosts();
+  });
 
   // Handle opening the remove member dialog
   const handleOpenRemoveMemberDialog = useCallback((member: any) => {
@@ -658,6 +630,99 @@ export const GroupDetailScreen = () => {
     [savePost, unsavePost],
   );
 
+  // Render each user item
+  const renderUserItem = useCallback(({item}: {item: IUser}) => {
+    return (
+      <UserCard
+        user={item}
+        onPress={() => {
+          if (item.id !== user?.id) {
+            closeBottomSheet();
+            navigateToScreen(navigation, 'Profile', {userId: item.id});
+          }
+        }}
+        showFollowButton={false}
+        showUnfollowButton={false}
+      />
+    );
+  }, []);
+
+  // Show liked users in bottom sheet with current user first
+  const handleLikesPress = useCallback(
+    (likedUsers?: IUser[]) => {
+      if (likedUsers) {
+        // Sort the array to put current user first
+        const sortedUsers = [...likedUsers].sort((a, b) => {
+          if (a.id === user?.id) {
+            return -1;
+          }
+          if (b.id === user?.id) {
+            return 1;
+          }
+          return 0;
+        });
+
+        openBottomSheet({
+          content: (
+            <FlatList
+              data={sortedUsers}
+              renderItem={renderUserItem}
+              keyExtractor={item => item.id}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={{padding: 20, alignItems: 'center'}}>
+                  <Body>{t('screens.home.no_likes_yet')}</Body>
+                </View>
+              }
+            />
+          ),
+        });
+      }
+    },
+    [user?.id],
+  );
+
+  // Transform post data to FeedCard props (matching HomeScreen)
+  const transformPostToFeedCard = useCallback(
+    (post: IPost) => {
+      // Create labels from post data
+      const labels = [];
+
+      if (post.addresses && post.addresses.length > 0) {
+        labels.push({
+          icon: 'map-pin' as IconName,
+          text:
+            post.addresses?.find(
+              address =>
+                address.language.toLowerCase() === language.toLowerCase(),
+            )?.address || '',
+        });
+      }
+
+      // Transform images from string URLs to objects with URI
+      const images =
+        post.images && post.images.length > 0
+          ? post.images.map((img: string) => ({uri: img}))
+          : undefined;
+
+      return {
+        id: post.id,
+        userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
+        avatarSource: formatAvatarSource(post.createdBy.avatar),
+        timeAgo: relativeTime(post.createdAt, t),
+        content: post.content,
+        images,
+        likeCount: post.likesCount,
+        commentCount: post.commentsCount,
+        isSaved: post.isSaved,
+        isLiked: post.isLiked,
+        isCommented: false, // This might not be available in the API
+        labels,
+      };
+    },
+    [language, t],
+  );
+
   // Create dropdown menu items for the feed posts (matching HomeScreen)
   const createPostDropdownItems = useCallback(
     (postId: string, isOwnPost: boolean): DropdownMenuItem[] => {
@@ -678,13 +743,6 @@ export const GroupDetailScreen = () => {
             isHighlighted: true,
           },
         );
-      } else {
-        items.push({
-          id: 'report',
-          label: t('screens.post.report_post'),
-          icon: 'error',
-          isHighlighted: true,
-        });
       }
 
       return items;
@@ -705,8 +763,44 @@ export const GroupDetailScreen = () => {
           break;
         case 'delete':
           loggingService.info(`Delete post: ${postId}`);
-          // For now, just call the remove function directly
-          removePost(postId);
+          // Show confirmation dialog before deleting
+          openBottomSheet({
+            title: t('screens.post.delete_post'),
+            closeButtonPosition: 'top-left',
+            enableGestureControl: false,
+            content: (
+              <View>
+                <BodySmall>
+                  {t('screens.post.delete_post_confirmation')}
+                </BodySmall>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    gap: spacing.md,
+                    paddingTop: spacing.lg,
+                    paddingBottom: spacing.lg,
+                  }}>
+                  <Button
+                    title={t('common.cancel')}
+                    variant="outline"
+                    onPress={() => closeBottomSheet()}
+                    style={{width: '50%'}}
+                  />
+                  <Button
+                    title={t('common.delete')}
+                    variant="primary"
+                    onPress={() => {
+                      removePost(postId);
+                      closeBottomSheet();
+                    }}
+                    style={{width: '50%'}}
+                  />
+                </View>
+              </View>
+            ),
+            snapPoint: 'minimal',
+          });
           break;
         default:
           loggingService.info(
@@ -714,7 +808,49 @@ export const GroupDetailScreen = () => {
           );
       }
     },
-    [navigation, removePost],
+    [navigation, removePost, t, refetchPosts],
+  );
+
+  // Render feed post with FeedCard component
+  const renderFeedPost = useCallback(
+    ({item}: {item: IPost}) => {
+      const isOwnPost = item.createdBy.id === user?.id;
+      const feedCardProps = transformPostToFeedCard(item);
+      return (
+        <FeedCard
+          avatarSource={feedCardProps.avatarSource}
+          userName={feedCardProps.userName}
+          timeAgo={feedCardProps.timeAgo}
+          labels={feedCardProps.labels}
+          content={feedCardProps.content}
+          images={feedCardProps.images}
+          likeCount={feedCardProps.likeCount}
+          commentCount={feedCardProps.commentCount}
+          isSaved={feedCardProps.isSaved}
+          isLiked={feedCardProps.isLiked}
+          isCommented={feedCardProps.isCommented}
+          dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
+          onDropdownSelect={menuItem =>
+            handlePostDropdownSelect(menuItem, item.id)
+          }
+          onLikePress={() => handleLikePress(item.id, item.isLiked)}
+          onCommentPress={() => handleCommentPress(item.id)}
+          onSavePress={() => handleSavePress(item.id, feedCardProps.isSaved)}
+          onLikesPress={() => handleLikesPress(item.likedUsers)}
+          style={styles.feedCard}
+        />
+      );
+    },
+    [
+      user,
+      handleLikePress,
+      handleSavePress,
+      createPostDropdownItems,
+      handlePostDropdownSelect,
+      transformPostToFeedCard,
+      handleLikesPress,
+      handleCommentPress,
+    ],
   );
 
   // Create dropdown menu items for the group detail screen
@@ -877,51 +1013,6 @@ export const GroupDetailScreen = () => {
       setSelectedRole(null);
     }
   }, []);
-
-  // Render feed post with comment navigation and dropdown menu (matching HomeScreen)
-  const renderFeedPost = useCallback(
-    ({item}: {item: IPost}) => {
-      // Determine if this is the user's own post
-      const isOwnPost = item.createdBy.id === user?.id;
-      // Transform Post model to FeedCard props
-      const feedCardProps = transformPostToFeedCard(item, t);
-
-      return (
-        <FeedCard
-          avatarSource={feedCardProps.avatarSource}
-          userName={feedCardProps.userName}
-          timeAgo={feedCardProps.timeAgo}
-          labels={feedCardProps.labels}
-          content={feedCardProps.content}
-          images={feedCardProps.images}
-          likeCount={feedCardProps.likeCount}
-          commentCount={feedCardProps.commentCount}
-          isSaved={feedCardProps.isSaved}
-          isLiked={feedCardProps.isLiked}
-          isCommented={feedCardProps.isCommented}
-          dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
-          onDropdownSelect={menuItem =>
-            handlePostDropdownSelect(menuItem, item.id)
-          }
-          onLikePress={() => handleLikePress(item.id, item.isLiked)}
-          onCommentPress={() => handleCommentPress(item.id)}
-          onSavePress={() => handleSavePress(item.id, item.isSaved)}
-          style={styles.feedCard}
-        />
-      );
-    },
-    [
-      user,
-      transformPostToFeedCard,
-      createPostDropdownItems,
-      handlePostDropdownSelect,
-      handleLikePress,
-      handleCommentPress,
-      handleSavePress,
-    ],
-  );
-
-  // Feed keyExtractor
   const feedKeyExtractor = useCallback((item: IPost) => item.id, []);
 
   // Handle FlatList scroll event to update the current page
