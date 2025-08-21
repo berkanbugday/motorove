@@ -11,6 +11,7 @@ import {Typography} from '../../Typography/Typography';
 import {colors, spacing} from '@theme';
 import {Comment} from '../comments';
 import {Icon} from '@components';
+import profanityFilterService from '@services/profanity-filter.service';
 
 interface CommentItemProps {
   comment: Comment;
@@ -69,7 +70,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
         </TouchableOpacity>
 
         <Typography variant="body" style={styles.content}>
-          {comment.content}
+          {profanityFilterService.filterText(comment.content)}
         </Typography>
 
         {actionBarActive && (

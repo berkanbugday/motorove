@@ -19,6 +19,7 @@ import {Button, Chip, Icon} from '@components';
 import {IconName} from '@components/Icon';
 import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {useTranslation} from '@hooks/useTranslation';
+import profanityFilterService from '@services/profanity-filter.service';
 
 export interface FeedCardProps {
   /**
@@ -406,7 +407,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
       {/* Content */}
       {content && (
         <Typography variant="body" style={[styles.content, contentStyle]}>
-          {content}
+          {profanityFilterService.filterText(content)}
         </Typography>
       )}
 
