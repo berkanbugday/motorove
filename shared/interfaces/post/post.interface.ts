@@ -14,4 +14,5 @@ export interface IPost {
   groupId?: string;
   groupName?: string;
   addresses?: IAddress[];
+  likedUsers?: IUser[];
 }

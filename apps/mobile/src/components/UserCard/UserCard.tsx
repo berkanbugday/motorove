@@ -15,6 +15,7 @@ interface UserCardProps {
   handleUnfollowPress?: () => void;
   style?: any;
   loading?: boolean;
+  isOwnProfile?: boolean;
 }
 
 /**
@@ -27,6 +28,7 @@ export const UserCard: React.FC<UserCardProps> = ({
   handleUnfollowPress,
   style,
   loading,
+  isOwnProfile,
 }) => {
   const {t} = useTranslation();
   const [followingStatus, setFollowingStatus] = useState<ApprovalStatus>();
@@ -69,29 +71,31 @@ export const UserCard: React.FC<UserCardProps> = ({
             </View>
           )}
         </View>
-        <View style={styles.buttonContainer}>
-          {followingStatus === ApprovalStatus.ACCEPTED ? (
-            <Button
-              title={t('common.unfollow')}
-              variant="secondary"
-              size="small"
-              onPress={handleUnfollowPress}
-              disabled={loading}
-              loading={loading}
-            />
-          ) : followingStatus === ApprovalStatus.PENDING ? (
-            <Caption>{t('common.pending_approval')}</Caption>
-          ) : (
-            <Button
-              title={t('common.follow')}
-              variant="dark"
-              size="small"
-              onPress={handleFollowPress}
-              disabled={loading}
-              loading={loading}
-            />
-          )}
-        </View>
+        {!isOwnProfile && (
+          <View style={styles.buttonContainer}>
+            {followingStatus === ApprovalStatus.ACCEPTED ? (
+              <Button
+                title={t('common.unfollow')}
+                variant="secondary"
+                size="small"
+                onPress={handleUnfollowPress}
+                disabled={loading}
+                loading={loading}
+              />
+            ) : followingStatus === ApprovalStatus.PENDING ? (
+              <Caption>{t('common.pending_approval')}</Caption>
+            ) : (
+              <Button
+                title={t('common.follow')}
+                variant="dark"
+                size="small"
+                onPress={handleFollowPress}
+                disabled={loading}
+                loading={loading}
+              />
+            )}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );

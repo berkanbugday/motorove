@@ -15,8 +15,8 @@ import { StorageService } from '../core/storage/storage.service';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { PostDto } from './dto/post.dto';
-import { AddressDto } from 'src/addresses/dto/address.dto';
-import { UserDto } from 'src/users/dto/user.dto';
+import { AddressDto } from '../addresses/dto/address.dto';
+import { UserDto } from '../users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
 
 @Injectable()
@@ -47,6 +47,11 @@ export class PostsService {
           group: true,
           createdBy: true,
           addresses: true,
+          likes: {
+            include: {
+              user: true,
+            },
+          },
         },
         take: limit || undefined,
         skip: skip || undefined,
@@ -73,6 +78,45 @@ export class PostsService {
               return null;
             }
           }
+
+          post.likes.map(async (like) => {
+            const user = like.user as UserDto;
+
+            // Get signed URL for avatar if exists
+            if (user.avatar && authToken) {
+              try {
+                user.avatar = await this.storageService.getSignedUrl(
+                  user.avatar,
+                  3600,
+                  authToken,
+                );
+              } catch (error) {
+                this.logger.error(
+                  `Error getting signed URL for avatar: ${error.message}`,
+                );
+              }
+            }
+
+            // Check following status
+            if (currentUserId) {
+              const following = await this.prisma.userFollowing.findUnique({
+                where: {
+                  followerId_followingId: {
+                    followerId: currentUserId,
+                    followingId: user.id,
+                  },
+                  isActive: true,
+                  follower: { isActive: true },
+                  following: { isActive: true },
+                },
+              });
+
+              if (following) {
+                user.followingStatus = following.status as ApprovalStatus;
+              }
+            }
+          });
+
           return this.mapToDto(post as Post, currentUserId, authToken);
         }),
       );
@@ -96,6 +140,11 @@ export class PostsService {
         updatedBy: true,
         group: true,
         addresses: true,
+        likes: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
@@ -705,6 +754,7 @@ export class PostsService {
       isSaved,
       createdBy: prismaPost.createdBy as UserDto,
       createdAt: prismaPost.createdAt,
+      likedUsers: prismaPost.likes?.map((like) => like.user) || [],
     } as PostDto;
   }
 

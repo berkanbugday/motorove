@@ -68,4 +68,9 @@ export class PostDto implements IPost {
   @ValidateNested()
   @Type(() => AddressDto)
   addresses?: AddressDto[];
+
+  @Field(() => [UserDto], { nullable: true })
+  @ValidateNested()
+  @Type(() => UserDto)
+  likedUsers?: UserDto[];
 }

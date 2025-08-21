@@ -19,6 +19,7 @@ import {
   FeedCard,
   Body,
   SkeletonGroup,
+  UserCard,
 } from '@components';
 import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
@@ -39,7 +40,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost} from '@motorove/shared';
+import {IPost, IUser} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -50,6 +51,7 @@ import {
 } from '@services/post.service';
 import {relativeTime} from '@utils/dateUtils';
 import {useTranslation} from '@hooks/useTranslation';
+import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
 
 // Route data
 const recommendedRoutes = [
@@ -141,6 +143,8 @@ export const HomeScreen = ({navigation}: Props) => {
   // Create a stable animated value for scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
   const {openBottomSheet} = useBottomSheet();
+  const {followUser, loading: followLoading} = useFollowUser();
+  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser();
   // Use the real API hook for posts"
   const {
     posts,
@@ -363,10 +367,67 @@ export const HomeScreen = ({navigation}: Props) => {
     [],
   );
 
-  // Show liked users in bottom sheet
+  // Render each user item
+  const renderUserItem = useCallback(
+    ({item}: {item: IUser}) => {
+      return (
+        <UserCard
+          user={item}
+          loading={followLoading || unfollowLoading}
+          onPress={() => {
+            if (item.id !== user?.id) {
+              closeBottomSheet();
+              navigateToScreen(navigation, 'Profile', {userId: item.id});
+            }
+          }}
+          handleFollowPress={async () => {
+            const status = await followUser(item.id);
+            item.followingStatus = status;
+          }}
+          handleUnfollowPress={async () => {
+            const status = await unfollowUser(item.id);
+            item.followingStatus = status;
+          }}
+          isOwnProfile={item.id === user?.id}
+        />
+      );
+    },
+    [followUser, unfollowUser],
+  );
+
+  // Show liked users in bottom sheet with current user first
   const handleLikesPress = useCallback(
-    (postId: string) => {},
-    [openBottomSheet, t],
+    (likedUsers?: IUser[]) => {
+      if (likedUsers) {
+        // Sort the array to put current user first
+        const sortedUsers = [...likedUsers].sort((a, b) => {
+          if (a.id === user?.id) {
+            return -1;
+          }
+          if (b.id === user?.id) {
+            return 1;
+          }
+          return 0;
+        });
+
+        openBottomSheet({
+          content: (
+            <FlatList
+              data={sortedUsers}
+              renderItem={renderUserItem}
+              keyExtractor={item => item.id}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <View style={{padding: 20, alignItems: 'center'}}>
+                  <Body>{t('screens.home.no_likes_yet')}</Body>
+                </View>
+              }
+            />
+          ),
+        });
+      }
+    },
+    [user?.id],
   );
 
   // Handle dropdown menu item selection
@@ -510,7 +571,7 @@ export const HomeScreen = ({navigation}: Props) => {
           onLikePress={() => handleLikePress(item.id, item.isLiked)}
           onCommentPress={() => handleCommentPress(item.id)}
           onSavePress={() => handleSavePress(item.id, item.isSaved)}
-          onLikesPress={handleLikesPress}
+          onLikesPress={() => handleLikesPress(item.likedUsers)}
           style={styles.feedCard}
         />
       );

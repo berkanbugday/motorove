@@ -20,6 +20,9 @@ export const POST_FRAGMENT = gql`
     addresses {
       ...AddressFragment
     }
+    likedUsers {
+      ...UserFragment
+    }
   }
   ${USER_FRAGMENT}
   ${ADDRESS_FRAGMENT}

@@ -828,6 +828,7 @@ type PostDto {
   images: [String!]
   isLiked: Boolean!
   isSaved: Boolean!
+  likedUsers: [UserDto!]
   likesCount: Int!
 }
 
