@@ -44,7 +44,7 @@
     "deprecated-react-native-prop-types": "5.0.0",
     "graphql": "16.11.0",
     "i18next": "25.3.2",
-    "leo-profanity": "^1.8.0",
+    "leo-profanity": "1.8.0",
     "lottie-react-native": "7.2.2",
     "react": "19.0.0",
     "react-hook-form": "7.56.0",
