@@ -19,6 +19,8 @@ import { AddressDto } from '../addresses/dto/address.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
 import { CommentDto } from '../comments/dto/comment.dto';
+import { NSFWService } from '../nsfw/nsfw.service';
+import { ImageDto } from './dto/image.dto';
 
 @Injectable()
 export class PostsService {
@@ -27,6 +29,7 @@ export class PostsService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    private nsfwService: NSFWService,
   ) {}
 
   async findAll(
@@ -725,24 +728,26 @@ export class PostsService {
     }
 
     // Process images to get signed URLs if needed
-    let processedImages = prismaPost.images || [];
+    const images: ImageDto[] = [];
 
     if (
-      Array.isArray(processedImages) &&
-      processedImages.length > 0 &&
+      Array.isArray(prismaPost.images) &&
+      prismaPost.images.length > 0 &&
       authToken
     ) {
       try {
-        processedImages = await Promise.all(
-          processedImages.map(async (imageUrl) => {
+        await Promise.all(
+          prismaPost.images.map(async (imageUrl) => {
             if (imageUrl && typeof imageUrl === 'string') {
-              return await this.storageService.getSignedUrl(
+              const url = await this.storageService.getSignedUrl(
                 imageUrl,
                 3600,
                 authToken,
               );
+              const { isCensored } =
+                await this.nsfwService.checkNSFWContent(url);
+              images.push({ url: url, isCensored });
             }
-            return imageUrl;
           }),
         );
       } catch (error) {
@@ -777,7 +782,7 @@ export class PostsService {
     return {
       id: prismaPost.id,
       content: prismaPost.content,
-      images: processedImages,
+      images: images,
       groupId: prismaPost.group?.id,
       groupName: prismaPost.group?.name,
       addresses: prismaPost.addresses as AddressDto[],

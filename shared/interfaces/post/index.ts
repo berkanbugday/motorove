@@ -4,3 +4,4 @@ export * from "./create-post.interface";
 export * from "./update-post.interface";
 export * from "./post-interaction.interface";
 export * from "./filter-post.interface";
+export * from "./image.interface";

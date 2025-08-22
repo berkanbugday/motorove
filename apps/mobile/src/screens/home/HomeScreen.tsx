@@ -40,7 +40,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, IUser} from '@motorove/shared';
+import {IPost, IUser, IImage} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -499,7 +499,10 @@ export const HomeScreen = ({navigation}: Props) => {
       // Transform images from string URLs to objects with URI
       const images =
         post.images && post.images.length > 0
-          ? post.images.map((img: string) => ({uri: img}))
+          ? post.images.map((img: IImage) => ({
+              url: img.url,
+              isCensored: img.isCensored,
+            }))
           : undefined;
 
       return {

@@ -59,6 +59,7 @@ import {
   GroupMemberRole,
   GroupPrivacy,
   IUser,
+  IImage,
 } from '@motorove/shared';
 import {relativeTime} from '@utils/dateUtils';
 import {useAuth} from '@contexts';
@@ -702,7 +703,10 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       // Transform images from string URLs to objects with URI
       const images =
         post.images && post.images.length > 0
-          ? post.images.map((img: string) => ({uri: img}))
+          ? post.images.map((img: IImage) => ({
+              url: img.url,
+              isCensored: img.isCensored,
+            }))
           : undefined;
 
       return {

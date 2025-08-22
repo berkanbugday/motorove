@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Image,
@@ -11,6 +11,7 @@ import {
   LayoutChangeEvent,
   Animated,
 } from 'react-native';
+import {BlurView} from '@react-native-community/blur';
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {Typography} from '../Typography/Typography';
 import {colors} from '@theme';
@@ -20,6 +21,7 @@ import {IconName} from '@components/Icon';
 import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {useTranslation} from '@hooks/useTranslation';
 import profanityFilterService from '@services/profanity-filter.service';
+import {IImage} from '@motorove/shared';
 
 export interface FeedCardProps {
   /**
@@ -54,7 +56,7 @@ export interface FeedCardProps {
   /**
    * Main images for the post (can be a single image or multiple)
    */
-  images?: ImageSourcePropType[];
+  images?: IImage[];
 
   /**
    * Title for the route or location
@@ -206,19 +208,21 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     imageStyle,
     overlayProps = {
       color: colors.neutral.black,
-      opacity: 0.3,
+      opacity: 0.1,
     },
     actionBarDisabled = false,
   } = props;
   const [activeSlide, setActiveSlide] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
+  const [revealedCensoredImages, setRevealedCensoredImages] = useState<{
+    [key: number]: boolean;
+  }>({});
   const carouselRef = useRef(null);
   const likeAnimatedValue = useRef(new Animated.Value(1)).current;
   const saveAnimatedValue = useRef(new Animated.Value(1)).current;
 
   // For backward compatibility, convert single image to array
   const imageArray = images ? (Array.isArray(images) ? images : [images]) : [];
-
   const handlePress = () => {
     if (onPress) {
       onPress();
@@ -303,7 +307,17 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     }
   };
 
-  const renderCarouselItem = ({item}: {item: ImageSourcePropType}) => {
+  const handleToggleCensoredImage = (index: number) => {
+    setRevealedCensoredImages(prev => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+  const renderCarouselItem = ({item, index}: {item: any; index: number}) => {
+    const isCensored = imageArray[index]?.isCensored;
+    const isRevealed = revealedCensoredImages[index];
+
     return (
       <View style={styles.imageContainer}>
         <View style={{position: 'relative'}}>
@@ -312,40 +326,131 @@ const FeedCard: React.FC<FeedCardProps> = props => {
             style={[styles.mainImage, imageStyle]}
             resizeMode="stretch"
           />
-          <View
-            style={[
-              styles.imageOverlay,
-              {
-                backgroundColor: overlayProps.color || colors.neutral.black,
-                opacity: overlayProps.opacity || 0.3,
-              },
-              overlayProps.style,
-            ]}
-          />
+          {isCensored && !isRevealed ? (
+            <TouchableOpacity
+              style={styles.blurContainer}
+              activeOpacity={0.9}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={15}
+              />
+              <View style={styles.censoredOverlay}>
+                <Icon
+                  name="eye-filled"
+                  size={32}
+                  color={colors.neutral.white}
+                />
+                <Typography
+                  variant="subtitle"
+                  weight="medium"
+                  color={colors.neutral.white}
+                  style={styles.censoredText}>
+                  {t('components.feedCard.tap_to_view')}
+                </Typography>
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <View
+              style={[
+                styles.imageOverlay,
+                {
+                  backgroundColor: overlayProps.color || colors.neutral.black,
+                  opacity: overlayProps.opacity || 0.3,
+                },
+                overlayProps.style,
+              ]}
+            />
+          )}
+          {isCensored && isRevealed && (
+            <TouchableOpacity
+              style={styles.hideButton}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <Icon
+                name="eye-slash-filled"
+                size={20}
+                color={colors.neutral.white}
+              />
+              <Typography
+                variant="caption"
+                color={colors.neutral.white}
+                style={{marginLeft: 4}}>
+                {t('components.feedCard.hide')}
+              </Typography>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );
   };
 
-  const renderSingleImage = (image: ImageSourcePropType) => {
+  const renderSingleImage = (image: IImage, index: number = 0) => {
+    const isCensored = imageArray[index]?.isCensored;
+    const isRevealed = revealedCensoredImages[index];
+
     return (
       <View style={styles.imageContainer}>
         <View style={{position: 'relative'}}>
           <Image
-            source={image}
+            source={{uri: image.url}}
             style={[styles.mainImage, imageStyle]}
             resizeMode="stretch"
           />
-          <View
-            style={[
-              styles.imageOverlay,
-              {
-                backgroundColor: overlayProps.color || colors.neutral.black,
-                opacity: overlayProps.opacity || 0.3,
-              },
-              overlayProps.style,
-            ]}
-          />
+          {isCensored && !isRevealed ? (
+            <TouchableOpacity
+              style={styles.blurContainer}
+              activeOpacity={0.9}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={15}
+              />
+              <View style={styles.censoredOverlay}>
+                <Icon
+                  name="eye-filled"
+                  size={32}
+                  color={colors.neutral.white}
+                />
+                <Typography
+                  variant="subtitle"
+                  weight="medium"
+                  color={colors.neutral.white}
+                  style={styles.censoredText}>
+                  {t('components.feedCard.tap_to_view')}
+                </Typography>
+              </View>
+            </TouchableOpacity>
+          ) : (
+            <View
+              style={[
+                styles.imageOverlay,
+                {
+                  backgroundColor: overlayProps.color || colors.neutral.black,
+                  opacity: overlayProps.opacity || 0.3,
+                },
+                overlayProps.style,
+              ]}
+            />
+          )}
+          {isCensored && isRevealed && (
+            <TouchableOpacity
+              style={styles.hideButton}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <Icon
+                name="eye-slash-filled"
+                size={20}
+                color={colors.neutral.white}
+              />
+              <Typography
+                variant="caption"
+                color={colors.neutral.white}
+                style={{marginLeft: 4}}>
+                {t('components.feedCard.hide')}
+              </Typography>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );
@@ -419,8 +524,10 @@ const FeedCard: React.FC<FeedCardProps> = props => {
             <>
               <Carousel
                 ref={carouselRef}
-                data={imageArray}
-                renderItem={renderCarouselItem}
+                data={imageArray.map(image => ({uri: image.url}))}
+                renderItem={({item, index}) =>
+                  renderCarouselItem({item, index})
+                }
                 sliderWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
                 itemWidth={cardWidth > 0 ? cardWidth : screenWidth - 32}
                 onSnapToItem={(index: number) => setActiveSlide(index)}
@@ -439,7 +546,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
               />
             </>
           ) : (
-            renderSingleImage(imageArray[0])
+            renderSingleImage(imageArray[0], 0)
           )}
         </View>
       )}

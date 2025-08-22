@@ -1,11 +1,12 @@
 import { IUser } from "../user";
 import { IAddress } from "../address";
 import { IComment } from "../comment";
+import { IImage } from "./image.interface";
 
 export interface IPost {
   id: string;
   content: string;
-  images?: string[];
+  images?: IImage[];
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;

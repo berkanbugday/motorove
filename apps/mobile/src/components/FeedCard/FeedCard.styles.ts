@@ -125,4 +125,46 @@ export const styles = StyleSheet.create({
   paginationInactiveDot: {
     backgroundColor: colors.neutral.white,
   },
+  // Blur effect styles
+  blurContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+  },
+  blurView: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
+  censoredOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  censoredText: {
+    marginTop: spacing.sm,
+    textAlign: 'center',
+  },
+  hideButton: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });

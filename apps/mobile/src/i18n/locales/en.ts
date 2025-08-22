@@ -623,6 +623,8 @@ export default {
       save: 'Save',
       saved: 'Saved',
       view_route: 'View Route',
+      tap_to_view: 'Tap to view',
+      hide: 'Hide',
     },
     animatedInput: {
       optional: 'Optional',

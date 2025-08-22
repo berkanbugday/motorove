@@ -7,7 +7,10 @@ export const POST_FRAGMENT = gql`
   fragment PostFragment on PostDto {
     id
     content
-    images
+    images {
+      url
+      isCensored
+    }
     likesCount
     commentsCount
     isLiked

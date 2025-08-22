@@ -634,6 +634,11 @@ enum GroupTag {
   YOUNG_RIDERS
 }
 
+type ImageDto {
+  isCensored: Boolean!
+  url: String!
+}
+
 """Different interests for motorcyclists"""
 enum Interest {
   COASTAL_RIDES
@@ -827,7 +832,7 @@ type PostDto {
   groupId: String
   groupName: String
   id: ID!
-  images: [String!]
+  images: [ImageDto!]
   isLiked: Boolean!
   isSaved: Boolean!
   likedUsers: [UserDto!]

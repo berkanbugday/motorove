@@ -620,6 +620,8 @@ export default {
       save: 'Kaydet',
       saved: 'Kaydedildi',
       view_route: 'Rotayı Görüntüle',
+      tap_to_view: 'Görüntülemek için dokunun',
+      hide: 'Gizle',
     },
     animatedInput: {
       optional: 'Opsiyonel',

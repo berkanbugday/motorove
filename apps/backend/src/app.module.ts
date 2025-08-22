@@ -25,6 +25,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { UserSettingsModule } from './user-settings/user-settings.module';
 import { BusinessesModule } from './businesses/businesses.module';
 import { SupportsModule } from './supports/supports.module';
+import { NSFWModule } from './nsfw/nsfw.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { SupportsModule } from './supports/supports.module';
     UserSettingsModule,
     BusinessesModule,
     SupportsModule,
+    NSFWModule,
   ],
   controllers: [AppController],
   providers: [

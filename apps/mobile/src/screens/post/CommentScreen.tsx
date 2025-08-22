@@ -16,7 +16,7 @@ import {
   SkeletonGroup,
   Button,
 } from '@components';
-import {IComment, IPost} from '@motorove/shared';
+import {IComment, IImage, IPost} from '@motorove/shared';
 import {Comment} from '@components/Comment/comments';
 import {
   useCreateComment,
@@ -225,7 +225,10 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       // Transform images from string URLs to objects with URI
       const images =
         postData.images && postData.images.length > 0
-          ? postData.images.map((img: string) => ({uri: img}))
+          ? postData.images.map((img: IImage) => ({
+              url: img.url,
+              isCensored: img.isCensored,
+            }))
           : undefined;
 
       return {

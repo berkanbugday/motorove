@@ -14,6 +14,7 @@ import { UserDto } from '../../users/dto/user.dto';
 import { AddressDto } from '../../addresses/dto/address.dto';
 import { IPost } from '@motorove/shared';
 import { CommentDto } from '../../comments/dto/comment.dto';
+import { ImageDto } from './image.dto';
 
 @ObjectType()
 export class PostDto implements IPost {
@@ -25,10 +26,10 @@ export class PostDto implements IPost {
   @IsString()
   content: string;
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [ImageDto], { nullable: true })
   @IsOptional()
   @IsArray()
-  images?: string[];
+  images?: ImageDto[];
 
   @Field(() => Int)
   @IsNumber()

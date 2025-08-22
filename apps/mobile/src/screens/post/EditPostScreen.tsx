@@ -147,7 +147,7 @@ export const EditPostScreen = () => {
       if (post.images && post.images.length > 0) {
         const formattedImages = post.images.map((uri, index) => ({
           id: Date.now() + index,
-          uri,
+          uri: uri.url,
         }));
         setSelectedImages(formattedImages);
       }
