@@ -4,7 +4,7 @@ import { PostsResolver } from './posts.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { StorageModule } from '../core/storage/storage.module';
-import { NSFWModule } from '../nsfw/nsfw.module';
+import { ImageCensorFilterModule } from '../core/image-censor-filter/image-censor-filter.module';
 import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter.module';
 
 @Module({
@@ -12,7 +12,7 @@ import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter
     PrismaModule,
     AuthModule,
     StorageModule,
-    NSFWModule,
+    ImageCensorFilterModule,
     ProfanityFilterModule,
   ],
   providers: [PostsResolver, PostsService],

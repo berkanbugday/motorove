@@ -19,7 +19,7 @@ import { AddressDto } from '../addresses/dto/address.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
 import { CommentDto } from '../comments/dto/comment.dto';
-import { NSFWService } from '../nsfw/nsfw.service';
+import { ImageCensorFilterService } from '../core/image-censor-filter/image-censor-filter.service';
 import { ImageDto } from './dto/image.dto';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 
@@ -30,7 +30,7 @@ export class PostsService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
-    private nsfwService: NSFWService,
+    private imageCensorFilterService: ImageCensorFilterService,
     private profanityFilterService: ProfanityFilterService,
   ) {}
 
@@ -747,7 +747,9 @@ export class PostsService {
                 authToken,
               );
               const { isCensored } =
-                await this.nsfwService.checkNSFWContent(url);
+                await this.imageCensorFilterService.checkImageCensorContent(
+                  url,
+                );
               images.push({ url: url, isCensored });
             }
           }),

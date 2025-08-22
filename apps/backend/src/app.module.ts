@@ -25,8 +25,6 @@ import { AddressesModule } from './addresses/addresses.module';
 import { UserSettingsModule } from './user-settings/user-settings.module';
 import { BusinessesModule } from './businesses/businesses.module';
 import { SupportsModule } from './supports/supports.module';
-import { NSFWModule } from './nsfw/nsfw.module';
-import { ProfanityFilterModule } from './core/profanity-filter/profanity-filter.module';
 
 @Module({
   imports: [
@@ -79,8 +77,6 @@ import { ProfanityFilterModule } from './core/profanity-filter/profanity-filter.
     UserSettingsModule,
     BusinessesModule,
     SupportsModule,
-    NSFWModule,
-    ProfanityFilterModule,
   ],
   controllers: [AppController],
   providers: [
