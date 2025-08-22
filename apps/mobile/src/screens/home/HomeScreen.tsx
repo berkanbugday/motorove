@@ -693,6 +693,7 @@ export const HomeScreen = ({navigation}: Props) => {
                 </Subtitle>
                 <Button
                   variant="text"
+                  size="small"
                   onPress={() => loggingService.info('View all')}
                   title={t('common.view_all')}
                 />
