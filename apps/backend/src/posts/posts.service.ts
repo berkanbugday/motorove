@@ -21,6 +21,7 @@ import { PostInteractionDto } from './dto/post-interaction.dto';
 import { CommentDto } from '../comments/dto/comment.dto';
 import { NSFWService } from '../nsfw/nsfw.service';
 import { ImageDto } from './dto/image.dto';
+import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 
 @Injectable()
 export class PostsService {
@@ -30,6 +31,7 @@ export class PostsService {
     private prisma: PrismaService,
     private storageService: StorageService,
     private nsfwService: NSFWService,
+    private profanityFilterService: ProfanityFilterService,
   ) {}
 
   async findAll(
@@ -775,13 +777,17 @@ export class PostsService {
               authToken,
             );
           }
+
+          comment.content = this.profanityFilterService.filterText(
+            comment.content,
+          );
         }),
       );
     }
 
     return {
       id: prismaPost.id,
-      content: prismaPost.content,
+      content: this.profanityFilterService.filterText(prismaPost.content),
       images: images,
       groupId: prismaPost.group?.id,
       groupName: prismaPost.group?.name,

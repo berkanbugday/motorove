@@ -20,7 +20,6 @@ import {Button, Chip, Icon} from '@components';
 import {IconName} from '@components/Icon';
 import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {useTranslation} from '@hooks/useTranslation';
-import profanityFilterService from '@services/profanity-filter.service';
 import {IImage} from '@motorove/shared';
 
 export interface FeedCardProps {
@@ -512,8 +511,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
       {/* Content */}
       {content && (
         <Typography variant="body" style={[styles.content, contentStyle]}>
-          {/* Filter both English and Turkish profanity */}
-          {profanityFilterService.filterText(content)}
+          {content}
         </Typography>
       )}
 
