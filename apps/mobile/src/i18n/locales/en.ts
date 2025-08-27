@@ -238,6 +238,52 @@ export default {
       create_event: 'Create Event',
       edit: 'Edit Event',
       join: 'Join Event',
+      creating: 'Creating...',
+      basic_info_title: 'Basic Info',
+      date_time_title: 'Date & Time',
+      event_details_title: 'Event Details',
+      title_label: 'Event Title',
+      type_label: 'Event Type',
+      meeting_point_label: 'Meeting Point (optional)',
+      max_participants_label: 'Maximum Participants (optional)',
+      description_label: 'Description',
+      private_event_label: 'Private Event',
+      private_event_description:
+        'Only invited groups or users can join this event',
+      start_location_label: 'Start Location',
+      finish_location_label: 'Finish Location',
+      road_type_label: 'Road Type',
+      difficulty_level_label: 'Difficulty Level',
+      camping_info_label: 'Camping Information',
+      route_description_label: 'Route Description (optional)',
+      rest_stops_label: 'Fuel / Rest Stop Suggestions (optional)',
+      equipment_checklist_label: 'Equipment Checklist (optional)',
+      instructor_info_label: 'Instructor Information',
+      topics_covered_label: 'Topics Covered',
+      experience_level_label: 'Experience Level',
+      price_label: 'Price (optional)',
+      price_placeholder: 'Leave empty if free',
+      event_images: 'Event Images (Max 3)',
+      privacy_settings: 'Privacy Settings',
+      select_event_type_prompt: 'Please select an event type in the first step',
+      discard_dialog_title: 'Discard Changes?',
+      discard_dialog_message:
+        'You have unsaved changes. Are you sure you want to go back? All changes will be lost.',
+      save_draft_dialog_title: 'Save Draft?',
+      save_draft_dialog_message:
+        'Would you like to save your progress as a draft?',
+      draft_saved: 'Event draft saved successfully',
+      draft_save_failed: 'Failed to save draft',
+      limit_reached: 'Limit Reached',
+      max_images_limit: 'You can select a maximum of 3 images',
+      file_too_large: 'File too large',
+      image_size_limit: 'Please select an image smaller than 10MB',
+      image_selection_failed: 'Failed to select image',
+      creation_success: 'Event created successfully',
+      creation_failed: 'Failed to create event',
+      select_meeting_point: 'Select Meeting Point',
+      select_start_location: 'Select Start Location',
+      select_finish_location: 'Select Finish Location',
       leave: 'Leave Event',
       title: 'Title',
       description: 'Description',
@@ -739,6 +785,72 @@ export default {
 
   // Validation messages
   validation: {
+    event: {
+      title: {
+        required: 'Title is required',
+        min_length: 'Title must be at least 3 characters',
+        max_length: 'Title must be at most 100 characters',
+      },
+      description: {
+        required: 'Description is required',
+        max_length: 'Description cannot exceed 1000 characters',
+      },
+      meeting_point: {
+        max_length: 'Meeting point cannot exceed 200 characters',
+      },
+      start_location: {
+        required: 'Start location is required',
+        max_length: 'Start location cannot exceed 200 characters',
+      },
+      finish_location: {
+        required: 'Finish location is required',
+        max_length: 'Finish location cannot exceed 200 characters',
+      },
+      start_date: {
+        required: 'Date is required',
+        invalid: 'Invalid date format',
+      },
+      start_time: {
+        required: 'Time is required',
+        invalid: 'Invalid time format',
+      },
+      end_date: {
+        invalid: 'Invalid date format',
+        not_before_start: 'End date cannot be before start date',
+      },
+      end_time: {
+        invalid: 'Invalid end time format',
+        not_before_start: 'End time cannot be before start time',
+      },
+      event_type: {
+        required: 'Event type is required',
+        select: 'Please select an event type',
+      },
+      max_participants: {
+        number: 'Maximum participants must be a number',
+        min: 'Minimum 2 participants required',
+        max: 'Maximum 1000 participants allowed',
+      },
+      road_type: {
+        required: 'Road type is required',
+        required_for_type: 'Road type is required for this event type',
+      },
+      difficulty_level: {
+        required: 'Difficulty level is required',
+      },
+      camping_info: {
+        required: 'Camping information is required',
+      },
+      instructor_info: {
+        required: 'Instructor information is required',
+      },
+      topics_covered: {
+        required: 'Topics covered is required',
+      },
+      experience_level: {
+        required: 'Experience level is required',
+      },
+    },
     support: {
       category: {
         required: 'Category is required',
@@ -1001,6 +1113,25 @@ export default {
       feature_request: 'New Feature Request',
       bug_report: 'Bug Report',
       other: 'Other',
+    },
+    eventType: {
+      solo_ride: 'Solo Ride',
+      group_ride: 'Group Ride',
+      camping_ride: 'Camping Ride',
+      meet_up: 'Meet Up',
+      training: 'Training',
+      motofest: 'Motofest',
+      social_responsibility: 'Social Responsibility',
+    },
+    roadType: {
+      asphalt: 'Asphalt',
+      off_road: 'Off Road',
+      mixed: 'Mixed',
+    },
+    difficultyLevel: {
+      easy: 'Easy',
+      medium: 'Medium',
+      hard: 'Hard',
     },
   },
 };

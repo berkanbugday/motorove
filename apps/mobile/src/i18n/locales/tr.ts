@@ -238,8 +238,54 @@ export default {
     // Events screens
     event: {
       create_event: 'Etkinlik Oluştur',
-      edit: 'Etkinlik Düzenle',
-      join: 'Katıl',
+      edit: 'Etkinliği Düzenle',
+      join: 'Etkinliğe Katıl',
+      creating: 'Oluşturuluyor...',
+      basic_info_title: 'Temel Bilgiler',
+      date_time_title: 'Tarih ve Saat',
+      event_details_title: 'Etkinlik Detayları',
+      title_label: 'Etkinlik Başlığı',
+      type_label: 'Etkinlik Türü',
+      meeting_point_label: 'Buluşma Noktası (isteğe bağlı)',
+      max_participants_label: 'Maksimum Katılımcı (isteğe bağlı)',
+      description_label: 'Açıklama',
+      private_event_label: 'Özel Etkinlik',
+      private_event_description:
+        'Sadece davet edilen gruplar veya kullanıcılar bu etkinliğe katılabilir',
+      start_location_label: 'Başlangıç Konumu',
+      finish_location_label: 'Bitiş Konumu',
+      road_type_label: 'Yol Tipi',
+      difficulty_level_label: 'Zorluk Seviyesi',
+      camping_info_label: 'Kamp Bilgisi',
+      route_description_label: 'Rota Açıklaması (isteğe bağlı)',
+      rest_stops_label: 'Yakıt / Mola Önerileri (isteğe bağlı)',
+      equipment_checklist_label: 'Ekipman Listesi (isteğe bağlı)',
+      instructor_info_label: 'Eğitmen Bilgisi',
+      topics_covered_label: 'Kapsanan Konular',
+      experience_level_label: 'Deneyim Seviyesi',
+      price_label: 'Ücret (isteğe bağlı)',
+      price_placeholder: 'Ücretsizse boş bırakın',
+      event_images: 'Etkinlik Görselleri (Maks 3)',
+      privacy_settings: 'Gizlilik Ayarları',
+      select_event_type_prompt: 'Lütfen ilk adımda bir etkinlik türü seçin',
+      discard_dialog_title: 'Değişiklikleri İptal Et?',
+      discard_dialog_message:
+        'Kaydedilmemiş değişiklikleriniz var. Geri dönmek istediğinizden emin misiniz? Tüm değişiklikler kaybolacak.',
+      save_draft_dialog_title: 'Taslak Kaydedilsin mi?',
+      save_draft_dialog_message:
+        'İlerlemenizi taslak olarak kaydetmek ister misiniz?',
+      draft_saved: 'Etkinlik taslağı başarıyla kaydedildi',
+      draft_save_failed: 'Taslak kaydedilemedi',
+      limit_reached: 'Limite Ulaşıldı',
+      max_images_limit: 'En fazla 3 görsel seçebilirsiniz',
+      file_too_large: 'Dosya çok büyük',
+      image_size_limit: 'Lütfen 10MB dan küçük bir görsel seçin',
+      image_selection_failed: 'Görsel seçilemedi',
+      creation_success: 'Etkinlik başarıyla oluşturuldu',
+      creation_failed: 'Etkinlik oluşturulamadı',
+      select_meeting_point: 'Buluşma Noktası Seç',
+      select_start_location: 'Başlangıç Konumu Seç',
+      select_finish_location: 'Bitiş Konumu Seç',
       leave: 'Ayrıl',
       title: 'Başlık',
       description: 'Açıklama',
@@ -736,6 +782,72 @@ export default {
 
   // Validation messages
   validation: {
+    event: {
+      title: {
+        required: 'Başlık gereklidir',
+        min_length: 'Başlık en az 3 karakter olmalıdır',
+        max_length: 'Başlık en fazla 100 karakter olmalıdır',
+      },
+      description: {
+        required: 'Açıklama gereklidir',
+        max_length: 'Açıklama 1000 karakteri geçemez',
+      },
+      meeting_point: {
+        max_length: 'Buluşma noktası 200 karakteri geçemez',
+      },
+      start_location: {
+        required: 'Başlangıç konumu gereklidir',
+        max_length: 'Başlangıç konumu 200 karakteri geçemez',
+      },
+      finish_location: {
+        required: 'Bitiş konumu gereklidir',
+        max_length: 'Bitiş konumu 200 karakteri geçemez',
+      },
+      start_date: {
+        required: 'Tarih gereklidir',
+        invalid: 'Geçersiz tarih formatı',
+      },
+      start_time: {
+        required: 'Saat gereklidir',
+        invalid: 'Geçersiz saat formatı',
+      },
+      end_date: {
+        invalid: 'Geçersiz tarih formatı',
+        not_before_start: 'Bitiş tarihi başlangıç tarihinden önce olamaz',
+      },
+      end_time: {
+        invalid: 'Geçersiz bitiş saati formatı',
+        not_before_start: 'Bitiş saati başlangıç saatinden önce olamaz',
+      },
+      event_type: {
+        required: 'Etkinlik türü gereklidir',
+        select: 'Lütfen bir etkinlik türü seçin',
+      },
+      max_participants: {
+        number: 'Maksimum katılımcı sayısı bir sayı olmalıdır',
+        min: 'En az 2 katılımcı gereklidir',
+        max: 'En fazla 1000 katılımcıya izin verilir',
+      },
+      road_type: {
+        required: 'Yol tipi gereklidir',
+        required_for_type: 'Bu etkinlik türü için yol tipi gereklidir',
+      },
+      difficulty_level: {
+        required: 'Zorluk seviyesi gereklidir',
+      },
+      camping_info: {
+        required: 'Kamp bilgisi gereklidir',
+      },
+      instructor_info: {
+        required: 'Eğitmen bilgisi gereklidir',
+      },
+      topics_covered: {
+        required: 'Kapsanan konular gereklidir',
+      },
+      experience_level: {
+        required: 'Deneyim seviyesi gereklidir',
+      },
+    },
     support: {
       category: {
         required: 'Kategori gereklidir',
@@ -1001,6 +1113,25 @@ export default {
       feature_request: 'Yeni Özellik İsteği',
       bug_report: 'Hata Raporu',
       other: 'Diğer',
+    },
+    eventType: {
+      solo_ride: 'Yalnız Sürüş',
+      group_ride: 'Grup Sürüşü',
+      camping_ride: 'Kamp Sürüşü',
+      meet_up: 'Buluşma',
+      training: 'Eğitim',
+      motofest: 'Motofest',
+      social_responsibility: 'Sosyal Sorumluluk',
+    },
+    roadType: {
+      asphalt: 'Asfalt',
+      off_road: 'Arazi',
+      mixed: 'Karışık',
+    },
+    difficultyLevel: {
+      easy: 'Kolay',
+      medium: 'Orta',
+      hard: 'Zor',
     },
   },
 };

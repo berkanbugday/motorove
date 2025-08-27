@@ -1,65 +1,72 @@
 import {z} from 'zod';
+import {TFunction} from 'i18next';
+import {EventType} from '@motorove/shared/enums/event-type.enum';
 
-// Base schema definition
-const eventBaseSchema = z.object({
-  title: z
-    .string({required_error: 'Title is required'})
-    .nonempty('Title is required')
-    .min(3, 'Title must be at least 3 characters')
-    .max(100, 'Title must be at most 100 characters'),
-  description: z
-    .string({required_error: 'Description is required'})
-    .nonempty('Description is required')
-    .max(1000, 'Description cannot exceed 1000 characters'),
-  meetingPoint: z
-    .string()
-    .max(200, 'Meeting point cannot exceed 200 characters')
-    .optional()
-    .nullable(),
-  startLocation: z
-    .string()
-    .max(200, 'Start location cannot exceed 200 characters')
-    .optional(),
-  finishLocation: z
-    .string()
-    .max(200, 'Finish location cannot exceed 200 characters')
-    .optional(),
-  startDate: z.date({
-    required_error: 'Date is required',
-    invalid_type_error: 'Invalid date format',
-  }),
-  startTime: z.date({
-    required_error: 'Time is required',
-    invalid_type_error: 'Invalid time format',
-  }),
-  endDate: z
-    .date({
-      invalid_type_error: 'Invalid date format',
-    })
-    .optional(),
-  endTime: z
-    .date({
-      invalid_type_error: 'Invalid end time format',
-    })
-    .optional(),
-  eventType: z
-    .string({required_error: 'Event type is required'})
-    .nonempty('Event type is required')
-    .min(1, 'Please select an event type'),
-  maxParticipants: z
-    .string()
-    .transform(val => (val === '' ? null : val))
-    .refine(val => val === null || Number.isInteger(Number(val)), {
-      message: 'Maximum participants must be a number',
-    })
-    .refine(val => val === null || Number(val) >= 2, {
-      message: 'Minimum 2 participants required',
-    })
-    .refine(val => val === null || Number(val) <= 1000, {
-      message: 'Maximum 1000 participants allowed',
-    })
-    .nullable()
-    .optional(),
+/**
+ * Creates event validation schemas with translated error messages
+ * @param t Translation function
+ * @returns Object containing event validation schemas
+ */
+export const eventSchemas = (t: TFunction) => {
+  // Base schema definition
+  const eventBaseSchema = z.object({
+    title: z
+      .string({required_error: t('validation.event.title.required')})
+      .nonempty(t('validation.event.title.required'))
+      .min(3, t('validation.event.title.min_length'))
+      .max(100, t('validation.event.title.max_length')),
+    description: z
+      .string({required_error: t('validation.event.description.required')})
+      .nonempty(t('validation.event.description.required'))
+      .max(1000, t('validation.event.description.max_length')),
+    meetingPoint: z
+      .string()
+      .max(200, t('validation.event.meeting_point.max_length'))
+      .optional()
+      .nullable(),
+    startLocation: z
+      .string()
+      .max(200, t('validation.event.start_location.max_length'))
+      .optional(),
+    finishLocation: z
+      .string()
+      .max(200, t('validation.event.finish_location.max_length'))
+      .optional(),
+    startDate: z.date({
+      required_error: t('validation.event.start_date.required'),
+      invalid_type_error: t('validation.event.start_date.invalid'),
+    }),
+    startTime: z.date({
+      required_error: t('validation.event.start_time.required'),
+      invalid_type_error: t('validation.event.start_time.invalid'),
+    }),
+    endDate: z
+      .date({
+        invalid_type_error: t('validation.event.end_date.invalid'),
+      })
+      .optional(),
+    endTime: z
+      .date({
+        invalid_type_error: t('validation.event.end_time.invalid'),
+      })
+      .optional(),
+    eventType: z
+      .nativeEnum(EventType, {required_error: t('validation.event.event_type.required')})
+      .or(z.string().nonempty(t('validation.event.event_type.required')).min(1, t('validation.event.event_type.select'))),
+    maxParticipants: z
+      .string()
+      .transform(val => (val === '' ? null : val))
+      .refine(val => val === null || Number.isInteger(Number(val)), {
+        message: t('validation.event.max_participants.number'),
+      })
+      .refine(val => val === null || Number(val) >= 2, {
+        message: t('validation.event.max_participants.min'),
+      })
+      .refine(val => val === null || Number(val) <= 1000, {
+        message: t('validation.event.max_participants.max'),
+      })
+      .nullable()
+      .optional(),
   images: z.array(z.string()).nullable().optional(),
   isPrivate: z.boolean().default(false),
   invitedGroups: z.array(z.string()).optional().default([]),
@@ -80,21 +87,21 @@ const eventBaseSchema = z.object({
   price: z.string().optional(),
 });
 
-// Event creation form schema with dynamic validation
-export const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
+  // Event creation form schema with dynamic validation
+  const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
   // Validate roadType is required for ride and camping event types
   const rideOrCampingEventTypes = [
-    'SOLO_RIDE',
-    'GROUP_RIDE',
-    'CAMPING_RIDE',
-    'CHARITY_RIDE',
+    EventType.SOLO_RIDE,
+    EventType.GROUP_RIDE,
+    EventType.CAMPING_RIDE,
+    EventType.SOCIAL_RESPONSIBILITY,
   ];
 
-  if (rideOrCampingEventTypes.includes(data.eventType)) {
+  if (rideOrCampingEventTypes.includes(data.eventType as EventType)) {
     if (!data.startLocation || data.startLocation.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Start location is required',
+        message: t('validation.event.start_location.required'),
         path: ['startLocation'],
       });
     }
@@ -102,7 +109,7 @@ export const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
     if (!data.finishLocation || data.finishLocation.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Finish location is required',
+        message: t('validation.event.finish_location.required'),
         path: ['finishLocation'],
       });
     }
@@ -110,47 +117,47 @@ export const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
     if (!data.roadType || data.roadType.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Road type is required',
+        message: t('validation.event.road_type.required'),
         path: ['roadType'],
       });
     }
     if (!data.difficultyLevel || data.difficultyLevel.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Difficulty level is required',
+        message: t('validation.event.difficulty_level.required'),
         path: ['difficultyLevel'],
       });
     }
-    if (data.eventType === 'CAMPING_RIDE') {
+    if (data.eventType === EventType.CAMPING_RIDE) {
       if (!data.campingInfo || data.campingInfo.trim() === '') {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Camping information is required',
+          message: t('validation.event.camping_info.required'),
           path: ['campingInfo'],
         });
       }
     }
   }
 
-  if (data.eventType === 'WORKSHOP_TRAINING') {
+  if (data.eventType === EventType.TRAINING) {
     if (!data.instructorInfo || data.instructorInfo.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Instructor information is required',
+        message: t('validation.event.instructor_info.required'),
         path: ['instructorInfo'],
       });
     }
     if (!data.topicsCovered || data.topicsCovered.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Topics covered is required',
+        message: t('validation.event.topics_covered.required'),
         path: ['topicsCovered'],
       });
     }
     if (!data.experienceLevel || data.experienceLevel.trim() === '') {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Experience level is required',
+        message: t('validation.event.experience_level.required'),
         path: ['experienceLevel'],
       });
     }
@@ -173,7 +180,7 @@ export const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
     if (endDateOnly < startDateOnly) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'End date cannot be before start date',
+        message: t('validation.event.end_date.not_before_start'),
         path: ['endDate'],
       });
     }
@@ -200,32 +207,32 @@ export const createEventSchema = eventBaseSchema.superRefine((data, ctx) => {
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'End time cannot be before start time',
+        message: t('validation.event.end_time.not_before_start'),
         path: ['endTime'],
       });
     }
   }
 });
 
-export const updateEventSchema = eventBaseSchema
+  const updateEventSchema = eventBaseSchema
   .extend({
     id: z.string(),
   })
   .superRefine((data, ctx) => {
     // Validate roadType is required for ride and camping event types
     const rideOrCampingEventTypes = [
-      'SOLO_RIDE',
-      'GROUP_RIDE',
-      'CAMPING_RIDE',
-      'CHARITY_RIDE',
+      EventType.SOLO_RIDE,
+      EventType.GROUP_RIDE,
+      EventType.CAMPING_RIDE,
+      EventType.SOCIAL_RESPONSIBILITY,
     ];
     if (
-      rideOrCampingEventTypes.includes(data.eventType) &&
+      rideOrCampingEventTypes.includes(data.eventType as EventType) &&
       (!data.roadType || data.roadType.trim() === '')
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Road type is required for this event type',
+        message: t('validation.event.road_type.required_for_type'),
         path: ['roadType'],
       });
     }
@@ -274,12 +281,23 @@ export const updateEventSchema = eventBaseSchema
       ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'End time cannot be before start time',
+          message: t('validation.event.end_time.not_before_start'),
           path: ['endTime'],
         });
       }
     }
   });
 
-export type CreateEventFormValues = z.infer<typeof createEventSchema>;
-export type UpdateEventFormValues = z.infer<typeof updateEventSchema>;
+  return {
+    createEventSchema,
+    updateEventSchema,
+  };
+};
+
+// For backward compatibility, export the types
+export type CreateEventFormValues = z.infer<
+  ReturnType<typeof eventSchemas>['createEventSchema']
+>;
+export type UpdateEventFormValues = z.infer<
+  ReturnType<typeof eventSchemas>['updateEventSchema']
+>;

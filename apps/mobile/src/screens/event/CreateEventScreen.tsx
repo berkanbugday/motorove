@@ -44,16 +44,22 @@ import {colors, commonStyles, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
 import {eventService} from '@services/event.service';
-import {createEventSchema, CreateEventFormValues} from '@utils/validation';
+import {eventSchemas, CreateEventFormValues} from '@utils/validation';
+import {useTranslation} from '@hooks/useTranslation';
+import {ICreateAddress, AddressType} from '@motorove/shared';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
 import {Language} from '@motorove/shared';
+import {EventType} from '@motorove/shared/enums/event-type.enum';
+import {useLanguage} from '@contexts/LanguageContext';
 
 export const CreateEventScreen: React.FC = () => {
+  const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
   const insets = useSafeAreaInsets();
+  const {language} = useLanguage();
 
   // Refs
   const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -111,7 +117,7 @@ export const CreateEventScreen: React.FC = () => {
 
   // Form setup with Zod validation
   const methods = useForm<CreateEventFormValues>({
-    resolver: zodResolver(createEventSchema) as any,
+    resolver: zodResolver(eventSchemas(t).createEventSchema) as any,
     defaultValues: {
       title: '',
       description: '',
@@ -158,16 +164,22 @@ export const CreateEventScreen: React.FC = () => {
   const eventType = watch('eventType');
 
   // Memoized derived values
-  const isSoloRide = useMemo(() => eventType === 'SOLO_RIDE', [eventType]);
+  const isSoloRide = useMemo(
+    () => eventType === EventType.SOLO_RIDE,
+    [eventType],
+  );
   const isRideOrCamping = useMemo(
     () =>
-      ['SOLO_RIDE', 'GROUP_RIDE', 'CAMPING_RIDE', 'CHARITY_RIDE'].includes(
-        eventType || '',
-      ),
+      [
+        EventType.SOLO_RIDE,
+        EventType.GROUP_RIDE,
+        EventType.CAMPING_RIDE,
+        EventType.SOCIAL_RESPONSIBILITY,
+      ].includes((eventType as EventType) || ''),
     [eventType],
   );
   const isWorkshop = useMemo(
-    () => eventType === 'WORKSHOP_TRAINING',
+    () => eventType === EventType.TRAINING,
     [eventType],
   );
   const shouldShowEventDetails = useMemo(
@@ -223,14 +235,14 @@ export const CreateEventScreen: React.FC = () => {
       console.log('Saving draft:', formData);
       showToast({
         type: 'success',
-        text1: 'Success',
-        text2: 'Event draft saved successfully',
+        text1: t('common.success'),
+        text2: t('screens.event.draft_saved'),
       });
     } catch (error) {
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to save draft',
+        text1: t('common.error'),
+        text2: t('screens.event.draft_save_failed'),
       });
       loggingService.error('Error saving draft:', error);
     }
@@ -258,26 +270,30 @@ export const CreateEventScreen: React.FC = () => {
   }, []);
 
   const handleLocationSelect = useCallback(
-    (location: {
-      latitude?: number;
-      longitude?: number;
-      name?: string;
-      addresses?: any[];
-    }) => {
-      setSelectedMeetingPoint(location);
+    (addresses: ICreateAddress[]) => {
+      if (addresses.length === 0) {
+        // Reset if no addresses provided
+        setSelectedMeetingPoint({});
+        setValue('meetingPoint', '', {shouldValidate: true});
+        return;
+      }
+
+      // Get the first address to extract coordinates
+      const firstAddress = addresses[0];
+      setSelectedMeetingPoint({
+        latitude: firstAddress.latitude,
+        longitude: firstAddress.longitude,
+      });
 
       // Get display address (prefer English)
-      const englishAddress = location.addresses?.find(
-        addr => addr.language === Language.EN.toLowerCase(),
+      const displayAddress = addresses.find(
+        addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
-      const turkishAddress = location.addresses?.find(
-        addr => addr.language === Language.TR.toLowerCase(),
-      );
-      const displayAddress =
-        englishAddress?.address || turkishAddress?.address || '';
 
       // Set the meetingPoint field value
-      setValue('meetingPoint', displayAddress, {shouldValidate: true});
+      setValue('meetingPoint', displayAddress?.address || '', {
+        shouldValidate: true,
+      });
 
       // Close the bottom sheet
       meetingPointMapBottomSheetRef.current?.close();
@@ -286,26 +302,30 @@ export const CreateEventScreen: React.FC = () => {
   );
 
   const handleStartLocationSelect = useCallback(
-    (location: {
-      latitude?: number;
-      longitude?: number;
-      name?: string;
-      addresses?: any[];
-    }) => {
-      setSelectedStartLocation(location);
+    (addresses: ICreateAddress[]) => {
+      if (addresses.length === 0) {
+        // Reset if no addresses provided
+        setSelectedStartLocation({});
+        setValue('startLocation', '', {shouldValidate: true});
+        return;
+      }
+
+      // Get the first address to extract coordinates
+      const firstAddress = addresses[0];
+      setSelectedStartLocation({
+        latitude: firstAddress.latitude,
+        longitude: firstAddress.longitude,
+      });
 
       // Get display address (prefer English)
-      const englishAddress = location.addresses?.find(
-        addr => addr.language === Language.EN.toLowerCase(),
+      const displayAddress = addresses.find(
+        addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
-      const turkishAddress = location.addresses?.find(
-        addr => addr.language === Language.TR.toLowerCase(),
-      );
-      const displayAddress =
-        englishAddress?.address || turkishAddress?.address || '';
 
       // Set the startLocation field value
-      setValue('startLocation', displayAddress, {shouldValidate: true});
+      setValue('startLocation', displayAddress?.address || '', {
+        shouldValidate: true,
+      });
 
       // Close the bottom sheet
       startLocationMapBottomSheetRef.current?.close();
@@ -314,26 +334,30 @@ export const CreateEventScreen: React.FC = () => {
   );
 
   const handleFinishLocationSelect = useCallback(
-    (location: {
-      latitude?: number;
-      longitude?: number;
-      name?: string;
-      addresses?: any[];
-    }) => {
-      setSelectedFinishLocation(location);
+    (addresses: ICreateAddress[]) => {
+      if (addresses.length === 0) {
+        // Reset if no addresses provided
+        setSelectedFinishLocation({});
+        setValue('finishLocation', '', {shouldValidate: true});
+        return;
+      }
+
+      // Get the first address to extract coordinates
+      const firstAddress = addresses[0];
+      setSelectedFinishLocation({
+        latitude: firstAddress.latitude,
+        longitude: firstAddress.longitude,
+      });
 
       // Get display address (prefer English)
-      const englishAddress = location.addresses?.find(
-        addr => addr.language === Language.EN.toLowerCase(),
+      const displayAddress = addresses.find(
+        addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
-      const turkishAddress = location.addresses?.find(
-        addr => addr.language === Language.TR.toLowerCase(),
-      );
-      const displayAddress =
-        englishAddress?.address || turkishAddress?.address || '';
 
       // Set the finishLocation field value
-      setValue('finishLocation', displayAddress, {shouldValidate: true});
+      setValue('finishLocation', displayAddress?.address || '', {
+        shouldValidate: true,
+      });
 
       // Close the bottom sheet
       finishLocationMapBottomSheetRef.current?.close();
@@ -348,8 +372,8 @@ export const CreateEventScreen: React.FC = () => {
       if (selectedImages.length >= 3) {
         showToast({
           type: 'error',
-          text1: 'Limit Reached',
-          text2: 'You can select a maximum of 3 images',
+          text1: t('screens.event.limit_reached'),
+          text2: t('screens.event.max_images_limit'),
         });
         return;
       }
@@ -368,8 +392,8 @@ export const CreateEventScreen: React.FC = () => {
         if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
           showToast({
             type: 'error',
-            text1: 'File too large',
-            text2: 'Please select an image smaller than 10MB',
+            text1: t('screens.event.file_too_large'),
+            text2: t('screens.event.image_size_limit'),
           });
           return;
         }
@@ -393,8 +417,8 @@ export const CreateEventScreen: React.FC = () => {
       loggingService.error('Error selecting event image:', error);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to select image',
+        text1: t('common.error'),
+        text2: t('screens.event.image_selection_failed'),
       });
     }
   }, [selectedImages, setValue]);
@@ -517,7 +541,7 @@ export const CreateEventScreen: React.FC = () => {
         'finishLocation',
       ];
 
-      if (eventType === 'CAMPING_RIDE') {
+      if (eventType === EventType.CAMPING_RIDE) {
         fieldsToValidate.push('campingInfo');
       }
 
@@ -544,8 +568,8 @@ export const CreateEventScreen: React.FC = () => {
 
         showToast({
           type: 'success',
-          text1: 'Success',
-          text2: 'Event created successfully',
+          text1: t('common.success'),
+          text2: t('screens.event.creation_success'),
         });
 
         // Navigate back after successful creation
@@ -555,9 +579,11 @@ export const CreateEventScreen: React.FC = () => {
       } catch (error) {
         showToast({
           type: 'error',
-          text1: 'Error',
+          text1: t('common.error'),
           text2:
-            error instanceof Error ? error.message : 'Failed to create event',
+            error instanceof Error
+              ? error.message
+              : t('screens.event.creation_failed'),
         });
         loggingService.error('Error creating event:', error);
       } finally {
@@ -576,7 +602,7 @@ export const CreateEventScreen: React.FC = () => {
     () => [
       {
         id: 'basic-info',
-        title: 'Basic Information',
+        title: t('screens.event.basic_info_title'),
         validate: validateBasicInfo,
         content: (
           <KeyboardAwareScrollView
@@ -590,7 +616,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="title"
-                label="Event Title"
+                label={t('screens.event.title_label')}
                 error={errors.title}
                 key="title-input"
               />
@@ -598,7 +624,7 @@ export const CreateEventScreen: React.FC = () => {
               {/* Event Type Dropdown */}
               <Dropdown
                 data={eventTypes}
-                label="Event Type"
+                label={t('screens.event.type_label')}
                 onSelect={handleEventTypeSelect}
                 placeholder=""
                 selectedItem={selectedEventType}
@@ -611,7 +637,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="meetingPoint"
-                label="Meeting Point (optional)"
+                label={t('screens.event.meeting_point_label')}
                 error={errors.meetingPoint}
                 icon={
                   <Icon name="map-pin" size={20} color={colors.neutral.grey} />
@@ -627,7 +653,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="maxParticipants"
-                label="Maximum Participants (optional)"
+                label={t('screens.event.max_participants_label')}
                 error={errors.maxParticipants}
                 keyboardType="numeric"
                 key="maxParticipants-input"
@@ -638,7 +664,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="description"
-                label="Description"
+                label={t('screens.event.description_label')}
                 multiline
                 showClearButton={false}
                 error={errors.description}
@@ -648,11 +674,8 @@ export const CreateEventScreen: React.FC = () => {
 
             {/* Event Images Section */}
             <View style={styles.imagesSection}>
-              <Typography
-                variant="body"
-                weight="semiBold"
-                style={styles.subSectionTitle}>
-                Event Images (Max 3)
+              <Typography variant="body" style={styles.sectionTitle}>
+                {t('screens.event.event_images')}
               </Typography>
               <ScrollView
                 horizontal
@@ -687,7 +710,7 @@ export const CreateEventScreen: React.FC = () => {
       },
       {
         id: 'date-time',
-        title: 'Date, Time & Privacy',
+        title: t('screens.event.date_time_title'),
         validate: validateDateTime,
         content: (
           <KeyboardAwareScrollView
@@ -701,23 +724,29 @@ export const CreateEventScreen: React.FC = () => {
                 <DateTimePicker
                   control={control}
                   name="startDate"
-                  placeholder="Start Date"
+                  placeholder={t('screens.event.start_date')}
+                  cancelText={t('common.cancel')}
+                  confirmText={t('common.confirm')}
                   displayFormat="medium"
                   mode="date"
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
                   error={errors.startDate}
                   key="startDate-picker"
+                  locale={language}
                 />
                 <DateTimePicker
                   control={control}
                   name="startTime"
-                  placeholder="Start Time"
+                  placeholder={t('screens.event.start_time')}
+                  cancelText={t('common.cancel')}
+                  confirmText={t('common.confirm')}
                   mode="time"
                   minuteInterval={15}
                   style={styles.dateTimePicker}
                   error={errors.startTime}
                   key="startTime-picker"
+                  locale={language}
                 />
               </View>
 
@@ -726,23 +755,29 @@ export const CreateEventScreen: React.FC = () => {
                 <DateTimePicker
                   control={control}
                   name="endDate"
-                  placeholder="End Date"
+                  placeholder={t('screens.event.end_date')}
+                  cancelText={t('common.cancel')}
+                  confirmText={t('common.confirm')}
                   displayFormat="medium"
                   mode="date"
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
                   error={errors.endDate}
                   key="endDate-picker"
+                  locale={language}
                 />
                 <DateTimePicker
                   control={control}
                   name="endTime"
-                  placeholder="End Time"
+                  placeholder={t('screens.event.end_time')}
+                  cancelText={t('common.cancel')}
+                  confirmText={t('common.confirm')}
                   mode="time"
                   minuteInterval={15}
                   style={styles.dateTimePicker}
                   error={errors.endTime}
                   key="endTime-picker"
+                  locale={language}
                 />
               </View>
 
@@ -752,7 +787,7 @@ export const CreateEventScreen: React.FC = () => {
                   variant="body"
                   weight="semiBold"
                   style={styles.subSectionTitle}>
-                  Privacy Settings
+                  {t('screens.event.privacy_settings')}
                 </Typography>
 
                 {/* Privacy Switch */}
@@ -760,8 +795,8 @@ export const CreateEventScreen: React.FC = () => {
                   <Switch
                     value={isPrivate}
                     onValueChange={togglePrivacy}
-                    label="Private Event"
-                    description="Only invited groups or users can join this event"
+                    label={t('screens.event.private_event_label')}
+                    description={t('screens.event.private_event_description')}
                     style={{paddingVertical: spacing.md}}
                   />
                 </View>
@@ -771,8 +806,8 @@ export const CreateEventScreen: React.FC = () => {
                   <View style={styles.privateEventSection}>
                     <Tabs
                       items={[
-                        {key: 'users', label: 'Users'},
-                        {key: 'groups', label: 'Groups'},
+                        {key: 'users', label: t('common.users')},
+                        {key: 'groups', label: t('common.groups')},
                       ]}
                       selectedKey={activeInviteTab}
                       onTabChange={handleTabChange}
@@ -809,7 +844,7 @@ export const CreateEventScreen: React.FC = () => {
 
       {
         id: 'event-details',
-        title: 'Event Details',
+        title: t('screens.event.event_details_title'),
         validate: validateEventSpecificDetails,
         content: (
           <KeyboardAwareScrollView
@@ -826,7 +861,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="startLocation"
-                      label="Start Location"
+                      label={t('screens.event.start_location_label')}
                       error={errors.startLocation}
                       icon={
                         <Icon
@@ -845,7 +880,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="finishLocation"
-                      label="Finish Location"
+                      label={t('screens.event.finish_location_label')}
                       error={errors.finishLocation}
                       icon={
                         <Icon
@@ -863,7 +898,7 @@ export const CreateEventScreen: React.FC = () => {
 
                     <Dropdown
                       data={roadTypes}
-                      label="Road Type"
+                      label={t('screens.event.road_type_label')}
                       onSelect={handleRoadTypeSelect}
                       placeholder=""
                       selectedItem={selectedRoadType}
@@ -873,7 +908,7 @@ export const CreateEventScreen: React.FC = () => {
 
                     <Dropdown
                       data={difficultyLevels}
-                      label="Difficulty Level"
+                      label={t('screens.event.difficulty_level_label')}
                       onSelect={handleDifficultySelect}
                       placeholder=""
                       selectedItem={selectedDifficultyLevel}
@@ -886,7 +921,7 @@ export const CreateEventScreen: React.FC = () => {
                       <AnimatedInput
                         control={control}
                         name="campingInfo"
-                        label="Camping Information"
+                        label={t('screens.event.camping_info_label')}
                         multiline
                         showClearButton={false}
                         error={errors.campingInfo}
@@ -897,7 +932,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="routeDescription"
-                      label="Route Description (optional)"
+                      label={t('screens.event.route_description_label')}
                       multiline
                       showClearButton={false}
                       error={errors.routeDescription}
@@ -907,7 +942,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="restStops"
-                      label="Fuel / Rest Stop Suggestions (optional)"
+                      label={t('screens.event.rest_stops_label')}
                       multiline
                       showClearButton={false}
                       error={errors.restStops}
@@ -917,7 +952,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="equipmentChecklist"
-                      label="Equipment Checklist (optional)"
+                      label={t('screens.event.equipment_checklist_label')}
                       multiline
                       showClearButton={false}
                       error={errors.equipmentChecklist}
@@ -932,7 +967,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="instructorInfo"
-                      label="Instructor Information"
+                      label={t('screens.event.instructor_info_label')}
                       multiline
                       showClearButton={false}
                       error={errors.instructorInfo}
@@ -942,7 +977,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="topicsCovered"
-                      label="Topics Covered"
+                      label={t('screens.event.topics_covered_label')}
                       multiline
                       showClearButton={false}
                       error={errors.topicsCovered}
@@ -951,7 +986,7 @@ export const CreateEventScreen: React.FC = () => {
 
                     <Dropdown
                       data={experienceLevels}
-                      label="Experience Level"
+                      label={t('screens.event.experience_level_label')}
                       onSelect={handleExperienceLevelSelect}
                       placeholder=""
                       selectedItem={selectedExperienceLevel}
@@ -962,10 +997,10 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="price"
-                      label="Price (optional)"
+                      label={t('screens.event.price_label')}
                       keyboardType="numeric"
                       error={errors.price}
-                      placeholder="Leave empty if free"
+                      placeholder={t('screens.event.price_placeholder')}
                       key="price-input"
                     />
                   </>
@@ -974,7 +1009,7 @@ export const CreateEventScreen: React.FC = () => {
             ) : (
               <View style={styles.eventTypeWarning}>
                 <Typography variant="body" color={colors.neutral.darkGrey}>
-                  Please select an event type in the first step
+                  {t('screens.event.select_event_type_prompt')}
                 </Typography>
               </View>
             )}
@@ -1083,14 +1118,14 @@ export const CreateEventScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title="Create Event"
+        title={t('screens.event.create_event')}
         showBackButton
         showShadow={false}
         onBackPress={handleGoBack}
         rightIconName={isDirty ? 'check' : undefined}
         onRightButtonPress={isDirty ? handleSaveDraft : undefined}
       />
-      <SafeAreaView style={[styles.container, {paddingBottom: insets.bottom}]}>
+      <SafeAreaView style={styles.container}>
         <FormProvider {...methods}>
           <View style={styles.wizardContainer}>
             <Wizard
@@ -1101,145 +1136,161 @@ export const CreateEventScreen: React.FC = () => {
               onStepChange={handleStepChange}
             />
           </View>
-
-          {/* Navigation Buttons */}
-          <View style={styles.buttonContainer}>
-            {isLastStep ? (
-              <>
-                <Button
-                  title="Previous"
-                  variant="outline"
-                  shape="round"
-                  onPress={handlePreviousStep}
-                  style={{flex: 1}}
-                />
-                <Button
-                  title={loading ? 'Creating...' : 'Create Event'}
-                  variant="dark"
-                  shape="round"
-                  onPress={handleSubmit(onSubmit)}
-                  loading={loading}
-                  style={{flex: 1}}
-                />
-              </>
-            ) : isFirstStep ? (
-              <Button
-                title="Next"
-                variant="dark"
-                shape="round"
-                onPress={handleNextStep}
-                style={{flex: 1}}
-              />
-            ) : (
-              <>
-                <Button
-                  title="Previous"
-                  variant="outline"
-                  shape="round"
-                  onPress={handlePreviousStep}
-                  style={{flex: 1}}
-                />
-                <Button
-                  title="Next"
-                  variant="dark"
-                  shape="round"
-                  onPress={handleNextStep}
-                  style={{flex: 1}}
-                />
-              </>
-            )}
-          </View>
         </FormProvider>
       </SafeAreaView>
+      {/* Navigation Buttons */}
+      <View style={styles.buttonContainer}>
+        {isLastStep ? (
+          <>
+            <Button
+              title={t('common.back')}
+              variant="outline"
+              shape="round"
+              onPress={handlePreviousStep}
+              style={{flex: 1}}
+            />
+            <Button
+              title={
+                loading
+                  ? t('screens.event.creating')
+                  : t('screens.event.create_event')
+              }
+              variant="dark"
+              shape="round"
+              onPress={handleSubmit(onSubmit)}
+              loading={loading}
+              style={{flex: 1}}
+            />
+          </>
+        ) : isFirstStep ? (
+          <Button
+            title={t('common.next')}
+            variant="dark"
+            shape="round"
+            onPress={handleNextStep}
+            style={{flex: 1}}
+          />
+        ) : (
+          <>
+            <Button
+              title={t('common.back')}
+              variant="outline"
+              shape="round"
+              onPress={handlePreviousStep}
+              style={{flex: 1}}
+            />
+            <Button
+              title={t('common.next')}
+              variant="dark"
+              shape="round"
+              onPress={handleNextStep}
+              style={{flex: 1}}
+            />
+          </>
+        )}
+      </View>
 
       {/* Location Map Bottom Sheets */}
       <BottomSheet
         ref={meetingPointMapBottomSheetRef}
-        title="Select Meeting Point"
+        title={t('screens.event.select_meeting_point')}
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
           onLocationSelect={handleLocationSelect}
           onClose={() => meetingPointMapBottomSheetRef.current?.close()}
-          initialLocation={
+          initialAddress={
             selectedMeetingPoint.latitude && selectedMeetingPoint.longitude
               ? {
                   latitude: selectedMeetingPoint.latitude,
                   longitude: selectedMeetingPoint.longitude,
+                  address: '',
+                  language: language as Language,
+                  type: AddressType.EVENT_MEETING_POINT,
                 }
               : undefined
           }
+          addressType={AddressType.EVENT_MEETING_POINT}
         />
       </BottomSheet>
 
       <BottomSheet
         ref={startLocationMapBottomSheetRef}
-        title="Select Start Location"
+        title={t('screens.event.select_start_location')}
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
           onLocationSelect={handleStartLocationSelect}
           onClose={() => startLocationMapBottomSheetRef.current?.close()}
-          initialLocation={
+          initialAddress={
             selectedStartLocation.latitude && selectedStartLocation.longitude
               ? {
                   latitude: selectedStartLocation.latitude,
                   longitude: selectedStartLocation.longitude,
+                  address: '',
+                  language: language as Language,
+                  type: AddressType.EVENT_START_LOCATION,
                 }
               : undefined
           }
+          addressType={AddressType.EVENT_START_LOCATION}
         />
       </BottomSheet>
 
       <BottomSheet
         ref={finishLocationMapBottomSheetRef}
-        title="Select Finish Location"
+        title={t('screens.event.select_finish_location')}
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
           onLocationSelect={handleFinishLocationSelect}
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
-          initialLocation={
+          initialAddress={
             selectedFinishLocation.latitude && selectedFinishLocation.longitude
               ? {
                   latitude: selectedFinishLocation.latitude,
                   longitude: selectedFinishLocation.longitude,
+                  address: '',
+                  language: language as Language,
+                  type: AddressType.EVENT_FINISH_LOCATION,
                 }
               : undefined
           }
+          addressType={AddressType.EVENT_FINISH_LOCATION}
         />
       </BottomSheet>
 
       {/* Exit Confirmation Dialog */}
       <Dialog
         ref={exitDialogRef}
-        title="Exit Without Saving"
-        message="Are you sure you want to exit? All unsaved changes will be lost."
         variant="confirm"
+        title={t('screens.event.discard_dialog_title')}
+        message={t('screens.event.discard_dialog_message')}
         confirmButton={{
-          text: 'Exit',
+          text: t('common.confirm'),
           variant: 'primary',
           onPress: confirmExit,
         }}
         cancelButton={{
-          text: 'Cancel',
+          text: t('common.cancel'),
           variant: 'outline',
+          onPress: () => exitDialogRef.current?.close(),
         }}
       />
 
       {/* Save Draft Confirmation Dialog */}
       <Dialog
         ref={draftDialogRef}
-        title="Save Draft"
-        message="Do you want to save your event as a draft? You can continue editing it later."
         variant="confirm"
+        title={t('screens.event.save_draft_dialog_title')}
+        message={t('screens.event.save_draft_dialog_message')}
         confirmButton={{
-          text: 'Save Draft',
+          text: t('common.save'),
           variant: 'primary',
           onPress: confirmSaveDraft,
         }}
         cancelButton={{
-          text: 'Cancel',
+          text: t('common.cancel'),
           variant: 'outline',
         }}
       />
@@ -1269,6 +1320,7 @@ const styles = StyleSheet.create({
   },
   formFields: {
     marginTop: spacing.lg,
+    marginBottom: spacing.xs,
     gap: spacing.lg,
   },
   dateTimeContainer: {
@@ -1297,10 +1349,10 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
   },
   conditionalFieldsContainer: {
     marginTop: spacing.md,
