@@ -264,7 +264,6 @@ export default {
       topics_covered_label: 'Kapsanan Konular',
       experience_level_label: 'Deneyim Seviyesi',
       price_label: 'Ücret (isteğe bağlı)',
-      price_placeholder: 'Ücretsizse boş bırakın',
       event_images: 'Etkinlik Görselleri (Maks 3)',
       privacy_settings: 'Gizlilik Ayarları',
       select_event_type_prompt: 'Lütfen ilk adımda bir etkinlik türü seçin',
@@ -1132,6 +1131,12 @@ export default {
       easy: 'Kolay',
       medium: 'Orta',
       hard: 'Zor',
+    },
+    experienceLevel: {
+      beginner: 'Başlangıç',
+      intermediate: 'Orta',
+      advanced: 'İleri',
+      all_levels: 'Tüm Seviyeler',
     },
   },
 };

@@ -262,7 +262,6 @@ export default {
       topics_covered_label: 'Topics Covered',
       experience_level_label: 'Experience Level',
       price_label: 'Price (optional)',
-      price_placeholder: 'Leave empty if free',
       event_images: 'Event Images (Max 3)',
       privacy_settings: 'Privacy Settings',
       select_event_type_prompt: 'Please select an event type in the first step',
@@ -1132,6 +1131,12 @@ export default {
       easy: 'Easy',
       medium: 'Medium',
       hard: 'Hard',
+    },
+    experienceLevel: {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced',
+      all_levels: 'All Levels',
     },
   },
 };

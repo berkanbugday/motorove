@@ -47,7 +47,6 @@ import {eventService} from '@services/event.service';
 import {eventSchemas, CreateEventFormValues} from '@utils/validation';
 import {useTranslation} from '@hooks/useTranslation';
 import {ICreateAddress, AddressType} from '@motorove/shared';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
@@ -58,7 +57,6 @@ import {useLanguage} from '@contexts/LanguageContext';
 export const CreateEventScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
-  const insets = useSafeAreaInsets();
   const {language} = useLanguage();
 
   // Refs
@@ -1000,7 +998,6 @@ export const CreateEventScreen: React.FC = () => {
                       label={t('screens.event.price_label')}
                       keyboardType="numeric"
                       error={errors.price}
-                      placeholder={t('screens.event.price_placeholder')}
                       key="price-input"
                     />
                   </>
