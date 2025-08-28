@@ -61,8 +61,8 @@ export const MARK_NOTIFICATION_AS_READ = gql`
 `;
 
 export const MARK_ALL_NOTIFICATIONS_AS_READ = gql`
-  mutation MarkAllNotificationsAsRead($userId: String!) {
-    markAllNotificationsAsRead(userId: $userId) {
+  mutation MarkAllNotificationsAsRead {
+    markAllNotificationsAsRead {
       id
       read
     }

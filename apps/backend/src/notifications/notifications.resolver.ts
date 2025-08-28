@@ -1,6 +1,5 @@
 import { Args, ID, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { NotificationsService } from './notifications.service';
-import { Notification } from './models/notification.model';
 import { CreateNotificationInput } from './dto/create-notification.input';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -52,13 +51,15 @@ export class NotificationsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => [NotificationDto])
-  async markAllAsRead(@CurrentUser() user: User): Promise<NotificationDto[]> {
+  async markAllNotificationsAsRead(
+    @CurrentUser() user: User,
+  ): Promise<NotificationDto[]> {
     return await this.notificationsService.markAllAsRead(user.id);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => NotificationDto)
-  async markAsRead(
+  async markNotificationAsRead(
     @Args('id', { type: () => ID }) id: string,
     @CurrentUser() user: User,
   ): Promise<NotificationDto> {
@@ -67,7 +68,9 @@ export class NotificationsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => [NotificationDto])
-  async deleteAll(@CurrentUser() user: User): Promise<NotificationDto[]> {
+  async deleteAllNotifications(
+    @CurrentUser() user: User,
+  ): Promise<NotificationDto[]> {
     return await this.notificationsService.deleteAll(user.id);
   }
 

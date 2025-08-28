@@ -464,7 +464,7 @@ export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
     },
   );
 
-  const markAsRead = async (notificationId: string) => {
+  const markNotificationAsRead = async (notificationId: string) => {
     try {
       const result = await markAsReadMutation({
         variables: {
@@ -484,7 +484,7 @@ export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
   };
 
   return {
-    markAsRead,
+    markNotificationAsRead,
     loading,
     error,
   };
@@ -520,13 +520,9 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
     },
   );
 
-  const markAllAsRead = async (userId: string) => {
+  const markAllNotificationsAsRead = async () => {
     try {
-      const result = await markAllAsReadMutation({
-        variables: {
-          userId,
-        },
-      });
+      const result = await markAllAsReadMutation();
       return result.data?.markAllNotificationsAsRead;
     } catch (err) {
       loggingService.error('Error in markAllNotificationsAsRead:', err);
@@ -540,7 +536,7 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
   };
 
   return {
-    markAllAsRead,
+    markAllNotificationsAsRead,
     loading,
     error,
   };

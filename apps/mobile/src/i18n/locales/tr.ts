@@ -549,7 +549,6 @@ export default {
       delete_all_notifications_title: 'Tüm Bildirimleri Sil',
       delete_all_notifications_message:
         'Tüm bildirimleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
-      delete_all: 'Tümünü Sil',
     },
 
     // Map screen

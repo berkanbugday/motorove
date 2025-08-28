@@ -92,6 +92,7 @@ export const useNotificationPermission = () => {
             return;
           }
 
+          // Android 13 (API 33) and above requires POST_NOTIFICATIONS permission
           if (androidVersion >= 33) {
             const hasPermission = await PermissionsAndroid.check(
               PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
@@ -117,7 +118,8 @@ export const useNotificationPermission = () => {
               }
             }
           } else {
-            // For Android < 13 (API < 33), notification permissions are granted by default
+            // For Android 12 and below, notification permissions are granted by default
+            // Firebase messaging can still be used without explicit permission
             setStatus('granted');
           }
         } catch (err) {
@@ -175,25 +177,31 @@ export const useNotificationPermission = () => {
         }
       } else {
         // Android
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-        );
+        // Check Android version - only Android 13+ (API 33+) needs explicit permission
+        const androidVersion = parseInt(Platform.Version as string, 10);
 
-        const permissionGranted =
-          granted === PermissionsAndroid.RESULTS.GRANTED;
+        if (androidVersion >= 33) {
+          // For Android 13+, request POST_NOTIFICATIONS permission
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          );
 
-        if (permissionGranted) {
-          isGranted = true;
-        } else {
-          // If not the first request, consider it blocked
-          if (permissionRequestCount > 1) {
-            isGranted = false;
-            setTimeout(() => {
-              openSettings();
-            }, 500);
+          const permissionGranted =
+            granted === PermissionsAndroid.RESULTS.GRANTED;
+
+          if (permissionGranted) {
+            isGranted = true;
           } else {
-            isGranted = false;
+            // If not the first request, consider it blocked
+            if (permissionRequestCount > 1) {
+              isGranted = false;
+            } else {
+              isGranted = false;
+            }
           }
+        } else {
+          // For Android 12 and below, notification permissions are granted by default
+          isGranted = true;
         }
       }
 

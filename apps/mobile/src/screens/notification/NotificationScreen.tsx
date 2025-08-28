@@ -30,7 +30,6 @@ import {
   useDeleteAllNotifications,
 } from '@services/notification.service';
 import {relativeTime} from '@utils/dateUtils';
-import {useAuth} from '@contexts';
 import {INotification} from '@motorove/shared';
 import {useTranslation} from '@/hooks/useTranslation';
 
@@ -56,7 +55,6 @@ const NotificationSkeleton = () => {
  */
 export const NotificationScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
-  const {user} = useAuth();
   const {t} = useTranslation();
   const {
     notifications: apiNotifications,
@@ -66,7 +64,7 @@ export const NotificationScreen = () => {
     hasMore,
   } = useGetNotifications(10, 0);
 
-  const {markAsRead} = useMarkNotificationAsRead(() => {
+  const {markNotificationAsRead} = useMarkNotificationAsRead(() => {
     refetch();
   });
 
@@ -78,7 +76,7 @@ export const NotificationScreen = () => {
     refetch();
   });
 
-  const {markAllAsRead} = useMarkAllNotificationsAsRead(() => {
+  const {markAllNotificationsAsRead} = useMarkAllNotificationsAsRead(() => {
     refetch();
   });
 
@@ -111,9 +109,9 @@ export const NotificationScreen = () => {
   // Mark notification as read
   const handleMarkAsRead = useCallback(
     (id: string) => {
-      markAsRead(id);
+      markNotificationAsRead(id);
     },
-    [markAsRead],
+    [markNotificationAsRead],
   );
 
   // Delete notification
@@ -131,10 +129,10 @@ export const NotificationScreen = () => {
 
   // Mark all notifications as read
   const handleMarkAllAsRead = useCallback(() => {
-    if (user && existingUnreadNotifications) {
-      markAllAsRead(user.id);
+    if (existingUnreadNotifications) {
+      markAllNotificationsAsRead();
     }
-  }, [markAllAsRead, user, existingUnreadNotifications]);
+  }, [markAllNotificationsAsRead, existingUnreadNotifications]);
 
   // Delete all notifications
   const handleDeleteAllNotifications = useCallback(() => {
@@ -334,7 +332,7 @@ export const NotificationScreen = () => {
         message={t('screens.notification.delete_all_notifications_message')}
         variant="confirm"
         confirmButton={{
-          text: t('screens.notification.delete_all'),
+          text: t('common.delete'),
           onPress: confirmDeleteAllNotifications,
           variant: 'primary',
         }}

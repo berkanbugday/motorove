@@ -698,14 +698,14 @@ type Mutation {
   createNotification(input: CreateNotificationInput!): NotificationDto!
   createPost(input: CreatePostInput!): PostDto!
   createSupportRequest(input: CreateSupportRequestInput!): Boolean!
-  deleteAll: [NotificationDto!]!
+  deleteAllNotifications: [NotificationDto!]!
   deleteNotification(id: ID!): NotificationDto!
   followUser(userId: ID!): ApprovalStatus!
   joinEvent(id: ID!): EventDto!
   leaveEvent(id: ID!): EventDto!
   likePost(postId: ID!): PostInteractionDto!
-  markAllAsRead: [NotificationDto!]!
-  markAsRead(id: ID!): NotificationDto!
+  markAllNotificationsAsRead: [NotificationDto!]!
+  markNotificationAsRead(id: ID!): NotificationDto!
   refreshToken(token: String!): AuthResponse!
   removeAddress(id: String!): Boolean!
   removeComment(id: ID!): CommentDto!

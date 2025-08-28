@@ -553,7 +553,6 @@ export default {
       delete_all_notifications_title: 'Delete All Notifications',
       delete_all_notifications_message:
         'Are you sure you want to delete all notifications? This action cannot be undone.',
-      delete_all: 'Delete All',
     },
 
     // Map screen
