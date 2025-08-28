@@ -1,6 +1,8 @@
 import {useMutation, useQuery} from '@apollo/client';
 import {
   GET_FOLLOW_REQUESTS,
+  GET_FOLLOWING_USERS,
+  GET_FOLLOWER_USERS,
   FOLLOW_USER,
   UNFOLLOW_USER,
   UPDATE_USER_FOLLOWING_APPROVAL_STATUS,
@@ -251,6 +253,186 @@ export const useUnfollowUser = (onSuccess?: () => void) => {
 };
 
 /**
+ * Hook for getting users that the current user or specified user is following
+ * @param userId Optional ID of the user to get following for (if not provided, gets current user's following)
+ * @param limit Optional number of following users to fetch (for pagination)
+ * @param skip Optional number of following users to skip (for pagination)
+ * @returns The following users list, loading state, error state, and helper functions
+ */
+export const useFollowingUsers = (
+  userId?: string,
+  limit?: number,
+  skip?: number,
+) => {
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(GET_FOLLOWING_USERS, {
+    variables: {
+      userId: userId || undefined,
+      limit: limit || undefined,
+      skip: skip || undefined,
+    },
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'network-only',
+    onCompleted: () => {
+      if (data?.followingUsers) {
+        if (data.followingUsers.length < (limit || 0)) {
+          setHasMore(false);
+        }
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error fetching following users:', errorObj);
+    },
+  });
+
+  // Wrap the original refetch to reset hasMore state
+  const refetch = useCallback(async () => {
+    setHasMore(true);
+    return await originalRefetch();
+  }, [originalRefetch]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) {
+      return;
+    }
+
+    try {
+      const result = await fetchMore({
+        variables: {
+          userId,
+          skip: data?.followingUsers?.length || 0,
+          limit,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) {
+            return prev;
+          }
+
+          return {
+            followingUsers: [
+              ...prev.followingUsers,
+              ...fetchMoreResult.followingUsers,
+            ],
+          };
+        },
+      });
+
+      if (result.data.followingUsers.length < (limit || 0)) {
+        setHasMore(false);
+      }
+    } catch (errorObj) {
+      loggingService.error('Error loading more following users:', errorObj);
+    }
+  }, [fetchMore, hasMore, limit, loading, userId]);
+
+  return {
+    followingUsers: (data?.followingUsers as IUserFollowing[]) || [],
+    loading,
+    error,
+    refetch,
+    loadMore,
+    hasMore,
+  };
+};
+
+/**
+ * Hook for getting users who follow the current user or specified user
+ * @param userId Optional ID of the user to get followers for (if not provided, gets current user's followers)
+ * @param limit Optional number of follower users to fetch (for pagination)
+ * @param skip Optional number of follower users to skip (for pagination)
+ * @returns The follower users list, loading state, error state, and helper functions
+ */
+export const useFollowerUsers = (
+  userId?: string,
+  limit?: number,
+  skip?: number,
+) => {
+  const [hasMore, setHasMore] = useState(true);
+
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(GET_FOLLOWER_USERS, {
+    variables: {
+      userId: userId || undefined,
+      limit: limit || undefined,
+      skip: skip || undefined,
+    },
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'network-only',
+    onCompleted: () => {
+      if (data?.followerUsers) {
+        if (data.followerUsers.length < (limit || 0)) {
+          setHasMore(false);
+        }
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error fetching follower users:', errorObj);
+    },
+  });
+
+  // Wrap the original refetch to reset hasMore state
+  const refetch = useCallback(async () => {
+    setHasMore(true);
+    return await originalRefetch();
+  }, [originalRefetch]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) {
+      return;
+    }
+
+    try {
+      const result = await fetchMore({
+        variables: {
+          userId,
+          skip: data?.followerUsers?.length || 0,
+          limit,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) {
+            return prev;
+          }
+
+          return {
+            followerUsers: [
+              ...prev.followerUsers,
+              ...fetchMoreResult.followerUsers,
+            ],
+          };
+        },
+      });
+
+      if (result.data.followerUsers.length < (limit || 0)) {
+        setHasMore(false);
+      }
+    } catch (errorObj) {
+      loggingService.error('Error loading more follower users:', errorObj);
+    }
+  }, [fetchMore, hasMore, limit, loading, userId]);
+
+  return {
+    followerUsers: (data?.followerUsers as IUserFollowing[]) || [],
+    loading,
+    error,
+    refetch,
+    loadMore,
+    hasMore,
+  };
+};
+
+/**
  * Export as FollowService object
  */
 export const FollowService = {
@@ -261,6 +443,8 @@ export const FollowService = {
   // useCheckIsFollowing,
   useFollowUser,
   useUnfollowUser,
+  useFollowingUsers,
+  useFollowerUsers,
 };
 
 export default FollowService;

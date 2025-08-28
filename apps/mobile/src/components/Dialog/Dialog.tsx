@@ -249,6 +249,7 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
                 keyboardType={promptKeyboardType}
                 autoCapitalize="none"
                 autoFocus
+                placeholderTextColor={colors.neutral.lightGrey}
               />
 
               {renderButtons()}
@@ -445,6 +446,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     marginVertical: spacing.sm,
     fontSize: 16,
+    color: colors.neutral.black,
   },
   buttonsContainer: {
     flexDirection: 'row',

@@ -3,7 +3,7 @@ import {View, StyleSheet} from 'react-native';
 import {loggingService} from '@services/logging.service';
 import {errorService} from '@services/error.service';
 import {Body, Button, Title} from '@components';
-import {colors, spacing} from '@theme';
+import {colors, commonStyles, spacing} from '@theme';
 import i18n from '@/i18n/i18n';
 
 interface Props {
@@ -101,7 +101,7 @@ class ErrorBoundary extends Component<Props, State> {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...commonStyles.container,
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
     gap: spacing.md,

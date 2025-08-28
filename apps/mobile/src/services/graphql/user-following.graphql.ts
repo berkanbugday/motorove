@@ -28,6 +28,26 @@ export const GET_FOLLOW_REQUESTS = gql`
   ${USER_FOLLOWING_FRAGMENT}
 `;
 
+// Get following users query
+export const GET_FOLLOWING_USERS = gql`
+  query GetFollowingUsers($userId: ID!, $limit: Int, $skip: Int) {
+    followingUsers(userId: $userId, limit: $limit, skip: $skip) {
+      ...UserFollowingFragment
+    }
+  }
+  ${USER_FOLLOWING_FRAGMENT}
+`;
+
+// Get follower users query
+export const GET_FOLLOWER_USERS = gql`
+  query GetFollowerUsers($userId: ID!, $limit: Int, $skip: Int) {
+    followerUsers(userId: $userId, limit: $limit, skip: $skip) {
+      ...UserFollowingFragment
+    }
+  }
+  ${USER_FOLLOWING_FRAGMENT}
+`;
+
 // Mutations
 export const FOLLOW_USER = gql`
   mutation FollowUser($userId: ID!) {

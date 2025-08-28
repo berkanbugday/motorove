@@ -147,7 +147,7 @@ export const RNMapSearch: React.FC<RNMapSearchProps> = ({
           <TextInput
             style={styles.searchInput}
             placeholder={placeholder}
-            placeholderTextColor={colors.neutral.grey}
+            placeholderTextColor={colors.neutral.lightGrey}
             value={query}
             onChangeText={setQuery}
             onFocus={() => {

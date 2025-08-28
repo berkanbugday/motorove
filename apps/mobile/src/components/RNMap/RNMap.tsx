@@ -14,6 +14,7 @@ import MapView, {
   LatLng,
   Circle,
   Polyline,
+  PROVIDER_DEFAULT,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {styles} from './RNMap.styles';
@@ -527,7 +528,9 @@ export const RNMap: React.FC<RNMapProps> = ({
           <MapView
             ref={mapRef}
             style={[styles.map, !isMapLoaded && styles.hiddenMap]}
-            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+            provider={
+              Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
+            }
             initialRegion={initialRegion || region}
             region={followUserLocation ? undefined : region}
             mapType={mapType}

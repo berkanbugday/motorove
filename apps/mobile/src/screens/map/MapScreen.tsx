@@ -5,7 +5,6 @@ import {RNMapMarkerType} from '@components/RNMap/types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useMapMarkerCards} from '../../hooks';
 import {BusinessService} from '@services/business.service';
-import {BusinessCategory} from '@motorove/shared';
 
 export const MapScreen = () => {
   const insets = useSafeAreaInsets();

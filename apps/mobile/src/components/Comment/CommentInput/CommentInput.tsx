@@ -105,6 +105,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
             multiline
             maxLength={500}
             editable={!isLoading}
+            placeholderTextColor={colors.neutral.lightGrey}
           />
           <TouchableOpacity
             onPress={handleSubmit}

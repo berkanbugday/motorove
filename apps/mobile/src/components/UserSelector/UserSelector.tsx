@@ -12,8 +12,9 @@ import {
 import {colors, spacing, radius} from '@theme';
 import {Typography, Icon, Chip, Button} from '@components';
 import {openBottomSheet} from '@components/BottomSheet';
-import {UserService} from '@services/user.service';
-import type {User} from '../../../src/types';
+import {FollowService} from '@services/user-following.service';
+import type {IUser} from '@motorove/shared';
+import {useAuth} from '@contexts';
 
 export interface UserSelectorProps {
   selectedUsers: string[];
@@ -24,14 +25,14 @@ export interface UserSelectorProps {
 }
 
 interface UserItemProps {
-  user: User;
+  user: IUser;
   isSelected: boolean;
   onToggle: (userId: string) => void;
   disabled?: boolean;
 }
 
 interface BottomSheetContentProps {
-  users: User[];
+  users: IUser[];
   selectedUsers: string[];
   loading: boolean;
   error: any;
@@ -43,7 +44,7 @@ interface BottomSheetContentProps {
 }
 
 // Utility function to get user's display name
-const getUserName = (user: User): string => {
+const getUserName = (user: IUser): string => {
   if (user.firstName && user.lastName) {
     return `${user.firstName} ${user.lastName}`;
   }
@@ -265,13 +266,27 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   disabled = false,
   maxUsers = 10,
 }) => {
-  const [selectedUserDetails, setSelectedUserDetails] = useState<User[]>([]);
-  const {users, loading, error, refresh, loadMore} =
-    UserService.useMyFollowing();
+  const [selectedUserDetails, setSelectedUserDetails] = useState<IUser[]>([]);
+  const {user} = useAuth();
+
+  // Get following users - ensure we always have a valid user ID
+  const {followingUsers, loading, error, loadMore, refetch} = user?.id
+    ? FollowService.useFollowingUsers(user.id, 50)
+    : {
+        followingUsers: [],
+        loading: false,
+        error: null,
+        loadMore: () => {},
+        refetch: () => Promise.resolve(),
+      };
+  // Extract user objects from followingUsers
+  const users: IUser[] = followingUsers
+    .map(following => following.following)
+    .filter((user): user is IUser => user !== undefined && user !== null);
 
   // Update selected user details when the list of users or selected IDs changes
   useEffect(() => {
-    if (users) {
+    if (users && users.length > 0) {
       const selectedDetails = users.filter(user =>
         selectedUsers.includes(user.id),
       );
@@ -289,7 +304,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           selectedUsers={selectedUsers}
           loading={loading}
           error={error}
-          refetch={refresh}
+          refetch={refetch}
           loadMore={loadMore}
           onSelectionChange={onUsersChange}
           disabled={disabled}
@@ -306,7 +321,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
     selectedUsers,
     loading,
     error,
-    refresh,
+    refetch,
     loadMore,
     onUsersChange,
     disabled,
@@ -328,7 +343,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           {error ? 'Failed to load users' : "You don't follow any users yet"}
         </Typography>
         {error && (
-          <TouchableOpacity onPress={refresh} style={styles.retryButton}>
+          <TouchableOpacity onPress={refetch} style={styles.retryButton}>
             <Typography variant="caption">Try again</Typography>
           </TouchableOpacity>
         )}

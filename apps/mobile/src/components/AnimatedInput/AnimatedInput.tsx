@@ -369,6 +369,8 @@ function AnimatedInputBase({
         textAlignVertical={multiline ? 'top' : 'center'}
         editable={editable}
         onEndEditing={onEndEditing || (() => {})}
+        textContentType={secureTextEntry ? 'password' : 'none'}
+        placeholderTextColor={colors.neutral.lightGrey}
       />
       {onPress && !editable && (
         <TouchableOpacity
@@ -415,6 +417,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: spacing.form.inputPaddingHorizontal,
     fontSize: fontSizes.md,
+    color: colors.neutral.black, // Ensure text color is explicitly set for Android
   },
   roundInput: {
     borderRadius: radius.round,

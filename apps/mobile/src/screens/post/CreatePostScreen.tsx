@@ -353,7 +353,7 @@ export const CreatePostScreen = () => {
           <TextInput
             style={styles.postInput as TextStyle}
             placeholder={t('screens.post.what_do_you_want_to_write')}
-            placeholderTextColor={colors.neutral.grey}
+            placeholderTextColor={colors.neutral.lightGrey}
             multiline
             value={postText}
             onChangeText={setPostText}
