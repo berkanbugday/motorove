@@ -61,6 +61,8 @@ export default {
     following: 'Takip Ediliyor',
     not_now: 'Şimdi Değil',
     view_all: 'Tümünü Gör',
+    users: 'Kullanıcılar',
+    groups: 'Gruplar',
   },
 
   // Bottom tabs navigation items

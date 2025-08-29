@@ -797,43 +797,42 @@ export const CreateEventScreen: React.FC = () => {
                     description={t('screens.event.private_event_description')}
                     style={{paddingVertical: spacing.md}}
                   />
+                  {/* Group/User Selectors for Private Events */}
+                  {isPrivate && (
+                    <View style={styles.privateEventSection}>
+                      <Tabs
+                        items={[
+                          {key: 'users', label: t('common.users')},
+                          {key: 'groups', label: t('common.groups')},
+                        ]}
+                        selectedKey={activeInviteTab}
+                        onTabChange={handleTabChange}
+                        variant="minimal"
+                        equalWidth={true}
+                      />
+
+                      {activeInviteTab === 'users' && (
+                        <View style={styles.tabContent}>
+                          <UserSelector
+                            selectedUsers={selectedUsers}
+                            onUsersChange={handleUsersChange}
+                            maxUsers={10}
+                          />
+                        </View>
+                      )}
+
+                      {activeInviteTab === 'groups' && (
+                        <View style={styles.tabContent}>
+                          <GroupSelector
+                            selectedGroups={selectedGroups}
+                            onGroupsChange={handleGroupsChange}
+                            maxGroups={3}
+                          />
+                        </View>
+                      )}
+                    </View>
+                  )}
                 </View>
-
-                {/* Group/User Selectors for Private Events */}
-                {isPrivate && (
-                  <View style={styles.privateEventSection}>
-                    <Tabs
-                      items={[
-                        {key: 'users', label: t('common.users')},
-                        {key: 'groups', label: t('common.groups')},
-                      ]}
-                      selectedKey={activeInviteTab}
-                      onTabChange={handleTabChange}
-                      variant="pill"
-                      equalWidth={true}
-                    />
-
-                    {activeInviteTab === 'users' && (
-                      <View style={styles.tabContent}>
-                        <UserSelector
-                          selectedUsers={selectedUsers}
-                          onUsersChange={handleUsersChange}
-                          maxUsers={10}
-                        />
-                      </View>
-                    )}
-
-                    {activeInviteTab === 'groups' && (
-                      <View style={styles.tabContent}>
-                        <GroupSelector
-                          selectedGroups={selectedGroups}
-                          onGroupsChange={handleGroupsChange}
-                          maxGroups={3}
-                        />
-                      </View>
-                    )}
-                  </View>
-                )}
               </View>
             </View>
           </KeyboardAwareScrollView>
@@ -1333,9 +1332,10 @@ const styles = StyleSheet.create({
     borderColor: colors.neutral.lightGrey,
   },
   privateEventSection: {
-    padding: spacing.md,
-    borderRadius: radius.sm,
-    backgroundColor: colors.secondary.light,
+    margin: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.neutral.lightGrey,
+    paddingVertical: spacing.md,
   },
   privateEventTitle: {
     marginBottom: spacing.sm,

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useMemo, useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -266,7 +266,6 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   disabled = false,
   maxUsers = 10,
 }) => {
-  const [selectedUserDetails, setSelectedUserDetails] = useState<IUser[]>([]);
   const {user} = useAuth();
 
   // Get following users - ensure we always have a valid user ID
@@ -284,14 +283,13 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
     .map(following => following.following)
     .filter((user): user is IUser => user !== undefined && user !== null);
 
-  // Update selected user details when the list of users or selected IDs changes
-  useEffect(() => {
-    if (users && users.length > 0) {
-      const selectedDetails = users.filter(user =>
-        selectedUsers.includes(user.id),
-      );
-      setSelectedUserDetails(selectedDetails);
+  // Memoize the selected user details to prevent unnecessary re-renders
+  // This will only recalculate when users or selectedUsers actually change
+  const selectedUserDetails = useMemo(() => {
+    if (users && users.length > 0 && selectedUsers.length > 0) {
+      return users.filter(user => selectedUsers.includes(user.id));
     }
+    return [];
   }, [users, selectedUsers]);
 
   // Handle the bottom sheet selection logic

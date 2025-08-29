@@ -61,6 +61,8 @@ export default {
     following: 'Following',
     not_now: 'Not Now',
     view_all: 'View All',
+    users: 'Users',
+    groups: 'Groups',
   },
 
   // Bottom tabs navigation items
