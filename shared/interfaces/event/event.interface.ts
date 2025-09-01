@@ -1,4 +1,4 @@
-import { DifficultyLevel, EventType, RoadType } from "../../enums";
+import { DifficultyLevel, EventStatus, EventType, RoadType } from "../../enums";
 
 /**
  * Event Interface
@@ -9,6 +9,7 @@ export interface IEvent {
   title: string;
   description: string;
   eventType: EventType;
+  status: EventStatus;
   startDate: Date | string;
   endDate: Date | string;
   thumbnail?: string | null;
@@ -20,43 +21,4 @@ export interface IEvent {
   updatedById: string;
   updatedAt: Date | string;
   isActive: boolean;
-}
-
-/**
- * Event with related entities
- */
-export interface IEventWithRelations extends IEvent {
-  group?: {
-    id: string;
-    name: string;
-    logo?: string | null;
-  };
-  createdBy?: {
-    id: string;
-    email: string;
-    firstName?: string | null;
-    lastName?: string | null;
-    avatar?: string | null;
-  };
-  addresses?: Array<{
-    id: string;
-    title: string;
-    description?: string | null;
-    type: string;
-    latitude: number;
-    longitude: number;
-  }>;
-  participants?: Array<{
-    id: string;
-    userId: string;
-    status: string;
-    user?: {
-      id: string;
-      email: string;
-      firstName?: string | null;
-      lastName?: string | null;
-      avatar?: string | null;
-    };
-  }>;
-  participantsCount?: number;
 }

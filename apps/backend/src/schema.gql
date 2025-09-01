@@ -223,6 +223,7 @@ input CreateEventInput {
   roadType: String
   routeDescription: String
   startDateTime: DateTime!
+  status: String!
   title: String!
   topicsCovered: String
 }
@@ -370,6 +371,7 @@ type Event {
   roadType: RoadType
   routeDescription: String
   startDateTime: DateTime!
+  status: EventStatus!
   title: String!
   topicsCovered: String
   updatedAt: DateTime!
@@ -403,6 +405,7 @@ type EventDto {
   roadType: RoadType
   routeDescription: String
   startDateTime: DateTime!
+  status: EventStatus!
   title: String!
   topicsCovered: String
   updatedAt: DateTime!
@@ -444,6 +447,12 @@ type EventParticipant {
 enum EventParticipantStatus {
   JOINED
   LEFT
+}
+
+"""The status of an event"""
+enum EventStatus {
+  DRAFT
+  PUBLISHED
 }
 
 """The types of events that can be created"""
@@ -1022,6 +1031,7 @@ input UpdateEventInput {
   roadType: String
   routeDescription: String
   startDateTime: DateTime
+  status: String
   title: String
   topicsCovered: String
 }

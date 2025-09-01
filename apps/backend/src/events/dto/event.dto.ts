@@ -18,6 +18,7 @@ import { RoadType } from '../../enums/models/road-type.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { EventParticipantStatus } from '../../enums/models/event-participant-status.enum';
+import { EventStatus } from '../../enums/models/event-status.enum';
 
 @ObjectType()
 export class EventDto {
@@ -35,6 +36,9 @@ export class EventDto {
 
   @Field(() => EventType)
   eventType: EventType;
+
+  @Field(() => EventStatus)
+  status: EventStatus;
 
   @Field(() => Date)
   @IsDate()

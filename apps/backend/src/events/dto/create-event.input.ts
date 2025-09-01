@@ -3,6 +3,7 @@ import { EventType } from '../../enums/models/event-type.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
+import { EventStatus } from '../../enums/models/event-status.enum';
 import {
   IsEnum,
   IsOptional,
@@ -19,7 +20,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ICreateEvent } from '@motorove/shared';
-import { CreateAddressInput } from 'src/addresses/dto/create-address.input';
+import { CreateAddressInput } from '../../addresses/dto/create-address.input';
 
 @InputType()
 export class CreateEventInput implements ICreateEvent {
@@ -36,6 +37,10 @@ export class CreateEventInput implements ICreateEvent {
   @Field(() => String)
   @IsEnum(EventType)
   eventType: EventType;
+
+  @Field(() => String)
+  @IsEnum(EventStatus)
+  status: EventStatus;
 
   @Field(() => Date)
   @IsDate()

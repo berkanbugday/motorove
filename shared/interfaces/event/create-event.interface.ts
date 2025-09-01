@@ -3,6 +3,7 @@ import {
   RoadType,
   DifficultyLevel,
   ExperienceLevel,
+  EventStatus,
 } from "../../enums";
 import { ICreateAddress } from "../address/create-address.interface";
 
@@ -24,6 +25,11 @@ export interface ICreateEvent {
    * Type of event
    */
   eventType: EventType;
+
+  /**
+   * Status of the event
+   */
+  status: EventStatus;
 
   /**
    * Start date and time of the event

@@ -4,6 +4,7 @@ import { EventParticipant } from './event-participant.model';
 import { EventInvitation } from './event-invitation.model';
 import { BaseModel } from '../../core/models/base.model';
 import { EventType } from '../../enums/models/event-type.enum';
+import { EventStatus } from '../../enums/models/event-status.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
@@ -20,6 +21,9 @@ export class Event extends BaseModel {
 
   @Field(() => EventType)
   eventType: EventType;
+
+  @Field(() => EventStatus)
+  status: EventStatus;
 
   @Field(() => Date)
   startDateTime: Date;

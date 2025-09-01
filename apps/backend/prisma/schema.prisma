@@ -101,6 +101,11 @@ enum EventParticipantStatus {
   LEFT
 }
 
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+}
+
 enum DayOfWeek {
   MONDAY
   TUESDAY
@@ -797,14 +802,15 @@ model UserFollowing {
 
 // Event model
 model Event {
-  id              String    @id @default(uuid())
-  title           String    @db.VarChar(100)
-  description     String    @db.Text
+  id              String      @id @default(uuid())
+  title           String      @db.VarChar(100)
+  description     String      @db.Text
   eventType       EventType
+  status          EventStatus @default(PUBLISHED)
   startDateTime   DateTime
   endDateTime     DateTime?
   maxParticipants Int?
-  isPrivate       Boolean   @default(false)
+  isPrivate       Boolean     @default(false)
   images          String[]
 
   // Ride-specific fields
@@ -837,6 +843,7 @@ model Event {
   invitedGroups Group[]
 
   @@index([eventType])
+  @@index([status])
   @@index([startDateTime])
   @@index([createdById])
   @@index([isActive])
