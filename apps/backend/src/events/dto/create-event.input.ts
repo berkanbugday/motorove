@@ -10,7 +10,6 @@ import {
   IsString,
   IsNumber,
   IsBoolean,
-  IsDate,
   IsArray,
   Min,
   Max,
@@ -34,22 +33,22 @@ export class CreateEventInput implements ICreateEvent {
   @MaxLength(1000)
   description: string;
 
-  @Field(() => String)
+  @Field(() => EventType)
   @IsEnum(EventType)
   eventType: EventType;
 
-  @Field(() => String)
+  @Field(() => EventStatus)
   @IsEnum(EventStatus)
   status: EventStatus;
 
-  @Field(() => Date)
-  @IsDate()
-  startDateTime: Date;
+  @Field(() => String)
+  @IsString()
+  startDateTime: string;
 
-  @Field(() => Date, { nullable: true })
-  @IsDate()
+  @Field(() => String, { nullable: true })
+  @IsString()
   @IsOptional()
-  endDateTime?: Date;
+  endDateTime?: string;
 
   @Field(() => Int, { nullable: true })
   @IsNumber()
@@ -63,11 +62,10 @@ export class CreateEventInput implements ICreateEvent {
   @IsOptional()
   isPrivate?: boolean;
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String])
   @IsArray()
   @IsString({ each: true })
-  @IsOptional()
-  images?: string[];
+  images: string[];
 
   @Field(() => [CreateAddressInput], { nullable: true })
   @IsOptional()

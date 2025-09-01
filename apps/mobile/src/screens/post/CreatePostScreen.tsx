@@ -1,4 +1,4 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {
   View,
   TextInput,
@@ -188,7 +188,7 @@ export const CreatePostScreen = () => {
     });
   };
 
-  const handleSelectImage = async () => {
+  const handleSelectImage = useCallback(async () => {
     if (selectedImages.length >= 3) {
       showToast({
         type: 'error',
@@ -236,11 +236,14 @@ export const CreatePostScreen = () => {
         text2: t('screens.accountSetup.failed_to_select_image'),
       });
     }
-  };
+  }, [selectedImages]);
 
-  const handleRemoveImage = (id: number) => {
-    setSelectedImages(selectedImages.filter(image => image.id !== id));
-  };
+  const handleRemoveImage = useCallback(
+    (id: number) => {
+      setSelectedImages(selectedImages.filter(image => image.id !== id));
+    },
+    [selectedImages],
+  );
 
   const handleAddLocation = () => {
     // Open bottom sheet with map

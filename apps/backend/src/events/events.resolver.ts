@@ -59,10 +59,11 @@ export class EventsResolver {
   async createEvent(
     @Args('input') input: CreateEventInput,
     @Context() context: GqlContext,
-  ) {
+  ): Promise<EventDto> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
     return this.eventsService.create(input, userId, authToken);
   }
 
@@ -71,10 +72,11 @@ export class EventsResolver {
   async updateEvent(
     @Args('input') input: UpdateEventInput,
     @Context() context: GqlContext,
-  ) {
+  ): Promise<EventDto> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+
     return this.eventsService.update(input, userId, authToken);
   }
 

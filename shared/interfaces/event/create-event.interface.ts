@@ -34,12 +34,12 @@ export interface ICreateEvent {
   /**
    * Start date and time of the event
    */
-  startDateTime: Date;
+  startDateTime: string;
 
   /**
    * Optional end date and time of the event
    */
-  endDateTime?: Date;
+  endDateTime?: string;
 
   /**
    * Optional maximum number of participants
@@ -54,7 +54,7 @@ export interface ICreateEvent {
   /**
    * Optional array of image URLs
    */
-  images?: string[];
+  images: string[];
 
   /**
    * Optional addresses related to the event

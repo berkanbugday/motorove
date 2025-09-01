@@ -1,6 +1,6 @@
 import {z} from 'zod';
 import {TFunction} from 'i18next';
-import {EventType} from '@motorove/shared/enums/event-type.enum';
+import {EventType} from '@motorove/shared';
 
 /**
  * Creates event validation schemas with translated error messages
@@ -74,7 +74,9 @@ export const eventSchemas = (t: TFunction) => {
       })
       .nullable()
       .optional(),
-    images: z.array(z.string()).nullable().optional(),
+    images: z
+      .array(z.string().nonempty())
+      .min(1, t('validation.event.images.required')),
     isPrivate: z.boolean().default(false),
     invitedGroups: z.array(z.string()).optional().default([]),
     invitedUsers: z.array(z.string()).optional().default([]),

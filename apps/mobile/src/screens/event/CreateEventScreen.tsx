@@ -38,26 +38,34 @@ import {
   UserSelector,
   Wizard,
   Tabs,
+  Dialog,
+  BottomSheetRef,
 } from '@components';
-import Dialog from '@components/Dialog';
 import {colors, commonStyles, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
-import {eventService} from '@services/event.service';
+import {useCreateEvent} from '@services/event.service';
 import {eventSchemas, CreateEventFormValues} from '@utils/validation';
 import {useTranslation} from '@hooks/useTranslation';
-import {ICreateAddress, AddressType} from '@motorove/shared';
-import {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
+import {
+  ICreateAddress,
+  AddressType,
+  EventType,
+  ICreateEvent,
+  EventStatus,
+  RoadType,
+  DifficultyLevel,
+  ExperienceLevel,
+} from '@motorove/shared';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
-import {Language} from '@motorove/shared';
-import {EventType} from '@motorove/shared/enums/event-type.enum';
 import {useLanguage} from '@contexts/LanguageContext';
 
 export const CreateEventScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
   const {language} = useLanguage();
+  const {createEvent, loading} = useCreateEvent();
 
   // Refs
   const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -83,28 +91,18 @@ export const CreateEventScreen: React.FC = () => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const [isFirstStep, setIsFirstStep] = useState(true);
   const [isLastStep, setIsLastStep] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [selectedMeetingPoint, setSelectedMeetingPoint] = useState<{
-    latitude?: number;
-    longitude?: number;
-    name?: string;
-    addresses?: any[];
-  }>({});
-  const [selectedStartLocation, setSelectedStartLocation] = useState<{
-    latitude?: number;
-    longitude?: number;
-    name?: string;
-    addresses?: any[];
-  }>({});
-  const [selectedFinishLocation, setSelectedFinishLocation] = useState<{
-    latitude?: number;
-    longitude?: number;
-    name?: string;
-    addresses?: any[];
-  }>({});
+  const [selectedMeetingPoint, setSelectedMeetingPoint] = useState<
+    ICreateAddress[] | null
+  >();
+  const [selectedStartLocation, setSelectedStartLocation] = useState<
+    ICreateAddress[] | null
+  >();
+  const [selectedFinishLocation, setSelectedFinishLocation] = useState<
+    ICreateAddress[] | null
+  >();
   const [activeInviteTab, setActiveInviteTab] = useState<string>('users');
 
   // Enum hooks
@@ -160,6 +158,11 @@ export const CreateEventScreen: React.FC = () => {
 
   // Watch key form values
   const eventType = watch('eventType');
+
+  const startDate = watch('startDate');
+  const endDate = watch('endDate');
+  const startTime = watch('startTime');
+  const endTime = watch('endTime');
 
   // Memoized derived values
   const isSoloRide = useMemo(
@@ -225,26 +228,65 @@ export const CreateEventScreen: React.FC = () => {
     draftDialogRef.current?.open();
   }, []);
 
-  const confirmSaveDraft = useCallback(() => {
+  const confirmSaveDraft = useCallback(async () => {
     const formData = getValues();
 
     try {
-      // Save draft logic would go here
-      console.log('Saving draft:', formData);
-      showToast({
-        type: 'success',
-        text1: t('common.success'),
-        text2: t('screens.event.draft_saved'),
-      });
+      const addresses: ICreateAddress[] = [
+        ...(selectedMeetingPoint || []),
+        ...(selectedStartLocation || []),
+        ...(selectedFinishLocation || []),
+      ];
+      // Use base64 encoded images if available, otherwise fall back to URIs
+      const images = selectedImages.map(img => img.base64 || img.uri);
+
+      const createEventInput: ICreateEvent = {
+        title: formData.title,
+        description: formData.description,
+        isPrivate: formData.isPrivate,
+        invitedGroupIds: formData.invitedGroups,
+        invitedUserIds: formData.invitedUsers,
+        eventType: formData.eventType as EventType,
+        status: EventStatus.DRAFT,
+        addresses: addresses,
+        startDateTime: new Date(
+          `${formData.startDate.toISOString().split('T')[0]}T${
+            formData.startTime.toISOString().split('T')[1]
+          }`,
+        ).toISOString(),
+        endDateTime:
+          formData.endDate && formData.endTime
+            ? new Date(
+                `${formData.endDate.toISOString().split('T')[0]}T${
+                  formData.endTime.toISOString().split('T')[1]
+                }`,
+              ).toISOString()
+            : undefined,
+        maxParticipants: parseInt(formData.maxParticipants as string, 10),
+        images: images,
+        roadType: formData.roadType as RoadType,
+        difficultyLevel: formData.difficultyLevel as DifficultyLevel,
+        experienceLevel: formData.experienceLevel as ExperienceLevel,
+        routeDescription: formData.routeDescription,
+        restStops: formData.restStops,
+        campingInfo: formData.campingInfo,
+        equipmentChecklist: formData.equipmentChecklist,
+        instructorInfo: formData.instructorInfo,
+        topicsCovered: formData.topicsCovered,
+        price: formData.price,
+      };
+
+      await createEvent(createEventInput);
     } catch (error) {
-      showToast({
-        type: 'error',
-        text1: t('common.error'),
-        text2: t('screens.event.draft_save_failed'),
-      });
       loggingService.error('Error saving draft:', error);
     }
-  }, [getValues]);
+  }, [
+    getValues,
+    selectedMeetingPoint,
+    selectedStartLocation,
+    selectedFinishLocation,
+    selectedImages,
+  ]);
 
   const handleNextStep = useCallback(async () => {
     wizardRef.current?.nextStep();
@@ -267,23 +309,17 @@ export const CreateEventScreen: React.FC = () => {
     finishLocationMapBottomSheetRef.current?.open('full');
   }, []);
 
-  const handleLocationSelect = useCallback(
+  const handleMeetingLocationSelect = useCallback(
     (addresses: ICreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
-        setSelectedMeetingPoint({});
+        setSelectedMeetingPoint(null);
         setValue('meetingPoint', '', {shouldValidate: true});
         return;
       }
 
-      // Get the first address to extract coordinates
-      const firstAddress = addresses[0];
-      setSelectedMeetingPoint({
-        latitude: firstAddress.latitude,
-        longitude: firstAddress.longitude,
-      });
+      setSelectedMeetingPoint(addresses);
 
-      // Get display address (prefer English)
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
@@ -303,19 +339,13 @@ export const CreateEventScreen: React.FC = () => {
     (addresses: ICreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
-        setSelectedStartLocation({});
+        setSelectedStartLocation(null);
         setValue('startLocation', '', {shouldValidate: true});
         return;
       }
 
-      // Get the first address to extract coordinates
-      const firstAddress = addresses[0];
-      setSelectedStartLocation({
-        latitude: firstAddress.latitude,
-        longitude: firstAddress.longitude,
-      });
+      setSelectedStartLocation(addresses);
 
-      // Get display address (prefer English)
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
@@ -335,19 +365,13 @@ export const CreateEventScreen: React.FC = () => {
     (addresses: ICreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
-        setSelectedFinishLocation({});
+        setSelectedFinishLocation(null);
         setValue('finishLocation', '', {shouldValidate: true});
         return;
       }
 
-      // Get the first address to extract coordinates
-      const firstAddress = addresses[0];
-      setSelectedFinishLocation({
-        latitude: firstAddress.latitude,
-        longitude: firstAddress.longitude,
-      });
+      setSelectedFinishLocation(addresses);
 
-      // Get display address (prefer English)
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
@@ -364,14 +388,14 @@ export const CreateEventScreen: React.FC = () => {
   );
 
   // Image selection handlers
-  const handleSelectImages = useCallback(async () => {
+  const handleSelectImage = useCallback(async () => {
     try {
       // Check if image limit is reached
       if (selectedImages.length >= 3) {
         showToast({
           type: 'error',
-          text1: t('screens.event.limit_reached'),
-          text2: t('screens.event.max_images_limit'),
+          text1: t('validation.event.images.limit_reached'),
+          text2: t('validation.event.images.max_images_limit'),
         });
         return;
       }
@@ -390,8 +414,8 @@ export const CreateEventScreen: React.FC = () => {
         if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
           showToast({
             type: 'error',
-            text1: t('screens.event.file_too_large'),
-            text2: t('screens.event.image_size_limit'),
+            text1: t('validation.event.images.file_too_large'),
+            text2: t('validation.event.images.image_size_limit'),
           });
           return;
         }
@@ -510,6 +534,7 @@ export const CreateEventScreen: React.FC = () => {
       'maxParticipants',
       'description',
       'meetingPoint',
+      'images',
     ]);
   }, [trigger]);
 
@@ -560,32 +585,39 @@ export const CreateEventScreen: React.FC = () => {
   const onSubmit = useCallback(
     async (data: CreateEventFormValues) => {
       try {
-        setLoading(true);
+        const addresses: ICreateAddress[] = [
+          ...(selectedMeetingPoint || []),
+          ...(selectedStartLocation || []),
+          ...(selectedFinishLocation || []),
+        ];
+        const createEventInput: ICreateEvent = {
+          title: data.title,
+          description: data.description,
+          isPrivate: data.isPrivate,
+          invitedGroupIds: data.invitedGroups,
+          invitedUserIds: data.invitedUsers,
+          eventType: selectedEventType?.value as EventType,
+          status: EventStatus.PUBLISHED,
+          addresses: addresses,
+          startDateTime: new Date(
+            `${data.startDate.toISOString().split('T')[0]}T${
+              data.startTime.toISOString().split('T')[1]
+            }`,
+          ).toISOString(),
+          endDateTime:
+            data.endDate && data.endTime
+              ? new Date(
+                  `${data.endDate.toISOString().split('T')[0]}T${
+                    data.endTime.toISOString().split('T')[1]
+                  }`,
+                ).toISOString()
+              : undefined,
+          maxParticipants: parseInt(data.maxParticipants as string, 10),
+        };
 
-        await eventService.createEvent(data);
-
-        showToast({
-          type: 'success',
-          text1: t('common.success'),
-          text2: t('screens.event.creation_success'),
-        });
-
-        // Navigate back after successful creation
-        setTimeout(() => {
-          navigation.goBack();
-        }, 1000);
+        // await createEvent(createEventInput);
       } catch (error) {
-        showToast({
-          type: 'error',
-          text1: t('common.error'),
-          text2:
-            error instanceof Error
-              ? error.message
-              : t('screens.event.creation_failed'),
-        });
         loggingService.error('Error creating event:', error);
-      } finally {
-        setLoading(false);
       }
     },
     [navigation],
@@ -675,6 +707,11 @@ export const CreateEventScreen: React.FC = () => {
               <Typography variant="body" style={styles.sectionTitle}>
                 {t('screens.event.event_images')}
               </Typography>
+              {errors.images && (
+                <Typography variant="caption" color={colors.status.error}>
+                  {errors.images.message}
+                </Typography>
+              )}
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -696,7 +733,7 @@ export const CreateEventScreen: React.FC = () => {
                 {selectedImages.length < 3 && (
                   <TouchableOpacity
                     style={styles.addImageButton}
-                    onPress={handleSelectImages}
+                    onPress={handleSelectImage}
                     activeOpacity={0.8}>
                     <Icon name="plus" size={24} color={colors.neutral.grey} />
                   </TouchableOpacity>
@@ -725,8 +762,9 @@ export const CreateEventScreen: React.FC = () => {
                   placeholder={t('screens.event.start_date')}
                   cancelText={t('common.cancel')}
                   confirmText={t('common.confirm')}
-                  displayFormat="medium"
+                  displayFormat="long"
                   mode="date"
+                  defaultValue={startDate}
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
                   error={errors.startDate}
@@ -740,6 +778,7 @@ export const CreateEventScreen: React.FC = () => {
                   cancelText={t('common.cancel')}
                   confirmText={t('common.confirm')}
                   mode="time"
+                  defaultValue={startTime}
                   minuteInterval={15}
                   style={styles.dateTimePicker}
                   error={errors.startTime}
@@ -756,8 +795,9 @@ export const CreateEventScreen: React.FC = () => {
                   placeholder={t('screens.event.end_date')}
                   cancelText={t('common.cancel')}
                   confirmText={t('common.confirm')}
-                  displayFormat="medium"
+                  displayFormat="long"
                   mode="date"
+                  defaultValue={endDate}
                   minimumDate={new Date()}
                   style={styles.dateTimePicker}
                   error={errors.endDate}
@@ -771,6 +811,7 @@ export const CreateEventScreen: React.FC = () => {
                   cancelText={t('common.cancel')}
                   confirmText={t('common.confirm')}
                   mode="time"
+                  defaultValue={endTime}
                   minuteInterval={15}
                   style={styles.dateTimePicker}
                   error={errors.endTime}
@@ -1024,7 +1065,7 @@ export const CreateEventScreen: React.FC = () => {
       loading,
       selectedImages,
       handleRemoveImage,
-      handleSelectImages,
+      handleSelectImage,
       handleEventTypeSelect,
       roadTypes,
       difficultyLevels,
@@ -1087,8 +1128,9 @@ export const CreateEventScreen: React.FC = () => {
       setSelectedRoadType(null);
       setSelectedDifficultyLevel(null);
       setSelectedExperienceLevel(null);
-      setSelectedStartLocation({});
-      setSelectedFinishLocation({});
+      setSelectedMeetingPoint(null);
+      setSelectedStartLocation(null);
+      setSelectedFinishLocation(null);
 
       // Reset selected users and groups since they depend on event type
       setSelectedUsers([]);
@@ -1193,19 +1235,8 @@ export const CreateEventScreen: React.FC = () => {
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
-          onLocationSelect={handleLocationSelect}
+          onLocationSelect={handleMeetingLocationSelect}
           onClose={() => meetingPointMapBottomSheetRef.current?.close()}
-          initialAddress={
-            selectedMeetingPoint.latitude && selectedMeetingPoint.longitude
-              ? {
-                  latitude: selectedMeetingPoint.latitude,
-                  longitude: selectedMeetingPoint.longitude,
-                  address: '',
-                  language: language as Language,
-                  type: AddressType.EVENT_MEETING_POINT,
-                }
-              : undefined
-          }
           addressType={AddressType.EVENT_MEETING_POINT}
         />
       </BottomSheet>
@@ -1218,17 +1249,6 @@ export const CreateEventScreen: React.FC = () => {
         <SelectLocationMap
           onLocationSelect={handleStartLocationSelect}
           onClose={() => startLocationMapBottomSheetRef.current?.close()}
-          initialAddress={
-            selectedStartLocation.latitude && selectedStartLocation.longitude
-              ? {
-                  latitude: selectedStartLocation.latitude,
-                  longitude: selectedStartLocation.longitude,
-                  address: '',
-                  language: language as Language,
-                  type: AddressType.EVENT_START_LOCATION,
-                }
-              : undefined
-          }
           addressType={AddressType.EVENT_START_LOCATION}
         />
       </BottomSheet>
@@ -1241,17 +1261,6 @@ export const CreateEventScreen: React.FC = () => {
         <SelectLocationMap
           onLocationSelect={handleFinishLocationSelect}
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
-          initialAddress={
-            selectedFinishLocation.latitude && selectedFinishLocation.longitude
-              ? {
-                  latitude: selectedFinishLocation.latitude,
-                  longitude: selectedFinishLocation.longitude,
-                  address: '',
-                  language: language as Language,
-                  type: AddressType.EVENT_FINISH_LOCATION,
-                }
-              : undefined
-          }
           addressType={AddressType.EVENT_FINISH_LOCATION}
         />
       </BottomSheet>
@@ -1324,6 +1333,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   dateTimePicker: {
+    flex: 1,
     marginBottom: spacing.xs,
   },
   privacySwitchContainer: {

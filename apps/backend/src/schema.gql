@@ -208,11 +208,11 @@ input CreateEventInput {
   campingInfo: String
   description: String!
   difficultyLevel: String
-  endDateTime: DateTime
+  endDateTime: String
   equipmentChecklist: String
-  eventType: String!
+  eventType: EventType!
   experienceLevel: String
-  images: [String!]
+  images: [String!]!
   instructorInfo: String
   invitedGroupIds: [String!]
   invitedUserIds: [String!]
@@ -222,8 +222,8 @@ input CreateEventInput {
   restStops: String
   roadType: String
   routeDescription: String
-  startDateTime: DateTime!
-  status: String!
+  startDateTime: String!
+  status: EventStatus!
   title: String!
   topicsCovered: String
 }
@@ -1015,9 +1015,9 @@ input UpdateEventInput {
   campingInfo: String
   description: String
   difficultyLevel: String
-  endDateTime: DateTime
+  endDateTime: String
   equipmentChecklist: String
-  eventType: String
+  eventType: EventType
   experienceLevel: String
   id: String!
   images: [String!]
@@ -1030,8 +1030,8 @@ input UpdateEventInput {
   restStops: String
   roadType: String
   routeDescription: String
-  startDateTime: DateTime
-  status: String
+  startDateTime: String
+  status: EventStatus
   title: String
   topicsCovered: String
 }
