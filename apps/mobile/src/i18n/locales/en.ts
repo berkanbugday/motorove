@@ -63,8 +63,6 @@ export default {
     view_all: 'View All',
     select_all: 'Select All',
     clear_all: 'Clear All',
-    users: 'Users',
-    groups: 'Groups',
   },
 
   // Bottom tabs navigation items
@@ -268,6 +266,8 @@ export default {
       price_label: 'Price (optional)',
       event_images: 'Event Images (Max 3)',
       privacy_settings: 'Privacy Settings',
+      users: 'Users',
+      groups: 'Groups',
       select_event_type_prompt: 'Please select an event type in the first step',
       discard_dialog_title: 'Discard Changes?',
       discard_dialog_message:

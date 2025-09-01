@@ -802,8 +802,8 @@ export const CreateEventScreen: React.FC = () => {
                     <View style={styles.privateEventSection}>
                       <Tabs
                         items={[
-                          {key: 'users', label: t('common.users')},
-                          {key: 'groups', label: t('common.groups')},
+                          {key: 'users', label: t('screens.event.users')},
+                          {key: 'groups', label: t('screens.event.groups')},
                         ]}
                         selectedKey={activeInviteTab}
                         onTabChange={handleTabChange}

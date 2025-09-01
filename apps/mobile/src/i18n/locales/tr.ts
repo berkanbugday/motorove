@@ -63,8 +63,6 @@ export default {
     view_all: 'Tümünü Gör',
     select_all: 'Tümünü Seç',
     clear_all: 'Tümünü Temizle',
-    users: 'Kullanıcılar',
-    groups: 'Gruplar',
   },
 
   // Bottom tabs navigation items
@@ -270,6 +268,8 @@ export default {
       price_label: 'Ücret (isteğe bağlı)',
       event_images: 'Etkinlik Görselleri (Maks 3)',
       privacy_settings: 'Gizlilik Ayarları',
+      users: 'Kullanıcılar',
+      groups: 'Gruplar',
       select_event_type_prompt: 'Lütfen ilk adımda bir etkinlik türü seçin',
       discard_dialog_title: 'Değişiklikleri İptal Et?',
       discard_dialog_message:
