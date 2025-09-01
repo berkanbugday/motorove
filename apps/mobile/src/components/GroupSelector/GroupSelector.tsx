@@ -13,7 +13,7 @@ import {colors, spacing, radius} from '@theme';
 import {Typography, Icon, Chip, Button} from '@components';
 import {openBottomSheet} from '@components/BottomSheet';
 import {useGetJoinedGroups} from '@services/group.service';
-import type {Group} from '@services/group.service';
+import {IGroup} from '@motorove/shared';
 
 export interface GroupSelectorProps {
   selectedGroups: string[];
@@ -24,14 +24,14 @@ export interface GroupSelectorProps {
 }
 
 interface GroupItemProps {
-  group: Group;
+  group: IGroup;
   isSelected: boolean;
   onToggle: (groupId: string) => void;
   disabled?: boolean;
 }
 
 interface BottomSheetContentProps {
-  groups: Group[];
+  groups: IGroup[];
   selectedGroups: string[];
   loading: boolean;
   error: any;
@@ -83,13 +83,10 @@ const GroupItem: React.FC<GroupItemProps> = ({
       activeOpacity={0.7}>
       <View style={styles.groupContent}>
         <View style={styles.groupImageContainer}>
-          {group.logo ? (
-            <Image source={{uri: group.logo}} style={styles.groupImage} />
-          ) : (
-            <View style={[styles.groupImage, styles.groupImagePlaceholder]}>
-              <Icon name="users" size={16} color={colors.neutral.grey} />
-            </View>
-          )}
+          <Image
+            source={group.logo ? {uri: group.logo} : undefined}
+            style={styles.groupImage}
+          />
         </View>
         <View style={styles.groupInfo}>
           <Typography variant="body" style={styles.groupName} numberOfLines={1}>
@@ -208,7 +205,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
             <Typography variant="caption" color={colors.neutral.grey}>
               Selected: {localSelectedGroups.length}/{maxGroups}
             </Typography>
-            <View style={styles.bulkActionButtons}>
+            <View>
               {allSelected ? (
                 <Button
                   title="Clear All"
@@ -264,19 +261,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
   maxGroups = 10,
 }) => {
   // Initialize with role 'ADMIN' filter to only fetch admin groups
-  const {groups, loading, error, refetch, applyFilters, loadMore} =
-    useGetJoinedGroups();
-
-  // Apply admin role filter on component mount
-  useEffect(() => {
-    // Set the filter to only show groups where the user is an admin
-    applyFilters({
-      city: null,
-      tags: [],
-      privacy: 'ALL',
-      role: 'ADMIN',
-    });
-  }, [applyFilters]);
+  const {groups, loading, error, refetch, loadMore} = useGetJoinedGroups();
 
   // Local state to handle selection
   const [localSelectedGroups, setLocalSelectedGroups] =
@@ -474,15 +459,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
     marginBottom: spacing.md,
-  },
-  bulkActionButtons: {
-    flexDirection: 'row',
-    gap: spacing.sm,
+    paddingLeft: spacing.md,
   },
 
   // Existing Group Item Styles
