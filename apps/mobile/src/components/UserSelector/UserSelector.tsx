@@ -1,4 +1,5 @@
 import React, {useCallback, useMemo, useState, useEffect} from 'react';
+import {useTranslation} from '@hooks/useTranslation';
 import {
   View,
   StyleSheet,
@@ -44,14 +45,14 @@ interface BottomSheetContentProps {
 }
 
 // Utility function to get user's display name
-const getUserName = (user: IUser): string => {
+const getUserName = (user: IUser, t: any): string => {
   if (user.firstName && user.lastName) {
     return `${user.firstName} ${user.lastName}`;
   }
   if (user.firstName) {
     return user.firstName;
   }
-  return 'Unknown User';
+  return t('components.userSelector.unknown_user');
 };
 
 const UserItem: React.FC<UserItemProps> = ({
@@ -60,6 +61,7 @@ const UserItem: React.FC<UserItemProps> = ({
   onToggle,
   disabled,
 }) => {
+  const {t} = useTranslation();
   // Add animation value for selection indicator
   const [scaleAnim] = useState(new Animated.Value(1));
 
@@ -95,17 +97,18 @@ const UserItem: React.FC<UserItemProps> = ({
       activeOpacity={0.7}>
       <View style={styles.userContent}>
         <View style={styles.userImageContainer}>
-          {user.avatar ? (
-            <Image source={{uri: user.avatar}} style={styles.userImage} />
-          ) : (
-            <View style={[styles.userImage, styles.userImagePlaceholder]}>
-              <Icon name="user" size={16} color={colors.neutral.grey} />
-            </View>
-          )}
+          <Image
+            source={
+              user.avatar
+                ? {uri: user.avatar}
+                : require('@assets/images/default_avatar.png')
+            }
+            style={styles.userImage}
+          />
         </View>
         <View style={styles.userInfo}>
           <Typography variant="body" style={styles.userName} numberOfLines={1}>
-            {getUserName(user)}
+            {getUserName(user, t)}
           </Typography>
         </View>
       </View>
@@ -134,6 +137,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   disabled,
   maxUsers,
 }) => {
+  const {t} = useTranslation();
   // Use state derived from props with useEffect to ensure it stays in sync
   const [localSelectedUsers, setLocalSelectedUsers] =
     useState<string[]>(selectedUsers);
@@ -188,18 +192,20 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
       {loading ? (
         <View style={styles.loadingContainer}>
           <Typography variant="body" color={colors.neutral.grey}>
-            Loading users...
+            {t('components.userSelector.loading_users')}
           </Typography>
         </View>
       ) : error || users.length === 0 ? (
         <View style={styles.errorContainer}>
           <Typography variant="body" color={colors.neutral.grey}>
-            {error ? 'Failed to load users' : "You don't follow any users yet"}
+            {error
+              ? t('components.userSelector.failed_to_load')
+              : t('components.userSelector.no_followed_users')}
           </Typography>
           {error && (
             <TouchableOpacity onPress={refetch} style={styles.retryButton}>
               <Typography variant="caption" color={colors.primary.main}>
-                Try again
+                {t('components.userSelector.try_again')}
               </Typography>
             </TouchableOpacity>
           )}
@@ -209,12 +215,15 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
           {/* Add bulk selection controls */}
           <View style={styles.bulkSelectionControls}>
             <Typography variant="caption" color={colors.neutral.grey}>
-              Selected: {localSelectedUsers.length}/{maxUsers}
+              {t('components.userSelector.selected_count', {
+                current: localSelectedUsers.length,
+                max: maxUsers,
+              })}
             </Typography>
-            <View style={styles.bulkActionButtons}>
+            <View>
               {allSelected ? (
                 <Button
-                  title="Clear All"
+                  title={t('components.userSelector.clear_all')}
                   variant="text"
                   size="small"
                   onPress={handleClearAll}
@@ -222,7 +231,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                 />
               ) : (
                 <Button
-                  title="Select All"
+                  title={t('components.userSelector.select_all')}
                   variant="text"
                   size="small"
                   onPress={handleSelectAll}
@@ -266,6 +275,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   disabled = false,
   maxUsers = 10,
 }) => {
+  const {t} = useTranslation();
   const {user} = useAuth();
 
   // Get following users - ensure we always have a valid user ID
@@ -295,7 +305,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   // Handle the bottom sheet selection logic
   const handleShowSelector = useCallback(() => {
     openBottomSheet({
-      title: 'Select Users',
+      title: t('components.userSelector.select_users'),
       content: (
         <BottomSheetContent
           users={users}
@@ -338,11 +348,15 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
     return (
       <View style={[styles.container, style]}>
         <Typography variant="body" color={colors.neutral.grey}>
-          {error ? 'Failed to load users' : "You don't follow any users yet"}
+          {error
+            ? t('components.userSelector.failed_to_load')
+            : t('components.userSelector.no_followed_users')}
         </Typography>
         {error && (
           <TouchableOpacity onPress={refetch} style={styles.retryButton}>
-            <Typography variant="caption">Try again</Typography>
+            <Typography variant="caption">
+              {t('components.userSelector.try_again')}
+            </Typography>
           </TouchableOpacity>
         )}
       </View>
@@ -354,11 +368,11 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
       <View style={styles.headerContainer}>
         <View style={styles.headerContent}>
           <Typography variant="body" weight="semiBold" style={styles.title}>
-            Invite Users
+            {t('components.userSelector.invite_users')}
           </Typography>
           {selectedUsers.length < maxUsers && (
             <Button
-              title="Add User"
+              title={t('components.userSelector.add_user')}
               variant="text"
               size="small"
               iconName="plus"
@@ -368,8 +382,10 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
         </View>
         <Typography variant="caption" color={colors.neutral.grey}>
           {selectedUsers.length >= maxUsers
-            ? `Maximum number of users (${maxUsers}) selected`
-            : `Select users to invite to your private event (max ${maxUsers})`}
+            ? t('components.userSelector.max_users_selected', {max: maxUsers})
+            : t('components.userSelector.select_users_description', {
+                max: maxUsers,
+              })}
         </Typography>
       </View>
 
@@ -379,7 +395,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           {selectedUserDetails.map(user => (
             <Chip
               key={user.id}
-              label={getUserName(user)}
+              label={getUserName(user, t)}
               variant="filled"
               color="dark"
               removable={true}
@@ -396,7 +412,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           {/* Add User Chip - only show if under max limit */}
           {selectedUsers.length === 0 && selectedUsers.length < maxUsers && (
             <Chip
-              label="Add User"
+              label={t('components.userSelector.add_user')}
               variant="outlined"
               color="dark"
               leadingIcon="plus"
@@ -459,15 +475,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
     marginBottom: spacing.md,
-  },
-  bulkActionButtons: {
-    flexDirection: 'row',
-    gap: spacing.sm,
+    paddingLeft: spacing.md,
   },
 
   // User Item Styles
@@ -499,6 +510,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: radius.round,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
   userImagePlaceholder: {
     backgroundColor: colors.secondary.light,
