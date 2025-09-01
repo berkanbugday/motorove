@@ -223,7 +223,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
             <View>
               {allSelected ? (
                 <Button
-                  title={t('components.userSelector.clear_all')}
+                  title={t('common.clear_all')}
                   variant="text"
                   size="small"
                   onPress={handleClearAll}
@@ -231,7 +231,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                 />
               ) : (
                 <Button
-                  title={t('components.userSelector.select_all')}
+                  title={t('common.select_all')}
                   variant="text"
                   size="small"
                   onPress={handleSelectAll}
@@ -354,9 +354,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
         </Typography>
         {error && (
           <TouchableOpacity onPress={refetch} style={styles.retryButton}>
-            <Typography variant="caption">
-              {t('components.userSelector.try_again')}
-            </Typography>
+            <Typography variant="caption">{t('common.try_again')}</Typography>
           </TouchableOpacity>
         )}
       </View>

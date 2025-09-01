@@ -1,4 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useTranslation} from '@hooks/useTranslation';
 import {
   View,
   StyleSheet,
@@ -48,6 +49,8 @@ const GroupItem: React.FC<GroupItemProps> = ({
   onToggle,
   disabled,
 }) => {
+  const {t} = useTranslation();
+
   // Add animation value for selection indicator
   const [scaleAnim] = useState(new Animated.Value(1));
 
@@ -96,8 +99,9 @@ const GroupItem: React.FC<GroupItemProps> = ({
             variant="caption"
             color={colors.neutral.grey}
             numberOfLines={1}>
-            {group.city?.value || 'No city'} • {group.memberships?.length || 0}{' '}
-            members
+            {group.city?.value || t('components.groupSelector.no_city')} •{' '}
+            {group.memberships?.length || 0}{' '}
+            {t('components.groupSelector.members')}
           </Typography>
         </View>
       </View>
@@ -126,6 +130,8 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   disabled,
   maxGroups,
 }) => {
+  const {t} = useTranslation();
+
   // Use state derived from props with useEffect to ensure it stays in sync
   const [localSelectedGroups, setLocalSelectedGroups] =
     useState<string[]>(selectedGroups);
@@ -180,20 +186,20 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
       {loading ? (
         <View style={styles.loadingContainer}>
           <Typography variant="body" color={colors.neutral.grey}>
-            Loading your groups...
+            {t('components.groupSelector.loading')}
           </Typography>
         </View>
       ) : error || groups.length === 0 ? (
         <View style={styles.errorContainer}>
           <Typography variant="body" color={colors.neutral.grey}>
             {error
-              ? 'Failed to load groups'
-              : "You haven't joined any groups yet"}
+              ? t('components.groupSelector.failed_to_load')
+              : t('components.groupSelector.no_groups_joined')}
           </Typography>
           {error && (
             <TouchableOpacity onPress={refetch} style={styles.retryButton}>
               <Typography variant="caption" color={colors.primary.main}>
-                Try again
+                {t('common.try_again')}
               </Typography>
             </TouchableOpacity>
           )}
@@ -203,12 +209,15 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
           {/* Add bulk selection controls */}
           <View style={styles.bulkSelectionControls}>
             <Typography variant="caption" color={colors.neutral.grey}>
-              Selected: {localSelectedGroups.length}/{maxGroups}
+              {t('components.groupSelector.selected_count', {
+                current: localSelectedGroups.length,
+                max: maxGroups,
+              })}
             </Typography>
             <View>
               {allSelected ? (
                 <Button
-                  title="Clear All"
+                  title={t('common.clear_all')}
                   variant="text"
                   size="small"
                   onPress={handleClearAll}
@@ -216,7 +225,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                 />
               ) : (
                 <Button
-                  title="Select All"
+                  title={t('common.select_all')}
                   variant="text"
                   size="small"
                   onPress={handleSelectAll}
@@ -253,13 +262,22 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   );
 };
 
+export interface GroupSelectorProps {
+  selectedGroups: string[];
+  onGroupsChange: (selectedGroups: string[]) => void;
+  style?: ViewStyle;
+  disabled?: boolean;
+  maxGroups?: number;
+}
+
 export const GroupSelector: React.FC<GroupSelectorProps> = ({
-  selectedGroups,
+  selectedGroups = [],
   onGroupsChange,
   style,
   disabled = false,
   maxGroups = 10,
 }) => {
+  const {t} = useTranslation();
   // Initialize with role 'ADMIN' filter to only fetch admin groups
   const {groups, loading, error, refetch, loadMore} = useGetJoinedGroups();
 
@@ -311,7 +329,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
         />
       ),
       snapPoint: 'full',
-      title: 'Select Groups',
+      title: t('components.groupSelector.title'),
       showCloseButton: true,
       closeOnBackdropPress: true,
       closeButtonPosition: 'top-left',
@@ -341,12 +359,12 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
       <View style={[styles.container, style]}>
         <Typography variant="body" color={colors.neutral.grey}>
           {error
-            ? 'Failed to load groups'
-            : "You haven't joined any groups yet"}
+            ? t('components.groupSelector.failed_to_load')
+            : t('components.groupSelector.no_groups_joined')}
         </Typography>
         {error && (
           <TouchableOpacity onPress={refetch} style={styles.retryButton}>
-            <Typography variant="caption">Try again</Typography>
+            <Typography variant="caption">{t('common.try_again')}</Typography>
           </TouchableOpacity>
         )}
       </View>
@@ -358,11 +376,11 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
       <View style={styles.headerContainer}>
         <View style={styles.headerContent}>
           <Typography variant="body" weight="semiBold" style={styles.title}>
-            Invite Groups
+            {t('components.groupSelector.invite_groups')}
           </Typography>
           {localSelectedGroups.length < maxGroups && (
             <Button
-              title="Add Group"
+              title={t('components.groupSelector.add_group')}
               variant="text"
               size="small"
               iconName="plus"
@@ -372,8 +390,12 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
         </View>
         <Typography variant="caption" color={colors.neutral.grey}>
           {localSelectedGroups.length >= maxGroups
-            ? `Maximum number of groups (${maxGroups}) selected`
-            : `Select groups to invite to your private event (max ${maxGroups})`}
+            ? t('components.groupSelector.max_groups_selected', {
+                max: maxGroups,
+              })
+            : t('components.groupSelector.select_groups_description', {
+                max: maxGroups,
+              })}
         </Typography>
       </View>
 
@@ -396,7 +418,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
           {localSelectedGroups.length === 0 &&
             localSelectedGroups.length < maxGroups && (
               <Chip
-                label="Add Group"
+                label={t('components.groupSelector.add_group')}
                 variant="outlined"
                 color="dark"
                 leadingIcon="plus"
