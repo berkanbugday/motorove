@@ -115,6 +115,7 @@ export class EventsService {
         images,
         addresses,
         invitedGroupIds,
+        invitedUserIds,
         roadType,
         difficultyLevel,
         routeDescription,
