@@ -65,7 +65,9 @@ export const CreateEventScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
   const {language} = useLanguage();
-  const {createEvent, loading} = useCreateEvent();
+  const {createEvent, loading} = useCreateEvent(() => {
+    navigation.goBack();
+  });
 
   // Refs
   const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -244,8 +246,8 @@ export const CreateEventScreen: React.FC = () => {
         title: formData.title,
         description: formData.description,
         isPrivate: formData.isPrivate,
-        invitedGroupIds: formData.invitedGroups,
-        invitedUserIds: formData.invitedUsers,
+        invitedGroupIds: formData.isPrivate ? formData.invitedGroups : [],
+        invitedUserIds: formData.isPrivate ? formData.invitedUsers : [],
         eventType: formData.eventType as EventType,
         status: EventStatus.DRAFT,
         addresses: addresses,
@@ -1126,11 +1128,17 @@ export const CreateEventScreen: React.FC = () => {
 
       // Reset UI state for dropdowns and locations
       setSelectedRoadType(null);
+      setValue('roadType', '', {shouldValidate: false});
       setSelectedDifficultyLevel(null);
+      setValue('difficultyLevel', '', {shouldValidate: false});
       setSelectedExperienceLevel(null);
+      setValue('experienceLevel', '', {shouldValidate: false});
       setSelectedMeetingPoint(null);
+      setValue('meetingPoint', '', {shouldValidate: false});
       setSelectedStartLocation(null);
+      setValue('startLocation', '', {shouldValidate: false});
       setSelectedFinishLocation(null);
+      setValue('finishLocation', '', {shouldValidate: false});
 
       // Reset selected users and groups since they depend on event type
       setSelectedUsers([]);
@@ -1188,11 +1196,7 @@ export const CreateEventScreen: React.FC = () => {
               style={{flex: 1}}
             />
             <Button
-              title={
-                loading
-                  ? t('screens.event.creating')
-                  : t('screens.event.create_event')
-              }
+              title={t('screens.event.create_event')}
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}

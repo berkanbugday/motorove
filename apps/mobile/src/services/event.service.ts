@@ -21,18 +21,27 @@ import {
   IEvent,
   IUpdateEvent,
   IEventFilter,
+  EventStatus,
 } from '@motorove/shared';
 
 // Hook for creating an event
 export const useCreateEvent = (onSuccess?: () => void) => {
   const {t} = useTranslation();
   const [createEventMutation, {loading, error}] = useMutation(CREATE_EVENT, {
-    onCompleted: () => {
-      showToast({
-        type: 'success',
-        text1: t('common.success'),
-        text2: t('screens.event.success_created_event'),
-      });
+    onCompleted: data => {
+      if (data?.createEvent?.status === EventStatus.DRAFT) {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.event.draft_saved'),
+        });
+      } else {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.event.event_created'),
+        });
+      }
 
       if (onSuccess) {
         onSuccess();
@@ -43,7 +52,7 @@ export const useCreateEvent = (onSuccess?: () => void) => {
       showToast({
         type: 'error',
         text1: t('common.error'),
-        text2: errorObj.message || t('screens.event.error_creating_event'),
+        text2: errorObj.message || t('screens.event.event_created_failed'),
       });
     },
   });
@@ -91,7 +100,6 @@ export const useCreateEvent = (onSuccess?: () => void) => {
         ...(input.price && {price: input.price}),
       };
 
-      console.log('formattedData', formattedData);
       const result = await createEventMutation({
         variables: {
           input: formattedData,
