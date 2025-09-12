@@ -5,7 +5,7 @@ import { SentryModule } from './sentry/sentry.module';
 import { StorageModule } from './storage/storage.module';
 import { ImageCensorFilterModule } from './image-censor-filter/image-censor-filter.module';
 import { ProfanityFilterModule } from './profanity-filter/profanity-filter.module';
-
+import { QueueModule } from './queue/queue.module';
 @Global()
 @Module({
   imports: [
@@ -14,6 +14,7 @@ import { ProfanityFilterModule } from './profanity-filter/profanity-filter.modul
     StorageModule,
     ImageCensorFilterModule,
     ProfanityFilterModule,
+    QueueModule,
   ],
   providers: [CustomLogger],
   exports: [
@@ -23,6 +24,7 @@ import { ProfanityFilterModule } from './profanity-filter/profanity-filter.modul
     StorageModule,
     ImageCensorFilterModule,
     ProfanityFilterModule,
+    QueueModule,
   ],
 })
 export class CoreModule {}

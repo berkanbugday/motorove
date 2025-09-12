@@ -9,20 +9,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
-import { NotificationsService } from '../notifications/notifications.service';
 import { GroupMembershipDto } from './dto/group-membership.dto';
 import { plainToClass } from 'class-transformer';
 import { StorageService } from '../core/storage/storage.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { QueueService } from '../core/queue/queue.service';
+import { GroupMembership } from './models/group-membership.model';
 
 @Injectable()
 export class GroupMembershipsService {
   private readonly logger = new Logger(GroupMembershipsService.name);
   constructor(
     private prisma: PrismaService,
-    private notificationsService: NotificationsService,
     private storageService: StorageService,
+    private queueService: QueueService,
   ) {}
 
   async groupJoinRequests(
@@ -276,9 +277,9 @@ export class GroupMembershipsService {
 
       if (updatedMembership.role === newRole) {
         // Send notification to the user
-        await this.notificationsService.create(
+        await this.queueService.addNotificationJob(
           {
-            userId,
+            userId: updatedMembership.userId,
             title: 'Membership status updated',
             body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
             type: NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE,
@@ -289,7 +290,7 @@ export class GroupMembershipsService {
               role: newRole,
             }),
           },
-          userId,
+          adminId,
         );
       }
 
@@ -316,7 +317,7 @@ export class GroupMembershipsService {
       }
 
       // Update the membership status
-      const updatedMembership = await this.prisma.groupMembership.update({
+      const updatedMembership = (await this.prisma.groupMembership.update({
         where: {
           id,
         },
@@ -328,7 +329,7 @@ export class GroupMembershipsService {
           },
           updatedAt: new Date(),
         },
-      });
+      })) as GroupMembership;
 
       // Send notification to the user
       // await this.notificationsService.create(

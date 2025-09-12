@@ -24,6 +24,10 @@ import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
         API_PREFIX: Joi.string().default('api'),
         SWAGGER_ENABLE: Joi.boolean().default(true),
         CORS_ORIGIN: Joi.string().default('*'),
+        // Redis configuration
+        REDIS_HOST: Joi.string().default('localhost'),
+        REDIS_PORT: Joi.number().default(6379),
+        REDIS_PASSWORD: Joi.string().allow('').optional(),
       }),
       validationOptions: {
         allowUnknown: true,
