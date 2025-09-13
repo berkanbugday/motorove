@@ -28,6 +28,11 @@ import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
         REDIS_HOST: Joi.string().default('localhost'),
         REDIS_PORT: Joi.number().default(6379),
         REDIS_PASSWORD: Joi.string().allow('').optional(),
+        // Weather API configuration
+        WEATHER_API_BASE_URL: Joi.string().default(
+          'https://api.tomorrow.io/v4/weather/realtime',
+        ),
+        TOMORROW_IO_API_KEY: Joi.string().required(),
       }),
       validationOptions: {
         allowUnknown: true,

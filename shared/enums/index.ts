@@ -22,3 +22,4 @@ export * from "./notification-permission.enum";
 export * from "./notification-channel.enum";
 export * from "./support-category.enum";
 export * from "./event-status.enum";
+export * from "./weather-condition.enum";

@@ -909,6 +909,7 @@ type Query {
   userProfile(id: String!): UserDto!
   userSetting: UserSettingDto!
   users(limit: Int, query: String, skip: Int): [UserDto!]!
+  weather: Weather
 }
 
 input RemoveMemberInput {
@@ -1160,6 +1161,47 @@ type UserSettingDto {
   autoAcceptFollowers: Boolean!
   notificationPermission: NotificationPermission!
   notificationPreferences: JSON
+}
+
+type Weather {
+  cityId: String!
+  cityName: String!
+  condition: WeatherCondition!
+  temperature: Float!
+}
+
+"""Weather conditions"""
+enum WeatherCondition {
+  CLEAR
+  CLOUDY
+  DRIZZLE
+  FLURRIES
+  FOG
+  FREEZING_DRIZZLE
+  FREEZING_RAIN
+  HAIL
+  HEAVY_FREEZING_RAIN
+  HEAVY_ICE_PELLETS
+  HEAVY_RAIN
+  HEAVY_SNOW
+  HURRICANE
+  ICE_PELLETS
+  LIGHT_FOG
+  LIGHT_FREEZING_RAIN
+  LIGHT_ICE_PELLETS
+  LIGHT_RAIN
+  LIGHT_SNOW
+  LIGHT_WIND
+  MOSTLY_CLEAR
+  MOSTLY_CLOUDY
+  PARTLY_CLOUDY
+  RAIN
+  SNOW
+  STRONG_WIND
+  THUNDERSTORM
+  TORNADO
+  UNKNOWN
+  WIND
 }
 
 type WorkingHourDto {

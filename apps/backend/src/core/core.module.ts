@@ -6,6 +6,7 @@ import { StorageModule } from './storage/storage.module';
 import { ImageCensorFilterModule } from './image-censor-filter/image-censor-filter.module';
 import { ProfanityFilterModule } from './profanity-filter/profanity-filter.module';
 import { QueueModule } from './queue/queue.module';
+import { WeatherModule } from './weather/weather.module';
 @Global()
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { QueueModule } from './queue/queue.module';
     ImageCensorFilterModule,
     ProfanityFilterModule,
     QueueModule,
+    WeatherModule,
   ],
   providers: [CustomLogger],
   exports: [
@@ -25,6 +27,7 @@ import { QueueModule } from './queue/queue.module';
     ImageCensorFilterModule,
     ProfanityFilterModule,
     QueueModule,
+    WeatherModule,
   ],
 })
 export class CoreModule {}
