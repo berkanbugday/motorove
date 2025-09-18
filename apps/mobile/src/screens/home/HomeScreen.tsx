@@ -636,7 +636,7 @@ export const HomeScreen = ({navigation}: Props) => {
                 },
               ]}>
               <WeatherWidget
-                title="Today's Weather"
+                title={t('components.weatherWidget.title')}
                 data={weatherData}
                 showDetails={false}
                 style={styles.weatherWidget}

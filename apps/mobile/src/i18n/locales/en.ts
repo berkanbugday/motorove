@@ -740,11 +740,7 @@ export default {
       profile: 'Profile',
     },
     weatherWidget: {
-      forecast: 'Weather Forecast',
-      temperature: 'Temperature',
-      humidity: 'Humidity',
-      wind: 'Wind',
-      precipitation: 'Precipitation',
+      title: "Today's Weather",
       conditions: {
         sunny: 'Sunny',
         cloudy: 'Cloudy',

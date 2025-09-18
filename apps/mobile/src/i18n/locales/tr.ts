@@ -737,11 +737,7 @@ export default {
       profile: 'Profil',
     },
     weatherWidget: {
-      forecast: 'Hava Durumu',
-      temperature: 'Sıcaklık',
-      humidity: 'Nem',
-      wind: 'Rüzgar',
-      precipitation: 'Yağış',
+      title: 'Bugünün Hava Durumu',
       conditions: {
         sunny: 'Güneşli',
         cloudy: 'Bulutlu',
