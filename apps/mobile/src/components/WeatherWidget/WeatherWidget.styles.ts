@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '600',
   },
   weatherInfoHeader: {
     flexDirection: 'row',

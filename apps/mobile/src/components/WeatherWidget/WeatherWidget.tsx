@@ -39,7 +39,7 @@ export interface WeatherWidgetProps {
 const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   data,
   onPress,
-  showDetails = true,
+  showDetails = false,
   style,
   textStyle,
   title,
