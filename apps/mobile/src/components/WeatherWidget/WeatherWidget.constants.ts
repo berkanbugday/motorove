@@ -1,5 +1,6 @@
 import {colors} from '@theme';
 import type {WeatherCondition} from './weather';
+import {i18n} from '@/i18n';
 /**
  * Weather condition background colors and text colors
  */
@@ -47,21 +48,21 @@ export const weatherColors: Record<
 export const getConditionText = (condition: WeatherCondition): string => {
   switch (condition) {
     case 'sunny':
-      return 'Sunny';
+      return i18n.t('components.weatherWidget.conditions.sunny');
     case 'cloudy':
-      return 'Cloudy';
+      return i18n.t('components.weatherWidget.conditions.cloudy');
     case 'partlyCloudy':
-      return 'Partly Cloudy';
+      return i18n.t('components.weatherWidget.conditions.partlyCloudy');
     case 'rainy':
-      return 'Rainy';
+      return i18n.t('components.weatherWidget.conditions.rainy');
     case 'stormy':
-      return 'Thunderstorms';
+      return i18n.t('components.weatherWidget.conditions.stormy');
     case 'snowy':
-      return 'Snowy';
+      return i18n.t('components.weatherWidget.conditions.snowy');
     case 'foggy':
-      return 'Foggy';
+      return i18n.t('components.weatherWidget.conditions.foggy');
     case 'windy':
-      return 'Windy';
+      return i18n.t('components.weatherWidget.conditions.windy');
     default:
       return '';
   }

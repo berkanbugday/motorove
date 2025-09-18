@@ -25,7 +25,6 @@ import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
 import {colors, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import type {WeatherData} from '@components/WeatherWidget/weather';
 import type {IconName} from '@components/Icon';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {TabParamList} from '@navigation/types/navigationTypes';
@@ -34,6 +33,7 @@ import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts/AuthContext';
 import {useGetCount} from '@services/notification.service';
+import {useGetWeather} from '@services/weather.service';
 import {useFocusEffect} from '@react-navigation/native';
 import {useLanguage} from '@contexts/LanguageContext';
 import {
@@ -161,12 +161,16 @@ export const HomeScreen = ({navigation}: Props) => {
     refetchPosts();
   });
 
+  // Get weather data from the service
+  const {weatherData, refetch: refetchWeather} = useGetWeather();
+
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       refetchCount();
       refetchPosts();
-    }, [refetchCount, refetchPosts]),
+      refetchWeather();
+    }, [refetchCount, refetchPosts, refetchWeather]),
   );
 
   // Track the scroll direction for animation
@@ -186,13 +190,6 @@ export const HomeScreen = ({navigation}: Props) => {
     outputRange: [0, 0, -15, -30],
     extrapolate: 'clamp',
   });
-
-  // Weather data for the widget
-  const weatherData: WeatherData = {
-    temperature: 25,
-    unit: 'C',
-    condition: 'sunny',
-  };
 
   // Update hidden state based on scroll position
   useEffect(() => {
@@ -227,10 +224,11 @@ export const HomeScreen = ({navigation}: Props) => {
       rotateRecommendedRoute();
       await refetchCount();
       await refetchPosts();
+      await refetchWeather();
     } finally {
       setRefreshing(false);
     }
-  }, [rotateRecommendedRoute, refetchCount, refetchPosts]);
+  }, [rotateRecommendedRoute, refetchCount, refetchPosts, refetchWeather]);
 
   // Set initial route
   useEffect(() => {
@@ -625,28 +623,34 @@ export const HomeScreen = ({navigation}: Props) => {
         />
 
         {/* Weather Widget with ghost effect when scrolling up */}
-        <View style={styles.bannerContainer}>
-          <Animated.View
-            style={[
-              styles.animatedBannerContainer,
-              {
-                opacity: bannerOpacity,
-                transform: [{translateY: bannerTranslateY}],
-                zIndex: isScrollingUp.current ? 2 : 1,
-              },
-            ]}>
-            <WeatherWidget
-              title="Today's Weather"
-              data={weatherData}
-              showDetails={false}
-              style={styles.weatherWidget}
-            />
-          </Animated.View>
-        </View>
+
+        {weatherData && (
+          <View style={styles.bannerContainer}>
+            <Animated.View
+              style={[
+                styles.animatedBannerContainer,
+                {
+                  opacity: bannerOpacity,
+                  transform: [{translateY: bannerTranslateY}],
+                  zIndex: isScrollingUp.current ? 2 : 1,
+                },
+              ]}>
+              <WeatherWidget
+                title="Today's Weather"
+                data={weatherData}
+                showDetails={false}
+                style={styles.weatherWidget}
+              />
+            </Animated.View>
+          </View>
+        )}
 
         <ScrollView
           style={styles.scrollContainer}
-          contentContainerStyle={styles.scrollContentContainer}
+          contentContainerStyle={[
+            styles.scrollContentContainer,
+            weatherData ? {paddingTop: 95} : {paddingTop: 0},
+          ]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl

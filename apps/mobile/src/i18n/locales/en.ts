@@ -187,6 +187,7 @@ export default {
       shared_posts: 'Shared Posts',
       no_posts_found: 'No posts found',
       no_likes_yet: 'No likes yet',
+      error_fetching_weather: 'Error fetching weather',
     },
 
     // Posts screens
@@ -744,6 +745,16 @@ export default {
       humidity: 'Humidity',
       wind: 'Wind',
       precipitation: 'Precipitation',
+      conditions: {
+        sunny: 'Sunny',
+        cloudy: 'Cloudy',
+        partlyCloudy: 'Partly Cloudy',
+        rainy: 'Rainy',
+        stormy: 'Thunderstorms',
+        snowy: 'Snowy',
+        foggy: 'Foggy',
+        windy: 'Windy',
+      },
     },
     dialog: {
       confirm: 'Confirm',

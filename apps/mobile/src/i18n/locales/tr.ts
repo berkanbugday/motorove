@@ -189,6 +189,7 @@ export default {
       shared_posts: 'Paylaşılan Gönderiler',
       no_posts_found: 'Gönderi bulunamadı',
       no_likes_yet: 'Henüz beğeni yok',
+      error_fetching_weather: 'Hava durumu bilgisi alınamadı',
     },
 
     // Posts screens
@@ -741,6 +742,16 @@ export default {
       humidity: 'Nem',
       wind: 'Rüzgar',
       precipitation: 'Yağış',
+      conditions: {
+        sunny: 'Güneşli',
+        cloudy: 'Bulutlu',
+        partlyCloudy: 'Parçalı Bulutlu',
+        rainy: 'Yağmurlu',
+        stormy: 'Fırtınalı',
+        snowy: 'Karlı',
+        foggy: 'Sisli',
+        windy: 'Rüzgarlı',
+      },
     },
     dialog: {
       confirm: 'Onayla',

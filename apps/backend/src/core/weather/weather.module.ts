@@ -4,18 +4,10 @@ import { WeatherResolver } from './weather.resolver';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '../config/config.module';
 import { AuthModule } from '../../auth/auth.module';
-import { BullModule } from '@nestjs/bull';
-import { WEATHER_CACHE_QUEUE } from './constants';
+import { CacheModule } from '../cache/cache.module';
 
 @Module({
-  imports: [
-    HttpModule,
-    AuthModule,
-    ConfigModule,
-    BullModule.registerQueue({
-      name: WEATHER_CACHE_QUEUE,
-    }),
-  ],
+  imports: [HttpModule, AuthModule, ConfigModule, CacheModule],
   providers: [WeatherResolver, WeatherService],
   exports: [WeatherService],
 })

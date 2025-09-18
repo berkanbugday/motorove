@@ -8,5 +8,4 @@ export interface WeatherData {
   condition: WeatherCondition;
   cityId: string;
   cityName: string;
-  updatedAt: Date;
 }
