@@ -3,8 +3,10 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useTranslation } from '../app/i18n';
 
 const Community: React.FC = () => {
+  const { t } = useTranslation();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -66,9 +68,9 @@ const Community: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <h2 className="section-title">Join a Thriving Community</h2>
+          <h2 className="section-title">{t('community.title')}</h2>
           <p className="text-neutral-grey text-lg">
-            Connect with thousands of passionate motorcycle enthusiasts who share your love for the ride.
+            {t('community.subtitle')}
           </p>
         </motion.div>
 
@@ -80,18 +82,13 @@ const Community: React.FC = () => {
               transition={{ duration: 0.7 }}
               className="space-y-6"
             >
-              <h3 className="text-2xl md:text-3xl font-bold">Build Your Riding Network</h3>
+              <h3 className="text-2xl md:text-3xl font-bold">{t('community.networkTitle')}</h3>
               <p className="text-neutral-grey">
-                Create your rider profile, connect with others who share your interests, and build a network of fellow motorcycle enthusiasts. Share tips, experiences, and advice with riders from around the world.
+                {t('community.networkDescription')}
               </p>
               
               <ul className="space-y-3">
-                {[
-                  "Join motorcycle groups based on brand, style, or location",
-                  "Follow riders with similar interests and bikes",
-                  "Create and share your custom routes with the community",
-                  "Participate in challenges and events"
-                ].map((item, index) => (
+                {(t('community.features', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <span className="bg-primary-main rounded-full p-1 mr-3 mt-1">
                       <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -109,7 +106,7 @@ const Community: React.FC = () => {
                     <div key={i} className="w-10 h-10 rounded-full border-2 border-white overflow-hidden">
                       <Image
                         src={`/assets/images/avatars/avatar-${i}.jpg`}
-                        alt={`Community member ${i}`}
+                        alt={`${t('community.altText.memberPrefix')} ${i}`}
                         width={40}
                         height={40}
                         className="w-full h-full object-cover"
@@ -120,7 +117,7 @@ const Community: React.FC = () => {
                     +2k
                   </div>
                 </div>
-                <span className="text-sm text-neutral-grey">Over 10,000 active riders</span>
+                <span className="text-sm text-neutral-grey">{t('community.activeRiders')}</span>
               </div>
             </motion.div>
           </div>
@@ -134,7 +131,7 @@ const Community: React.FC = () => {
             <div className="relative h-[400px] md:h-[500px]">
               <Image
                 src="/assets/images/community-screen.png"
-                alt="Motorove Community Screen"
+                alt={t('community.altText.communityScreen')}
                 fill
                 className="object-contain rounded-2xl shadow-lg"
               />
@@ -153,7 +150,7 @@ const Community: React.FC = () => {
           animate={inView ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          What Our Riders Say
+          {t('community.testimonials.title')}
         </motion.h3>
 
         <motion.div
@@ -185,7 +182,7 @@ const Community: React.FC = () => {
               </div>
               <p className="text-neutral-grey italic mb-4">"{testimonial.quote}"</p>
               <div className="flex items-center text-sm">
-                <span className="text-primary-main font-semibold">Rides: </span>
+                <span className="text-primary-main font-semibold">{t('community.testimonials.riderInfo.rides')} </span>
                 <span className="ml-1">{testimonial.bike}</span>
               </div>
             </motion.div>

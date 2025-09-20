@@ -4,8 +4,11 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "../app/i18n";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -54,25 +57,29 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-10">
-            <NavLink href="#features">Features</NavLink>
-            <NavLink href="#community">Community</NavLink>
-            <NavLink href="#routes">Routes</NavLink>
-            <NavLink href="#events">Events</NavLink>
+            <NavLink href="#features">{t('header.features')}</NavLink>
+            <NavLink href="#community">{t('header.community')}</NavLink>
+            <NavLink href="#routes">{t('header.routes')}</NavLink>
+            <NavLink href="#events">{t('header.events')}</NavLink>
           </nav>
 
-          {/* CTA Button */}
-          <motion.div 
-            className="hidden md:block"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link 
-              href="https://app.motorove.com" 
-              className="btn btn-primary bg-gradient-to-r from-primary-main to-primary-dark hover:from-primary-dark hover:to-primary-main transition-all duration-300"
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
+            {/* CTA Button */}
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Download App
-            </Link>
-          </motion.div>
+              <Link 
+                href="https://app.motorove.com" 
+                className="btn btn-primary bg-gradient-to-r from-primary-main to-primary-dark hover:from-primary-dark hover:to-primary-main transition-all duration-300"
+              >
+                {t('header.download')}
+              </Link>
+            </motion.div>
+          </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
@@ -134,20 +141,28 @@ const Header: React.FC = () => {
                 href="#features"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Features
+                {t('header.features')}
               </MobileNavLink>
               <MobileNavLink
                 href="#community"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Community
+                {t('header.community')}
               </MobileNavLink>
               <MobileNavLink href="#routes" onClick={() => setIsMenuOpen(false)}>
-                Routes
+                {t('header.routes')}
               </MobileNavLink>
               <MobileNavLink href="#events" onClick={() => setIsMenuOpen(false)}>
-                Events
+                {t('header.events')}
               </MobileNavLink>
+              {/* Language Switcher - Mobile */}
+              <div className="pt-2 pb-2">
+                <div className="flex justify-center">
+                  <LanguageSwitcher />
+                </div>
+              </div>
+
+              {/* Download Button - Mobile */}
               <div className="pt-2">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
@@ -158,7 +173,7 @@ const Header: React.FC = () => {
                     className="block w-full text-center bg-gradient-to-r from-primary-main to-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-all duration-300"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Download App
+                    {t('header.download')}
                   </Link>
                 </motion.div>
               </div>

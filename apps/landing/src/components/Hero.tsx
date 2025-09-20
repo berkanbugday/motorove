@@ -4,8 +4,11 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Trans } from "react-i18next";
+import { useTranslation } from "../app/i18n";
 
 const Hero: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <div className="bg-dark-gradient pt-24 pb-16 md:pt-32 md:pb-32 overflow-hidden relative">
       {/* Gradient overlay effects */}
@@ -28,7 +31,7 @@ const Hero: React.FC = () => {
               className="text-primary-main font-semibold tracking-wide inline-flex items-center"
             >
               <span className="w-8 h-[1px] bg-primary-main mr-3"></span>
-              THE ULTIMATE MOTORCYCLE APP
+              {t('hero.heading')}
             </motion.span>
 
             <motion.h1 
@@ -37,7 +40,10 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight"
             >
-              Connect With <span className="text-primary-main">Fellow Riders</span> on Motorove
+              <Trans
+                i18nKey="hero.title"
+                components={[<span key="0" className="text-primary-main" />]}
+              />
             </motion.h1>
 
             <motion.p 
@@ -46,9 +52,7 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="text-lg text-gray-400"
             >
-              Join a thriving community of motorcycle enthusiasts, share your
-              journeys, discover routes, and attend events. Your complete
-              motorcycle experience in one app.
+              {t('hero.subtitle')}
             </motion.p>
 
             <motion.div 
@@ -69,7 +73,7 @@ const Hero: React.FC = () => {
                   >
                     <path d="M16.5 3c-2.05 0-3.7 1.24-4.5 3-0.8-1.76-2.45-3-4.5-3C4.01 3 2 5.01 2 8.5c0 3.77 3.4 6.86 8.55 11.53L12 21.35l1.45-1.32C18.6 15.36 22 12.27 22 8.5 22 5.01 19.99 3 16.5 3z" />
                   </svg>
-                  App Store
+                  {t('hero.appStore')}
                 </Link>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -84,7 +88,7 @@ const Hero: React.FC = () => {
                   >
                     <path d="M5 3v18l9-9L5 3zm11 0L7 12l9 9 3-3-6-6 6-6-3-3z" />
                   </svg>
-                  Google Play
+                  {t('hero.googlePlay')}
                 </Link>
               </motion.div>
             </motion.div>
@@ -97,7 +101,7 @@ const Hero: React.FC = () => {
               className="pt-6 border-t border-white/10 mt-4"
             >
               <p className="text-gray-500 text-sm mb-2 mt-4">
-                Trusted by riders worldwide
+                {t('hero.socialProof.trusted')}
               </p>
               <div className="flex items-center space-x-4">
                 <div className="flex">
@@ -113,7 +117,7 @@ const Hero: React.FC = () => {
                   ))}
                 </div>
                 <span className="text-sm text-gray-400">
-                  4.8/5 from over 10,000+ riders
+                  {t('hero.socialProof.rating')}
                 </span>
               </div>
             </motion.div>
@@ -144,7 +148,7 @@ const Hero: React.FC = () => {
                   <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_25px_rgba(255,59,48,0.15)]">
                     <Image
                       src="/assets/images/app-screen-1.png"
-                      alt="Motorove App Home Screen"
+                      alt={t('hero.altText.screen1')}
                       width={280}
                       height={560}
                       className="rounded-3xl z-10 relative"
@@ -170,7 +174,7 @@ const Hero: React.FC = () => {
                   <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_25px_rgba(51,102,255,0.15)]">
                     <Image
                       src="/assets/images/app-screen-2.png"
-                      alt="Motorove App Map Screen"
+                      alt={t('hero.altText.screen2')}
                       width={280}
                       height={560}
                       className="rounded-3xl z-10 relative"

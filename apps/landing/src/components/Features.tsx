@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
+import { useTranslation } from "../app/i18n";
 
 interface FeatureProps {
   title: string;
@@ -52,6 +53,7 @@ const Feature: React.FC<FeatureProps> = ({
 };
 
 const Features: React.FC = () => {
+  const { t } = useTranslation();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -59,39 +61,33 @@ const Features: React.FC = () => {
 
   const features = [
     {
-      title: "Connect with Riders",
-      description:
-        "Build a network of like-minded motorcycle enthusiasts in your area and beyond.",
+      title: t('features.connectRiders.title'),
+      description: t('features.connectRiders.description'),
       icon: "users",
     },
     {
-      title: "Discover Routes",
-      description:
-        "Explore the best motorcycle routes with turn-by-turn navigation and rider reviews.",
+      title: t('features.discoverRoutes.title'),
+      description: t('features.discoverRoutes.description'),
       icon: "map",
     },
     {
-      title: "Join Events",
-      description:
-        "Find and participate in local rides, meetups, and motorcycle events.",
+      title: t('features.joinEvents.title'),
+      description: t('features.joinEvents.description'),
       icon: "calendar",
     },
     {
-      title: "Share Your Journey",
-      description:
-        "Post photos, videos, and stories from your rides to inspire the community.",
+      title: t('features.shareJourney.title'),
+      description: t('features.shareJourney.description'),
       icon: "camera",
     },
     {
-      title: "Find Repair Shops",
-      description:
-        "Locate nearby motorcycle services with ratings from fellow riders.",
+      title: t('features.findRepairShops.title'),
+      description: t('features.findRepairShops.description'),
       icon: "tools",
     },
     {
-      title: "Weather Alerts",
-      description:
-        "Get real-time weather updates tailored for motorcycle riding conditions.",
+      title: t('features.weatherAlerts.title'),
+      description: t('features.weatherAlerts.description'),
       icon: "weather",
     },
   ];
@@ -118,7 +114,7 @@ const Features: React.FC = () => {
             className="text-primary-main font-semibold tracking-wide inline-flex items-center justify-center mb-4"
           >
             <span className="w-8 h-[1px] bg-primary-main mr-3"></span>
-            FEATURES
+            {t('features.heading')}
             <span className="w-8 h-[1px] bg-primary-main ml-3"></span>
           </motion.span>
           
@@ -128,7 +124,7 @@ const Features: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white"
           >
-            Everything You Need for Your Motorcycle Journey
+            {t('features.title')}
           </motion.h2>
           
           <motion.p 
@@ -137,8 +133,7 @@ const Features: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-gray-400 text-lg"
           >
-            Motorove brings together all the tools and connections you need to
-            enhance your riding experience in one seamless app.
+            {t('features.subtitle')}
           </motion.p>
         </motion.div>
 

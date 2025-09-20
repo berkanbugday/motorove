@@ -1,0 +1,165 @@
+{
+  "header": {
+    "features": "Özellikler",
+    "community": "Topluluk",
+    "routes": "Rotalar",
+    "events": "Etkinlikler",
+    "download": "Uygulamayı İndir"
+  },
+  "hero": {
+    "heading": "NİHAİ MOTOSİKLET UYGULAMASI",
+    "title": "Motorove ile <0>Diğer Motorcularla</0> Bağlantı Kurun",
+    "subtitle": "Gelişen bir motosiklet tutkunları topluluğuna katılın, yolculuklarınızı paylaşın, rotaları keşfedin ve etkinliklere katılın. Eksiksiz motosiklet deneyiminiz tek bir uygulamada.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play",
+    "socialProof": {
+      "trusted": "Dünya çapındaki motorcular tarafından güvenilen",
+      "rating": "10.000+ motorcu tarafından 4.8/5 puan"
+    },
+    "altText": {
+      "screen1": "Motorove Uygulama Ana Ekranı",
+      "screen2": "Motorove Uygulama Harita Ekranı"
+    }
+  },
+  "features": {
+    "heading": "ÖZELLİKLER",
+    "title": "Motosiklet Yolculuğunuz İçin İhtiyacınız Olan Her Şey",
+    "subtitle": "Motorove, sürüş deneyiminizi geliştirmek için gereken tüm araçları ve bağlantıları tek bir uygulamada bir araya getirir.",
+    "connectRiders": {
+      "title": "Motorcularla Bağlantı Kurun",
+      "description": "Bölgenizde ve ötesinde aynı düşünceye sahip motosiklet tutkunlarıyla bir ağ oluşturun."
+    },
+    "discoverRoutes": {
+      "title": "Rotaları Keşfedin",
+      "description": "Adım adım navigasyon ve sürücü değerlendirmeleriyle en iyi motosiklet rotalarını keşfedin."
+    },
+    "joinEvents": {
+      "title": "Etkinliklere Katılın",
+      "description": "Yerel sürüşleri, buluşmaları ve motosiklet etkinliklerini bulun ve katılın."
+    },
+    "shareJourney": {
+      "title": "Yolculuğunuzu Paylaşın",
+      "description": "Topluluğa ilham vermek için sürüşlerinizden fotoğraflar, videolar ve hikayeler paylaşın."
+    },
+    "findRepairShops": {
+      "title": "Tamir Atölyeleri Bulun",
+      "description": "Diğer motorcuların değerlendirmeleriyle yakındaki motosiklet servislerini bulun."
+    },
+    "weatherAlerts": {
+      "title": "Hava Durumu Uyarıları",
+      "description": "Motosiklet sürüş koşullarına özel gerçek zamanlı hava durumu güncellemeleri alın."
+    }
+  },
+  "community": {
+    "title": "Gelişen Bir Topluluğa Katılın",
+    "subtitle": "Sürüş tutkunuzu paylaşan binlerce tutkulu motosikletçi ile bağlantı kurun.",
+    "networkTitle": "Sürüş Ağınızı Oluşturun",
+    "networkDescription": "Sürücü profilinizi oluşturun, ilgi alanlarınızı paylaşan diğer kişilerle bağlantı kurun ve motosiklet tutkunlarından oluşan bir ağ kurun. Dünyanın dört bir yanındaki motorcularla ip uçları, deneyimler ve tavsiyeler paylaşın.",
+    "features": [
+      "Marka, stil veya konuma göre motosiklet gruplarına katılın",
+      "Benzer ilgi alanlarına ve motosikletlere sahip sürücüleri takip edin",
+      "Özel rotalarınızı oluşturun ve toplulukla paylaşın",
+      "Yarışmalara ve etkinliklere katılın"
+    ],
+    "activeRiders": "10.000'den fazla aktif sürücü",
+    "testimonials": {
+      "title": "Sürücülerimiz Ne Diyor",
+      "riderInfo": {
+        "rides": "Motosiklet:"
+      }
+    },
+    "altText": {
+      "communityScreen": "Motorove Topluluk Ekranı",
+      "memberPrefix": "Topluluk üyesi"
+    }
+  },
+  "routes": {
+    "title": "Harika Rotalar Keşfedin",
+    "subtitle": "Deneyimli sürücüler tarafından düzenlenmiş en iyi motosiklet rotalarını bulun ve kendi favori yollarınızı paylaşın.",
+    "findRideTitle": "Mükemmel Sürüşünüzü Bulun",
+    "findRideDescription": "Manzaralı sahil yolları, zorlayıcı dağ geçitleri veya rahat kırsal geziler arıyor olun, Motorove tercihlerinize göre özelleştirilmiş rotalar keşfetmenize yardımcı olur.",
+    "features": [
+      "Adım adım navigasyonlu Etkileşimli Haritalar",
+      "Diğer sürücülerden Rota İncelemeler & Değerlendirmeler",
+      "Kendi favori rotalarınızı oluşturun ve paylaşın",
+      "Yol boyunca ilgi çekici noktalar"
+    ],
+    "featuredTitle": "Öne Çıkan Rotalar",
+    "difficulty": {
+      "easy": "Kolay",
+      "moderate": "Orta",
+      "hard": "Zor"
+    },
+    "altText": {
+      "mapScreen": "Motorove Harita Ekranı"
+    }
+  },
+  "events": {
+    "title": "Heyecan Verici Etkinliklere Katılın",
+    "subtitle": "Yerel sürüşleri, buluşmaları ve toplantıları bulun veya motosiklet tutkunlarıyla bağlantı kurmak için kendi etkinliklerinizi organize edin.",
+    "joinButton": "Etkinliğe Katıl",
+    "riders": "sürücü",
+    "createEvent": {
+      "title": "Kendi Etkinliğinizi Oluşturun",
+      "description": "Grup sürüşü veya motosiklet buluşması mı planlıyorsunuz? Etkinliğinizi Motorove topluluğu içinde oluşturun ve tanıtın.",
+      "features": [
+        "Konum, rota ve ayrıntılarla kolay etkinlik kurulumu",
+        "Arkadaşlarınızı davet edin veya tüm topluluk üyelerine açık yapın",
+        "Katılım teyitlerini takip edin ve katılımcılarla iletişim kurun",
+        "Etkinlikten sonra fotoğrafları ve hikayeleri paylaşın"
+      ],
+      "getStarted": "Başlayın"
+    },
+    "altText": {
+      "createEventScreen": "Etkinlik Oluşturma Ekranı"
+    }
+  },
+  "download": {
+    "title": "Motorove Topluluğuna Katılmaya Hazır mısınız?",
+    "subtitle": "Uygulamayı bugün indirin ve binlerce motosiklet tutkunu ile bağlantı kurun. Bir sonraki maceranız sizi bekliyor!",
+    "appStore": "App Store",
+    "googlePlay": "Google Play",
+    "features": {
+      "security": {
+        "title": "Güvenli ve Özel",
+        "description": "Verileriniz korunur"
+      },
+      "free": {
+        "title": "Ücretsiz İndirme",
+        "description": "Temel özellikler ücretsiz"
+      }
+    },
+    "qrCode": "İndirmek için taratın",
+    "altText": {
+      "appScreen": "Motorove Uygulama Ekranı",
+      "qrCode": "Uygulama İndirme QR Kodu"
+    }
+  },
+  "footer": {
+    "description": "Motorcuları birbirine bağlayan, rotaları keşfetmeyi sağlayan ve etkinliklere katılmayı kolaylaştıran nihai motosiklet uygulaması.",
+    "quickLinks": "Hızlı Bağlantılar",
+    "resources": "Kaynaklar",
+    "downloadApp": "Uygulamayı İndir",
+    "links": {
+      "features": "Özellikler",
+      "community": "Topluluk",
+      "routes": "Rotalar",
+      "events": "Etkinlikler",
+      "blog": "Blog",
+      "help": "Yardım Merkezi",
+      "safety": "Sürüş Güvenliği",
+      "faq": "SSS",
+      "contact": "Bize Ulaşın"
+    },
+    "legal": {
+      "terms": "Kullanım Koşulları",
+      "privacy": "Gizlilik Politikası",
+      "cookies": "Çerez Politikası"
+    },
+    "copyright": "© {{year}} Motorove. Tüm hakları saklıdır."
+  },
+  "language": {
+    "en": "İngilizce",
+    "tr": "Türkçe"
+  }
+}

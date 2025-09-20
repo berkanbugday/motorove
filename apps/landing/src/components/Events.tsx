@@ -3,8 +3,10 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useTranslation } from '../app/i18n';
 
 const Events: React.FC = () => {
+  const { t } = useTranslation();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -56,9 +58,9 @@ const Events: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <h2 className="section-title">Join Exciting Events</h2>
+          <h2 className="section-title">{t('events.title')}</h2>
           <p className="text-neutral-grey text-lg">
-            Find local rides, meetups, and gatherings or organize your own events to connect with fellow motorcycle enthusiasts.
+            {t('events.subtitle')}
           </p>
         </motion.div>
 
@@ -97,11 +99,11 @@ const Events: React.FC = () => {
                     <span className="text-sm">{event.organizer}</span>
                   </div>
                   <div className="text-xs bg-primary-light bg-opacity-10 text-primary-main px-2 py-1 rounded-full">
-                    {event.participants}/{event.maxParticipants} riders
+                    {event.participants}/{event.maxParticipants} {t('events.riders')}
                   </div>
                 </div>
                 <button className="w-full py-2 bg-primary-main text-white rounded-lg hover:bg-primary-dark transition-colors">
-                  Join Event
+                  {t('events.joinButton')}
                 </button>
               </div>
             </motion.div>
@@ -116,17 +118,12 @@ const Events: React.FC = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">Create Your Own Event</h3>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">{t('events.createEvent.title')}</h3>
               <p className="mb-6">
-                Planning a group ride or motorcycle meetup? Create and promote your event within the Motorove community.
+                {t('events.createEvent.description')}
               </p>
               <ul className="space-y-3 mb-6">
-                {[
-                  "Easy event setup with location, route, and details",
-                  "Invite friends or open to all community members",
-                  "Track RSVPs and communicate with participants",
-                  "Share photos and stories after the event"
-                ].map((item, index) => (
+                {(t('events.createEvent.features', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -136,14 +133,14 @@ const Events: React.FC = () => {
                 ))}
               </ul>
               <button className="bg-white text-primary-main px-6 py-3 rounded-lg font-semibold hover:bg-neutral-100 transition-colors">
-                Get Started
+                {t('events.createEvent.getStarted')}
               </button>
             </div>
             <div className="relative h-[300px] hidden md:block">
               <div className="absolute top-0 right-0">
                 <Image
                   src="/assets/images/create-event.png"
-                  alt="Create Event Screen"
+                  alt={t('events.altText.createEventScreen')}
                   width={250}
                   height={300}
                   className="rounded-lg shadow-lg"

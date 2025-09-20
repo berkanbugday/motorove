@@ -3,8 +3,10 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useTranslation } from '../app/i18n';
 
 const Routes: React.FC = () => {
+  const { t } = useTranslation();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -48,9 +50,9 @@ const Routes: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <h2 className="section-title">Discover Amazing Routes</h2>
+          <h2 className="section-title">{t('routes.title')}</h2>
           <p className="text-neutral-grey text-lg">
-            Find the best motorcycle routes curated by experienced riders and share your own favorite paths.
+            {t('routes.subtitle')}
           </p>
         </motion.div>
 
@@ -64,7 +66,7 @@ const Routes: React.FC = () => {
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
               <Image
                 src="/assets/images/map-screen.png"
-                alt="Motorove Map Screen"
+                alt={t('routes.altText.mapScreen')}
                 width={300}
                 height={600}
                 className="rounded-2xl shadow-lg"
@@ -80,19 +82,13 @@ const Routes: React.FC = () => {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="space-y-6"
           >
-            <h3 className="text-2xl md:text-3xl font-bold">Find Your Perfect Ride</h3>
+            <h3 className="text-2xl md:text-3xl font-bold">{t('routes.findRideTitle')}</h3>
             <p className="text-neutral-grey">
-              Whether you're looking for scenic coastal roads, challenging mountain passes, or relaxed countryside cruises, 
-              Motorove helps you discover routes tailored to your preferences.
+              {t('routes.findRideDescription')}
             </p>
             
             <ul className="space-y-4">
-              {[
-                "Interactive Maps with turn-by-turn navigation",
-                "Route Reviews & Ratings from other riders",
-                "Create & Share your own favorite routes",
-                "Points of Interest along the way"
-              ].map((item, index) => (
+              {(t('routes.features', { returnObjects: true }) as string[]).map((item: string, index: number) => (
                 <li key={index} className="flex items-start">
                   <span className="bg-primary-main rounded-full p-1 mr-3 mt-1">
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -107,7 +103,7 @@ const Routes: React.FC = () => {
         </div>
 
         {/* Featured Routes */}
-        <h3 className="text-2xl md:text-3xl font-bold text-center mb-12">Featured Routes</h3>
+        <h3 className="text-2xl md:text-3xl font-bold text-center mb-12">{t('routes.featuredTitle')}</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {recommendedRoutes.map((route, index) => (
@@ -131,7 +127,7 @@ const Routes: React.FC = () => {
               </div>
               <div className="p-4 flex justify-between items-center">
                 <span className="bg-secondary-main text-neutral-black text-sm px-3 py-1 rounded-full">
-                  {route.difficulty}
+                  {t(`routes.difficulty.${route.difficulty.toLowerCase()}`)}
                 </span>
                 <div className="flex items-center text-sm">
                   <svg className="w-5 h-5 text-red-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
