@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --foreground-rgb: 255, 255, 255; /* White text for dark theme */
+  --background-rgb: 18, 18, 18; /* Dark background */
+  --primary-color: #FF3B30;
+  --primary-light: #FF6B60;
+  --primary-dark: #D32F2F;
+  --accent-blue: #3366FF;
+  --accent-purple: #9966FF;
+  --accent-teal: #33CCCC;
+  --dark-100: #333333;
+  --dark-300: #1E1E1E;
+  --dark-500: #121212;
+  --dark-700: #080808;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-rgb));
+  background-image: linear-gradient(to bottom, #121212, #181818);
+  min-height: 100vh;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold;
+  }
+  
+  h1 {
+    @apply text-5xl leading-tight;
+  }
+  
+  h2 {
+    @apply text-4xl leading-tight;
+  }
+  
+  h3 {
+    @apply text-3xl;
+  }
+  
+  h4 {
+    @apply text-2xl;
+  }
+  
+  h5 {
+    @apply text-xl;
+  }
+  
+  h6 {
+    @apply text-lg;
+  }
+
+  p {
+    @apply text-md leading-relaxed;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 inline-flex items-center justify-center;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-main text-neutral-white hover:bg-primary-dark;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary-main text-neutral-black hover:bg-secondary-dark;
+  }
+  
+  .btn-outline {
+    @apply border border-primary-main text-primary-main hover:bg-primary-main hover:text-neutral-white;
+  }
+
+  .container-section {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24;
+  }
+  
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold mb-6 md:mb-12 text-center;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

@@ -58,3 +58,6 @@ pnpm-debug.log*
 **/android/app/build
 *.keystore
 !debug.keystore
+
+# Next.js
+.next
