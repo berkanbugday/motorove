@@ -179,8 +179,10 @@ export const GroupCard: React.FC<GroupCardProps> = ({
 
   const renderMemberCount = () => {
     const memberText = membersCapacity
-      ? `${currentMembers} / ${membersCapacity} ${t('screens.group.member')}`
-      : `${currentMembers} ${t('screens.group.member')}`;
+      ? `${currentMembers} ${t(
+          'components.groupCard.member',
+        )} / ${membersCapacity} ${t('components.groupCard.members_capacity')} `
+      : `${currentMembers} ${t('components.groupCard.member')}`;
 
     return (
       <View style={styles.memberContainer}>

@@ -1071,7 +1071,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         infoTextStyle={styles.eventBannerInfoText}
         location={item.location}
         participantCount={item.participantCount}
-        membersCapacity={item.membersCapacity}
+        maxParticipants={item.membersCapacity}
         onChatPress={() =>
           loggingService.info(`Chat pressed for event: ${item.title}`)
         }
@@ -1181,11 +1181,11 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           <View style={styles.infoRow}>
             <Icon name="users-filled" size={18} />
             <Typography style={styles.infoText}>
-              {group?.membersCount || 0}
+              {group?.membersCount || 0} {t('screens.group.member')}
               {group?.membersCapacity
                 ? ` / ${group?.membersCapacity}`
                 : ''}{' '}
-              {t('screens.group.member')}
+              {t('screens.group.members_capacity')}
             </Typography>
             <View style={styles.dot} />
             <View style={styles.lockContainer}>

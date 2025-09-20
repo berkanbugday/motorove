@@ -34,13 +34,14 @@ import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts/AuthContext';
 import {useGetCount} from '@services/notification.service';
 import {useGetWeather} from '@services/weather.service';
+import {useGetEvents} from '@services/event.service';
 import {useFocusEffect} from '@react-navigation/native';
 import {useLanguage} from '@contexts/LanguageContext';
 import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, IUser, IImage} from '@motorove/shared';
+import {IPost, IUser, IImage, IEvent} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -89,42 +90,10 @@ interface EventItem {
   title: string;
   organizer: string;
   participantCount: number;
-  membersCapacity: number;
+  maxParticipants: number;
 }
 
-// Group events data
-const upcomingEvents: EventItem[] = [
-  {
-    id: '1',
-    day: '15',
-    month: 'JUN',
-    time: '10:00',
-    title: 'Sunday Breakfast Ride',
-    organizer: 'Coastal Riders Club',
-    participantCount: 10,
-    membersCapacity: 34,
-  },
-  {
-    id: '2',
-    day: '22',
-    month: 'JUN',
-    time: '09:30',
-    title: 'Mountain Pass Challenge',
-    organizer: 'Adventure Motorcycles',
-    participantCount: 16,
-    membersCapacity: 40,
-  },
-  {
-    id: '3',
-    day: '28',
-    month: 'JUN',
-    time: '14:00',
-    title: 'Evening City Tour',
-    organizer: 'Urban Moto Group',
-    participantCount: 8,
-    membersCapacity: 25,
-  },
-];
+// Group events data - now replaced with real API data
 
 // Change from MainStackParamList to accepting both TabParamList and MainStackParamList
 type Props = NativeStackScreenProps<TabParamList, 'HomeTab'>;
@@ -164,13 +133,21 @@ export const HomeScreen = ({navigation}: Props) => {
   // Get weather data from the service
   const {weatherData, refetch: refetchWeather} = useGetWeather();
 
+  // Get events data with limit of 3
+  const {
+    events,
+    loading: eventsLoading,
+    refetch: refetchEvents,
+  } = useGetEvents(3);
+
   // Refetch notification count when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       refetchCount();
       refetchPosts();
       refetchWeather();
-    }, [refetchCount, refetchPosts, refetchWeather]),
+      refetchEvents();
+    }, [refetchCount, refetchPosts, refetchWeather, refetchEvents]),
   );
 
   // Track the scroll direction for animation
@@ -225,15 +202,50 @@ export const HomeScreen = ({navigation}: Props) => {
       await refetchCount();
       await refetchPosts();
       await refetchWeather();
+      await refetchEvents();
     } finally {
       setRefreshing(false);
     }
-  }, [rotateRecommendedRoute, refetchCount, refetchPosts, refetchWeather]);
+  }, [
+    rotateRecommendedRoute,
+    refetchCount,
+    refetchPosts,
+    refetchWeather,
+    refetchEvents,
+  ]);
 
   // Set initial route
   useEffect(() => {
     setCurrentRoute(recommendedRoutes[currentRouteIndex]);
   }, [currentRouteIndex]);
+
+  // Transform IEvent to EventItem format for GroupEventBanner
+  const transformEventToEventItem = useCallback((event: IEvent): EventItem => {
+    const startDate = new Date(event.startDateTime);
+    const day = startDate.getDate().toString().padStart(2, '0');
+    const month = startDate
+      .toLocaleDateString(language, {month: 'short'})
+      .toUpperCase();
+    const time = startDate.toLocaleTimeString(language, {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    return {
+      id: event.id,
+      day,
+      month,
+      time,
+      title: event.title,
+      organizer: `${event.createdBy.firstName} ${event.createdBy.lastName}`,
+      participantCount: event.participantsCount || 0,
+      maxParticipants: event.maxParticipants || 0,
+    };
+  }, []);
+
+  // Transform events data to EventItem format
+  const upcomingEvents: EventItem[] = events.map(transformEventToEventItem);
 
   // Handle FlatList scroll event to update the current page
   const handleEventScroll = useCallback((event: any) => {
@@ -284,7 +296,7 @@ export const HomeScreen = ({navigation}: Props) => {
         title={item.title}
         organizer={item.organizer}
         participantCount={item.participantCount}
-        membersCapacity={item.membersCapacity}
+        maxParticipants={item.maxParticipants}
         onPress={() =>
           loggingService.info(`Event banner pressed: ${item.title}`)
         }
@@ -689,42 +701,56 @@ export const HomeScreen = ({navigation}: Props) => {
             </View>
 
             {/* Upcoming Group Events Section */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeaderContainer}>
-                <Subtitle weight="bold" style={styles.sectionTitle}>
-                  {t('screens.home.upcoming_events')}
-                </Subtitle>
-                <Button
-                  variant="text"
-                  size="small"
-                  onPress={() => loggingService.info('View all')}
-                  title={t('common.view_all')}
-                />
+            {(upcomingEvents.length > 0 || eventsLoading) && (
+              <View style={styles.sectionContainer}>
+                <View style={styles.sectionHeaderContainer}>
+                  <Subtitle weight="bold" style={styles.sectionTitle}>
+                    {t('screens.home.upcoming_events')}
+                  </Subtitle>
+                  <Button
+                    variant="text"
+                    size="small"
+                    onPress={() => navigateToScreen(navigation, 'Events')}
+                    title={t('common.view_all')}
+                  />
+                </View>
+                {eventsLoading ? (
+                  <View style={styles.skeletonListContainer}>
+                    <SkeletonGroup preset="post" showImage={false} lines={2} />
+                  </View>
+                ) : (
+                  <>
+                    <FlatList
+                      ref={eventsListRef}
+                      data={upcomingEvents}
+                      renderItem={renderEventBanner}
+                      keyExtractor={item => item.id}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      snapToInterval={
+                        Dimensions.get('window').width - spacing.xl
+                      }
+                      decelerationRate="fast"
+                      onScroll={handleEventScroll}
+                      onScrollToIndexFailed={handleScrollToIndexFailed}
+                      nestedScrollEnabled={true}
+                    />
+                    {upcomingEvents.length > 1 && (
+                      <PageIndicator
+                        totalPages={upcomingEvents.length}
+                        currentPage={currentEventIndex}
+                        onPageChange={handleEventPageChange}
+                        containerStyle={styles.pageIndicator}
+                        type="pill"
+                        indicatorSize={8}
+                        activeIndicatorSize={10}
+                        spacing={8}
+                      />
+                    )}
+                  </>
+                )}
               </View>
-              <FlatList
-                ref={eventsListRef}
-                data={upcomingEvents}
-                renderItem={renderEventBanner}
-                keyExtractor={item => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                snapToInterval={Dimensions.get('window').width - spacing.xl}
-                decelerationRate="fast"
-                onScroll={handleEventScroll}
-                onScrollToIndexFailed={handleScrollToIndexFailed}
-                nestedScrollEnabled={true}
-              />
-              <PageIndicator
-                totalPages={upcomingEvents.length}
-                currentPage={currentEventIndex}
-                onPageChange={handleEventPageChange}
-                containerStyle={styles.pageIndicator}
-                type="pill"
-                indicatorSize={8}
-                activeIndicatorSize={10}
-                spacing={8}
-              />
-            </View>
+            )}
 
             {/* Posts Section with FlatList */}
             <View style={[styles.sectionContainer]}>

@@ -316,7 +316,6 @@ export default {
       invite_users: 'Invite Users',
       invite_groups: 'Invite Groups',
       is_private: 'Private Event',
-      event_created: 'Event created successfully',
       event_updated: 'Event updated successfully',
       event_deleted: 'Event deleted successfully',
       cancel_event: 'Cancel Event',
@@ -802,6 +801,15 @@ export default {
       edit_your_comment: 'Edit your comment...',
       editing_comment: 'Editing comment',
       replying_to: 'Replying to',
+    },
+    groupEventBanner: {
+      chat: 'Chat',
+      participant: 'participant',
+      maxParticipants: 'participant limit',
+    },
+    groupCard: {
+      member: 'member',
+      members_capacity: 'members capacity',
     },
   },
 

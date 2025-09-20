@@ -318,7 +318,6 @@ export default {
       invite_users: 'Kullanıcıları Davet Et',
       invite_groups: 'Grupları Davet Et',
       is_private: 'Özel Etkinlik',
-      event_created: 'Etkinlik başarıyla oluşturuldu',
       event_updated: 'Etkinlik başarıyla güncellendi',
       event_deleted: 'Etkinlik başarıyla silindi',
       cancel_event: 'Etkinliği İptal Et',
@@ -799,6 +798,15 @@ export default {
       edit_your_comment: 'Yorumu düzenle...',
       editing_comment: 'Yorum düzenleniyor',
       replying_to: 'Yanıt veriliyor',
+    },
+    groupEventBanner: {
+      chat: 'Sohbet',
+      participant: 'katılımcı',
+      maxParticipants: 'katılımcı limiti',
+    },
+    groupCard: {
+      member: 'üye',
+      members_capacity: 'üye kapasitesi',
     },
   },
 

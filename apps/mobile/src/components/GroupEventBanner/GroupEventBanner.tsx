@@ -5,6 +5,7 @@ import {Icon} from '../Icon';
 import {Body, BodySmall, Caption, Title} from '../Typography';
 import {colors} from '@theme';
 import {Button} from '../Button';
+import {useTranslation} from '@hooks/useTranslation';
 export interface GroupEventBannerProps {
   /**
    * The date of the event (e.g., "15")
@@ -47,9 +48,9 @@ export interface GroupEventBannerProps {
   participantCount: number;
 
   /**
-   * The total number of members in the group/club
+   * The total number of participants allowed
    */
-  membersCapacity?: number;
+  maxParticipants?: number;
 
   /**
    * Badge text to display on the banner (e.g., "UPCOMING", "CANCELLED")
@@ -115,7 +116,7 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
   organizer,
   location,
   participantCount,
-  membersCapacity,
+  maxParticipants,
   badgeText,
   onChatPress,
   style,
@@ -126,6 +127,27 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
   badgeStyle,
   badgeTextStyle,
 }) => {
+  const {t} = useTranslation();
+
+  const renderParticipantCount = () => {
+    const participantCountText = maxParticipants
+      ? `${participantCount} ${t(
+          'components.groupEventBanner.participant',
+        )} / ${maxParticipants} ${t(
+          'components.groupEventBanner.maxParticipants',
+        )}`
+      : `${participantCount} ${t('components.groupEventBanner.participant')}`;
+
+    return (
+      <View style={styles.participantsContainer}>
+        <Icon name="users-filled" size={14} />
+        <Caption color={colors.neutral.grey} style={styles.participantsText}>
+          {participantCountText}
+        </Caption>
+      </View>
+    );
+  };
+
   return (
     <View style={[styles.container, style]}>
       {badgeText && (
@@ -173,12 +195,7 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
             </Caption>
           </View>
         )}
-        <View style={styles.participantsContainer}>
-          <Icon name="users-filled" size={14} />
-          <Caption color={colors.neutral.grey} style={styles.participantsText}>
-            {participantCount} / {membersCapacity} members
-          </Caption>
-        </View>
+        {renderParticipantCount()}
       </View>
 
       {/* Chat Button */}
@@ -191,7 +208,7 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
             shape="round"
             style={styles.chatButton}
             disabled={!onChatPress}
-            title="Chat"
+            title={t('components.groupEventBanner.chat')}
             onPress={onChatPress}
           />
         </View>
