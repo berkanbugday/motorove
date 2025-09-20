@@ -78,13 +78,13 @@ export const MenuScreen = () => {
         },
         {
           icon: (
-            <Icon name="save-filled" size={18} color={colors.neutral.black} />
+            <Icon name="pen-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.menu.favorites'),
+          title: t('screens.menu.posts'),
           onPress: () => {
-            navigation.navigate('Favorites');
+            navigation.navigate('Posts');
           },
-          showBadge: false, // Set to true when you have unread notifications
+          showBadge: false,
           showRightIcon: true,
         },
         {

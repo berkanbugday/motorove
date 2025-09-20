@@ -8,7 +8,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../core/storage/storage.service';
 import { CreateEventInput } from './dto/create-event.input';
 import { UpdateEventInput } from './dto/update-event.input';
-import { FilterEventInput } from './dto/filter-event.input';
 import { EventParticipantStatus } from '../enums/models/event-participant-status.enum';
 import { RoadType } from '../enums/models/road-type.enum';
 import { DifficultyLevel } from '../enums/models/difficulty-level.enum';
@@ -16,6 +15,7 @@ import { ExperienceLevel } from '../enums/models/experience-level.enum';
 import { EventDto } from './dto/event.dto';
 import { Event } from './models/event.model';
 import { plainToClass } from 'class-transformer';
+import { EventStatus } from '../enums/models/event-status.enum';
 
 @Injectable()
 export class EventsService {
@@ -28,12 +28,16 @@ export class EventsService {
   async findAll(
     limit?: number,
     skip?: number,
-    filters?: FilterEventInput,
     currentUserId?: string,
     authToken?: string,
+    status?: EventStatus,
   ): Promise<EventDto[]> {
     try {
-      const where = this.buildFilterQuery(filters);
+      const where: any = { isActive: true, status };
+
+      if (status === EventStatus.DRAFT) {
+        where.createdById = currentUserId;
+      }
 
       const events = await this.prisma.event.findMany({
         where,
@@ -551,76 +555,5 @@ export class EventsService {
       }
     }
     return 'image/jpeg'; // Default
-  }
-
-  // Helper method to build the filter query
-  private buildFilterQuery(filters?: FilterEventInput) {
-    if (!filters) return { isActive: true };
-
-    const {
-      eventType,
-      startDateFrom,
-      startDateTo,
-      query,
-      difficultyLevel,
-      experienceLevel,
-      roadType,
-      groupId,
-      createdById,
-      isPrivate,
-    } = filters;
-
-    const where: any = { isActive: true };
-
-    if (eventType) {
-      where.eventType = eventType;
-    }
-
-    if (startDateFrom || startDateTo) {
-      where.startDateTime = {};
-      if (startDateFrom) {
-        where.startDateTime.gte = startDateFrom;
-      }
-      if (startDateTo) {
-        where.startDateTime.lte = startDateTo;
-      }
-    }
-
-    if (query) {
-      where.OR = [
-        { title: { contains: query, mode: 'insensitive' } },
-        { description: { contains: query, mode: 'insensitive' } },
-      ];
-    }
-
-    if (difficultyLevel) {
-      where.difficultyLevel = difficultyLevel;
-    }
-
-    if (experienceLevel) {
-      where.experienceLevel = experienceLevel;
-    }
-
-    if (roadType) {
-      where.roadType = roadType;
-    }
-
-    if (groupId) {
-      where.invitedGroups = {
-        some: {
-          id: groupId,
-        },
-      };
-    }
-
-    if (createdById) {
-      where.createdById = createdById;
-    }
-
-    if (isPrivate !== undefined) {
-      where.isPrivate = isPrivate;
-    }
-
-    return where;
   }
 }

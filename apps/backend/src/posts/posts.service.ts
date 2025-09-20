@@ -37,6 +37,7 @@ export class PostsService {
   async findAll(
     groupId?: string,
     createdById?: string,
+    savedById?: string,
     limit?: number,
     skip?: number,
     currentUserId?: string,
@@ -47,6 +48,7 @@ export class PostsService {
         where: {
           ...(groupId && { groupId }),
           ...(createdById && { createdById }),
+          ...(savedById && { saves: { some: { userId: savedById } } }),
           isActive: true,
         },
         include: {

@@ -57,6 +57,8 @@ export type MainStackParamList = {
   NotificationSetting: undefined;
   FollowRequest: undefined;
   Support: undefined;
+  Posts: undefined;
+  Events: undefined;
 };
 
 export type MainScreenNavigationProp<T extends keyof MainStackParamList> =

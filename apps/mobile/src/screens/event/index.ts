@@ -1,1 +1,2 @@
-export {default as CreateEventScreen} from './CreateEventScreen';
+export {CreateEventScreen} from './CreateEventScreen';
+export {EventScreen} from './EventScreen';

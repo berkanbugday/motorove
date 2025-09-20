@@ -37,10 +37,17 @@ export const POST_FRAGMENT = gql`
 `;
 
 export const GET_POSTS = gql`
-  query GetPosts($groupId: ID, $createdById: ID, $limit: Int, $skip: Int) {
+  query GetPosts(
+    $groupId: ID
+    $createdById: ID
+    $savedById: ID
+    $limit: Int
+    $skip: Int
+  ) {
     posts(
       groupId: $groupId
       createdById: $createdById
+      savedById: $savedById
       limit: $limit
       skip: $skip
     ) {

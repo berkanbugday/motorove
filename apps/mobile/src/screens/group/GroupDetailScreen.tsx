@@ -27,7 +27,7 @@ import {
   FeedCard,
   BottomSheet,
   BottomSheetRef,
-  GroupEventBanner,
+  EventBanner,
   PageIndicator,
   showToast,
   Dropdown,
@@ -1061,7 +1061,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
   // Render event banner item
   const renderEventBanner = useCallback(
     ({item}: {item: EventItem}) => (
-      <GroupEventBanner
+      <EventBanner
         day={item.day}
         month={item.month}
         time={item.time}

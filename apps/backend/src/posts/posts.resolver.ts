@@ -36,6 +36,8 @@ export class PostsResolver {
     @Args('groupId', { type: () => ID, nullable: true }) groupId?: string,
     @Args('createdById', { type: () => ID, nullable: true })
     createdById?: string,
+    @Args('savedById', { type: () => ID, nullable: true })
+    savedById?: string,
   ): Promise<PostDto[]> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
@@ -44,6 +46,7 @@ export class PostsResolver {
     return await this.postsService.findAll(
       groupId,
       createdById,
+      savedById,
       limit,
       skip,
       userId,

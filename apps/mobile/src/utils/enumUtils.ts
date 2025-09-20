@@ -71,6 +71,13 @@ export class EnumUtils {
     return privacyItem?.label || privacy;
   }
 
+  static convertEventType(eventType: EventType): string {
+    const eventTypeItem = this.getEventTypes().find(
+      t => t.value.toLowerCase() === eventType.toLowerCase(),
+    );
+    return eventTypeItem?.label || eventType;
+  }
+
   static getGroupMemberRoles(): DropdownItem[] {
     return this.getDropdownOptions(GroupMemberRole, 'enums.groupMemberRole');
   }

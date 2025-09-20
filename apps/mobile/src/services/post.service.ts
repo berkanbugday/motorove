@@ -174,6 +174,7 @@ export const useGetPost = (id: string) => {
 export const useGetPosts = (
   groupId?: string,
   createdById?: string,
+  savedById?: string,
   limit = 20,
   skip = 0,
 ) => {
@@ -189,6 +190,7 @@ export const useGetPosts = (
     variables: {
       ...(groupId && {groupId}),
       ...(createdById && {createdById}),
+      ...(savedById && {savedById}),
       limit,
       skip,
     },

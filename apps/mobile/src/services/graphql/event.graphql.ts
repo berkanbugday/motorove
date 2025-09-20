@@ -99,18 +99,8 @@ export const INVITE_USERS_TO_EVENT = gql`
 
 // Get events query
 export const GET_EVENTS = gql`
-  query GetEvents($limit: Int, $skip: Int, $filters: FilterEventInput) {
-    events(limit: $limit, skip: $skip, filters: $filters) {
-      ...EventFragment
-    }
-  }
-  ${EVENT_FRAGMENT}
-`;
-
-// Get user events query
-export const GET_MY_EVENTS = gql`
-  query GetMyEvents($limit: Int, $skip: Int, $filters: FilterEventInput) {
-    myEvents(limit: $limit, skip: $skip, filters: $filters) {
+  query GetEvents($limit: Int, $skip: Int, $status: EventStatus) {
+    events(limit: $limit, skip: $skip, status: $status) {
       ...EventFragment
     }
   }
@@ -121,16 +111,6 @@ export const GET_MY_EVENTS = gql`
 export const GET_EVENT = gql`
   query GetEvent($id: String!) {
     event(id: $id) {
-      ...EventFragment
-    }
-  }
-  ${EVENT_FRAGMENT}
-`;
-
-// Search events
-export const SEARCH_EVENTS = gql`
-  query SearchEvents($query: String!, $limit: Int, $skip: Int) {
-    events(limit: $limit, skip: $skip, query: $query) {
       ...EventFragment
     }
   }

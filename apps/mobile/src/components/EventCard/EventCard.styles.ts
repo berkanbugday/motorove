@@ -9,6 +9,8 @@ export const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 140,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
   },
   content: {
     padding: spacing.md,

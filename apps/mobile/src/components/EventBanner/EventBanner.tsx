@@ -1,12 +1,12 @@
 import React from 'react';
 import {View, StyleProp, ViewStyle, TextStyle} from 'react-native';
-import {styles} from './GroupEventBanner.styles';
+import {styles} from './EventBanner.styles';
 import {Icon} from '../Icon';
 import {Body, BodySmall, Caption, Title} from '../Typography';
 import {colors} from '@theme';
 import {Button} from '../Button';
 import {useTranslation} from '@hooks/useTranslation';
-export interface GroupEventBannerProps {
+export interface EventBannerProps {
   /**
    * The date of the event (e.g., "15")
    */
@@ -104,10 +104,10 @@ export interface GroupEventBannerProps {
 }
 
 /**
- * A reusable banner component for displaying group events with date, title, organizer,
+ * A reusable banner component for displaying events with date, title, organizer,
  * participant information, and a chat button.
  */
-const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
+const EventBanner: React.FC<EventBannerProps> = ({
   day,
   month,
   time,
@@ -132,11 +132,9 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
   const renderParticipantCount = () => {
     const participantCountText = maxParticipants
       ? `${participantCount} ${t(
-          'components.groupEventBanner.participant',
-        )} / ${maxParticipants} ${t(
-          'components.groupEventBanner.maxParticipants',
-        )}`
-      : `${participantCount} ${t('components.groupEventBanner.participant')}`;
+          'components.eventBanner.participant',
+        )} / ${maxParticipants} ${t('components.eventBanner.maxParticipants')}`
+      : `${participantCount} ${t('components.eventBanner.participant')}`;
 
     return (
       <View style={styles.participantsContainer}>
@@ -202,13 +200,13 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
       {onChatPress && (
         <View style={styles.chatButtonContainer}>
           <Button
-            testID="group-event-banner-chat-button"
+            testID="event-banner-chat-button"
             variant="primary"
             size="medium"
             shape="round"
             style={styles.chatButton}
             disabled={!onChatPress}
-            title={t('components.groupEventBanner.chat')}
+            title={t('components.eventBanner.chat')}
             onPress={onChatPress}
           />
         </View>
@@ -217,4 +215,4 @@ const GroupEventBanner: React.FC<GroupEventBannerProps> = ({
   );
 };
 
-export default GroupEventBanner;
+export default EventBanner;

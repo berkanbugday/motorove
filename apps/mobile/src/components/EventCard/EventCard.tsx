@@ -13,7 +13,7 @@ import {Typography} from '../Typography';
 import {Icon} from '../Icon';
 import {colors, getShadow, radius} from '@theme';
 import {Chip, ChipColor} from '../Chip';
-import {styles} from './GroupEventCard.styles';
+import {styles} from './EventCard.styles';
 
 export interface ParticipantInfo {
   id: string;
@@ -21,7 +21,7 @@ export interface ParticipantInfo {
   avatar?: ImageSourcePropType;
 }
 
-export interface GroupEventCardProps {
+export interface EventCardProps {
   /**
    * Title of the event
    */
@@ -94,9 +94,9 @@ export interface GroupEventCardProps {
 }
 
 /**
- * A card component for displaying group events.
+ * A card component for displaying events.
  */
-const GroupEventCard: React.FC<GroupEventCardProps> = ({
+const EventCard: React.FC<EventCardProps> = ({
   title,
   dateTime,
   location,
@@ -271,7 +271,6 @@ const GroupEventCard: React.FC<GroupEventCardProps> = ({
     {
       backgroundColor: colors.neutral.white,
       borderRadius: radius.lg,
-      overflow: 'hidden',
       marginVertical: 8,
       ...getShadow('small'),
     },
@@ -298,4 +297,4 @@ const GroupEventCard: React.FC<GroupEventCardProps> = ({
   );
 };
 
-export default GroupEventCard;
+export default EventCard;

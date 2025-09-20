@@ -13,7 +13,7 @@ import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
 import {
   TopHeaderBar,
   Subtitle,
-  GroupEventBanner,
+  EventBanner,
   PageIndicator,
   Button,
   FeedCard,
@@ -289,7 +289,7 @@ export const HomeScreen = ({navigation}: Props) => {
   // Render event banner item
   const renderEventBanner = useCallback(
     ({item}: {item: EventItem}) => (
-      <GroupEventBanner
+      <EventBanner
         day={item.day}
         month={item.month}
         time={item.time}

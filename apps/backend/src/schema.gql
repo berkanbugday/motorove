@@ -488,20 +488,6 @@ input FilterCommentInput {
   postId: ID
 }
 
-input FilterEventInput {
-  createdById: String
-  difficultyLevel: DifficultyLevel
-  eventType: EventType
-  experienceLevel: ExperienceLevel
-  groupId: String
-  isActive: Boolean
-  isPrivate: Boolean
-  query: String
-  roadType: RoadType
-  startDateFrom: DateTime
-  startDateTo: DateTime
-}
-
 input FilterGroupInput {
   cityId: String
   privacy: GroupPrivacy = ALL
@@ -884,7 +870,7 @@ type Query {
   comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
   count: Float!
   event(id: ID!): EventDto!
-  events(filters: FilterEventInput, limit: Int, skip: Int): [EventDto!]!
+  events(limit: Int, skip: Int, status: EventStatus): [EventDto!]!
   followRequests(limit: Int, skip: Int): [UserFollowingDto!]!
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
   followingUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
@@ -903,7 +889,7 @@ type Query {
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
   post(id: ID!): PostDto!
-  posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [PostDto!]!
+  posts(createdById: ID, groupId: ID, limit: Int, savedById: ID, skip: Int): [PostDto!]!
   user(id: String!): UserDto!
   userProfile(id: String!): UserDto!
   userSetting: UserSettingDto!

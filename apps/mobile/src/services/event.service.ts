@@ -4,9 +4,7 @@ import {
   CREATE_EVENT,
   GET_EVENT,
   GET_EVENTS,
-  GET_MY_EVENTS,
   UPDATE_EVENT,
-  SEARCH_EVENTS,
   INVITE_USERS_TO_EVENT,
   GET_EVENT_JOIN_REQUESTS,
   ACCEPT_EVENT_JOIN_REQUEST,
@@ -20,7 +18,6 @@ import {
   ICreateEvent,
   IEvent,
   IUpdateEvent,
-  IEventFilter,
   EventStatus,
 } from '@motorove/shared';
 
@@ -208,119 +205,9 @@ export const useGetEvent = (id: string) => {
   };
 };
 
-// Hook for getting user's events
-export const useGetMyEvents = (limit = 20, skip = 0) => {
-  const [hasMore, setHasMore] = useState(true);
-  const [filters, setFilters] = useState<IEventFilter>({
-    eventType: undefined,
-    startDateFrom: undefined,
-    startDateTo: undefined,
-    isPrivate: undefined,
-  });
-
-  const {
-    data,
-    loading,
-    error,
-    refetch: originalRefetch,
-    fetchMore,
-  } = useQuery(GET_MY_EVENTS, {
-    variables: {
-      limit,
-      skip,
-      filters,
-    },
-    fetchPolicy: 'network-only',
-    nextFetchPolicy: 'network-only',
-    onError: errorObj => {
-      loggingService.error('Error fetching user events:', errorObj);
-    },
-  });
-
-  // Wrap the original refetch to reset hasMore state
-  const refetch = useCallback(async () => {
-    setHasMore(true);
-    return await originalRefetch();
-  }, [originalRefetch]);
-
-  const loadMore = useCallback(async () => {
-    if (!hasMore || loading) {
-      return;
-    }
-
-    try {
-      // First refetch current data to ensure we have the latest
-      await originalRefetch();
-
-      const result = await fetchMore({
-        variables: {
-          skip: data?.myEvents?.length || 0,
-          limit,
-          filters,
-        },
-        updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) {
-            return prev;
-          }
-
-          return {
-            myEvents: [...prev.myEvents, ...fetchMoreResult.myEvents],
-          };
-        },
-      });
-
-      if (result.data.myEvents.length < limit) {
-        setHasMore(false);
-      }
-    } catch (errorObj) {
-      loggingService.error('Error loading more events:', errorObj);
-    }
-  }, [
-    data?.myEvents?.length,
-    fetchMore,
-    hasMore,
-    limit,
-    loading,
-    filters,
-    originalRefetch,
-  ]);
-
-  // Apply filters and reset pagination
-  const applyFilters = useCallback((newFilters: IEventFilter) => {
-    setFilters(newFilters);
-    setHasMore(true);
-  }, []);
-
-  // Refetch when filters change
-  useEffect(() => {
-    originalRefetch({
-      limit,
-      skip: 0,
-      filters,
-    });
-  }, [filters, limit, originalRefetch]);
-
-  return {
-    events: (data?.myEvents as IEvent[]) || [],
-    loading,
-    error,
-    refetch,
-    loadMore,
-    hasMore,
-    filters,
-    applyFilters,
-  };
-};
-
 // Hook for getting all events
-export const useGetEvents = (limit = 20, skip = 0) => {
+export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
   const [hasMore, setHasMore] = useState(true);
-  const [filters, setFilters] = useState<IEventFilter>({
-    eventType: undefined,
-    startDateFrom: undefined,
-    startDateTo: undefined,
-    isPrivate: undefined,
-  });
 
   const {
     data,
@@ -332,7 +219,7 @@ export const useGetEvents = (limit = 20, skip = 0) => {
     variables: {
       limit,
       skip,
-      filters,
+      status,
     },
     onError: errorObj => {
       loggingService.error('Error fetching all events:', errorObj);
@@ -355,7 +242,7 @@ export const useGetEvents = (limit = 20, skip = 0) => {
         variables: {
           skip: data?.events?.length || 0,
           limit,
-          filters,
+          status,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
@@ -374,88 +261,16 @@ export const useGetEvents = (limit = 20, skip = 0) => {
     } catch (errorObj) {
       loggingService.error('Error loading more events:', errorObj);
     }
-  }, [data?.events?.length, fetchMore, hasMore, limit, loading, filters]);
-
-  // Apply filters and reset pagination
-  const applyFilters = useCallback((newFilters: IEventFilter) => {
-    setFilters(newFilters);
-    setHasMore(true);
-  }, []);
+  }, [data?.events?.length, fetchMore, hasMore, limit, loading, status]);
 
   // Refetch when filters change
   useEffect(() => {
     originalRefetch({
       limit,
       skip: 0,
-      filters,
+      status,
     });
-  }, [filters, limit, originalRefetch]);
-
-  return {
-    events: (data?.events as IEvent[]) || [],
-    loading,
-    error,
-    refetch,
-    loadMore,
-    hasMore,
-    filters,
-    applyFilters,
-  };
-};
-
-// Hook for searching events by title
-export const useSearchEvents = (query: string, limit = 20, skip = 0) => {
-  const [hasMore, setHasMore] = useState(true);
-  const {
-    data,
-    loading,
-    error,
-    refetch: originalRefetch,
-    fetchMore,
-  } = useQuery(SEARCH_EVENTS, {
-    variables: {query, limit, skip},
-    skip: !query || query.trim() === '',
-    onError: errorObj => {
-      loggingService.error('Error searching events:', errorObj);
-    },
-  });
-
-  // Wrap the original refetch to reset hasMore state
-  const refetch = useCallback(async () => {
-    setHasMore(true);
-    return await originalRefetch();
-  }, [originalRefetch]);
-
-  const loadMore = useCallback(async () => {
-    if (!hasMore || loading || !query) {
-      return;
-    }
-
-    try {
-      const result = await fetchMore({
-        variables: {
-          query,
-          skip: data?.events?.length || 0,
-          limit,
-        },
-        updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) {
-            return prev;
-          }
-
-          return {
-            events: [...prev.events, ...fetchMoreResult.events],
-          };
-        },
-      });
-
-      if (result.data.events.length < limit) {
-        setHasMore(false);
-      }
-    } catch (errorObj) {
-      loggingService.error('Error loading more search results:', errorObj);
-    }
-  }, [data?.events?.length, fetchMore, hasMore, limit, loading, query]);
+  }, [limit, originalRefetch, status]);
 
   return {
     events: (data?.events as IEvent[]) || [],
@@ -637,9 +452,7 @@ export const EventService = {
   useCreateEvent,
   useUpdateEvent,
   useGetEvent,
-  useGetMyEvents,
   useGetEvents,
-  useSearchEvents,
   useGetEventJoinRequests,
   inviteUsersToEvent,
   createEvent, // Add direct mutation function

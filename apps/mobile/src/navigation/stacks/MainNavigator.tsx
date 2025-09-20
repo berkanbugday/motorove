@@ -3,7 +3,12 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
-import {CreatePostScreen, CommentScreen, EditPostScreen} from '@screens/post';
+import {
+  CreatePostScreen,
+  CommentScreen,
+  EditPostScreen,
+  PostScreen,
+} from '@screens/post';
 import {
   CreateGroupScreen,
   GroupDetailScreen,
@@ -11,7 +16,7 @@ import {
   SearchGroupScreen,
 } from '@screens/group';
 import {SearchUserScreen} from '@screens/searchUser';
-import {CreateEventScreen} from '@screens/event';
+import {CreateEventScreen, EventScreen} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 import {
   ProfileScreen,
@@ -166,6 +171,17 @@ export function MainNavigator() {
       <Stack.Screen
         name="Support"
         component={SupportScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Posts"
+        component={PostScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Events"
+        component={EventScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
