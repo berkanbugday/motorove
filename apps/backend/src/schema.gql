@@ -904,7 +904,6 @@ type Query {
   notifications(limit: Int, skip: Int): [NotificationDto!]!
   post(id: ID!): PostDto!
   posts(createdById: ID, groupId: ID, limit: Int, skip: Int): [PostDto!]!
-  upcomingEvents: [EventDto!]!
   user(id: String!): UserDto!
   userProfile(id: String!): UserDto!
   userSetting: UserSettingDto!

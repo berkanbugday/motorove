@@ -113,13 +113,4 @@ export class EventsResolver {
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return this.eventsService.leave(id, userId, authToken);
   }
-
-  @UseGuards(JwtGuard)
-  @Query(() => [EventDto])
-  async upcomingEvents(@Context() context: GqlContext) {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.findUpcomingEvents(userId, authToken);
-  }
 }
