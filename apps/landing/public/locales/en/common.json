@@ -161,5 +161,240 @@
   "language": {
     "en": "English",
     "tr": "Turkish"
+  },
+  "legal": {
+    "cookies": {
+      "title": "Cookie Policy",
+      "lastUpdated": "Last Updated: September 1, 2023",
+      "sections": {
+        "introduction": {
+          "title": "Introduction",
+          "content": "This Cookie Policy explains how Motorove uses cookies and similar technologies to recognize you when you visit our website. It explains what these technologies are and why we use them, as well as your rights to control our use of them."
+        },
+        "whatAreCookies": {
+          "title": "What Are Cookies?",
+          "content": "Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners in order to make their websites work, or to work more efficiently, as well as to provide reporting information."
+        },
+        "typesOfCookies": {
+          "title": "Types of Cookies We Use",
+          "essential": {
+            "title": "Essential Cookies",
+            "content": "These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms."
+          },
+          "preferences": {
+            "title": "Preference Cookies",
+            "content": "These cookies enable a website to remember information that changes the way the website behaves or looks, like your preferred language or the region that you are in."
+          },
+          "analytics": {
+            "title": "Analytics Cookies",
+            "content": "These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site."
+          },
+          "marketing": {
+            "title": "Marketing Cookies",
+            "content": "These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites."
+          }
+        },
+        "cookiesWeUse": {
+          "title": "Specific Cookies We Use",
+          "content": "Below is a detailed list of the cookies we use on our website:",
+          "table": {
+            "name": "Name",
+            "provider": "Provider",
+            "purpose": "Purpose",
+            "expiry": "Expiry",
+            "type": "Type"
+          },
+          "cookies": {
+            "session": {
+              "name": "SESSION_ID",
+              "provider": "Motorove",
+              "purpose": "To maintain user sessions and login status",
+              "expiry": "Session",
+              "type": "Essential"
+            },
+            "language": {
+              "name": "NEXT_LOCALE",
+              "provider": "Motorove",
+              "purpose": "To remember your language preference",
+              "expiry": "1 Year",
+              "type": "Preference"
+            },
+            "analytics": {
+              "name": "_ga, _gid",
+              "provider": "Google Analytics",
+              "purpose": "To track website usage and user behavior",
+              "expiry": "2 Years",
+              "type": "Analytics"
+            }
+          }
+        },
+        "cookieManagement": {
+          "title": "How to Manage Cookies",
+          "content": "Most browsers allow you to refuse to accept cookies and to delete cookies. The methods for doing so vary from browser to browser, and from version to version.",
+          "browser": {
+            "title": "Block cookies by adjusting your browser settings",
+            "content": "You can find information about how to manage cookies in your browser at the following links:",
+            "chrome": "Google Chrome",
+            "firefox": "Mozilla Firefox",
+            "safari": "Apple Safari",
+            "edge": "Microsoft Edge"
+          }
+        },
+        "doNotTrack": {
+          "title": "Do Not Track",
+          "content": "Some browsers have a 'Do Not Track' feature that lets you tell websites that you do not want to have your online activities tracked. We currently do not respond to browser 'Do Not Track' signals."
+        },
+        "updates": {
+          "title": "Updates to This Cookie Policy",
+          "content": "We may update this Cookie Policy from time to time in order to reflect, for example, changes to the cookies we use or for other operational, legal or regulatory reasons. Please therefore re-visit this Cookie Policy regularly to stay informed about our use of cookies and related technologies."
+        },
+        "contact": {
+          "title": "Contact Us",
+          "content": "If you have any questions about our use of cookies or other technologies, please email us at privacy@motorove.com."
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last Updated: September 1, 2023",
+      "sections": {
+        "introduction": {
+          "title": "Introduction",
+          "content": "Welcome to Motorove. By accessing our website and using our services, you agree to be bound by these Terms of Service. Please read them carefully before using our platform."
+        },
+        "definitions": {
+          "title": "Definitions",
+          "content": "'Service' refers to the Motorove website and mobile application. 'User' refers to any individual who accesses or uses the Service. 'Content' refers to all information, text, graphics, photos, videos, or other materials uploaded, downloaded, or appearing on the Service."
+        },
+        "accountRegistration": {
+          "title": "Account Registration",
+          "content": "To use certain features of the Service, you must register for an account. You must provide accurate and complete information and keep your account information updated. You are responsible for safeguarding your account and password. You are responsible for any activity that occurs under your account."
+        },
+        "userContent": {
+          "title": "User Content",
+          "content": "You retain ownership rights to any content you submit to the Service. By submitting content, you grant Motorove a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display and distribute such content in any and all media or distribution methods."
+        },
+        "prohibitedActivities": {
+          "title": "Prohibited Activities",
+          "content": "You agree not to engage in any of the following prohibited activities:",
+          "items": {
+            "item1": "Violating any laws, rules, or regulations.",
+            "item2": "Posting content that is defamatory, obscene, or otherwise objectionable.",
+            "item3": "Impersonating any person or entity, or falsely stating or misrepresenting your affiliation with a person or entity.",
+            "item4": "Interfering with or disrupting the Service or servers or networks connected to the Service.",
+            "item5": "Attempting to gain unauthorized access to the Service or user accounts."
+          }
+        },
+        "intellectualProperty": {
+          "title": "Intellectual Property",
+          "content": "The Service and its original content, features, and functionality are owned by Motorove and are protected by international copyright, trademark, patent, trade secret, and other intellectual property or proprietary rights laws."
+        },
+        "termination": {
+          "title": "Termination",
+          "content": "We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms of Service."
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "content": "The Service is provided on an 'AS IS' and 'AS AVAILABLE' basis. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance."
+        },
+        "limitation": {
+          "title": "Limitation of Liability",
+          "content": "In no event shall Motorove be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service."
+        },
+        "governing": {
+          "title": "Governing Law",
+          "content": "These Terms shall be governed and construed in accordance with the laws of Turkey, without regard to its conflict of law provisions."
+        },
+        "changes": {
+          "title": "Changes to Terms",
+          "content": "We reserve the right, at our sole discretion, to modify or replace these Terms at any time. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms."
+        },
+        "contact": {
+          "title": "Contact Us",
+          "content": "If you have any questions about these Terms, please contact us at terms@motorove.com."
+        }
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last Updated: September 1, 2023",
+      "sections": {
+        "introduction": {
+          "title": "Introduction",
+          "content": "At Motorove, we respect your privacy and are committed to protecting it through our compliance with this policy. This policy describes the types of information we may collect from you or that you may provide when you use our Service and our practices for collecting, using, maintaining, protecting, and disclosing that information."
+        },
+        "dataCollection": {
+          "title": "Information We Collect",
+          "content": "We collect several types of information from and about users of our Service, including:",
+          "personalData": {
+            "title": "Personal Data",
+            "items": {
+              "item1": "Name, email address, and contact information",
+              "item2": "Account credentials",
+              "item3": "Profile information and preferences",
+              "item4": "Location data",
+              "item5": "Device information and identifiers"
+            }
+          },
+          "usageData": {
+            "title": "Usage Data",
+            "content": "We collect information about how you interact with our Service, the pages you visit, the features you use, the time spent on the Service, and other usage patterns."
+          }
+        },
+        "dataUse": {
+          "title": "How We Use Your Information",
+          "content": "We use the information we collect for various purposes, including:",
+          "items": {
+            "item1": "To provide and maintain our Service",
+            "item2": "To personalize your experience",
+            "item3": "To improve our Service",
+            "item4": "To communicate with you",
+            "item5": "To protect our Service and users"
+          }
+        },
+        "dataSharing": {
+          "title": "Sharing Your Information",
+          "content": "We may share information we have collected about you in certain situations. Your information may be disclosed to service providers, for business transfers, to protect our rights, or to comply with legal requirements."
+        },
+        "location": {
+          "title": "Location Information",
+          "content": "We may collect and use information about your location when you use our Service. This helps us provide features like finding nearby motorcycle routes or events, and connecting you with other riders in your area."
+        },
+        "dataRetention": {
+          "title": "Data Retention",
+          "content": "We will retain your information for as long as your account is active or as needed to provide you services. We will also retain and use your information as necessary to comply with our legal obligations, resolve disputes, and enforce our agreements."
+        },
+        "dataSecurity": {
+          "title": "Data Security",
+          "content": "We have implemented measures designed to secure your personal information from accidental loss and from unauthorized access, use, alteration, and disclosure. However, no method of transmission over the Internet is 100% secure."
+        },
+        "yourRights": {
+          "title": "Your Rights",
+          "content": "Depending on your location, you may have certain rights regarding your personal information, including:",
+          "items": {
+            "item1": "The right to access the personal information we hold about you",
+            "item2": "The right to request correction or deletion of your personal information",
+            "item3": "The right to restrict or object to our processing of your personal information",
+            "item4": "The right to data portability"
+          }
+        },
+        "thirdParty": {
+          "title": "Third-Party Links",
+          "content": "Our Service may contain links to other websites that are not operated by us. If you click on a third-party link, you will be directed to that third party's site. We strongly advise you to review the Privacy Policy of every site you visit."
+        },
+        "children": {
+          "title": "Children's Privacy",
+          "content": "Our Service is not intended for anyone under the age of 18. We do not knowingly collect personal information from children under 18. If we learn we have collected personal information from a child under 18, we will delete that information."
+        },
+        "changes": {
+          "title": "Changes to This Privacy Policy",
+          "content": "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the 'Last Updated' date."
+        },
+        "contact": {
+          "title": "Contact Us",
+          "content": "If you have any questions about this Privacy Policy, please contact us at privacy@motorove.com."
+        }
+      }
+    }
   }
 }
