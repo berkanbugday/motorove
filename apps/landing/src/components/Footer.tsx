@@ -6,7 +6,7 @@ import { useTranslation } from "../app/i18n";
 
 const Footer: React.FC = () => {
   const { t } = useTranslation();
-  
+
   return (
     <footer className="bg-neutral-black text-white pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,14 +17,14 @@ const Footer: React.FC = () => {
               <Image
                 src="/assets/images/logo.png"
                 alt="Motorove Logo"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 className="mr-2"
               />
               <span className="text-xl font-heading font-bold">Motorove</span>
             </div>
             <p className="text-neutral-lightGrey mb-4">
-              {t('footer.description')}
+              {t("footer.description")}
             </p>
             <div className="flex space-x-4">
               <SocialIcon
@@ -42,35 +42,43 @@ const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div className="col-span-1">
-            <h3 className="font-bold text-lg mb-4">{t('footer.quickLinks')}</h3>
+            <h3 className="font-bold text-lg mb-4">{t("footer.quickLinks")}</h3>
             <ul className="space-y-2">
-              <FooterLink href="#features">{t('footer.links.features')}</FooterLink>
-              <FooterLink href="#community">{t('footer.links.community')}</FooterLink>
-              <FooterLink href="#routes">{t('footer.links.routes')}</FooterLink>
-              <FooterLink href="#events">{t('footer.links.events')}</FooterLink>
-              <FooterLink href="/blog">{t('footer.links.blog')}</FooterLink>
+              <FooterLink href="#features">
+                {t("footer.links.features")}
+              </FooterLink>
+              <FooterLink href="#community">
+                {t("footer.links.community")}
+              </FooterLink>
+              <FooterLink href="#routes">{t("footer.links.routes")}</FooterLink>
+              <FooterLink href="#events">{t("footer.links.events")}</FooterLink>
+              <FooterLink href="/blog">{t("footer.links.blog")}</FooterLink>
             </ul>
           </div>
 
           {/* Resources */}
           <div className="col-span-1">
-            <h3 className="font-bold text-lg mb-4">{t('footer.resources')}</h3>
+            <h3 className="font-bold text-lg mb-4">{t("footer.resources")}</h3>
             <ul className="space-y-2">
-              <FooterLink href="/help">{t('footer.links.help')}</FooterLink>
-              <FooterLink href="/safety">{t('footer.links.safety')}</FooterLink>
-              <FooterLink href="/faq">{t('footer.links.faq')}</FooterLink>
-              <FooterLink href="/contact">{t('footer.links.contact')}</FooterLink>
+              <FooterLink href="/help">{t("footer.links.help")}</FooterLink>
+              <FooterLink href="/safety">{t("footer.links.safety")}</FooterLink>
+              <FooterLink href="/faq">{t("footer.links.faq")}</FooterLink>
+              <FooterLink href="/contact">
+                {t("footer.links.contact")}
+              </FooterLink>
             </ul>
           </div>
 
           {/* Download */}
           <div className="col-span-1">
-            <h3 className="font-bold text-lg mb-4">{t('footer.downloadApp')}</h3>
+            <h3 className="font-bold text-lg mb-4">
+              {t("footer.downloadApp")}
+            </h3>
             <div className="flex flex-col space-y-3">
               <Link href="https://apps.apple.com/app/motorove">
                 <Image
                   src="/assets/images/app-store-badge.png"
-                  alt={t('download.appStore')}
+                  alt={t("download.appStore")}
                   width={150}
                   height={50}
                   className="h-auto"
@@ -79,7 +87,7 @@ const Footer: React.FC = () => {
               <Link href="https://play.google.com/store/apps/details?id=com.motorove">
                 <Image
                   src="/assets/images/google-play-badge.png"
-                  alt={t('download.googlePlay')}
+                  alt={t("download.googlePlay")}
                   width={150}
                   height={50}
                   className="h-auto"
@@ -92,26 +100,26 @@ const Footer: React.FC = () => {
         <div className="border-t border-neutral-darkGrey mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-neutral-lightGrey text-sm mb-4 md:mb-0">
-              {t('footer.copyright', { year: new Date().getFullYear() })}
+              {t("footer.copyright", { year: new Date().getFullYear() })}
             </div>
             <div className="flex space-x-6">
               <Link
                 href="/terms"
                 className="text-neutral-lightGrey hover:text-white text-sm"
               >
-                {t('footer.legal.terms')}
+                {t("footer.legal.terms")}
               </Link>
               <Link
                 href="/privacy"
                 className="text-neutral-lightGrey hover:text-white text-sm"
               >
-                {t('footer.legal.privacy')}
+                {t("footer.legal.privacy")}
               </Link>
               <Link
                 href="/cookies"
                 className="text-neutral-lightGrey hover:text-white text-sm"
               >
-                {t('footer.legal.cookies')}
+                {t("footer.legal.cookies")}
               </Link>
             </div>
           </div>

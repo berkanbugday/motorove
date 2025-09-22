@@ -33,7 +33,7 @@ const Feature: React.FC<FeatureProps> = ({
       className="flex flex-col items-center p-8 bg-dark-200/50 backdrop-blur-sm rounded-xl border border-dark-100 hover:border-primary-main/30 transition-all duration-300 group"
       whileHover={{ y: -5, scale: 1.01 }}
     >
-      <motion.div 
+      <motion.div
         className="p-4 rounded-full mb-5 bg-gradient-to-br from-dark-100 to-dark-300 border border-dark-100 group-hover:border-primary-main/30"
         whileHover={{ rotate: [0, 5, -5, 0], scale: 1.1 }}
         transition={{ duration: 0.5 }}
@@ -43,7 +43,7 @@ const Feature: React.FC<FeatureProps> = ({
           alt={title}
           width={32}
           height={32}
-          className="filter brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
+          className="filter brightness-0 invert group-hover:brightness-100 transition-all duration-300"
         />
       </motion.div>
       <h3 className="text-xl font-bold mb-3 text-center text-white">{title}</h3>
@@ -61,39 +61,42 @@ const Features: React.FC = () => {
 
   const features = [
     {
-      title: t('features.connectRiders.title'),
-      description: t('features.connectRiders.description'),
+      title: t("features.connectRiders.title"),
+      description: t("features.connectRiders.description"),
       icon: "users",
     },
     {
-      title: t('features.discoverRoutes.title'),
-      description: t('features.discoverRoutes.description'),
+      title: t("features.discoverRoutes.title"),
+      description: t("features.discoverRoutes.description"),
       icon: "map",
     },
     {
-      title: t('features.joinEvents.title'),
-      description: t('features.joinEvents.description'),
+      title: t("features.joinEvents.title"),
+      description: t("features.joinEvents.description"),
       icon: "calendar",
     },
     {
-      title: t('features.shareJourney.title'),
-      description: t('features.shareJourney.description'),
-      icon: "camera",
+      title: t("features.shareJourney.title"),
+      description: t("features.shareJourney.description"),
+      icon: "share",
     },
     {
-      title: t('features.findRepairShops.title'),
-      description: t('features.findRepairShops.description'),
-      icon: "tools",
+      title: t("features.findRepairShops.title"),
+      description: t("features.findRepairShops.description"),
+      icon: "wrench",
     },
     {
-      title: t('features.weatherAlerts.title'),
-      description: t('features.weatherAlerts.description'),
-      icon: "weather",
+      title: t("features.weatherAlerts.title"),
+      description: t("features.weatherAlerts.description"),
+      icon: "bell",
     },
   ];
 
   return (
-    <section id="features" className="py-24 md:py-32 bg-dark-gradient relative overflow-hidden">
+    <section
+      id="features"
+      className="py-24 md:py-32 bg-dark-gradient relative overflow-hidden"
+    >
       {/* Background decoration */}
       <div className="absolute top-0 left-0 w-full h-full bg-hero-pattern opacity-[0.02] pointer-events-none"></div>
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-accent-blue/5 blur-3xl"></div>
@@ -107,33 +110,33 @@ const Features: React.FC = () => {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center max-w-3xl mx-auto mb-20"
         >
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-primary-main font-semibold tracking-wide inline-flex items-center justify-center mb-4"
           >
             <span className="w-8 h-[1px] bg-primary-main mr-3"></span>
-            {t('features.heading')}
+            {t("features.heading")}
             <span className="w-8 h-[1px] bg-primary-main ml-3"></span>
           </motion.span>
-          
-          <motion.h2 
+
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-white"
           >
-            {t('features.title')}
+            {t("features.title")}
           </motion.h2>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-gray-400 text-lg"
           >
-            {t('features.subtitle')}
+            {t("features.subtitle")}
           </motion.p>
         </motion.div>
 

@@ -25,18 +25,20 @@ const Header: React.FC = () => {
   }, [scrolled]);
 
   return (
-    <motion.header 
+    <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={`fixed w-full z-50 backdrop-blur-lg transition-all duration-300 ${
-        scrolled ? "bg-dark-500/80 shadow-lg shadow-dark-900/30" : "bg-transparent"
+        scrolled
+          ? "bg-dark-500/80 shadow-lg shadow-dark-900/30"
+          : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <motion.div 
+          <motion.div
             className="flex items-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
@@ -45,8 +47,8 @@ const Header: React.FC = () => {
               <Image
                 src="/assets/images/logo.png"
                 alt="Motorove Logo"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 className="mr-2"
               />
               <span className="text-xl font-heading font-bold text-white">
@@ -57,10 +59,10 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-10">
-            <NavLink href="#features">{t('header.features')}</NavLink>
-            <NavLink href="#community">{t('header.community')}</NavLink>
-            <NavLink href="#routes">{t('header.routes')}</NavLink>
-            <NavLink href="#events">{t('header.events')}</NavLink>
+            <NavLink href="#features">{t("header.features")}</NavLink>
+            <NavLink href="#community">{t("header.community")}</NavLink>
+            <NavLink href="#routes">{t("header.routes")}</NavLink>
+            <NavLink href="#events">{t("header.events")}</NavLink>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -68,15 +70,12 @@ const Header: React.FC = () => {
             <LanguageSwitcher />
 
             {/* CTA Button */}
-            <motion.div 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Link 
-                href="https://app.motorove.com" 
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href="https://app.motorove.com"
                 className="btn btn-primary bg-gradient-to-r from-primary-main to-primary-dark hover:from-primary-dark hover:to-primary-main transition-all duration-300"
               >
-                {t('header.download')}
+                {t("header.download")}
               </Link>
             </motion.div>
           </div>
@@ -141,19 +140,25 @@ const Header: React.FC = () => {
                 href="#features"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {t('header.features')}
+                {t("header.features")}
               </MobileNavLink>
               <MobileNavLink
                 href="#community"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {t('header.community')}
+                {t("header.community")}
               </MobileNavLink>
-              <MobileNavLink href="#routes" onClick={() => setIsMenuOpen(false)}>
-                {t('header.routes')}
+              <MobileNavLink
+                href="#routes"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t("header.routes")}
               </MobileNavLink>
-              <MobileNavLink href="#events" onClick={() => setIsMenuOpen(false)}>
-                {t('header.events')}
+              <MobileNavLink
+                href="#events"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t("header.events")}
               </MobileNavLink>
               {/* Language Switcher - Mobile */}
               <div className="pt-2 pb-2">
@@ -173,7 +178,7 @@ const Header: React.FC = () => {
                     className="block w-full text-center bg-gradient-to-r from-primary-main to-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-all duration-300"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    {t('header.download')}
+                    {t("header.download")}
                   </Link>
                 </motion.div>
               </div>
@@ -203,9 +208,9 @@ const NavLink: React.FC<NavLinkProps> = ({ href, children }) => {
         className="text-gray-300 hover:text-white font-medium transition-colors relative group"
       >
         <span>{children}</span>
-        <motion.span 
+        <motion.span
           className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-main group-hover:w-full transition-all duration-300"
-          whileHover={{ width: '100%' }}
+          whileHover={{ width: "100%" }}
         />
       </Link>
     </motion.div>
@@ -214,10 +219,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, children }) => {
 
 const MobileNavLink: React.FC<NavLinkProps> = ({ href, children, onClick }) => {
   return (
-    <motion.div
-      whileHover={{ x: 5 }}
-      whileTap={{ scale: 0.97 }}
-    >
+    <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.97 }}>
       <Link
         href={href}
         className="block px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-dark-300/50 rounded-md transition-all duration-200"
