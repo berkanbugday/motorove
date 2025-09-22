@@ -20,6 +20,7 @@ import {
   Typography,
   Title,
   showToast,
+  Chip,
 } from '@components';
 import {format} from 'date-fns';
 // import {useAuth} from '@contexts'; // Commented out as not used
@@ -135,6 +136,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           style={[styles.topHeaderBar, {opacity: backButtonOpacity}]}>
           <TopHeaderBar
             showBackButton
+            rightIconName="more-vertical"
             backgroundColor="transparent"
             onBackPress={() => navigation.goBack()}
           />
@@ -153,17 +155,25 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         scrollEventThrottle={16}>
         {/* Main Event Details Card - Overlapping background */}
         <View style={styles.eventCard}>
-          {/* Ride Badge */}
-          <View style={styles.rideBadge}>
-            <Typography style={styles.rideBadgeText}>Ride</Typography>
-          </View>
-
           {/* Event Title */}
           <Title style={styles.eventTitle}>{event.title}</Title>
 
+          {/* Ride Badge */}
+          <Chip
+            label="Grup Sürüşü"
+            variant="filled"
+            color="primary"
+            style={styles.rideBadge}
+            size="small"
+          />
+
           {/* Date/Time Row */}
           <View style={styles.infoRow}>
-            <Icon name="calendar" size={16} color={colors.neutral.grey} />
+            <Icon
+              name="calendar-filled"
+              size={16}
+              color={colors.neutral.grey}
+            />
             <Typography style={styles.infoText}>
               {formatEventDate(event.startDateTime)}
             </Typography>
@@ -179,7 +189,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
           {/* Distance/Duration/Difficulty Row */}
           <View style={styles.infoRow}>
-            <Typography style={styles.infoText}>🧭</Typography>
+            <Icon name="route-filled" size={16} color={colors.neutral.grey} />
             <Typography style={styles.infoText}>
               130 km • 4.5 hrs • Intermediate
             </Typography>
@@ -187,7 +197,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
           {/* Organizer Row */}
           <View style={styles.infoRow}>
-            <Icon name="users" size={16} color={colors.neutral.grey} />
+            <Icon name="users-filled" size={16} color={colors.neutral.grey} />
             <Typography style={styles.infoText}>
               {t('screens.event.organized_by')} {event.createdBy.firstName}{' '}
               {event.createdBy.lastName}
@@ -354,32 +364,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: spacing.lg,
     marginBottom: spacing.md,
+    gap: spacing.md,
     ...getShadow('medium'),
   },
   rideBadge: {
-    backgroundColor: colors.primary.main,
-    borderRadius: 12,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    alignSelf: 'flex-start',
-    marginBottom: spacing.sm,
-  },
-  rideBadgeText: {
-    color: colors.neutral.white,
-    fontSize: 12,
-    fontWeight: '600',
+    backgroundColor: colors.primary.light,
   },
   eventTitle: {
     fontSize: 22,
     fontWeight: '700',
     color: colors.neutral.black,
-    marginBottom: spacing.md,
     lineHeight: 28,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.sm,
   },
   infoText: {
     marginLeft: spacing.sm,
@@ -391,7 +390,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.neutral.black,
-    marginBottom: spacing.sm,
   },
   description: {
     fontSize: 15,
@@ -402,12 +400,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.neutral.black,
-    marginBottom: spacing.md,
   },
   participationButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.md,
   },
   participationButton: {
     flex: 1,
@@ -436,7 +432,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    marginBottom: spacing.md,
   },
   participantCount: {
     fontSize: 13,

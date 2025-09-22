@@ -477,8 +477,7 @@ export const PostScreen = ({navigation}: Props) => {
         rightIconName="plus"
         onRightButtonPress={() => navigation.navigate('CreatePost')}
       />
-      <SafeAreaView
-        style={[styles.container, {marginBottom: 16 + insets.bottom}]}>
+      <SafeAreaView style={[styles.container, {marginBottom: insets.bottom}]}>
         <View style={styles.contentContainer}>
           {/* Tab navigation for My Posts and Saved Posts */}
           <Tabs

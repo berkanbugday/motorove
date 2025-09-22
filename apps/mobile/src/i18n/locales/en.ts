@@ -610,6 +610,15 @@ export default {
 
     // Garage screen
     garage: {
+      motorcycles: 'Motorcycles',
+      equipment: 'Equipment',
+      add_item: 'Add Item',
+      add_motorcycle: 'Add Motorcycle',
+      add_equipment: 'Add Equipment',
+      add_first_motorcycle: 'Add Your First Motorcycle',
+      add_first_equipment: 'Add Your First Equipment',
+      no_motorcycles: 'No motorcycles added yet',
+      no_equipment: 'No equipment added yet',
       my_vehicles: 'My Vehicles',
       add_vehicle: 'Add Vehicle',
       edit_vehicle: 'Edit Vehicle',

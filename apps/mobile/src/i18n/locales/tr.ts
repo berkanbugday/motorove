@@ -607,6 +607,15 @@ export default {
 
     // Garage screen
     garage: {
+      motorcycles: 'Motosikletler',
+      equipment: 'Ekipmanlar',
+      add_item: 'Öğe Ekle',
+      add_motorcycle: 'Motosiklet Ekle',
+      add_equipment: 'Ekipman Ekle',
+      add_first_motorcycle: 'İlk Motosikletinizi Ekleyin',
+      add_first_equipment: 'İlk Ekipmanınızı Ekleyin',
+      no_motorcycles: 'Henüz motosiklet eklenmemiş',
+      no_equipment: 'Henüz ekipman eklenmemiş',
       my_vehicles: 'Araçlarım',
       add_vehicle: 'Araç Ekle',
       edit_vehicle: 'Aracı Düzenle',

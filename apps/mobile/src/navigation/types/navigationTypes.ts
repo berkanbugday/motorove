@@ -60,6 +60,7 @@ export type MainStackParamList = {
   Support: undefined;
   Posts: undefined;
   Events: undefined;
+  Garage: undefined;
 };
 
 export type MainScreenNavigationProp<T extends keyof MainStackParamList> =

@@ -172,6 +172,7 @@ const EventCard: React.FC<EventCardProps> = ({
             color="primary"
             size="small"
             variant="filled"
+            style={styles.categoryChip}
           />
         </View>
       )}

@@ -30,6 +30,7 @@ import {
   JoinRequestScreen,
   SupportScreen,
 } from '@screens/menu';
+import {GarageScreen} from '@screens/garage';
 import {
   // notificationService,
   // useSaveDeviceToken,
@@ -191,6 +192,11 @@ export function MainNavigator() {
       <Stack.Screen
         name="EventDetail"
         component={EventDetailScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Garage"
+        component={GarageScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
