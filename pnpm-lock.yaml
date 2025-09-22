@@ -212,7 +212,7 @@ importers:
         specifier: workspace:*
         version: link:../../shared
       accept-language:
-        specifier: ^3.0.20
+        specifier: 3.0.20
         version: 3.0.20
       framer-motion:
         specifier: 10.16.4
@@ -221,16 +221,16 @@ importers:
         specifier: 25.3.2
         version: 25.3.2(typescript@5.2.2)
       i18next-browser-languagedetector:
-        specifier: ^8.2.0
+        specifier: 8.2.0
         version: 8.2.0
       i18next-resources-to-backend:
-        specifier: ^1.2.1
+        specifier: 1.2.1
         version: 1.2.1
       next:
         specifier: 14.0.4
         version: 14.0.4(@opentelemetry/api@1.9.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       next-i18next:
-        specifier: ^15.4.2
+        specifier: 15.4.2
         version: 15.4.2(@types/react@18.2.21)(i18next@25.3.2(typescript@5.2.2))(next@14.0.4(@opentelemetry/api@1.9.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-i18next@15.6.0(i18next@25.3.2(typescript@5.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.2.2))(react@18.2.0)
       react:
         specifier: 18.2.0
@@ -323,6 +323,9 @@ importers:
       '@sentry/react-native':
         specifier: 6.13.0
         version: 6.13.0(encoding@0.1.13)(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0)
+      date-fns:
+        specifier: 4.1.0
+        version: 4.1.0
       deprecated-react-native-prop-types:
         specifier: 5.0.0
         version: 5.0.0
@@ -4877,6 +4880,9 @@ packages:
   data-view-byte-offset@1.0.1:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
+
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
@@ -12177,22 +12183,15 @@ snapshots:
       metro-runtime: 0.82.4
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.73.2': {}
 
   '@react-native/normalize-colors@0.79.1': {}
 
   '@react-native/typescript-config@0.79.1': {}
-
-  '@react-native/virtualized-lists@0.79.1(@types/react@18.2.21)(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@18.2.21)(react@19.0.0))(react@19.0.0)':
-    dependencies:
-      invariant: 2.2.4
-      nullthrows: 1.1.1
-      react: 19.0.0
-      react-native: 0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@18.2.21)(react@19.0.0)
-    optionalDependencies:
-      '@types/react': 18.2.21
 
   '@react-native/virtualized-lists@0.79.1(@types/react@19.0.0)(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0)':
     dependencies:
@@ -12969,8 +12968,8 @@ snapshots:
 
   '@types/react-native-snap-carousel@3.8.11(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(react@19.0.0)':
     dependencies:
-      '@types/react': 18.2.21
-      react-native: 0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@18.2.21)(react@19.0.0)
+      '@types/react': 19.0.0
+      react-native: 0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0)
     transitivePeerDependencies:
       - '@babel/core'
       - '@react-native-community/cli'
@@ -12981,7 +12980,7 @@ snapshots:
 
   '@types/react-test-renderer@19.0.0':
     dependencies:
-      '@types/react': 18.2.21
+      '@types/react': 19.0.0
 
   '@types/react@18.2.21':
     dependencies:
@@ -14458,6 +14457,8 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-data-view: 1.0.2
+
+  date-fns@4.1.0: {}
 
   dayjs@1.11.13: {}
 
@@ -18107,54 +18108,6 @@ snapshots:
       react: 19.0.0
       react-native: 0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0)
       warn-once: 0.1.1
-
-  react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@18.2.21)(react@19.0.0):
-    dependencies:
-      '@jest/create-cache-key-function': 29.7.0
-      '@react-native/assets-registry': 0.79.1
-      '@react-native/codegen': 0.79.1(@babel/core@7.25.2)
-      '@react-native/community-cli-plugin': 0.79.1(@react-native-community/cli@18.0.0(typescript@5.7.3))
-      '@react-native/gradle-plugin': 0.79.1
-      '@react-native/js-polyfills': 0.79.1
-      '@react-native/normalize-colors': 0.79.1
-      '@react-native/virtualized-lists': 0.79.1(@types/react@18.2.21)(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@18.2.21)(react@19.0.0))(react@19.0.0)
-      abort-controller: 3.0.0
-      anser: 1.4.10
-      ansi-regex: 5.0.1
-      babel-jest: 29.7.0(@babel/core@7.25.2)
-      babel-plugin-syntax-hermes-parser: 0.25.1
-      base64-js: 1.5.1
-      chalk: 4.1.2
-      commander: 12.1.0
-      event-target-shim: 5.0.1
-      flow-enums-runtime: 0.0.6
-      glob: 7.2.3
-      invariant: 2.2.4
-      jest-environment-node: 29.7.0
-      memoize-one: 5.2.1
-      metro-runtime: 0.82.4
-      metro-source-map: 0.82.4
-      nullthrows: 1.1.1
-      pretty-format: 29.7.0
-      promise: 8.3.0
-      react: 19.0.0
-      react-devtools-core: 6.1.3
-      react-refresh: 0.14.2
-      regenerator-runtime: 0.13.11
-      scheduler: 0.25.0
-      semver: 7.7.2
-      stacktrace-parser: 0.1.11
-      whatwg-fetch: 3.6.20
-      ws: 6.2.3
-      yargs: 17.7.2
-    optionalDependencies:
-      '@types/react': 18.2.21
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@react-native-community/cli'
-      - bufferutil
-      - supports-color
-      - utf-8-validate
 
   react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0):
     dependencies:

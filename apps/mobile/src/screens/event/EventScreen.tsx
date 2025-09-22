@@ -233,7 +233,9 @@ export const EventScreen = () => {
               category={EnumUtils.convertEventType(item.eventType)}
               participants={participants}
               maxParticipants={item.maxParticipants || undefined}
-              onPress={() => console.log('Navigate to event:', item.id)}
+              onPress={() =>
+                navigation.navigate('EventDetail', {eventId: item.id})
+              }
             />
           );
         }}

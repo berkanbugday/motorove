@@ -350,13 +350,11 @@ model User {
   socialMediaProfiles  SocialMedia[]
   updatedSocialMedia   SocialMedia[]     @relation("SocialMediaUpdatedBy")
 
-  // Garage system relations
-  garages            Garage[]     @relation("UserGarages")
-  updatedGarages     Garage[]     @relation("GarageUpdatedBy")
-  createdMotorcycles Motorcycle[] @relation("MotorcycleCreatedBy")
+  // Motorcycle and Equipment relations
+  motorcycles        Motorcycle[]
+  equipments         Equipment[]
   updatedMotorcycles Motorcycle[] @relation("MotorcycleUpdatedBy")
-  createdEquipment   Equipment[]  @relation("EquipmentCreatedBy")
-  updatedEquipment   Equipment[]  @relation("EquipmentUpdatedBy")
+  updatedEquipments  Equipment[]  @relation("EquipmentUpdatedBy")
   userSetting        UserSetting?
 
   // Following system relations
@@ -388,28 +386,7 @@ model User {
   @@index([cityId])
 }
 
-// New model for user garages
-model Garage {
-  id          String       @id @default(uuid())
-  name        String
-  description String?
-  equipments  Equipment[]
-  motorcycles Motorcycle[] // Add relation to motorcycles
-
-  // Base model fields
-  createdById String
-  createdBy   User     @relation("UserGarages", fields: [createdById], references: [id])
-  createdAt   DateTime @default(now())
-  updatedById String?
-  updatedBy   User?    @relation("GarageUpdatedBy", fields: [updatedById], references: [id])
-  updatedAt   DateTime @updatedAt
-  isActive    Boolean  @default(true)
-
-  @@index([createdById])
-  @@index([isActive])
-}
-
-// New model for motorcycles
+// Model for motorcycles
 model Motorcycle {
   id          String   @id @default(uuid())
   brand       String
@@ -417,24 +394,22 @@ model Motorcycle {
   year        Int?
   description String?
   images      String[] @default([])
-  garageId    String // Change to reference garage instead of user
-  garage      Garage   @relation(fields: [garageId], references: [id], onDelete: Cascade)
 
   // Base model fields
   createdById String
-  createdBy   User     @relation("MotorcycleCreatedBy", fields: [createdById], references: [id])
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedById String?
   updatedBy   User?    @relation("MotorcycleUpdatedBy", fields: [updatedById], references: [id])
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
 
-  @@index([garageId])
+  @@index([createdById])
   @@index([brand])
   @@index([isActive])
 }
 
-// New model for equipment in garages
+// Model for equipment
 model Equipment {
   id          String        @id @default(uuid())
   name        String
@@ -444,19 +419,17 @@ model Equipment {
   year        Int?
   description String?
   images      String[]      @default([])
-  garageId    String
-  garage      Garage        @relation(fields: [garageId], references: [id], onDelete: Cascade)
 
   // Base model fields
   createdById String
-  createdBy   User     @relation("EquipmentCreatedBy", fields: [createdById], references: [id])
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedById String?
   updatedBy   User?    @relation("EquipmentUpdatedBy", fields: [updatedById], references: [id])
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
 
-  @@index([garageId])
+  @@index([createdById])
   @@index([type])
   @@index([brand])
   @@index([isActive])

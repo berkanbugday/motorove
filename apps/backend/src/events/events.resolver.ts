@@ -44,10 +44,7 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => EventDto, { name: 'event' })
-  async findOne(
-    @Args('id', { type: () => ID }) id: string,
-    @Context() context: GqlContext,
-  ) {
+  async findOne(@Args('id') id: string, @Context() context: GqlContext) {
     const authHeader = context.req.headers.authorization;
     const userId = context.req.user?.id;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;

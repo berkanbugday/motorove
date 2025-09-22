@@ -869,7 +869,7 @@ type Query {
   comment(id: ID!): CommentDto!
   comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
   count: Float!
-  event(id: ID!): EventDto!
+  event(id: String!): EventDto!
   events(limit: Int, skip: Int, status: EventStatus): [EventDto!]!
   followRequests(limit: Int, skip: Int): [UserFollowingDto!]!
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!

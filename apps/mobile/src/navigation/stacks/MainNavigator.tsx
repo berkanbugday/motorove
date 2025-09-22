@@ -16,7 +16,11 @@ import {
   SearchGroupScreen,
 } from '@screens/group';
 import {SearchUserScreen} from '@screens/searchUser';
-import {CreateEventScreen, EventScreen} from '@screens/event';
+import {
+  CreateEventScreen,
+  EventScreen,
+  EventDetailScreen,
+} from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 import {
   ProfileScreen,
@@ -182,6 +186,11 @@ export function MainNavigator() {
       <Stack.Screen
         name="Events"
         component={EventScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="EventDetail"
+        component={EventDetailScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>
