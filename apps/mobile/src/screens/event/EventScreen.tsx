@@ -15,9 +15,10 @@ import {
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {IEvent, EventStatus} from '@motorove/shared';
+import {IEvent, EventStatus, AddressType} from '@motorove/shared';
 import {useGetEvents} from '@services/event.service';
 import {EnumUtils} from '@utils/enumUtils';
+import {useLanguage} from '@contexts/LanguageContext';
 
 /**
  * Events Screen - Displays user events with tab navigation
@@ -30,6 +31,7 @@ export const EventScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
+  const {language} = useLanguage();
 
   // Fetch published events
   const {
@@ -134,17 +136,17 @@ export const EventScreen = () => {
           return event.status === EventStatus.PUBLISHED && eventDate >= now;
         });
         break;
-      case 'draft':
-        filteredEvents = eventsList.filter(
-          event => event.status === EventStatus.DRAFT,
-        );
-        break;
       case 'past':
         filteredEvents = eventsList.filter(event => {
           const eventDate = new Date(event.startDateTime);
           const now = new Date();
           return event.status === EventStatus.PUBLISHED && eventDate < now;
         });
+        break;
+      case 'draft':
+        filteredEvents = eventsList.filter(
+          event => event.status === EventStatus.DRAFT,
+        );
         break;
       default:
         filteredEvents = eventsList.filter(
@@ -191,10 +193,25 @@ export const EventScreen = () => {
         keyExtractor={item => item.id}
         renderItem={({item}) => {
           // Get the first address (if available)
-          const address =
-            item.addresses && item.addresses.length > 0
-              ? item.addresses[0]
-              : null;
+          const meetingLocation =
+            item.addresses &&
+            item.addresses.find(
+              address =>
+                address.type === AddressType.EVENT_MEETING_POINT &&
+                address.language.toLowerCase() === language.toLowerCase(),
+            );
+
+          const startLocation =
+            item.addresses &&
+            item.addresses.find(
+              address =>
+                address.type === AddressType.EVENT_START_LOCATION &&
+                address.language.toLowerCase() === language.toLowerCase(),
+            );
+
+          const location = meetingLocation?.address
+            ? meetingLocation.address
+            : startLocation?.address;
 
           // For the UI we'll create a basic participants array
           // The actual data structure might be different
@@ -212,7 +229,7 @@ export const EventScreen = () => {
               title={item.title}
               image={{uri: item.images?.[0]}}
               dateTime={item.startDateTime}
-              location={address ? `${address.country || ''}`.trim() : ''}
+              location={location || ''}
               category={EnumUtils.convertEventType(item.eventType)}
               participants={participants}
               maxParticipants={item.maxParticipants || undefined}

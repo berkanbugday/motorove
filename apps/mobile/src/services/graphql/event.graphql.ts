@@ -16,6 +16,7 @@ export const EVENT_FRAGMENT = gql`
     addresses {
       id
       language
+      address
       type
       latitude
       longitude

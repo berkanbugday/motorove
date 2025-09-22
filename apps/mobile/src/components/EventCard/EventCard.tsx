@@ -12,8 +12,9 @@ import {
 import {Typography} from '../Typography';
 import {Icon} from '../Icon';
 import {colors, getShadow, radius} from '@theme';
-import {Chip, ChipColor} from '../Chip';
+import {Chip} from '../Chip';
 import {styles} from './EventCard.styles';
+import {useLanguage} from '@contexts/LanguageContext';
 
 export interface ParticipantInfo {
   id: string;
@@ -112,10 +113,11 @@ const EventCard: React.FC<EventCardProps> = ({
   imageStyle,
   titleStyle,
 }) => {
+  const {language} = useLanguage();
   // Format date to show only the day and month
   const getFormattedDate = () => {
     const date = typeof dateTime === 'string' ? new Date(dateTime) : dateTime;
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(language, {
       month: 'short',
       day: 'numeric',
     });
@@ -124,26 +126,11 @@ const EventCard: React.FC<EventCardProps> = ({
   // Format time to show only hours and minutes
   const getFormattedTime = () => {
     const date = typeof dateTime === 'string' ? new Date(dateTime) : dateTime;
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString(language, {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true,
+      hour12: false,
     });
-  };
-
-  // Get color for category chip
-  const getCategoryColor = (): ChipColor => {
-    // Map categories to colors - can be extended
-    switch (category?.toLowerCase()) {
-      case 'group ride':
-        return 'primary';
-      case 'night ride':
-        return 'info';
-      case 'off-road':
-        return 'warning';
-      default:
-        return 'primary';
-    }
   };
 
   // Calculate the number of participants to display
@@ -182,7 +169,7 @@ const EventCard: React.FC<EventCardProps> = ({
         <View style={styles.categoryContainer}>
           <Chip
             label={category}
-            color={getCategoryColor()}
+            color="primary"
             size="small"
             variant="filled"
           />
@@ -196,14 +183,14 @@ const EventCard: React.FC<EventCardProps> = ({
     <View style={[styles.content, contentStyle]}>
       {/* Title */}
       {title && (
-        <Typography variant="subtitle" style={titleStyle}>
+        <Typography weight="semiBold" variant="subtitle" style={titleStyle}>
           {title}
         </Typography>
       )}
 
       {/* Date and Time */}
       <View style={styles.dateTimeContainer}>
-        <Icon name="chevron-down" size={14} color={colors.neutral.grey} />
+        <Icon name="calendar-filled" size={14} color={colors.neutral.grey} />
         <Typography
           variant="caption"
           color={colors.neutral.grey}
@@ -220,7 +207,6 @@ const EventCard: React.FC<EventCardProps> = ({
           color={colors.neutral.grey}
           style={styles.location}>
           {location}
-          {distance && ` • ${distance}`}
         </Typography>
       </View>
 
