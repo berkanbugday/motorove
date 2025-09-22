@@ -7,7 +7,7 @@ import {Body, Subtitle, useBottomSheet, LanguageSelector} from '@components';
 import {colors, commonStyles, radius, spacing} from '@theme';
 import {useAuth} from '@contexts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 
 type MenuSection = {
   title: string;

@@ -29,7 +29,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, IUser, IImage} from '@motorove/shared';
+import {IPost, IUser, IImage, Language} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -38,7 +38,8 @@ import {
   useUnsavePost,
   useRemovePost,
 } from '@services/post.service';
-import {relativeTime} from '@utils/dateUtils';
+import {formatDistanceToNow} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
 import {useTranslation} from '@hooks/useTranslation';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -317,7 +318,11 @@ export const PostScreen = ({navigation}: Props) => {
         id: post.id,
         userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
-        timeAgo: relativeTime(post.createdAt, t),
+        timeAgo: formatDistanceToNow(new Date(post.createdAt), {
+          addSuffix: true,
+          locale:
+            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+        }),
         content: post.content,
         images,
         likeCount: post.likesCount,

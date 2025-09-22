@@ -13,7 +13,7 @@ import {radius} from '@theme/radius';
 import {AddressType, ICreateAddress} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 
 interface SelectLocationMapProps {
   onLocationSelect: (addresses: ICreateAddress[]) => void;

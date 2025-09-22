@@ -16,7 +16,7 @@ import {
   SkeletonGroup,
   Button,
 } from '@components';
-import {IComment, IImage, IPost} from '@motorove/shared';
+import {IComment, IImage, IPost, Language} from '@motorove/shared';
 import {Comment} from '@components/Comment/comments';
 import {
   useCreateComment,
@@ -26,7 +26,8 @@ import {
 } from '@services';
 import {useAuth} from '@contexts/AuthContext';
 import {IconName} from '@components/Icon';
-import {relativeTime} from '@utils/dateUtils';
+import {formatDistanceToNow} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
 import {
@@ -235,7 +236,11 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         id: postData.id,
         userName: `${postData.createdBy.firstName} ${postData.createdBy.lastName}`,
         avatarSource: formatAvatarSource(postData.createdBy.avatar),
-        timeAgo: relativeTime(postData.createdAt, t),
+        timeAgo: formatDistanceToNow(new Date(postData.createdAt), {
+          addSuffix: true,
+          locale:
+            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+        }),
         content: postData.content,
         images,
         likeCount: postData.likesCount,
@@ -287,7 +292,11 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
       userName: userName.trim(),
       avatarSource: formatAvatarSource(comment.createdBy?.avatar),
       content: comment.content,
-      timeAgo: relativeTime(comment.createdAt, t),
+      timeAgo: formatDistanceToNow(new Date(comment.createdAt), {
+        addSuffix: true,
+        locale:
+          language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+      }),
       likeCount: 0,
       replyCount: 0, // Adding required property
       isLiked: false,

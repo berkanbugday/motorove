@@ -3,7 +3,10 @@ import {View, StyleSheet, Image} from 'react-native';
 import {colors, spacing, radius} from '@theme';
 import {Typography, Button, Icon} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
-import {relativeTime} from '@utils/dateUtils';
+import {formatDistanceToNow} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
+import {useLanguage} from '@contexts/LanguageContext';
+import {Language} from '@motorove/shared';
 
 export interface FollowRequestCardProps {
   /**
@@ -55,6 +58,7 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
   style,
 }) => {
   const {t} = useTranslation();
+  const {language} = useLanguage();
 
   return (
     <View style={[styles.container, style]}>
@@ -78,7 +82,13 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
               {name}
             </Typography>
             <Typography variant="caption" color={colors.neutral.darkGrey}>
-              {relativeTime(timeAgo, t)}
+              {formatDistanceToNow(new Date(timeAgo), {
+                addSuffix: true,
+                locale:
+                  language.toLowerCase() === Language.TR.toLowerCase()
+                    ? tr
+                    : enUS,
+              })}
             </Typography>
           </View>
 

@@ -6,7 +6,7 @@ import {Button} from '@components/Button';
 import {Icon} from '@components/Icon';
 import {styles} from './UserCard.styles';
 import {ApprovalStatus, IUser} from '@motorove/shared';
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 
 interface UserCardProps {
   user: IUser;

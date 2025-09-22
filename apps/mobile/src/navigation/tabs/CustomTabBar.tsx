@@ -11,7 +11,7 @@ import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Icon, IconName} from '@components/Icon';
 import {colors} from '@theme/colors';
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 
 /**
  * Custom Tab Bar component for bottom navigation

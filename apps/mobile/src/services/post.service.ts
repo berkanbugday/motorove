@@ -14,7 +14,7 @@ import {IPost, ICreatePost, IUpdatePost} from '@motorove/shared';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
-import useTranslation from '@/hooks/useTranslation';
+import useTranslation from '@hooks/useTranslation';
 import {useAuth} from '@contexts/AuthContext';
 
 // Hook for creating a post

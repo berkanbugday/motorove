@@ -29,9 +29,11 @@ import {
   useDeleteNotification,
   useDeleteAllNotifications,
 } from '@services/notification.service';
-import {relativeTime} from '@utils/dateUtils';
-import {INotification} from '@motorove/shared';
-import {useTranslation} from '@/hooks/useTranslation';
+import {formatDistanceToNow} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
+import {INotification, Language} from '@motorove/shared';
+import {useTranslation} from '@hooks/useTranslation';
+import {useLanguage} from '@contexts/LanguageContext';
 
 /**
  * NotificationSkeleton - Skeleton component for notification items
@@ -56,6 +58,7 @@ const NotificationSkeleton = () => {
 export const NotificationScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {t} = useTranslation();
+  const {language} = useLanguage();
   const {
     notifications: apiNotifications,
     loading,
@@ -224,7 +227,13 @@ export const NotificationScreen = () => {
               <View style={styles.timeContainer}>
                 <Icon name="clock" size={12} color={colors.neutral.grey} />
                 <Caption color={colors.neutral.grey} style={styles.infoText}>
-                  {relativeTime(item.createdAt, t)}
+                  {formatDistanceToNow(new Date(item.createdAt), {
+                    addSuffix: true,
+                    locale:
+                      language.toLowerCase() === Language.TR.toLowerCase()
+                        ? tr
+                        : enUS,
+                  })}
                 </Caption>
               </View>
             </View>

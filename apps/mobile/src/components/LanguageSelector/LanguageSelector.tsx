@@ -3,7 +3,7 @@ import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {Icon} from '@components/Icon';
 import {Body} from '@components';
 import {colors, spacing} from '@theme';
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 import {Language} from '@motorove/shared';
 
 interface LanguageOption {

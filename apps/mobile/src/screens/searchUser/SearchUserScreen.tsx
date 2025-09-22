@@ -11,7 +11,7 @@ import {
 import {colors, commonStyles, spacing} from '@theme';
 import {useSearchUsers} from '@services/user.service';
 import {IUser} from '@motorove/shared';
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/index';
 import {useFollowUser, useUnfollowUser} from '@services/user-following.service';

@@ -41,7 +41,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, IUser, IImage, IEvent} from '@motorove/shared';
+import {IPost, IUser, IImage, IEvent, Language} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -50,7 +50,8 @@ import {
   useUnsavePost,
   useRemovePost,
 } from '@services/post.service';
-import {relativeTime} from '@utils/dateUtils';
+import {formatDistanceToNow} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
 import {useTranslation} from '@hooks/useTranslation';
 
 // Route data
@@ -220,29 +221,32 @@ export const HomeScreen = ({navigation}: Props) => {
   }, [currentRouteIndex]);
 
   // Transform IEvent to EventItem format for GroupEventBanner
-  const transformEventToEventItem = useCallback((event: IEvent): EventItem => {
-    const startDate = new Date(event.startDateTime);
-    const day = startDate.getDate().toString().padStart(2, '0');
-    const month = startDate
-      .toLocaleDateString(language, {month: 'short'})
-      .toUpperCase();
-    const time = startDate.toLocaleTimeString(language, {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
+  const transformEventToEventItem = useCallback(
+    (event: IEvent): EventItem => {
+      const startDate = new Date(event.startDateTime);
+      const day = startDate.getDate().toString().padStart(2, '0');
+      const month = startDate
+        .toLocaleDateString(language, {month: 'short'})
+        .toUpperCase();
+      const time = startDate.toLocaleTimeString(language, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
 
-    return {
-      id: event.id,
-      day,
-      month,
-      time,
-      title: event.title,
-      organizer: `${event.createdBy.firstName} ${event.createdBy.lastName}`,
-      participantCount: event.participantsCount || 0,
-      maxParticipants: event.maxParticipants || 0,
-    };
-  }, []);
+      return {
+        id: event.id,
+        day,
+        month,
+        time,
+        title: event.title,
+        organizer: `${event.createdBy.firstName} ${event.createdBy.lastName}`,
+        participantCount: event.participantsCount || 0,
+        maxParticipants: event.maxParticipants || 0,
+      };
+    },
+    [language],
+  );
 
   // Transform events data to EventItem format
   const upcomingEvents: EventItem[] = events.map(transformEventToEventItem);
@@ -519,7 +523,11 @@ export const HomeScreen = ({navigation}: Props) => {
         id: post.id,
         userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
-        timeAgo: relativeTime(post.createdAt, t),
+        timeAgo: formatDistanceToNow(new Date(post.createdAt), {
+          addSuffix: true,
+          locale:
+            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+        }),
         content: post.content,
         images,
         likeCount: post.likesCount,

@@ -15,7 +15,7 @@ This directory contains the multi-language implementation for the Motorove mobil
 ### In Components
 
 ```tsx
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 
 const MyComponent = () => {
   // Get the translation function and language utilities
@@ -222,7 +222,7 @@ Always use the custom `useTranslation` hook instead of the raw `react-i18next` h
 import {useTranslation} from 'react-i18next';
 
 // ✅ Good
-import {useTranslation} from '@/hooks/useTranslation';
+import {useTranslation} from '@hooks/useTranslation';
 ```
 
 ### 3. Handle Loading States
