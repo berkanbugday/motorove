@@ -153,7 +153,7 @@ const Community: React.FC = () => {
           >
             <div className="relative h-[400px] md:h-[500px]">
               <Image
-                src="/assets/images/community-screen.png"
+                src="/assets/images/app-screen-1.png"
                 alt={t("community.altText.communityScreen")}
                 fill
                 className="object-contain rounded-2xl shadow-lg"
