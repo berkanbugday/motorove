@@ -79,7 +79,4 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  categoryChip: {
-    backgroundColor: colors.primary.light,
-  },
 });

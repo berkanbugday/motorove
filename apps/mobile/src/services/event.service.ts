@@ -283,11 +283,7 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
 };
 
 // Hook to fetch event join requests
-export const useGetEventJoinRequests = (
-  eventId: string,
-  limit = 20,
-  skip = 0,
-) => {
+export const useGetEventJoinRequests = (limit = 20, skip = 0) => {
   const {t} = useTranslation();
   const [hasMore, setHasMore] = useState(true);
 
@@ -298,8 +294,7 @@ export const useGetEventJoinRequests = (
     refetch: originalRefetch,
     fetchMore,
   } = useQuery(GET_EVENT_JOIN_REQUESTS, {
-    variables: {eventId, limit, skip},
-    skip: !eventId,
+    variables: {limit, skip},
     onError: errorObj => {
       loggingService.error('Error fetching event join requests:', errorObj);
     },
@@ -319,7 +314,6 @@ export const useGetEventJoinRequests = (
     try {
       const result = await fetchMore({
         variables: {
-          eventId,
           skip: data?.eventJoinRequests?.length || 0,
           limit,
         },
@@ -343,14 +337,7 @@ export const useGetEventJoinRequests = (
     } catch (errorObj) {
       loggingService.error('Error loading more join requests:', errorObj);
     }
-  }, [
-    data?.eventJoinRequests?.length,
-    fetchMore,
-    hasMore,
-    limit,
-    loading,
-    eventId,
-  ]);
+  }, [data?.eventJoinRequests?.length, fetchMore, hasMore, limit, loading]);
 
   const handleAccept = useCallback(
     async (requestId: string) => {

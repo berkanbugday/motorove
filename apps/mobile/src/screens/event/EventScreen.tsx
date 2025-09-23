@@ -12,6 +12,8 @@ import {
   Title,
   BodySmall,
   SkeletonGroup,
+  Subtitle,
+  Body,
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -25,9 +27,9 @@ import {useLanguage} from '@contexts/LanguageContext';
  */
 export const EventScreen = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
-  const [refreshingEvents, setRefreshingEvents] = useState(false);
+  const [refreshingPublishedEvents, setRefreshingPublishedEvents] =
+    useState(false);
   const [refreshingDraftEvents, setRefreshingDraftEvents] = useState(false);
-  const [refreshingPastEvents, setRefreshingPastEvents] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
@@ -41,7 +43,7 @@ export const EventScreen = () => {
     refetch: refetchPublishedEvents,
     loadMore: loadMorePublishedEvents,
     hasMore: hasMorePublishedEvents,
-  } = useGetEvents(20, 0);
+  } = useGetEvents(20, 0, EventStatus.PUBLISHED);
 
   // Fetch draft events
   const {
@@ -53,20 +55,10 @@ export const EventScreen = () => {
     hasMore: hasMoreDraftEvents,
   } = useGetEvents(20, 0, EventStatus.DRAFT);
 
-  // Fetch past events (we'll filter by date since there's no PAST status)
-  const {
-    events: pastEvents,
-    loading: pastEventsLoading,
-    error: pastEventsError,
-    refetch: refetchPastEvents,
-    loadMore: loadMorePastEvents,
-    hasMore: hasMorePastEvents,
-  } = useGetEvents(20, 0, EventStatus.PUBLISHED);
-
-  const handleRefreshEvents = useCallback(async () => {
-    setRefreshingEvents(true);
+  const handleRefreshPublishedEvents = useCallback(async () => {
+    setRefreshingPublishedEvents(true);
     await refetchPublishedEvents();
-    setRefreshingEvents(false);
+    setRefreshingPublishedEvents(false);
   }, [refetchPublishedEvents]);
 
   const handleRefreshDraftEvents = useCallback(async () => {
@@ -74,12 +66,6 @@ export const EventScreen = () => {
     await refetchDraftEvents();
     setRefreshingDraftEvents(false);
   }, [refetchDraftEvents]);
-
-  const handleRefreshPastEvents = useCallback(async () => {
-    setRefreshingPastEvents(true);
-    await refetchPastEvents();
-    setRefreshingPastEvents(false);
-  }, [refetchPastEvents]);
 
   const renderEmptyState = useCallback(
     (tabType: string, isLoading: boolean) => {
@@ -90,25 +76,23 @@ export const EventScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="calendar" size={48} />
-          <Title weight="bold">
+          <Subtitle weight="bold">
             {tabType === 'upcoming'
               ? t('screens.event.no_upcoming_events')
               : tabType === 'draft'
               ? t('screens.event.no_draft_events')
               : t('screens.event.no_past_events')}
-          </Title>
-          <BodySmall align="center">
-            {t('screens.event.could_not_load_events')}
-          </BodySmall>
+          </Subtitle>
+          <Body align="center">{t('screens.event.could_not_load_events')}</Body>
           <Button
-            title={
-              tabType === 'draft'
-                ? t('screens.event.create_event')
-                : t('common.try_again')
-            }
+            title={t('common.try_again')}
             variant="primary"
             shape="round"
-            onPress={() => navigation.navigate('CreateEvent')}
+            onPress={() =>
+              tabType === 'upcoming' || tabType === 'past'
+                ? handleRefreshPublishedEvents()
+                : handleRefreshDraftEvents()
+            }
           />
         </View>
       );
@@ -249,6 +233,8 @@ export const EventScreen = () => {
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={renderEmptyState(activeTab, isLoading)}
+        onEndReached={hasMore ? loadMore : undefined}
+        onEndReachedThreshold={0.5}
       />
     );
   };
@@ -261,8 +247,8 @@ export const EventScreen = () => {
         <View style={styles.tabContent}>
           {renderEventsList(
             publishedEvents,
-            refreshingEvents,
-            handleRefreshEvents,
+            refreshingPublishedEvents,
+            handleRefreshPublishedEvents,
             publishedEventsLoading,
             publishedEventsError,
             loadMorePublishedEvents,
@@ -277,13 +263,13 @@ export const EventScreen = () => {
       content: (
         <View style={styles.tabContent}>
           {renderEventsList(
-            pastEvents,
-            refreshingPastEvents,
-            handleRefreshPastEvents,
-            pastEventsLoading,
-            pastEventsError,
-            loadMorePastEvents,
-            hasMorePastEvents,
+            publishedEvents,
+            refreshingPublishedEvents,
+            handleRefreshPublishedEvents,
+            publishedEventsLoading,
+            publishedEventsError,
+            loadMorePublishedEvents,
+            hasMorePublishedEvents,
           )}
         </View>
       ),
@@ -352,7 +338,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: spacing.md,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
   },
   loadingContainer: {
     flex: 1,

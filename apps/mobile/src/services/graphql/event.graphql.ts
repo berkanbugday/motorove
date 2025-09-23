@@ -120,8 +120,8 @@ export const GET_EVENT = gql`
 
 // Get event join requests
 export const GET_EVENT_JOIN_REQUESTS = gql`
-  query GetEventJoinRequests($eventId: String!, $limit: Int, $skip: Int) {
-    eventJoinRequests(eventId: $eventId, limit: $limit, skip: $skip) {
+  query GetEventJoinRequests($limit: Int, $skip: Int) {
+    eventJoinRequests(limit: $limit, skip: $skip) {
       id
       event {
         id
