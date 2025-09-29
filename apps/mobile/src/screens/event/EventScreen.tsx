@@ -210,7 +210,7 @@ export const EventScreen = () => {
             ? Array(Math.min(3, item.participantsCount))
                 .fill(0)
                 .map((_, i) => ({
-                  id: `participant-${i}`,
+                  id: `${item.id}-participant-${i}`,
                   name: '',
                 }))
             : [];

@@ -190,7 +190,9 @@ const EventCard: React.FC<EventCardProps> = ({
 
       {/* Date and Time */}
       <View style={styles.dateTimeContainer}>
-        <Icon name="calendar-filled" size={14} color={colors.neutral.grey} />
+        {dateTime && (
+          <Icon name="calendar-filled" size={14} color={colors.neutral.grey} />
+        )}
         <Typography
           variant="caption"
           color={colors.neutral.grey}
@@ -201,7 +203,9 @@ const EventCard: React.FC<EventCardProps> = ({
 
       {/* Location */}
       <View style={styles.locationContainer}>
-        <Icon name="map-pin" size={14} color={colors.neutral.grey} />
+        {location && (
+          <Icon name="map-pin" size={14} color={colors.neutral.grey} />
+        )}
         <Typography
           variant="caption"
           color={colors.neutral.grey}

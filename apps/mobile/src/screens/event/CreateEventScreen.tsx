@@ -233,6 +233,24 @@ export const CreateEventScreen: React.FC = () => {
   const confirmSaveDraft = useCallback(async () => {
     const formData = getValues();
 
+    if (!formData.eventType) {
+      showToast({
+        type: 'error',
+        text1: t('validation.event.event_type.required'),
+        text2: t('validation.event.event_type.select'),
+      });
+      return;
+    }
+
+    if (!selectedImages.length) {
+      showToast({
+        type: 'error',
+        text1: t('validation.event.images.required'),
+        text2: t('validation.event.images.image_size_limit'),
+      });
+      return;
+    }
+
     try {
       const addresses: ICreateAddress[] = [
         ...(selectedMeetingPoint || []),

@@ -189,11 +189,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
       {/* Animated Header with Background Image */}
       <Animated.View style={[styles.headerContainer, {height: headerHeight}]}>
         <Animated.Image
-          source={
-            event.images && event.images.length > 0
-              ? {uri: event.images[0]}
-              : require('@assets/images/default_event_cover.png')
-          }
+          source={{uri: event.images?.[0]}}
           style={styles.headerImage}
         />
         <Animated.View
