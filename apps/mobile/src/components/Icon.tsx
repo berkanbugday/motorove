@@ -18,7 +18,7 @@ import ChevronDown from '@assets/icons/chevron-down.svg';
 import ChevronRight from '@assets/icons/chevron-right.svg';
 import Check from '@assets/icons/check.svg';
 import CheckFilled from '@assets/icons/check-filled.svg';
-import MapPin from '@assets/icons/map-pin.svg';
+import MapPinFilled from '@assets/icons/map-pin-filled.svg';
 import Route from '@assets/icons/route.svg';
 import RouteFilled from '@assets/icons/route-filled.svg';
 import Users from '@assets/icons/users.svg';
@@ -92,6 +92,9 @@ import FileFilled from '@assets/icons/file-filled.svg';
 import SignOut from '@assets/icons/sign-out.svg';
 import QuestionFilled from '@assets/icons/question-filled.svg';
 import ShareFilled from '@assets/icons/share-filled.svg';
+import CalendarClockFilled from '@assets/icons/calendar-clock-filled.svg';
+import MapPinSlashFilled from '@assets/icons/map-pin-slash-filled.svg';
+import LocationArrowFilled from '@assets/icons/location-arrow-filled.svg';
 
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
@@ -121,7 +124,7 @@ export type IconName =
   | 'chevron-right'
   | 'check'
   | 'check-filled'
-  | 'map-pin'
+  | 'map-pin-filled'
   | 'route'
   | 'route-filled'
   | 'users'
@@ -202,7 +205,10 @@ export type IconName =
   | 'file-filled'
   | 'sign-out'
   | 'question-filled'
-  | 'share-filled';
+  | 'share-filled'
+  | 'calendar-clock-filled'
+  | 'map-pin-slash-filled'
+  | 'location-arrow-filled';
 
 interface IconProps {
   name: IconName;
@@ -257,8 +263,8 @@ export function Icon({
       return <Check {...commonProps} />;
     case 'check-filled':
       return <CheckFilled {...commonProps} />;
-    case 'map-pin':
-      return <MapPin {...commonProps} />;
+    case 'map-pin-filled':
+      return <MapPinFilled {...commonProps} />;
     case 'route':
       return <Route {...commonProps} />;
     case 'route-filled':
@@ -421,6 +427,12 @@ export function Icon({
       return <QuestionFilled {...commonProps} />;
     case 'share-filled':
       return <ShareFilled {...commonProps} />;
+    case 'calendar-clock-filled':
+      return <CalendarClockFilled {...commonProps} />;
+    case 'map-pin-slash-filled':
+      return <MapPinSlashFilled {...commonProps} />;
+    case 'location-arrow-filled':
+      return <LocationArrowFilled {...commonProps} />;
     default:
       return null;
   }

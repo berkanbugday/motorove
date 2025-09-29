@@ -109,7 +109,7 @@ export function LocationPermissionOverlay({
 
 interface FeatureItemProps {
   icon:
-    | 'map-pin'
+    | 'map-pin-filled'
     | 'route'
     | 'route-filled'
     | 'comments'

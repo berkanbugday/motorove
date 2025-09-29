@@ -204,7 +204,7 @@ const EventCard: React.FC<EventCardProps> = ({
       {/* Location */}
       <View style={styles.locationContainer}>
         {location && (
-          <Icon name="map-pin" size={14} color={colors.neutral.grey} />
+          <Icon name="map-pin-filled" size={14} color={colors.neutral.grey} />
         )}
         <Typography
           variant="caption"

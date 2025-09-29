@@ -679,7 +679,6 @@ export const CreateEventScreen: React.FC = () => {
                 placeholder=""
                 selectedItem={selectedEventType}
                 error={errors.eventType?.message}
-                disabled={loading}
                 key="eventType-dropdown"
               />
 
@@ -690,7 +689,11 @@ export const CreateEventScreen: React.FC = () => {
                 label={t('screens.event.meeting_point_label')}
                 error={errors.meetingPoint}
                 icon={
-                  <Icon name="map-pin" size={20} color={colors.neutral.grey} />
+                  <Icon
+                    name="map-pin-filled"
+                    size={20}
+                    color={colors.neutral.grey}
+                  />
                 }
                 iconPosition="right"
                 onPress={handleOpenLocationMap}
@@ -923,7 +926,7 @@ export const CreateEventScreen: React.FC = () => {
                       error={errors.startLocation}
                       icon={
                         <Icon
-                          name="map-pin"
+                          name="map-pin-filled"
                           size={20}
                           color={colors.neutral.grey}
                         />
@@ -942,7 +945,7 @@ export const CreateEventScreen: React.FC = () => {
                       error={errors.finishLocation}
                       icon={
                         <Icon
-                          name="map-pin"
+                          name="map-pin-filled"
                           size={20}
                           color={colors.neutral.grey}
                         />
@@ -1228,6 +1231,7 @@ export const CreateEventScreen: React.FC = () => {
             variant="dark"
             shape="round"
             onPress={handleNextStep}
+            loading={loading}
             style={{flex: 1}}
           />
         ) : (
@@ -1244,6 +1248,7 @@ export const CreateEventScreen: React.FC = () => {
               variant="dark"
               shape="round"
               onPress={handleNextStep}
+              loading={loading}
               style={{flex: 1}}
             />
           </>

@@ -214,7 +214,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
 
       if (postData.addresses && postData.addresses.length > 0) {
         labels.push({
-          icon: 'map-pin' as IconName,
+          icon: 'map-pin-filled' as IconName,
           text:
             postData.addresses?.find(
               address =>

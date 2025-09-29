@@ -90,7 +90,11 @@ export const ProfileScreen = () => {
                 <Text style={styles.routeDetailText}>{route.duration}</Text>
               </View>
               <View style={styles.routeDetail}>
-                <Icon name="map-pin" size={14} color={colors.neutral.grey} />
+                <Icon
+                  name="map-pin-filled"
+                  size={14}
+                  color={colors.neutral.grey}
+                />
                 <Text style={styles.routeDetailText}>{route.date}</Text>
               </View>
             </View>
@@ -170,7 +174,7 @@ export const ProfileScreen = () => {
                 {`${user?.firstName} ${user?.lastName}`}
               </Title>
               <View style={styles.locationContainer}>
-                <Icon name="map-pin" size={16} />
+                <Icon name="map-pin-filled" size={16} />
                 <BodySmall color={colors.neutral.grey}>
                   {profileData.location}
                 </BodySmall>

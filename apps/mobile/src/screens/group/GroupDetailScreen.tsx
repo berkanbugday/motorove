@@ -693,7 +693,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
 
       if (post.addresses && post.addresses.length > 0) {
         labels.push({
-          icon: 'map-pin' as IconName,
+          icon: 'map-pin-filled' as IconName,
           text:
             post.addresses?.find(
               address =>
@@ -1214,7 +1214,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           </View>
 
           <View style={styles.infoRow}>
-            <Icon name="map-pin" size={18} />
+            <Icon name="map-pin-filled" size={18} />
             <Typography style={styles.infoText}>
               {group?.city.value || t('screens.group.no_location')}
             </Typography>

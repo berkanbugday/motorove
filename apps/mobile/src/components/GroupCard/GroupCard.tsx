@@ -230,7 +230,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             {name}
           </Typography>
           <View style={styles.locationContainer}>
-            <Icon name="map-pin" size={12} color={colors.neutral.grey} />
+            <Icon name="map-pin-filled" size={12} color={colors.neutral.grey} />
             <Typography
               variant="caption"
               color={colors.neutral.darkGrey}

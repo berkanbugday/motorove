@@ -133,7 +133,7 @@ const WeatherWidget: React.FC<WeatherWidgetProps> = ({
             ) : (
               <View style={styles.locationContainer}>
                 <Icon
-                  name="map-pin"
+                  name="map-pin-filled"
                   size={14}
                   color={conditionStyle.text}
                   style={styles.locationIcon}

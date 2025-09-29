@@ -395,7 +395,7 @@ export const CreatePostScreen = () => {
           <View style={styles.actionButtonsContainer}>
             <Button
               variant="text"
-              iconName="map-pin"
+              iconName="map-pin-filled"
               iconColor={colors.neutral.black}
               iconSize={18}
               onPress={handleAddLocation}

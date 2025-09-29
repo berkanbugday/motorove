@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -27,14 +27,14 @@ import {
   BottomSheetRef,
   Body,
 } from '@components';
-import {format} from 'date-fns';
-// import {useAuth} from '@contexts'; // Commented out as not used
+import {format, formatDuration, intervalToDuration} from 'date-fns';
 import {useTranslation} from '@hooks/useTranslation';
-import {IEvent, EventStatus} from '@motorove/shared';
+import {useLanguage} from '@contexts/LanguageContext';
+import {IEvent, EventStatus, Language, AddressType} from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
-// import {EventParticipantStatus} from '@motorove/shared'; // Commented out as not used
-
+import {tr, enUS} from 'date-fns/locale';
+import {EnumUtils} from '@utils/enumUtils';
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
 
 type Props = {
@@ -48,7 +48,7 @@ type Props = {
 export const EventDetailScreen = ({route, navigation}: Props) => {
   const {eventId} = route.params;
   const {t} = useTranslation();
-  // const {user} = useAuth(); // Commented out as not used in current implementation
+  const {language} = useLanguage();
   const [isJoining, setIsJoining] = useState(false);
   const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
 
@@ -65,17 +65,41 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const formatEventDate = useCallback((dateInput: string | Date) => {
     const eventDate =
       typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-    return format(eventDate, 'EEEE, MMM d • HH:mm');
+    return format(eventDate, 'EEEE, MMM d • HH:mm', {
+      locale: language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+    });
   }, []);
 
   // Get meeting point address (if available)
   const getMeetingPointAddress = useCallback(() => {
-    if (!event?.addresses || event.addresses.length === 0) {
-      return t('screens.event.no_location');
-    }
+    return (
+      event?.addresses?.find(
+        address =>
+          address.language.toLowerCase() === language.toLowerCase() &&
+          address.type === AddressType.EVENT_MEETING_POINT,
+      )?.address || null
+    );
+  }, [event?.addresses, language]);
 
-    return event.addresses[0]?.address || t('screens.event.no_location');
-  }, [event?.addresses, t]);
+  const getStartLocationAddress = useCallback(() => {
+    return (
+      event?.addresses?.find(
+        address =>
+          address.language.toLowerCase() === language.toLowerCase() &&
+          address.type === AddressType.EVENT_START_LOCATION,
+      )?.address || null
+    );
+  }, [event?.addresses, language]);
+
+  const getFinishLocationAddress = useCallback(() => {
+    return (
+      event?.addresses?.find(
+        address =>
+          address.language.toLowerCase() === language.toLowerCase() &&
+          address.type === AddressType.EVENT_FINISH_LOCATION,
+      )?.address || null
+    );
+  }, [event?.addresses, language]);
 
   // Handle join event
   const handleJoinEvent = useCallback(async () => {
@@ -147,6 +171,118 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   // Determine if the user is going to the event (using hardcoded values for demo)
   const isUserGoing = false; // Replace with actual logic when backend is connected
   const isUserMaybe = false; // Replace with actual logic when backend is connected
+
+  // State for route data
+  const [routeInfo, setRouteInfo] = useState<string>('');
+  const [isLoadingRoute, setIsLoadingRoute] = useState<boolean>(false);
+
+  // Calculate route using OSRM API (OpenStreetMap Routing Machine)
+  const calculateRouteWithOSRM = useCallback(
+    async (
+      startLat: number,
+      startLng: number,
+      endLat: number,
+      endLng: number,
+    ) => {
+      try {
+        setIsLoadingRoute(true);
+
+        // Use the OSRM API to calculate route distance and duration
+        const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=false`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+          const routeData = data.routes[0];
+          const distanceKm = Math.round(routeData.distance / 1000); // Convert meters to km
+          const durationHours = routeData.duration / 3600; // Convert seconds to hours
+
+          // Format duration using date-fns
+          const durationMs = routeData.duration * 1000; // Convert seconds to milliseconds
+          const duration = intervalToDuration({start: 0, end: durationMs});
+
+          // Get the correct locale based on current language setting
+          const locale =
+            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS;
+
+          let durationText;
+          if (durationHours < 1) {
+            // For durations less than 1 hour, display minutes only
+            durationText = formatDuration(
+              {minutes: duration.minutes || 0},
+              {
+                format: ['minutes'],
+                locale: locale,
+              },
+            );
+            if (!durationText && duration.seconds) {
+              // If less than a minute, use localized version of '1 minute'
+              durationText = formatDuration(
+                {minutes: 1},
+                {format: ['minutes'], locale: locale},
+              );
+            }
+          } else {
+            // For longer durations, display hours and minutes
+            durationText = formatDuration(
+              {hours: duration.hours || 0, minutes: duration.minutes || 0},
+              {
+                format: ['hours', 'minutes'],
+                delimiter: ' ',
+                locale: locale,
+              },
+            );
+          }
+
+          setRouteInfo(`${distanceKm} km • ${durationText}`);
+        } else {
+          throw new Error('Route calculation failed');
+        }
+      } catch (error) {
+        loggingService.error('Error calculating route:', error);
+
+        setRouteInfo('');
+      } finally {
+        setIsLoadingRoute(false);
+      }
+    },
+    [],
+  );
+
+  // Load route data when event data is available
+  useEffect(() => {
+    if (event?.addresses) {
+      const startAddress = event.addresses.find(
+        address =>
+          address.language.toLowerCase() === language.toLowerCase() &&
+          address.type === AddressType.EVENT_START_LOCATION,
+      );
+
+      const finishAddress = event.addresses.find(
+        address =>
+          address.language.toLowerCase() === language.toLowerCase() &&
+          address.type === AddressType.EVENT_FINISH_LOCATION,
+      );
+
+      if (
+        startAddress &&
+        finishAddress &&
+        startAddress.latitude &&
+        startAddress.longitude &&
+        finishAddress.latitude &&
+        finishAddress.longitude
+      ) {
+        calculateRouteWithOSRM(
+          startAddress.latitude,
+          startAddress.longitude,
+          finishAddress.latitude,
+          finishAddress.longitude,
+        );
+      } else {
+        setRouteInfo('');
+      }
+    }
+  }, [event?.addresses, language, calculateRouteWithOSRM]);
 
   // Show loading while fetching initial data
   if (loading) {
@@ -223,7 +359,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
           {/* Ride Badge */}
           <Chip
-            label="Grup Sürüşü"
+            label={EnumUtils.convertEventType(event.eventType)}
             variant="filled"
             color="primary"
             style={styles.rideBadge}
@@ -233,39 +369,82 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           {/* Date/Time Row */}
           <View style={styles.infoRow}>
             <Icon
-              name="calendar-filled"
+              name="calendar-clock-filled"
               size={16}
               color={colors.neutral.grey}
             />
-            <Typography style={styles.infoText}>
-              {formatEventDate(event.startDateTime)}
-            </Typography>
+            <View style={styles.infoTextContainer}>
+              <Typography style={styles.infoText}>
+                {formatEventDate(event.startDateTime)}
+              </Typography>
+              {event.endDateTime && (
+                <Typography style={styles.infoText}>
+                  {formatEventDate(event.endDateTime)}
+                </Typography>
+              )}
+            </View>
           </View>
 
-          {/* Location Row */}
-          <View style={styles.infoRow}>
-            <Icon name="map-pin" size={16} color={colors.neutral.grey} />
-            <Typography style={styles.infoText}>
-              {getMeetingPointAddress()}
-            </Typography>
-          </View>
+          {/* Meeting Location Row */}
+          {getMeetingPointAddress() && (
+            <View style={styles.infoRow}>
+              <Icon
+                name="user-location"
+                size={16}
+                color={colors.neutral.grey}
+              />
+              <Typography style={styles.infoText}>
+                {getMeetingPointAddress()}
+              </Typography>
+            </View>
+          )}
+
+          {/* Start Location Row */}
+          {getStartLocationAddress() && (
+            <View style={styles.infoRow}>
+              <Icon
+                name="map-pin-filled"
+                size={16}
+                color={colors.neutral.grey}
+              />
+              <Typography style={styles.infoText}>
+                {getStartLocationAddress()}
+              </Typography>
+            </View>
+          )}
+
+          {/* Finish Location Row */}
+          {getFinishLocationAddress() && (
+            <View style={styles.infoRow}>
+              <Icon
+                name="map-pin-slash-filled"
+                size={20}
+                color={colors.neutral.grey}
+              />
+              <Typography style={styles.infoText}>
+                {getFinishLocationAddress()}
+              </Typography>
+            </View>
+          )}
 
           {/* Distance/Duration/Difficulty Row */}
-          <View style={styles.infoRow}>
-            <Icon name="route-filled" size={16} color={colors.neutral.grey} />
-            <Typography style={styles.infoText}>
-              130 km • 4.5 hrs • Intermediate
-            </Typography>
-          </View>
+          {!isLoadingRoute && routeInfo && (
+            <View style={styles.infoRow}>
+              <Icon name="route-filled" size={16} color={colors.neutral.grey} />
+              <Typography style={styles.infoText}>{routeInfo}</Typography>
+            </View>
+          )}
 
           {/* Organizer Row */}
-          <View style={styles.infoRow}>
-            <Icon name="users-filled" size={16} color={colors.neutral.grey} />
-            <Typography style={styles.infoText}>
-              {t('screens.event.organized_by')} {event.createdBy.firstName}{' '}
-              {event.createdBy.lastName}
-            </Typography>
-          </View>
+          {event.createdBy && (
+            <View style={styles.infoRow}>
+              <Icon name="user-filled" size={16} color={colors.neutral.grey} />
+              <Typography style={styles.infoText}>
+                {t('screens.event.organized_by')} {event.createdBy.firstName}{' '}
+                {event.createdBy.lastName}
+              </Typography>
+            </View>
+          )}
         </View>
 
         {/* Description Card */}
@@ -344,7 +523,11 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionButton}>
-              <Icon name="map-pin" size={16} color={colors.neutral.black} />
+              <Icon
+                name="map-pin-filled"
+                size={16}
+                color={colors.neutral.black}
+              />
               <Typography style={styles.actionButtonText}>
                 {t('screens.event.maps')}
               </Typography>
@@ -478,6 +661,9 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoTextContainer: {
     alignItems: 'center',
   },
   infoText: {

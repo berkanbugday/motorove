@@ -277,7 +277,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
         {/* Center indicator */}
         {!selectedLocation && (
           <View style={styles.centerMarker}>
-            <Icon name="map-pin" size={36} color={colors.primary.main} />
+            <Icon name="map-pin-filled" size={36} color={colors.primary.main} />
           </View>
         )}
       </View>

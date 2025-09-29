@@ -77,7 +77,11 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
   const {updateEvent, loading} = useUpdateEvent(() => {
     navigation.goBack();
   });
-  const {event, loading: eventLoading, error: eventError} = useGetEvent(eventId);
+  const {
+    event,
+    loading: eventLoading,
+    error: eventError,
+  } = useGetEvent(eventId);
 
   // Refs
   const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -662,7 +666,15 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
         loggingService.error('Error creating event:', error);
       }
     },
-    [updateEvent, eventId, selectedMeetingPoint, selectedStartLocation, selectedFinishLocation, selectedImages, selectedEventType],
+    [
+      updateEvent,
+      eventId,
+      selectedMeetingPoint,
+      selectedStartLocation,
+      selectedFinishLocation,
+      selectedImages,
+      selectedEventType,
+    ],
   );
 
   const handleWizardComplete = useCallback(() => {
@@ -712,7 +724,11 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                 label={t('screens.event.meeting_point_label')}
                 error={errors.meetingPoint}
                 icon={
-                  <Icon name="map-pin" size={20} color={colors.neutral.grey} />
+                  <Icon
+                    name="map-pin-filled"
+                    size={20}
+                    color={colors.neutral.grey}
+                  />
                 }
                 iconPosition="right"
                 onPress={handleOpenLocationMap}
@@ -945,7 +961,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                       error={errors.startLocation}
                       icon={
                         <Icon
-                          name="map-pin"
+                          name="map-pin-filled"
                           size={20}
                           color={colors.neutral.grey}
                         />
@@ -964,7 +980,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                       error={errors.finishLocation}
                       icon={
                         <Icon
-                          name="map-pin"
+                          name="map-pin-filled"
                           size={20}
                           color={colors.neutral.grey}
                         />
@@ -1225,7 +1241,9 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
       // Set event type
       if (event.eventType) {
-        const eventTypeItem = eventTypes.find(type => type.value === event.eventType);
+        const eventTypeItem = eventTypes.find(
+          type => type.value === event.eventType,
+        );
         if (eventTypeItem) {
           setSelectedEventType(eventTypeItem);
           setValue('eventType', event.eventType);
@@ -1234,7 +1252,9 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
       // Set event-specific fields
       if (event.roadType) {
-        const roadTypeItem = roadTypes.find(type => type.value === event.roadType);
+        const roadTypeItem = roadTypes.find(
+          type => type.value === event.roadType,
+        );
         if (roadTypeItem) {
           setSelectedRoadType(roadTypeItem);
           setValue('roadType', event.roadType);
@@ -1242,7 +1262,9 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
       }
 
       if (event.difficultyLevel) {
-        const difficultyItem = difficultyLevels.find(level => level.value === event.difficultyLevel);
+        const difficultyItem = difficultyLevels.find(
+          level => level.value === event.difficultyLevel,
+        );
         if (difficultyItem) {
           setSelectedDifficultyLevel(difficultyItem);
           setValue('difficultyLevel', event.difficultyLevel);
@@ -1250,7 +1272,9 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
       }
 
       if (event.experienceLevel) {
-        const experienceItem = experienceLevels.find(level => level.value === event.experienceLevel);
+        const experienceItem = experienceLevels.find(
+          level => level.value === event.experienceLevel,
+        );
         if (experienceItem) {
           setSelectedExperienceLevel(experienceItem);
           setValue('experienceLevel', event.experienceLevel);
@@ -1268,26 +1292,47 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
       // Set addresses
       if (event.addresses && event.addresses.length > 0) {
-        const meetingPointAddresses = event.addresses.filter(addr => addr.type === AddressType.EVENT_MEETING_POINT);
-        const startLocationAddresses = event.addresses.filter(addr => addr.type === AddressType.EVENT_START_LOCATION);
-        const finishLocationAddresses = event.addresses.filter(addr => addr.type === AddressType.EVENT_FINISH_LOCATION);
+        const meetingPointAddresses = event.addresses.filter(
+          addr => addr.type === AddressType.EVENT_MEETING_POINT,
+        );
+        const startLocationAddresses = event.addresses.filter(
+          addr => addr.type === AddressType.EVENT_START_LOCATION,
+        );
+        const finishLocationAddresses = event.addresses.filter(
+          addr => addr.type === AddressType.EVENT_FINISH_LOCATION,
+        );
 
         if (meetingPointAddresses.length > 0) {
           setSelectedMeetingPoint(meetingPointAddresses);
-          const displayAddress = meetingPointAddresses.find(addr => addr.language.toLowerCase() === language.toLowerCase());
-          setValue('meetingPoint', displayAddress?.address || meetingPointAddresses[0].address);
+          const displayAddress = meetingPointAddresses.find(
+            addr => addr.language.toLowerCase() === language.toLowerCase(),
+          );
+          setValue(
+            'meetingPoint',
+            displayAddress?.address || meetingPointAddresses[0].address,
+          );
         }
 
         if (startLocationAddresses.length > 0) {
           setSelectedStartLocation(startLocationAddresses);
-          const displayAddress = startLocationAddresses.find(addr => addr.language.toLowerCase() === language.toLowerCase());
-          setValue('startLocation', displayAddress?.address || startLocationAddresses[0].address);
+          const displayAddress = startLocationAddresses.find(
+            addr => addr.language.toLowerCase() === language.toLowerCase(),
+          );
+          setValue(
+            'startLocation',
+            displayAddress?.address || startLocationAddresses[0].address,
+          );
         }
 
         if (finishLocationAddresses.length > 0) {
           setSelectedFinishLocation(finishLocationAddresses);
-          const displayAddress = finishLocationAddresses.find(addr => addr.language.toLowerCase() === language.toLowerCase());
-          setValue('finishLocation', displayAddress?.address || finishLocationAddresses[0].address);
+          const displayAddress = finishLocationAddresses.find(
+            addr => addr.language.toLowerCase() === language.toLowerCase(),
+          );
+          setValue(
+            'finishLocation',
+            displayAddress?.address || finishLocationAddresses[0].address,
+          );
         }
       }
 
@@ -1315,12 +1360,25 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
         setValue('invitedGroups', eventData.invitedGroupIds);
       }
     }
-  }, [event, eventLoading, eventError, eventTypes, roadTypes, difficultyLevels, experienceLevels, language]);
+  }, [
+    event,
+    eventLoading,
+    eventError,
+    eventTypes,
+    roadTypes,
+    difficultyLevels,
+    experienceLevels,
+    language,
+  ]);
 
   // Show loading state while fetching event data
   if (eventLoading) {
     return (
-      <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+      <View
+        style={[
+          styles.container,
+          {justifyContent: 'center', alignItems: 'center'},
+        ]}>
         <TopHeaderBar
           title={t('screens.event.edit_event')}
           showBackButton
@@ -1337,7 +1395,11 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
   // Show error state if event couldn't be loaded
   if (eventError || !event) {
     return (
-      <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+      <View
+        style={[
+          styles.container,
+          {justifyContent: 'center', alignItems: 'center'},
+        ]}>
         <TopHeaderBar
           title={t('screens.event.edit_event')}
           showBackButton

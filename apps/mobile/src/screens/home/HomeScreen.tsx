@@ -501,7 +501,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
       if (post.addresses && post.addresses.length > 0) {
         labels.push({
-          icon: 'map-pin' as IconName,
+          icon: 'map-pin-filled' as IconName,
           text:
             post.addresses?.find(
               address =>

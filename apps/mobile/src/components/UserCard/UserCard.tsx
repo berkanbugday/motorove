@@ -62,7 +62,11 @@ export const UserCard: React.FC<UserCardProps> = ({
 
           {user.city && (
             <View style={styles.locationContainer}>
-              <Icon name="map-pin" size={12} color={colors.neutral.grey} />
+              <Icon
+                name="map-pin-filled"
+                size={12}
+                color={colors.neutral.grey}
+              />
               <Typography
                 variant="caption"
                 color={colors.neutral.darkGrey}

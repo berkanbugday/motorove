@@ -93,7 +93,11 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
           </View>
 
           <View style={styles.cityRow}>
-            <Icon name="map-pin" size={14} color={colors.neutral.darkGrey} />
+            <Icon
+              name="map-pin-filled"
+              size={14}
+              color={colors.neutral.darkGrey}
+            />
             <Typography
               variant="body"
               weight="medium"

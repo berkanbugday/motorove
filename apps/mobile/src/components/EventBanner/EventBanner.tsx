@@ -187,7 +187,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
         )}
         {location && (
           <View style={styles.locationContainer}>
-            <Icon name="map-pin" size={14} />
+            <Icon name="map-pin-filled" size={14} />
             <Caption color={colors.neutral.grey} style={styles.locationText}>
               {location}
             </Caption>

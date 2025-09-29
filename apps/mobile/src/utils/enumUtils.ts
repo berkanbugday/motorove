@@ -78,6 +78,13 @@ export class EnumUtils {
     return eventTypeItem?.label || eventType;
   }
 
+  static convertDifficultyLevel(difficultyLevel: DifficultyLevel): string {
+    const difficultyLevelItem = this.getDifficultyLevels().find(
+      t => t.value.toLowerCase() === difficultyLevel.toLowerCase(),
+    );
+    return difficultyLevelItem?.label || difficultyLevel;
+  }
+
   static getGroupMemberRoles(): DropdownItem[] {
     return this.getDropdownOptions(GroupMemberRole, 'enums.groupMemberRole');
   }
