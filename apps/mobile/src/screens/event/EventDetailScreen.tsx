@@ -24,8 +24,8 @@ import {
   DropdownMenuItem,
   Subtitle,
   BottomSheet,
-  BodySmall,
   BottomSheetRef,
+  Body,
 } from '@components';
 import {format} from 'date-fns';
 // import {useAuth} from '@contexts'; // Commented out as not used
@@ -57,7 +57,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
   // Use the useGetEvent hook to fetch the event data
   const {event, loading, refetch: refetchEvent} = useGetEvent(eventId);
-  const {removeEvent} = useRemoveEvent(() => {
+  const {removeEvent, loading: removeEventLoading} = useRemoveEvent(() => {
     navigation.goBack();
   });
 
@@ -402,9 +402,9 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         }>
         <View style={{flex: 1}}>
           <View style={{flex: 1}}>
-            <BodySmall align="center">
+            <Body align="center">
               {t('screens.event.delete_event_confirmation')}
-            </BodySmall>
+            </Body>
           </View>
           <View style={styles.deleteEventButtonsContainer}>
             <Button
@@ -420,6 +420,8 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               shape="round"
               onPress={confirmDeleteEvent}
               style={styles.deleteEventButton}
+              disabled={removeEventLoading}
+              loading={removeEventLoading}
             />
           </View>
         </View>

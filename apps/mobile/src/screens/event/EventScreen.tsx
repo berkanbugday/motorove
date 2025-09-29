@@ -1,6 +1,6 @@
 import React, {useState, useCallback} from 'react';
 import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {colors, spacing} from '@theme';
 import {
@@ -9,8 +9,6 @@ import {
   Icon,
   Tabs,
   EventCard,
-  Title,
-  BodySmall,
   SkeletonGroup,
   Subtitle,
   Body,
@@ -54,6 +52,16 @@ export const EventScreen = () => {
     loadMore: loadMoreDraftEvents,
     hasMore: hasMoreDraftEvents,
   } = useGetEvents(20, 0, EventStatus.DRAFT);
+
+  // Refresh draft events when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (activeTab === 'draft') {
+        refetchDraftEvents();
+      }
+      return () => {};
+    }, [activeTab, refetchDraftEvents]),
+  );
 
   const handleRefreshPublishedEvents = useCallback(async () => {
     setRefreshingPublishedEvents(true);
