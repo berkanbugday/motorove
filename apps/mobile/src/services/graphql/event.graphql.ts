@@ -88,6 +88,13 @@ export const UPDATE_EVENT = gql`
   ${EVENT_FRAGMENT}
 `;
 
+// Remove event mutation
+export const REMOVE_EVENT = gql`
+  mutation RemoveEvent($id: ID!) {
+    removeEvent(id: $id)
+  }
+`;
+
 // Invite users to an event
 export const INVITE_USERS_TO_EVENT = gql`
   mutation InviteUsersToEvent($input: InviteUsersInput!) {

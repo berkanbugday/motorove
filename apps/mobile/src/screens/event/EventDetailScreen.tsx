@@ -12,7 +12,7 @@ import {
   MainScreenNavigationProp,
   MainStackParamList,
 } from '@navigation/types/navigationTypes';
-import {useGetEvent} from '@services/event.service';
+import {useGetEvent, useRemoveEvent} from '@services/event.service';
 import {
   Icon,
   TopHeaderBar,
@@ -21,10 +21,18 @@ import {
   Title,
   showToast,
   Chip,
+  DropdownMenuItem,
+  Subtitle,
+  BottomSheet,
+  BodySmall,
+  BottomSheetRef,
 } from '@components';
 import {format} from 'date-fns';
 // import {useAuth} from '@contexts'; // Commented out as not used
 import {useTranslation} from '@hooks/useTranslation';
+import {IEvent, EventStatus} from '@motorove/shared';
+import {navigateToScreen} from '@navigation/utils/navigationHelpers';
+import {loggingService} from '@services/logging.service';
 // import {EventParticipantStatus} from '@motorove/shared'; // Commented out as not used
 
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
@@ -42,12 +50,16 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const {t} = useTranslation();
   // const {user} = useAuth(); // Commented out as not used in current implementation
   const [isJoining, setIsJoining] = useState(false);
+  const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
 
   // Animated value for scroll
   const scrollY = useRef(new Animated.Value(0)).current;
 
   // Use the useGetEvent hook to fetch the event data
   const {event, loading, refetch: refetchEvent} = useGetEvent(eventId);
+  const {removeEvent} = useRemoveEvent(() => {
+    navigation.goBack();
+  });
 
   // Format date for display
   const formatEventDate = useCallback((dateInput: string | Date) => {
@@ -80,6 +92,58 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     }, 1000);
   }, [refetchEvent, t]);
 
+  const eventDropdownMenuItems = useCallback(
+    (status?: EventStatus): DropdownMenuItem[] => {
+      const items: DropdownMenuItem[] = [];
+
+      if (status === EventStatus.DRAFT) {
+        items.push({
+          id: 'edit_event',
+          label: t('common.edit'),
+          icon: 'pen-filled',
+        });
+        items.push({
+          id: 'delete_event',
+          label: t('common.delete'),
+          icon: 'trash',
+          isHighlighted: true,
+        });
+      }
+
+      return items;
+    },
+    [t],
+  );
+
+  const handleDropdownMenuItemSelect = useCallback(
+    (item: DropdownMenuItem, _event: IEvent) => {
+      switch (item.id) {
+        case 'edit_event':
+          navigateToScreen(navigation, 'EditEvent', {eventId});
+          break;
+        case 'delete_event':
+          deleteEventBottomSheetRef.current?.open('minimal');
+          break;
+        default:
+          loggingService.info(
+            `Unhandled action: ${item.id} for event: ${eventId}`,
+          );
+      }
+    },
+    [],
+  );
+
+  const confirmDeleteEvent = useCallback(async () => {
+    try {
+      if (event && event.id) {
+        await removeEvent(event.id);
+      }
+    } catch (error) {
+      loggingService.error(`Error deleting event: ${eventId}`, error);
+      // Error handling is already done in the service hook
+    }
+  }, [eventId]);
+
   // Determine if the user is going to the event (using hardcoded values for demo)
   const isUserGoing = false; // Replace with actual logic when backend is connected
   const isUserMaybe = false; // Replace with actual logic when backend is connected
@@ -96,7 +160,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   if (!event) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <Typography>{t('errors.api.not_found')}</Typography>
+        <Subtitle weight="bold">{t('errors.api.not_found')}</Subtitle>
         <Button
           title={t('common.back')}
           onPress={() => navigation.goBack()}
@@ -136,7 +200,10 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           style={[styles.topHeaderBar, {opacity: backButtonOpacity}]}>
           <TopHeaderBar
             showBackButton
-            rightIconName="more-vertical"
+            dropdownMenuItems={eventDropdownMenuItems(event?.status)}
+            onDropdownItemSelect={item =>
+              handleDropdownMenuItemSelect(item, event as IEvent)
+            }
             backgroundColor="transparent"
             onBackPress={() => navigation.goBack()}
           />
@@ -322,6 +389,41 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           </View>
         </View>
       </Animated.ScrollView>
+
+      <BottomSheet
+        ref={deleteEventBottomSheetRef}
+        closeOnBackdropPress={false}
+        initialSnap="closed"
+        showCloseButton={true}
+        enableGestureControl={false}
+        closeButtonPosition="top-left"
+        header={
+          <Subtitle align="center">{t('screens.event.delete_event')}</Subtitle>
+        }>
+        <View style={{flex: 1}}>
+          <View style={{flex: 1}}>
+            <BodySmall align="center">
+              {t('screens.event.delete_event_confirmation')}
+            </BodySmall>
+          </View>
+          <View style={styles.deleteEventButtonsContainer}>
+            <Button
+              title={t('common.no')}
+              variant="outline"
+              shape="round"
+              onPress={() => deleteEventBottomSheetRef.current?.close()}
+              style={styles.cancelButton}
+            />
+            <Button
+              title={t('common.yes')}
+              variant="primary"
+              shape="round"
+              onPress={confirmDeleteEvent}
+              style={styles.deleteEventButton}
+            />
+          </View>
+        </View>
+      </BottomSheet>
     </View>
   );
 };
@@ -459,6 +561,23 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: spacing.md,
+  },
+  deleteEventButtonsContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  deleteEventButton: {
+    flex: 1,
+    marginLeft: spacing.sm,
   },
 });
 

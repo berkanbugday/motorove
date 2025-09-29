@@ -78,7 +78,7 @@ export class EventsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => EventDto)
+  @Mutation(() => Boolean)
   async removeEvent(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,

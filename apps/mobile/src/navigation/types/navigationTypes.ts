@@ -60,6 +60,7 @@ export type MainStackParamList = {
   Support: undefined;
   Posts: undefined;
   Events: undefined;
+  EditEvent: {eventId: string};
   Garage: undefined;
 };
 

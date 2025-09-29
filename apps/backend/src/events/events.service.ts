@@ -74,7 +74,7 @@ export class EventsService {
   ): Promise<EventDto> {
     try {
       const event = await this.prisma.event.findUnique({
-        where: { id },
+        where: { id, isActive: true },
         include: {
           createdBy: true,
           updatedBy: true,
@@ -265,7 +265,7 @@ export class EventsService {
 
       // First get the current event to handle group relationships properly
       const currentEvent = await this.prisma.event.findUnique({
-        where: { id },
+        where: { id, isActive: true },
         include: {
           invitedGroups: true,
         },
@@ -276,7 +276,7 @@ export class EventsService {
       }
 
       const event = await this.prisma.event.update({
-        where: { id },
+        where: { id, isActive: true },
         data: {
           title,
           description,
@@ -343,7 +343,7 @@ export class EventsService {
   async remove(id: string, userId: string): Promise<boolean> {
     try {
       const event = await this.prisma.event.update({
-        where: { id },
+        where: { id, isActive: true },
         data: {
           isActive: false,
           updatedBy: { connect: { id: userId } },
@@ -371,6 +371,14 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
+      const event = await this.prisma.event.findUnique({
+        where: { id: eventId, isActive: true },
+      });
+
+      if (!event) {
+        throw new NotFoundException(`Event with id ${eventId} not found`);
+      }
+
       const participant = await this.prisma.eventParticipant.create({
         data: {
           event: { connect: { id: eventId } },
@@ -396,6 +404,13 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
+      const event = await this.prisma.event.findUnique({
+        where: { id: eventId, isActive: true },
+      });
+
+      if (!event) {
+        throw new NotFoundException(`Event with id ${eventId} not found`);
+      }
       const participant = await this.prisma.eventParticipant.findFirst({
         where: {
           eventId,
@@ -414,9 +429,9 @@ export class EventsService {
         },
       });
 
-      const event = await this.findOne(eventId, userId, authToken);
+      const eventDto = await this.findOne(eventId, userId, authToken);
 
-      return event;
+      return eventDto;
     } catch (error) {
       this.logger.error(`Failed to leave event`, error);
       throw error;

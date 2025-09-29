@@ -705,7 +705,7 @@ type Mutation {
   removeAddress(id: String!): Boolean!
   removeComment(id: ID!): CommentDto!
   removeDeviceToken: Boolean!
-  removeEvent(id: ID!): EventDto!
+  removeEvent(id: ID!): Boolean!
   removeMember(input: RemoveMemberInput!): Boolean!
   removePost(id: ID!): PostDto!
   resetPassword(input: ResetPasswordInput!): Boolean!

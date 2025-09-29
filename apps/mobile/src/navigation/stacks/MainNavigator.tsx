@@ -20,6 +20,7 @@ import {
   CreateEventScreen,
   EventScreen,
   EventDetailScreen,
+  EditEventScreen,
 } from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 import {
@@ -192,6 +193,11 @@ export function MainNavigator() {
       <Stack.Screen
         name="EventDetail"
         component={EventDetailScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="EditEvent"
+        component={EditEventScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen

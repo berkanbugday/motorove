@@ -239,8 +239,9 @@ export default {
     // Events screens
     event: {
       create_event: 'Create Event',
-      edit: 'Edit Event',
-      join: 'Join Event',
+      edit_event: 'Edit Event',
+      delete_event: 'Delete Event',
+      join_event: 'Join Event',
       basic_info_title: 'Basic Info',
       date_time_title: 'Date & Time',
       event_details_title: 'Event Details',
@@ -323,8 +324,8 @@ export default {
       is_private: 'Private Event',
       event_updated: 'Event updated successfully',
       event_deleted: 'Event deleted successfully',
+      event_deleted_failed: 'Event deleted failed',
       cancel_event: 'Cancel Event',
-      reschedule_event: 'Reschedule Event',
       participants: 'Participants',
       invited_users: 'Invited Users',
       invited_groups: 'Invited Groups',
@@ -348,25 +349,7 @@ export default {
       maps: 'Maps',
       chat: 'Chat',
       no_location: 'No location specified',
-      types: {
-        solo_ride: 'Solo Ride',
-        group_ride: 'Group Ride',
-        camping_ride: 'Camping Ride',
-        charity_ride: 'Charity Ride',
-        workshop_training: 'Workshop/Training',
-        meetup_exhibition: 'Meetup/Exhibition',
-      },
-      road_types: {
-        on_road: 'On Road',
-        off_road: 'Off Road',
-        mixed: 'Mixed',
-      },
-      difficulty_levels: {
-        beginner: 'Beginner',
-        intermediate: 'Intermediate',
-        advanced: 'Advanced',
-        expert: 'Expert',
-      },
+      delete_event_confirmation: 'Are you sure you want to delete this event?',
     },
 
     // Groups screens

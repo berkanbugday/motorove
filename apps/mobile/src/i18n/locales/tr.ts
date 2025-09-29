@@ -245,8 +245,9 @@ export default {
     // Events screens
     event: {
       create_event: 'Etkinlik Oluştur',
-      edit: 'Etkinliği Düzenle',
-      join: 'Etkinliğe Katıl',
+      edit_event: 'Etkinliği Düzenle',
+      delete_event: 'Etkinliği Sil',
+      join_event: 'Etkinliğe Katıl',
       basic_info_title: 'Temel Bilgiler',
       date_time_title: 'Tarih ve Saat',
       event_details_title: 'Etkinlik Detayları',
@@ -325,8 +326,8 @@ export default {
       is_private: 'Özel Etkinlik',
       event_updated: 'Etkinlik başarıyla güncellendi',
       event_deleted: 'Etkinlik başarıyla silindi',
+      event_deleted_failed: 'Etkinlik silinemedi',
       cancel_event: 'Etkinliği İptal Et',
-      reschedule_event: 'Etkinliği Yeniden Planla',
       participants: 'Katılımcılar',
       invited_users: 'Davet Edilen Kullanıcılar',
       invited_groups: 'Davet Edilen Gruplar',
@@ -351,25 +352,7 @@ export default {
       maps: 'Harita',
       chat: 'Sohbet',
       no_location: 'Konum belirtilmemiş',
-      types: {
-        solo_ride: 'Solo Sürüş',
-        group_ride: 'Grup Sürüşü',
-        camping_ride: 'Kamp Sürüşü',
-        charity_ride: 'Yardım Sürüşü',
-        workshop_training: 'Atölye/Eğitim',
-        meetup_exhibition: 'Buluşma/Sergi',
-      },
-      road_types: {
-        on_road: 'Asfalt Yol',
-        off_road: 'Arazi Yolu',
-        mixed: 'Karışık',
-      },
-      difficulty_levels: {
-        beginner: 'Başlangıç',
-        intermediate: 'Orta',
-        advanced: 'İleri',
-        expert: 'Uzman',
-      },
+      delete_event_confirmation: 'Etkinliği silmek istediğinize emin misiniz?',
     },
 
     // Groups screens

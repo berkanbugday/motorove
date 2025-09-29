@@ -9,6 +9,7 @@ import {
   GET_EVENT_JOIN_REQUESTS,
   ACCEPT_EVENT_JOIN_REQUEST,
   REJECT_EVENT_JOIN_REQUEST,
+  REMOVE_EVENT,
 } from './graphql/event.graphql';
 import {loggingService} from './logging.service';
 import {useState, useCallback, useEffect} from 'react';
@@ -160,6 +161,51 @@ export const useUpdateEvent = (onSuccess?: () => void) => {
 
   return {
     updateEvent,
+    loading,
+    error,
+  };
+};
+
+// Hook for removing an event
+export const useRemoveEvent = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
+  const [removeEventMutation, {loading, error}] = useMutation(REMOVE_EVENT, {
+    onCompleted: _data => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.event.event_deleted'),
+      });
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error removing event:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.event.event_deleted_failed'),
+      });
+    },
+  });
+
+  const removeEvent = async (id: string) => {
+    try {
+      const result = await removeEventMutation({
+        variables: {id},
+      });
+      return result.data?.removeEvent;
+    } catch (err) {
+      loggingService.error('Error in removeEvent:', err);
+      // Error is already handled in onError callback
+      return null;
+    }
+  };
+
+  return {
+    removeEvent,
     loading,
     error,
   };

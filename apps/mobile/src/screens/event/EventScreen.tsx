@@ -157,10 +157,9 @@ export const EventScreen = () => {
       return (
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
-          <Title weight="bold">{t('errors.general.something_wrong')}</Title>
-          <BodySmall align="center">
-            {t('screens.event.could_not_load_events')}
-          </BodySmall>
+          <Subtitle weight="bold">
+            {t('errors.general.something_wrong')}
+          </Subtitle>
           <Button
             title={t('common.try_again')}
             variant="primary"
