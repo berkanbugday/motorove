@@ -408,7 +408,7 @@ export const PostScreen = ({navigation}: Props) => {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Body>{t('screens.post.no_posts_yet')}</Body>
+            <Body>{t('screens.post.no_shared_posts_yet')}</Body>
           </View>
         }
       />

@@ -1450,7 +1450,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
               style={{flex: 1}}
             />
             <Button
-              title={t('screens.event.update_event')}
+              title={t('common.update')}
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}
