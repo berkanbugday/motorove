@@ -34,8 +34,11 @@ export const DELETE_NOTIFICATION = gql`
 
 export const DELETE_ALL_NOTIFICATIONS = gql`
   mutation DeleteAllNotifications {
-    deleteAllNotifications
+    deleteAllNotifications {
+      ...NotificationFragment
+    }
   }
+  ${NOTIFICATION_FRAGMENT}
 `;
 
 // Mutations
