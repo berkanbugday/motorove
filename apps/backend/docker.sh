@@ -250,6 +250,160 @@ seed() {
     print_success "Database seeded successfully!"
 }
 
+# Push to Docker Hub
+push() {
+    local env=${1:-prod}
+    shift
+    
+    print_header "Pushing to Docker Hub - $env"
+    
+    # Default Docker Hub username (can be overridden with DOCKER_HUB_USERNAME env var)
+    local docker_username="${DOCKER_HUB_USERNAME:-yourusername}"
+    local image_name="${DOCKER_HUB_IMAGE_NAME:-backend}"
+    local tags=()
+    
+    # Determine target and default tags
+    local target=""
+    local default_tag=""
+    case $env in
+        dev|development)
+            target="development"
+            default_tag="dev"
+            ;;
+        staging)
+            target="staging"
+            default_tag="staging"
+            ;;
+        prod|production)
+            target="production"
+            default_tag="latest"
+            ;;
+    esac
+    
+    # Parse additional tags from arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --tag|-t)
+                tags+=("$2")
+                shift 2
+                ;;
+            --username|-u)
+                docker_username="$2"
+                shift 2
+                ;;
+            --image|-i)
+                image_name="$2"
+                shift 2
+                ;;
+            *)
+                print_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+    
+    # Add default tag if no custom tags specified
+    if [ ${#tags[@]} -eq 0 ]; then
+        tags+=("$default_tag")
+    fi
+    
+    # Check if logged in to Docker Hub
+    if ! docker info | grep -q "Username"; then
+        print_warning "Not logged in to Docker Hub"
+        print_info "Attempting to log in..."
+        docker login
+        if [ $? -ne 0 ]; then
+            print_error "Docker login failed"
+            exit 1
+        fi
+    fi
+    
+    # Build the image
+    print_info "Building image for $env environment..."
+    docker build -f Dockerfile \
+        --target "$target" \
+        -t "temp-motorove-$env:build" \
+        ../..
+    
+    if [ $? -ne 0 ]; then
+        print_error "Build failed"
+        exit 1
+    fi
+    
+    print_success "Build completed!"
+    
+    # Tag the image
+    print_info "Tagging image..."
+    for tag in "${tags[@]}"; do
+        local full_tag="${docker_username}/${image_name}:${tag}"
+        print_info "  → $full_tag"
+        docker tag "temp-motorove-$env:build" "$full_tag"
+    done
+    
+    # Add git commit SHA tag if in a git repo
+    if git rev-parse --git-dir > /dev/null 2>&1; then
+        local git_sha=$(git rev-parse --short HEAD)
+        local sha_tag="${docker_username}/${image_name}:sha-${git_sha}"
+        print_info "  → $sha_tag (git commit)"
+        docker tag "temp-motorove-$env:build" "$sha_tag"
+        tags+=("sha-${git_sha}")
+    fi
+    
+    # Push all tags
+    print_info "Pushing to Docker Hub..."
+    for tag in "${tags[@]}"; do
+        local full_tag="${docker_username}/${image_name}:${tag}"
+        print_info "Pushing $full_tag..."
+        docker push "$full_tag"
+        
+        if [ $? -eq 0 ]; then
+            print_success "  ✓ Pushed $full_tag"
+        else
+            print_error "  ✗ Failed to push $full_tag"
+        fi
+    done
+    
+    # Clean up temporary image
+    docker rmi "temp-motorove-$env:build" > /dev/null 2>&1
+    
+    print_success "All images pushed successfully!"
+    print_info "Docker Hub: https://hub.docker.com/r/${docker_username}/${image_name}"
+}
+
+# Pull from Docker Hub
+pull() {
+    local env=${1:-prod}
+    local docker_username="${DOCKER_HUB_USERNAME:-yourusername}"
+    local image_name="${DOCKER_HUB_IMAGE_NAME:-backend}"
+    
+    print_header "Pulling from Docker Hub - $env"
+    
+    local tag=""
+    case $env in
+        dev|development)
+            tag="dev"
+            ;;
+        staging)
+            tag="staging"
+            ;;
+        prod|production)
+            tag="latest"
+            ;;
+    esac
+    
+    local full_image="${docker_username}/${image_name}:${tag}"
+    
+    print_info "Pulling $full_image..."
+    docker pull "$full_image"
+    
+    if [ $? -eq 0 ]; then
+        print_success "Image pulled successfully!"
+    else
+        print_error "Failed to pull image"
+        exit 1
+    fi
+}
+
 # Shell access
 shell() {
     local env=${1:-dev}
@@ -299,7 +453,7 @@ show_help() {
 ${BLUE}Motorove Backend Docker Management Script${NC}
 
 ${GREEN}Usage:${NC}
-    ./docker.sh <command> [environment]
+    ./docker.sh <command> [environment] [options]
 
 ${GREEN}Commands:${NC}
     start [env]     Start containers (default: dev)
@@ -310,6 +464,8 @@ ${GREEN}Commands:${NC}
     migrate [env]   Run database migrations
     seed [env]      Seed database
     shell [env]     Open shell in container
+    push [env]      Build and push image to Docker Hub
+    pull [env]      Pull image from Docker Hub
     status          Show container status
     clean           Stop containers and remove volumes
     help            Show this help message
@@ -319,12 +475,30 @@ ${GREEN}Environments:${NC}
     staging             Staging environment
     prod, production    Production environment
 
+${GREEN}Push Options:${NC}
+    --tag, -t <tag>         Additional tag for the image (can be used multiple times)
+    --username, -u <user>   Docker Hub username (default: \$DOCKER_HUB_USERNAME)
+    --image, -i <name>      Image name (default: backend)
+
+${GREEN}Environment Variables:${NC}
+    DOCKER_HUB_USERNAME     Your Docker Hub username
+    DOCKER_HUB_IMAGE_NAME   Custom image name (default: backend)
+
 ${GREEN}Examples:${NC}
     ./docker.sh start dev           # Start development environment
     ./docker.sh build staging       # Build staging image
     ./docker.sh logs prod           # View production logs
     ./docker.sh migrate dev         # Run migrations in development
     ./docker.sh shell dev           # Open shell in development container
+    
+    # Push to Docker Hub
+    ./docker.sh push prod                           # Push with default tags
+    ./docker.sh push prod --tag v1.0.0              # Push with version tag
+    ./docker.sh push prod --tag v1.0.0 --tag stable # Push with multiple tags
+    ./docker.sh push staging -u myusername          # Push with custom username
+    
+    # Pull from Docker Hub
+    ./docker.sh pull prod                           # Pull latest production image
 
 ${GREEN}Quick Start:${NC}
     1. ./docker.sh build dev        # Build development image
@@ -332,9 +506,16 @@ ${GREEN}Quick Start:${NC}
     3. ./docker.sh migrate dev      # Run migrations
     4. ./docker.sh logs dev         # View logs
 
+${GREEN}Docker Hub Workflow:${NC}
+    1. export DOCKER_HUB_USERNAME=yourusername
+    2. docker login                 # Login to Docker Hub
+    3. ./docker.sh push prod --tag v1.0.0 --tag latest
+    4. ./docker.sh pull prod        # Pull on another machine
+
 ${YELLOW}Note:${NC}
     Make sure to configure your .env files before starting containers.
-    Run './docker.sh setup [env]' to create environment files from samples.
+    Set DOCKER_HUB_USERNAME environment variable for push/pull commands.
+    See README-DOCKER-HUB.md for detailed Docker Hub documentation.
 
 EOF
 }
@@ -364,6 +545,13 @@ case ${1:-help} in
         ;;
     shell)
         shell "${2:-dev}"
+        ;;
+    push)
+        shift
+        push "$@"
+        ;;
+    pull)
+        pull "${2:-prod}"
         ;;
     clean)
         clean
