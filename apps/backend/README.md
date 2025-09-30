@@ -1,98 +1,301 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Motorove Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS-based GraphQL API for the Motorove motorcycle community platform.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Quick Start
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+### Using Docker (Recommended)
 
 ```bash
-$ pnpm install
+cd apps/backend
+
+# Build and start development environment
+./docker.sh build dev
+./docker.sh start dev
+
+# Run database migrations
+./docker.sh migrate dev
+
+# View logs
+./docker.sh logs dev
 ```
 
-## Compile and run the project
+Access:
+
+- **API**: http://localhost:3000/api
+- **GraphQL**: http://localhost:3000/graphql
+
+### Local Development (Without Docker)
 
 ```bash
-# development
-$ pnpm run start
+cd apps/backend
 
-# watch mode
-$ pnpm run start:dev
+# Install dependencies
+pnpm install
 
-# production mode
-$ pnpm run start:prod
+# Run migrations
+pnpm prisma migrate deploy
+
+# Start development server
+pnpm dev
 ```
 
-## Run tests
+## 📚 Documentation
+
+### Docker Setup
+
+- **[README-DOCKER.md](./README-DOCKER.md)** - Complete Docker guide
+- **[DOCKER-SETUP-SUMMARY.md](./DOCKER-SETUP-SUMMARY.md)** - Quick reference
+- **[CHANGES.md](./CHANGES.md)** - Detailed changelog
+- **[docker.sh](./docker.sh)** - Helper script (`./docker.sh help`)
+
+### Supabase Integration
+
+- **[README-SUPABASE.md](./README-SUPABASE.md)** - Supabase-specific guide
+- **[SUPABASE-CHANGES.md](./SUPABASE-CHANGES.md)** - Supabase setup summary
+
+### Configuration
+
+- **[README-ENVIRONMENTS.md](./README-ENVIRONMENTS.md)** - Environment configuration
+- **[README-AUTH.md](./README-AUTH.md)** - Authentication setup
+
+## 🗄️ Database
+
+This project uses **Supabase** as the database provider:
+
+- ✅ Hosted PostgreSQL database
+- ✅ Built-in connection pooling
+- ✅ Automatic backups
+- ✅ Storage for file uploads
+- ✅ Real-time subscriptions
+
+See [README-SUPABASE.md](./README-SUPABASE.md) for detailed setup instructions.
+
+### Get Your Supabase Credentials
+
+1. Go to your [Supabase Dashboard](https://app.supabase.com)
+2. **Database**: Settings → Database → Connection string (Session pooler)
+3. **API**: Settings → API → Copy Project URL and anon key
+4. Update your `.env.dev` file
+
+## 🛠️ Available Scripts
+
+### Development
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm dev              # Start development server
+pnpm build            # Build production bundle
+pnpm start:dev        # Start with watch mode
+pnpm start:staging    # Start in staging mode
+pnpm start:prod       # Start in production mode
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Database
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm prisma:generate  # Generate Prisma client
+pnpm prisma:migrate   # Run migrations
+pnpm prisma:studio    # Open Prisma Studio
+pnpm prisma:seed      # Seed database
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Testing
 
-## Resources
+```bash
+pnpm test             # Run tests
+pnpm test:watch       # Run tests in watch mode
+pnpm test:cov         # Generate coverage report
+pnpm test:e2e         # Run e2e tests
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### Docker
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+./docker.sh start dev     # Start development
+./docker.sh stop dev      # Stop development
+./docker.sh build dev     # Build image
+./docker.sh logs dev      # View logs
+./docker.sh migrate dev   # Run migrations
+./docker.sh shell dev     # Access container shell
+./docker.sh help          # Show all commands
+```
 
-## Support
+## 🏗️ Project Structure
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+apps/backend/
+├── prisma/
+│   ├── schema.prisma          # Database schema
+│   ├── migrations/            # Migration files
+│   └── seed.ts                # Seed data
+├── src/
+│   ├── auth/                  # Authentication module
+│   ├── users/                 # User management
+│   ├── posts/                 # Posts module
+│   ├── groups/                # Groups module
+│   ├── events/                # Events module
+│   ├── core/                  # Core utilities & config
+│   │   ├── config/            # Configuration service
+│   │   ├── filters/           # Exception filters
+│   │   └── interceptors/      # Interceptors
+│   └── main.ts                # Application entry point
+├── docker-compose.yml         # Docker services
+├── Dockerfile                 # Multi-stage Docker build
+├── docker.sh                  # Docker helper script
+└── README.md                  # This file
+```
 
-## Stay in touch
+## 🔐 Environment Variables
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Create a `.env.dev` file based on `.env.dev.sample`:
 
-## License
+```bash
+# Required
+NODE_ENV=development
+DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+JWT_SECRET=your-secret-key
+SUPABASE_URL=https://[PROJECT-REF].supabase.co
+SUPABASE_KEY=your-supabase-anon-key
+FIREBASE_SERVICE_ACCOUNT={...}
+TOMORROW_IO_API_KEY=your-weather-api-key
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Optional
+SENTRY_DSN=your-sentry-dsn
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+See [README-ENVIRONMENTS.md](./README-ENVIRONMENTS.md) for complete list.
+
+## 🏃 Running the Application
+
+### Option 1: Docker (Recommended)
+
+**Development:**
+
+```bash
+./docker.sh start dev
+```
+
+**Staging:**
+
+```bash
+./docker.sh start staging
+```
+
+**Production:**
+
+```bash
+./docker.sh start prod
+```
+
+### Option 2: Local
+
+```bash
+pnpm dev
+```
+
+## 📊 Database Migrations
+
+### Create Migration
+
+```bash
+# Local
+pnpm prisma migrate dev --name migration_name
+
+# Docker
+./docker.sh shell dev
+pnpm prisma migrate dev --name migration_name
+```
+
+### Apply Migrations
+
+```bash
+# Local
+pnpm prisma migrate deploy
+
+# Docker
+./docker.sh migrate dev
+```
+
+## 🧪 Testing
+
+```bash
+# Unit tests
+pnpm test
+
+# E2E tests
+pnpm test:e2e
+
+# Coverage
+pnpm test:cov
+```
+
+## 🚢 Deployment
+
+### Docker Production Build
+
+```bash
+# Build production image
+docker-compose build api-prod
+
+# Run migrations
+docker-compose run --rm api-prod pnpm prisma migrate deploy
+
+# Start production
+docker-compose up -d api-prod
+```
+
+See [README-DOCKER.md](./README-DOCKER.md) for detailed deployment instructions.
+
+## 🔧 Tech Stack
+
+- **Framework**: NestJS 11
+- **Database**: PostgreSQL (via Supabase)
+- **ORM**: Prisma 6
+- **API**: GraphQL (Apollo Server)
+- **Auth**: JWT, Firebase Admin
+- **Storage**: Supabase Storage
+- **Queue**: BullMQ + Redis
+- **Validation**: class-validator
+- **Documentation**: GraphQL Playground
+
+## 📦 Monorepo Structure
+
+This backend is part of a pnpm workspace monorepo:
+
+```
+motorove/
+├── apps/
+│   ├── backend/          # This project
+│   ├── mobile/           # React Native app
+│   └── landing/          # Next.js landing page
+└── shared/               # Shared types & interfaces
+```
+
+The Docker setup is optimized for this monorepo structure.
+
+## 🤝 Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Write/update tests
+4. Run linting: `pnpm lint`
+5. Submit a pull request
+
+## 📄 License
+
+UNLICENSED
+
+## 🆘 Support
+
+For issues and questions:
+
+1. Check the documentation in this directory
+2. Review [troubleshooting guides](./README-DOCKER.md#troubleshooting)
+3. Check application logs: `./docker.sh logs dev`
+4. Review Supabase dashboard for database issues
+
+---
+
+**Made with ❤️ for the motorcycle community**

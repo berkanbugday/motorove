@@ -51,7 +51,6 @@ export class ProfanityFilterService implements OnModuleInit {
     try {
       // Add Turkish profanity words to the filter
       Filter.add(turkishProfanityWords);
-      this.logger.debug('Turkish profanity dictionary loaded');
     } catch (error: any) {
       this.logger.error(`Failed to load Turkish dictionary: ${error.message}`);
       throw error;

@@ -1,6 +1,6 @@
 # Environment Configuration System Guide
 
-This guide explains how to work with the multiple environments system in the Motorove backend application.
+This guide explains how to work with the multiple environments system in the Motorove backend application with Supabase as the database provider.
 
 ## Overview
 
@@ -38,29 +38,48 @@ This will:
 
 If you prefer to set up environment files manually, create the following files:
 
-- `.env` - Base configuration shared across all environments
-- `.env.development` - Development-specific configuration
+- `.env.dev` - Development configuration (includes Supabase credentials)
 - `.env.staging` - Staging-specific configuration
-- `.env` - Production-specific configuration
-- `.env.test` - Test-specific configuration
+- `.env` - Production configuration
+- `.env.test` - Test-specific configuration (optional)
 
-You can use the templates in `src/core/config/README.md` as a reference.
+**Note:** The actual file names are `.env.dev`, `.env.staging`, and `.env` (not `.env.development` or `.env.production`).
+
+You can use the sample files (`.env.sample`, `.env.staging.sample`) as templates.
 
 ## Required Environment Variables
 
 At minimum, your environment files should contain:
 
-```
+```bash
 # Required variables
 NODE_ENV=development
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/motorove?schema=public
+
+# Supabase Database (use Session pooler connection string)
+DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+
+# JWT Authentication
 JWT_SECRET=your_jwt_secret_key
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
+
+# Supabase API
+SUPABASE_URL=https://[PROJECT-REF].supabase.co
+SUPABASE_KEY=your_supabase_anon_key
 SUPABASE_STORAGE_BUCKET=images
+
+# Firebase
+FIREBASE_SERVICE_ACCOUNT={...your-service-account-json...}
+
+# Weather API
+TOMORROW_IO_API_KEY=your_api_key
 ```
 
-See `src/core/config/README.md` for a complete list of supported variables and their default values.
+### Getting Supabase Credentials
+
+1. Go to [Supabase Dashboard](https://app.supabase.com)
+2. **DATABASE_URL**: Settings → Database → Connection string (Session pooler)
+3. **SUPABASE_URL & KEY**: Settings → API
+
+See [README-SUPABASE.md](./README-SUPABASE.md) for detailed setup instructions.
 
 ## Running the Application in Different Environments
 
@@ -100,8 +119,14 @@ You can also build and run specific environments:
 ```bash
 # Build and run a specific environment
 docker build --target development -t motorove-api-dev .
-docker run -p 3000:3000 --env-file .env.development motorove-api-dev
+docker run -p 3000:3000 --env-file .env.dev motorove-api-dev
 ```
+
+**Note:** All environments connect to Supabase. No local database is required. Each environment should have its own Supabase project for isolation:
+
+- Development: Your development Supabase project
+- Staging: Your staging Supabase project
+- Production: Your production Supabase project
 
 ## Accessing Environment Configuration in Code
 
