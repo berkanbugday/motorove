@@ -41,6 +41,6 @@ export class ConfigService {
    * Get the current environment
    */
   getEnvironment(): NodeEnv {
-    return this.configService.get<NodeEnv>('environment') ?? NodeEnv.Dev;
+    return this.configService.get<NodeEnv>('NODE_ENV') ?? NodeEnv.Dev;
   }
 }

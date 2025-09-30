@@ -36,6 +36,8 @@ import { SupportsModule } from './supports/supports.module';
       useFactory: (configService: ConfigService) => ({
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
         sortSchema: true,
+        playground: configService.isDevelopment(),
+        introspection: configService.isDevelopment(),
         formatError: (error) => {
           // Only return stacktrace in development mode
           const isDev = configService.isDevelopment();
