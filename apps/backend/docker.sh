@@ -250,17 +250,19 @@ seed() {
     print_success "Database seeded successfully!"
 }
 
-# Push to Docker Hub
+# Push to Docker Hub with multi-architecture support
 push() {
     local env=${1:-prod}
     shift
     
-    print_header "Pushing to Docker Hub - $env"
+    print_header "Multi-Architecture Docker Build & Push - $env"
     
     # Default Docker Hub username (can be overridden with DOCKER_HUB_USERNAME env var)
     local docker_username="${DOCKER_HUB_USERNAME:-yourusername}"
     local image_name="${DOCKER_HUB_IMAGE_NAME:-backend}"
     local tags=()
+    local platforms="linux/amd64,linux/arm64"
+    local use_buildx=true
     
     # Determine target and default tags
     local target=""
@@ -295,6 +297,14 @@ push() {
                 image_name="$2"
                 shift 2
                 ;;
+            --platform|-p)
+                platforms="$2"
+                shift 2
+                ;;
+            --no-buildx)
+                use_buildx=false
+                shift
+                ;;
             *)
                 print_error "Unknown option: $1"
                 exit 1
@@ -318,55 +328,129 @@ push() {
         fi
     fi
     
-    # Build the image
-    print_info "Building image for $env environment..."
-    docker build -f Dockerfile \
-        --target "$target" \
-        -t "temp-motorove-$env:build" \
-        ../..
+    print_info "Environment: $env"
+    print_info "Target: $target"
+    print_info "Docker Hub: ${docker_username}/${image_name}"
+    print_info "Platforms: $platforms"
     
-    if [ $? -ne 0 ]; then
-        print_error "Build failed"
-        exit 1
-    fi
-    
-    print_success "Build completed!"
-    
-    # Tag the image
-    print_info "Tagging image..."
-    for tag in "${tags[@]}"; do
-        local full_tag="${docker_username}/${image_name}:${tag}"
-        print_info "  → $full_tag"
-        docker tag "temp-motorove-$env:build" "$full_tag"
-    done
-    
-    # Add git commit SHA tag if in a git repo
-    if git rev-parse --git-dir > /dev/null 2>&1; then
-        local git_sha=$(git rev-parse --short HEAD)
-        local sha_tag="${docker_username}/${image_name}:sha-${git_sha}"
-        print_info "  → $sha_tag (git commit)"
-        docker tag "temp-motorove-$env:build" "$sha_tag"
-        tags+=("sha-${git_sha}")
-    fi
-    
-    # Push all tags
-    print_info "Pushing to Docker Hub..."
-    for tag in "${tags[@]}"; do
-        local full_tag="${docker_username}/${image_name}:${tag}"
-        print_info "Pushing $full_tag..."
-        docker push "$full_tag"
+    if [ "$use_buildx" = true ]; then
+        # Multi-architecture build with buildx
+        print_info "Using Docker Buildx for multi-architecture build..."
+        
+        # Create or use existing buildx builder
+        if ! docker buildx ls | grep -q "multiarch"; then
+            print_info "Creating multiarch builder..."
+            docker buildx create --name multiarch --driver docker-container --use
+            print_success "Created multiarch builder"
+        else
+            docker buildx use multiarch
+            print_success "Using existing multiarch builder"
+        fi
+        
+        # Bootstrap the builder
+        docker buildx inspect --bootstrap > /dev/null 2>&1
+        
+        # Build tag arguments
+        local tag_args=()
+        for tag in "${tags[@]}"; do
+            tag_args+=("-t" "${docker_username}/${image_name}:${tag}")
+        done
+        
+        # Add git commit SHA tag if in a git repo
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            local git_sha=$(git rev-parse --short HEAD)
+            tag_args+=("-t" "${docker_username}/${image_name}:sha-${git_sha}")
+            print_info "Adding git commit tag: sha-${git_sha}"
+        fi
+        
+        # Build and push multi-architecture image
+        print_info "Building and pushing multi-architecture image..."
+        docker buildx build \
+            --platform "$platforms" \
+            --target "$target" \
+            "${tag_args[@]}" \
+            --push \
+            -f Dockerfile \
+            ../..
         
         if [ $? -eq 0 ]; then
-            print_success "  ✓ Pushed $full_tag"
+            print_success "Multi-architecture image built and pushed successfully!"
+            echo ""
+            print_info "Images pushed:"
+            for tag in "${tags[@]}"; do
+                echo "  • ${docker_username}/${image_name}:${tag}"
+            done
+            if git rev-parse --git-dir > /dev/null 2>&1; then
+                local git_sha=$(git rev-parse --short HEAD)
+                echo "  • ${docker_username}/${image_name}:sha-${git_sha}"
+            fi
+            echo ""
+            print_info "Supported platforms: $platforms"
+            echo ""
+            print_info "To use on Railway, add this to your railway.toml:"
+            echo ""
+            echo "  [deploy]"
+            echo "  image = \"${docker_username}/${image_name}:${tags[0]}\""
+            echo ""
         else
-            print_error "  ✗ Failed to push $full_tag"
+            print_error "Build failed"
+            exit 1
         fi
-    done
+    else
+        # Single-architecture build (legacy method)
+        print_info "Using standard Docker build (single architecture)..."
+        
+        # Build the image
+        print_info "Building image for $env environment..."
+        docker build -f Dockerfile \
+            --target "$target" \
+            -t "temp-motorove-$env:build" \
+            ../..
+        
+        if [ $? -ne 0 ]; then
+            print_error "Build failed"
+            exit 1
+        fi
+        
+        print_success "Build completed!"
+        
+        # Tag the image
+        print_info "Tagging image..."
+        for tag in "${tags[@]}"; do
+            local full_tag="${docker_username}/${image_name}:${tag}"
+            print_info "  → $full_tag"
+            docker tag "temp-motorove-$env:build" "$full_tag"
+        done
+        
+        # Add git commit SHA tag if in a git repo
+        if git rev-parse --git-dir > /dev/null 2>&1; then
+            local git_sha=$(git rev-parse --short HEAD)
+            local sha_tag="${docker_username}/${image_name}:sha-${git_sha}"
+            print_info "  → $sha_tag (git commit)"
+            docker tag "temp-motorove-$env:build" "$sha_tag"
+            tags+=("sha-${git_sha}")
+        fi
+        
+        # Push all tags
+        print_info "Pushing to Docker Hub..."
+        for tag in "${tags[@]}"; do
+            local full_tag="${docker_username}/${image_name}:${tag}"
+            print_info "Pushing $full_tag..."
+            docker push "$full_tag"
+            
+            if [ $? -eq 0 ]; then
+                print_success "  ✓ Pushed $full_tag"
+            else
+                print_error "  ✗ Failed to push $full_tag"
+            fi
+        done
+        
+        # Clean up temporary image
+        docker rmi "temp-motorove-$env:build" > /dev/null 2>&1
+        
+        print_success "All images pushed successfully!"
+    fi
     
-    # Clean up temporary image
-    docker rmi "temp-motorove-$env:build" > /dev/null 2>&1
-    
-    print_success "All images pushed successfully!"
     print_info "Docker Hub: https://hub.docker.com/r/${docker_username}/${image_name}"
 }
 
@@ -479,6 +563,8 @@ ${GREEN}Push Options:${NC}
     --tag, -t <tag>         Additional tag for the image (can be used multiple times)
     --username, -u <user>   Docker Hub username (default: \$DOCKER_HUB_USERNAME)
     --image, -i <name>      Image name (default: backend)
+    --platform, -p <plat>   Target platforms (default: linux/amd64,linux/arm64)
+    --no-buildx             Use standard build instead of buildx (single architecture)
 
 ${GREEN}Environment Variables:${NC}
     DOCKER_HUB_USERNAME     Your Docker Hub username
@@ -491,11 +577,13 @@ ${GREEN}Examples:${NC}
     ./docker.sh migrate dev         # Run migrations in development
     ./docker.sh shell dev           # Open shell in development container
     
-    # Push to Docker Hub
-    ./docker.sh push prod                           # Push with default tags
+    # Push to Docker Hub (multi-architecture by default)
+    ./docker.sh push prod                           # Push with default tags (amd64 + arm64)
     ./docker.sh push prod --tag v1.0.0              # Push with version tag
     ./docker.sh push prod --tag v1.0.0 --tag stable # Push with multiple tags
     ./docker.sh push staging -u myusername          # Push with custom username
+    ./docker.sh push prod --platform linux/amd64    # Push only for amd64
+    ./docker.sh push prod --no-buildx               # Use single-arch build (legacy)
     
     # Pull from Docker Hub
     ./docker.sh pull prod                           # Pull latest production image
@@ -506,11 +594,14 @@ ${GREEN}Quick Start:${NC}
     3. ./docker.sh migrate dev      # Run migrations
     4. ./docker.sh logs dev         # View logs
 
-${GREEN}Docker Hub Workflow:${NC}
+${GREEN}Docker Hub Workflow (Multi-Architecture):${NC}
     1. export DOCKER_HUB_USERNAME=yourusername
     2. docker login                 # Login to Docker Hub
-    3. ./docker.sh push prod --tag v1.0.0 --tag latest
+    3. ./docker.sh push prod --tag v1.0.0
     4. ./docker.sh pull prod        # Pull on another machine
+    
+    The push command builds for both linux/amd64 (Railway, AWS) and 
+    linux/arm64 (Mac M1/M2) by default using Docker Buildx.
 
 ${YELLOW}Note:${NC}
     Make sure to configure your .env files before starting containers.

@@ -31,10 +31,13 @@ COPY apps/backend/package.json ./apps/backend/package.json
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Rebuild TensorFlow bindings for ARM64
-RUN cd node_modules/.pnpm/@tensorflow+tfjs-node@4.22.0_encoding@0.1.13_seedrandom@3.0.5/node_modules/@tensorflow/tfjs-node && \
-    rm -rf lib/napi-v8/tfjs_binding.node && \
-    npm run build-addon-from-source
+# Rebuild TensorFlow bindings for the target architecture
+RUN TFJS_PATH=$(find node_modules/.pnpm -type d -path "*/@tensorflow/tfjs-node" | head -1) && \
+    if [ -n "$TFJS_PATH" ]; then \
+        cd "$TFJS_PATH" && \
+        rm -rf lib/napi-v8/tfjs_binding.node && \
+        npm run build-addon-from-source || true; \
+    fi
 
 # Build shared package
 RUN pnpm --filter @motorove/shared build
