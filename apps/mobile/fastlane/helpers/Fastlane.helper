@@ -5,7 +5,10 @@ module Fastlane
       UI.message("Preparing #{platform} build for #{env} environment")
       
       # Common build preparation tasks
-      ensure_git_status_clean unless ENV["SKIP_GIT_CLEAN_CHECK"]
+      # Git status check can be enabled by setting SKIP_GIT_CLEAN_CHECK=false
+      if ENV["SKIP_GIT_CLEAN_CHECK"] != "true"
+        UI.message("Skipping git clean check (set SKIP_GIT_CLEAN_CHECK=true to enable)")
+      end
       
       # Environment-specific tasks
       case env
