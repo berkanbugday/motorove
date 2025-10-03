@@ -17,38 +17,32 @@ export class FirebaseService implements OnModuleInit {
   private initializeFirebaseApp(): void {
     try {
       if (!this.initialized && admin.apps.length === 0) {
-        // For production use, the service account should be stored securely
-        const serviceAccount = this.configService.get<string>(
-          'FIREBASE_SERVICE_ACCOUNT',
+        // Read individual Firebase configuration variables
+        const projectId = this.configService.get<string>('FIREBASE_PROJECT_ID');
+        const privateKey = this.configService.get<string>(
+          'FIREBASE_PRIVATE_KEY',
+        );
+        const clientEmail = this.configService.get<string>(
+          'FIREBASE_CLIENT_EMAIL',
         );
 
-        if (!serviceAccount) {
+        // Validate required fields
+        if (!projectId || !privateKey || !clientEmail) {
           this.logger.warn(
-            'Firebase service account not found. Notifications will not work.',
+            'Firebase configuration incomplete. Missing required fields (project_id, private_key, or client_email). Notifications will not work.',
           );
           return;
         }
 
-        let parsedServiceAccount: Record<string, unknown>;
-        try {
-          parsedServiceAccount = JSON.parse(serviceAccount) as Record<
-            string,
-            unknown
-          >;
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Error parsing JSON';
-          this.logger.error(
-            'Failed to parse Firebase service account JSON',
-            errorMessage,
-          );
-          return;
-        }
+        // Construct service account object
+        const serviceAccount: admin.ServiceAccount = {
+          projectId,
+          privateKey: privateKey.replace(/\\n/g, '\n'), // Handle escaped newlines
+          clientEmail,
+        };
 
         admin.initializeApp({
-          credential: admin.credential.cert(
-            parsedServiceAccount as admin.ServiceAccount,
-          ),
+          credential: admin.credential.cert(serviceAccount),
           // Optional database URL if you're using Firebase Database
           // databaseURL: this.configService.get<string>('FIREBASE_DATABASE_URL'),
         });
