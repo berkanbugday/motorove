@@ -1,193 +1,220 @@
-# Fastlane Setup
+# Motorove Fastlane Documentation
 
-This directory contains Fastlane configuration for automated builds and deployments.
+This document describes the available Fastlane lanes for building and deploying the Motorove mobile application.
 
-## Environment Setup
+## Installation
 
-Create the following environment files in the `fastlane` directory:
+### Prerequisites
 
-### .env.dev
+Make sure you have the following installed:
 
-```
-# Common variables
-APP_NAME="motorove"
+```sh
+# Install Xcode command line tools
+xcode-select --install
 
-# iOS specific
-IOS_APP_IDENTIFIER="com.motorove.dev"
-IOS_SCHEME="motoroveDev"
-IOS_WORKSPACE="ios/motorove.xcworkspace"
-IOS_CONFIGURATION="Debug"
-IOS_EXPORT_METHOD="development"
+# Install Bundler (if not already installed)
+gem install bundler
 
-# Match (code signing)
-MATCH_GIT_URL="your_certificates_repo_url_here"
-MATCH_KEYCHAIN_NAME="login.keychain"
-MATCH_KEYCHAIN_PASSWORD=""  # Set in CI system or local setup
-
-# Android specific
-ANDROID_KEYSTORE_PATH="android/app/keystores/motorove-dev.keystore"
-ANDROID_KEYSTORE_PASSWORD=""  # Set in CI system or local setup
-ANDROID_KEY_ALIAS="motorove-dev"
-ANDROID_KEY_PASSWORD=""  # Set in CI system or local setup
-ANDROID_VERSION_CODE=""  # Dynamically set during build
-ANDROID_VERSION_NAME=""  # Dynamically set during build
-
-# Firebase
-FIREBASE_IOS_APP_ID="your_firebase_ios_app_id_here"
-FIREBASE_ANDROID_APP_ID="your_firebase_android_app_id_here"
-FIREBASE_TEST_GROUPS="testers,developers"
-
-# CI specific
-SKIP_GIT_CLEAN_CHECK="false"
-CI="false"
+# Install dependencies
+bundle install
 ```
 
-### .env.staging
+For _fastlane_ installation instructions, see [Installing _fastlane_](https://docs.fastlane.tools/#installing-fastlane)
 
-```
-# Common variables
-APP_NAME="motorove"
+## Environment Configuration
 
-# iOS specific
-IOS_APP_IDENTIFIER="com.motorove.staging"
-IOS_SCHEME="motoroveStaging"
-IOS_WORKSPACE="ios/motorove.xcworkspace"
-IOS_CONFIGURATION="Release"
-IOS_EXPORT_METHOD="ad-hoc"
+The project supports three environments:
+- **dev** - Development environment
+- **staging** - Staging/beta environment  
+- **prod** - Production environment
 
-# Match (code signing)
-MATCH_GIT_URL="your_certificates_repo_url_here"
-MATCH_KEYCHAIN_NAME="login.keychain"
-MATCH_KEYCHAIN_PASSWORD=""  # Set in CI system or local setup
+Environment-specific configuration files are located in `fastlane/.env.*`:
+- `.env.dev` - Development configuration
+- `.env.staging` - Staging configuration
+- `.env` - Production configuration
 
-# Android specific
-ANDROID_KEYSTORE_PATH="android/app/keystores/motorove-staging.keystore"
-ANDROID_KEYSTORE_PASSWORD=""  # Set in CI system or local setup
-ANDROID_KEY_ALIAS="motorove-staging"
-ANDROID_KEY_PASSWORD=""  # Set in CI system or local setup
-ANDROID_VERSION_CODE=""  # Dynamically set during build
-ANDROID_VERSION_NAME=""  # Dynamically set during build
-ANDROID_TRACK="beta"  # production, beta, alpha, internal
-ANDROID_RELEASE_STATUS="completed"
+## Available Actions
 
-# Firebase
-FIREBASE_IOS_APP_ID="your_firebase_ios_app_id_here"
-FIREBASE_ANDROID_APP_ID="your_firebase_android_app_id_here"
-FIREBASE_TEST_GROUPS="testers,stakeholders"
+### bump_version
 
-# Google Play
-GOOGLE_PLAY_JSON_KEY_PATH="path/to/google-play-api-key.json"
-
-# CI specific
-SKIP_GIT_CLEAN_CHECK="false"
-CI="false"
-```
-
-### .env
-
-```
-# Common variables
-APP_NAME="motorove"
-
-# iOS specific
-IOS_APP_IDENTIFIER="com.motorove"
-IOS_SCHEME="motorove"
-IOS_WORKSPACE="ios/motorove.xcworkspace"
-IOS_CONFIGURATION="Release"
-IOS_EXPORT_METHOD="app-store"
-
-# Match (code signing)
-MATCH_GIT_URL="your_certificates_repo_url_here"
-MATCH_KEYCHAIN_NAME="login.keychain"
-MATCH_KEYCHAIN_PASSWORD=""  # Set in CI system or local setup
-
-# Android specific
-ANDROID_KEYSTORE_PATH="android/app/keystores/motorove.keystore"
-ANDROID_KEYSTORE_PASSWORD=""  # Set in CI system or local setup
-ANDROID_KEY_ALIAS="motorove"
-ANDROID_KEY_PASSWORD=""  # Set in CI system or local setup
-ANDROID_VERSION_CODE=""  # Dynamically set during build
-ANDROID_VERSION_NAME=""  # Dynamically set during build
-ANDROID_TRACK="prod"  # prod, beta, alpha, internal
-ANDROID_RELEASE_STATUS="completed"  # completed, draft, halted, inProgress
-
-# Firebase
-FIREBASE_IOS_APP_ID="your_firebase_ios_app_id_here"
-FIREBASE_ANDROID_APP_ID="your_firebase_android_app_id_here"
-FIREBASE_TEST_GROUPS="stakeholders"
-
-# Google Play
-GOOGLE_PLAY_JSON_KEY_PATH="path/to/google-play-api-key.json"
-
-# CI specific
-SKIP_GIT_CLEAN_CHECK="false"
-CI="false"
-```
-
-## Usage Examples
-
-### iOS
-
-Build for dev:
-
-```
-bundle exec fastlane ios build env:dev
-```
-
-Deploy to TestFlight:
-
-```
-bundle exec fastlane ios deploy_testflight env:staging
-```
-
-Release to App Store:
-
-```
-bundle exec fastlane ios release_appstore env:prod
-```
-
-### Android
-
-Build for dev:
-
-```
-bundle exec fastlane android build env:dev
-```
-
-Deploy to Play Store Beta:
-
-```
-bundle exec fastlane android deploy_play_beta env:staging
-```
-
-Release to Play Store:
-
-```
-bundle exec fastlane android release_playstore env:prod
-```
-
-### Cross-platform
-
-Bump version numbers:
-
-```
+```sh
 bundle exec fastlane bump_version
 ```
 
-## Gemfile
+Bump build numbers on both iOS and Android platforms.
 
-Make sure the Gemfile includes the required gems:
+----
 
-```ruby
-gem 'fastlane', '~> 2.219.0'
-gem 'fastlane-plugin-firebase_app_distribution'
-gem 'dotenv'
+## iOS
+
+### ios build
+
+Build the iOS application for a specified environment.
+
+```sh
+# Development build
+bundle exec fastlane ios build env:dev
+
+# Staging build
+bundle exec fastlane ios build env:staging
+
+# Production build
+bundle exec fastlane ios build env:prod
 ```
 
-## Plugins
+**Parameters:**
+- `env` - Environment to build for (default: `dev`)
 
-Install the Firebase App Distribution plugin:
+### ios deploy_testflight
 
+Deploy a beta build to TestFlight for internal/external testing.
+
+```sh
+# Deploy staging build to TestFlight
+bundle exec fastlane ios deploy_testflight env:staging
+
+# Deploy production build to TestFlight
+bundle exec fastlane ios deploy_testflight env:prod
 ```
-bundle exec fastlane add_plugin firebase_app_distribution
+
+**Parameters:**
+- `env` - Environment to deploy (default: `staging`)
+
+**Requirements:**
+- Apple ID credentials configured in `.env.*`
+- App-specific password set in `FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD`
+- Valid provisioning profiles via match
+
+### ios deploy_firebase
+
+Deploy a beta build to Firebase App Distribution.
+
+```sh
+# Deploy dev build to Firebase
+bundle exec fastlane ios deploy_firebase env:dev
+
+# Deploy staging build to Firebase
+bundle exec fastlane ios deploy_firebase env:staging
 ```
+
+**Parameters:**
+- `env` - Environment to deploy (default: `dev`)
+- `notes` - Release notes (optional)
+
+**Example with release notes:**
+```sh
+bundle exec fastlane ios deploy_firebase env:staging notes:"Bug fixes and improvements"
+```
+
+### ios release_appstore
+
+Release to App Store Connect for review and production release.
+
+```sh
+bundle exec fastlane ios release_appstore env:prod
+```
+
+**Parameters:**
+- `env` - Environment to release (default: `prod`)
+
+----
+
+## Android
+
+### android build
+
+Build the Android application for a specified environment.
+
+```sh
+# Development build
+bundle exec fastlane android build env:dev
+
+# Staging build
+bundle exec fastlane android build env:staging
+
+# Production build
+bundle exec fastlane android build env:prod
+```
+
+**Parameters:**
+- `env` - Environment to build for (default: `dev`)
+
+### android deploy_firebase
+
+Deploy a beta build to Firebase App Distribution.
+
+```sh
+# Deploy dev build to Firebase
+bundle exec fastlane android deploy_firebase env:dev
+
+# Deploy staging build to Firebase
+bundle exec fastlane android deploy_firebase env:staging
+```
+
+**Parameters:**
+- `env` - Environment to deploy (default: `dev`)
+- `notes` - Release notes (optional)
+
+### android deploy_play_beta
+
+Deploy a beta build to Google Play Beta track.
+
+```sh
+bundle exec fastlane android deploy_play_beta env:staging
+```
+
+**Parameters:**
+- `env` - Environment to deploy (default: `staging`)
+
+### android release_playstore
+
+Release to Google Play Store for production.
+
+```sh
+bundle exec fastlane android release_playstore env:prod
+```
+
+**Parameters:**
+- `env` - Environment to release (default: `prod`)
+
+----
+
+## Troubleshooting
+
+### iOS Code Signing Issues
+
+If you encounter code signing errors:
+
+```sh
+# Update provisioning profiles
+bundle exec fastlane match appstore --force_for_new_devices
+```
+
+### Version Conflicts
+
+Ensure version numbers in `.env.*` files follow semantic versioning (e.g., `1.0.0`).
+
+### TestFlight Upload Errors
+
+- Verify your app-specific password is correctly set in `.env.staging`
+- Check that your Apple ID has the necessary permissions
+- Ensure the app icon has no alpha channel (transparency)
+
+### Common Issues
+
+1. **Build failures**: Clean the project and rebuild
+   ```sh
+   cd ios && pod deintegrate && pod install && cd ..
+   ```
+
+2. **Environment not loading**: Check that `.env.*` files exist in the `fastlane/` directory
+
+3. **Match errors**: Ensure you have access to the certificates repository and correct passphrase
+
+----
+
+## More Information
+
+More information about _fastlane_ can be found on [fastlane.tools](https://fastlane.tools).
+
+The documentation of _fastlane_ can be found on [docs.fastlane.tools](https://docs.fastlane.tools).

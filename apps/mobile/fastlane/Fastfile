@@ -7,7 +7,7 @@ import "./helpers/Fastlane.helper"
 before_all do |lane, options|
   # Use appropriate .env file by default
   env = options[:env] || "dev"
-  env_file = env == "prod" ? "./fastlane/.env" : "./fastlane/.env.#{env}"
+  env_file = env == "prod" ? ".env" : ".env.#{env}"
   UI.message("Loading environment from #{env_file}")
   Dotenv.load(env_file)
 end
@@ -28,6 +28,16 @@ platform :ios do
     # Load environment-specific configuration
     env = options[:env] || "dev"
     prepare_build(platform: "ios", env: env)
+    
+    # Setup code signing
+    match(
+      type: get_match_type(env: env),
+      app_identifier: ENV["IOS_APP_IDENTIFIER"],
+      readonly: true,
+      keychain_name: ENV["MATCH_KEYCHAIN_NAME"],
+      keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"],
+      api_key_path: nil  # Don't use API key for match, only for TestFlight upload
+    )
     
     # Build iOS app
     gym(
@@ -62,7 +72,10 @@ platform :ios do
     
     upload_to_testflight(
       skip_waiting_for_build_processing: true,
-      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa"
+      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa",
+      username: ENV["FASTLANE_USER"],
+      app_identifier: ENV["IOS_APP_IDENTIFIER"],
+      apple_id: ENV["FASTLANE_APPLE_ID"]
     )
   end
   

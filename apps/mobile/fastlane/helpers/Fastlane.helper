@@ -34,26 +34,37 @@ module Fastlane
       end
     end
     
-    # Sets up iOS certificates and provisioning profiles
+    # Gets the match type for iOS signing based on environment
+    def self.get_match_type(env:)
+      case env
+      when "dev"
+        "development"
+      when "staging"
+        "appstore"
+      when "prod"
+        "appstore"
+      end
+    end
+    
+    # Validates iOS signing requirements
     def self.setup_ios_signing(env:)
       UI.message("Setting up iOS signing for #{env}")
       
-      match_type = case env
-                  when "dev"
-                    "development"
-                  when "staging"
-                    "appstore"
-                  when "prod"
-                    "appstore"
-                  end
+      # Verify required env variables are present
+      required_vars = [
+        "IOS_APP_IDENTIFIER",
+        "MATCH_KEYCHAIN_NAME",
+        "MATCH_KEYCHAIN_PASSWORD"
+      ]
       
-      match(
-        type: match_type,
-        app_identifier: ENV["IOS_APP_IDENTIFIER"],
-        readonly: true,
-        keychain_name: ENV["MATCH_KEYCHAIN_NAME"],
-        keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"]
-      )
+      missing_vars = required_vars.select { |var| ENV[var].nil? || ENV[var].empty? }
+      
+      unless missing_vars.empty?
+        UI.error("Missing required environment variables: #{missing_vars.join(', ')}")
+        raise "Missing environment variables for iOS signing"
+      end
+      
+      UI.success("iOS signing configuration validated")
     end
     
     # Sets up Android signing configuration
@@ -130,4 +141,8 @@ def validate_version(options)
   Fastlane::Helper.validate_version(
     platform: options[:platform]
   )
+end
+
+def get_match_type(env:)
+  Fastlane::Helper.get_match_type(env: env)
 end 

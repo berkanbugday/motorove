@@ -1,19 +1,21 @@
 # Dependencies
 node_modules
-npm-debug.log
-yarn-error.log
-pnpm-debug.log
+**/node_modules
 
 # Build outputs
 dist
+**/dist
 build
+**/build
 .turbo
 
-# Development files
-.env*
-!.env.example
-.env.local
-.env.*.local
+# Environment files (will be mounted separately)
+**/.env*
+!**/.env.sample
+
+# Git
+.git
+.gitignore
 
 # IDE
 .vscode
@@ -26,32 +28,48 @@ build
 .DS_Store
 Thumbs.db
 
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
 # Testing
 coverage
 .nyc_output
+**/__tests__
+**/test
+*.spec.ts
+*.test.ts
+*.e2e-spec.ts
 
-# Misc
-*.log
-.cache
-temp
-tmp
+# Temp files
+.temp
+.tmp
+*.tmp
 
 # Documentation
 *.md
 !README.md
 
-# Git
-.git
-.gitignore
-.gitattributes
+# Mobile app (not needed for backend)
+apps/mobile
+
+# Landing page (not needed for backend)
+apps/landing
+
+# CI/CD
+.github
+.gitlab-ci.yml
 
 # Docker
+Dockerfile*
 docker-compose*.yml
-Dockerfile
 .dockerignore
 
-# Other apps in monorepo (we're only building backend)
-../landing
-../mobile
+# Prisma generated (will be regenerated in container)
+**/prisma/generated
 
-
+# Patches
+patches

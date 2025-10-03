@@ -263,7 +263,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Get the path to the env file\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  ENVFILE=.env.dev\nelif [ \"${CONFIGURATION}\" = \"Staging\" ]; then\n  ENVFILE=.env.staging\nelif [ \"${CONFIGURATION}\" = \"Release\" ]; then\n  ENVFILE=.env\nfi\n\n# Extract app name,version and build number from .env file\nexport APP_NAME=$(grep \"APP_NAME\" ../$ENVFILE | cut -d '=' -f2)\nexport VERSION_NUMBER=$(grep \"APP_VERSION\" ../$ENVFILE | cut -d'=' -f2)\nexport BUILD_NUMBER=$(grep \"APP_BUILD_NUMBER\" ../$ENVFILE | cut -d'=' -f2)\n\n# Set Info.plist values\n/usr/libexec/PlistBuddy -c \"Set :CFBundleDisplayName $APP_NAME\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $VERSION_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\necho \"Updated version to $VERSION_NUMBER ($BUILD_NUMBER)\"\n";
+			shellScript = "# Get the path to the env file\nif [ \"${CONFIGURATION}\" = \"Debug\" ]; then\n  ENVFILE=.env.dev\nelif [ \"${CONFIGURATION}\" = \"Staging\" ]; then\n  ENVFILE=.env.staging\nelif [ \"${CONFIGURATION}\" = \"Release\" ]; then\n  ENVFILE=.env\nfi\n\n# Extract app name,version and build number from .env file\nexport APP_NAME=$(grep \"^APP_NAME=\" ../$ENVFILE | cut -d '=' -f2)\nexport VERSION_NUMBER=$(grep \"^APP_VERSION=\" ../$ENVFILE | cut -d'=' -f2)\nexport BUILD_NUMBER=$(grep \"^APP_BUILD_NUMBER=\" ../$ENVFILE | cut -d'=' -f2)\n\n# Set Info.plist values\n/usr/libexec/PlistBuddy -c \"Set :CFBundleDisplayName $APP_NAME\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $VERSION_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n\necho \"Updated version to $VERSION_NUMBER ($BUILD_NUMBER)\"\n";
 		};
 		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -593,11 +593,10 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = motorove/motorove.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = QNEEF264MY;
+				DEVELOPMENT_TEAM = QNEEF264MY;
 				INFOPLIST_FILE = motorove/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "$(APP_NAME)";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -615,7 +614,6 @@
 				PRODUCT_BUNDLE_IDENTIFIERR = com.motorove.staging;
 				PRODUCT_NAME = motorove;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore com.motorove.staging";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
