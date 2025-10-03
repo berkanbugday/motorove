@@ -28,7 +28,7 @@ services:
       target: development
     container_name: motorove-api-dev
     ports:
-      - '${API_PORT:-3000}:3000'
+      - '${DEV_PORT:-3000}:3000'
     environment:
       - NODE_ENV=development
     env_file:
@@ -53,7 +53,7 @@ services:
       target: staging
     container_name: motorove-api-staging
     ports:
-      - '${API_PORT:-3001}:3000'
+      - '${STAGING_PORT:-3000}:3000'
     environment:
       - NODE_ENV=staging
     env_file:
@@ -78,7 +78,7 @@ services:
       target: production
     container_name: motorove-api-prod
     ports:
-      - '${API_PORT:-3002}:3000'
+      - '${PROD_PORT:-3000}:3000'
     environment:
       - NODE_ENV=production
     env_file:

@@ -6,10 +6,11 @@ RUN apt-get update && apt-get install -y \
     make \
     g++ \
     openssl \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.6.0 --activate
+# Install pnpm globally using npm (more reliable than corepack for multi-arch builds)
+RUN npm install -g pnpm@9.6.0
 
 # Set working directory
 WORKDIR /app

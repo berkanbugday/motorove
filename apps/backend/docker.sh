@@ -263,6 +263,7 @@ push() {
     local tags=()
     local platforms="linux/amd64,linux/arm64"
     local use_buildx=true
+    local no_cache=false
     
     # Determine target and default tags
     local target=""
@@ -303,6 +304,10 @@ push() {
                 ;;
             --no-buildx)
                 use_buildx=false
+                shift
+                ;;
+            --no-cache)
+                no_cache=true
                 shift
                 ;;
             *)
@@ -365,13 +370,21 @@ push() {
         
         # Build and push multi-architecture image
         print_info "Building and pushing multi-architecture image..."
-        docker buildx build \
-            --platform "$platforms" \
-            --target "$target" \
-            "${tag_args[@]}" \
-            --push \
-            -f Dockerfile \
-            ../..
+        local buildx_args=(
+            --platform "$platforms"
+            --target "$target"
+            "${tag_args[@]}"
+            --push
+            -f Dockerfile
+        )
+        
+        # Add no-cache flag if requested
+        if [ "$no_cache" = true ]; then
+            buildx_args+=(--no-cache)
+            print_warning "Building with --no-cache (this will take longer)"
+        fi
+        
+        docker buildx build "${buildx_args[@]}" ../..
         
         if [ $? -eq 0 ]; then
             print_success "Multi-architecture image built and pushed successfully!"
@@ -402,10 +415,19 @@ push() {
         
         # Build the image
         print_info "Building image for $env environment..."
-        docker build -f Dockerfile \
-            --target "$target" \
-            -t "temp-motorove-$env:build" \
-            ../..
+        local build_args=(
+            -f Dockerfile
+            --target "$target"
+            -t "temp-motorove-$env:build"
+        )
+        
+        # Add no-cache flag if requested
+        if [ "$no_cache" = true ]; then
+            build_args+=(--no-cache)
+            print_warning "Building with --no-cache (this will take longer)"
+        fi
+        
+        docker build "${build_args[@]}" ../..
         
         if [ $? -ne 0 ]; then
             print_error "Build failed"
@@ -565,6 +587,7 @@ ${GREEN}Push Options:${NC}
     --image, -i <name>      Image name (default: backend)
     --platform, -p <plat>   Target platforms (default: linux/amd64,linux/arm64)
     --no-buildx             Use standard build instead of buildx (single architecture)
+    --no-cache              Build without using cache (clean rebuild)
 
 ${GREEN}Environment Variables:${NC}
     DOCKER_HUB_USERNAME     Your Docker Hub username
@@ -584,6 +607,7 @@ ${GREEN}Examples:${NC}
     ./docker.sh push staging -u myusername          # Push with custom username
     ./docker.sh push prod --platform linux/amd64    # Push only for amd64
     ./docker.sh push prod --no-buildx               # Use single-arch build (legacy)
+    ./docker.sh push staging --tag v1.0.0 --no-cache # Clean rebuild without cache
     
     # Pull from Docker Hub
     ./docker.sh pull prod                           # Pull latest production image
