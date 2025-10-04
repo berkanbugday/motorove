@@ -29,6 +29,14 @@ platform :ios do
     env = options[:env] || "dev"
     prepare_build(platform: "ios", env: env)
     
+    # Determine the correct .env file for this environment
+    env_file = env == "prod" ? ".env" : ".env.#{env}"
+    
+    # Set ENVFILE environment variable for react-native-config
+    # This ensures react-native-config reads from the correct .env file
+    ENV["ENVFILE"] = env_file
+    UI.message("Setting ENVFILE=#{env_file} for react-native-config")
+    
     # Setup code signing
     match(
       type: get_match_type(env: env),
@@ -39,7 +47,12 @@ platform :ios do
       api_key_path: nil  # Don't use API key for match, only for TestFlight upload
     )
     
-    # Build iOS app
+    # Build iOS app with ENVFILE environment variable set
+    # This is critical for react-native-config to load the correct .env file
+    # Use absolute path to ensure the .env file is found correctly
+    absolute_env_path = File.expand_path("../#{env_file}", __dir__)
+    UI.message("Using absolute ENVFILE path: #{absolute_env_path}")
+    
     gym(
       scheme: ENV["IOS_SCHEME"],
       workspace: ENV["IOS_WORKSPACE"],
@@ -47,7 +60,8 @@ platform :ios do
       export_method: ENV["IOS_EXPORT_METHOD"],
       output_directory: "build/ios/#{env}",
       output_name: "#{ENV['APP_NAME']}-#{env}.ipa",
-      clean: true
+      clean: true,
+      xcargs: "ENVFILE=#{absolute_env_path}"
     )
   end
   
@@ -104,6 +118,14 @@ platform :android do
     # Load environment-specific configuration
     env = options[:env] || "dev"
     prepare_build(platform: "android", env: env)
+    
+    # Determine the correct .env file for this environment
+    env_file = env == "prod" ? ".env" : ".env.#{env}"
+    
+    # Set ENVFILE environment variable for react-native-config
+    # This ensures react-native-config reads from the correct .env file
+    ENV["ENVFILE"] = env_file
+    UI.message("Setting ENVFILE=#{env_file} for react-native-config")
     
     # Build Android app
     gradle(
