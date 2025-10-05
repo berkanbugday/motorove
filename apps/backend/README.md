@@ -157,7 +157,8 @@ JWT_SECRET=your-secret-key
 SUPABASE_URL=https://[PROJECT-REF].supabase.co
 SUPABASE_KEY=your-supabase-anon-key
 FIREBASE_SERVICE_ACCOUNT={...}
-TOMORROW_IO_API_KEY=your-weather-api-key
+WEATHER_API_KEY=your-google-cloud-weather-api-key
+GEOCODING_API_KEY=your-google-maps-geocoding-api-key
 
 # Optional
 SENTRY_DSN=your-sentry-dsn
@@ -166,6 +167,56 @@ REDIS_PORT=6379
 ```
 
 See [README-ENVIRONMENTS.md](./README-ENVIRONMENTS.md) for complete list.
+
+## ☁️ Google Cloud Weather API Setup
+
+The application uses Google Cloud Weather API for weather data. You need to set up Google Cloud Platform and enable the required APIs.
+
+### 1. Create Google Cloud Project
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable billing for the project
+
+### 2. Enable Required APIs
+
+Enable these APIs in your Google Cloud project:
+
+```bash
+# Using gcloud CLI
+gcloud services enable weather.googleapis.com
+gcloud services enable geocoding-backend.googleapis.com
+```
+
+Or enable them manually in the [Google Cloud Console](https://console.cloud.google.com/apis/library):
+- **Weather API** - For current weather conditions
+- **Geocoding API** - For converting city names to coordinates
+
+### 3. Create API Key
+
+1. Go to [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials)
+2. Click "Create Credentials" → "API Key"
+3. Copy the API key
+4. **Recommended**: Restrict the API key to only the required APIs for security
+
+### 4. Configure Environment Variables
+
+Add your Google Cloud API keys to your environment files:
+
+```bash
+# .env.dev and .env.staging
+WEATHER_API_KEY=your_google_cloud_weather_api_key_here
+GEOCODING_API_KEY=your_google_maps_geocoding_api_key_here
+```
+
+### 5. API Usage & Pricing
+
+- **Weather API**: $0.002 per request (first 100,000 requests/month free)
+- **Geocoding API**: $0.005 per request (first $200 credit free)
+
+The application implements caching to minimize API calls:
+- Weather data: 3-hour cache
+- Geocoding results: 24-hour cache
 
 ## 🏃 Running the Application
 

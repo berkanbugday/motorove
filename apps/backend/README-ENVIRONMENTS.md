@@ -69,8 +69,9 @@ SUPABASE_STORAGE_BUCKET=images
 # Firebase
 FIREBASE_SERVICE_ACCOUNT={...your-service-account-json...}
 
-# Weather API
-TOMORROW_IO_API_KEY=your_api_key
+# Google Cloud APIs
+WEATHER_API_KEY=your_google_cloud_weather_api_key
+GEOCODING_API_KEY=your_google_maps_geocoding_api_key
 ```
 
 ### Getting Supabase Credentials
@@ -80,6 +81,17 @@ TOMORROW_IO_API_KEY=your_api_key
 3. **SUPABASE_URL & KEY**: Settings → API
 
 See [README-SUPABASE.md](./README-SUPABASE.md) for detailed setup instructions.
+
+### Getting Google Cloud API Key
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a project or select an existing one
+3. Enable **Weather API** and **Geocoding API**
+4. Go to **APIs & Services → Credentials**
+5. Click **Create Credentials → API Key**
+6. Copy the API key and add it to your environment files
+
+**Important**: Restrict the API key to only Weather API and Geocoding API for security.
 
 ## Running the Application in Different Environments
 

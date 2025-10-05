@@ -28,7 +28,6 @@ The application uses the following environment files in order of precedence:
 | JWT_EXPIRATION | JWT token expiration           | No       | `1d`          |
 | SENTRY_DSN     | Sentry DSN for error reporting | No       | -             |
 | API_PREFIX     | API route prefix               | No       | `api`         |
-| SWAGGER_ENABLE | Whether to enable Swagger docs | No       | `true`        |
 | CORS_ORIGIN    | CORS allowed origins           | No       | `*`           |
 
 ## Sample Environment Files
@@ -45,7 +44,6 @@ HOST=0.0.0.0
 APP_NAME="Motorove API (Dev)"
 API_PREFIX=api
 CORS_ORIGIN=*
-SWAGGER_ENABLE=true
 
 # DATABASE
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/motorove_dev?schema=public"
@@ -77,7 +75,6 @@ HOST=0.0.0.0
 APP_NAME="Motorove API (Staging)"
 API_PREFIX=api
 CORS_ORIGIN=https://staging.example.com
-SWAGGER_ENABLE=true
 
 # DATABASE
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/motorove_staging?schema=public"
@@ -109,7 +106,6 @@ HOST=0.0.0.0
 APP_NAME="Motorove API"
 API_PREFIX=api
 CORS_ORIGIN=https://example.com
-SWAGGER_ENABLE=false
 
 # DATABASE
 DATABASE_URL="postgresql://postgres:strong_password@production-db:5432/motorove_prod?schema=public"

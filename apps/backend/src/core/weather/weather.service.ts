@@ -10,15 +10,22 @@ import { CacheService } from '../cache/cache.service';
 import {
   WEATHER_CACHE_KEY_PREFIX,
   WEATHER_CACHE_EXPIRATION,
+  GEOCODING_CACHE_KEY_PREFIX,
+  GEOCODING_CACHE_EXPIRATION,
 } from './constants';
-import { TomorrowIoResponse } from './interfaces/tomorrow-io-response.interface';
+import {
+  GoogleCloudWeatherResponse,
+  GoogleCloudWeatherConditionType,
+} from './interfaces/google-cloud-weather-response.interface';
 import { WeatherData } from './interfaces/weather-data.interface';
 
 @Injectable()
 export class WeatherService {
   private readonly logger = new Logger(WeatherService.name);
-  private readonly apiKey: string;
+  private readonly weatherApiKey: string;
+  private readonly geocodingApiKey: string;
   private readonly baseUrl: string;
+  private readonly geocodingBaseUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
@@ -26,15 +33,23 @@ export class WeatherService {
     private readonly prisma: PrismaService,
     private readonly cacheService: CacheService,
   ) {
-    this.apiKey = this.configService.get<string>('TOMORROW_IO_API_KEY', '');
-    this.baseUrl = this.configService.get<string>(
-      'WEATHER_API_BASE_URL',
-      'https://api.tomorrow.io/v4/weather/realtime',
+    this.weatherApiKey = this.configService.get<string>('WEATHER_API_KEY', '');
+    this.geocodingApiKey = this.configService.get<string>(
+      'GEOCODING_API_KEY',
+      '',
+    );
+    this.baseUrl = this.configService.get<string>('WEATHER_API_BASE_URL', '');
+    this.geocodingBaseUrl = this.configService.get<string>(
+      'GEOCODING_API_BASE_URL',
+      '',
     );
 
-    // Validate API key is available
-    if (!this.apiKey) {
-      this.logger.error('TOMORROW_IO_API_KEY is not configured');
+    // Validate API keys are available
+    if (!this.weatherApiKey) {
+      this.logger.error('WEATHER_API_KEY is not configured');
+    }
+    if (!this.geocodingApiKey) {
+      this.logger.error('GEOCODING_API_KEY is not configured');
     }
   }
 
@@ -96,7 +111,7 @@ export class WeatherService {
         return null;
       }
 
-      // Fetch weather data from Tomorrow.io API
+      // Fetch weather data from Google Cloud Weather API
       const weatherData = await this.fetchWeatherFromApi(city.value);
 
       if (weatherData) {
@@ -157,7 +172,7 @@ export class WeatherService {
   }
 
   /**
-   * Fetch weather data from Tomorrow.io API
+   * Fetch weather data from Google Cloud Weather API
    * @param cityName The name of the city
    * @returns Weather data from the API
    */
@@ -166,8 +181,10 @@ export class WeatherService {
   ): Promise<WeatherData | null> {
     try {
       // Validate API key
-      if (!this.apiKey) {
-        this.logger.error('Cannot fetch weather data: API key is missing');
+      if (!this.weatherApiKey) {
+        this.logger.error(
+          'Cannot fetch weather data: Weather API key is missing',
+        );
         return null;
       }
 
@@ -177,12 +194,21 @@ export class WeatherService {
         return null;
       }
 
-      const url = `${this.baseUrl}?location=${encodeURIComponent(cityName)}&apikey=${this.apiKey}&units=metric`;
+      // First, get coordinates for the city using Google Geocoding API
+      const coordinates = await this.getCoordinatesForCity(cityName);
+      if (!coordinates) {
+        this.logger.error(`Could not get coordinates for city: ${cityName}`);
+        return null;
+      }
 
-      this.logger.debug(`Fetching weather data for ${cityName}`);
+      const url = `${this.baseUrl}?key=${this.weatherApiKey}&location.latitude=${coordinates.lat}&location.longitude=${coordinates.lng}&unitsSystem=METRIC`;
 
-      const response = await firstValueFrom<TomorrowIoResponse>(
-        this.httpService.get<TomorrowIoResponse>(url).pipe(
+      this.logger.debug(
+        `Fetching weather data for ${cityName} at coordinates (${coordinates.lat}, ${coordinates.lng})`,
+      );
+
+      const response = await firstValueFrom<GoogleCloudWeatherResponse>(
+        this.httpService.get<GoogleCloudWeatherResponse>(url).pipe(
           timeout(10000), // 10 second timeout
           map((res) => res.data),
           catchError((error: AxiosError) => {
@@ -214,30 +240,26 @@ export class WeatherService {
         return null;
       }
 
-      if (!response.data || !response.data.values) {
+      if (!response.weatherCondition || !response.temperature) {
         this.logger.warn(
           `Invalid response structure for ${cityName}: ${JSON.stringify(response)}`,
         );
         return null;
       }
 
-      const { values } = response.data;
-
-      if (
-        typeof values.temperature !== 'number' ||
-        typeof values.weatherCode !== 'number'
-      ) {
+      const { weatherCondition, temperature } = response;
+      if (typeof temperature.degrees !== 'number' || !weatherCondition.type) {
         this.logger.warn(
-          `Invalid temperature or weatherCode for ${cityName}: ${JSON.stringify(values)}`,
+          `Invalid temperature or weather condition for ${cityName}: ${JSON.stringify({ temperature, weatherCondition })}`,
         );
         return null;
       }
 
-      const { temperature, weatherCode } = values;
-
       return {
-        temperature,
-        condition: this.mapWeatherCodeToCondition(weatherCode),
+        temperature: temperature.degrees,
+        condition: this.mapGoogleCloudWeatherConditionToCondition(
+          weatherCondition.type,
+        ),
         cityId: '', // Will be filled by the calling method
         cityName,
       };
@@ -251,59 +273,152 @@ export class WeatherService {
   }
 
   /**
-   * Map Tomorrow.io weather code to our WeatherCondition enum
-   * @param weatherCode The weather code from Tomorrow.io API
+   * Get coordinates for a city using Google Geocoding API
+   * @param cityName The name of the city
+   * @returns Coordinates (lat, lng) or null if not found
+   */
+  private async getCoordinatesForCity(
+    cityName: string,
+  ): Promise<{ lat: number; lng: number } | null> {
+    try {
+      const cacheKey = `${GEOCODING_CACHE_KEY_PREFIX}${cityName.toLowerCase()}`;
+
+      // Check cache first
+      const cachedCoordinates = await this.cacheService.get<{
+        lat: number;
+        lng: number;
+      }>(cacheKey);
+
+      if (cachedCoordinates) {
+        this.logger.debug(`Using cached coordinates for ${cityName}`);
+        return cachedCoordinates;
+      }
+
+      // If cache miss, fetch from Google Geocoding API
+      const url = `${this.geocodingBaseUrl}?address=${encodeURIComponent(cityName)}&key=${this.geocodingApiKey}`;
+
+      this.logger.debug(`Fetching coordinates for ${cityName}`);
+
+      interface GeocodingResponse {
+        results: Array<{
+          geometry: {
+            location: {
+              lat: number;
+              lng: number;
+            };
+          };
+        }>;
+      }
+
+      const response = await firstValueFrom<GeocodingResponse>(
+        this.httpService.get<GeocodingResponse>(url).pipe(
+          timeout(10000),
+          map((res) => res.data),
+          catchError((error: AxiosError) => {
+            this.logger.error(
+              `Geocoding API error for ${cityName}:`,
+              error.response?.data || error.message,
+            );
+            throw error;
+          }),
+        ),
+      );
+
+      if (!response || !response.results || response.results.length === 0) {
+        this.logger.warn(`No geocoding results found for ${cityName}`);
+        return null;
+      }
+
+      const location = response.results[0].geometry.location;
+      const coordinates = { lat: location.lat, lng: location.lng };
+
+      // Cache coordinates for 30 days (monthly)
+      await this.cacheService.set(
+        cacheKey,
+        coordinates,
+        GEOCODING_CACHE_EXPIRATION,
+      );
+
+      return coordinates;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get coordinates for ${cityName}`,
+        error instanceof Error ? error.message : String(error),
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Map Google Cloud Weather API condition type to our WeatherCondition enum
+   * @param conditionType The condition type from Google Cloud Weather API
    * @returns The corresponding WeatherCondition
    */
-  private mapWeatherCodeToCondition(weatherCode: number): WeatherCondition {
-    // Tomorrow.io weather codes mapping based on their documentation
-    switch (weatherCode) {
-      case 1000: // Clear, Sunny
+  private mapGoogleCloudWeatherConditionToCondition(
+    conditionType: GoogleCloudWeatherConditionType,
+  ): WeatherCondition {
+    // Google Cloud Weather API condition types mapping
+    switch (conditionType) {
+      case GoogleCloudWeatherConditionType.CLEAR:
         return WeatherCondition.CLEAR;
-      case 1100: // Mostly Clear
+      case GoogleCloudWeatherConditionType.MOSTLY_CLEAR:
         return WeatherCondition.MOSTLY_CLEAR;
-      case 1101: // Partly Cloudy
+      case GoogleCloudWeatherConditionType.PARTLY_CLOUDY:
         return WeatherCondition.PARTLY_CLOUDY;
-      case 1102: // Mostly Cloudy
+      case GoogleCloudWeatherConditionType.MOSTLY_CLOUDY:
         return WeatherCondition.MOSTLY_CLOUDY;
-      case 1001: // Cloudy
+      case GoogleCloudWeatherConditionType.CLOUDY:
         return WeatherCondition.CLOUDY;
-      case 2000: // Fog
-        return WeatherCondition.FOG;
-      case 2100: // Light Fog
-        return WeatherCondition.LIGHT_FOG;
-      case 4000: // Drizzle
-        return WeatherCondition.DRIZZLE;
-      case 4001: // Rain
-        return WeatherCondition.RAIN;
-      case 4200: // Light Rain
+      case GoogleCloudWeatherConditionType.WINDY:
+        return WeatherCondition.WIND;
+      case GoogleCloudWeatherConditionType.WIND_AND_RAIN:
+        return WeatherCondition.RAIN; // Map to general rain
+      case GoogleCloudWeatherConditionType.LIGHT_RAIN_SHOWERS:
+      case GoogleCloudWeatherConditionType.LIGHT_RAIN:
         return WeatherCondition.LIGHT_RAIN;
-      case 4201: // Heavy Rain
+      case GoogleCloudWeatherConditionType.CHANCE_OF_SHOWERS:
+      case GoogleCloudWeatherConditionType.SCATTERED_SHOWERS:
+        return WeatherCondition.DRIZZLE;
+      case GoogleCloudWeatherConditionType.RAIN_SHOWERS:
+      case GoogleCloudWeatherConditionType.RAIN:
+      case GoogleCloudWeatherConditionType.LIGHT_TO_MODERATE_RAIN:
+        return WeatherCondition.RAIN;
+      case GoogleCloudWeatherConditionType.HEAVY_RAIN_SHOWERS:
+      case GoogleCloudWeatherConditionType.HEAVY_RAIN:
+      case GoogleCloudWeatherConditionType.MODERATE_TO_HEAVY_RAIN:
+      case GoogleCloudWeatherConditionType.RAIN_PERIODICALLY_HEAVY:
         return WeatherCondition.HEAVY_RAIN;
-      case 5000: // Snow
-        return WeatherCondition.SNOW;
-      case 5001: // Flurries
-        return WeatherCondition.FLURRIES;
-      case 5100: // Light Snow
+      case GoogleCloudWeatherConditionType.LIGHT_SNOW_SHOWERS:
+      case GoogleCloudWeatherConditionType.LIGHT_SNOW:
+      case GoogleCloudWeatherConditionType.LIGHT_TO_MODERATE_SNOW:
         return WeatherCondition.LIGHT_SNOW;
-      case 5101: // Heavy Snow
+      case GoogleCloudWeatherConditionType.CHANCE_OF_SNOW_SHOWERS:
+      case GoogleCloudWeatherConditionType.SCATTERED_SNOW_SHOWERS:
+        return WeatherCondition.FLURRIES;
+      case GoogleCloudWeatherConditionType.SNOW_SHOWERS:
+      case GoogleCloudWeatherConditionType.SNOW:
+      case GoogleCloudWeatherConditionType.MODERATE_TO_HEAVY_SNOW:
+        return WeatherCondition.SNOW;
+      case GoogleCloudWeatherConditionType.HEAVY_SNOW_SHOWERS:
+      case GoogleCloudWeatherConditionType.HEAVY_SNOW:
+      case GoogleCloudWeatherConditionType.SNOWSTORM:
+      case GoogleCloudWeatherConditionType.SNOW_PERIODICALLY_HEAVY:
+      case GoogleCloudWeatherConditionType.HEAVY_SNOW_STORM:
         return WeatherCondition.HEAVY_SNOW;
-      case 6000: // Freezing Drizzle
-        return WeatherCondition.FREEZING_DRIZZLE;
-      case 6001: // Freezing Rain
-        return WeatherCondition.FREEZING_RAIN;
-      case 6200: // Light Freezing Rain
-        return WeatherCondition.LIGHT_FREEZING_RAIN;
-      case 6201: // Heavy Freezing Rain
-        return WeatherCondition.HEAVY_FREEZING_RAIN;
-      case 7000: // Ice Pellets
-        return WeatherCondition.ICE_PELLETS;
-      case 7101: // Heavy Ice Pellets
-        return WeatherCondition.HEAVY_ICE_PELLETS;
-      case 7102: // Light Ice Pellets
-        return WeatherCondition.LIGHT_ICE_PELLETS;
-      case 8000: // Thunderstorm
+      case GoogleCloudWeatherConditionType.BLOWING_SNOW:
+        return WeatherCondition.SNOW; // Map to general snow
+      case GoogleCloudWeatherConditionType.RAIN_AND_SNOW:
+        return WeatherCondition.RAIN; // Map to rain as primary
+      case GoogleCloudWeatherConditionType.HAIL:
+      case GoogleCloudWeatherConditionType.HAIL_SHOWERS:
+        return WeatherCondition.ICE_PELLETS; // Map hail to ice pellets
+      case GoogleCloudWeatherConditionType.THUNDERSTORM:
+      case GoogleCloudWeatherConditionType.THUNDERSHOWER:
+      case GoogleCloudWeatherConditionType.LIGHT_THUNDERSTORM_RAIN:
+      case GoogleCloudWeatherConditionType.SCATTERED_THUNDERSTORMS:
+      case GoogleCloudWeatherConditionType.HEAVY_THUNDERSTORM:
         return WeatherCondition.THUNDERSTORM;
+      case GoogleCloudWeatherConditionType.TYPE_UNSPECIFIED:
       default:
         return WeatherCondition.UNKNOWN;
     }

@@ -51,7 +51,8 @@ cp .env.sample .env
 - `JWT_SECRET`
 - `SUPABASE_URL` and `SUPABASE_KEY`
 - `FIREBASE_SERVICE_ACCOUNT`
-- `TOMORROW_IO_API_KEY`
+- `WEATHER_API_KEY` (Google Cloud Weather API key)
+- `GEOCODING_API_KEY` (Google Maps Geocoding API key)
 
 ### 3. Run with Docker Compose
 
@@ -111,7 +112,6 @@ docker-compose exec api-prod pnpm prisma migrate deploy
 
 - **Development API**: http://localhost:3000/api
 - **Development GraphQL**: http://localhost:3000/graphql
-- **Swagger Documentation**: http://localhost:3000/api (if SWAGGER_ENABLE=true)
 
 - **Staging API**: http://localhost:3001/api
 - **Production API**: http://localhost:3002/api
@@ -249,7 +249,8 @@ Each environment uses specific `.env` files in this order:
 | SUPABASE_URL             | Supabase project URL (https://[PROJECT-REF].supabase.co) | Yes      |
 | SUPABASE_KEY             | Supabase anon/public key                                 | Yes      |
 | FIREBASE_SERVICE_ACCOUNT | Firebase service account JSON                            | Yes      |
-| TOMORROW_IO_API_KEY      | Weather API key                                          | Yes      |
+| WEATHER_API_KEY          | Google Cloud Weather API key                             | Yes      |
+| GEOCODING_API_KEY        | Google Maps Geocoding API key                            | Yes      |
 
 **DATABASE_URL Format:**
 

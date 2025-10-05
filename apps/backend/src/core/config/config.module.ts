@@ -22,17 +22,20 @@ import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
         JWT_EXPIRATION: Joi.string().default('1d'),
         SENTRY_DSN: Joi.string().optional().empty(''),
         API_PREFIX: Joi.string().default('api'),
-        SWAGGER_ENABLE: Joi.boolean().default(true),
         CORS_ORIGIN: Joi.string().default('*'),
         // Redis configuration
         REDIS_HOST: Joi.string().default('localhost'),
         REDIS_PORT: Joi.number().default(6379),
         REDIS_PASSWORD: Joi.string().allow('').optional(),
-        // Weather API configuration
+        // Google Cloud Weather API configuration
         WEATHER_API_BASE_URL: Joi.string().default(
-          'https://api.tomorrow.io/v4/weather/realtime',
+          'https://weather.googleapis.com/v1/currentConditions:lookup',
         ),
-        TOMORROW_IO_API_KEY: Joi.string().required(),
+        GEOCODING_API_BASE_URL: Joi.string().default(
+          'https://maps.googleapis.com/maps/api/geocode/json',
+        ),
+        WEATHER_API_KEY: Joi.string().required(),
+        GEOCODING_API_KEY: Joi.string().required(),
       }),
       validationOptions: {
         allowUnknown: true,
