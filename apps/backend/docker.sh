@@ -258,7 +258,7 @@ push() {
     print_header "Multi-Architecture Docker Build & Push - $env"
     
     # Default Docker Hub username (can be overridden with DOCKER_HUB_USERNAME env var)
-    local docker_username="${DOCKER_HUB_USERNAME:-yourusername}"
+    local docker_username="${DOCKER_HUB_USERNAME:-motorove}"
     local image_name="${DOCKER_HUB_IMAGE_NAME:-backend}"
     local tags=()
     local platforms="linux/amd64,linux/arm64"
@@ -479,7 +479,7 @@ push() {
 # Pull from Docker Hub
 pull() {
     local env=${1:-prod}
-    local docker_username="${DOCKER_HUB_USERNAME:-yourusername}"
+    local docker_username="${DOCKER_HUB_USERNAME:-motorove}"
     local image_name="${DOCKER_HUB_IMAGE_NAME:-backend}"
     
     print_header "Pulling from Docker Hub - $env"
