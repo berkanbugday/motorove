@@ -182,7 +182,8 @@ android {
             variant.mergedFlavor.manifestPlaceholders = [
                 appName: variant.name.endsWith("Dev") ? "Motorove Dev" : 
                          variant.name.endsWith("Staging") ? "Motorove Staging" : 
-                         "Motorove"
+                         "Motorove",
+                GOOGLE_MAPS_API_KEY: project.env.get("GOOGLE_MAPS_API_KEY") ?: ""
             ]
         }
         
