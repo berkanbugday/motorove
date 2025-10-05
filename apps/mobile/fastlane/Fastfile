@@ -127,23 +127,36 @@ platform :android do
     ENV["ENVFILE"] = env_file
     UI.message("Setting ENVFILE=#{env_file} for react-native-config")
     
-    # Build Android app
+    # Build Android app with ENVFILE environment variable set
+    # This is critical for react-native-config to load the correct .env file
+    # Use absolute path to ensure the .env file is found correctly
+    absolute_env_path = File.expand_path("../#{env_file}", __dir__)
+    UI.message("Using absolute ENVFILE path: #{absolute_env_path}")
+    
     gradle(
       task: "clean assembleRelease",
       project_dir: "android",
       properties: {
-        "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE_PATH"],
-        "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
-        "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
-        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+        "RELEASE_UPLOAD_STORE_FILE" => ENV["ANDROID_KEYSTORE_PATH"],
+        "RELEASE_UPLOAD_STORE_PASSWORD" => ENV["ANDROID_KEYSTORE_PASSWORD"],
+        "RELEASE_UPLOAD_KEY_ALIAS" => ENV["ANDROID_KEY_ALIAS"],
+        "RELEASE_UPLOAD_KEY_PASSWORD" => ENV["ANDROID_KEY_PASSWORD"],
         "versionCode" => ENV["ANDROID_VERSION_CODE"],
-        "versionName" => ENV["ANDROID_VERSION_NAME"]
+        "versionName" => ENV["ANDROID_VERSION_NAME"],
+        "ENVFILE" => absolute_env_path
       }
     )
     
     # Move and rename APK to consistent location
     sh("mkdir -p build/android/#{env}")
-    sh("cp android/app/build/outputs/apk/release/app-release.apk build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk")
+    
+    # Use the actual APK path from gradle output
+    apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    if apk_path && File.exist?(apk_path)
+      sh("cp '#{apk_path}' 'build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk'")
+    else
+      UI.user_error!("APK file not found at expected location: #{apk_path}")
+    end
   end
   
   desc "Release to Google Play Store"

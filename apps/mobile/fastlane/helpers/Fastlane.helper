@@ -73,11 +73,14 @@ module Fastlane
       
       # Verify keystore exists
       keystore_path = ENV["ANDROID_KEYSTORE_PATH"]
-      unless File.exist?(keystore_path)
-        UI.error("Keystore file not found at: #{keystore_path}")
-        UI.error("Please ensure the keystore file exists or update ANDROID_KEYSTORE_PATH")
+      # Build the full path to the keystore file
+      expected_keystore_path = File.expand_path("../../android/app/#{keystore_path}", __dir__)
+      unless File.exist?(expected_keystore_path)
+        UI.error("Keystore file not found at: #{expected_keystore_path}")
+        UI.error("Please ensure the keystore file exists or set ANDROID_KEYSTORE_PATH environment variable")
         raise "Keystore file not found"
       end
+      UI.success("Keystore found at: #{expected_keystore_path}")
       
       # Verify all required env variables are present
       required_vars = [
