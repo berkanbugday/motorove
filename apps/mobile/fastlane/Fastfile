@@ -186,21 +186,22 @@ platform :android do
       UI.message("AAB copied to: #{target_path}")
       
       # Store the target path for use in upload actions
-      lane_context[:CUSTOM_AAB_PATH] = target_path
     else
       UI.user_error!("AAB file not found at expected location: #{aab_path}")
     end
   end
   
-  desc "Release to Google Play Store"
-  lane :release_playstore do |options|
+  desc "Deploy a production build to Google Play Production track"
+  lane :deploy_play_prod do |options|
     env = options[:env] || "prod"
     build(env: env)
     
     upload_to_play_store(
       track: ENV["ANDROID_TRACK"] || "prod",
       release_status: ENV["ANDROID_RELEASE_STATUS"] || "completed",
-      aab: lane_context[:CUSTOM_AAB_PATH]
+      aab: lane_context[:CUSTOM_AAB_PATH],
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
+      package_name: ENV["ANDROID_PACKAGE_NAME"]
     )
   end
   
@@ -212,7 +213,9 @@ platform :android do
     upload_to_play_store(
       track: "beta",
       release_status: "completed",
-      aab: lane_context[:CUSTOM_AAB_PATH]
+      aab: lane_context[:CUSTOM_AAB_PATH],
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
+      package_name: ENV["ANDROID_PACKAGE_NAME"]
     )
   end
   

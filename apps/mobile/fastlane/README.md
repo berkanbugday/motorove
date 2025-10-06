@@ -71,13 +71,13 @@ Deploy a beta build to Firebase App Distribution
 
 Build the Android application for specified environment
 
-### android release_playstore
+### android deploy_play_prod
 
 ```sh
-[bundle exec] fastlane android release_playstore
+[bundle exec] fastlane android deploy_play_prod
 ```
 
-Release to Google Play Store
+Deploy a production build to Google Play Production track
 
 ### android deploy_play_beta
 

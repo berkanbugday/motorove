@@ -623,11 +623,11 @@ export default {
     // Menu screen
     menu: {
       general: 'General',
-      account: 'Account',
       my_profile: 'My Profile',
       my_garage: 'My Garage',
       posts: 'Posts',
       events: 'Events',
+      requests: 'Requests',
       join_requests: 'Join Requests',
       follow_requests: 'Follow Requests',
       settings: 'Settings',
