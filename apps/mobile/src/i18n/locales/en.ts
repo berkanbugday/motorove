@@ -78,14 +78,18 @@ export default {
   screens: {
     // Welcome screen
     welcome: {
-      welcome: 'Welcome',
       sign_in: 'Sign In',
       sign_up: 'Sign Up',
       slides: {
-        discover_community: 'Discover Motorcycle Community',
-        join_events: 'Join Events',
-        create_groups: 'Create Groups',
-        share_experiences: 'Share Your Experiences',
+        discover_community_title: 'Welcome',
+        discover_community_text:
+          'Riders and events in your city are just a tap away',
+        join_events_title: 'Join Events',
+        join_events_text:
+          'Connect with riders, routes, and events near you. The road is better together',
+        create_garage_title: 'Connect Your Garage to the Community',
+        create_garage_text:
+          'Add, edit, and share your motorcycles and equipment with the community',
       },
     },
 

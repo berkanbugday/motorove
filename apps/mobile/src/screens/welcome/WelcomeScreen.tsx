@@ -108,21 +108,24 @@ export function WelcomeScreen(): React.JSX.Element {
   const carouselItems: CarouselItem[] = [
     {
       id: 1,
-      titleKey: 'screens.welcome.welcome',
-      textKey: 'screens.welcome.slides.discover_community',
-      color: '#2E64E5',
+      titleKey: 'screens.welcome.slides.discover_community_title',
+      textKey: 'screens.welcome.slides.discover_community_text',
+      color: '#ffff',
+      image: require('@assets/images/welcome/discover_community.png'),
     },
     {
       id: 2,
-      titleKey: 'screens.welcome.slides.join_events',
-      textKey: 'screens.welcome.slides.join_events',
-      color: '#4CAF50',
+      titleKey: 'screens.welcome.slides.join_events_title',
+      textKey: 'screens.welcome.slides.join_events_text',
+      color: '#ffff',
+      image: require('@assets/images/welcome/join_events.png'),
     },
     {
       id: 3,
-      titleKey: 'screens.welcome.slides.create_groups',
-      textKey: 'screens.welcome.slides.share_experiences',
-      color: '#FF9800',
+      titleKey: 'screens.welcome.slides.create_garage_title',
+      textKey: 'screens.welcome.slides.create_garage_text',
+      color: '#ffff',
+      image: require('@assets/images/welcome/garage.png'),
     },
   ];
 
@@ -197,8 +200,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: '80%',
-    height: '80%',
+    width: '100%',
+    height: '100%',
+    borderRadius: radius.lg,
   },
   imageText: {
     color: colors.neutral.white,

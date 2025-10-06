@@ -164,7 +164,7 @@ android {
         staging {
             dimension "environment"
             applicationIdSuffix ".staging"
-            resValue "string", "app_name", "Motorove Staging"
+            resValue "string", "app_name", "Motorove Beta"
             buildConfigField "String", "ENVIRONMENT", '"staging"'
         }
         
@@ -181,7 +181,7 @@ android {
         if (variant.hasProperty("mergedFlavor")) {
             variant.mergedFlavor.manifestPlaceholders = [
                 appName: variant.name.endsWith("Dev") ? "Motorove Dev" : 
-                         variant.name.endsWith("Staging") ? "Motorove Staging" : 
+                         variant.name.endsWith("Staging") ? "Motorove Beta" : 
                          "Motorove",
                 GOOGLE_MAPS_API_KEY: project.env.get("GOOGLE_MAPS_API_KEY") ?: ""
             ]

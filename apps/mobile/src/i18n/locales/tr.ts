@@ -78,14 +78,18 @@ export default {
   screens: {
     // Welcome screen
     welcome: {
-      welcome: 'Hoş Geldiniz',
       sign_in: 'Giriş Yap',
       sign_up: 'Kayıt Ol',
       slides: {
-        discover_community: 'Motosiklet Topluluğunu Keşfet',
-        join_events: 'Etkinliklere Katıl',
-        create_groups: 'Gruplar Oluştur',
-        share_experiences: 'Deneyimlerini Paylaş',
+        discover_community_title: 'Hoş Geldiniz!',
+        discover_community_text:
+          'Şehrindeki sürücüler ve etkinlikler bir dokunuş uzağında',
+        join_events_title: 'Etkinliklere Katıl',
+        join_events_text:
+          'Yakınındaki sürücüler, rotalar ve etkinliklerle bağ kur. Yol, birlikte daha güzel',
+        create_garage_title: 'Garajını Toplulukla Buluştur',
+        create_garage_text:
+          'Motosikletlerini ve ekipmanlarını ekle, düzenle, toplulukla paylaş',
       },
     },
 

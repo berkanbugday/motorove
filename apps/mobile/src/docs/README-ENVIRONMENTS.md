@@ -69,7 +69,7 @@ FIREBASE_DATABASE_URL_DEV=your_dev_database_url
 # Staging Environment Configuration
 
 # App Settings
-APP_NAME=Motorove Staging
+APP_NAME=Motorove Beta
 APP_ENV=staging
 APP_VERSION=1.0.0
 APP_BUILD_NUMBER=1
