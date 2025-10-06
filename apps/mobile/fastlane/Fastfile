@@ -53,13 +53,16 @@ platform :ios do
     absolute_env_path = File.expand_path("../#{env_file}", __dir__)
     UI.message("Using absolute ENVFILE path: #{absolute_env_path}")
     
+    # Create a safe filename by replacing spaces with underscores
+    safe_app_name = ENV['APP_NAME'].downcase.gsub(' ', '-')
+    
     gym(
       scheme: ENV["IOS_SCHEME"],
       workspace: ENV["IOS_WORKSPACE"],
       configuration: ENV["IOS_CONFIGURATION"],
       export_method: ENV["IOS_EXPORT_METHOD"],
       output_directory: "build/ios/#{env}",
-      output_name: "#{ENV['APP_NAME']}-#{env}.ipa",
+      output_name: "#{safe_app_name}.ipa",
       clean: true,
       xcargs: "ENVFILE=#{absolute_env_path}"
     )
@@ -70,12 +73,13 @@ platform :ios do
     env = options[:env] || "prod"
     build(env: env)
     
+    safe_app_name = ENV['APP_NAME'].downcase.gsub(' ', '-')
     deliver(
       submit_for_review: false,
       automatic_release: false,
       skip_metadata: true,
       skip_screenshots: true,
-      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}.ipa"
+      ipa: "build/ios/#{env}/#{safe_app_name}.ipa"
     )
   end
   
@@ -84,9 +88,10 @@ platform :ios do
     env = options[:env] || "staging"
     build(env: env)
     
+    safe_app_name = ENV['APP_NAME'].downcase.gsub(' ', '-')
     upload_to_testflight(
       skip_waiting_for_build_processing: true,
-      ipa: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa",
+      ipa: "build/ios/#{env}/#{safe_app_name}.ipa",
       username: ENV["FASTLANE_USER"],
       app_identifier: ENV["IOS_APP_IDENTIFIER"],
       apple_id: ENV["FASTLANE_APPLE_ID"]
@@ -98,11 +103,12 @@ platform :ios do
     env = options[:env] || "dev"
     build(env: env)
     
+    safe_app_name = ENV['APP_NAME'].downcase.gsub(' ', '-')
     firebase_app_distribution(
       app: ENV["FIREBASE_IOS_APP_ID"],
       groups: ENV["FIREBASE_TEST_GROUPS"],
       release_notes: options[:notes] || "New build for testing",
-      ipa_path: "build/ios/#{env}/#{ENV['APP_NAME']}-#{env}.ipa"
+      ipa_path: "build/ios/#{env}/#{safe_app_name}.ipa"
     )
   end
   
@@ -148,12 +154,21 @@ platform :android do
     )
     
     # Move and rename APK to consistent location
-    sh("mkdir -p build/android/#{env}")
+    # Use absolute path to ensure it's accessible from mobile app root
+    build_dir = File.expand_path("../build/android/#{env}", __dir__)
+    sh("mkdir -p '#{build_dir}'")
     
     # Use the actual APK path from gradle output
     apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
     if apk_path && File.exist?(apk_path)
-      sh("cp '#{apk_path}' 'build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk'")
+      # Create a safe filename by replacing spaces with underscores
+      safe_app_name = ENV['APP_NAME'].downcase.gsub(' ', '-')
+      target_path = "#{build_dir}/#{safe_app_name}.apk"
+      sh("cp '#{apk_path}' '#{target_path}'")
+      UI.message("APK copied to: #{target_path}")
+      
+      # Store the target path for use in upload actions
+      lane_context[:CUSTOM_APK_PATH] = target_path
     else
       UI.user_error!("APK file not found at expected location: #{apk_path}")
     end
@@ -167,7 +182,7 @@ platform :android do
     upload_to_play_store(
       track: ENV["ANDROID_TRACK"] || "prod",
       release_status: ENV["ANDROID_RELEASE_STATUS"] || "completed",
-      apk: "build/android/#{env}/#{ENV['APP_NAME']}.apk"
+      apk: lane_context[:CUSTOM_APK_PATH]
     )
   end
   
@@ -179,7 +194,7 @@ platform :android do
     upload_to_play_store(
       track: "beta",
       release_status: "completed",
-      apk: "build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk"
+      apk: lane_context[:CUSTOM_APK_PATH]
     )
   end
   
@@ -192,7 +207,7 @@ platform :android do
       app: ENV["FIREBASE_ANDROID_APP_ID"],
       groups: ENV["FIREBASE_TEST_GROUPS"],
       release_notes: options[:notes] || "New build for testing",
-      apk_path: "build/android/#{env}/#{ENV['APP_NAME']}-#{env}.apk"
+      apk_path: lane_context[:CUSTOM_APK_PATH]
     )
   end
   
