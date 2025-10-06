@@ -111,15 +111,11 @@ export class PostsService {
 
             // Check following status
             if (currentUserId) {
-              const following = await this.prisma.userFollowing.findUnique({
+              const following = await this.prisma.userFollowing.findFirst({
                 where: {
-                  followerId_followingId: {
-                    followerId: currentUserId,
-                    followingId: user.id,
-                  },
+                  followerId: currentUserId,
+                  followingId: user.id,
                   isActive: true,
-                  follower: { isActive: true },
-                  following: { isActive: true },
                 },
               });
 
