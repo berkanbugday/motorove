@@ -139,8 +139,26 @@ platform :android do
     absolute_env_path = File.expand_path("../#{env_file}", __dir__)
     UI.message("Using absolute ENVFILE path: #{absolute_env_path}")
     
+    # Clean first, then build - separate tasks to avoid C++ compilation issues
     gradle(
-      task: "clean assembleRelease",
+      task: "clean",
+      project_dir: "android"
+    )
+    
+    # Determine the correct gradle task based on environment
+    gradle_task = case env
+                  when "dev"
+                    "bundleDevRelease"
+                  when "staging"
+                    "bundleStagingRelease"
+                  when "prod"
+                    "bundleProdRelease"
+                  else
+                    "bundleRelease"
+                  end
+    
+    gradle(
+      task: gradle_task,
       project_dir: "android",
       properties: {
         "RELEASE_UPLOAD_STORE_FILE" => ENV["ANDROID_KEYSTORE_PATH"],
@@ -153,24 +171,24 @@ platform :android do
       }
     )
     
-    # Move and rename APK to consistent location
+    # Move and rename AAB to consistent location
     # Use absolute path to ensure it's accessible from mobile app root
     build_dir = File.expand_path("../build/android/#{env}", __dir__)
     sh("mkdir -p '#{build_dir}'")
     
-    # Use the actual APK path from gradle output
-    apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
-    if apk_path && File.exist?(apk_path)
+    # Use the actual AAB path from gradle output
+    aab_path = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    if aab_path && File.exist?(aab_path)
       # Create a safe filename by replacing spaces with underscores
       safe_app_name = ENV['APP_NAME'].downcase.gsub(' ', '-')
-      target_path = "#{build_dir}/#{safe_app_name}.apk"
-      sh("cp '#{apk_path}' '#{target_path}'")
-      UI.message("APK copied to: #{target_path}")
+      target_path = "#{build_dir}/#{safe_app_name}.aab"
+      sh("cp '#{aab_path}' '#{target_path}'")
+      UI.message("AAB copied to: #{target_path}")
       
       # Store the target path for use in upload actions
-      lane_context[:CUSTOM_APK_PATH] = target_path
+      lane_context[:CUSTOM_AAB_PATH] = target_path
     else
-      UI.user_error!("APK file not found at expected location: #{apk_path}")
+      UI.user_error!("AAB file not found at expected location: #{aab_path}")
     end
   end
   
@@ -182,7 +200,7 @@ platform :android do
     upload_to_play_store(
       track: ENV["ANDROID_TRACK"] || "prod",
       release_status: ENV["ANDROID_RELEASE_STATUS"] || "completed",
-      apk: lane_context[:CUSTOM_APK_PATH]
+      aab: lane_context[:CUSTOM_AAB_PATH]
     )
   end
   
@@ -194,21 +212,81 @@ platform :android do
     upload_to_play_store(
       track: "beta",
       release_status: "completed",
-      apk: lane_context[:CUSTOM_APK_PATH]
+      aab: lane_context[:CUSTOM_AAB_PATH]
     )
   end
   
   desc "Deploy a beta build to Firebase App Distribution"
   lane :deploy_firebase do |options|
     env = options[:env] || "dev"
-    build(env: env)
     
-    firebase_app_distribution(
-      app: ENV["FIREBASE_ANDROID_APP_ID"],
-      groups: ENV["FIREBASE_TEST_GROUPS"],
-      release_notes: options[:notes] || "New build for testing",
-      apk_path: lane_context[:CUSTOM_APK_PATH]
+    # Firebase App Distribution requires APK, so build APK specifically
+    prepare_build(platform: "android", env: env)
+    
+    # Determine the correct .env file for this environment
+    env_file = env == "prod" ? ".env" : ".env.#{env}"
+    
+    # Set ENVFILE environment variable for react-native-config
+    ENV["ENVFILE"] = env_file
+    UI.message("Setting ENVFILE=#{env_file} for react-native-config")
+    
+    # Build Android APK for Firebase (Firebase doesn't support AAB)
+    absolute_env_path = File.expand_path("../#{env_file}", __dir__)
+    UI.message("Using absolute ENVFILE path: #{absolute_env_path}")
+    
+    # Clean first, then build APK - separate tasks to avoid C++ compilation issues
+    gradle(
+      task: "clean",
+      project_dir: "android"
     )
+    
+    # Determine the correct gradle task based on environment for APK
+    gradle_task_apk = case env
+                      when "dev"
+                        "assembleDevRelease"
+                      when "staging"
+                        "assembleStagingRelease"
+                      when "prod"
+                        "assembleProdRelease"
+                      else
+                        "assembleRelease"
+                      end
+    
+    gradle(
+      task: gradle_task_apk,
+      project_dir: "android",
+      properties: {
+        "RELEASE_UPLOAD_STORE_FILE" => ENV["ANDROID_KEYSTORE_PATH"],
+        "RELEASE_UPLOAD_STORE_PASSWORD" => ENV["ANDROID_KEYSTORE_PASSWORD"],
+        "RELEASE_UPLOAD_KEY_ALIAS" => ENV["ANDROID_KEY_ALIAS"],
+        "RELEASE_UPLOAD_KEY_PASSWORD" => ENV["ANDROID_KEY_PASSWORD"],
+        "versionCode" => ENV["ANDROID_VERSION_CODE"],
+        "versionName" => ENV["ANDROID_VERSION_NAME"],
+        "ENVFILE" => absolute_env_path
+      }
+    )
+    
+    # Move and rename APK for Firebase
+    build_dir = File.expand_path("../build/android/#{env}", __dir__)
+    sh("mkdir -p '#{build_dir}'")
+    
+    # Use the actual APK path from gradle output
+    apk_path = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    if apk_path && File.exist?(apk_path)
+      safe_app_name = ENV['APP_NAME'].downcase.gsub(' ', '-')
+      target_path = "#{build_dir}/#{safe_app_name}.apk"
+      sh("cp '#{apk_path}' '#{target_path}'")
+      UI.message("APK copied to: #{target_path}")
+      
+      firebase_app_distribution(
+        app: ENV["FIREBASE_ANDROID_APP_ID"],
+        groups: ENV["FIREBASE_TEST_GROUPS"],
+        release_notes: options[:notes] || "New build for testing",
+        apk_path: target_path
+      )
+    else
+      UI.user_error!("APK file not found at expected location: #{apk_path}")
+    end
   end
   
   # Add more lanes as needed for Android
