@@ -5,7 +5,7 @@ import Features from "@components/Features";
 import Community from "@components/Community";
 import Routes from "@components/Routes";
 import Events from "@components/Events";
-import DownloadCTA from "@components/DownloadCTA";
+// import DownloadCTA from "@components/DownloadCTA"; // Hidden - app not ready yet
 import Footer from "@components/Footer";
 import { I18nProvider } from "../i18n";
 
@@ -28,7 +28,7 @@ export default function Home({ params }: HomePageProps) {
         <Community />
         <Routes />
         <Events />
-        <DownloadCTA />
+        {/* <DownloadCTA /> */}
         <Footer />
       </main>
     </I18nProvider>

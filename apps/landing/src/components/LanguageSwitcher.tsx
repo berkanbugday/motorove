@@ -14,7 +14,7 @@ const LanguageSwitcher: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Get current locale from URL path
-  const currentLocale = pathname?.split("/")[1] || "tr";
+  const currentLocale = pathname?.split("/")[1] || Language.TR.toLowerCase();
 
   // Available locales (lowercase)
   const locales = Object.values(Language).map((lang) => lang.toLowerCase());

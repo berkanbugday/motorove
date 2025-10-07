@@ -64,6 +64,7 @@ const Events: React.FC = () => {
           </p>
         </motion.div>
 
+        {/* Events list with participant counts - Hidden until app is deployed
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {upcomingEvents.map((event, index) => (
             <motion.div
@@ -108,7 +109,7 @@ const Events: React.FC = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+        </div> */}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

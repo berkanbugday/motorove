@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-neutral-black text-white pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Logo and Description */}
           <div className="col-span-1">
             <div className="flex items-center mb-4">
@@ -69,8 +69,8 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Download */}
-          <div className="col-span-1">
+          {/* Download - Hidden until app is ready */}
+          {/* <div className="col-span-1">
             <h3 className="font-bold text-lg mb-4">
               {t("footer.downloadApp")}
             </h3>
@@ -94,7 +94,7 @@ const Footer: React.FC = () => {
                 />
               </Link>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="border-t border-neutral-darkGrey mt-12 pt-8">

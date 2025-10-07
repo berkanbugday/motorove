@@ -19,6 +19,10 @@
     "altText": {
       "screen1": "Motorove Uygulama Ana Ekranı",
       "screen2": "Motorove Uygulama Harita Ekranı"
+    },
+    "comingSoon": {
+      "badge": "Çok Yakında",
+      "message": "Harika bir şeyin son dokunuşlarını yapıyoruz. Takipte kalın!"
     }
   },
   "features": {

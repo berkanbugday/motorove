@@ -24,17 +24,17 @@ const Hero: React.FC = () => {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col space-y-8 max-w-xl"
           >
-            <motion.span 
+            <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-primary-main font-semibold tracking-wide inline-flex items-center"
             >
               <span className="w-8 h-[1px] bg-primary-main mr-3"></span>
-              {t('hero.heading')}
+              {t("hero.heading")}
             </motion.span>
 
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -46,16 +46,17 @@ const Hero: React.FC = () => {
               />
             </motion.h1>
 
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               className="text-lg text-gray-400"
             >
-              {t('hero.subtitle')}
+              {t("hero.subtitle")}
             </motion.p>
 
-            <motion.div 
+            {/* Download buttons temporarily hidden - app not ready yet */}
+            {/* <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
@@ -91,17 +92,35 @@ const Hero: React.FC = () => {
                   {t('hero.googlePlay')}
                 </Link>
               </motion.div>
+            </motion.div> */}
+
+            {/* Coming Soon Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="pt-6 mt-4"
+            >
+              <div className="inline-flex items-center px-4 py-2 bg-primary-main/10 border border-primary-main/20 rounded-full">
+                <div className="w-2 h-2 bg-primary-main rounded-full mr-2 animate-pulse"></div>
+                <span className="text-primary-main font-semibold text-sm">
+                  {t("hero.comingSoon.badge")}
+                </span>
+              </div>
+              <p className="text-gray-400 text-sm mt-3">
+                {t("hero.comingSoon.message")}
+              </p>
             </motion.div>
 
-            {/* Social Proof */}
-            <motion.div 
+            {/* Social Proof - Hidden until app is deployed */}
+            {/* <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
               className="pt-6 border-t border-white/10 mt-4"
             >
               <p className="text-gray-500 text-sm mb-2 mt-4">
-                {t('hero.socialProof.trusted')}
+                {t("hero.socialProof.trusted")}
               </p>
               <div className="flex items-center space-x-4">
                 <div className="flex">
@@ -117,10 +136,10 @@ const Hero: React.FC = () => {
                   ))}
                 </div>
                 <span className="text-sm text-gray-400">
-                  {t('hero.socialProof.rating')}
+                  {t("hero.socialProof.rating")}
                 </span>
               </div>
-            </motion.div>
+            </motion.div> */}
           </motion.div>
 
           {/* App Preview Image */}
@@ -133,7 +152,7 @@ const Hero: React.FC = () => {
             <div className="absolute top-0 right-0 w-full h-full pointer-events-none">
               {/* Ring light effect */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-primary-main opacity-5 rounded-full blur-3xl"></div>
-              
+
               <div className="relative h-full w-full">
                 {/* Floating App Screens with glass effect */}
                 <motion.div
@@ -148,7 +167,7 @@ const Hero: React.FC = () => {
                   <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_25px_rgba(255,59,48,0.15)]">
                     <Image
                       src="/assets/images/app-screen-1.png"
-                      alt={t('hero.altText.screen1')}
+                      alt={t("hero.altText.screen1")}
                       width={280}
                       height={560}
                       className="rounded-3xl z-10 relative"
@@ -156,13 +175,13 @@ const Hero: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-tr from-primary-dark/10 to-transparent opacity-60"></div>
                   </div>
                 </motion.div>
-                
+
                 <motion.div
                   className="absolute left-32 top-12 animate-float"
                   style={{ animationDelay: "1s" }}
-                  animate={{ 
+                  animate={{
                     y: [0, -10, 0],
-                    rotate: [0, 1, 0] 
+                    rotate: [0, 1, 0],
                   }}
                   transition={{
                     duration: 7,
@@ -174,7 +193,7 @@ const Hero: React.FC = () => {
                   <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_25px_rgba(51,102,255,0.15)]">
                     <Image
                       src="/assets/images/app-screen-2.png"
-                      alt={t('hero.altText.screen2')}
+                      alt={t("hero.altText.screen2")}
                       width={280}
                       height={560}
                       className="rounded-3xl z-10 relative"
@@ -186,23 +205,23 @@ const Hero: React.FC = () => {
             </div>
 
             {/* Glowing circle elements */}
-            <motion.div 
+            <motion.div
               className="absolute -z-10 w-64 h-64 bg-accent-purple/5 rounded-full blur-3xl"
-              animate={{ 
+              animate={{
                 scale: [1, 1.1, 1],
-                opacity: [0.3, 0.5, 0.3]
+                opacity: [0.3, 0.5, 0.3],
               }}
               transition={{ duration: 5, repeat: Infinity }}
-              style={{ top: '20%', left: '10%' }}
+              style={{ top: "20%", left: "10%" }}
             />
-            <motion.div 
+            <motion.div
               className="absolute -z-10 w-48 h-48 bg-primary-main/5 rounded-full blur-3xl"
-              animate={{ 
+              animate={{
                 scale: [1, 1.15, 1],
-                opacity: [0.2, 0.4, 0.2]
+                opacity: [0.2, 0.4, 0.2],
               }}
               transition={{ duration: 7, delay: 1, repeat: Infinity }}
-              style={{ top: '60%', right: '15%' }}
+              style={{ top: "60%", right: "15%" }}
             />
           </motion.div>
         </div>

@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import type { Metadata } from "next";
 import { I18nProvider } from "./i18n";
+import { Language } from "@motorove/shared";
 
 export const metadata: Metadata = {
   title: "Motorove - Connect with Motorcycle Enthusiasts",
@@ -16,7 +17,7 @@ export default function RootLayout({
   params: { locale?: string };
 }) {
   return (
-    <html lang={params.locale || "tr"}>
+    <html lang={params.locale || Language.TR.toLowerCase()}>
       <body>
         <I18nProvider locale={params.locale}>{children}</I18nProvider>
       </body>

@@ -21,7 +21,7 @@ i18next
     fallbackLng: Language.TR.toLowerCase(),
     ns: ["common"],
     defaultNS: "common",
-    supportedLngs: ["en", "tr"],
+    supportedLngs: [Language.EN.toLowerCase(), Language.TR.toLowerCase()],
     interpolation: {
       escapeValue: false,
     },
@@ -37,7 +37,10 @@ export interface I18nProviderProps {
   locale?: string;
 }
 
-export function I18nProvider({ children, locale = "tr" }: I18nProviderProps) {
+export function I18nProvider({
+  children,
+  locale = Language.TR.toLowerCase(),
+}: I18nProviderProps) {
   const [mounted, setMounted] = useState(false);
 
   // Set language

@@ -116,6 +116,7 @@ const Community: React.FC = () => {
                 ))}
               </ul>
 
+              {/* Active riders section - Hidden until app is deployed
               <div className="mt-6 flex items-center space-x-4">
                 <div className="flex -space-x-3">
                   {[1, 2, 3, 4].map((i) => (
@@ -139,7 +140,7 @@ const Community: React.FC = () => {
                 <span className="text-sm text-neutral-grey">
                   {t("community.activeRiders")}
                 </span>
-              </div>
+              </div> */}
             </motion.div>
           </div>
 
@@ -166,7 +167,7 @@ const Community: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Testimonials */}
+        {/* Testimonials - Hidden until app is deployed
         <motion.h3
           className="text-2xl md:text-3xl font-bold text-center mb-12"
           initial={{ opacity: 0 }}
@@ -218,7 +219,7 @@ const Community: React.FC = () => {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </motion.div> */}
       </div>
     </section>
   );

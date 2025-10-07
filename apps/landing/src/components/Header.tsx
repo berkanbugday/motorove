@@ -69,15 +69,15 @@ const Header: React.FC = () => {
             {/* Language Switcher */}
             <LanguageSwitcher />
 
-            {/* CTA Button */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* CTA Button - Hidden until app is ready */}
+            {/* <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="https://app.motorove.com"
                 className="btn btn-primary bg-gradient-to-r from-primary-main to-primary-dark hover:from-primary-dark hover:to-primary-main transition-all duration-300"
               >
                 {t("header.download")}
               </Link>
-            </motion.div>
+            </motion.div> */}
           </div>
 
           {/* Mobile Menu Button */}
@@ -167,8 +167,8 @@ const Header: React.FC = () => {
                 </div>
               </div>
 
-              {/* Download Button - Mobile */}
-              <div className="pt-2">
+              {/* Download Button - Mobile - Hidden until app is ready */}
+              {/* <div className="pt-2">
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -181,7 +181,7 @@ const Header: React.FC = () => {
                     {t("header.download")}
                   </Link>
                 </motion.div>
-              </div>
+              </div> */}
             </div>
           </motion.div>
         )}

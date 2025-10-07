@@ -19,6 +19,10 @@
     "altText": {
       "screen1": "Motorove App Home Screen",
       "screen2": "Motorove App Map Screen"
+    },
+    "comingSoon": {
+      "badge": "Coming Soon",
+      "message": "We're putting the finishing touches on something amazing. Stay tuned!"
     }
   },
   "features": {
