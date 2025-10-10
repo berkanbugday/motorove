@@ -148,6 +148,20 @@ export const eventSchemas = (t: TFunction) => {
       }
     }
 
+    // Validate meetingPoint is required for MEET_UP event type
+    if (
+      data.eventType === EventType.MEET_UP ||
+      data.eventType === EventType.MOTOFEST
+    ) {
+      if (!data.meetingPoint || data.meetingPoint.trim() === '') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t('validation.event.meeting_point.required'),
+          path: ['meetingPoint'],
+        });
+      }
+    }
+
     if (data.eventType === EventType.TRAINING) {
       if (!data.instructorInfo || data.instructorInfo.trim() === '') {
         ctx.addIssue({
@@ -244,6 +258,17 @@ export const eventSchemas = (t: TFunction) => {
           message: t('validation.event.road_type.required_for_type'),
           path: ['roadType'],
         });
+      }
+
+      // Validate meetingPoint is required for MEET_UP event type
+      if (data.eventType === EventType.MEET_UP) {
+        if (!data.meetingPoint || data.meetingPoint.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.meeting_point.required'),
+            path: ['meetingPoint'],
+          });
+        }
       }
 
       // Validate end date is not before start date

@@ -78,6 +78,7 @@ export function MainNavigator() {
       initialRouteName="Tabs"
       screenOptions={{
         headerShown: false,
+        animation: 'slide_from_right',
       }}>
       <Stack.Screen name="Tabs" component={TabNavigator} />
 

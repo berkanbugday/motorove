@@ -343,22 +343,22 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
   // Create animated scroll value to track scroll position
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  // Create interpolated values for animations
+  // Create interpolated values for animations with smoother transitions
   const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100 + insets.top],
-    outputRange: [150 + insets.top, 50 + insets.top],
+    inputRange: [0, 80 + insets.top, 120 + insets.top],
+    outputRange: [150 + insets.top, 80 + insets.top, 50 + insets.top],
     extrapolate: 'clamp',
   });
 
   const logoSize = scrollY.interpolate({
-    inputRange: [0, 100 + insets.top],
-    outputRange: [100, 60],
+    inputRange: [0, 80 + insets.top, 120 + insets.top],
+    outputRange: [100, 75, 60],
     extrapolate: 'clamp',
   });
 
   const logoMarginTop = scrollY.interpolate({
-    inputRange: [0, 100 + insets.top],
-    outputRange: [-50 + insets.top, -130 + insets.top],
+    inputRange: [0, 80 + insets.top, 120 + insets.top],
+    outputRange: [-50 + insets.top, -100 + insets.top, -130 + insets.top],
     extrapolate: 'clamp',
   });
 
@@ -1023,7 +1023,6 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       setSelectedRole(null);
     }
   }, []);
-  const feedKeyExtractor = useCallback((item: IPost) => item.id, []);
 
   // Handle FlatList scroll event to update the current page
   const handleEventScroll = useCallback((event: any) => {
@@ -1173,13 +1172,22 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       <Animated.ScrollView
         style={[styles.scrollView, {marginTop: rh(10) + insets.top}]}
         showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16} // Ensures smooth scrolling
+        scrollEventThrottle={8} // Reduced for smoother animations
+        bounces={true}
+        bouncesZoom={false}
+        alwaysBounceVertical={false}
+        decelerationRate="normal"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onScroll={Animated.event(
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
-          {useNativeDriver: false},
+          {
+            useNativeDriver: false,
+            listener: _event => {
+              // Optional: Add any additional scroll handling here if needed
+            },
+          },
         )}>
         <View style={styles.infoContainer}>
           <Title align="center">{group?.name}</Title>
@@ -1189,9 +1197,10 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
             <Typography style={styles.infoText}>
               {group?.membersCount || 0} {t('screens.group.member')}
               {group?.membersCapacity
-                ? ` / ${group?.membersCapacity}`
+                ? ` / ${group?.membersCapacity} ${t(
+                    'screens.group.members_capacity',
+                  )}`
                 : ''}{' '}
-              {t('screens.group.members_capacity')}
             </Typography>
             <View style={styles.dot} />
             <View style={styles.lockContainer}>
@@ -1303,13 +1312,11 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
                   <ActivityIndicator size="large" />
                 </View>
               ) : posts.length > 0 ? (
-                <FlatList
-                  data={posts}
-                  renderItem={renderFeedPost}
-                  keyExtractor={feedKeyExtractor}
-                  scrollEnabled={false}
-                  contentContainerStyle={styles.feedList}
-                />
+                <View style={styles.feedList}>
+                  {posts.map(post => (
+                    <View key={post.id}>{renderFeedPost({item: post})}</View>
+                  ))}
+                </View>
               ) : (
                 <View style={styles.noPostsContainer}>
                   <Typography color={colors.neutral.grey}>

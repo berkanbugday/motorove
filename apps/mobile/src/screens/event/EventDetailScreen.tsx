@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Animated,
+  Platform,
 } from 'react-native';
 import {colors, spacing, getShadow, commonStyles} from '@theme';
 import {RouteProp} from '@react-navigation/native';
@@ -52,7 +53,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const [isJoining, setIsJoining] = useState(false);
   const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
 
-  // Animated value for scroll
+  // Animated value for scroll with better performance
   const scrollY = useRef(new Animated.Value(0)).current;
 
   // Use the useGetEvent hook to fetch the event data
@@ -175,6 +176,9 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   // State for route data
   const [routeInfo, setRouteInfo] = useState<string>('');
   const [isLoadingRoute, setIsLoadingRoute] = useState<boolean>(false);
+
+  // Add scroll optimization
+  const scrollViewRef = useRef<any>(null);
 
   // Calculate route using OSRM API (OpenStreetMap Routing Machine)
   const calculateRouteWithOSRM = useCallback(
@@ -306,44 +310,44 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     );
   }
 
-  // Animated value for header height only
+  // Animated values with smoother interpolation
   const headerHeight = scrollY.interpolate({
-    inputRange: [0, 150],
-    outputRange: [280, 100], // Shrink to status bar size (around 100px)
+    inputRange: [0, 200],
+    outputRange: [280, 120], // More gradual shrinking
     extrapolate: 'clamp',
   });
 
-  // Animated value for back button opacity
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 150, 200],
+    outputRange: [1, 0.8, 0.6],
+    extrapolate: 'clamp',
+  });
+
   const backButtonOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
+    inputRange: [0, 120],
     outputRange: [1, 0], // Fade out when scrolling
     extrapolate: 'clamp',
   });
 
   return (
     <View style={styles.container}>
-      {/* Animated Header with Background Image */}
-      <Animated.View style={[styles.headerContainer, {height: headerHeight}]}>
-        <Animated.Image
-          source={{uri: event.images?.[0]}}
-          style={styles.headerImage}
+      {/* Floating Header Bar */}
+      <Animated.View
+        style={[styles.floatingHeaderBar, {opacity: backButtonOpacity}]}>
+        <TopHeaderBar
+          showBackButton
+          dropdownMenuItems={eventDropdownMenuItems(event?.status)}
+          onDropdownItemSelect={item =>
+            handleDropdownMenuItemSelect(item, event as IEvent)
+          }
+          backgroundColor="transparent"
+          onBackPress={() => navigation.goBack()}
         />
-        <Animated.View
-          style={[styles.topHeaderBar, {opacity: backButtonOpacity}]}>
-          <TopHeaderBar
-            showBackButton
-            dropdownMenuItems={eventDropdownMenuItems(event?.status)}
-            onDropdownItemSelect={item =>
-              handleDropdownMenuItemSelect(item, event as IEvent)
-            }
-            backgroundColor="transparent"
-            onBackPress={() => navigation.goBack()}
-          />
-        </Animated.View>
       </Animated.View>
 
-      {/* Animated Scrollable Content - Overlapping the background */}
+      {/* Single ScrollView with header as first element */}
       <Animated.ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -351,7 +355,24 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
           {useNativeDriver: false},
         )}
-        scrollEventThrottle={16}>
+        scrollEventThrottle={Platform.OS === 'android' ? 16 : 8}
+        bounces={Platform.OS === 'ios'}
+        overScrollMode={Platform.OS === 'android' ? 'never' : 'auto'}
+        nestedScrollEnabled={Platform.OS === 'android'}
+        removeClippedSubviews={false}
+        decelerationRate={Platform.OS === 'android' ? 'fast' : 'normal'}>
+        {/* Header Image as first scroll element */}
+        <Animated.View style={[styles.headerContainer, {height: headerHeight}]}>
+          <Animated.Image
+            source={{uri: event.images?.[0]}}
+            style={[
+              styles.headerImage,
+              {
+                opacity: headerOpacity,
+              },
+            ]}
+          />
+        </Animated.View>
         {/* Main Event Details Card - Overlapping background */}
         <View style={styles.eventCard}>
           {/* Event Title */}
@@ -617,16 +638,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerContainer: {
-    height: 280,
-    position: 'relative',
-  },
-  headerImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  topHeaderBar: {
+  floatingHeaderBar: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -634,18 +646,27 @@ const styles = StyleSheet.create({
     zIndex: 20,
     backgroundColor: 'transparent',
   },
+  headerContainer: {
+    height: 280,
+    position: 'relative',
+    marginBottom: Platform.OS === 'android' ? -spacing.xl : -spacing.lg,
+  },
+  headerImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
   scrollView: {
     flex: 1,
-    marginTop: -120, // Increased negative margin for better overlap with smaller final size
   },
   scrollContent: {
-    padding: spacing.md,
-    paddingTop: spacing.lg, // Extra padding at top for the overlapping card
+    paddingBottom: spacing.xl,
   },
   eventCard: {
     backgroundColor: colors.neutral.white,
     borderRadius: 12,
     padding: spacing.lg,
+    marginHorizontal: spacing.md,
     marginBottom: spacing.md,
     gap: spacing.md,
     ...getShadow('medium'),

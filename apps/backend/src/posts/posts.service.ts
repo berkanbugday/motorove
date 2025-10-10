@@ -82,7 +82,7 @@ export class PostsService {
               },
             });
 
-            if (!isGroupMember || post.createdById !== currentUserId) {
+            if (!isGroupMember && post.createdById !== currentUserId) {
               return null;
             }
           }

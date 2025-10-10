@@ -41,7 +41,14 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, IUser, IImage, IEvent, Language} from '@motorove/shared';
+import {
+  IPost,
+  IUser,
+  IImage,
+  IEvent,
+  Language,
+  EventStatus,
+} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -139,7 +146,7 @@ export const HomeScreen = ({navigation}: Props) => {
     events,
     loading: eventsLoading,
     refetch: refetchEvents,
-  } = useGetEvents(3);
+  } = useGetEvents(3, 0, EventStatus.PUBLISHED);
 
   // Refetch notification count when the screen comes into focus
   useFocusEffect(

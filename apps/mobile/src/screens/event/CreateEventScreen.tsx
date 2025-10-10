@@ -666,7 +666,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="title"
-                label={t('screens.event.title_label')}
+                label={t('screens.event.event_title')}
                 error={errors.title}
                 key="title-input"
               />
@@ -674,7 +674,7 @@ export const CreateEventScreen: React.FC = () => {
               {/* Event Type Dropdown */}
               <Dropdown
                 data={eventTypes}
-                label={t('screens.event.type_label')}
+                label={t('screens.event.event_type')}
                 onSelect={handleEventTypeSelect}
                 placeholder=""
                 selectedItem={selectedEventType}
@@ -686,7 +686,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="meetingPoint"
-                label={t('screens.event.meeting_point_label')}
+                label={t('screens.event.meeting_point')}
                 error={errors.meetingPoint}
                 icon={
                   <Icon
@@ -706,7 +706,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="maxParticipants"
-                label={t('screens.event.max_participants_label')}
+                label={t('screens.event.max_participants')}
                 error={errors.maxParticipants}
                 keyboardType="numeric"
                 key="maxParticipants-input"
@@ -717,7 +717,7 @@ export const CreateEventScreen: React.FC = () => {
               <AnimatedInput
                 control={control}
                 name="description"
-                label={t('screens.event.description_label')}
+                label={t('screens.event.description')}
                 multiline
                 showClearButton={false}
                 error={errors.description}
@@ -857,7 +857,7 @@ export const CreateEventScreen: React.FC = () => {
                   <Switch
                     value={isPrivate}
                     onValueChange={togglePrivacy}
-                    label={t('screens.event.private_event_label')}
+                    label={t('screens.event.private_event')}
                     description={t('screens.event.private_event_description')}
                     style={{paddingVertical: spacing.md}}
                   />
@@ -922,7 +922,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="startLocation"
-                      label={t('screens.event.start_location_label')}
+                      label={t('screens.event.start_location')}
                       error={errors.startLocation}
                       icon={
                         <Icon
@@ -941,7 +941,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="finishLocation"
-                      label={t('screens.event.finish_location_label')}
+                      label={t('screens.event.finish_location')}
                       error={errors.finishLocation}
                       icon={
                         <Icon
@@ -959,7 +959,7 @@ export const CreateEventScreen: React.FC = () => {
 
                     <Dropdown
                       data={roadTypes}
-                      label={t('screens.event.road_type_label')}
+                      label={t('screens.event.road_type')}
                       onSelect={handleRoadTypeSelect}
                       placeholder=""
                       selectedItem={selectedRoadType}
@@ -969,7 +969,7 @@ export const CreateEventScreen: React.FC = () => {
 
                     <Dropdown
                       data={difficultyLevels}
-                      label={t('screens.event.difficulty_level_label')}
+                      label={t('screens.event.difficulty_level')}
                       onSelect={handleDifficultySelect}
                       placeholder=""
                       selectedItem={selectedDifficultyLevel}
@@ -982,7 +982,7 @@ export const CreateEventScreen: React.FC = () => {
                       <AnimatedInput
                         control={control}
                         name="campingInfo"
-                        label={t('screens.event.camping_info_label')}
+                        label={t('screens.event.camping_info')}
                         multiline
                         showClearButton={false}
                         error={errors.campingInfo}
@@ -993,7 +993,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="routeDescription"
-                      label={t('screens.event.route_description_label')}
+                      label={t('screens.event.route_description')}
                       multiline
                       showClearButton={false}
                       error={errors.routeDescription}
@@ -1003,7 +1003,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="restStops"
-                      label={t('screens.event.rest_stops_label')}
+                      label={t('screens.event.rest_stops')}
                       multiline
                       showClearButton={false}
                       error={errors.restStops}
@@ -1013,7 +1013,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="equipmentChecklist"
-                      label={t('screens.event.equipment_checklist_label')}
+                      label={t('screens.event.equipment_checklist')}
                       multiline
                       showClearButton={false}
                       error={errors.equipmentChecklist}
@@ -1028,7 +1028,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="instructorInfo"
-                      label={t('screens.event.instructor_info_label')}
+                      label={t('screens.event.instructor_info')}
                       multiline
                       showClearButton={false}
                       error={errors.instructorInfo}
@@ -1038,7 +1038,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="topicsCovered"
-                      label={t('screens.event.topics_covered_label')}
+                      label={t('screens.event.topics_covered')}
                       multiline
                       showClearButton={false}
                       error={errors.topicsCovered}
@@ -1047,7 +1047,7 @@ export const CreateEventScreen: React.FC = () => {
 
                     <Dropdown
                       data={experienceLevels}
-                      label={t('screens.event.experience_level_label')}
+                      label={t('screens.event.experience_level')}
                       onSelect={handleExperienceLevelSelect}
                       placeholder=""
                       selectedItem={selectedExperienceLevel}
@@ -1058,7 +1058,7 @@ export const CreateEventScreen: React.FC = () => {
                     <AnimatedInput
                       control={control}
                       name="price"
-                      label={t('screens.event.price_label')}
+                      label={t('screens.event.price')}
                       keyboardType="numeric"
                       error={errors.price}
                       key="price-input"
