@@ -89,7 +89,7 @@ export const styles = StyleSheet.create({
   },
   actionBar: {
     flexDirection: 'row',
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
   actionButton: {

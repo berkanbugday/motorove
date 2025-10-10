@@ -16,6 +16,7 @@ import Close from '@assets/icons/close.svg';
 import ChevronUp from '@assets/icons/chevron-up.svg';
 import ChevronDown from '@assets/icons/chevron-down.svg';
 import ChevronRight from '@assets/icons/chevron-right.svg';
+import ChevronLeft from '@assets/icons/chevron-left.svg';
 import Check from '@assets/icons/check.svg';
 import CheckFilled from '@assets/icons/check-filled.svg';
 import MapPinFilled from '@assets/icons/map-pin-filled.svg';
@@ -122,6 +123,7 @@ export type IconName =
   | 'chevron-up'
   | 'chevron-down'
   | 'chevron-right'
+  | 'chevron-left'
   | 'check'
   | 'check-filled'
   | 'map-pin-filled'
@@ -259,6 +261,8 @@ export function Icon({
       return <ChevronDown {...commonProps} />;
     case 'chevron-right':
       return <ChevronRight {...commonProps} />;
+    case 'chevron-left':
+      return <ChevronLeft {...commonProps} />;
     case 'check':
       return <Check {...commonProps} />;
     case 'check-filled':

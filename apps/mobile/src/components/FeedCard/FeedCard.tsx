@@ -16,7 +16,7 @@ import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {Typography} from '../Typography/Typography';
 import {colors} from '@theme';
 import {styles} from './FeedCard.styles';
-import {Button, Chip, Icon} from '@components';
+import {Button, Chip, Icon, ImagePreviewModal} from '@components';
 import {IconName} from '@components/Icon';
 import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {useTranslation} from '@hooks/useTranslation';
@@ -66,6 +66,11 @@ export interface FeedCardProps {
    * Handler for when the card is pressed
    */
   onPress?: () => void;
+
+  /**
+   * Handler for when the profile button is pressed
+   */
+  onProfilePress?: () => void;
 
   /**
    * Handler for when the route button is pressed
@@ -189,6 +194,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     images,
     routeTitle,
     onPress,
+    onProfilePress,
     onRoutePress,
     likeCount = 0,
     commentCount = 0,
@@ -205,10 +211,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     style,
     contentStyle,
     imageStyle,
-    overlayProps = {
-      color: colors.neutral.black,
-      opacity: 0.1,
-    },
+
     actionBarDisabled = false,
   } = props;
   const [activeSlide, setActiveSlide] = useState(0);
@@ -216,6 +219,8 @@ const FeedCard: React.FC<FeedCardProps> = props => {
   const [revealedCensoredImages, setRevealedCensoredImages] = useState<{
     [key: number]: boolean;
   }>({});
+  const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
+  const [imagePreviewIndex, setImagePreviewIndex] = useState(0);
   const carouselRef = useRef(null);
   const likeAnimatedValue = useRef(new Animated.Value(1)).current;
   const saveAnimatedValue = useRef(new Animated.Value(1)).current;
@@ -313,6 +318,15 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     }));
   };
 
+  const handleImagePress = (index: number) => {
+    setImagePreviewIndex(index);
+    setImagePreviewVisible(true);
+  };
+
+  const handleCloseImagePreview = () => {
+    setImagePreviewVisible(false);
+  };
+
   const renderCarouselItem = ({item, index}: {item: any; index: number}) => {
     const isCensored = imageArray[index]?.isCensored;
     const isRevealed = revealedCensoredImages[index];
@@ -320,11 +334,15 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     return (
       <View style={styles.imageContainer}>
         <View style={{position: 'relative'}}>
-          <Image
-            source={item}
-            style={[styles.mainImage, imageStyle]}
-            resizeMode="stretch"
-          />
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => handleImagePress(index)}>
+            <Image
+              source={item}
+              style={[styles.mainImage, imageStyle]}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
           {isCensored && !isRevealed ? (
             <TouchableOpacity
               style={styles.blurContainer}
@@ -350,18 +368,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
                 </Typography>
               </View>
             </TouchableOpacity>
-          ) : (
-            <View
-              style={[
-                styles.imageOverlay,
-                {
-                  backgroundColor: overlayProps.color || colors.neutral.black,
-                  opacity: overlayProps.opacity || 0.3,
-                },
-                overlayProps.style,
-              ]}
-            />
-          )}
+          ) : null}
           {isCensored && isRevealed && (
             <TouchableOpacity
               style={styles.hideButton}
@@ -391,11 +398,15 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     return (
       <View style={styles.imageContainer}>
         <View style={{position: 'relative'}}>
-          <Image
-            source={{uri: image.url}}
-            style={[styles.mainImage, imageStyle]}
-            resizeMode="stretch"
-          />
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => handleImagePress(index)}>
+            <Image
+              source={{uri: image.url}}
+              style={[styles.mainImage, imageStyle]}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
           {isCensored && !isRevealed ? (
             <TouchableOpacity
               style={styles.blurContainer}
@@ -421,18 +432,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
                 </Typography>
               </View>
             </TouchableOpacity>
-          ) : (
-            <View
-              style={[
-                styles.imageOverlay,
-                {
-                  backgroundColor: overlayProps.color || colors.neutral.black,
-                  opacity: overlayProps.opacity || 0.3,
-                },
-                overlayProps.style,
-              ]}
-            />
-          )}
+          ) : null}
           {isCensored && isRevealed && (
             <TouchableOpacity
               style={styles.hideButton}
@@ -462,12 +462,14 @@ const FeedCard: React.FC<FeedCardProps> = props => {
         <Image source={avatarSource} style={styles.avatar} />
 
         <View style={styles.headerInfo}>
-          <Typography variant="subtitle" weight="medium">
-            {userName}
-          </Typography>
-          <Typography variant="caption" color={colors.neutral.grey}>
-            {timeAgo}
-          </Typography>
+          <TouchableOpacity onPress={onProfilePress}>
+            <Typography variant="subtitle" weight="medium">
+              {userName}
+            </Typography>
+            <Typography variant="caption" color={colors.neutral.grey}>
+              {timeAgo}
+            </Typography>
+          </TouchableOpacity>
         </View>
 
         {/* More Button or Dropdown Menu */}
@@ -651,13 +653,31 @@ const FeedCard: React.FC<FeedCardProps> = props => {
 
   if (onPress) {
     return (
-      <TouchableOpacity activeOpacity={0.9} onPress={handlePress}>
-        {renderCard()}
-      </TouchableOpacity>
+      <>
+        <TouchableOpacity activeOpacity={0.9} onPress={handlePress}>
+          {renderCard()}
+        </TouchableOpacity>
+        <ImagePreviewModal
+          visible={imagePreviewVisible}
+          images={imageArray}
+          initialIndex={imagePreviewIndex}
+          onClose={handleCloseImagePreview}
+        />
+      </>
     );
   }
 
-  return renderCard();
+  return (
+    <>
+      {renderCard()}
+      <ImagePreviewModal
+        visible={imagePreviewVisible}
+        images={imageArray}
+        initialIndex={imagePreviewIndex}
+        onClose={handleCloseImagePreview}
+      />
+    </>
+  );
 };
 
 export default FeedCard;

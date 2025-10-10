@@ -9,6 +9,7 @@ export * from './FeedCard';
 export * from './Comment/CommentItem';
 export * from './Comment/CommentInput';
 export * from './FullImageCard';
+export * from './ImagePreviewModal';
 export * from './TopHeaderBar';
 export * from './FullscreenOverlay';
 export * from './Banner';

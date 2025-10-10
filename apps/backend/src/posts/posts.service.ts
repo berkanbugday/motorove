@@ -73,20 +73,16 @@ export class PostsService {
       const postsWithGroupMembership = await Promise.all(
         posts.map(async (post) => {
           if (post.group && currentUserId) {
-            const isGroupMember = await this.prisma.groupMembership.findUnique({
+            const isGroupMember = await this.prisma.groupMembership.findFirst({
               where: {
-                groupId_userId: {
-                  groupId: post.group.id,
-                  userId: currentUserId,
-                },
+                groupId: post.group.id,
+                userId: currentUserId,
+                isActive: true,
+                status: ApprovalStatus.ACCEPTED,
               },
             });
 
-            if (
-              (!isGroupMember ||
-                isGroupMember.status !== ApprovalStatus.ACCEPTED) &&
-              post.createdById !== currentUserId
-            ) {
+            if (!isGroupMember || post.createdById !== currentUserId) {
               return null;
             }
           }
