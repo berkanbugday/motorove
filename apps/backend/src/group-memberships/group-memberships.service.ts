@@ -80,7 +80,7 @@ export class GroupMembershipsService {
   async addMember(groupId: string, userId: string): Promise<boolean> {
     try {
       // Check if the group exists
-      const group = await this.prisma.group.findUnique({
+      const group = await this.prisma.group.findFirst({
         where: { id: groupId, isActive: true },
         include: {
           memberships: true,
@@ -157,7 +157,7 @@ export class GroupMembershipsService {
   ): Promise<boolean> {
     try {
       // Check if the group exists
-      const group = await this.prisma.group.findUnique({
+      const group = await this.prisma.group.findFirst({
         where: { id: groupId, isActive: true },
         include: {
           memberships: true,
@@ -218,7 +218,7 @@ export class GroupMembershipsService {
   ): Promise<boolean> {
     try {
       // Check if the group exists
-      const group = await this.prisma.group.findUnique({
+      const group = await this.prisma.group.findFirst({
         where: { id: groupId, isActive: true },
         include: {
           memberships: true,
@@ -308,7 +308,7 @@ export class GroupMembershipsService {
   ): Promise<GroupMembershipDto> {
     try {
       // Check if the group exists
-      const membership = await this.prisma.groupMembership.findUnique({
+      const membership = await this.prisma.groupMembership.findFirst({
         where: { id, isActive: true },
       });
 

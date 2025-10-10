@@ -30,7 +30,7 @@ export class AuthService {
 
     try {
       // First, check if the email already exists in our database
-      const existingUser = await this.prismaService.user.findUnique({
+      const existingUser = await this.prismaService.user.findFirst({
         where: { email },
       });
 
@@ -137,7 +137,7 @@ export class AuthService {
     }
 
     // Get user from our database
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findFirst({
       where: { email },
       include: {
         userSetting: true,
@@ -206,7 +206,7 @@ export class AuthService {
       }
 
       // Get user from our database
-      const user = await this.prismaService.user.findUnique({
+      const user = await this.prismaService.user.findFirst({
         where: { supabaseId: data.user.id },
         include: {
           userSetting: true,
@@ -270,7 +270,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token');
     }
 
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findFirst({
       where: { supabaseId: data.user.id },
       include: {
         userSetting: true,
@@ -295,7 +295,7 @@ export class AuthService {
   async resetPassword(email: string): Promise<boolean> {
     try {
       // First verify if the user exists in our database
-      // const user = await this.prismaService.user.findUnique({
+      // const user = await this.prismaService.user.findFirst({
       //   where: { email },
       // });
 

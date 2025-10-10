@@ -26,7 +26,7 @@ export class CitiesService {
 
   async findOne(id: string): Promise<CityDto> {
     try {
-      const city = await this.prisma.city.findUnique({
+      const city = await this.prisma.city.findFirst({
         where: { id },
       });
 

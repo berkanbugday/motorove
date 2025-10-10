@@ -166,8 +166,8 @@ export class UserFollowingsService {
   ): Promise<ApprovalStatus> {
     // Check if users exist
     const [followerUser, followingUser] = await Promise.all([
-      await this.prisma.user.findUnique({ where: { id: followerId } }),
-      await this.prisma.user.findUnique({
+      await this.prisma.user.findFirst({ where: { id: followerId } }),
+      await this.prisma.user.findFirst({
         where: { id: followingId },
         include: { userSetting: true },
       }),
@@ -183,12 +183,10 @@ export class UserFollowingsService {
     }
 
     // Check if already following
-    const existingFollow = await this.prisma.userFollowing.findUnique({
+    const existingFollow = await this.prisma.userFollowing.findFirst({
       where: {
-        followerId_followingId: {
-          followerId: followerId,
-          followingId: followingId,
-        },
+        followerId: followerId,
+        followingId: followingId,
         isActive: true,
         status: {
           in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
@@ -235,12 +233,10 @@ export class UserFollowingsService {
     followingId: string,
   ): Promise<ApprovalStatus> {
     // Check if relationship exists
-    const userFollowing = await this.prisma.userFollowing.findUnique({
+    const userFollowing = await this.prisma.userFollowing.findFirst({
       where: {
-        followerId_followingId: {
-          followerId: followerId,
-          followingId: followingId,
-        },
+        followerId: followerId,
+        followingId: followingId,
         isActive: true,
         status: {
           in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
@@ -272,7 +268,7 @@ export class UserFollowingsService {
   ): Promise<UserFollowingDto> {
     try {
       // Check if the group exists
-      const userFollowing = await this.prisma.userFollowing.findUnique({
+      const userFollowing = await this.prisma.userFollowing.findFirst({
         where: {
           id,
           isActive: true,

@@ -82,7 +82,7 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<UserDto> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: { id },
       include: {
         city: true,
@@ -101,7 +101,7 @@ export class UsersService {
   }
 
   async userProfile(userId: string): Promise<UserDto> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: { id: userId },
       include: {
         city: true,

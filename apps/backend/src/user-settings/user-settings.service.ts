@@ -12,7 +12,7 @@ export class UserSettingsService {
 
   async findOne(userId: string): Promise<UserSettingDto> {
     try {
-      const userSetting = await this.prisma.userSetting.findUnique({
+      const userSetting = await this.prisma.userSetting.findFirst({
         where: { userId },
       });
 
@@ -31,7 +31,7 @@ export class UserSettingsService {
     userId: string,
   ): Promise<UserSettingDto> {
     try {
-      const existingSetting = await this.prisma.userSetting.findUnique({
+      const existingSetting = await this.prisma.userSetting.findFirst({
         where: { userId },
       });
 

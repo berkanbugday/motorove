@@ -193,7 +193,7 @@ export class GroupsService {
     authToken?: string,
   ): Promise<GroupDto> {
     try {
-      const group = await this.prisma.group.findUnique({
+      const group = await this.prisma.group.findFirst({
         where: { id, isActive: true },
         include: {
           createdBy: true,

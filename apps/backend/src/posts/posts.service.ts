@@ -137,7 +137,7 @@ export class PostsService {
     currentUserId?: string,
     authToken?: string,
   ): Promise<PostDto> {
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findFirst({
       where: { id },
       include: {
         group: true,
@@ -210,12 +210,10 @@ export class PostsService {
     // Add optional fields if they exist
     if (input.groupId) {
       // Check if user is a member of the group
-      const membership = await this.prisma.groupMembership.findUnique({
+      const membership = await this.prisma.groupMembership.findFirst({
         where: {
-          groupId_userId: {
-            groupId: input.groupId,
-            userId,
-          },
+          groupId: input.groupId,
+          userId,
         },
       });
 
@@ -252,7 +250,7 @@ export class PostsService {
       });
 
       // Fetch the post again with addresses included
-      const postWithAddresses = await this.prisma.post.findUnique({
+      const postWithAddresses = await this.prisma.post.findFirst({
         where: { id: createdPost.id },
         include: {
           createdBy: true,
@@ -273,7 +271,7 @@ export class PostsService {
     userId: string,
     authToken?: string,
   ): Promise<PostDto> {
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findFirst({
       where: { id: input.id },
       include: {
         createdBy: true,
@@ -309,12 +307,10 @@ export class PostsService {
 
     // If trying to change the group, verify membership in the new group
     if (input.groupId) {
-      const membership = await this.prisma.groupMembership.findUnique({
+      const membership = await this.prisma.groupMembership.findFirst({
         where: {
-          groupId_userId: {
-            groupId: input.groupId,
-            userId,
-          },
+          groupId: input.groupId,
+          userId,
         },
       });
 
@@ -399,7 +395,7 @@ export class PostsService {
       }
 
       // Fetch the post again with addresses included
-      const postWithAddresses = await this.prisma.post.findUnique({
+      const postWithAddresses = await this.prisma.post.findFirst({
         where: { id: input.id },
         include: {
           createdBy: true,
@@ -420,7 +416,7 @@ export class PostsService {
     userId: string,
     authToken?: string,
   ): Promise<PostDto> {
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findFirst({
       where: { id },
       include: {
         createdBy: true,
@@ -469,7 +465,7 @@ export class PostsService {
 
   async likePost(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findFirst({
       where: { id: postId },
     });
 
@@ -478,12 +474,10 @@ export class PostsService {
     }
 
     // Check if user has already liked the post
-    const existingLike = await this.prisma.postLike.findUnique({
+    const existingLike = await this.prisma.postLike.findFirst({
       where: {
-        postId_userId: {
-          postId,
-          userId,
-        },
+        postId,
+        userId,
       },
       include: {
         post: true,
@@ -515,7 +509,7 @@ export class PostsService {
     userId: string,
   ): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findFirst({
       where: { id: postId },
     });
 
@@ -524,12 +518,10 @@ export class PostsService {
     }
 
     // Check if user has liked the post
-    const existingLike = await this.prisma.postLike.findUnique({
+    const existingLike = await this.prisma.postLike.findFirst({
       where: {
-        postId_userId: {
-          postId,
-          userId,
-        },
+        postId,
+        userId,
       },
     });
 
@@ -552,7 +544,7 @@ export class PostsService {
 
   async savePost(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findFirst({
       where: { id: postId },
     });
 
@@ -561,12 +553,10 @@ export class PostsService {
     }
 
     // Check if user has already saved the post
-    const existingSave = await this.prisma.postSave.findUnique({
+    const existingSave = await this.prisma.postSave.findFirst({
       where: {
-        postId_userId: {
-          postId,
-          userId,
-        },
+        postId,
+        userId,
       },
       include: {
         post: true,
@@ -598,7 +588,7 @@ export class PostsService {
     userId: string,
   ): Promise<PostInteractionDto> {
     // Check if post exists and is active
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findFirst({
       where: { id: postId },
     });
 
@@ -607,12 +597,10 @@ export class PostsService {
     }
 
     // Check if user has saved the post
-    const existingSave = await this.prisma.postSave.findUnique({
+    const existingSave = await this.prisma.postSave.findFirst({
       where: {
-        postId_userId: {
-          postId,
-          userId,
-        },
+        postId,
+        userId,
       },
     });
 
@@ -701,21 +689,17 @@ export class PostsService {
     let isSaved = false;
 
     if (currentUserId) {
-      const like = await this.prisma.postLike.findUnique({
+      const like = await this.prisma.postLike.findFirst({
         where: {
-          postId_userId: {
-            postId: prismaPost.id,
-            userId: currentUserId,
-          },
+          postId: prismaPost.id,
+          userId: currentUserId,
         },
       });
 
-      const save = await this.prisma.postSave.findUnique({
+      const save = await this.prisma.postSave.findFirst({
         where: {
-          postId_userId: {
-            postId: prismaPost.id,
-            userId: currentUserId,
-          },
+          postId: prismaPost.id,
+          userId: currentUserId,
         },
       });
 

@@ -51,7 +51,7 @@ export class AddressesService {
 
   async findOne(id: string): Promise<AddressDto> {
     try {
-      const address = await this.prisma.address.findUnique({
+      const address = await this.prisma.address.findFirst({
         where: { id },
         include: {
           post: true,
@@ -87,7 +87,7 @@ export class AddressesService {
 
       // If creating for a post, check if user owns the post
       if (input.postId) {
-        const post = await this.prisma.post.findUnique({
+        const post = await this.prisma.post.findFirst({
           where: { id: input.postId },
         });
 
@@ -104,7 +104,7 @@ export class AddressesService {
 
       // If creating for an event, check if user owns the event
       if (input.eventId) {
-        const event = await this.prisma.event.findUnique({
+        const event = await this.prisma.event.findFirst({
           where: { id: input.eventId },
         });
 
@@ -144,7 +144,7 @@ export class AddressesService {
   async update(input: UpdateAddressInput, userId: string): Promise<AddressDto> {
     try {
       // First, find the address to check ownership
-      const address = await this.prisma.address.findUnique({
+      const address = await this.prisma.address.findFirst({
         where: { id: input.id },
         include: {
           post: true,
@@ -222,7 +222,7 @@ export class AddressesService {
   async remove(id: string): Promise<AddressDto> {
     try {
       // Find address to check permissions
-      const address = await this.prisma.address.findUnique({
+      const address = await this.prisma.address.findFirst({
         where: { id },
         include: {
           post: true,

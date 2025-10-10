@@ -73,7 +73,7 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
-      const event = await this.prisma.event.findUnique({
+      const event = await this.prisma.event.findFirst({
         where: { id, isActive: true },
         include: {
           createdBy: true,
@@ -264,7 +264,7 @@ export class EventsService {
       }
 
       // First get the current event to handle group relationships properly
-      const currentEvent = await this.prisma.event.findUnique({
+      const currentEvent = await this.prisma.event.findFirst({
         where: { id, isActive: true },
         include: {
           invitedGroups: true,
@@ -371,7 +371,7 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
-      const event = await this.prisma.event.findUnique({
+      const event = await this.prisma.event.findFirst({
         where: { id: eventId, isActive: true },
       });
 
@@ -404,7 +404,7 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
-      const event = await this.prisma.event.findUnique({
+      const event = await this.prisma.event.findFirst({
         where: { id: eventId, isActive: true },
       });
 

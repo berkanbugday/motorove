@@ -31,7 +31,7 @@ export class BusinessesService {
   }
 
   async findOne(id: string): Promise<BusinessDto> {
-    const business = (await this.prisma.business.findUnique({
+    const business = (await this.prisma.business.findFirst({
       where: {
         id,
         isActive: true,

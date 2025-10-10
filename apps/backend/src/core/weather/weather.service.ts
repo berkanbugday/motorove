@@ -66,7 +66,7 @@ export class WeatherService {
         return null;
       }
 
-      const user = await this.prisma.user.findUnique({
+      const user = await this.prisma.user.findFirst({
         where: { id: userId, isActive: true },
       });
 
@@ -102,7 +102,7 @@ export class WeatherService {
       }
 
       // Cache miss, expired, or invalid - fetch from API
-      const city = await this.prisma.city.findUnique({
+      const city = await this.prisma.city.findFirst({
         where: { id: cityId },
       });
 

@@ -65,7 +65,7 @@ export class CommentsService {
 
   async findOne(id: string): Promise<CommentDto> {
     try {
-      const comment = await this.prisma.comment.findUnique({
+      const comment = await this.prisma.comment.findFirst({
         where: { id },
         include: {
           createdBy: true,
@@ -102,7 +102,7 @@ export class CommentsService {
   async create(input: CreateCommentInput, userId: string): Promise<CommentDto> {
     try {
       // Check if the post exists and is active
-      const post = await this.prisma.post.findUnique({
+      const post = await this.prisma.post.findFirst({
         where: { id: input.postId },
         include: {
           group: true,
@@ -115,12 +115,10 @@ export class CommentsService {
 
       if (post.groupId) {
         // Check if user is a member of the group
-        const membership = await this.prisma.groupMembership.findUnique({
+        const membership = await this.prisma.groupMembership.findFirst({
           where: {
-            groupId_userId: {
-              groupId: post.groupId,
-              userId,
-            },
+            groupId: post.groupId,
+            userId,
           },
         });
 
@@ -133,7 +131,7 @@ export class CommentsService {
 
       // If parentId is provided, check if the parent comment exists and belongs to the same post
       if (input.parentId) {
-        const parentComment = await this.prisma.comment.findUnique({
+        const parentComment = await this.prisma.comment.findFirst({
           where: { id: input.parentId },
         });
 
@@ -176,7 +174,7 @@ export class CommentsService {
 
   async update(input: UpdateCommentInput, userId: string): Promise<CommentDto> {
     try {
-      const comment = await this.prisma.comment.findUnique({
+      const comment = await this.prisma.comment.findFirst({
         where: { id: input.id },
         include: {
           createdBy: true,
@@ -239,7 +237,7 @@ export class CommentsService {
 
   async remove(id: string, userId: string): Promise<CommentDto> {
     try {
-      const comment = await this.prisma.comment.findUnique({
+      const comment = await this.prisma.comment.findFirst({
         where: { id },
         include: {
           createdBy: true,
