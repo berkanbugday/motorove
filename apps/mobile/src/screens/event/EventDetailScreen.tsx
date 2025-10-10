@@ -7,7 +7,7 @@ import {
   Animated,
   Platform,
 } from 'react-native';
-import {colors, spacing, getShadow, commonStyles} from '@theme';
+import {colors, spacing, getShadow, commonStyles, radius} from '@theme';
 import {RouteProp} from '@react-navigation/native';
 import {
   MainScreenNavigationProp,
@@ -375,9 +375,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         </Animated.View>
         {/* Main Event Details Card - Overlapping background */}
         <View style={styles.eventCard}>
-          {/* Event Title */}
-          <Title style={styles.eventTitle}>{event.title}</Title>
-
           {/* Ride Badge */}
           <Chip
             label={EnumUtils.convertEventType(event.eventType)}
@@ -386,6 +383,9 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             style={styles.rideBadge}
             size="small"
           />
+
+          {/* Event Title */}
+          <Title weight="bold">{event.title}</Title>
 
           {/* Date/Time Row */}
           <View style={styles.infoRow}>
@@ -664,28 +664,22 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     backgroundColor: colors.neutral.white,
-    borderRadius: 12,
+    borderRadius: radius.lg,
     padding: spacing.lg,
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
-    gap: spacing.md,
+    gap: spacing.sm,
     ...getShadow('medium'),
   },
   rideBadge: {
     backgroundColor: colors.primary.light,
-  },
-  eventTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.neutral.black,
-    lineHeight: 28,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   infoTextContainer: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   infoText: {
     marginLeft: spacing.sm,
