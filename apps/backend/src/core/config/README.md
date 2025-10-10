@@ -18,17 +18,15 @@ The application uses the following environment files in order of precedence:
 
 ## Required Environment Variables
 
-| Variable       | Description                    | Required | Default       |
-| -------------- | ------------------------------ | -------- | ------------- |
-| NODE_ENV       | Application environment        | No       | `development` |
-| PORT           | HTTP server port               | No       | `3000`        |
-| HOST           | IP address to bind server to   | No       | `0.0.0.0`     |
-| DATABASE_URL   | PostgreSQL connection string   | Yes      | -             |
-| JWT_SECRET     | Secret key for JWT signing     | Yes      | -             |
-| JWT_EXPIRATION | JWT token expiration           | No       | `1d`          |
-| SENTRY_DSN     | Sentry DSN for error reporting | No       | -             |
-| API_PREFIX     | API route prefix               | No       | `api`         |
-| CORS_ORIGIN    | CORS allowed origins           | No       | `*`           |
+| Variable     | Description                    | Required | Default       |
+| ------------ | ------------------------------ | -------- | ------------- |
+| NODE_ENV     | Application environment        | No       | `development` |
+| PORT         | HTTP server port               | No       | `3000`        |
+| HOST         | IP address to bind server to   | No       | `0.0.0.0`     |
+| DATABASE_URL | PostgreSQL connection string   | Yes      | -             |
+| SENTRY_DSN   | Sentry DSN for error reporting | No       | -             |
+| API_PREFIX   | API route prefix               | No       | `api`         |
+| CORS_ORIGIN  | CORS allowed origins           | No       | `*`           |
 
 ## Sample Environment Files
 
@@ -47,10 +45,6 @@ CORS_ORIGIN=*
 
 # DATABASE
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/motorove_dev?schema=public"
-
-# AUTHENTICATION
-JWT_SECRET=dev_jwt_secret_replace_in_production
-JWT_EXPIRATION=1d
 
 # LOGGING
 LOG_LEVEL=debug
@@ -79,10 +73,6 @@ CORS_ORIGIN=https://staging.example.com
 # DATABASE
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/motorove_staging?schema=public"
 
-# AUTHENTICATION
-JWT_SECRET=staging_jwt_secret_replace_in_production
-JWT_EXPIRATION=1d
-
 # LOGGING
 LOG_LEVEL=info
 
@@ -109,10 +99,6 @@ CORS_ORIGIN=https://example.com
 
 # DATABASE
 DATABASE_URL="postgresql://postgres:strong_password@production-db:5432/motorove_prod?schema=public"
-
-# AUTHENTICATION
-JWT_SECRET=strong_production_jwt_secret
-JWT_EXPIRATION=1d
 
 # LOGGING
 LOG_LEVEL=warn

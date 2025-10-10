@@ -153,7 +153,6 @@ Create a `.env.dev` file based on `.env.dev.sample`:
 # Required
 NODE_ENV=development
 DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
-JWT_SECRET=your-secret-key
 SUPABASE_URL=https://[PROJECT-REF].supabase.co
 SUPABASE_KEY=your-supabase-anon-key
 FIREBASE_SERVICE_ACCOUNT={...}
@@ -189,6 +188,7 @@ gcloud services enable geocoding-backend.googleapis.com
 ```
 
 Or enable them manually in the [Google Cloud Console](https://console.cloud.google.com/apis/library):
+
 - **Weather API** - For current weather conditions
 - **Geocoding API** - For converting city names to coordinates
 
@@ -215,6 +215,7 @@ GEOCODING_API_KEY=your_google_maps_geocoding_api_key_here
 - **Geocoding API**: $0.005 per request (first $200 credit free)
 
 The application implements caching to minimize API calls:
+
 - Weather data: 3-hour cache
 - Geocoding results: 24-hour cache
 

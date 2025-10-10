@@ -48,7 +48,6 @@ cp .env.sample .env
 **Important**: Make sure to fill in all required values, especially:
 
 - `DATABASE_URL` (Supabase connection string with Session pooler)
-- `JWT_SECRET`
 - `SUPABASE_URL` and `SUPABASE_KEY`
 - `FIREBASE_SERVICE_ACCOUNT`
 - `WEATHER_API_KEY` (Google Cloud Weather API key)
@@ -245,7 +244,6 @@ Each environment uses specific `.env` files in this order:
 | ------------------------ | -------------------------------------------------------- | -------- |
 | NODE_ENV                 | Application environment                                  | Yes      |
 | DATABASE_URL             | Supabase PostgreSQL connection (use Session pooler)      | Yes      |
-| JWT_SECRET               | Secret key for JWT signing                               | Yes      |
 | SUPABASE_URL             | Supabase project URL (https://[PROJECT-REF].supabase.co) | Yes      |
 | SUPABASE_KEY             | Supabase anon/public key                                 | Yes      |
 | FIREBASE_SERVICE_ACCOUNT | Firebase service account JSON                            | Yes      |

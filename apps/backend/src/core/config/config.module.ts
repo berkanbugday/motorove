@@ -18,8 +18,6 @@ import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
           .default(NodeEnv.Dev),
         PORT: Joi.number().default(3000),
         DATABASE_URL: Joi.string().required(),
-        JWT_SECRET: Joi.string().required(),
-        JWT_EXPIRATION: Joi.string().default('1d'),
         SENTRY_DSN: Joi.string().optional().empty(''),
         API_PREFIX: Joi.string().default('api'),
         CORS_ORIGIN: Joi.string().default('*'),

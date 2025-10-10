@@ -58,9 +58,6 @@ NODE_ENV=development
 # Supabase Database (use Session pooler connection string)
 DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
 
-# JWT Authentication
-JWT_SECRET=your_jwt_secret_key
-
 # Supabase API
 SUPABASE_URL=https://[PROJECT-REF].supabase.co
 SUPABASE_KEY=your_supabase_anon_key
