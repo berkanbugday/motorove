@@ -464,55 +464,57 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         </View>
 
         {/* Participation Card */}
-        <View style={styles.eventCard}>
-          <Typography style={styles.joinQuestion}>
-            {t('screens.event.are_you_joining')}
-          </Typography>
-
-          <View style={styles.participationButtons}>
-            <Button
-              title={t('screens.event.going')}
-              onPress={handleJoinEvent}
-              disabled={isJoining}
-              loading={isJoining}
-              variant={isUserGoing ? 'dark' : 'secondary'}
-              shape="round"
-              size="small"
-              style={{flex: 1, paddingVertical: spacing.md}}
-            />
-
-            <Button
-              title={t('screens.event.not_going')}
-              // onPress={handleNotJoinEvent}
-              disabled={isJoining}
-              loading={isJoining}
-              variant={isUserGoing ? 'secondary' : 'dark'}
-              shape="round"
-              size="small"
-              style={{flex: 1, paddingVertical: spacing.md}}
-            />
-          </View>
-
-          {/* Participant Count */}
-          <View style={styles.participantInfo}>
-            <Icon name="user-check-filled" size={14} />
-            <Typography style={styles.participantCount}>
-              8 {t('screens.event.going')}
+        {event.status !== EventStatus.DRAFT && (
+          <View style={styles.eventCard}>
+            <Typography style={styles.joinQuestion}>
+              {t('screens.event.are_you_joining')}
             </Typography>
-          </View>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <Button
-              title={t('screens.event.chat')}
-              onPress={() => {}}
-              variant="text"
-              size="small"
-              iconName="comments"
-              iconSize={16}
-            />
+            <View style={styles.participationButtons}>
+              <Button
+                title={t('screens.event.going')}
+                onPress={handleJoinEvent}
+                disabled={isJoining}
+                loading={isJoining}
+                variant={isUserGoing ? 'dark' : 'secondary'}
+                shape="round"
+                size="small"
+                style={{flex: 1, paddingVertical: spacing.md}}
+              />
+
+              <Button
+                title={t('screens.event.not_going')}
+                // onPress={handleNotJoinEvent}
+                disabled={isJoining}
+                loading={isJoining}
+                variant={isUserGoing ? 'secondary' : 'dark'}
+                shape="round"
+                size="small"
+                style={{flex: 1, paddingVertical: spacing.md}}
+              />
+            </View>
+
+            {/* Participant Count */}
+            <View style={styles.participantInfo}>
+              <Icon name="user-check-filled" size={14} />
+              <Typography style={styles.participantCount}>
+                8 {t('screens.event.going')}
+              </Typography>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.actionButtons}>
+              <Button
+                title={t('screens.event.chat')}
+                onPress={() => {}}
+                variant="text"
+                size="small"
+                iconName="comments"
+                iconSize={16}
+              />
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Description Card */}
         {event.description && (
