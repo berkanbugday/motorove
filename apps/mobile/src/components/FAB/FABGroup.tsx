@@ -1,16 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   Animated,
   TouchableWithoutFeedback,
   ViewStyle,
 } from 'react-native';
 
-import {FABGroupProps} from './types';
-import {createFABGroupStyles, getPositionStyles, FAB_SIZES} from './FAB.styles';
+import {FABGroupProps, FABActionDisplayMode} from './types';
+import {createFABGroupStyles, getPositionStyles} from './FAB.styles';
 import FAB from './FAB';
+import {Typography} from '@components/Typography';
 
 /**
  * FAB Group component that implements a speed dial pattern with multiple actions.
@@ -22,7 +22,6 @@ const FABGroup: React.FC<FABGroupProps> = ({
   onStateChange,
   position = 'bottomRight',
   customPosition,
-  showLabels = true,
   showBackdrop = true,
   backdropStyle,
   backdropColor = 'rgba(0, 0, 0, 0.4)',
@@ -44,7 +43,7 @@ const FABGroup: React.FC<FABGroupProps> = ({
   useEffect(() => {
     Animated.timing(animation, {
       toValue: isOpen ? 1 : 0,
-      duration: 300,
+      duration: 250,
       useNativeDriver: true,
     }).start();
   }, [isOpen, animation]);
@@ -52,6 +51,7 @@ const FABGroup: React.FC<FABGroupProps> = ({
   // Toggle open/closed state
   const toggle = () => {
     const newState = !isOpen;
+    console.log('FABGroup toggle:', newState, 'actions count:', actions.length);
     setIsOpen(newState);
     if (onStateChange) {
       onStateChange(newState);
@@ -72,7 +72,7 @@ const FABGroup: React.FC<FABGroupProps> = ({
     customPosition,
   ) as ViewStyle;
 
-  // Rotate the main FAB icon when opening/closing
+  // Rotate the main FAB icon 45 degrees when opening/closing (+ becomes X)
   const rotateAnimation = animation.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '45deg'],
@@ -80,7 +80,6 @@ const FABGroup: React.FC<FABGroupProps> = ({
 
   // Calculate the direction in which to show actions
   const isTop = position === 'topLeft' || position === 'topRight';
-  const actionDirection = isTop ? 1 : -1;
 
   return (
     <View
@@ -103,33 +102,51 @@ const FABGroup: React.FC<FABGroupProps> = ({
         </Animated.View>
       )}
 
-      {/* Action buttons */}
-      {isOpen && (
+      {/* Main FAB - Render first so it's behind actions */}
+      <View style={{zIndex: 1}}>
+        <FAB
+          {...mainFAB}
+          onPress={toggle}
+          icon={mainFAB.icon}
+          position={position}
+          customPosition={customPosition}
+          shadow="large"
+          iconRotation={rotateAnimation}
+        />
+      </View>
+
+      {/* Action buttons - Render last so they appear on top */}
+      {isOpen && actions.length > 0 && (
         <Animated.View
           style={[
             createFABGroupStyles.actionsContainer,
             {
-              transform: [
-                {
-                  translateY: animation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20 * actionDirection, 0],
-                  }),
-                },
-              ],
-              opacity: animation,
+              opacity: 1, // Temporarily remove animation
+              position: 'absolute',
+              bottom: 70, // Position above the main FAB
+              right: 0,
             },
           ]}>
           {actions.map((action, index) => {
-            const actionAnimation = animation.interpolate({
-              inputRange: [0, 0.5, 1],
-              outputRange: [0, 0, 1],
-              extrapolate: 'clamp',
-            });
+            console.log(
+              `Rendering action ${index}:`,
+              action.label,
+              'displayMode:',
+              action.displayMode,
+            );
 
-            // Calculate spacing based on FAB size
+            // Get display mode for this action
+            const displayMode: FABActionDisplayMode =
+              action.displayMode || 'both';
+            const shouldShowIcon =
+              displayMode === 'icon' || displayMode === 'both';
+            const shouldShowLabel =
+              displayMode === 'label' || displayMode === 'both';
+
+            // Calculate spacing based on FAB size and position
             const actionSpacing = {
-              marginBottom: FAB_SIZES.small.size / 2,
+              marginBottom: isTop ? 0 : 16,
+              marginTop: isTop ? 16 : 0,
             };
 
             return (
@@ -137,100 +154,97 @@ const FABGroup: React.FC<FABGroupProps> = ({
                 key={index}
                 style={[
                   createFABGroupStyles.actionItem,
+                  actionSpacing,
                   {
-                    opacity: actionAnimation,
+                    opacity: 1, // Temporarily remove animation
                     transform: [
                       {
-                        translateY: animation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [
-                            20 * actionDirection,
-                            0 * actionDirection,
-                          ],
-                          extrapolate: 'clamp',
-                        }),
+                        scale: 1, // Temporarily remove animation
                       },
                     ],
                   },
                 ]}>
-                {/* Action label */}
-                {showLabels && action.label && (
-                  <Animated.View
-                    style={[
-                      createFABGroupStyles.actionLabel,
-                      {
-                        opacity: actionAnimation,
-                        transform: [
-                          {
-                            translateX: animation.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [
-                                position.includes('Right') ? 20 : -20,
-                                0,
-                              ],
-                              extrapolate: 'clamp',
-                            }),
-                          },
-                        ],
-                      },
-                      action.labelStyle,
-                    ]}>
-                    <Text
-                      style={createFABGroupStyles.actionLabelText}
-                      numberOfLines={1}>
-                      {action.label}
-                    </Text>
-                  </Animated.View>
-                )}
-
-                {/* Action button */}
-                <TouchableOpacity
-                  onPress={() => {
-                    close();
-                    action.onPress();
-                  }}
-                  style={[actionSpacing, action.style]}
-                  testID={action.testID}
-                  accessibilityLabel={action.accessibilityLabel}>
-                  <FAB
-                    icon={action.icon}
-                    size="small"
-                    shape="circle"
-                    variant="custom"
-                    backgroundColor={action.backgroundColor}
-                    color={action.color}
+                {/* Render based on display mode */}
+                {displayMode === 'label' ? (
+                  // Label-only mode
+                  <TouchableOpacity
                     onPress={() => {
                       close();
                       action.onPress();
                     }}
-                    position="custom"
-                    customPosition={{}}
-                    style={action.style}
-                  />
-                </TouchableOpacity>
+                    style={[
+                      createFABGroupStyles.labelOnlyButton,
+                      {
+                        backgroundColor: action.backgroundColor,
+                      },
+                      action.style,
+                    ]}
+                    testID={action.testID}
+                    accessibilityLabel={action.accessibilityLabel}>
+                    <Typography
+                      style={[
+                        createFABGroupStyles.labelOnlyText,
+                        {
+                          color: action.color,
+                        },
+                        action.labelStyle,
+                      ]}
+                      numberOfLines={1}>
+                      {action.label}
+                    </Typography>
+                  </TouchableOpacity>
+                ) : (
+                  // Icon-only or both modes
+                  <View style={createFABGroupStyles.actionRow}>
+                    {/* Action label (for 'both' mode) */}
+                    {shouldShowLabel && action.label && (
+                      <View
+                        style={[
+                          createFABGroupStyles.actionLabel,
+                          action.labelStyle,
+                        ]}>
+                        <Typography
+                          style={createFABGroupStyles.actionLabelText}
+                          numberOfLines={1}>
+                          {action.label}
+                        </Typography>
+                      </View>
+                    )}
+
+                    {/* Action button (for 'icon' or 'both' modes) */}
+                    {shouldShowIcon && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          close();
+                          action.onPress();
+                        }}
+                        testID={action.testID}
+                        accessibilityLabel={action.accessibilityLabel}>
+                        <FAB
+                          icon={action.icon}
+                          size="small"
+                          shape="circle"
+                          variant="custom"
+                          backgroundColor={action.backgroundColor || '#FFFFFF'}
+                          color={action.color || '#666666'}
+                          onPress={() => {
+                            close();
+                            action.onPress();
+                          }}
+                          position={position}
+                          customPosition={customPosition}
+                          style={action.style}
+                          shadow="medium"
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
               </Animated.View>
             );
           })}
         </Animated.View>
       )}
-
-      {/* Main FAB */}
-      <Animated.View
-        style={{
-          transform: [
-            {
-              rotate: mainFAB.icon ? rotateAnimation : '0deg',
-            },
-          ],
-        }}>
-        <FAB
-          {...mainFAB}
-          onPress={toggle}
-          icon={mainFAB.icon}
-          position="custom"
-          customPosition={{}}
-        />
-      </Animated.View>
     </View>
   );
 };

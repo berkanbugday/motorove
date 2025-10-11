@@ -35,6 +35,7 @@ const FAB: React.FC<FABProps> = ({
   labelStyle,
   testID,
   accessibilityLabel,
+  iconRotation,
 }) => {
   // Create base styles based on props
   const positionStyle = useMemo(
@@ -119,13 +120,19 @@ const FAB: React.FC<FABProps> = ({
         style={StyleSheet.absoluteFill}>
         <View style={createFABStyles.contentContainer}>
           {/* Render icon */}
-          {React.isValidElement(icon) &&
-            React.cloneElement(icon as React.ReactElement<any>, {
-              // Only clone with properties that the icon component supports
-              color: contentColor,
-              // Pass the size as a prop that most icon libraries support
-              size: iconSize,
-            })}
+          {React.isValidElement(icon) && (
+            <Animated.View
+              style={{
+                transform: iconRotation ? [{rotate: iconRotation as any}] : [],
+              }}>
+              {React.cloneElement(icon as React.ReactElement<any>, {
+                // Only clone with properties that the icon component supports
+                color: contentColor,
+                // Pass the size as a prop that most icon libraries support
+                size: iconSize,
+              })}
+            </Animated.View>
+          )}
 
           {/* Render label for extended FAB */}
           {shape === 'extended' && label && (

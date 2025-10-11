@@ -1,5 +1,5 @@
 import {ReactNode} from 'react';
-import {StyleProp, ViewStyle, TextStyle} from 'react-native';
+import {StyleProp, ViewStyle, TextStyle, Animated} from 'react-native';
 import {ShadowSizeType as ThemeShadowSizeType} from '../../theme';
 
 /**
@@ -157,7 +157,17 @@ export interface FABProps {
    * Accessibility label for screen readers
    */
   accessibilityLabel?: string;
+
+  /**
+   * Rotation angle for the icon (in degrees)
+   */
+  iconRotation?: string | Animated.AnimatedInterpolation<string | number>;
 }
+
+/**
+ * Display mode for FAB group actions
+ */
+export type FABActionDisplayMode = 'icon' | 'label' | 'both';
 
 /**
  * Props for the FABGroup component
@@ -172,7 +182,7 @@ export interface FABGroupProps {
    * Array of actions/FABs to show in the speed dial
    */
   actions: Array<{
-    icon: ReactNode;
+    icon?: ReactNode;
     label?: string;
     onPress: () => void;
     backgroundColor?: string;
@@ -181,6 +191,11 @@ export interface FABGroupProps {
     labelStyle?: StyleProp<TextStyle>;
     testID?: string;
     accessibilityLabel?: string;
+    /**
+     * Display mode for this action
+     * @default 'both'
+     */
+    displayMode?: FABActionDisplayMode;
   }>;
 
   /**

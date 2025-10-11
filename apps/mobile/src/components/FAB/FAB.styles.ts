@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-import {colors, spacing, getShadow, rh} from '../../theme';
+import {colors, spacing, getShadow, rh, radius} from '../../theme';
 import {
   FABPosition,
   FABSize,
@@ -179,7 +179,9 @@ export const getShadowStyle = (shadow: boolean | ShadowSizeType) => {
   }
 
   const shadowSize: 'small' | 'medium' | 'large' =
-    typeof shadow === 'string' ? shadow : 'medium';
+    typeof shadow === 'string' && shadow !== 'none'
+      ? (shadow as 'small' | 'medium' | 'large')
+      : 'medium';
   return getShadow(shadowSize);
 };
 
@@ -214,25 +216,55 @@ export const createFABGroupStyles = StyleSheet.create({
   container: {
     position: 'absolute',
     alignItems: 'flex-end',
+    justifyContent: 'flex-end',
   },
   actionsContainer: {
     marginBottom: spacing.md,
+    alignItems: 'flex-end',
+    zIndex: 1000,
+    elevation: 1000, // For Android
   },
   actionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.sm,
+    zIndex: 1001,
+    elevation: 1001, // For Android
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   actionLabel: {
     backgroundColor: colors.neutral.darkGrey,
-    borderRadius: 5,
+    borderRadius: 8,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     marginRight: spacing.sm,
+    ...getShadow('small'),
   },
   actionLabelText: {
     color: colors.neutral.white,
     fontWeight: '500',
+    fontSize: 14,
+  },
+  labelOnlyButton: {
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    // paddingVertical: spacing.md,
+    minWidth: 80,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...getShadow('small'),
+    elevation: 1002, // Higher than actionItem for Android
+    zIndex: 1002,
+  },
+  labelOnlyText: {
+    color: colors.neutral.black,
+    fontWeight: '600',
+    fontSize: 14,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
