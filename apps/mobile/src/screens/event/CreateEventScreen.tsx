@@ -1161,12 +1161,6 @@ export const CreateEventScreen: React.FC = () => {
       setSelectedFinishLocation(null);
       setValue('finishLocation', '', {shouldValidate: false});
 
-      // Reset selected users and groups since they depend on event type
-      setSelectedUsers([]);
-      setSelectedGroups([]);
-      resetField('invitedUsers');
-      resetField('invitedGroups');
-
       // If we're past the first step, jump back to first step
       if (currentStepIndex > 0) {
         setTimeout(() => {
@@ -1262,6 +1256,10 @@ export const CreateEventScreen: React.FC = () => {
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
+          initialAddress={selectedMeetingPoint?.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           onLocationSelect={handleMeetingLocationSelect}
           onClose={() => meetingPointMapBottomSheetRef.current?.close()}
           addressType={AddressType.EVENT_MEETING_POINT}
@@ -1274,6 +1272,10 @@ export const CreateEventScreen: React.FC = () => {
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
+          initialAddress={selectedStartLocation?.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           onLocationSelect={handleStartLocationSelect}
           onClose={() => startLocationMapBottomSheetRef.current?.close()}
           addressType={AddressType.EVENT_START_LOCATION}
@@ -1286,6 +1288,10 @@ export const CreateEventScreen: React.FC = () => {
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
+          initialAddress={selectedFinishLocation?.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           onLocationSelect={handleFinishLocationSelect}
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
           addressType={AddressType.EVENT_FINISH_LOCATION}

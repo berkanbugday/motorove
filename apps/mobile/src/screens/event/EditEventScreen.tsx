@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   BackHandler,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
@@ -69,9 +70,9 @@ interface EditEventScreenProps {
   };
 }
 
-export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
+export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const {t} = useTranslation();
-  const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
+  const navigation = useNavigation<MainScreenNavigationProp<'EditEvent'>>();
   const {eventId} = route.params;
   const {language} = useLanguage();
   const {updateEvent, loading} = useUpdateEvent(() => {
@@ -247,6 +248,24 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
   const confirmSaveDraft = useCallback(async () => {
     const formData = getValues();
 
+    if (!formData.eventType) {
+      showToast({
+        type: 'error',
+        text1: t('validation.event.event_type.required'),
+        text2: t('validation.event.event_type.select'),
+      });
+      return;
+    }
+
+    if (!selectedImages.length) {
+      showToast({
+        type: 'error',
+        text1: t('validation.event.images.required'),
+        text2: t('validation.event.images.image_size_limit'),
+      });
+      return;
+    }
+
     try {
       const addresses: ICreateAddress[] = [
         ...(selectedMeetingPoint || []),
@@ -302,6 +321,9 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
     selectedStartLocation,
     selectedFinishLocation,
     selectedImages,
+    t,
+    updateEvent,
+    eventId,
   ]);
 
   const handleNextStep = useCallback(async () => {
@@ -348,7 +370,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
       // Close the bottom sheet
       meetingPointMapBottomSheetRef.current?.close();
     },
-    [setValue, language],
+    [setValue],
   );
 
   const handleStartLocationSelect = useCallback(
@@ -374,7 +396,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
       // Close the bottom sheet
       startLocationMapBottomSheetRef.current?.close();
     },
-    [setValue, language],
+    [setValue],
   );
 
   const handleFinishLocationSelect = useCallback(
@@ -400,7 +422,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
       // Close the bottom sheet
       finishLocationMapBottomSheetRef.current?.close();
     },
-    [setValue, language],
+    [setValue],
   );
 
   // Image selection handlers
@@ -663,7 +685,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
         await updateEvent(updateEventInput);
       } catch (error) {
-        loggingService.error('Error creating event:', error);
+        loggingService.error('Error updating event:', error);
       }
     },
     [
@@ -700,7 +722,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
               <AnimatedInput
                 control={control}
                 name="title"
-                label={t('screens.event.title_label')}
+                label={t('screens.event.event_title')}
                 error={errors.title}
                 key="title-input"
               />
@@ -708,7 +730,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
               {/* Event Type Dropdown */}
               <Dropdown
                 data={eventTypes}
-                label={t('screens.event.type_label')}
+                label={t('screens.event.event_type')}
                 onSelect={handleEventTypeSelect}
                 placeholder=""
                 selectedItem={selectedEventType}
@@ -721,7 +743,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
               <AnimatedInput
                 control={control}
                 name="meetingPoint"
-                label={t('screens.event.meeting_point_label')}
+                label={t('screens.event.meeting_point')}
                 error={errors.meetingPoint}
                 icon={
                   <Icon
@@ -741,7 +763,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
               <AnimatedInput
                 control={control}
                 name="maxParticipants"
-                label={t('screens.event.max_participants_label')}
+                label={t('screens.event.max_participants')}
                 error={errors.maxParticipants}
                 keyboardType="numeric"
                 key="maxParticipants-input"
@@ -752,7 +774,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
               <AnimatedInput
                 control={control}
                 name="description"
-                label={t('screens.event.description_label')}
+                label={t('screens.event.description')}
                 multiline
                 showClearButton={false}
                 error={errors.description}
@@ -892,7 +914,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                   <Switch
                     value={isPrivate}
                     onValueChange={togglePrivacy}
-                    label={t('screens.event.private_event_label')}
+                    label={t('screens.event.private_event')}
                     description={t('screens.event.private_event_description')}
                     style={{paddingVertical: spacing.md}}
                   />
@@ -957,7 +979,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="startLocation"
-                      label={t('screens.event.start_location_label')}
+                      label={t('screens.event.start_location')}
                       error={errors.startLocation}
                       icon={
                         <Icon
@@ -976,7 +998,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="finishLocation"
-                      label={t('screens.event.finish_location_label')}
+                      label={t('screens.event.finish_location')}
                       error={errors.finishLocation}
                       icon={
                         <Icon
@@ -994,7 +1016,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
                     <Dropdown
                       data={roadTypes}
-                      label={t('screens.event.road_type_label')}
+                      label={t('screens.event.road_type')}
                       onSelect={handleRoadTypeSelect}
                       placeholder=""
                       selectedItem={selectedRoadType}
@@ -1004,7 +1026,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
                     <Dropdown
                       data={difficultyLevels}
-                      label={t('screens.event.difficulty_level_label')}
+                      label={t('screens.event.difficulty_level')}
                       onSelect={handleDifficultySelect}
                       placeholder=""
                       selectedItem={selectedDifficultyLevel}
@@ -1017,7 +1039,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                       <AnimatedInput
                         control={control}
                         name="campingInfo"
-                        label={t('screens.event.camping_info_label')}
+                        label={t('screens.event.camping_info')}
                         multiline
                         showClearButton={false}
                         error={errors.campingInfo}
@@ -1028,7 +1050,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="routeDescription"
-                      label={t('screens.event.route_description_label')}
+                      label={t('screens.event.route_description')}
                       multiline
                       showClearButton={false}
                       error={errors.routeDescription}
@@ -1038,7 +1060,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="restStops"
-                      label={t('screens.event.rest_stops_label')}
+                      label={t('screens.event.rest_stops')}
                       multiline
                       showClearButton={false}
                       error={errors.restStops}
@@ -1048,7 +1070,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="equipmentChecklist"
-                      label={t('screens.event.equipment_checklist_label')}
+                      label={t('screens.event.equipment_checklist')}
                       multiline
                       showClearButton={false}
                       error={errors.equipmentChecklist}
@@ -1063,7 +1085,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="instructorInfo"
-                      label={t('screens.event.instructor_info_label')}
+                      label={t('screens.event.instructor_info')}
                       multiline
                       showClearButton={false}
                       error={errors.instructorInfo}
@@ -1073,7 +1095,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="topicsCovered"
-                      label={t('screens.event.topics_covered_label')}
+                      label={t('screens.event.topics_covered')}
                       multiline
                       showClearButton={false}
                       error={errors.topicsCovered}
@@ -1082,7 +1104,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
                     <Dropdown
                       data={experienceLevels}
-                      label={t('screens.event.experience_level_label')}
+                      label={t('screens.event.experience_level')}
                       onSelect={handleExperienceLevelSelect}
                       placeholder=""
                       selectedItem={selectedExperienceLevel}
@@ -1093,7 +1115,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
                     <AnimatedInput
                       control={control}
                       name="price"
-                      label={t('screens.event.price_label')}
+                      label={t('screens.event.price')}
                       keyboardType="numeric"
                       error={errors.price}
                       key="price-input"
@@ -1195,12 +1217,6 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
       setValue('startLocation', '', {shouldValidate: false});
       setSelectedFinishLocation(null);
       setValue('finishLocation', '', {shouldValidate: false});
-
-      // Reset selected users and groups since they depend on event type
-      setSelectedUsers([]);
-      setSelectedGroups([]);
-      resetField('invitedUsers');
-      resetField('invitedGroups');
 
       // If we're past the first step, jump back to first step
       if (currentStepIndex > 0) {
@@ -1304,35 +1320,29 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 
         if (meetingPointAddresses.length > 0) {
           setSelectedMeetingPoint(meetingPointAddresses);
-          const displayAddress = meetingPointAddresses.find(
-            addr => addr.language.toLowerCase() === language.toLowerCase(),
-          );
-          setValue(
-            'meetingPoint',
-            displayAddress?.address || meetingPointAddresses[0].address,
-          );
+          const displayAddress =
+            meetingPointAddresses.find(
+              addr => addr.language.toLowerCase() === language.toLowerCase(),
+            ) || meetingPointAddresses[0]; // Fallback to first address if no language match
+          setValue('meetingPoint', displayAddress?.address || '');
         }
 
         if (startLocationAddresses.length > 0) {
           setSelectedStartLocation(startLocationAddresses);
-          const displayAddress = startLocationAddresses.find(
-            addr => addr.language.toLowerCase() === language.toLowerCase(),
-          );
-          setValue(
-            'startLocation',
-            displayAddress?.address || startLocationAddresses[0].address,
-          );
+          const displayAddress =
+            startLocationAddresses.find(
+              addr => addr.language.toLowerCase() === language.toLowerCase(),
+            ) || startLocationAddresses[0]; // Fallback to first address if no language match
+          setValue('startLocation', displayAddress?.address || '');
         }
 
         if (finishLocationAddresses.length > 0) {
           setSelectedFinishLocation(finishLocationAddresses);
-          const displayAddress = finishLocationAddresses.find(
-            addr => addr.language.toLowerCase() === language.toLowerCase(),
-          );
-          setValue(
-            'finishLocation',
-            displayAddress?.address || finishLocationAddresses[0].address,
-          );
+          const displayAddress =
+            finishLocationAddresses.find(
+              addr => addr.language.toLowerCase() === language.toLowerCase(),
+            ) || finishLocationAddresses[0]; // Fallback to first address if no language match
+          setValue('finishLocation', displayAddress?.address || '');
         }
       }
 
@@ -1369,25 +1379,14 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
     difficultyLevels,
     experienceLevels,
     language,
+    setValue,
   ]);
 
   // Show loading state while fetching event data
   if (eventLoading) {
     return (
-      <View
-        style={[
-          styles.container,
-          {justifyContent: 'center', alignItems: 'center'},
-        ]}>
-        <TopHeaderBar
-          title={t('screens.event.edit_event')}
-          showBackButton
-          showShadow={false}
-          onBackPress={() => navigation.goBack()}
-        />
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Typography variant="body">{t('common.loading')}</Typography>
-        </View>
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" />
       </View>
     );
   }
@@ -1450,7 +1449,7 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
               style={{flex: 1}}
             />
             <Button
-              title={t('common.update')}
+              title={t('screens.event.create_event')}
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}
@@ -1493,6 +1492,10 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
+          initialAddress={selectedMeetingPoint?.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           onLocationSelect={handleMeetingLocationSelect}
           onClose={() => meetingPointMapBottomSheetRef.current?.close()}
           addressType={AddressType.EVENT_MEETING_POINT}
@@ -1505,6 +1508,10 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
+          initialAddress={selectedStartLocation?.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           onLocationSelect={handleStartLocationSelect}
           onClose={() => startLocationMapBottomSheetRef.current?.close()}
           addressType={AddressType.EVENT_START_LOCATION}
@@ -1517,6 +1524,10 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
+          initialAddress={selectedFinishLocation?.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           onLocationSelect={handleFinishLocationSelect}
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
           addressType={AddressType.EVENT_FINISH_LOCATION}
@@ -1564,6 +1575,10 @@ export const EditEventScreen: React.FC<EditEventScreenProps> = ({route}) => {
 const styles = StyleSheet.create({
   container: {
     ...commonStyles.container,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   wizardContainer: {
     flex: 1,

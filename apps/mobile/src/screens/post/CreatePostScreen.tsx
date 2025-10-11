@@ -251,7 +251,10 @@ export const CreatePostScreen = () => {
       title: t('screens.post.select_location'),
       content: (
         <SelectLocationMap
-          initialAddress={location[0]}
+          initialAddress={location.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           addressType={AddressType.POST_LOCATION}
           onLocationSelect={selectedLocation => {
             setLocation(selectedLocation);

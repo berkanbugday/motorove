@@ -304,7 +304,10 @@ export const EditPostScreen = () => {
       title: t('screens.post.select_location'),
       content: (
         <SelectLocationMap
-          initialAddress={location[0]}
+          initialAddress={location.find(
+            address =>
+              address.language.toLowerCase() === language.toLowerCase(),
+          )}
           addressType={AddressType.POST_LOCATION}
           onLocationSelect={selectedLocation => {
             setLocation(selectedLocation);
@@ -465,7 +468,9 @@ export const EditPostScreen = () => {
               title={
                 location.length > 0
                   ? location.find(
-                      address => address.language.toLowerCase() === language,
+                      address =>
+                        address.language.toLowerCase() ===
+                        language.toLowerCase(),
                     )?.address
                   : t('screens.post.add_location')
               }
