@@ -40,6 +40,7 @@ export * from './LanguageSelector';
 export * from './GroupFilter';
 export * from './JoinRequestCard';
 export * from './PermissionHandler';
+export * from './CollapsibleCard';
 // Skeleton components
 export * from './Skeleton';
 export * from './Skeleton/SkeletonGroup';

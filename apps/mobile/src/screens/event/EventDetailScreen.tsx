@@ -27,6 +27,7 @@ import {
   BottomSheet,
   BottomSheetRef,
   Body,
+  CollapsibleCard,
 } from '@components';
 import {format, formatDuration, intervalToDuration} from 'date-fns';
 import {useTranslation} from '@hooks/useTranslation';
@@ -456,12 +457,22 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             </View>
           )}
 
+          {/* Maximum Participants Row */}
+          {event.maxParticipants && (
+            <View style={styles.infoRow}>
+              <Icon name="users-filled" size={16} color={colors.neutral.grey} />
+              <Typography style={styles.infoText}>
+                {t('screens.event.max_participants')}: {event.maxParticipants}
+              </Typography>
+            </View>
+          )}
+
           {/* Organizer Row */}
           {event.createdBy && (
             <View style={styles.infoRow}>
               <Icon name="user-filled" size={16} color={colors.neutral.grey} />
               <Typography style={styles.infoText}>
-                {t('screens.event.organized_by')} {event.createdBy.firstName}{' '}
+                {t('screens.event.organized_by')}: {event.createdBy.firstName}{' '}
                 {event.createdBy.lastName}
               </Typography>
             </View>
@@ -469,14 +480,13 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         </View>
 
         {/* Description Card */}
-        <View style={styles.eventCard}>
-          <Typography style={styles.sectionTitle}>
-            {t('screens.event.description')}
-          </Typography>
+        <CollapsibleCard
+          title={t('screens.event.description')}
+          initiallyExpanded={true}>
           <Typography style={styles.description}>
             {event.description}
           </Typography>
-        </View>
+        </CollapsibleCard>
 
         {/* Participation Card */}
         <View style={styles.eventCard}>
@@ -531,6 +541,10 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             <Icon name="users" size={14} color={colors.neutral.grey} />
             <Typography style={styles.participantCount}>
               8 {t('screens.event.going')} • 4 {t('screens.event.maybe')}
+              {event.maxParticipants &&
+                ` • ${t('screens.event.max_participants', {
+                  count: event.maxParticipants,
+                })}`}
             </Typography>
           </View>
 
@@ -564,17 +578,15 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         </View>
 
         {/* Route Description Card */}
-        <View style={styles.eventCard}>
-          <Typography style={styles.sectionTitle}>Route Description</Typography>
+        <CollapsibleCard title="Route Description" initiallyExpanded={false}>
           <Typography style={styles.description}>
             Ride through hills & coastline. Includes a food stop and group
             photo!
           </Typography>
-        </View>
+        </CollapsibleCard>
 
         {/* Rest Stops Card */}
-        <View style={styles.eventCard}>
-          <Typography style={styles.sectionTitle}>Rest Stops</Typography>
+        <CollapsibleCard title="Rest Stops" initiallyExpanded={false}>
           <View style={styles.infoRow}>
             <Typography style={styles.infoText}>📍</Typography>
             <Typography style={styles.infoText}>
@@ -587,7 +599,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               Scenic Viewpoint - 85km (Photo Stop)
             </Typography>
           </View>
-        </View>
+        </CollapsibleCard>
       </Animated.ScrollView>
 
       <BottomSheet
@@ -664,7 +676,7 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     backgroundColor: colors.neutral.white,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     padding: spacing.lg,
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
