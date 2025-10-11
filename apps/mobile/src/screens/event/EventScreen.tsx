@@ -25,23 +25,34 @@ import {useLanguage} from '@contexts/LanguageContext';
  */
 export const EventScreen = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
-  const [refreshingPublishedEvents, setRefreshingPublishedEvents] =
+  const [refreshingUpcomingEvents, setRefreshingUpcomingEvents] =
     useState(false);
+  const [refreshingPastEvents, setRefreshingPastEvents] = useState(false);
   const [refreshingDraftEvents, setRefreshingDraftEvents] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
   const {language} = useLanguage();
 
-  // Fetch published events
+  // Fetch upcoming events
   const {
-    events: publishedEvents,
-    loading: publishedEventsLoading,
-    error: publishedEventsError,
-    refetch: refetchPublishedEvents,
-    loadMore: loadMorePublishedEvents,
-    hasMore: hasMorePublishedEvents,
-  } = useGetEvents(20, 0, EventStatus.PUBLISHED);
+    events: upcomingEvents,
+    loading: upcomingEventsLoading,
+    error: upcomingEventsError,
+    refetch: refetchUpcomingEvents,
+    loadMore: loadMoreUpcomingEvents,
+    hasMore: hasMoreUpcomingEvents,
+  } = useGetEvents(20, 0, EventStatus.UPCOMING);
+
+  // Fetch past events
+  const {
+    events: pastEvents,
+    loading: pastEventsLoading,
+    error: pastEventsError,
+    refetch: refetchPastEvents,
+    loadMore: loadMorePastEvents,
+    hasMore: hasMorePastEvents,
+  } = useGetEvents(20, 0, EventStatus.PAST);
 
   // Fetch draft events
   const {
@@ -63,11 +74,17 @@ export const EventScreen = () => {
     }, [activeTab, refetchDraftEvents]),
   );
 
-  const handleRefreshPublishedEvents = useCallback(async () => {
-    setRefreshingPublishedEvents(true);
-    await refetchPublishedEvents();
-    setRefreshingPublishedEvents(false);
-  }, [refetchPublishedEvents]);
+  const handleRefreshUpcomingEvents = useCallback(async () => {
+    setRefreshingUpcomingEvents(true);
+    await refetchUpcomingEvents();
+    setRefreshingUpcomingEvents(false);
+  }, [refetchUpcomingEvents]);
+
+  const handleRefreshPastEvents = useCallback(async () => {
+    setRefreshingPastEvents(true);
+    await refetchPastEvents();
+    setRefreshingPastEvents(false);
+  }, [refetchPastEvents]);
 
   const handleRefreshDraftEvents = useCallback(async () => {
     setRefreshingDraftEvents(true);
@@ -96,11 +113,19 @@ export const EventScreen = () => {
             title={t('common.try_again')}
             variant="primary"
             shape="round"
-            onPress={() =>
-              tabType === 'upcoming' || tabType === 'past'
-                ? handleRefreshPublishedEvents()
-                : handleRefreshDraftEvents()
-            }
+            onPress={() => {
+              switch (tabType) {
+                case 'upcoming':
+                  handleRefreshUpcomingEvents();
+                  break;
+                case 'past':
+                  handleRefreshPastEvents();
+                  break;
+                case 'draft':
+                  handleRefreshDraftEvents();
+                  break;
+              }
+            }}
           />
         </View>
       );
@@ -117,36 +142,7 @@ export const EventScreen = () => {
     loadMore: () => void,
     hasMore: boolean,
   ) => {
-    // Filter events based on status and date for past events
-    let filteredEvents;
-
-    switch (activeTab) {
-      case 'upcoming':
-        filteredEvents = eventsList.filter(event => {
-          const eventDate = new Date(event.startDateTime);
-          const now = new Date();
-          return event.status === EventStatus.PUBLISHED && eventDate >= now;
-        });
-        break;
-      case 'past':
-        filteredEvents = eventsList.filter(event => {
-          const eventDate = new Date(event.startDateTime);
-          const now = new Date();
-          return event.status === EventStatus.PUBLISHED && eventDate < now;
-        });
-        break;
-      case 'draft':
-        filteredEvents = eventsList.filter(
-          event => event.status === EventStatus.DRAFT,
-        );
-        break;
-      default:
-        filteredEvents = eventsList.filter(
-          event => event.status === EventStatus.PUBLISHED,
-        );
-    }
-
-    if (isLoading && !isRefreshing && !filteredEvents?.length) {
+    if (isLoading && !isRefreshing && !eventsList?.length) {
       return (
         <View style={styles.loadingContainer}>
           {Array.from({length: 3}).map((_, index) => (
@@ -180,7 +176,7 @@ export const EventScreen = () => {
 
     return (
       <FlatList
-        data={filteredEvents}
+        data={eventsList}
         keyExtractor={item => item.id}
         renderItem={({item}) => {
           // Get the first address (if available)
@@ -233,7 +229,7 @@ export const EventScreen = () => {
         contentContainerStyle={{
           paddingHorizontal: spacing.md,
           paddingBottom: insets.bottom + 70,
-          ...(filteredEvents.length === 0 && !isLoading ? {flex: 1} : {}),
+          ...(eventsList.length === 0 && !isLoading ? {flex: 1} : {}),
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -253,13 +249,13 @@ export const EventScreen = () => {
       content: (
         <View style={styles.tabContent}>
           {renderEventsList(
-            publishedEvents,
-            refreshingPublishedEvents,
-            handleRefreshPublishedEvents,
-            publishedEventsLoading,
-            publishedEventsError,
-            loadMorePublishedEvents,
-            hasMorePublishedEvents,
+            upcomingEvents,
+            refreshingUpcomingEvents,
+            handleRefreshUpcomingEvents,
+            upcomingEventsLoading,
+            upcomingEventsError,
+            loadMoreUpcomingEvents,
+            hasMoreUpcomingEvents,
           )}
         </View>
       ),
@@ -270,13 +266,13 @@ export const EventScreen = () => {
       content: (
         <View style={styles.tabContent}>
           {renderEventsList(
-            publishedEvents,
-            refreshingPublishedEvents,
-            handleRefreshPublishedEvents,
-            publishedEventsLoading,
-            publishedEventsError,
-            loadMorePublishedEvents,
-            hasMorePublishedEvents,
+            pastEvents,
+            refreshingPastEvents,
+            handleRefreshPastEvents,
+            pastEventsLoading,
+            pastEventsError,
+            loadMorePastEvents,
+            hasMorePastEvents,
           )}
         </View>
       ),

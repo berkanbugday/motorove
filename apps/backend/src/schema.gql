@@ -452,7 +452,8 @@ enum EventParticipantStatus {
 """The status of an event"""
 enum EventStatus {
   DRAFT
-  PUBLISHED
+  PAST
+  UPCOMING
 }
 
 """The types of events that can be created"""

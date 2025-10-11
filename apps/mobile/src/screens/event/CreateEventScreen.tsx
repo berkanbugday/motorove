@@ -617,7 +617,7 @@ export const CreateEventScreen: React.FC = () => {
           invitedGroupIds: data.invitedGroups,
           invitedUserIds: data.invitedUsers,
           eventType: selectedEventType?.value as EventType,
-          status: EventStatus.PUBLISHED,
+          status: EventStatus.UPCOMING,
           addresses: addresses,
           startDateTime: new Date(
             `${data.startDate.toISOString().split('T')[0]}T${

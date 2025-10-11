@@ -104,7 +104,8 @@ enum EventParticipantStatus {
 
 enum EventStatus {
   DRAFT
-  PUBLISHED
+  UPCOMING
+  PAST
 }
 
 enum DayOfWeek {
@@ -780,7 +781,7 @@ model Event {
   title           String      @db.VarChar(100)
   description     String      @db.Text
   eventType       EventType
-  status          EventStatus @default(PUBLISHED)
+  status          EventStatus @default(UPCOMING)
   startDateTime   DateTime
   endDateTime     DateTime?
   maxParticipants Int?

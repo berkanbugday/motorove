@@ -1,4 +1,5 @@
 export enum EventStatus {
   DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
+  UPCOMING = 'UPCOMING',
+  PAST = 'PAST',
 }

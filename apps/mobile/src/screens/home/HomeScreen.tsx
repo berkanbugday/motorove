@@ -146,7 +146,7 @@ export const HomeScreen = ({navigation}: Props) => {
     events,
     loading: eventsLoading,
     refetch: refetchEvents,
-  } = useGetEvents(3, 0, EventStatus.PUBLISHED);
+  } = useGetEvents(3, 0, EventStatus.UPCOMING);
 
   // Refetch notification count when the screen comes into focus
   useFocusEffect(

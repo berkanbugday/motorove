@@ -57,6 +57,9 @@ importers:
       '@nestjs/platform-ws':
         specifier: 11.1.0
         version: 11.1.0(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/websockets@11.1.0(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@11.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(rxjs@7.8.1)
+      '@nestjs/schedule':
+        specifier: ^6.0.1
+        version: 6.0.1(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@11.0.1(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@11.0.1)(@nestjs/websockets@11.1.0)(reflect-metadata@0.2.2)(rxjs@7.8.1))
       '@nestjs/websockets':
         specifier: 11.1.0
         version: 11.1.0(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@11.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.1)
@@ -2405,6 +2408,12 @@ packages:
       '@nestjs/websockets': ^11.0.0
       rxjs: ^7.1.0
 
+  '@nestjs/schedule@6.0.1':
+    resolution: {integrity: sha512-v3yO6cSPAoBSSyH67HWnXHzuhPhSNZhRmLY38JvCt2sqY8sPMOODpcU1D79iUMFf7k16DaMEbL4Mgx61ZhiC8Q==}
+    peerDependencies:
+      '@nestjs/common': ^10.0.0 || ^11.0.0
+      '@nestjs/core': ^10.0.0 || ^11.0.0
+
   '@nestjs/schematics@11.0.0':
     resolution: {integrity: sha512-wts8lG0GfNWw3Wk9aaG5I/wcMIAdm7HjjeThQfUZhJxeIFT82Z3F5+0cYdHH4ii2pYQGiCSrR1VcuMwPiHoecg==}
     peerDependencies:
@@ -3576,6 +3585,9 @@ packages:
 
   '@types/long@4.0.2':
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
+
+  '@types/luxon@3.7.1':
+    resolution: {integrity: sha512-H3iskjFIAn5SlJU7OuxUmTEpebK6TKB8rxZShDslBMZJ5u9S//KM1sbdAisiSrqwLQncVjnpi2OK2J51h+4lsg==}
 
   '@types/methods@1.1.4':
     resolution: {integrity: sha512-ymXWVrDiCxTBE3+RIrrP533E70eA+9qu7zdWoHuOmGujkYtzf4HQF96b8nwHLqhuf4ykX61IGRIB38CC6/sImQ==}
@@ -4826,6 +4838,10 @@ packages:
   cron-parser@4.9.0:
     resolution: {integrity: sha512-p0SaNjrHOnQeR8/VnfGbmg9te2kfyYSQ7Sc/j/6DtPL3JQvKxmjO9TSjNFpujqV3vEYYBvNNvXSxzyksBWAx1Q==}
     engines: {node: '>=12.0.0'}
+
+  cron@4.3.3:
+    resolution: {integrity: sha512-B/CJj5yL3sjtlun6RtYHvoSB26EmQ2NUmhq9ZiJSyKIM4K/fqfh9aelDFlIayD2YMeFZqWLi9hHV+c+pq2Djkw==}
+    engines: {node: '>=18.x'}
 
   cross-inspect@1.0.1:
     resolution: {integrity: sha512-Pcw1JTvZLSJH83iiGWt6fRcT+BjZlCDRVwYLbUcHzv/CRpB7r0MlSrGbIyQvVSNyGnbt7G4AXuyCiDR3POvZ1A==}
@@ -11469,6 +11485,12 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@nestjs/schedule@6.0.1(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@11.0.1(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@11.0.1)(@nestjs/websockets@11.1.0)(reflect-metadata@0.2.2)(rxjs@7.8.1))':
+    dependencies:
+      '@nestjs/common': 11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1)
+      '@nestjs/core': 11.0.1(@nestjs/common@11.0.1(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@11.0.1)(@nestjs/websockets@11.1.0)(reflect-metadata@0.2.2)(rxjs@7.8.1)
+      cron: 4.3.3
+
   '@nestjs/schematics@11.0.0(chokidar@4.0.3)(typescript@5.7.3)':
     dependencies:
       '@angular-devkit/core': 19.0.1(chokidar@4.0.3)
@@ -12931,6 +12953,8 @@ snapshots:
   '@types/leo-profanity@1.5.4': {}
 
   '@types/long@4.0.2': {}
+
+  '@types/luxon@3.7.1': {}
 
   '@types/methods@1.1.4': {}
 
@@ -14404,6 +14428,11 @@ snapshots:
 
   cron-parser@4.9.0:
     dependencies:
+      luxon: 3.7.2
+
+  cron@4.3.3:
+    dependencies:
+      '@types/luxon': 3.7.1
       luxon: 3.7.2
 
   cross-inspect@1.0.1:
