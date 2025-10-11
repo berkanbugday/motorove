@@ -34,6 +34,7 @@ import UserGear from '@assets/icons/user-gear.svg';
 import UserGearFilled from '@assets/icons/user-gear-filled.svg';
 import UserPlusFilled from '@assets/icons/user-plus-filled.svg';
 import UserSlashFilled from '@assets/icons/user-slash-filled.svg';
+import UserCheckFilled from '@assets/icons/user-check-filled.svg';
 import Bell from '@assets/icons/bell.svg';
 import BellFilled from '@assets/icons/bell-filled.svg';
 import BellExclamation from '@assets/icons/bell-exclamation.svg';
@@ -96,6 +97,9 @@ import ShareFilled from '@assets/icons/share-filled.svg';
 import CalendarClockFilled from '@assets/icons/calendar-clock-filled.svg';
 import MapPinSlashFilled from '@assets/icons/map-pin-slash-filled.svg';
 import LocationArrowFilled from '@assets/icons/location-arrow-filled.svg';
+import MountainsFilled from '@assets/icons/mountains-filled.svg';
+import MotorcycleFilled from '@assets/icons/motorcycle-filled.svg';
+import MoneyBillFilled from '@assets/icons/money-bill-filled.svg';
 
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
@@ -141,6 +145,7 @@ export type IconName =
   | 'user-gear-filled'
   | 'user-plus-filled'
   | 'user-slash-filled'
+  | 'user-check-filled'
   | 'bell'
   | 'bell-filled'
   | 'bell-exclamation'
@@ -210,7 +215,10 @@ export type IconName =
   | 'share-filled'
   | 'calendar-clock-filled'
   | 'map-pin-slash-filled'
-  | 'location-arrow-filled';
+  | 'location-arrow-filled'
+  | 'mountains-filled'
+  | 'motorcycle-filled'
+  | 'money-bill-filled';
 
 interface IconProps {
   name: IconName;
@@ -297,6 +305,8 @@ export function Icon({
       return <UserPlusFilled {...commonProps} />;
     case 'user-slash-filled':
       return <UserSlashFilled {...commonProps} />;
+    case 'user-check-filled':
+      return <UserCheckFilled {...commonProps} />;
     case 'bell':
       return <Bell {...commonProps} />;
     case 'bell-filled':
@@ -437,6 +447,12 @@ export function Icon({
       return <MapPinSlashFilled {...commonProps} />;
     case 'location-arrow-filled':
       return <LocationArrowFilled {...commonProps} />;
+    case 'mountains-filled':
+      return <MountainsFilled {...commonProps} />;
+    case 'motorcycle-filled':
+      return <MotorcycleFilled {...commonProps} />;
+    case 'money-bill-filled':
+      return <MoneyBillFilled {...commonProps} />;
     default:
       return null;
   }

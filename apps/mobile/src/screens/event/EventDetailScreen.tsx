@@ -376,14 +376,26 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         </Animated.View>
         {/* Main Event Details Card - Overlapping background */}
         <View style={styles.eventCard}>
-          {/* Ride Badge */}
-          <Chip
-            label={EnumUtils.convertEventType(event.eventType)}
-            variant="filled"
-            color="primary"
-            style={styles.rideBadge}
-            size="small"
-          />
+          <View style={styles.eventCardHeader}>
+            {/* Ride Badge */}
+            <Chip
+              label={EnumUtils.convertEventType(event.eventType)}
+              variant="filled"
+              color="primary"
+              style={styles.rideBadge}
+              size="small"
+            />
+
+            {event?.isPrivate && (
+              <Chip
+                label={t('screens.event.private_event')}
+                variant="outlined"
+                color="dark"
+                leadingIcon="lock-filled"
+                size="small"
+              />
+            )}
+          </View>
 
           {/* Event Title */}
           <Title weight="bold">{event.title}</Title>
@@ -421,34 +433,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             </View>
           )}
 
-          {/* Start Location Row */}
-          {getStartLocationAddress() && (
-            <View style={styles.infoRow}>
-              <Icon
-                name="map-pin-filled"
-                size={16}
-                color={colors.neutral.grey}
-              />
-              <Typography style={styles.infoText}>
-                {getStartLocationAddress()}
-              </Typography>
-            </View>
-          )}
-
-          {/* Finish Location Row */}
-          {getFinishLocationAddress() && (
-            <View style={styles.infoRow}>
-              <Icon
-                name="map-pin-slash-filled"
-                size={20}
-                color={colors.neutral.grey}
-              />
-              <Typography style={styles.infoText}>
-                {getFinishLocationAddress()}
-              </Typography>
-            </View>
-          )}
-
           {/* Distance/Duration/Difficulty Row */}
           {!isLoadingRoute && routeInfo && (
             <View style={styles.infoRow}>
@@ -479,15 +463,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           )}
         </View>
 
-        {/* Description Card */}
-        <CollapsibleCard
-          title={t('screens.event.description')}
-          initiallyExpanded={true}>
-          <Typography style={styles.description}>
-            {event.description}
-          </Typography>
-        </CollapsibleCard>
-
         {/* Participation Card */}
         <View style={styles.eventCard}>
           <Typography style={styles.joinQuestion}>
@@ -495,111 +470,225 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           </Typography>
 
           <View style={styles.participationButtons}>
-            <TouchableOpacity
-              style={[
-                styles.participationButton,
-                isUserGoing && styles.goingButton,
-              ]}
+            <Button
+              title={t('screens.event.going')}
               onPress={handleJoinEvent}
-              disabled={isJoining}>
-              <Typography
-                style={[
-                  styles.participationButtonText,
-                  isUserGoing && styles.goingButtonText,
-                ]}>
-                {t('screens.event.going')}
-              </Typography>
-            </TouchableOpacity>
+              disabled={isJoining}
+              loading={isJoining}
+              variant={isUserGoing ? 'dark' : 'secondary'}
+              shape="round"
+              size="small"
+              style={{flex: 1, paddingVertical: spacing.md}}
+            />
 
-            <TouchableOpacity
-              style={[
-                styles.participationButton,
-                isUserMaybe && styles.goingButton,
-              ]}
-              onPress={handleJoinEvent}
-              disabled={isJoining}>
-              <Typography
-                style={[
-                  styles.participationButtonText,
-                  isUserMaybe && styles.goingButtonText,
-                ]}>
-                {t('screens.event.maybe')}
-              </Typography>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.participationButton}
-              disabled={isJoining}>
-              <Typography style={styles.participationButtonText}>
-                {t('screens.event.not_going')}
-              </Typography>
-            </TouchableOpacity>
+            <Button
+              title={t('screens.event.not_going')}
+              // onPress={handleNotJoinEvent}
+              disabled={isJoining}
+              loading={isJoining}
+              variant={isUserGoing ? 'secondary' : 'dark'}
+              shape="round"
+              size="small"
+              style={{flex: 1, paddingVertical: spacing.md}}
+            />
           </View>
 
           {/* Participant Count */}
           <View style={styles.participantInfo}>
-            <Icon name="users" size={14} color={colors.neutral.grey} />
+            <Icon name="user-check-filled" size={14} />
             <Typography style={styles.participantCount}>
-              8 {t('screens.event.going')} • 4 {t('screens.event.maybe')}
-              {event.maxParticipants &&
-                ` • ${t('screens.event.max_participants', {
-                  count: event.maxParticipants,
-                })}`}
+              8 {t('screens.event.going')}
             </Typography>
           </View>
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Typography style={styles.actionButtonText}>🧭</Typography>
-              <Typography style={styles.actionButtonText}>
-                {t('screens.event.route')}
-              </Typography>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon
-                name="map-pin-filled"
-                size={16}
-                color={colors.neutral.black}
-              />
-              <Typography style={styles.actionButtonText}>
-                {t('screens.event.maps')}
-              </Typography>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton}>
-              <Typography style={styles.actionButtonText}>💬</Typography>
-              <Typography style={styles.actionButtonText}>
-                {t('screens.event.chat')}
-              </Typography>
-            </TouchableOpacity>
+            <Button
+              title={t('screens.event.chat')}
+              onPress={() => {}}
+              variant="text"
+              size="small"
+              iconName="comments"
+              iconSize={16}
+            />
           </View>
         </View>
 
+        {/* Description Card */}
+        {event.description && (
+          <CollapsibleCard
+            title={t('screens.event.description')}
+            initiallyExpanded={false}>
+            <Typography style={styles.description}>
+              {event.description}
+            </Typography>
+          </CollapsibleCard>
+        )}
+
+        {/* Event Details Card */}
+        {getStartLocationAddress() ||
+          getFinishLocationAddress() ||
+          event.roadType ||
+          event.difficultyLevel ||
+          event.experienceLevel ||
+          (event.price && (
+            <CollapsibleCard
+              title={t('screens.event.event_details_title')}
+              initiallyExpanded={false}>
+              {/* Start Location Row */}
+              {getStartLocationAddress() && (
+                <View style={styles.infoRow}>
+                  <Icon
+                    name="map-pin-filled"
+                    size={16}
+                    color={colors.neutral.grey}
+                  />
+                  <Typography style={styles.infoText}>
+                    {getStartLocationAddress()}
+                  </Typography>
+                </View>
+              )}
+
+              {/* Finish Location Row */}
+              {getFinishLocationAddress() && (
+                <View style={styles.infoRow}>
+                  <Icon
+                    name="map-pin-slash-filled"
+                    size={20}
+                    color={colors.neutral.grey}
+                  />
+                  <Typography style={styles.infoText}>
+                    {getFinishLocationAddress()}
+                  </Typography>
+                </View>
+              )}
+
+              {/* Road Type Row */}
+              {event.roadType && (
+                <View style={styles.infoRow}>
+                  <Icon
+                    name="mountains-filled"
+                    size={20}
+                    color={colors.neutral.grey}
+                  />
+                  <Typography style={styles.infoText}>
+                    {t('screens.event.road_type')}:{' '}
+                    {EnumUtils.convertRoadType(event.roadType)}
+                  </Typography>
+                </View>
+              )}
+
+              {/* Difficulty Level Row */}
+              {event.difficultyLevel && (
+                <View style={styles.infoRow}>
+                  <Icon
+                    name="route-filled"
+                    size={20}
+                    color={colors.neutral.grey}
+                  />
+                  <Typography style={styles.infoText}>
+                    {t('screens.event.difficulty_level')}:{' '}
+                    {EnumUtils.convertDifficultyLevel(event.difficultyLevel)}
+                  </Typography>
+                </View>
+              )}
+
+              {/* Experience Level Row */}
+              {event.experienceLevel && (
+                <View style={styles.infoRow}>
+                  <Icon
+                    name="motorcycle-filled"
+                    size={20}
+                    color={colors.neutral.grey}
+                  />
+                  <Typography style={styles.infoText}>
+                    {t('screens.event.experience_level')}:{' '}
+                    {EnumUtils.convertExperienceLevel(event.experienceLevel)}
+                  </Typography>
+                </View>
+              )}
+
+              {/* Experience Level Row */}
+              {event.price && (
+                <View style={styles.infoRow}>
+                  <Icon
+                    name="money-bill-filled"
+                    size={20}
+                    color={colors.neutral.grey}
+                  />
+                  <Typography style={styles.infoText}>
+                    {t('screens.event.price')}: {event.price}
+                  </Typography>
+                </View>
+              )}
+            </CollapsibleCard>
+          ))}
+
+        {/* Instructor Information Card */}
+        {event.instructorInfo && (
+          <CollapsibleCard
+            title={t('screens.event.instructor_info')}
+            initiallyExpanded={false}>
+            <Typography style={styles.description}>
+              {event.instructorInfo}
+            </Typography>
+          </CollapsibleCard>
+        )}
+
+        {/* Topics Covered Card */}
+        {event.topicsCovered && (
+          <CollapsibleCard
+            title={t('screens.event.topics_covered')}
+            initiallyExpanded={false}>
+            <Typography style={styles.description}>
+              {event.topicsCovered}
+            </Typography>
+          </CollapsibleCard>
+        )}
+
+        {/* Camping Information Card */}
+        {event.campingInfo && (
+          <CollapsibleCard
+            title={t('screens.event.camping_info')}
+            initiallyExpanded={false}>
+            <Typography style={styles.description}>
+              {event.campingInfo}
+            </Typography>
+          </CollapsibleCard>
+        )}
+
         {/* Route Description Card */}
-        <CollapsibleCard title="Route Description" initiallyExpanded={false}>
-          <Typography style={styles.description}>
-            Ride through hills & coastline. Includes a food stop and group
-            photo!
-          </Typography>
-        </CollapsibleCard>
+        {event.routeDescription && (
+          <CollapsibleCard
+            title={t('screens.event.route_description')}
+            initiallyExpanded={false}>
+            <Typography style={styles.description}>
+              {event.routeDescription}
+            </Typography>
+          </CollapsibleCard>
+        )}
 
         {/* Rest Stops Card */}
-        <CollapsibleCard title="Rest Stops" initiallyExpanded={false}>
-          <View style={styles.infoRow}>
-            <Typography style={styles.infoText}>📍</Typography>
-            <Typography style={styles.infoText}>
-              Coastal Café - 45km (Coffee & Snacks)
+        {event.restStops && (
+          <CollapsibleCard
+            title={t('screens.event.rest_stops')}
+            initiallyExpanded={false}>
+            <Typography style={styles.description}>
+              {event.restStops}
             </Typography>
-          </View>
-          <View style={styles.infoRow}>
-            <Typography style={styles.infoText}>📍</Typography>
-            <Typography style={styles.infoText}>
-              Scenic Viewpoint - 85km (Photo Stop)
+          </CollapsibleCard>
+        )}
+
+        {/* Equipment Checklist Card */}
+        {event.equipmentChecklist && (
+          <CollapsibleCard
+            title={t('screens.event.equipment_checklist')}
+            initiallyExpanded={false}>
+            <Typography style={styles.description}>
+              {event.equipmentChecklist}
             </Typography>
-          </View>
-        </CollapsibleCard>
+          </CollapsibleCard>
+        )}
       </Animated.ScrollView>
 
       <BottomSheet
@@ -683,6 +772,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     ...getShadow('medium'),
   },
+  eventCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   rideBadge: {
     backgroundColor: colors.primary.light,
   },
@@ -716,30 +809,8 @@ const styles = StyleSheet.create({
   },
   participationButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  participationButton: {
-    flex: 1,
-    backgroundColor: colors.neutral.lightGrey,
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: spacing.sm,
-    marginHorizontal: 4,
-    alignItems: 'center',
     justifyContent: 'center',
-  },
-  goingButton: {
-    backgroundColor: colors.neutral.black,
-  },
-  participationButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.neutral.darkGrey,
-  },
-  goingButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.neutral.white,
+    gap: spacing.md,
   },
   participantInfo: {
     flexDirection: 'row',
@@ -752,23 +823,10 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.lightGrey,
+    borderTopColor: colors.secondary.main,
     paddingTop: spacing.md,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    gap: spacing.xs,
-  },
-  actionButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.neutral.black,
   },
   backButton: {
     marginTop: spacing.md,

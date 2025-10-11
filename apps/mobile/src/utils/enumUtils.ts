@@ -78,6 +78,20 @@ export class EnumUtils {
     return eventTypeItem?.label || eventType;
   }
 
+  static convertRoadType(roadType: RoadType): string {
+    const roadTypeItem = this.getRoadTypes().find(
+      t => t.value.toLowerCase() === roadType.toLowerCase(),
+    );
+    return roadTypeItem?.label || roadType;
+  }
+
+  static convertExperienceLevel(experienceLevel: ExperienceLevel): string {
+    const experienceLevelItem = this.getExperienceLevels().find(
+      t => t.value.toLowerCase() === experienceLevel.toLowerCase(),
+    );
+    return experienceLevelItem?.label || experienceLevel;
+  }
+
   static convertDifficultyLevel(difficultyLevel: DifficultyLevel): string {
     const difficultyLevelItem = this.getDifficultyLevels().find(
       t => t.value.toLowerCase() === difficultyLevel.toLowerCase(),

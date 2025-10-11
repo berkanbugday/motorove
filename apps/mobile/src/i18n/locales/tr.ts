@@ -309,7 +309,7 @@ export default {
       no_past_events: 'Geçmiş etkinlik bulunamadı',
       could_not_load_events: 'Etkinlikler yüklenemedi. Lütfen tekrar deneyin.',
       organized_by: 'Düzenleyen',
-      are_you_joining: 'Katılıyor musun?',
+      are_you_joining: 'Katılıyor musunuz?',
       going: 'Katılıyorum',
       maybe: 'Belki',
       not_going: 'Katılmıyorum',
