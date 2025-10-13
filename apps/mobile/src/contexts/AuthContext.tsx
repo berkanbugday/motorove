@@ -23,6 +23,7 @@ export interface AuthContextType extends AuthState {
   updateNotificationPermission: (
     permission: NotificationPermission,
   ) => Promise<void>;
+  isInitializing: boolean;
 }
 
 // Create the context
@@ -43,6 +44,7 @@ const AuthContext = createContext<AuthContextType>({
   updateNotificationPermission: async () => {
     throw new Error('Not implemented');
   },
+  isInitializing: false,
 });
 
 // Provider props
@@ -53,6 +55,7 @@ interface AuthProviderProps {
 // Auth provider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {updateUserSetting} = useUpdateUserSetting();
   // Load authentication state on component mount
@@ -63,17 +66,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   // Load authentication state
   const loadAuthState = async (): Promise<void> => {
     try {
+      setIsInitializing(true);
+      loggingService.info('Loading authentication state');
+      // Use simplified getAuthState which handles refresh automatically
       const state = await authService.getAuthState();
       setAuthState({...state});
 
-      // Setup token refresh if needed
+      // Log the result
       if (state.user && state.accessToken && state.expiresAt) {
-        // We already have background refresh in the auth service, this is just a safety check
         loggingService.info('Auth context loaded with valid auth state');
+      } else {
+        loggingService.info('Auth context loaded with no valid session');
       }
     } catch (error) {
       loggingService.error('Error loading auth state:', error);
       setAuthState({...defaultAuthState});
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -170,6 +179,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         signOut,
         loadAuthState,
         updateNotificationPermission,
+        isInitializing,
       }}>
       {children}
     </AuthContext.Provider>

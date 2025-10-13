@@ -30,7 +30,7 @@ const linking: LinkingOptions<RootStackParamList> = {
  * Uses a NativeStackNavigator but hides all screen headers
  */
 export function RootNavigator() {
-  const {user, accessToken} = useAuth();
+  const {user, accessToken, isInitializing} = useAuth();
   const {
     checkFirstTimeUser,
     isFirstTime,
@@ -45,8 +45,8 @@ export function RootNavigator() {
   }, [checkFirstTimeUser]);
 
   const isAuthenticated = Boolean(user) && Boolean(accessToken);
-  // Show loading indicator when checking auth or first time status
-  if (firstTimeLoading) {
+  // Show loading indicator when checking auth, session revival, or first time status
+  if (isInitializing || firstTimeLoading) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" />

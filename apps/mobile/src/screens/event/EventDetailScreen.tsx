@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
   Animated,
   Platform,
 } from 'react-native';
@@ -172,7 +171,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
   // Determine if the user is going to the event (using hardcoded values for demo)
   const isUserGoing = false; // Replace with actual logic when backend is connected
-  const isUserMaybe = false; // Replace with actual logic when backend is connected
 
   // State for route data
   const [routeInfo, setRouteInfo] = useState<string>('');
@@ -528,103 +526,119 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         )}
 
         {/* Event Details Card */}
-        {getStartLocationAddress() ||
+
+        {(getStartLocationAddress() ||
           getFinishLocationAddress() ||
           event.roadType ||
           event.difficultyLevel ||
           event.experienceLevel ||
-          (event.price && (
-            <CollapsibleCard
-              title={t('screens.event.event_details_title')}
-              initiallyExpanded={false}>
-              {/* Start Location Row */}
-              {getStartLocationAddress() && (
-                <View style={styles.infoRow}>
-                  <Icon
-                    name="map-pin-filled"
-                    size={16}
-                    color={colors.neutral.grey}
-                  />
-                  <Typography style={styles.infoText}>
-                    {getStartLocationAddress()}
+          event.price) && (
+          <CollapsibleCard
+            title={t('screens.event.event_details_title')}
+            initiallyExpanded={false}>
+            {/* Start Location Row */}
+            {getStartLocationAddress() && (
+              <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
+                <Icon
+                  name="map-pin-filled"
+                  size={16}
+                  color={colors.neutral.grey}
+                />
+                <Typography style={styles.infoText}>
+                  <Typography variant="bodySmall" weight="bold">
+                    {t('screens.event.start_location')}:{' '}
                   </Typography>
-                </View>
-              )}
+                  {getStartLocationAddress()}
+                </Typography>
+              </View>
+            )}
 
-              {/* Finish Location Row */}
-              {getFinishLocationAddress() && (
-                <View style={styles.infoRow}>
-                  <Icon
-                    name="map-pin-slash-filled"
-                    size={20}
-                    color={colors.neutral.grey}
-                  />
-                  <Typography style={styles.infoText}>
-                    {getFinishLocationAddress()}
+            {/* Finish Location Row */}
+            {getFinishLocationAddress() && (
+              <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
+                <Icon
+                  name="map-pin-slash-filled"
+                  size={20}
+                  color={colors.neutral.grey}
+                />
+                <Typography style={styles.infoText}>
+                  <Typography variant="bodySmall" weight="bold">
+                    {t('screens.event.finish_location')}:{' '}
                   </Typography>
-                </View>
-              )}
+                  {getFinishLocationAddress()}
+                </Typography>
+              </View>
+            )}
 
-              {/* Road Type Row */}
-              {event.roadType && (
-                <View style={styles.infoRow}>
-                  <Icon
-                    name="mountains-filled"
-                    size={20}
-                    color={colors.neutral.grey}
-                  />
-                  <Typography style={styles.infoText}>
+            {/* Road Type Row */}
+            {event.roadType && (
+              <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
+                <Icon
+                  name="route-filled"
+                  size={20}
+                  color={colors.neutral.grey}
+                />
+                <Typography style={styles.infoText}>
+                  <Typography variant="bodySmall" weight="bold">
                     {t('screens.event.road_type')}:{' '}
-                    {EnumUtils.convertRoadType(event.roadType)}
                   </Typography>
-                </View>
-              )}
+                  {EnumUtils.convertRoadType(event.roadType)}
+                </Typography>
+              </View>
+            )}
 
-              {/* Difficulty Level Row */}
-              {event.difficultyLevel && (
-                <View style={styles.infoRow}>
-                  <Icon
-                    name="route-filled"
-                    size={20}
-                    color={colors.neutral.grey}
-                  />
-                  <Typography style={styles.infoText}>
+            {/* Difficulty Level Row */}
+            {event.difficultyLevel && (
+              <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
+                <Icon
+                  name="mountains-filled"
+                  size={20}
+                  color={colors.neutral.grey}
+                />
+                <Typography style={styles.infoText}>
+                  <Typography variant="bodySmall" weight="bold">
                     {t('screens.event.difficulty_level')}:{' '}
-                    {EnumUtils.convertDifficultyLevel(event.difficultyLevel)}
                   </Typography>
-                </View>
-              )}
+                  {EnumUtils.convertDifficultyLevel(event.difficultyLevel)}
+                </Typography>
+              </View>
+            )}
 
-              {/* Experience Level Row */}
-              {event.experienceLevel && (
-                <View style={styles.infoRow}>
-                  <Icon
-                    name="motorcycle-filled"
-                    size={20}
-                    color={colors.neutral.grey}
-                  />
-                  <Typography style={styles.infoText}>
+            {/* Experience Level Row */}
+            {event.experienceLevel && (
+              <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
+                <Icon
+                  name="motorcycle-filled"
+                  size={20}
+                  color={colors.neutral.grey}
+                />
+                <Typography style={styles.infoText}>
+                  <Typography variant="bodySmall" weight="bold">
                     {t('screens.event.experience_level')}:{' '}
-                    {EnumUtils.convertExperienceLevel(event.experienceLevel)}
                   </Typography>
-                </View>
-              )}
+                  {EnumUtils.convertExperienceLevel(event.experienceLevel)}
+                </Typography>
+              </View>
+            )}
 
-              {/* Experience Level Row */}
-              {event.price && (
-                <View style={styles.infoRow}>
-                  <Icon
-                    name="money-bill-filled"
-                    size={20}
-                    color={colors.neutral.grey}
-                  />
-                  <Typography style={styles.infoText}>
-                    {t('screens.event.price')}: {event.price}
+            {/* Experience Level Row */}
+            {event.price && (
+              <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
+                <Icon
+                  name="money-bill-filled"
+                  size={20}
+                  color={colors.neutral.grey}
+                />
+                <Typography style={styles.infoText}>
+                  <Typography variant="bodySmall" weight="bold">
+                    {t('screens.event.price')}:{' '}
                   </Typography>
-                </View>
-              )}
-            </CollapsibleCard>
-          ))}
+                  {event.price}
+                </Typography>
+              </View>
+            )}
+          </CollapsibleCard>
+        )}
 
         {/* Instructor Information Card */}
         {event.instructorInfo && (
