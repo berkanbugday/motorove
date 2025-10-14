@@ -318,7 +318,7 @@ export default {
       delete_event_confirmation: 'Etkinliği silmek istediğinize emin misiniz?',
       currency: 'Para Birimi',
       organized_by: 'Düzenleyen',
-      organized_by_me: 'Ben',
+      organized_by_group: 'Düzenleyen Grup',
     },
 
     // Groups screens

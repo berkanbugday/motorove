@@ -220,7 +220,6 @@ input CreateEventInput {
   isPrivate: Boolean! = false
   maxParticipants: Int
   organizedByGroupId: String
-  organizedByUserId: String
   price: String
   restStops: String
   roadType: String
@@ -378,7 +377,6 @@ type Event {
   maxParticipants: Int
   organizedByGroup: Group
   organizedByGroupId: String
-  organizedByUser: User
   organizedByUserId: String
   participants: [EventParticipant!]
   price: Float
@@ -410,12 +408,12 @@ type EventDto {
   id: ID!
   images: [String!]
   instructorInfo: String
+  invitedGroups: [GroupDto!]
   isActive: Boolean!
   isParticipating: Boolean
   isPrivate: Boolean!
   maxParticipants: Int
   organizedByGroup: GroupDto
-  organizedByUser: UserDto
   participantsCount: Int
   participationStatus: EventParticipantStatus
   price: Float
@@ -1034,7 +1032,6 @@ input UpdateEventInput {
   isPrivate: Boolean = false
   maxParticipants: Int
   organizedByGroupId: String
-  organizedByUserId: String
   price: String
   restStops: String
   roadType: String

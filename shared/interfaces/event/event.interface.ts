@@ -27,8 +27,6 @@ export interface IEvent {
   isPrivate: boolean;
   images?: string[] | null;
   addresses?: IAddress[] | null;
-  organizedByUserId?: string | null;
-  organizedByUser?: IUser | null;
   organizedByGroupId?: string | null;
   organizedByGroup?: IGroup | null;
   roadType?: RoadType | null;

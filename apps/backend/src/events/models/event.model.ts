@@ -50,9 +50,6 @@ export class Event extends BaseModel {
   @Field(() => String, { nullable: true })
   organizedByUserId?: string;
 
-  @Field(() => User, { nullable: true })
-  organizedByUser?: User;
-
   @Field(() => String, { nullable: true })
   organizedByGroupId?: string;
 

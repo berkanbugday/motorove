@@ -81,7 +81,6 @@ export const eventSchemas = (t: TFunction) => {
     invitedUsers: z.array(z.string()).optional().default([]),
 
     // Organized by fields
-    organizedByUserId: z.string().optional(),
     organizedByGroupId: z.string().optional(),
 
     // Ride/camping specific fields
@@ -249,15 +248,81 @@ export const eventSchemas = (t: TFunction) => {
         EventType.CAMPING_RIDE,
         EventType.SOCIAL_RESPONSIBILITY,
       ];
-      if (
-        rideOrCampingEventTypes.includes(data.eventType as EventType) &&
-        (!data.roadType || data.roadType.trim() === '')
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: t('validation.event.road_type.required_for_type'),
-          path: ['roadType'],
-        });
+
+      if (rideOrCampingEventTypes.includes(data.eventType as EventType)) {
+        if (!data.startLocation || data.startLocation.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.start_location.required'),
+            path: ['startLocation'],
+          });
+        }
+
+        if (!data.finishLocation || data.finishLocation.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.finish_location.required'),
+            path: ['finishLocation'],
+          });
+        }
+
+        if (!data.roadType || data.roadType.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.road_type.required'),
+            path: ['roadType'],
+          });
+        }
+        if (!data.difficultyLevel || data.difficultyLevel.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.difficulty_level.required'),
+            path: ['difficultyLevel'],
+          });
+        }
+        if (data.eventType === EventType.CAMPING_RIDE) {
+          if (!data.campingInfo || data.campingInfo.trim() === '') {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t('validation.event.camping_info.required'),
+              path: ['campingInfo'],
+            });
+          }
+        }
+      }
+
+      if (data.eventType === EventType.TRAINING) {
+        if (!data.instructorInfo || data.instructorInfo.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.instructor_info.required'),
+            path: ['instructorInfo'],
+          });
+        }
+        if (!data.topicsCovered || data.topicsCovered.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.topics_covered.required'),
+            path: ['topicsCovered'],
+          });
+        }
+        if (!data.experienceLevel || data.experienceLevel.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.experience_level.required'),
+            path: ['experienceLevel'],
+          });
+        }
+
+        if (data.price && data.price.trim() !== '') {
+          if (!data.currency || data.currency.trim() === '') {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t('validation.event.currency.required'),
+              path: ['currency'],
+            });
+          }
+        }
       }
 
       // Validate end date is not before start date
@@ -277,7 +342,7 @@ export const eventSchemas = (t: TFunction) => {
         if (endDateOnly < startDateOnly) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'End date cannot be before start date',
+            message: t('validation.event.end_date.not_before_start'),
             path: ['endDate'],
           });
         }

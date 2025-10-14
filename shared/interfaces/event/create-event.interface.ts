@@ -73,11 +73,6 @@ export interface ICreateEvent {
   invitedUserIds?: string[];
 
   /**
-   * Optional ID of the user organizing the event
-   */
-  organizedByUserId?: string;
-
-  /**
    * Optional ID of the group organizing the event
    */
   organizedByGroupId?: string;

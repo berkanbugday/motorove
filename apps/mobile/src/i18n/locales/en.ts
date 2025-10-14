@@ -307,6 +307,7 @@ export default {
       no_past_events: 'No past events found',
       could_not_load_events: 'Could not load events. Please try again.',
       organized_by: 'Organized by',
+      organized_by_group: 'Organized by Group',
       are_you_joining: 'Are you joining?',
       going: 'Going',
       maybe: 'Maybe',
@@ -316,7 +317,6 @@ export default {
       chat: 'Chat',
       delete_event_confirmation: 'Are you sure you want to delete this event?',
       currency: 'Currency',
-      organized_by_me: 'Me',
     },
 
     // Groups screens

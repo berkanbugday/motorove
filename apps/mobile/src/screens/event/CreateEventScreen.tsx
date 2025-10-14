@@ -66,13 +66,11 @@ import {
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
-import {useAuth} from '@contexts/AuthContext';
 
 export const CreateEventScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
   const {language} = useLanguage();
-  const {user} = useAuth();
   const {createEvent, loading} = useCreateEvent(() => {
     navigation.goBack();
   });
@@ -105,7 +103,7 @@ export const CreateEventScreen: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<DropdownItem | null>(
     null,
   );
-  const [selectedOrganizedBy, setSelectedOrganizedBy] =
+  const [selectedOrganizedByGroup, setSelectedOrganizedByGroup] =
     useState<DropdownItem | null>(null);
 
   const [selectedImages, setSelectedImages] = useState<
@@ -135,16 +133,9 @@ export const CreateEventScreen: React.FC = () => {
   const experienceLevels = EnumUtils.getExperienceLevels();
   const currencies = EnumUtils.getCurrencyDropdownOptions();
 
-  // Organized by options (Me + Admin Groups)
-  const organizedByOptions = useMemo(() => {
-    const options: DropdownItem[] = [
-      {
-        id: user?.id || '',
-        label: t('screens.event.organized_by_me'),
-        value: user?.id,
-        type: 'user',
-      },
-    ];
+  // Organized by group options (Admin Groups only)
+  const organizedByGroupOptions = useMemo(() => {
+    const options: DropdownItem[] = [];
 
     // Add admin groups
     adminGroups.forEach(group => {
@@ -152,12 +143,11 @@ export const CreateEventScreen: React.FC = () => {
         id: group.id,
         label: group.name,
         value: group.id,
-        type: 'group',
       });
     });
 
     return options;
-  }, [adminGroups, t]);
+  }, [adminGroups]);
 
   // Form setup with Zod validation
   const methods = useForm<CreateEventFormValues>({
@@ -191,7 +181,6 @@ export const CreateEventScreen: React.FC = () => {
       price: '',
       currency: '',
       // Organized by fields
-      organizedByUserId: '',
       organizedByGroupId: '',
     },
     mode: 'onChange',
@@ -320,7 +309,6 @@ export const CreateEventScreen: React.FC = () => {
         isPrivate: formData.isPrivate,
         invitedGroupIds: formData.isPrivate ? formData.invitedGroups : [],
         invitedUserIds: formData.isPrivate ? formData.invitedUsers : [],
-        organizedByUserId: formData.organizedByUserId,
         organizedByGroupId: formData.organizedByGroupId,
         eventType: formData.eventType as EventType,
         status: EventStatus.DRAFT,
@@ -575,20 +563,10 @@ export const CreateEventScreen: React.FC = () => {
     [setValue],
   );
 
-  const handleOrganizedBySelect = useCallback(
+  const handleOrganizedByGroupSelect = useCallback(
     (item: DropdownItem | null) => {
-      console.log('item', item);
-      setSelectedOrganizedBy(item);
-      if (item?.type === 'user') {
-        setValue('organizedByUserId', item.value, {shouldValidate: true});
-        setValue('organizedByGroupId', '', {shouldValidate: true});
-      } else if (item?.type === 'group') {
-        setValue('organizedByGroupId', item.value, {shouldValidate: true});
-        setValue('organizedByUserId', '', {shouldValidate: true});
-      } else {
-        setValue('organizedByUserId', '', {shouldValidate: true});
-        setValue('organizedByGroupId', '', {shouldValidate: true});
-      }
+      setSelectedOrganizedByGroup(item);
+      setValue('organizedByGroupId', item?.value || '', {shouldValidate: true});
     },
     [setValue],
   );
@@ -704,7 +682,6 @@ export const CreateEventScreen: React.FC = () => {
           isPrivate: data.isPrivate,
           invitedGroupIds: data.invitedGroups,
           invitedUserIds: data.invitedUsers,
-          organizedByUserId: data.organizedByUserId,
           organizedByGroupId: data.organizedByGroupId,
           eventType: selectedEventType?.value as EventType,
           status: EventStatus.UPCOMING,
@@ -791,14 +768,14 @@ export const CreateEventScreen: React.FC = () => {
                 key="eventType-dropdown"
               />
 
-              {/* Event organized by */}
+              {/* Event organized by group */}
               <Dropdown
-                data={organizedByOptions}
-                label={t('screens.event.organized_by')}
-                onSelect={handleOrganizedBySelect}
-                selectedItem={selectedOrganizedBy}
-                showClearButton={false}
-                key="organizedBy-dropdown"
+                data={organizedByGroupOptions}
+                label={t('screens.event.organized_by_group')}
+                onSelect={handleOrganizedByGroupSelect}
+                selectedItem={selectedOrganizedByGroup}
+                showClearButton={true}
+                key="organizedByGroup-dropdown"
                 loading={adminGroupsLoading}
               />
 

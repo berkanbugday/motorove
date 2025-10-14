@@ -33,18 +33,18 @@ export class EventsService {
     status?: EventStatus,
   ): Promise<EventDto[]> {
     try {
-      const where: any = { isActive: true, status };
-
-      if (status === EventStatus.DRAFT) {
-        where.createdById = currentUserId;
-      }
+      const where = {
+        isActive: true,
+        ...(status && { status }),
+        ...(status === EventStatus.DRAFT &&
+          currentUserId && { createdById: currentUserId }),
+      };
 
       const events = await this.prisma.event.findMany({
         where,
         include: {
           createdBy: true,
           updatedBy: true,
-          organizedByUser: true,
           organizedByGroup: true,
           participants: true,
           addresses: true,
@@ -80,7 +80,6 @@ export class EventsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          organizedByUser: true,
           organizedByGroup: true,
           participants: true,
           addresses: true,
@@ -124,7 +123,6 @@ export class EventsService {
         addresses,
         invitedGroupIds,
         invitedUserIds,
-        organizedByUserId,
         organizedByGroupId,
         roadType,
         difficultyLevel,
@@ -156,8 +154,6 @@ export class EventsService {
         ).filter(Boolean) as string[];
       }
 
-      console.log('organizedByUserId', organizedByUserId);
-      console.log('organizedByGroupId', organizedByGroupId);
       const event = await this.prisma.event.create({
         data: {
           title,
@@ -169,7 +165,6 @@ export class EventsService {
           maxParticipants,
           isPrivate,
           images: processedImages,
-          organizedByUserId: organizedByUserId || null,
           organizedByGroupId: organizedByGroupId || null,
           roadType: roadType as RoadType,
           difficultyLevel: difficultyLevel as DifficultyLevel,
@@ -204,14 +199,30 @@ export class EventsService {
                 connect: invitedGroupIds.map((id) => ({ id })),
               }
             : undefined,
+          // Handle invited users through invitations if provided
+          invitations: invitedUserIds?.length
+            ? {
+                createMany: {
+                  data: invitedUserIds.map((inviteeId) => ({
+                    inviteeId: inviteeId,
+                    inviterId: userId,
+                    createdById: userId,
+                  })),
+                },
+              }
+            : undefined,
         },
         include: {
           createdBy: true,
           updatedBy: true,
-          organizedByUser: true,
           organizedByGroup: true,
           addresses: true,
           invitedGroups: true,
+          invitations: {
+            include: {
+              invitee: true,
+            },
+          },
         },
       });
 
@@ -241,6 +252,8 @@ export class EventsService {
         images,
         addresses,
         invitedGroupIds,
+        invitedUserIds,
+        organizedByGroupId,
         roadType,
         difficultyLevel,
         routeDescription,
@@ -278,11 +291,12 @@ export class EventsService {
         ).filter(Boolean);
       }
 
-      // First get the current event to handle group relationships properly
+      // First get the current event to handle relationships properly
       const currentEvent = await this.prisma.event.findFirst({
         where: { id, isActive: true },
         include: {
           invitedGroups: true,
+          invitations: true,
         },
       });
 
@@ -313,7 +327,9 @@ export class EventsService {
           experienceLevel: experienceLevel as ExperienceLevel,
           price: price ? parseFloat(price) : null,
           currency,
-          updatedBy: { connect: { id: userId } },
+          // Handle organized by fields
+          organizedByGroupId: organizedByGroupId || null,
+          updatedById: userId,
           updatedAt: new Date(),
           // Handle addresses update - delete old ones if new ones provided
           addresses: addresses?.length
@@ -339,13 +355,34 @@ export class EventsService {
                 connect: invitedGroupIds.map((id) => ({ id })),
               }
             : undefined,
+          // Handle invited users through invitations if provided
+          invitations: invitedUserIds?.length
+            ? {
+                deleteMany: {
+                  eventId: id,
+                },
+                createMany: {
+                  data: invitedUserIds.map((inviteeId) => ({
+                    inviteeId: inviteeId,
+                    inviterId: userId, // The user updating the event
+                    createdById: userId,
+                  })),
+                },
+              }
+            : undefined,
         },
         include: {
           createdBy: true,
           updatedBy: true,
+          organizedByGroup: true,
           addresses: true,
           participants: true,
           invitedGroups: true,
+          invitations: {
+            include: {
+              invitee: true,
+            },
+          },
         },
       });
 

@@ -178,6 +178,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const methods = useForm<UpdateEventFormValues>({
     resolver: zodResolver(eventSchemas(t).updateEventSchema) as any,
     defaultValues: {
+      id: eventId,
       title: '',
       description: '',
       meetingLocation: '',
@@ -186,12 +187,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       startDate: new Date(),
       startTime: new Date(),
       endDate: new Date(),
-      endTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000), // Default 2 hours later
+      endTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
       maxParticipants: null,
       images: [],
       isPrivate: false,
       invitedGroups: [],
       invitedUsers: [],
+      eventType: undefined,
       // Ride/camping specific fields
       routeDescription: '',
       roadType: '',
@@ -206,7 +208,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       price: '',
       currency: '',
       // Organized by fields
-      organizedByUserId: '',
       organizedByGroupId: '',
     },
     mode: 'onChange',
@@ -335,7 +336,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         isPrivate: formData.isPrivate,
         invitedGroupIds: formData.isPrivate ? formData.invitedGroups : [],
         invitedUserIds: formData.isPrivate ? formData.invitedUsers : [],
-        organizedByUserId: formData.organizedByUserId,
         organizedByGroupId: formData.organizedByGroupId,
         eventType: formData.eventType as EventType,
         status: EventStatus.DRAFT,
@@ -596,14 +596,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleOrganizedBySelect = useCallback(
     (item: DropdownItem | null) => {
       setSelectedOrganizedBy(item);
-      if (item?.type === 'user') {
-        setValue('organizedByUserId', item.value, {shouldValidate: true});
-        setValue('organizedByGroupId', '', {shouldValidate: true});
-      } else if (item?.type === 'group') {
+      if (item?.type === 'group') {
         setValue('organizedByGroupId', item.value, {shouldValidate: true});
-        setValue('organizedByUserId', '', {shouldValidate: true});
       } else {
-        setValue('organizedByUserId', '', {shouldValidate: true});
         setValue('organizedByGroupId', '', {shouldValidate: true});
       }
     },
@@ -722,7 +717,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           isPrivate: data.isPrivate,
           invitedGroupIds: data.invitedGroups,
           invitedUserIds: data.invitedUsers,
-          organizedByUserId: data.organizedByUserId,
           organizedByGroupId: data.organizedByGroupId,
           eventType: selectedEventType?.value as EventType,
           status: EventStatus.UPCOMING,
@@ -822,7 +816,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                 placeholder=""
                 selectedItem={selectedEventType}
                 error={errors.eventType?.message}
-                disabled={loading}
+                showClearButton={false}
                 key="eventType-dropdown"
               />
 
@@ -852,6 +846,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                 }
                 iconPosition="right"
                 onPress={handleOpenLocationMap}
+                showClearButton={false}
                 editable={false}
                 key="meetingLocation-input"
                 testID="meetingLocation-input"
@@ -1343,8 +1338,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       setValue('difficultyLevel', '', {shouldValidate: false});
       setSelectedExperienceLevel(null);
       setValue('experienceLevel', '', {shouldValidate: false});
-      setSelectedMeetingLocation(null);
-      setValue('meetingLocation', '', {shouldValidate: false});
       setSelectedStartLocation(null);
       setValue('startLocation', '', {shouldValidate: false});
       setSelectedFinishLocation(null);
@@ -1505,18 +1498,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
       // Set organized by fields
       const eventData = event as any;
-      if (eventData.organizedByUser) {
-        const organizedByItem = organizedByOptions.find(
-          option =>
-            option.value === eventData.organizedByUser.id &&
-            option.type === 'user',
-        );
-        if (organizedByItem) {
-          setSelectedOrganizedBy(organizedByItem);
-          setValue('organizedByUserId', eventData.organizedByUser.id);
-          setValue('organizedByGroupId', '');
-        }
-      } else if (eventData.organizedByGroup) {
+      if (eventData.organizedByGroup) {
         const organizedByItem = organizedByOptions.find(
           option =>
             option.value === eventData.organizedByGroup.id &&
@@ -1525,7 +1507,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         if (organizedByItem) {
           setSelectedOrganizedBy(organizedByItem);
           setValue('organizedByGroupId', eventData.organizedByGroup.id);
-          setValue('organizedByUserId', '');
         }
       }
 
@@ -1554,10 +1535,8 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     experienceLevels,
     currencies,
     language,
-    adminGroups,
     user?.id,
     t,
-    organizedByOptions,
   ]);
 
   // Show loading state while fetching event data

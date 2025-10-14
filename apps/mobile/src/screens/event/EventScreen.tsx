@@ -141,13 +141,14 @@ export const EventScreen = () => {
     hasError: any,
     loadMore: () => void,
     hasMore: boolean,
+    tabType: string,
   ) => {
     if (isLoading && !isRefreshing && !eventsList?.length) {
       return (
         <View style={styles.loadingContainer}>
           {Array.from({length: 3}).map((_, index) => (
             <SkeletonGroup
-              key={`skeleton-${index}`}
+              key={`${tabType}-skeleton-${index}`}
               preset="groupCard"
               showShadow={false}
               style={styles.skeletonItem}
@@ -177,7 +178,7 @@ export const EventScreen = () => {
     return (
       <FlatList
         data={eventsList}
-        keyExtractor={item => item.id}
+        keyExtractor={item => `${tabType}-${item.id}`}
         renderItem={({item}) => {
           // Get the first address (if available)
           const meetingLocation =
@@ -256,6 +257,7 @@ export const EventScreen = () => {
             upcomingEventsError,
             loadMoreUpcomingEvents,
             hasMoreUpcomingEvents,
+            'upcoming',
           )}
         </View>
       ),
@@ -273,6 +275,7 @@ export const EventScreen = () => {
             pastEventsError,
             loadMorePastEvents,
             hasMorePastEvents,
+            'past',
           )}
         </View>
       ),
@@ -290,6 +293,7 @@ export const EventScreen = () => {
             draftEventsError,
             loadMoreDraftEvents,
             hasMoreDraftEvents,
+            'draft',
           )}
         </View>
       ),

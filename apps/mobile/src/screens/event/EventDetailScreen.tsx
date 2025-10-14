@@ -453,31 +453,25 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             <View style={styles.infoRow}>
               <Icon name="users-filled" size={16} color={colors.neutral.grey} />
               <Typography style={styles.infoText}>
-                {t('screens.event.max_participants')}: {event.maxParticipants}
+                <Typography variant="bodySmall" weight="bold">
+                  {t('screens.event.max_participants')}:{' '}
+                </Typography>
+                {event.maxParticipants}
               </Typography>
             </View>
           )}
 
           {/* Organizer Row */}
-          {event.organizedByGroup ? (
-            <View style={styles.infoRow}>
-              <Icon name="users-filled" size={16} color={colors.neutral.grey} />
-              <Typography style={styles.infoText}>
-                <Typography variant="bodySmall" weight="bold">
-                  {t('screens.event.organized_by')}:{' '}
-                </Typography>
-                {event.organizedByGroup?.name}
-              </Typography>
-            </View>
-          ) : (
+          {(event.organizedByGroup || event.createdBy) && (
             <View style={styles.infoRow}>
               <Icon name="user-filled" size={16} color={colors.neutral.grey} />
               <Typography style={styles.infoText}>
                 <Typography variant="bodySmall" weight="bold">
                   {t('screens.event.organized_by')}:{' '}
                 </Typography>
-                {event.organizedByUser?.firstName}{' '}
-                {event.organizedByUser?.lastName}
+                {event.organizedByGroup
+                  ? event.organizedByGroup.name
+                  : event.createdBy.firstName + ' ' + event.createdBy.lastName}
               </Typography>
             </View>
           )}
