@@ -20,6 +20,7 @@ import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { EventParticipantStatus } from '../../enums/models/event-participant-status.enum';
 import { EventStatus } from '../../enums/models/event-status.enum';
 import { Currency } from '../../enums/models/currency.enum';
+import { GroupDto } from 'src/groups/dto/group.dto';
 
 @ObjectType()
 export class EventDto {
@@ -164,4 +165,14 @@ export class EventDto {
   @Field()
   @IsBoolean()
   isActive: boolean;
+
+  @Field(() => UserDto, { nullable: true })
+  @ValidateNested()
+  @Type(() => UserDto)
+  organizedByUser?: UserDto;
+
+  @Field(() => GroupDto, { nullable: true })
+  @ValidateNested()
+  @Type(() => GroupDto)
+  organizedByGroup?: GroupDto;
 }

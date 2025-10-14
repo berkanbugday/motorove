@@ -47,6 +47,18 @@ export class Event extends BaseModel {
   @Field(() => [String], { nullable: true })
   invitedGroupIds?: string[];
 
+  @Field(() => String, { nullable: true })
+  organizedByUserId?: string;
+
+  @Field(() => User, { nullable: true })
+  organizedByUser?: User;
+
+  @Field(() => String, { nullable: true })
+  organizedByGroupId?: string;
+
+  @Field(() => Group, { nullable: true })
+  organizedByGroup?: Group;
+
   @Field(() => [Address], { nullable: true })
   addresses?: Address[];
 

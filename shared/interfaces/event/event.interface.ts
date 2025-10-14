@@ -9,6 +9,7 @@ import {
 } from "../../enums";
 import { IAddress } from "../address/address.interface";
 import { IUser } from "../user/user.interface";
+import { IGroup } from "../group/group.interface";
 
 /**
  * Event Interface
@@ -26,6 +27,10 @@ export interface IEvent {
   isPrivate: boolean;
   images?: string[] | null;
   addresses?: IAddress[] | null;
+  organizedByUserId?: string | null;
+  organizedByUser?: IUser | null;
+  organizedByGroupId?: string | null;
+  organizedByGroup?: IGroup | null;
   roadType?: RoadType | null;
   difficultyLevel?: DifficultyLevel | null;
   routeDescription?: string | null;

@@ -308,7 +308,6 @@ export default {
       no_draft_events: 'Henüz taslak etkinlik yok',
       no_past_events: 'Geçmiş etkinlik bulunamadı',
       could_not_load_events: 'Etkinlikler yüklenemedi. Lütfen tekrar deneyin.',
-      organized_by: 'Düzenleyen',
       are_you_joining: 'Katılıyor musunuz?',
       going: 'Katılıyorum',
       maybe: 'Belki',
@@ -318,6 +317,8 @@ export default {
       chat: 'Sohbet',
       delete_event_confirmation: 'Etkinliği silmek istediğinize emin misiniz?',
       currency: 'Para Birimi',
+      organized_by: 'Düzenleyen',
+      organized_by_me: 'Ben',
     },
 
     // Groups screens

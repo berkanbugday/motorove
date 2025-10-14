@@ -376,6 +376,7 @@ model User {
   // Event relations
   createdEvents       Event[]            @relation("EventCreatedBy")
   updatedEvents       Event[]            @relation("EventUpdatedBy")
+  organizedEvents     Event[]            @relation("EventOrganizedByUser")
   eventParticipations EventParticipant[] @relation("EventParticipantCreatedBy")
   receivedInvitations EventInvitation[]  @relation("ReceivedInvitations")
 
@@ -498,9 +499,10 @@ model Group {
   isActive    Boolean  @default(true)
 
   // Relations
-  memberships GroupMembership[]
-  posts       Post[]
-  events      Event[]
+  memberships    GroupMembership[]
+  posts          Post[]
+  events         Event[]
+  organizedEvents Event[]           @relation("EventOrganizedByGroup")
 
   @@index([cityId])
   @@index([privacy])
@@ -794,6 +796,12 @@ model Event {
   isPrivate       Boolean     @default(false)
   images          String[]
 
+  // Organized by field - can be either user or group
+  organizedByUserId  String?
+  organizedByUser    User?   @relation("EventOrganizedByUser", fields: [organizedByUserId], references: [id])
+  organizedByGroupId String?
+  organizedByGroup   Group?  @relation("EventOrganizedByGroup", fields: [organizedByGroupId], references: [id])
+
   // Ride-specific fields
   roadType           RoadType?
   difficultyLevel    DifficultyLevel?
@@ -828,6 +836,8 @@ model Event {
   @@index([status])
   @@index([startDateTime])
   @@index([createdById])
+  @@index([organizedByUserId])
+  @@index([organizedByGroupId])
   @@index([isActive])
   @@index([isPrivate])
 }

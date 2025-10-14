@@ -46,9 +46,11 @@ import {colors, commonStyles, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
 import {useCreateEvent} from '@services/event.service';
+import {useGetJoinedGroups} from '@services/group.service';
 import {eventSchemas, CreateEventFormValues} from '@utils/validation';
 import {useTranslation} from '@hooks/useTranslation';
 import {
+  GroupMemberRole,
   ICreateAddress,
   AddressType,
   EventType,
@@ -64,14 +66,23 @@ import {
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
+import {useAuth} from '@contexts/AuthContext';
 
 export const CreateEventScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
   const {language} = useLanguage();
+  const {user} = useAuth();
   const {createEvent, loading} = useCreateEvent(() => {
     navigation.goBack();
   });
+
+  // Get user admin groups for organized by dropdown
+  const {
+    groups: adminGroups,
+    loading: adminGroupsLoading,
+    applyFilters,
+  } = useGetJoinedGroups();
 
   // Refs
   const meetingLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -94,6 +105,8 @@ export const CreateEventScreen: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<DropdownItem | null>(
     null,
   );
+  const [selectedOrganizedBy, setSelectedOrganizedBy] =
+    useState<DropdownItem | null>(null);
 
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
@@ -121,6 +134,30 @@ export const CreateEventScreen: React.FC = () => {
   const difficultyLevels = EnumUtils.getDifficultyLevels();
   const experienceLevels = EnumUtils.getExperienceLevels();
   const currencies = EnumUtils.getCurrencyDropdownOptions();
+
+  // Organized by options (Me + Admin Groups)
+  const organizedByOptions = useMemo(() => {
+    const options: DropdownItem[] = [
+      {
+        id: user?.id || '',
+        label: t('screens.event.organized_by_me'),
+        value: user?.id,
+        type: 'user',
+      },
+    ];
+
+    // Add admin groups
+    adminGroups.forEach(group => {
+      options.push({
+        id: group.id,
+        label: group.name,
+        value: group.id,
+        type: 'group',
+      });
+    });
+
+    return options;
+  }, [adminGroups, t]);
 
   // Form setup with Zod validation
   const methods = useForm<CreateEventFormValues>({
@@ -153,6 +190,9 @@ export const CreateEventScreen: React.FC = () => {
       experienceLevel: '',
       price: '',
       currency: '',
+      // Organized by fields
+      organizedByUserId: '',
+      organizedByGroupId: '',
     },
     mode: 'onChange',
   });
@@ -221,6 +261,10 @@ export const CreateEventScreen: React.FC = () => {
       );
       return () => backHandler.remove();
     }
+
+    applyFilters({
+      role: GroupMemberRole.ADMIN,
+    });
   }, [navigation, isDirty]);
 
   // Navigation handlers
@@ -276,6 +320,8 @@ export const CreateEventScreen: React.FC = () => {
         isPrivate: formData.isPrivate,
         invitedGroupIds: formData.isPrivate ? formData.invitedGroups : [],
         invitedUserIds: formData.isPrivate ? formData.invitedUsers : [],
+        organizedByUserId: formData.organizedByUserId,
+        organizedByGroupId: formData.organizedByGroupId,
         eventType: formData.eventType as EventType,
         status: EventStatus.DRAFT,
         addresses: addresses,
@@ -529,6 +575,24 @@ export const CreateEventScreen: React.FC = () => {
     [setValue],
   );
 
+  const handleOrganizedBySelect = useCallback(
+    (item: DropdownItem | null) => {
+      console.log('item', item);
+      setSelectedOrganizedBy(item);
+      if (item?.type === 'user') {
+        setValue('organizedByUserId', item.value, {shouldValidate: true});
+        setValue('organizedByGroupId', '', {shouldValidate: true});
+      } else if (item?.type === 'group') {
+        setValue('organizedByGroupId', item.value, {shouldValidate: true});
+        setValue('organizedByUserId', '', {shouldValidate: true});
+      } else {
+        setValue('organizedByUserId', '', {shouldValidate: true});
+        setValue('organizedByGroupId', '', {shouldValidate: true});
+      }
+    },
+    [setValue],
+  );
+
   // Toggle handlers
   const togglePrivacy = useCallback(
     (newValue: boolean) => {
@@ -640,6 +704,8 @@ export const CreateEventScreen: React.FC = () => {
           isPrivate: data.isPrivate,
           invitedGroupIds: data.invitedGroups,
           invitedUserIds: data.invitedUsers,
+          organizedByUserId: data.organizedByUserId,
+          organizedByGroupId: data.organizedByGroupId,
           eventType: selectedEventType?.value as EventType,
           status: EventStatus.UPCOMING,
           addresses: addresses,
@@ -723,6 +789,17 @@ export const CreateEventScreen: React.FC = () => {
                 selectedItem={selectedEventType}
                 error={errors.eventType?.message}
                 key="eventType-dropdown"
+              />
+
+              {/* Event organized by */}
+              <Dropdown
+                data={organizedByOptions}
+                label={t('screens.event.organized_by')}
+                onSelect={handleOrganizedBySelect}
+                selectedItem={selectedOrganizedBy}
+                showClearButton={false}
+                key="organizedBy-dropdown"
+                loading={adminGroupsLoading}
               />
 
               {/* Meeting Point */}

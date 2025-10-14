@@ -80,6 +80,10 @@ export const eventSchemas = (t: TFunction) => {
     invitedGroups: z.array(z.string()).optional().default([]),
     invitedUsers: z.array(z.string()).optional().default([]),
 
+    // Organized by fields
+    organizedByUserId: z.string().optional(),
+    organizedByGroupId: z.string().optional(),
+
     // Ride/camping specific fields
     routeDescription: z.string().optional(),
     roadType: z.string().optional(), // This is conditionally required in superRefine

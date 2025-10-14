@@ -219,6 +219,8 @@ input CreateEventInput {
   invitedUserIds: [String!]
   isPrivate: Boolean! = false
   maxParticipants: Int
+  organizedByGroupId: String
+  organizedByUserId: String
   price: String
   restStops: String
   roadType: String
@@ -374,6 +376,10 @@ type Event {
   isActive: Boolean!
   isPrivate: Boolean!
   maxParticipants: Int
+  organizedByGroup: Group
+  organizedByGroupId: String
+  organizedByUser: User
+  organizedByUserId: String
   participants: [EventParticipant!]
   price: Float
   restStops: String
@@ -408,6 +414,8 @@ type EventDto {
   isParticipating: Boolean
   isPrivate: Boolean!
   maxParticipants: Int
+  organizedByGroup: GroupDto
+  organizedByUser: UserDto
   participantsCount: Int
   participationStatus: EventParticipantStatus
   price: Float
@@ -502,6 +510,7 @@ input FilterCommentInput {
 input FilterGroupInput {
   cityId: String
   privacy: GroupPrivacy = ALL
+  role: GroupMemberRole
   tags: [GroupTag!]! = []
 }
 
@@ -1024,6 +1033,8 @@ input UpdateEventInput {
   invitedUserIds: [String!]
   isPrivate: Boolean = false
   maxParticipants: Int
+  organizedByGroupId: String
+  organizedByUserId: String
   price: String
   restStops: String
   roadType: String

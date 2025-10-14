@@ -87,6 +87,16 @@ export class CreateEventInput implements ICreateEvent {
   @IsOptional()
   invitedUserIds?: string[];
 
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  organizedByUserId?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  organizedByGroupId?: string;
+
   // Ride-specific fields
   @Field(() => String, { nullable: true })
   @IsOptional()

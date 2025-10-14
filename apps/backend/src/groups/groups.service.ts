@@ -129,6 +129,12 @@ export class GroupsService {
         },
       };
 
+      if (filters?.role) {
+        whereClause.memberships.some.role = {
+          in: [filters.role],
+        };
+      }
+
       // Add city filter if provided
       if (filters?.cityId && filters.cityId !== null) {
         whereClause.city = { id: filters.cityId };

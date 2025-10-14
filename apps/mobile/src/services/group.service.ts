@@ -138,6 +138,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     cityId: null,
     tags: [],
     privacy: GroupPrivacy.ALL,
+    role: null,
   });
 
   const {

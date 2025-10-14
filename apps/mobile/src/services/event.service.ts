@@ -71,6 +71,8 @@ export const useCreateEvent = (onSuccess?: () => void) => {
         status: input.status,
         invitedGroupIds: input.invitedGroupIds,
         invitedUserIds: input.invitedUserIds,
+        organizedByUserId: input.organizedByUserId,
+        organizedByGroupId: input.organizedByGroupId,
         // Include specific fields based on event type
         ...(input.routeDescription && {
           routeDescription: input.routeDescription,

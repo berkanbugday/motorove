@@ -459,12 +459,25 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           )}
 
           {/* Organizer Row */}
-          {event.createdBy && (
+          {event.organizedByGroup ? (
+            <View style={styles.infoRow}>
+              <Icon name="users-filled" size={16} color={colors.neutral.grey} />
+              <Typography style={styles.infoText}>
+                <Typography variant="bodySmall" weight="bold">
+                  {t('screens.event.organized_by')}:{' '}
+                </Typography>
+                {event.organizedByGroup?.name}
+              </Typography>
+            </View>
+          ) : (
             <View style={styles.infoRow}>
               <Icon name="user-filled" size={16} color={colors.neutral.grey} />
               <Typography style={styles.infoText}>
-                {t('screens.event.organized_by')}: {event.createdBy.firstName}{' '}
-                {event.createdBy.lastName}
+                <Typography variant="bodySmall" weight="bold">
+                  {t('screens.event.organized_by')}:{' '}
+                </Typography>
+                {event.organizedByUser?.firstName}{' '}
+                {event.organizedByUser?.lastName}
               </Typography>
             </View>
           )}

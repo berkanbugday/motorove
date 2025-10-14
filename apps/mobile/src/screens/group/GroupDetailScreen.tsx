@@ -266,16 +266,16 @@ const MemberItem = React.memo(
               iconSize={24}
               variant="secondary"
               shape="circle"
-              size="small"
               onPress={() => onChangeRole && onChangeRole(item)}
+              style={styles.memberAction}
             />
             <Button
               iconName="user-slash-filled"
               iconSize={24}
               variant="primary"
               shape="circle"
-              size="small"
               onPress={() => onRemoveMember && onRemoveMember(item)}
+              style={styles.memberAction}
             />
           </Animated.View>
         )}
@@ -1693,5 +1693,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  memberAction: {
+    width: spacing.xxl,
+    height: spacing.xxl,
   },
 });

@@ -44,6 +44,8 @@ export class EventsService {
         include: {
           createdBy: true,
           updatedBy: true,
+          organizedByUser: true,
+          organizedByGroup: true,
           participants: true,
           addresses: true,
           invitedGroups: true,
@@ -78,6 +80,8 @@ export class EventsService {
         include: {
           createdBy: true,
           updatedBy: true,
+          organizedByUser: true,
+          organizedByGroup: true,
           participants: true,
           addresses: true,
           invitedGroups: true,
@@ -120,6 +124,8 @@ export class EventsService {
         addresses,
         invitedGroupIds,
         invitedUserIds,
+        organizedByUserId,
+        organizedByGroupId,
         roadType,
         difficultyLevel,
         routeDescription,
@@ -150,6 +156,8 @@ export class EventsService {
         ).filter(Boolean) as string[];
       }
 
+      console.log('organizedByUserId', organizedByUserId);
+      console.log('organizedByGroupId', organizedByGroupId);
       const event = await this.prisma.event.create({
         data: {
           title,
@@ -161,6 +169,8 @@ export class EventsService {
           maxParticipants,
           isPrivate,
           images: processedImages,
+          organizedByUserId: organizedByUserId || null,
+          organizedByGroupId: organizedByGroupId || null,
           roadType: roadType as RoadType,
           difficultyLevel: difficultyLevel as DifficultyLevel,
           routeDescription,
@@ -172,8 +182,8 @@ export class EventsService {
           experienceLevel: experienceLevel as ExperienceLevel,
           price: price ? parseFloat(price) : null,
           currency,
-          createdBy: { connect: { id: userId } },
-          updatedBy: { connect: { id: userId } },
+          createdById: userId,
+          updatedById: userId,
           // Handle addresses
           addresses: addresses?.length
             ? {
@@ -198,6 +208,8 @@ export class EventsService {
         include: {
           createdBy: true,
           updatedBy: true,
+          organizedByUser: true,
+          organizedByGroup: true,
           addresses: true,
           invitedGroups: true,
         },

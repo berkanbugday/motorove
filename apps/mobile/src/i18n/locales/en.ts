@@ -316,6 +316,7 @@ export default {
       chat: 'Chat',
       delete_event_confirmation: 'Are you sure you want to delete this event?',
       currency: 'Currency',
+      organized_by_me: 'Me',
     },
 
     // Groups screens

@@ -47,9 +47,11 @@ import {colors, commonStyles, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {loggingService} from '@services/logging.service';
 import {useUpdateEvent, useGetEvent} from '@services/event.service';
+import {useGetJoinedGroups} from '@services/group.service';
 import {eventSchemas, UpdateEventFormValues} from '@utils/validation';
 import {useTranslation} from '@hooks/useTranslation';
 import {
+  GroupMemberRole,
   ICreateAddress,
   AddressType,
   EventType,
@@ -65,6 +67,7 @@ import {
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
+import {useAuth} from '@contexts/AuthContext';
 
 interface EditEventScreenProps {
   route: {
@@ -79,6 +82,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const navigation = useNavigation<MainScreenNavigationProp<'EditEvent'>>();
   const {eventId} = route.params;
   const {language} = useLanguage();
+  const {user} = useAuth();
   const {updateEvent, loading} = useUpdateEvent(() => {
     navigation.goBack();
   });
@@ -88,6 +92,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     error: eventError,
   } = useGetEvent(eventId);
 
+  // Get user admin groups for organized by dropdown
+  const {
+    groups: adminGroups,
+    loading: adminGroupsLoading,
+    applyFilters,
+  } = useGetJoinedGroups();
+
   // Refs
   const meetingLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const startLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -95,6 +106,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const wizardRef = useRef<WizardHandle>(null);
   const exitDialogRef = useRef<any>(null);
   const draftDialogRef = useRef<any>(null);
+  const isFormPopulatedRef = useRef<boolean>(false);
 
   // State hooks
   const [selectedEventType, setSelectedEventType] =
@@ -109,6 +121,8 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const [selectedCurrency, setSelectedCurrency] = useState<DropdownItem | null>(
     null,
   );
+  const [selectedOrganizedBy, setSelectedOrganizedBy] =
+    useState<DropdownItem | null>(null);
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
@@ -135,6 +149,30 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const difficultyLevels = EnumUtils.getDifficultyLevels();
   const experienceLevels = EnumUtils.getExperienceLevels();
   const currencies = EnumUtils.getCurrencyDropdownOptions();
+
+  // Organized by options (Me + Admin Groups)
+  const organizedByOptions = useMemo(() => {
+    const options: DropdownItem[] = [
+      {
+        id: user?.id || '',
+        label: t('screens.event.organized_by_me'),
+        value: user?.id,
+        type: 'user',
+      },
+    ];
+
+    // Add admin groups
+    adminGroups.forEach(group => {
+      options.push({
+        id: group.id,
+        label: group.name,
+        value: group.id,
+        type: 'group',
+      });
+    });
+
+    return options;
+  }, [adminGroups, t, user?.id]);
 
   // Form setup with Zod validation
   const methods = useForm<UpdateEventFormValues>({
@@ -167,6 +205,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       experienceLevel: '',
       price: '',
       currency: '',
+      // Organized by fields
+      organizedByUserId: '',
+      organizedByGroupId: '',
     },
     mode: 'onChange',
   });
@@ -235,7 +276,11 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       );
       return () => backHandler.remove();
     }
-  }, [navigation, isDirty]);
+
+    applyFilters({
+      role: GroupMemberRole.ADMIN,
+    });
+  }, [navigation, isDirty, applyFilters]);
 
   // Navigation handlers
   const handleGoBack = useCallback(() => {
@@ -290,6 +335,8 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         isPrivate: formData.isPrivate,
         invitedGroupIds: formData.isPrivate ? formData.invitedGroups : [],
         invitedUserIds: formData.isPrivate ? formData.invitedUsers : [],
+        organizedByUserId: formData.organizedByUserId,
+        organizedByGroupId: formData.organizedByGroupId,
         eventType: formData.eventType as EventType,
         status: EventStatus.DRAFT,
         addresses: addresses,
@@ -546,6 +593,23 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     [setValue],
   );
 
+  const handleOrganizedBySelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedOrganizedBy(item);
+      if (item?.type === 'user') {
+        setValue('organizedByUserId', item.value, {shouldValidate: true});
+        setValue('organizedByGroupId', '', {shouldValidate: true});
+      } else if (item?.type === 'group') {
+        setValue('organizedByGroupId', item.value, {shouldValidate: true});
+        setValue('organizedByUserId', '', {shouldValidate: true});
+      } else {
+        setValue('organizedByUserId', '', {shouldValidate: true});
+        setValue('organizedByGroupId', '', {shouldValidate: true});
+      }
+    },
+    [setValue],
+  );
+
   // Toggle handlers
   const togglePrivacy = useCallback(
     (newValue: boolean) => {
@@ -658,6 +722,8 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           isPrivate: data.isPrivate,
           invitedGroupIds: data.invitedGroups,
           invitedUserIds: data.invitedUsers,
+          organizedByUserId: data.organizedByUserId,
+          organizedByGroupId: data.organizedByGroupId,
           eventType: selectedEventType?.value as EventType,
           status: EventStatus.UPCOMING,
           addresses: addresses,
@@ -758,6 +824,17 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                 error={errors.eventType?.message}
                 disabled={loading}
                 key="eventType-dropdown"
+              />
+
+              {/* Event organized by */}
+              <Dropdown
+                data={organizedByOptions}
+                label={t('screens.event.organized_by')}
+                onSelect={handleOrganizedBySelect}
+                selectedItem={selectedOrganizedBy}
+                showClearButton={false}
+                key="organizedBy-dropdown"
+                loading={adminGroupsLoading}
               />
 
               {/* Meeting Point */}
@@ -1226,7 +1303,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       currencies,
       selectedCurrency,
       handleCurrencySelect,
-      price,
     ],
   );
 
@@ -1293,7 +1369,8 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
   // Pre-populate form with existing event data
   useEffect(() => {
-    if (event && !eventLoading && !eventError) {
+    if (event && !eventLoading && !eventError && !isFormPopulatedRef.current) {
+      isFormPopulatedRef.current = true;
       // Set basic form values
       setValue('title', event.title || '');
       setValue('description', event.description || '');
@@ -1426,10 +1503,35 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         setValue('images', event.images);
       }
 
+      // Set organized by fields
+      const eventData = event as any;
+      if (eventData.organizedByUser) {
+        const organizedByItem = organizedByOptions.find(
+          option =>
+            option.value === eventData.organizedByUser.id &&
+            option.type === 'user',
+        );
+        if (organizedByItem) {
+          setSelectedOrganizedBy(organizedByItem);
+          setValue('organizedByUserId', eventData.organizedByUser.id);
+          setValue('organizedByGroupId', '');
+        }
+      } else if (eventData.organizedByGroup) {
+        const organizedByItem = organizedByOptions.find(
+          option =>
+            option.value === eventData.organizedByGroup.id &&
+            option.type === 'group',
+        );
+        if (organizedByItem) {
+          setSelectedOrganizedBy(organizedByItem);
+          setValue('organizedByGroupId', eventData.organizedByGroup.id);
+          setValue('organizedByUserId', '');
+        }
+      }
+
       // Set invited users and groups (if they exist in the event data)
       // Note: These fields might not be available in the IEvent interface
       // but could be part of the actual event data from the API
-      const eventData = event as any;
       if (eventData.invitedUserIds) {
         setSelectedUsers(eventData.invitedUserIds);
         setValue('invitedUsers', eventData.invitedUserIds);
@@ -1438,6 +1540,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         setSelectedGroups(eventData.invitedGroupIds);
         setValue('invitedGroups', eventData.invitedGroupIds);
       }
+    } else if (eventLoading || eventError) {
+      // Reset the flag if we're loading again or there's an error
+      isFormPopulatedRef.current = false;
     }
   }, [
     event,
@@ -1449,7 +1554,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     experienceLevels,
     currencies,
     language,
-    setValue,
+    adminGroups,
+    user?.id,
+    t,
+    organizedByOptions,
   ]);
 
   // Show loading state while fetching event data
@@ -1519,7 +1627,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
               style={{flex: 1}}
             />
             <Button
-              title={t('screens.event.create_event')}
+              title={t('screens.event.update_event')}
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}
