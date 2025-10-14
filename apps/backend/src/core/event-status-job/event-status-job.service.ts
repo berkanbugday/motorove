@@ -45,21 +45,42 @@ export class EventStatusJobService {
         `Found ${eventsToUpdate.length} events to update to PAST status`,
       );
 
-      // Update all found events to PAST status
-      const updateResult = await this.prisma.event.updateMany({
-        where: {
-          id: {
-            in: eventsToUpdate.map((event) => event.id),
+      const eventIds = eventsToUpdate.map((event) => event.id);
+
+      // Use transaction to ensure data consistency
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Update all found events to PAST status
+        const updateResult = await tx.event.updateMany({
+          where: {
+            id: {
+              in: eventIds,
+            },
           },
-        },
-        data: {
-          status: EventStatus.PAST,
-          updatedAt: now,
-        },
+          data: {
+            status: EventStatus.PAST,
+            updatedAt: now,
+          },
+        });
+
+        // Deactivate related event invitations
+        await tx.eventInvitation.updateMany({
+          where: {
+            eventId: {
+              in: eventIds,
+            },
+            isActive: true,
+          },
+          data: {
+            isActive: false,
+            updatedAt: now,
+          },
+        });
+
+        return updateResult;
       });
 
       this.logger.log(
-        `Successfully updated ${updateResult.count} events to PAST status`,
+        `Successfully updated ${result.count} events to PAST status`,
       );
 
       // Log details of updated events

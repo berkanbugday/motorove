@@ -205,7 +205,6 @@ export class EventsService {
                 createMany: {
                   data: invitedUserIds.map((inviteeId) => ({
                     inviteeId: inviteeId,
-                    inviterId: userId,
                     createdById: userId,
                   })),
                 },

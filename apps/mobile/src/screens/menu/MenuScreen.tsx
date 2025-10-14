@@ -73,7 +73,6 @@ export const MenuScreen = () => {
           onPress: () => {
             navigation.navigate('Garage');
           },
-          showBadge: false, // Set to true when you have unread notifications
           showRightIcon: true,
         },
         {
@@ -84,7 +83,6 @@ export const MenuScreen = () => {
           onPress: () => {
             navigation.navigate('Posts');
           },
-          showBadge: false,
           showRightIcon: true,
         },
         {
@@ -119,6 +117,7 @@ export const MenuScreen = () => {
             navigation.navigate('JoinRequest');
           },
           showRightIcon: true,
+          showBadge: false,
         },
         {
           icon: (
@@ -133,6 +132,7 @@ export const MenuScreen = () => {
             navigation.navigate('FollowRequest');
           },
           showRightIcon: true,
+          showBadge: false,
         },
       ],
     },
