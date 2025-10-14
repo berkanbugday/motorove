@@ -657,6 +657,8 @@ export default {
     },
     dropdown: {
       no_results: 'No results found',
+      search_placeholder: 'Search...',
+      no_search_results: 'No search results found',
     },
     datePicker: {
       select: 'Select Date',

@@ -135,4 +135,10 @@ export interface DropdownProps {
    * Default is true
    */
   showClearButton?: boolean;
+
+  /**
+   * Whether to enable search functionality in the dropdown
+   * Default is false
+   */
+  searchable?: boolean;
 }

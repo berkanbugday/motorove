@@ -655,6 +655,8 @@ export default {
     },
     dropdown: {
       no_results: 'Sonuç bulunamadı',
+      search_placeholder: 'Ara...',
+      no_search_results: 'Arama sonucu bulunamadı',
     },
     datePicker: {
       select: 'Tarih Seç',

@@ -112,6 +112,29 @@ export const createStyles = (props: {
     fullWidth: {
       width: '100%',
     },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.neutral.lightGrey,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    searchInput: {
+      flex: 1,
+      height: 40,
+      fontSize: fontSizes.md,
+      color: colors.neutral.black,
+      paddingHorizontal: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.neutral.lightGrey,
+      borderRadius: radius.sm,
+      backgroundColor: colors.neutral.white,
+    },
+    searchClearButton: {
+      padding: spacing.xs,
+      marginLeft: spacing.sm,
+    },
   });
 };
 

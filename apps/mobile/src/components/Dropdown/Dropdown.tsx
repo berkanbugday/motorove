@@ -10,6 +10,7 @@ import {
   ScrollView,
   Modal,
   Dimensions,
+  TextInput,
 } from 'react-native';
 import {
   createStyles,
@@ -47,6 +48,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   onOpen,
   testID,
   showClearButton = true,
+  searchable = false,
 }) => {
   const {t} = useTranslation();
   const [isOpen, setIsOpen] = useState(initiallyOpen);
@@ -59,9 +61,13 @@ const Dropdown: React.FC<DropdownProps> = ({
   });
   const flatListRef = useRef<ScrollView>(null);
   const inputWrapperRef = useRef<View>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const animatedIsFocused = useRef(
     new Animated.Value(selectedItem?.label ? 1 : 0),
   ).current;
+
+  // Search state for searchable dropdown
+  const [searchQuery, setSearchQuery] = useState(_searchQuery || '');
 
   // Animation effect for label
   useEffect(() => {
@@ -71,6 +77,22 @@ const Dropdown: React.FC<DropdownProps> = ({
       useNativeDriver: false,
     }).start();
   }, [animatedIsFocused, isFocused, selectedItem]);
+
+  // Handle search query change
+  const handleSearchQueryChange = (query: string) => {
+    setSearchQuery(query);
+    if (_onSearchQueryChange) {
+      _onSearchQueryChange(query);
+    }
+  };
+
+  // Clear search query
+  const clearSearchQuery = () => {
+    setSearchQuery('');
+    if (_onSearchQueryChange) {
+      _onSearchQueryChange('');
+    }
+  };
 
   // Calculate modal position
   const updateModalPosition = () => {
@@ -114,6 +136,13 @@ const Dropdown: React.FC<DropdownProps> = ({
     // Update modal position after state change
     setTimeout(updateModalPosition, 50);
 
+    // Focus search input if searchable
+    if (searchable) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+
     // Scroll to selected item when dropdown opens
     setTimeout(() => {
       if (selectedItem?.id && flatListRef.current) {
@@ -136,11 +165,14 @@ const Dropdown: React.FC<DropdownProps> = ({
   const closeDropdown = useCallback(() => {
     setIsOpen(false);
     setIsFocused(false);
+    if (searchable) {
+      clearSearchQuery();
+    }
     if (onClose) {
       onClose();
     }
     Keyboard.dismiss();
-  }, [onClose]);
+  }, [onClose, searchable, clearSearchQuery]);
 
   // Toggle dropdown
   const toggleDropdown = useCallback(() => {
@@ -162,15 +194,36 @@ const Dropdown: React.FC<DropdownProps> = ({
     return '';
   };
 
+  // Filter data based on search query
+  const filteredData =
+    searchable && searchQuery.trim()
+      ? data.filter(item => {
+          const searchValue = item[searchProperty as keyof typeof item];
+          return (
+            searchValue &&
+            searchValue
+              .toString()
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+          );
+        })
+      : data;
+
   // Handle item selection
   const handleSelect = (item: DropdownItem) => {
     onSelect(item);
+    if (searchable) {
+      clearSearchQuery();
+    }
     closeDropdown();
   };
 
   // Clear selection
   const handleClear = () => {
     onSelect(null);
+    if (searchable) {
+      clearSearchQuery();
+    }
   };
 
   // Create styles
@@ -280,17 +333,44 @@ const Dropdown: React.FC<DropdownProps> = ({
                   maxHeight: modalPosition.height,
                 },
               ]}>
+              {/* Search input for searchable dropdown */}
+              {searchable && (
+                <View style={styles.searchContainer}>
+                  <TextInput
+                    ref={searchInputRef}
+                    style={styles.searchInput}
+                    placeholder={t('components.dropdown.search_placeholder')}
+                    value={searchQuery}
+                    onChangeText={handleSearchQueryChange}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                  />
+                  {searchQuery.length > 0 && (
+                    <TouchableOpacity
+                      onPress={clearSearchQuery}
+                      style={styles.searchClearButton}>
+                      <Icon
+                        name="close"
+                        size={16}
+                        color={colors.neutral.grey}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
               {loading ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator color={colors.neutral.black} />
                 </View>
-              ) : data.length === 0 ? (
+              ) : filteredData.length === 0 ? (
                 renderNoResults ? (
                   renderNoResults()
                 ) : (
                   <View style={styles.noResults}>
                     <Text style={styles.noResultsText}>
-                      {t('components.dropdown.no_results')}
+                      {searchable && searchQuery.trim()
+                        ? t('components.dropdown.no_search_results')
+                        : t('components.dropdown.no_results')}
                     </Text>
                   </View>
                 )
@@ -300,7 +380,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                   keyboardShouldPersistTaps="handled"
                   nestedScrollEnabled
                   showsVerticalScrollIndicator={false}>
-                  {data.map(item => {
+                  {filteredData.map(item => {
                     const isItemSelected =
                       selectedItem && selectedItem.id === item.id;
 
