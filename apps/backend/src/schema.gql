@@ -45,7 +45,7 @@ type AddressDto {
 enum AddressType {
   BUSINESS_LOCATION
   EVENT_FINISH_LOCATION
-  EVENT_MEETING_POINT
+  EVENT_MEETING_LOCATION
   EVENT_START_LOCATION
   POST_LOCATION
 }
@@ -206,6 +206,7 @@ input CreateDeviceTokenInput {
 input CreateEventInput {
   addresses: [CreateAddressInput!]
   campingInfo: String
+  currency: String
   description: String!
   difficultyLevel: String
   endDateTime: String
@@ -269,6 +270,13 @@ input CreateSupportRequestInput {
   deviceInfo: JSON
   message: String!
   subject: String!
+}
+
+"""Currency types"""
+enum Currency {
+  EUR
+  TL
+  USD
 }
 
 """
@@ -348,6 +356,7 @@ type Event {
   createdAt: DateTime!
   createdBy: User!
   createdById: String!
+  currency: Currency
   description: String!
   difficultyLevel: DifficultyLevel
   endDateTime: DateTime
@@ -385,6 +394,7 @@ type EventDto {
   createdAt: DateTime!
   createdBy: UserDto!
   createdById: String!
+  currency: Currency
   description: String!
   difficultyLevel: DifficultyLevel
   endDateTime: DateTime
@@ -1000,6 +1010,7 @@ input UpdateCommentInput {
 input UpdateEventInput {
   addresses: [CreateAddressInput!]
   campingInfo: String
+  currency: String
   description: String
   difficultyLevel: String
   endDateTime: String

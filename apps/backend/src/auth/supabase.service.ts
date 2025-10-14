@@ -16,7 +16,11 @@ export class SupabaseService {
       );
     }
 
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+      },
+    });
   }
 
   getClient(): SupabaseClient {

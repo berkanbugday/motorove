@@ -19,11 +19,10 @@ export const eventSchemas = (t: TFunction) => {
       .string({required_error: t('validation.event.description.required')})
       .nonempty(t('validation.event.description.required'))
       .max(1000, t('validation.event.description.max_length')),
-    meetingPoint: z
-      .string()
-      .max(200, t('validation.event.meeting_point.max_length'))
-      .optional()
-      .nullable(),
+    meetingLocation: z
+      .string({required_error: t('validation.event.meeting_location.required')})
+      .nonempty(t('validation.event.meeting_location.required'))
+      .max(200, t('validation.event.meeting_location.max_length')),
     startLocation: z
       .string()
       .max(200, t('validation.event.start_location.max_length'))
@@ -94,6 +93,7 @@ export const eventSchemas = (t: TFunction) => {
     topicsCovered: z.string().optional(),
     experienceLevel: z.string().optional(),
     price: z.string().optional(),
+    currency: z.string().optional(),
   });
 
   // Event creation form schema with dynamic validation
@@ -148,20 +148,6 @@ export const eventSchemas = (t: TFunction) => {
       }
     }
 
-    // Validate meetingPoint is required for MEET_UP event type
-    if (
-      data.eventType === EventType.MEET_UP ||
-      data.eventType === EventType.MOTOFEST
-    ) {
-      if (!data.meetingPoint || data.meetingPoint.trim() === '') {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: t('validation.event.meeting_point.required'),
-          path: ['meetingPoint'],
-        });
-      }
-    }
-
     if (data.eventType === EventType.TRAINING) {
       if (!data.instructorInfo || data.instructorInfo.trim() === '') {
         ctx.addIssue({
@@ -183,6 +169,16 @@ export const eventSchemas = (t: TFunction) => {
           message: t('validation.event.experience_level.required'),
           path: ['experienceLevel'],
         });
+      }
+
+      if (data.price && data.price.trim() !== '') {
+        if (!data.currency || data.currency.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t('validation.event.currency.required'),
+            path: ['currency'],
+          });
+        }
       }
     }
 
@@ -258,17 +254,6 @@ export const eventSchemas = (t: TFunction) => {
           message: t('validation.event.road_type.required_for_type'),
           path: ['roadType'],
         });
-      }
-
-      // Validate meetingPoint is required for MEET_UP event type
-      if (data.eventType === EventType.MEET_UP) {
-        if (!data.meetingPoint || data.meetingPoint.trim() === '') {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: t('validation.event.meeting_point.required'),
-            path: ['meetingPoint'],
-          });
-        }
       }
 
       // Validate end date is not before start date

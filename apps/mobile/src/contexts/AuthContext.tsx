@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState, useCallback} from 'react';
 import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
@@ -6,104 +6,115 @@ import {NotificationPermission} from '@motorove/shared';
 import {useRemoveDeviceToken} from '@services/notification.service';
 import {useUpdateUserSetting} from '@services/user-setting.service';
 
-// Default auth state
-const defaultAuthState: AuthState = {
-  user: null,
-  accessToken: null,
-  refreshToken: null,
-  expiresAt: null,
-};
+// Import refactored helpers
+import {useAppStateRefresh} from './auth/useAppStateRefresh';
+import {
+  createEmptyAuthState,
+  convertAuthResponseToState,
+  updateAuthStateWithSetup,
+  updateAuthStateWithNotificationPermission,
+  isValidAuthState,
+} from './auth/authStateHelpers';
 
-// Context type
+/**
+ * Authentication Context Type
+ */
 export interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<AuthResponse>;
   accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
-  updateNotificationPermission: (
-    permission: NotificationPermission,
-  ) => Promise<void>;
+  updateNotificationPermission: (permission: NotificationPermission) => Promise<void>;
   isInitializing: boolean;
 }
 
-// Create the context
-const AuthContext = createContext<AuthContextType>({
-  ...defaultAuthState,
+/**
+ * Default context value with error-throwing implementations
+ */
+const createDefaultContextValue = (): AuthContextType => ({
+  ...createEmptyAuthState(),
   signIn: async () => {
-    throw new Error('Not implemented');
+    throw new Error('AuthContext not initialized');
   },
   accountSetup: async () => {
-    throw new Error('Not implemented');
+    throw new Error('AuthContext not initialized');
   },
   signOut: async () => {
-    throw new Error('Not implemented');
+    throw new Error('AuthContext not initialized');
   },
   loadAuthState: async () => {
-    throw new Error('Not implemented');
+    throw new Error('AuthContext not initialized');
   },
   updateNotificationPermission: async () => {
-    throw new Error('Not implemented');
+    throw new Error('AuthContext not initialized');
   },
   isInitializing: false,
 });
 
-// Provider props
+// Create the context
+const AuthContext = createContext<AuthContextType>(createDefaultContextValue());
+
+/**
+ * Provider props
+ */
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-// Auth provider component
+/**
+ * Authentication Provider Component
+ * Manages global authentication state and provides auth operations
+ */
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
-  const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
+  const [authState, setAuthState] = useState<AuthState>(createEmptyAuthState());
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {updateUserSetting} = useUpdateUserSetting();
-  // Load authentication state on component mount
+
+  // Load authentication state on mount
   useEffect(() => {
     loadAuthState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load authentication state
-  const loadAuthState = async (): Promise<void> => {
+  // Handle app foreground token refresh
+  useAppStateRefresh(authState, setAuthState);
+
+  /**
+   * Load authentication state from storage
+   */
+  const loadAuthState = useCallback(async (): Promise<void> => {
     try {
       setIsInitializing(true);
       loggingService.info('Loading authentication state');
-      // Use simplified getAuthState which handles refresh automatically
-      const state = await authService.getAuthState();
-      setAuthState({...state});
 
-      // Log the result
-      if (state.user && state.accessToken && state.expiresAt) {
+      const state = await authService.getAuthState();
+      setAuthState(state);
+
+      if (isValidAuthState(state)) {
         loggingService.info('Auth context loaded with valid auth state');
       } else {
         loggingService.info('Auth context loaded with no valid session');
       }
     } catch (error) {
       loggingService.error('Error loading auth state:', error);
-      setAuthState({...defaultAuthState});
+      setAuthState(createEmptyAuthState());
     } finally {
       setIsInitializing(false);
     }
-  };
+  }, []);
 
-  // Sign in
-  const signIn = async (
-    email: string,
-    password: string,
-  ): Promise<AuthResponse> => {
-    try {
+  /**
+   * Sign in user
+   */
+  const signIn = useCallback(
+    async (email: string, password: string): Promise<AuthResponse> => {
       const response = await authService.signIn(email, password);
 
       if (response.session) {
-        // Ensure we're setting the state correctly after signin
-        const newState = {
-          user: response.user,
-          accessToken: response.session?.access_token || null,
-          refreshToken: response.session?.refresh_token || null,
-          expiresAt: response.session?.expires_at || null,
-        };
+        const newState = convertAuthResponseToState(response);
 
-        loggingService.info('Setting auth state after signin:', {
+        loggingService.info('Setting auth state after signin', {
           hasUser: !!newState.user,
           hasToken: !!newState.accessToken,
         });
@@ -112,81 +123,80 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       }
 
       return response;
-    } catch (error) {
-      throw error;
-    }
-  };
+    },
+    [],
+  );
 
-  // Account setup
-  const accountSetup = async (hasCompletedSetup: boolean): Promise<void> => {
-    try {
-      const newState: AuthState = {
-        ...authState,
-        user: {
-          ...authState.user!,
-          hasCompletedSetup,
-        },
-      };
+  /**
+   * Update account setup status
+   */
+  const accountSetup = useCallback(
+    async (hasCompletedSetup: boolean): Promise<void> => {
+      const newState = updateAuthStateWithSetup(authState, hasCompletedSetup);
       setAuthState(newState);
-
       await authService.saveAuthDataToEncryptedStorage(newState);
-    } catch (error) {}
-  };
+    },
+    [authState],
+  );
 
-  // Sign out
-  const signOut = async (): Promise<void> => {
+  /**
+   * Sign out user
+   */
+  const signOut = useCallback(async (): Promise<void> => {
     try {
       await removeDeviceToken();
       await authService.signOut();
-      setAuthState(defaultAuthState);
+      setAuthState(createEmptyAuthState());
     } catch (error) {
       loggingService.error('Error signing out:', error);
       throw error;
     }
-  };
+  }, [removeDeviceToken]);
 
-  const updateNotificationPermission = async (
-    permission: NotificationPermission,
-  ): Promise<void> => {
-    try {
+  /**
+   * Update notification permission
+   */
+  const updateNotificationPermission = useCallback(
+    async (permission: NotificationPermission): Promise<void> => {
       const userSetting = await updateUserSetting({
         notificationPermission: permission,
       });
 
-      if (userSetting) {
-        const newState: AuthState = {
-          ...authState,
-          user: {
-            ...authState.user!,
-            notificationPermission: permission,
-          },
-        };
-        setAuthState(newState);
-        await authService.saveAuthDataToEncryptedStorage(newState);
+      if (!userSetting) {
+        throw new Error('Failed to update notification permission');
       }
-    } catch (error) {
-      loggingService.error('Error updating notification permission:', error);
-      throw error;
-    }
+
+      const newState = updateAuthStateWithNotificationPermission(
+        authState,
+        permission,
+      );
+      setAuthState(newState);
+      await authService.saveAuthDataToEncryptedStorage(newState);
+    },
+    [authState, updateUserSetting],
+  );
+
+  const contextValue: AuthContextType = {
+    ...authState,
+    signIn,
+    accountSetup,
+    signOut,
+    loadAuthState,
+    updateNotificationPermission,
+    isInitializing,
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        ...authState,
-        signIn,
-        accountSetup,
-        signOut,
-        loadAuthState,
-        updateNotificationPermission,
-        isInitializing,
-      }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use auth context
+/**
+ * Custom hook to use auth context
+ * @throws {Error} If used outside of AuthProvider
+ */
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
 

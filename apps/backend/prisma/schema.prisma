@@ -120,10 +120,16 @@ enum DayOfWeek {
 
 enum AddressType {
   POST_LOCATION
-  EVENT_MEETING_POINT
+  EVENT_MEETING_LOCATION
   EVENT_START_LOCATION
   EVENT_FINISH_LOCATION
   BUSINESS_LOCATION
+}
+
+enum Currency {
+  TL
+  USD
+  EUR
 }
 
 enum Language {
@@ -801,6 +807,7 @@ model Event {
   topicsCovered   String?          @db.Text
   experienceLevel ExperienceLevel?
   price           Float?
+  currency        Currency?        @default(TL)
 
   // Base model fields
   createdById String

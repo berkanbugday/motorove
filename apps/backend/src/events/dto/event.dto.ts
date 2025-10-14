@@ -19,6 +19,7 @@ import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { EventParticipantStatus } from '../../enums/models/event-participant-status.enum';
 import { EventStatus } from '../../enums/models/event-status.enum';
+import { Currency } from '../../enums/models/currency.enum';
 
 @ObjectType()
 export class EventDto {
@@ -115,6 +116,10 @@ export class EventDto {
   @IsOptional()
   @IsNumber()
   price?: number;
+
+  @Field(() => Currency, { nullable: true })
+  @IsOptional()
+  currency?: Currency;
 
   @Field(() => Int, { nullable: true })
   @IsOptional()

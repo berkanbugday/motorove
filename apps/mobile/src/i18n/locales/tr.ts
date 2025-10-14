@@ -257,7 +257,7 @@ export default {
       event_details_title: 'Etkinlik Detayları',
       event_title: 'Etkinlik Başlığı',
       event_type: 'Etkinlik Türü',
-      meeting_point: 'Buluşma Noktası',
+      meeting_location: 'Buluşma Konumu',
       max_participants: 'Maksimum Katılımcı',
       description: 'Açıklama',
       private_event: 'Özel Etkinlik',
@@ -290,7 +290,7 @@ export default {
       image_selection_failed: 'Görsel seçilemedi',
       event_created: 'Etkinlik başarıyla oluşturuldu',
       event_created_failed: 'Etkinlik oluşturulamadı',
-      select_meeting_point: 'Buluşma Noktası Seç',
+      select_meeting_location: 'Buluşma Konumu Seç',
       select_start_location: 'Başlangıç Konumu Seç',
       select_finish_location: 'Bitiş Konumu Seç',
       upcoming: 'Yaklaşan',
@@ -317,6 +317,7 @@ export default {
       maps: 'Harita',
       chat: 'Sohbet',
       delete_event_confirmation: 'Etkinliği silmek istediğinize emin misiniz?',
+      currency: 'Para Birimi',
     },
 
     // Groups screens
@@ -535,7 +536,7 @@ export default {
       traffic: 'Trafik',
       satellite: 'Uydu',
       terrain: 'Arazi',
-      set_as_meeting_point: 'Buluşma Noktası Olarak Ayarla',
+      set_as_meeting_location: 'Buluşma Konumu Olarak Ayarla',
       set_as_start_location: 'Başlangıç Konumu Olarak Ayarla',
       set_as_finish_location: 'Bitiş Konumu Olarak Ayarla',
     },
@@ -817,9 +818,9 @@ export default {
         required: 'Açıklama gereklidir',
         max_length: 'Açıklama 1000 karakteri geçemez',
       },
-      meeting_point: {
-        required: 'Buluşma noktası gereklidir',
-        max_length: 'Buluşma noktası 200 karakteri geçemez',
+      meeting_location: {
+        required: 'Buluşma konumu gereklidir',
+        max_length: 'Buluşma konumu 200 karakteri geçemez',
       },
       start_location: {
         required: 'Başlangıç konumu gereklidir',
@@ -872,6 +873,9 @@ export default {
       },
       experience_level: {
         required: 'Deneyim seviyesi gereklidir',
+      },
+      currency: {
+        required: 'Para birimi gereklidir',
       },
     },
     support: {
@@ -1164,6 +1168,11 @@ export default {
       intermediate: 'Orta',
       advanced: 'İleri',
       all_levels: 'Tüm Seviyeler',
+    },
+    currency: {
+      tl: '₺ TL',
+      usd: '$ USD',
+      eur: '€ EUR',
     },
   },
 };

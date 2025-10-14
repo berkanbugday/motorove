@@ -130,6 +130,7 @@ export class EventsService {
         topicsCovered,
         experienceLevel,
         price,
+        currency,
       } = input;
 
       // Process uploaded images if they exist
@@ -170,6 +171,7 @@ export class EventsService {
           topicsCovered,
           experienceLevel: experienceLevel as ExperienceLevel,
           price: price ? parseFloat(price) : null,
+          currency,
           createdBy: { connect: { id: userId } },
           updatedBy: { connect: { id: userId } },
           // Handle addresses
@@ -237,6 +239,7 @@ export class EventsService {
         topicsCovered,
         experienceLevel,
         price,
+        currency,
       } = input;
 
       // Process uploaded images if they exist
@@ -297,6 +300,7 @@ export class EventsService {
           topicsCovered,
           experienceLevel: experienceLevel as ExperienceLevel,
           price: price ? parseFloat(price) : null,
+          currency,
           updatedBy: { connect: { id: userId } },
           updatedAt: new Date(),
           // Handle addresses update - delete old ones if new ones provided

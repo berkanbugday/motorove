@@ -184,7 +184,7 @@ export const EventScreen = () => {
             item.addresses &&
             item.addresses.find(
               address =>
-                address.type === AddressType.EVENT_MEETING_POINT &&
+                address.type === AddressType.EVENT_MEETING_LOCATION &&
                 address.language.toLowerCase() === language.toLowerCase(),
             );
 

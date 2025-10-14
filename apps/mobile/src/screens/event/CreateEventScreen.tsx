@@ -24,6 +24,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {
   TopHeaderBar,
   AnimatedInput,
+  NumberAnimatedInput,
   Button,
   Typography,
   Dropdown,
@@ -56,6 +57,9 @@ import {
   RoadType,
   DifficultyLevel,
   ExperienceLevel,
+  CURRENCY_FORMATTING,
+  Currency,
+  DEFAULT_CURRENCY,
 } from '@motorove/shared';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
@@ -70,7 +74,7 @@ export const CreateEventScreen: React.FC = () => {
   });
 
   // Refs
-  const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
+  const meetingLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const startLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const finishLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const wizardRef = useRef<WizardHandle>(null);
@@ -87,6 +91,10 @@ export const CreateEventScreen: React.FC = () => {
     useState<DropdownItem | null>(null);
   const [selectedExperienceLevel, setSelectedExperienceLevel] =
     useState<DropdownItem | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<DropdownItem | null>(
+    null,
+  );
+
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
@@ -96,7 +104,7 @@ export const CreateEventScreen: React.FC = () => {
   const [isFirstStep, setIsFirstStep] = useState(true);
   const [isLastStep, setIsLastStep] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [selectedMeetingPoint, setSelectedMeetingPoint] = useState<
+  const [selectedMeetingLocation, setSelectedMeetingLocation] = useState<
     ICreateAddress[] | null
   >();
   const [selectedStartLocation, setSelectedStartLocation] = useState<
@@ -112,6 +120,7 @@ export const CreateEventScreen: React.FC = () => {
   const roadTypes = EnumUtils.getRoadTypes();
   const difficultyLevels = EnumUtils.getDifficultyLevels();
   const experienceLevels = EnumUtils.getExperienceLevels();
+  const currencies = EnumUtils.getCurrencyDropdownOptions();
 
   // Form setup with Zod validation
   const methods = useForm<CreateEventFormValues>({
@@ -119,7 +128,7 @@ export const CreateEventScreen: React.FC = () => {
     defaultValues: {
       title: '',
       description: '',
-      meetingPoint: '',
+      meetingLocation: '',
       startLocation: '',
       finishLocation: '',
       startDate: new Date(),
@@ -143,6 +152,7 @@ export const CreateEventScreen: React.FC = () => {
       topicsCovered: '',
       experienceLevel: '',
       price: '',
+      currency: '',
     },
     mode: 'onChange',
   });
@@ -253,7 +263,7 @@ export const CreateEventScreen: React.FC = () => {
 
     try {
       const addresses: ICreateAddress[] = [
-        ...(selectedMeetingPoint || []),
+        ...(selectedMeetingLocation || []),
         ...(selectedStartLocation || []),
         ...(selectedFinishLocation || []),
       ];
@@ -294,6 +304,7 @@ export const CreateEventScreen: React.FC = () => {
         instructorInfo: formData.instructorInfo,
         topicsCovered: formData.topicsCovered,
         price: formData.price,
+        currency: formData.currency as Currency,
       };
 
       await createEvent(createEventInput);
@@ -302,7 +313,7 @@ export const CreateEventScreen: React.FC = () => {
     }
   }, [
     getValues,
-    selectedMeetingPoint,
+    selectedMeetingLocation,
     selectedStartLocation,
     selectedFinishLocation,
     selectedImages,
@@ -318,7 +329,7 @@ export const CreateEventScreen: React.FC = () => {
 
   // Location selection handlers
   const handleOpenLocationMap = useCallback(() => {
-    meetingPointMapBottomSheetRef.current?.open('full');
+    meetingLocationMapBottomSheetRef.current?.open('full');
   }, []);
 
   const handleOpenStartLocationMap = useCallback(() => {
@@ -333,24 +344,24 @@ export const CreateEventScreen: React.FC = () => {
     (addresses: ICreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
-        setSelectedMeetingPoint(null);
-        setValue('meetingPoint', '', {shouldValidate: true});
+        setSelectedMeetingLocation(null);
+        setValue('meetingLocation', '', {shouldValidate: true});
         return;
       }
 
-      setSelectedMeetingPoint(addresses);
+      setSelectedMeetingLocation(addresses);
 
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
 
-      // Set the meetingPoint field value
-      setValue('meetingPoint', displayAddress?.address || '', {
+      // Set the meetingLocation field value
+      setValue('meetingLocation', displayAddress?.address || '', {
         shouldValidate: true,
       });
 
       // Close the bottom sheet
-      meetingPointMapBottomSheetRef.current?.close();
+      meetingLocationMapBottomSheetRef.current?.close();
     },
     [setValue],
   );
@@ -510,6 +521,14 @@ export const CreateEventScreen: React.FC = () => {
     [setValue],
   );
 
+  const handleCurrencySelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedCurrency(item);
+      setValue('currency', item?.value || '', {shouldValidate: true});
+    },
+    [setValue],
+  );
+
   // Toggle handlers
   const togglePrivacy = useCallback(
     (newValue: boolean) => {
@@ -553,7 +572,7 @@ export const CreateEventScreen: React.FC = () => {
       'eventType',
       'maxParticipants',
       'description',
-      'meetingPoint',
+      'meetingLocation',
       'images',
     ]);
   }, [trigger]);
@@ -596,6 +615,8 @@ export const CreateEventScreen: React.FC = () => {
         'instructorInfo',
         'topicsCovered',
         'experienceLevel',
+        'price',
+        'currency',
       ] as const);
     }
     return true;
@@ -606,10 +627,13 @@ export const CreateEventScreen: React.FC = () => {
     async (data: CreateEventFormValues) => {
       try {
         const addresses: ICreateAddress[] = [
-          ...(selectedMeetingPoint || []),
+          ...(selectedMeetingLocation || []),
           ...(selectedStartLocation || []),
           ...(selectedFinishLocation || []),
         ];
+        // Use base64 encoded images if available, otherwise fall back to URIs
+        const images = selectedImages.map(img => img.base64 || img.uri);
+
         const createEventInput: ICreateEvent = {
           title: data.title,
           description: data.description,
@@ -633,6 +657,18 @@ export const CreateEventScreen: React.FC = () => {
                 ).toISOString()
               : undefined,
           maxParticipants: parseInt(data.maxParticipants as string, 10),
+          images: images,
+          roadType: data.roadType as RoadType,
+          difficultyLevel: data.difficultyLevel as DifficultyLevel,
+          experienceLevel: data.experienceLevel as ExperienceLevel,
+          routeDescription: data.routeDescription,
+          restStops: data.restStops,
+          campingInfo: data.campingInfo,
+          equipmentChecklist: data.equipmentChecklist,
+          instructorInfo: data.instructorInfo,
+          topicsCovered: data.topicsCovered,
+          price: data.price,
+          currency: data.currency as Currency,
         };
 
         // await createEvent(createEventInput);
@@ -640,7 +676,14 @@ export const CreateEventScreen: React.FC = () => {
         loggingService.error('Error creating event:', error);
       }
     },
-    [navigation],
+    [
+      selectedMeetingLocation,
+      selectedStartLocation,
+      selectedFinishLocation,
+      selectedImages,
+      selectedEventType,
+      createEvent,
+    ],
   );
 
   const handleWizardComplete = useCallback(() => {
@@ -685,9 +728,9 @@ export const CreateEventScreen: React.FC = () => {
               {/* Meeting Point */}
               <AnimatedInput
                 control={control}
-                name="meetingPoint"
-                label={t('screens.event.meeting_point')}
-                error={errors.meetingPoint}
+                name="meetingLocation"
+                label={t('screens.event.meeting_location')}
+                error={errors.meetingLocation}
                 icon={
                   <Icon
                     name="map-pin-filled"
@@ -698,8 +741,8 @@ export const CreateEventScreen: React.FC = () => {
                 iconPosition="right"
                 onPress={handleOpenLocationMap}
                 editable={false}
-                key="meetingPoint-input"
-                testID="meetingPoint-input"
+                key="meetingLocation-input"
+                testID="meetingLocation-input"
               />
 
               {/* Max Participants */}
@@ -1054,15 +1097,44 @@ export const CreateEventScreen: React.FC = () => {
                       error={errors.experienceLevel?.message}
                       key="experienceLevel-dropdown"
                     />
-
-                    <AnimatedInput
-                      control={control}
-                      name="price"
-                      label={t('screens.event.price')}
-                      keyboardType="numeric"
-                      error={errors.price}
-                      key="price-input"
-                    />
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        gap: spacing.md,
+                      }}>
+                      <View style={{flex: 1}}>
+                        <NumberAnimatedInput
+                          control={control}
+                          decimalSeparator={
+                            CURRENCY_FORMATTING[
+                              (selectedCurrency?.value as Currency) ||
+                                DEFAULT_CURRENCY
+                            ].decimalSeparator
+                          }
+                          thousandSeparator={
+                            CURRENCY_FORMATTING[
+                              (selectedCurrency?.value as Currency) ||
+                                DEFAULT_CURRENCY
+                            ].thousandSeparator
+                          }
+                          name="price"
+                          label={t('screens.event.price')}
+                          error={errors.price}
+                          testID="price-input"
+                        />
+                      </View>
+                      <View style={{flex: 1}}>
+                        <Dropdown
+                          data={currencies}
+                          label={t('screens.event.currency')}
+                          onSelect={handleCurrencySelect}
+                          selectedItem={selectedCurrency}
+                          showClearButton={false}
+                          error={errors.currency?.message}
+                          key="currency-dropdown"
+                        />
+                      </View>
+                    </View>
                   </>
                 )}
               </View>
@@ -1146,6 +1218,7 @@ export const CreateEventScreen: React.FC = () => {
       resetField('topicsCovered');
       resetField('experienceLevel');
       resetField('price');
+      resetField('currency');
 
       // Reset UI state for dropdowns and locations
       setSelectedRoadType(null);
@@ -1154,12 +1227,14 @@ export const CreateEventScreen: React.FC = () => {
       setValue('difficultyLevel', '', {shouldValidate: false});
       setSelectedExperienceLevel(null);
       setValue('experienceLevel', '', {shouldValidate: false});
-      setSelectedMeetingPoint(null);
-      setValue('meetingPoint', '', {shouldValidate: false});
+      setSelectedMeetingLocation(null);
+      setValue('meetingLocation', '', {shouldValidate: false});
       setSelectedStartLocation(null);
       setValue('startLocation', '', {shouldValidate: false});
       setSelectedFinishLocation(null);
       setValue('finishLocation', '', {shouldValidate: false});
+      setSelectedCurrency(null);
+      setValue('currency', '', {shouldValidate: false});
 
       // If we're past the first step, jump back to first step
       if (currentStepIndex > 0) {
@@ -1251,18 +1326,18 @@ export const CreateEventScreen: React.FC = () => {
 
       {/* Location Map Bottom Sheets */}
       <BottomSheet
-        ref={meetingPointMapBottomSheetRef}
-        title={t('screens.event.select_meeting_point')}
+        ref={meetingLocationMapBottomSheetRef}
+        title={t('screens.event.select_meeting_location')}
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
-          initialAddress={selectedMeetingPoint?.find(
+          initialAddress={selectedMeetingLocation?.find(
             address =>
               address.language.toLowerCase() === language.toLowerCase(),
           )}
           onLocationSelect={handleMeetingLocationSelect}
-          onClose={() => meetingPointMapBottomSheetRef.current?.close()}
-          addressType={AddressType.EVENT_MEETING_POINT}
+          onClose={() => meetingLocationMapBottomSheetRef.current?.close()}
+          addressType={AddressType.EVENT_MEETING_LOCATION}
         />
       </BottomSheet>
 

@@ -31,11 +31,20 @@ import {
 import {format, formatDuration, intervalToDuration} from 'date-fns';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
-import {IEvent, EventStatus, Language, AddressType} from '@motorove/shared';
+import {
+  IEvent,
+  EventStatus,
+  Language,
+  AddressType,
+  CURRENCY_SYMBOLS,
+  Currency,
+  CURRENCY_FORMATTING,
+} from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
 import {tr, enUS} from 'date-fns/locale';
 import {EnumUtils} from '@utils/enumUtils';
+import {formatCurrency} from '@utils/currencyUtils';
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
 
 type Props = {
@@ -72,12 +81,12 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   }, []);
 
   // Get meeting point address (if available)
-  const getMeetingPointAddress = useCallback(() => {
+  const getMeetingLocationAddress = useCallback(() => {
     return (
       event?.addresses?.find(
         address =>
           address.language.toLowerCase() === language.toLowerCase() &&
-          address.type === AddressType.EVENT_MEETING_POINT,
+          address.type === AddressType.EVENT_MEETING_LOCATION,
       )?.address || null
     );
   }, [event?.addresses, language]);
@@ -418,7 +427,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           </View>
 
           {/* Meeting Location Row */}
-          {getMeetingPointAddress() && (
+          {getMeetingLocationAddress() && (
             <View style={styles.infoRow}>
               <Icon
                 name="user-location"
@@ -426,7 +435,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
                 color={colors.neutral.grey}
               />
               <Typography style={styles.infoText}>
-                {getMeetingPointAddress()}
+                {getMeetingLocationAddress()}
               </Typography>
             </View>
           )}
@@ -633,7 +642,19 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
                   <Typography variant="bodySmall" weight="bold">
                     {t('screens.event.price')}:{' '}
                   </Typography>
-                  {event.price}
+                  {formatCurrency(event.price, {
+                    thousandSeparator:
+                      CURRENCY_FORMATTING[event.currency as Currency]
+                        .thousandSeparator,
+                    decimalSeparator:
+                      CURRENCY_FORMATTING[event.currency as Currency]
+                        .decimalSeparator,
+                    currencySymbol:
+                      CURRENCY_SYMBOLS[event.currency as Currency],
+                    showCurrencySymbol: true,
+                    currencyPosition:
+                      event.currency === Currency.USD ? 'before' : 'after',
+                  })}
                 </Typography>
               </View>
             )}

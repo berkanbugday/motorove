@@ -17,6 +17,7 @@ import {
   EquipmentType,
   SocialMediaPlatform,
   SupportCategory,
+  Currency,
 } from '@motorove/shared';
 import {DropdownItem} from '@components/Dropdown/types';
 import {i18n} from '@/i18n';
@@ -190,5 +191,8 @@ export class EnumUtils {
 
   static getSupportCategories(): DropdownItem[] {
     return this.getDropdownOptions(SupportCategory, 'enums.supportCategory');
+  }
+  static getCurrencyDropdownOptions(): DropdownItem[] {
+    return this.getDropdownOptions(Currency, 'enums.currency');
   }
 }

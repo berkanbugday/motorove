@@ -25,6 +25,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {
   TopHeaderBar,
   AnimatedInput,
+  NumberAnimatedInput,
   Button,
   Typography,
   Dropdown,
@@ -57,6 +58,9 @@ import {
   RoadType,
   DifficultyLevel,
   ExperienceLevel,
+  CURRENCY_FORMATTING,
+  Currency,
+  DEFAULT_CURRENCY,
 } from '@motorove/shared';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
@@ -85,7 +89,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   } = useGetEvent(eventId);
 
   // Refs
-  const meetingPointMapBottomSheetRef = useRef<BottomSheetRef>(null);
+  const meetingLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const startLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const finishLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const wizardRef = useRef<WizardHandle>(null);
@@ -102,6 +106,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     useState<DropdownItem | null>(null);
   const [selectedExperienceLevel, setSelectedExperienceLevel] =
     useState<DropdownItem | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<DropdownItem | null>(
+    null,
+  );
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
@@ -111,7 +118,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const [isFirstStep, setIsFirstStep] = useState(true);
   const [isLastStep, setIsLastStep] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [selectedMeetingPoint, setSelectedMeetingPoint] = useState<
+  const [selectedMeetingLocation, setSelectedMeetingLocation] = useState<
     ICreateAddress[] | null
   >();
   const [selectedStartLocation, setSelectedStartLocation] = useState<
@@ -122,11 +129,12 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   >();
   const [activeInviteTab, setActiveInviteTab] = useState<string>('users');
 
-  // Memoized enum arrays to prevent unnecessary re-renders
-  const eventTypes = useMemo(() => EnumUtils.getEventTypes(), []);
-  const roadTypes = useMemo(() => EnumUtils.getRoadTypes(), []);
-  const difficultyLevels = useMemo(() => EnumUtils.getDifficultyLevels(), []);
-  const experienceLevels = useMemo(() => EnumUtils.getExperienceLevels(), []);
+  // Enum hooks
+  const eventTypes = EnumUtils.getEventTypes();
+  const roadTypes = EnumUtils.getRoadTypes();
+  const difficultyLevels = EnumUtils.getDifficultyLevels();
+  const experienceLevels = EnumUtils.getExperienceLevels();
+  const currencies = EnumUtils.getCurrencyDropdownOptions();
 
   // Form setup with Zod validation
   const methods = useForm<UpdateEventFormValues>({
@@ -134,7 +142,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     defaultValues: {
       title: '',
       description: '',
-      meetingPoint: '',
+      meetingLocation: '',
       startLocation: '',
       finishLocation: '',
       startDate: new Date(),
@@ -158,6 +166,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       topicsCovered: '',
       experienceLevel: '',
       price: '',
+      currency: '',
     },
     mode: 'onChange',
   });
@@ -268,7 +277,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
     try {
       const addresses: ICreateAddress[] = [
-        ...(selectedMeetingPoint || []),
+        ...(selectedMeetingLocation || []),
         ...(selectedStartLocation || []),
         ...(selectedFinishLocation || []),
       ];
@@ -309,6 +318,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         instructorInfo: formData.instructorInfo,
         topicsCovered: formData.topicsCovered,
         price: formData.price,
+        currency: formData.currency as Currency,
       };
 
       await updateEvent({...createEventInput, id: eventId});
@@ -317,7 +327,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     }
   }, [
     getValues,
-    selectedMeetingPoint,
+    selectedMeetingLocation,
     selectedStartLocation,
     selectedFinishLocation,
     selectedImages,
@@ -336,7 +346,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
   // Location selection handlers
   const handleOpenLocationMap = useCallback(() => {
-    meetingPointMapBottomSheetRef.current?.open('full');
+    meetingLocationMapBottomSheetRef.current?.open('full');
   }, []);
 
   const handleOpenStartLocationMap = useCallback(() => {
@@ -351,24 +361,24 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     (addresses: ICreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
-        setSelectedMeetingPoint(null);
-        setValue('meetingPoint', '', {shouldValidate: true});
+        setSelectedMeetingLocation(null);
+        setValue('meetingLocation', '', {shouldValidate: true});
         return;
       }
 
-      setSelectedMeetingPoint(addresses);
+      setSelectedMeetingLocation(addresses);
 
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
       );
 
-      // Set the meetingPoint field value
-      setValue('meetingPoint', displayAddress?.address || '', {
+      // Set the meetingLocation field value
+      setValue('meetingLocation', displayAddress?.address || '', {
         shouldValidate: true,
       });
 
       // Close the bottom sheet
-      meetingPointMapBottomSheetRef.current?.close();
+      meetingLocationMapBottomSheetRef.current?.close();
     },
     [setValue],
   );
@@ -528,6 +538,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     [setValue],
   );
 
+  const handleCurrencySelect = useCallback(
+    (item: DropdownItem | null) => {
+      setSelectedCurrency(item);
+      setValue('currency', item?.value || '', {shouldValidate: true});
+    },
+    [setValue],
+  );
+
   // Toggle handlers
   const togglePrivacy = useCallback(
     (newValue: boolean) => {
@@ -571,7 +589,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       'eventType',
       'maxParticipants',
       'description',
-      'meetingPoint',
+      'meetingLocation',
       'images',
     ]);
   }, [trigger]);
@@ -614,6 +632,8 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         'instructorInfo',
         'topicsCovered',
         'experienceLevel',
+        'price',
+        'currency',
       ] as const);
     }
     return true;
@@ -624,7 +644,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     async (data: UpdateEventFormValues) => {
       try {
         const addresses: ICreateAddress[] = [
-          ...(selectedMeetingPoint || []),
+          ...(selectedMeetingLocation || []),
           ...(selectedStartLocation || []),
           ...(selectedFinishLocation || []),
         ];
@@ -681,6 +701,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
             experienceLevel: data.experienceLevel as ExperienceLevel,
           }),
           ...(data.price && {price: data.price}),
+          ...(data.currency && {currency: data.currency as Currency}),
         };
 
         await updateEvent(updateEventInput);
@@ -691,7 +712,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     [
       updateEvent,
       eventId,
-      selectedMeetingPoint,
+      selectedMeetingLocation,
       selectedStartLocation,
       selectedFinishLocation,
       selectedImages,
@@ -742,9 +763,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
               {/* Meeting Point */}
               <AnimatedInput
                 control={control}
-                name="meetingPoint"
-                label={t('screens.event.meeting_point')}
-                error={errors.meetingPoint}
+                name="meetingLocation"
+                label={t('screens.event.meeting_location')}
+                error={errors.meetingLocation}
                 icon={
                   <Icon
                     name="map-pin-filled"
@@ -755,8 +776,8 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                 iconPosition="right"
                 onPress={handleOpenLocationMap}
                 editable={false}
-                key="meetingPoint-input"
-                testID="meetingPoint-input"
+                key="meetingLocation-input"
+                testID="meetingLocation-input"
               />
 
               {/* Max Participants */}
@@ -1112,14 +1133,44 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                       key="experienceLevel-dropdown"
                     />
 
-                    <AnimatedInput
-                      control={control}
-                      name="price"
-                      label={t('screens.event.price')}
-                      keyboardType="numeric"
-                      error={errors.price}
-                      key="price-input"
-                    />
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        gap: spacing.md,
+                      }}>
+                      <View style={{flex: 1}}>
+                        <NumberAnimatedInput
+                          control={control}
+                          decimalSeparator={
+                            CURRENCY_FORMATTING[
+                              (selectedCurrency?.value as Currency) ||
+                                DEFAULT_CURRENCY
+                            ].decimalSeparator
+                          }
+                          thousandSeparator={
+                            CURRENCY_FORMATTING[
+                              (selectedCurrency?.value as Currency) ||
+                                DEFAULT_CURRENCY
+                            ].thousandSeparator
+                          }
+                          name="price"
+                          label={t('screens.event.price')}
+                          error={errors.price}
+                          testID="price-input"
+                        />
+                      </View>
+                      <View style={{flex: 1}}>
+                        <Dropdown
+                          data={currencies}
+                          label={t('screens.event.currency')}
+                          onSelect={handleCurrencySelect}
+                          selectedItem={selectedCurrency}
+                          showClearButton={false}
+                          error={errors.currency?.message}
+                          key="currency-dropdown"
+                        />
+                      </View>
+                    </View>
                   </>
                 )}
               </View>
@@ -1172,6 +1223,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       selectedFinishLocation,
       activeInviteTab,
       handleTabChange,
+      currencies,
+      selectedCurrency,
+      handleCurrencySelect,
+      price,
     ],
   );
 
@@ -1203,6 +1258,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       resetField('topicsCovered');
       resetField('experienceLevel');
       resetField('price');
+      resetField('currency');
 
       // Reset UI state for dropdowns and locations
       setSelectedRoadType(null);
@@ -1211,12 +1267,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       setValue('difficultyLevel', '', {shouldValidate: false});
       setSelectedExperienceLevel(null);
       setValue('experienceLevel', '', {shouldValidate: false});
-      setSelectedMeetingPoint(null);
-      setValue('meetingPoint', '', {shouldValidate: false});
+      setSelectedMeetingLocation(null);
+      setValue('meetingLocation', '', {shouldValidate: false});
       setSelectedStartLocation(null);
       setValue('startLocation', '', {shouldValidate: false});
       setSelectedFinishLocation(null);
       setValue('finishLocation', '', {shouldValidate: false});
+      setSelectedCurrency(null);
+      setValue('currency', '', {shouldValidate: false});
 
       // If we're past the first step, jump back to first step
       if (currentStepIndex > 0) {
@@ -1306,10 +1364,21 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       setValue('topicsCovered', event.topicsCovered || '');
       setValue('price', event.price?.toString() || '');
 
+      // Set currency if available
+      if (event.currency) {
+        const currencyItem = currencies.find(
+          curr => curr.value === event.currency,
+        );
+        if (currencyItem) {
+          setSelectedCurrency(currencyItem);
+          setValue('currency', event.currency);
+        }
+      }
+
       // Set addresses
       if (event.addresses && event.addresses.length > 0) {
-        const meetingPointAddresses = event.addresses.filter(
-          addr => addr.type === AddressType.EVENT_MEETING_POINT,
+        const meetingLocationAddresses = event.addresses.filter(
+          addr => addr.type === AddressType.EVENT_MEETING_LOCATION,
         );
         const startLocationAddresses = event.addresses.filter(
           addr => addr.type === AddressType.EVENT_START_LOCATION,
@@ -1318,13 +1387,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           addr => addr.type === AddressType.EVENT_FINISH_LOCATION,
         );
 
-        if (meetingPointAddresses.length > 0) {
-          setSelectedMeetingPoint(meetingPointAddresses);
+        if (meetingLocationAddresses.length > 0) {
+          setSelectedMeetingLocation(meetingLocationAddresses);
           const displayAddress =
-            meetingPointAddresses.find(
+            meetingLocationAddresses.find(
               addr => addr.language.toLowerCase() === language.toLowerCase(),
-            ) || meetingPointAddresses[0]; // Fallback to first address if no language match
-          setValue('meetingPoint', displayAddress?.address || '');
+            ) || meetingLocationAddresses[0]; // Fallback to first address if no language match
+          setValue('meetingLocation', displayAddress?.address || '');
         }
 
         if (startLocationAddresses.length > 0) {
@@ -1378,6 +1447,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     roadTypes,
     difficultyLevels,
     experienceLevels,
+    currencies,
     language,
     setValue,
   ]);
@@ -1487,18 +1557,18 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
       {/* Location Map Bottom Sheets */}
       <BottomSheet
-        ref={meetingPointMapBottomSheetRef}
-        title={t('screens.event.select_meeting_point')}
+        ref={meetingLocationMapBottomSheetRef}
+        title={t('screens.event.select_meeting_location')}
         closeButtonPosition="top-left"
         enableGestureControl={false}>
         <SelectLocationMap
-          initialAddress={selectedMeetingPoint?.find(
+          initialAddress={selectedMeetingLocation?.find(
             address =>
               address.language.toLowerCase() === language.toLowerCase(),
           )}
           onLocationSelect={handleMeetingLocationSelect}
-          onClose={() => meetingPointMapBottomSheetRef.current?.close()}
-          addressType={AddressType.EVENT_MEETING_POINT}
+          onClose={() => meetingLocationMapBottomSheetRef.current?.close()}
+          addressType={AddressType.EVENT_MEETING_LOCATION}
         />
       </BottomSheet>
 

@@ -31,6 +31,7 @@ export const EVENT_FRAGMENT = gql`
     topicsCovered
     experienceLevel
     price
+    currency
     participantsCount
     isParticipating
     participationStatus

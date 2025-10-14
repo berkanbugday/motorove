@@ -1,4 +1,12 @@
-import { DifficultyLevel, EventStatus, EventType, RoadType, ExperienceLevel, EventParticipantStatus } from "../../enums";
+import {
+  DifficultyLevel,
+  EventStatus,
+  EventType,
+  RoadType,
+  ExperienceLevel,
+  EventParticipantStatus,
+  Currency,
+} from "../../enums";
 import { IAddress } from "../address/address.interface";
 import { IUser } from "../user/user.interface";
 
@@ -28,6 +36,7 @@ export interface IEvent {
   topicsCovered?: string | null;
   experienceLevel?: ExperienceLevel | null;
   price?: number | null;
+  currency?: Currency | null;
   participantsCount?: number | null;
   isParticipating?: boolean | null;
   participationStatus?: EventParticipantStatus | null;

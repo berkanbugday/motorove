@@ -4,6 +4,7 @@ import { RoadType } from '../../enums/models/road-type.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { EventStatus } from '../../enums/models/event-status.enum';
+import { Currency } from '../../enums/models/currency.enum';
 import {
   IsEnum,
   IsOptional,
@@ -195,4 +196,10 @@ export class CreateEventInput implements ICreateEvent {
   @IsOptional()
   @ValidateIf((o: CreateEventInput) => o.eventType === EventType.TRAINING)
   price?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsEnum(Currency)
+  @ValidateIf((o: CreateEventInput) => o.eventType === EventType.TRAINING)
+  currency?: Currency;
 }

@@ -4,6 +4,7 @@ import {
   DifficultyLevel,
   ExperienceLevel,
   EventStatus,
+  Currency,
 } from "../../enums";
 import { ICreateAddress } from "../address/create-address.interface";
 
@@ -120,4 +121,9 @@ export interface ICreateEvent {
    * Optional price information (for training events)
    */
   price?: string;
+
+  /**
+   * Optional currency (for training events)
+   */
+  currency?: Currency;
 }

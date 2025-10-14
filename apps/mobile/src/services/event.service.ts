@@ -96,6 +96,7 @@ export const useCreateEvent = (onSuccess?: () => void) => {
           experienceLevel: input.experienceLevel,
         }),
         ...(input.price && {price: input.price}),
+        ...(input.price && input.currency && {currency: input.currency}),
       };
 
       const result = await createEventMutation({
@@ -464,22 +465,6 @@ export const useGetEventJoinRequests = (limit = 20, skip = 0) => {
   };
 };
 
-// Direct mutation function for creating events (for use outside of React components)
-export const createEvent = async (input: any): Promise<any> => {
-  try {
-    const {data} = await apolloClient.mutate({
-      mutation: CREATE_EVENT,
-      variables: {
-        input: input,
-      },
-    });
-    return data?.createEvent;
-  } catch (error) {
-    loggingService.error('Error creating event:', error);
-    throw error;
-  }
-};
-
 // Export as EventService object
 export const EventService = {
   useCreateEvent,
@@ -488,7 +473,6 @@ export const EventService = {
   useGetEvents,
   useGetEventJoinRequests,
   inviteUsersToEvent,
-  createEvent, // Add direct mutation function
 };
 
 export default EventService;

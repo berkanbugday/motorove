@@ -8,6 +8,7 @@ import { EventStatus } from '../../enums/models/event-status.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
 import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
+import { Currency } from '../../enums/models/currency.enum';
 import { User } from 'src/users/models/user.model';
 import { Address } from 'src/addresses/models/address.model';
 
@@ -78,6 +79,9 @@ export class Event extends BaseModel {
 
   @Field(() => Float, { nullable: true })
   price?: number;
+
+  @Field(() => Currency, { nullable: true })
+  currency?: Currency;
 
   @Field(() => [EventParticipant], { nullable: true })
   participants?: EventParticipant[];

@@ -4,3 +4,4 @@ export * from './dateUtils';
 export * from './errorUtils';
 export * from './languageUtils';
 export * from './enumUtils';
+export * from './currencyUtils';

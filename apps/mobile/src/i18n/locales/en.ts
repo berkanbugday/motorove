@@ -251,7 +251,7 @@ export default {
       event_details_title: 'Event Details',
       event_title: 'Event Title',
       event_type: 'Event Type',
-      meeting_point: 'Meeting Point',
+      meeting_location: 'Meeting Location',
       max_participants: 'Maximum Participants',
       description: 'Description',
       private_event: 'Private Event',
@@ -288,7 +288,7 @@ export default {
       image_selection_failed: 'Failed to select image',
       event_created: 'Event created successfully',
       event_created_failed: 'Failed to create event',
-      select_meeting_point: 'Select Meeting Point',
+      select_meeting_location: 'Select Meeting Location',
       select_start_location: 'Select Start Location',
       select_finish_location: 'Select Finish Location',
       upcoming: 'Upcoming',
@@ -315,6 +315,7 @@ export default {
       maps: 'Maps',
       chat: 'Chat',
       delete_event_confirmation: 'Are you sure you want to delete this event?',
+      currency: 'Currency',
     },
 
     // Groups screens
@@ -539,7 +540,7 @@ export default {
       traffic: 'Traffic',
       satellite: 'Satellite',
       terrain: 'Terrain',
-      set_as_meeting_point: 'Set as Meeting Point',
+      set_as_meeting_location: 'Set as Meeting Location',
       set_as_start_location: 'Set as Start Location',
       set_as_finish_location: 'Set as Finish Location',
     },
@@ -819,9 +820,9 @@ export default {
         required: 'Description is required',
         max_length: 'Description cannot exceed 1000 characters',
       },
-      meeting_point: {
-        required: 'Meeting point is required',
-        max_length: 'Meeting point cannot exceed 200 characters',
+      meeting_location: {
+        required: 'Meeting location is required',
+        max_length: 'Meeting location cannot exceed 200 characters',
       },
       start_location: {
         required: 'Start location is required',
@@ -874,6 +875,9 @@ export default {
       },
       experience_level: {
         required: 'Experience level is required',
+      },
+      currency: {
+        required: 'Currency is required',
       },
     },
     support: {
@@ -1163,6 +1167,11 @@ export default {
       intermediate: 'Intermediate',
       advanced: 'Advanced',
       all_levels: 'All Levels',
+    },
+    currency: {
+      tl: '₺ TL',
+      usd: '$ USD',
+      eur: '€ EUR',
     },
   },
 };

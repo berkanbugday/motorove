@@ -27,6 +27,7 @@ export * from './Wizard';
 export * from './BottomSheet';
 export * from './Button';
 export * from './AnimatedInput';
+export * from './NumberAnimatedInput';
 export * from './MarkerInfoCard';
 export * from './FAB';
 export * from './SwipeableItem';
