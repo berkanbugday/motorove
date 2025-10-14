@@ -1,5 +1,11 @@
 import React from 'react';
-import {View, StyleProp, ViewStyle, TextStyle} from 'react-native';
+import {
+  View,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+  TouchableOpacity,
+} from 'react-native';
 import {styles} from './EventBanner.styles';
 import {Icon} from '../Icon';
 import {Body, BodySmall, Caption, Title} from '../Typography';
@@ -119,6 +125,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
   maxParticipants,
   badgeText,
   onChatPress,
+  onPress,
   style,
   contentStyle,
   dateContainerStyle,
@@ -147,71 +154,73 @@ const EventBanner: React.FC<EventBannerProps> = ({
   };
 
   return (
-    <View style={[styles.container, style]}>
-      {badgeText && (
-        <View style={[styles.badgeContainer, badgeStyle]}>
-          <Caption
-            weight="bold"
-            align="center"
-            color={colors.neutral.white}
-            style={[styles.badgeText, badgeTextStyle]}>
-            {badgeText}
-          </Caption>
-        </View>
-      )}
-      {/* Date and Time Container */}
-      <View style={[styles.dateContainer, dateContainerStyle]}>
-        <Title weight="bold">{day}</Title>
-        <BodySmall weight="bold">{month}</BodySmall>
-        <Caption>{time}</Caption>
-      </View>
-
-      {/* Event Details Container */}
-      <View style={[styles.contentContainer, contentStyle]}>
-        {title && (
-          <Body weight="bold" style={[styles.title, titleStyle]}>
-            {title}
-          </Body>
-        )}
-        {infoText && (
-          <Caption
-            color={colors.neutral.grey}
-            style={[styles.infoText, infoTextStyle]}>
-            {infoText}
-          </Caption>
-        )}
-        {organizer && (
-          <Caption color={colors.neutral.grey} style={styles.organizer}>
-            {organizer}
-          </Caption>
-        )}
-        {location && (
-          <View style={styles.locationContainer}>
-            <Icon name="map-pin-filled" size={14} />
-            <Caption color={colors.neutral.grey} style={styles.locationText}>
-              {location}
+    <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
+      <View style={[styles.container, style]}>
+        {badgeText && (
+          <View style={[styles.badgeContainer, badgeStyle]}>
+            <Caption
+              weight="bold"
+              align="center"
+              color={colors.neutral.white}
+              style={[styles.badgeText, badgeTextStyle]}>
+              {badgeText}
             </Caption>
           </View>
         )}
-        {renderParticipantCount()}
-      </View>
-
-      {/* Chat Button */}
-      {onChatPress && (
-        <View style={styles.chatButtonContainer}>
-          <Button
-            testID="event-banner-chat-button"
-            variant="primary"
-            size="medium"
-            shape="round"
-            style={styles.chatButton}
-            disabled={!onChatPress}
-            title={t('components.eventBanner.chat')}
-            onPress={onChatPress}
-          />
+        {/* Date and Time Container */}
+        <View style={[styles.dateContainer, dateContainerStyle]}>
+          <Title weight="bold">{day}</Title>
+          <BodySmall weight="bold">{month}</BodySmall>
+          <Caption>{time}</Caption>
         </View>
-      )}
-    </View>
+
+        {/* Event Details Container */}
+        <View style={[styles.contentContainer, contentStyle]}>
+          {title && (
+            <Body weight="bold" style={[styles.title, titleStyle]}>
+              {title}
+            </Body>
+          )}
+          {infoText && (
+            <Caption
+              color={colors.neutral.grey}
+              style={[styles.infoText, infoTextStyle]}>
+              {infoText}
+            </Caption>
+          )}
+          {organizer && (
+            <Caption color={colors.neutral.grey} style={styles.organizer}>
+              {organizer}
+            </Caption>
+          )}
+          {location && (
+            <View style={styles.locationContainer}>
+              <Icon name="map-pin-filled" size={14} />
+              <Caption color={colors.neutral.grey} style={styles.locationText}>
+                {location}
+              </Caption>
+            </View>
+          )}
+          {renderParticipantCount()}
+        </View>
+
+        {/* Chat Button */}
+        {onChatPress && (
+          <View style={styles.chatButtonContainer}>
+            <Button
+              testID="event-banner-chat-button"
+              variant="primary"
+              size="medium"
+              shape="round"
+              style={styles.chatButton}
+              disabled={!onChatPress}
+              title={t('components.eventBanner.chat')}
+              onPress={onChatPress}
+            />
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
   );
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet, Image} from 'react-native';
+import {View, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {colors, spacing, radius} from '@theme';
 import {Typography, Button, Icon} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
@@ -48,6 +48,11 @@ export interface JoinRequestCardProps {
    * Additional styles for the card container
    */
   style?: any;
+
+  /**
+   * Handler for when the card is pressed
+   */
+  onPress?: () => void;
 }
 
 /**
@@ -62,68 +67,71 @@ export const JoinRequestCard: React.FC<JoinRequestCardProps> = ({
   onAccept,
   onReject,
   style,
+  onPress,
 }) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
 
   return (
     <View style={[styles.container, style]}>
-      <View style={styles.content}>
-        <Image
-          source={
-            avatarSource
-              ? {uri: avatarSource}
-              : require('../../assets/images/default_avatar.png')
-          }
-          style={styles.avatar}
-        />
+      <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
+        <View style={styles.content}>
+          <Image
+            source={
+              avatarSource
+                ? {uri: avatarSource}
+                : require('../../assets/images/default_avatar.png')
+            }
+            style={styles.avatar}
+          />
 
-        <View style={styles.infoContainer}>
-          <View style={styles.headerRow}>
+          <View style={styles.infoContainer}>
+            <View style={styles.headerRow}>
+              <Typography
+                variant="body"
+                weight="bold"
+                numberOfLines={1}
+                style={styles.name}>
+                {name}
+              </Typography>
+              <Typography variant="caption" color={colors.neutral.darkGrey}>
+                {formatDistanceToNow(new Date(timeAgo), {
+                  addSuffix: true,
+                  locale:
+                    language.toLowerCase() === Language.TR.toLowerCase()
+                      ? tr
+                      : enUS,
+                })}
+              </Typography>
+            </View>
+
+            <View style={styles.groupRow}>
+              <Icon
+                name={type === 'group' ? 'users-filled' : 'calendar-filled'}
+                size={14}
+                color={colors.neutral.darkGrey}
+              />
+              <Typography
+                variant="body"
+                weight="medium"
+                color={colors.neutral.darkGrey}
+                style={styles.groupText}
+                numberOfLines={1}>
+                {groupName}
+              </Typography>
+            </View>
+
             <Typography
-              variant="body"
-              weight="bold"
-              numberOfLines={1}
-              style={styles.name}>
-              {name}
-            </Typography>
-            <Typography variant="caption" color={colors.neutral.darkGrey}>
-              {formatDistanceToNow(new Date(timeAgo), {
-                addSuffix: true,
-                locale:
-                  language.toLowerCase() === Language.TR.toLowerCase()
-                    ? tr
-                    : enUS,
-              })}
+              variant="caption"
+              color={colors.neutral.darkGrey}
+              numberOfLines={2}>
+              {type === 'group'
+                ? t('screens.joinRequest.wants_to_join_group')
+                : t('screens.joinRequest.invites_to_event')}
             </Typography>
           </View>
-
-          <View style={styles.groupRow}>
-            <Icon
-              name={type === 'group' ? 'users-filled' : 'calendar-filled'}
-              size={14}
-              color={colors.neutral.darkGrey}
-            />
-            <Typography
-              variant="body"
-              weight="medium"
-              color={colors.neutral.darkGrey}
-              style={styles.groupText}
-              numberOfLines={1}>
-              {groupName}
-            </Typography>
-          </View>
-
-          <Typography
-            variant="caption"
-            color={colors.neutral.darkGrey}
-            numberOfLines={2}>
-            {type === 'group'
-              ? t('screens.joinRequest.wants_to_join_group')
-              : t('screens.joinRequest.wants_to_join_event')}
-          </Typography>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.actionsContainer}>
         <Button

@@ -309,7 +309,7 @@ export const HomeScreen = ({navigation}: Props) => {
         participantCount={item.participantCount}
         maxParticipants={item.maxParticipants}
         onPress={() =>
-          loggingService.info(`Event banner pressed: ${item.title}`)
+          navigateToScreen(navigation, 'EventDetail', {eventId: item.id})
         }
         style={styles.eventBanner}
       />

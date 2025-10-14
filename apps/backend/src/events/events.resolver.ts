@@ -15,6 +15,8 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Request } from 'express';
 import { EventDto } from './dto/event.dto';
 import { EventStatus } from '../enums/models/event-status.enum';
+import { EventInvitation } from './models/event-invitation.model';
+import { EventInvitationDto } from './dto/event-invitation.dto';
 
 interface GqlContext {
   req: Request & {
@@ -49,6 +51,25 @@ export class EventsResolver {
     const userId = context.req.user?.id;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return this.eventsService.findOne(id, userId, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Query(() => [EventInvitationDto], { name: 'eventInvitations' })
+  async findAllInvitations(
+    @Context() context: GqlContext,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+  ) {
+    const authHeader = context.req.headers.authorization;
+    const userId = context.req.user?.id;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    const invitations = await this.eventsService.findAllInvitations(
+      limit,
+      skip,
+      userId,
+      authToken,
+    );
+    return invitations;
   }
 
   @UseGuards(JwtGuard)
@@ -109,5 +130,25 @@ export class EventsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return this.eventsService.leave(id, userId, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => EventInvitation)
+  async acceptEventInvitation(
+    @Args('id', { type: () => ID }) id: string,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    return this.eventsService.acceptInvitation(id, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => EventInvitation)
+  async rejectEventInvitation(
+    @Args('id', { type: () => ID }) id: string,
+    @Context() context: GqlContext,
+  ) {
+    const userId = context.req.user.id;
+    return this.eventsService.rejectInvitation(id, userId);
   }
 }

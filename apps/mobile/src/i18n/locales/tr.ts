@@ -391,18 +391,17 @@ export default {
 
     // Join Request screens
     joinRequest: {
-      join_requests: 'Katılım İstekleri',
       group_requests: 'Grup İstekleri',
-      event_requests: 'Etkinlik İstekleri',
+      event_invitations: 'Etkinlik davetleri',
       no_requests: 'Henüz İstek Yok',
       no_group_requests_yet: 'Henüz grup katılım isteği yok.',
-      no_event_requests_yet: 'Henüz etkinlik katılım isteği yok.',
+      no_event_invitations_yet: 'Henüz etkinlik daveti yok.',
       could_not_load_requests:
         'Katılım istekleri yüklenemedi. Lütfen tekrar deneyin.',
       request_accepted: 'Katılım isteği kabul edildi',
       request_rejected: 'Katılım isteği reddedildi',
       wants_to_join_group: 'gruba katılmak istiyor.',
-      wants_to_join_event: 'etkinliğe katılmak istiyor.',
+      invites_to_event: 'etkinliğine davet ediyor.',
     },
 
     // Follow Request screens

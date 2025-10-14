@@ -55,7 +55,6 @@ export function MainNavigator() {
 
   useEffect(() => {
     const init = async (): Promise<void> => {
-      console.log('status', status);
       if (status === 'unavailable') {
         requestPermission();
       } else if (status !== 'requesting') {

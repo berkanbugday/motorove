@@ -445,6 +445,11 @@ type EventInvitation {
   updatedById: String!
 }
 
+type EventInvitationDto {
+  event: EventDto!
+  id: ID!
+}
+
 type EventParticipant {
   createdAt: DateTime!
   createdBy: User!
@@ -700,6 +705,7 @@ type Motorcycle {
 }
 
 type Mutation {
+  acceptEventInvitation(id: ID!): EventInvitation!
   accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddMemberInput!): Boolean!
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
@@ -720,6 +726,7 @@ type Mutation {
   markAllNotificationsAsRead: [NotificationDto!]!
   markNotificationAsRead(id: ID!): NotificationDto!
   refreshToken(token: String!): AuthResponse!
+  rejectEventInvitation(id: ID!): EventInvitation!
   removeAddress(id: String!): Boolean!
   removeComment(id: ID!): CommentDto!
   removeDeviceToken: Boolean!
@@ -888,6 +895,7 @@ type Query {
   comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
   count: Float!
   event(id: String!): EventDto!
+  eventInvitations(limit: Int, skip: Int): [EventInvitationDto!]!
   events(limit: Int, skip: Int, status: EventStatus): [EventDto!]!
   followRequests(limit: Int, skip: Int): [UserFollowingDto!]!
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!

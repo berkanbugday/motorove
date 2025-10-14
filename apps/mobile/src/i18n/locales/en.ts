@@ -392,28 +392,24 @@ export default {
 
     // Join Request screens
     joinRequest: {
-      join_requests: 'Join Requests',
       group_requests: 'Group Requests',
-      event_requests: 'Event Requests',
+      event_invitations: 'Event Invitations',
       no_requests: 'No Pending Requests',
-      no_group_requests_yet:
-        'There are no pending group join requests at this time.',
-      no_event_requests_yet:
-        'There are no pending event join requests at this time.',
+      no_group_requests_yet: 'There are no pending group join requests yet.',
+      no_event_invitations_yet: 'There are no pending event invitations yet.',
       could_not_load_requests:
         "We couldn't load join requests. Please try again.",
       request_accepted: 'Request accepted successfully',
       request_rejected: 'Request rejected successfully',
       wants_to_join_group: 'wants to join group.',
-      wants_to_join_event: 'wants to join event.',
+      invites_to_event: 'invites you to the event.',
     },
 
     // Follow Request screens
     followRequest: {
       follow_requests: 'Follow Requests',
       no_requests: 'No Pending Requests',
-      no_follow_requests_yet:
-        'There are no pending follow requests at this time.',
+      no_follow_requests_yet: 'There are no pending follow requests yet.',
       could_not_load_requests:
         "We couldn't load follow requests. Please try again.",
       request_accepted: 'Request accepted successfully',

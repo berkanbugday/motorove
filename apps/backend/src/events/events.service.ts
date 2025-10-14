@@ -16,6 +16,7 @@ import { EventDto } from './dto/event.dto';
 import { Event } from './models/event.model';
 import { plainToClass } from 'class-transformer';
 import { EventStatus } from '../enums/models/event-status.enum';
+import { EventInvitationDto } from './dto/event-invitation.dto';
 
 @Injectable()
 export class EventsService {
@@ -101,6 +102,76 @@ export class EventsService {
     } catch (error) {
       this.logger.error(`Failed to get event with ID ${id}`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Find all invitations for the current user where event status is upcoming and isActive is true
+   */
+  async findAllInvitations(
+    limit?: number,
+    skip?: number,
+    currentUserId?: string,
+    authToken?: string,
+  ): Promise<EventInvitationDto[]> {
+    try {
+      const invitations = await this.prisma.eventInvitation.findMany({
+        where: {
+          inviteeId: currentUserId,
+          isActive: true,
+          event: {
+            status: EventStatus.UPCOMING,
+            isActive: true,
+          },
+        },
+        include: {
+          event: {
+            include: {
+              createdBy: true,
+              organizedByGroup: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: limit,
+        skip: skip,
+      });
+
+      this.logger.log(
+        `Found ${invitations.length} invitations for user ${currentUserId}`,
+      );
+
+      if (invitations.length > 0) {
+        await Promise.all(
+          invitations.map(async (invitation) => {
+            if (invitation.event.images && authToken) {
+              try {
+                invitation.event.images[0] =
+                  await this.storageService.getSignedUrl(
+                    invitation.event.images[0],
+                    3600,
+                    authToken,
+                  );
+              } catch (error) {
+                this.logger.error(
+                  `Error getting signed URL for avatar: ${error.message}`,
+                );
+              }
+            }
+          }),
+        );
+      }
+
+      return await Promise.all(
+        invitations.map((invitation) =>
+          plainToClass(EventInvitationDto, invitation),
+        ),
+      );
+    } catch (error) {
+      this.logger.error('Error finding invitations:', error);
+      throw new BadRequestException('Failed to fetch invitations');
     }
   }
 
@@ -608,6 +679,119 @@ export class EventsService {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
+    }
+  }
+  /**
+   * Accept an event invitation
+   */
+  async acceptInvitation(invitationId: string, currentUserId: string) {
+    try {
+      // First, verify the invitation exists and belongs to the current user
+      const invitation = await this.prisma.eventInvitation.findFirst({
+        where: {
+          id: invitationId,
+          inviteeId: currentUserId,
+          isActive: true,
+        },
+        include: {
+          event: true,
+        },
+      });
+
+      if (!invitation) {
+        throw new NotFoundException('Invitation not found');
+      }
+
+      // Update invitation status to ACCEPTED
+      const updatedInvitation = await this.prisma.eventInvitation.update({
+        where: { id: invitationId },
+        data: {
+          status: 'ACCEPTED',
+          updatedById: currentUserId,
+        },
+        include: {
+          event: {
+            include: {
+              createdBy: true,
+              organizedByGroup: true,
+            },
+          },
+          invitee: true,
+          createdBy: true,
+        },
+      });
+
+      // Add user as participant to the event
+      await this.prisma.eventParticipant.create({
+        data: {
+          eventId: invitation.eventId,
+          status: 'JOINED',
+          createdById: currentUserId,
+        },
+      });
+
+      this.logger.log(
+        `User ${currentUserId} accepted invitation ${invitationId}`,
+      );
+
+      return updatedInvitation;
+    } catch (error) {
+      this.logger.error('Error accepting invitation:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Failed to accept invitation');
+    }
+  }
+
+  /**
+   * Reject an event invitation
+   */
+  async rejectInvitation(invitationId: string, currentUserId: string) {
+    try {
+      // First, verify the invitation exists and belongs to the current user
+      const invitation = await this.prisma.eventInvitation.findFirst({
+        where: {
+          id: invitationId,
+          inviteeId: currentUserId,
+          isActive: true,
+        },
+      });
+
+      if (!invitation) {
+        throw new NotFoundException('Invitation not found');
+      }
+
+      // Update invitation status to REJECTED
+      const updatedInvitation = await this.prisma.eventInvitation.update({
+        where: { id: invitationId },
+        data: {
+          status: 'REJECTED',
+          updatedById: currentUserId,
+        },
+        include: {
+          event: {
+            include: {
+              createdBy: true,
+              organizedByGroup: true,
+            },
+          },
+          invitee: true,
+          createdBy: true,
+        },
+      });
+
+      this.logger.log(
+        `User ${currentUserId} rejected invitation ${invitationId}`,
+      );
+
+      return updatedInvitation;
+    } catch (error) {
+      this.logger.error('Error rejecting invitation:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Failed to reject invitation');
     }
   }
 

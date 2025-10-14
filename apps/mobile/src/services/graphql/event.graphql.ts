@@ -59,16 +59,23 @@ export const EVENT_FRAGMENT = gql`
 `;
 
 // User invitation fragment
-export const USER_INVITATION_FRAGMENT = gql`
-  fragment UserInvitationFragment on EventInvitation {
+export const EVENT_INVITATION_FRAGMENT = gql`
+  fragment EventInvitationFragment on EventInvitationDto {
     id
-    eventId
-    status
-    invitee {
+    event {
       id
-      firstName
-      lastName
-      avatar
+      title
+      createdAt
+      images
+      createdBy {
+        id
+        firstName
+        lastName
+      }
+      organizedByGroup {
+        id
+        name
+      }
     }
   }
 `;
@@ -100,16 +107,6 @@ export const REMOVE_EVENT = gql`
   }
 `;
 
-// Invite users to an event
-export const INVITE_USERS_TO_EVENT = gql`
-  mutation InviteUsersToEvent($input: InviteUsersInput!) {
-    inviteUsersToEvent(input: $input) {
-      ...UserInvitationFragment
-    }
-  }
-  ${USER_INVITATION_FRAGMENT}
-`;
-
 // Get events query
 export const GET_EVENTS = gql`
   query GetEvents($limit: Int, $skip: Int, $status: EventStatus) {
@@ -130,43 +127,26 @@ export const GET_EVENT = gql`
   ${EVENT_FRAGMENT}
 `;
 
-// Get event join requests
-export const GET_EVENT_JOIN_REQUESTS = gql`
-  query GetEventJoinRequests($limit: Int, $skip: Int) {
-    eventJoinRequests(limit: $limit, skip: $skip) {
-      id
-      event {
-        id
-        title
-      }
-      user {
-        id
-        firstName
-        lastName
-        avatar
-      }
-      status
-      createdAt
+// Get event invitations
+export const GET_EVENT_INVITATIONS = gql`
+  query GetEventInvitations($limit: Int, $skip: Int) {
+    eventInvitations(limit: $limit, skip: $skip) {
+      ...EventInvitationFragment
     }
+  }
+  ${EVENT_INVITATION_FRAGMENT}
+`;
+
+// Accept event invitation
+export const ACCEPT_EVENT_INVITATION = gql`
+  mutation AcceptEventInvitation($id: ID!) {
+    acceptEventInvitation(id: $id)
   }
 `;
 
-// Accept event join request
-export const ACCEPT_EVENT_JOIN_REQUEST = gql`
-  mutation AcceptEventJoinRequest($id: String!) {
-    acceptEventJoinRequest(id: $id) {
-      id
-      status
-    }
-  }
-`;
-
-// Reject event join request
-export const REJECT_EVENT_JOIN_REQUEST = gql`
-  mutation RejectEventJoinRequest($id: String!) {
-    rejectEventJoinRequest(id: $id) {
-      id
-      status
-    }
+// Reject event invitation
+export const REJECT_EVENT_INVITATION = gql`
+  mutation RejectEventInvitation($id: ID!) {
+    rejectEventInvitation(id: $id)
   }
 `;

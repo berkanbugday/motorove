@@ -1,14 +1,12 @@
 import {useMutation, useQuery} from '@apollo/client';
-import {apolloClient} from '../configs/apolloClientConfig';
 import {
   CREATE_EVENT,
   GET_EVENT,
   GET_EVENTS,
   UPDATE_EVENT,
-  INVITE_USERS_TO_EVENT,
-  GET_EVENT_JOIN_REQUESTS,
-  ACCEPT_EVENT_JOIN_REQUEST,
-  REJECT_EVENT_JOIN_REQUEST,
+  GET_EVENT_INVITATIONS,
+  ACCEPT_EVENT_INVITATION,
+  REJECT_EVENT_INVITATION,
   REMOVE_EVENT,
 } from './graphql/event.graphql';
 import {loggingService} from './logging.service';
@@ -213,28 +211,6 @@ export const useRemoveEvent = (onSuccess?: () => void) => {
   };
 };
 
-// Function to invite users to an event
-export const inviteUsersToEvent = async (
-  eventId: string,
-  userIds: string[],
-): Promise<any> => {
-  try {
-    const {data} = await apolloClient.mutate({
-      mutation: INVITE_USERS_TO_EVENT,
-      variables: {
-        input: {
-          eventId,
-          userIds,
-        },
-      },
-    });
-    return data?.inviteUsersToEvent;
-  } catch (error) {
-    loggingService.error('Error inviting users to event:', error);
-    return null;
-  }
-};
-
 // Hook for getting a specific event
 export const useGetEvent = (id: string) => {
   const {data, loading, error, refetch} = useQuery(GET_EVENT, {
@@ -330,8 +306,8 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
   };
 };
 
-// Hook to fetch event join requests
-export const useGetEventJoinRequests = (limit = 20, skip = 0) => {
+// Hook to fetch event invitations
+export const useGetEventInvitations = (limit = 20, skip = 0) => {
   const {t} = useTranslation();
   const [hasMore, setHasMore] = useState(true);
 
@@ -341,10 +317,10 @@ export const useGetEventJoinRequests = (limit = 20, skip = 0) => {
     error,
     refetch: originalRefetch,
     fetchMore,
-  } = useQuery(GET_EVENT_JOIN_REQUESTS, {
+  } = useQuery(GET_EVENT_INVITATIONS, {
     variables: {limit, skip},
     onError: errorObj => {
-      loggingService.error('Error fetching event join requests:', errorObj);
+      loggingService.error('Error fetching event invitations:', errorObj);
     },
   });
 
@@ -362,7 +338,7 @@ export const useGetEventJoinRequests = (limit = 20, skip = 0) => {
     try {
       const result = await fetchMore({
         variables: {
-          skip: data?.eventJoinRequests?.length || 0,
+          skip: data?.eventInvitations?.length || 0,
           limit,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
@@ -371,91 +347,76 @@ export const useGetEventJoinRequests = (limit = 20, skip = 0) => {
           }
 
           return {
-            eventJoinRequests: [
-              ...prev.eventJoinRequests,
-              ...fetchMoreResult.eventJoinRequests,
+            eventInvitations: [
+              ...prev.eventInvitations,
+              ...fetchMoreResult.eventInvitations,
             ],
           };
         },
       });
 
-      if (result.data.eventJoinRequests.length < limit) {
+      if (result.data.eventInvitations.length < limit) {
         setHasMore(false);
       }
     } catch (errorObj) {
-      loggingService.error('Error loading more join requests:', errorObj);
+      loggingService.error('Error loading more invitations:', errorObj);
     }
-  }, [data?.eventJoinRequests?.length, fetchMore, hasMore, limit, loading]);
+  }, [data?.eventInvitations?.length, fetchMore, hasMore, limit, loading]);
+
+  const [acceptMutation] = useMutation(ACCEPT_EVENT_INVITATION, {
+    onCompleted: () => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.joinRequest.invitation_accepted'),
+      });
+      refetch();
+    },
+    onError: errorObj => {
+      loggingService.error('Error accepting invitation:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.joinRequest.error_accepting'),
+      });
+    },
+  });
+
+  const [rejectMutation] = useMutation(REJECT_EVENT_INVITATION, {
+    onCompleted: () => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.joinRequest.invitation_rejected'),
+      });
+      refetch();
+    },
+    onError: errorObj => {
+      loggingService.error('Error rejecting invitation:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.joinRequest.error_rejecting'),
+      });
+    },
+  });
 
   const handleAccept = useCallback(
-    async (requestId: string) => {
-      try {
-        const [acceptEventJoinRequest] = useMutation(
-          ACCEPT_EVENT_JOIN_REQUEST,
-          {
-            variables: {id: requestId},
-            onCompleted: () => {
-              showToast({
-                type: 'success',
-                text1: t('common.success'),
-                text2: t('screens.joinRequest.request_accepted'),
-              });
-              refetch();
-            },
-            onError: errorObj => {
-              loggingService.error('Error accepting join request:', errorObj);
-              showToast({
-                type: 'error',
-                text1: t('common.error'),
-                text2:
-                  errorObj.message || t('screens.joinRequest.error_accepting'),
-              });
-            },
-          },
-        );
-        await acceptEventJoinRequest();
-      } catch (error) {
-        loggingService.error('Error accepting join request:', error);
-      }
+    (invitationId: string) => {
+      acceptMutation({variables: {id: invitationId}});
     },
-    [t, refetch],
+    [acceptMutation],
   );
 
   const handleReject = useCallback(
-    async (requestId: string) => {
-      try {
-        const [rejectEventJoinRequest] = useMutation(
-          REJECT_EVENT_JOIN_REQUEST,
-          {
-            variables: {id: requestId},
-            onCompleted: () => {
-              showToast({
-                type: 'success',
-                text1: t('common.success'),
-                text2: t('screens.joinRequest.request_rejected'),
-              });
-              refetch();
-            },
-            onError: errorObj => {
-              loggingService.error('Error rejecting join request:', errorObj);
-              showToast({
-                type: 'error',
-                text1: t('common.error'),
-                text2:
-                  errorObj.message || t('screens.joinRequest.error_rejecting'),
-              });
-            },
-          },
-        );
-      } catch (error) {
-        loggingService.error('Error rejecting join request:', error);
-      }
+    (invitationId: string) => {
+      rejectMutation({variables: {id: invitationId}});
     },
-    [t, refetch],
+    [rejectMutation],
   );
 
   return {
-    joinRequests: data?.eventJoinRequests || [],
+    invitations: data?.eventInvitations || [],
     loading,
     error,
     refetch,
@@ -472,8 +433,7 @@ export const EventService = {
   useUpdateEvent,
   useGetEvent,
   useGetEvents,
-  useGetEventJoinRequests,
-  inviteUsersToEvent,
+  useGetEventInvitations,
 };
 
 export default EventService;

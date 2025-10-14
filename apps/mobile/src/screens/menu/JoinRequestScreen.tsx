@@ -16,7 +16,7 @@ import {
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {useGetGroupJoinRequests} from '@services/group-membership.service';
-import {useGetEventJoinRequests} from '@services/event.service';
+import {useGetEventInvitations} from '@services/event.service';
 
 /**
  * JoinRequestScreen - Displays join requests for groups and events
@@ -25,7 +25,7 @@ export const JoinRequestScreen = () => {
   const [activeTab, setActiveTab] = useState('group');
   const [refreshingGroupRequests, setRefreshingGroupRequests] = useState(false);
   const [refreshingEventRequests, setRefreshingEventRequests] = useState(false);
-  const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
+  const navigation = useNavigation<MainScreenNavigationProp<'JoinRequest'>>();
   const {t} = useTranslation();
 
   // Fetch group join requests
@@ -39,16 +39,16 @@ export const JoinRequestScreen = () => {
     handleReject: rejectGroupRequest,
   } = useGetGroupJoinRequests();
 
-  // Fetch event join requests
+  // Fetch event invitations
   const {
-    joinRequests: eventJoinRequests,
-    loading: eventRequestsLoading,
-    error: eventRequestsError,
-    refetch: refetchEventRequests,
-    loadMore: loadMoreEventRequests,
-    handleAccept: acceptEventRequest,
-    handleReject: rejectEventRequest,
-  } = useGetEventJoinRequests();
+    invitations: eventInvitations,
+    loading: eventInvitationsLoading,
+    error: eventInvitationsError,
+    refetch: refetchEventInvitations,
+    loadMore: loadMoreEventInvitations,
+    handleAccept: acceptEventInvitation,
+    handleReject: rejectEventInvitation,
+  } = useGetEventInvitations();
 
   // Handle refresh group requests
   const handleRefreshGroupRequests = useCallback(async () => {
@@ -57,12 +57,12 @@ export const JoinRequestScreen = () => {
     setRefreshingGroupRequests(false);
   }, [refetchGroupRequests]);
 
-  // Handle refresh event requests
-  const handleRefreshEventRequests = useCallback(async () => {
+  // Handle refresh event invitations
+  const handleRefreshEventInvitations = useCallback(async () => {
     setRefreshingEventRequests(true);
-    await refetchEventRequests();
+    await refetchEventInvitations();
     setRefreshingEventRequests(false);
-  }, [refetchEventRequests]);
+  }, [refetchEventInvitations]);
 
   // Render skeleton loaders for groups
   const renderGroupSkeletons = (count = 3) => {
@@ -133,6 +133,9 @@ export const JoinRequestScreen = () => {
             name={`${item.user.firstName} ${item.user.lastName}`}
             groupName={item.group.name}
             timeAgo={item.updatedAt}
+            onPress={() =>
+              navigation.navigate('Profile', {userId: item.user.id})
+            }
             onAccept={() => acceptGroupRequest(item.id)}
             onReject={() => rejectGroupRequest(item.id)}
           />
@@ -150,19 +153,19 @@ export const JoinRequestScreen = () => {
     );
   };
 
-  // Render event requests list
-  const renderEventRequests = () => {
+  // Render event invitations list
+  const renderEventInvitations = () => {
     if (
-      eventRequestsLoading &&
+      eventInvitationsLoading &&
       !refreshingEventRequests &&
-      !eventJoinRequests?.length
+      !eventInvitations?.length
     ) {
       return (
         <View style={styles.loadingContainer}>{renderGroupSkeletons()}</View>
       );
     }
 
-    if (eventRequestsError) {
+    if (eventInvitationsError) {
       return (
         <View style={styles.emptyState}>
           <Icon name="error" size={48} color={colors.status.error} />
@@ -176,13 +179,13 @@ export const JoinRequestScreen = () => {
             title={t('common.try_again')}
             variant="primary"
             shape="round"
-            onPress={handleRefreshEventRequests}
+            onPress={handleRefreshEventInvitations}
           />
         </View>
       );
     }
 
-    if (!eventJoinRequests || eventJoinRequests.length === 0) {
+    if (!eventInvitations || eventInvitations.length === 0) {
       return (
         <View style={styles.emptyState}>
           <Icon name="calendar-filled" size={48} />
@@ -190,7 +193,7 @@ export const JoinRequestScreen = () => {
             {t('screens.joinRequest.no_requests')}
           </Title>
           <BodySmall align="center">
-            {t('screens.joinRequest.no_event_requests_yet')}
+            {t('screens.joinRequest.no_event_invitations_yet')}
           </BodySmall>
         </View>
       );
@@ -198,27 +201,38 @@ export const JoinRequestScreen = () => {
 
     return (
       <FlatList
-        data={eventJoinRequests}
+        data={eventInvitations}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <JoinRequestCard
             type="event"
-            avatarSource={item.user.avatar}
-            name={`${item.user.firstName} ${item.user.lastName}`}
+            avatarSource={
+              item.event.images && item.event.images.length > 0
+                ? item.event.images[0]
+                : null
+            }
+            name={
+              item.event.organizedByGroup
+                ? item.event.organizedByGroup.name
+                : `${item.event.createdBy.firstName} ${item.event.createdBy.lastName}`
+            }
             groupName={item.event.title}
-            timeAgo={item.createdAt}
-            onAccept={() => acceptEventRequest(item.id)}
-            onReject={() => rejectEventRequest(item.id)}
+            timeAgo={item.event.createdAt}
+            onPress={() =>
+              navigation.navigate('EventDetail', {eventId: item.event.id})
+            }
+            onAccept={() => acceptEventInvitation(item.id)}
+            onReject={() => rejectEventInvitation(item.id)}
           />
         )}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshingEventRequests}
-            onRefresh={handleRefreshEventRequests}
+            onRefresh={handleRefreshEventInvitations}
           />
         }
-        onEndReached={loadMoreEventRequests}
+        onEndReached={loadMoreEventInvitations}
         onEndReachedThreshold={0.5}
       />
     );
@@ -232,15 +246,17 @@ export const JoinRequestScreen = () => {
     },
     {
       key: 'event',
-      label: t('screens.joinRequest.event_requests'),
-      content: <View style={styles.tabContent}>{renderEventRequests()}</View>,
+      label: t('screens.joinRequest.event_invitations'),
+      content: (
+        <View style={styles.tabContent}>{renderEventInvitations()}</View>
+      ),
     },
   ];
 
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('screens.joinRequest.join_requests')}
+        title={t('screens.menu.join_requests')}
         showShadow={false}
         showBackButton
         onBackPress={() => navigation.goBack()}

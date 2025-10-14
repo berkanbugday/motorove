@@ -51,7 +51,6 @@ const FABGroup: React.FC<FABGroupProps> = ({
   // Toggle open/closed state
   const toggle = () => {
     const newState = !isOpen;
-    console.log('FABGroup toggle:', newState, 'actions count:', actions.length);
     setIsOpen(newState);
     if (onStateChange) {
       onStateChange(newState);
@@ -128,13 +127,6 @@ const FABGroup: React.FC<FABGroupProps> = ({
             },
           ]}>
           {actions.map((action, index) => {
-            console.log(
-              `Rendering action ${index}:`,
-              action.label,
-              'displayMode:',
-              action.displayMode,
-            );
-
             // Get display mode for this action
             const displayMode: FABActionDisplayMode =
               action.displayMode || 'both';
