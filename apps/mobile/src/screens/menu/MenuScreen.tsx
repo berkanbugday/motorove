@@ -107,14 +107,29 @@ export const MenuScreen = () => {
         {
           icon: (
             <Icon
-              name="list-check-filled"
+              name="users-filled"
               size={18}
               color={colors.neutral.black}
             />
           ),
-          title: t('screens.menu.join_requests'),
+          title: t('screens.menu.group_join_requests'),
           onPress: () => {
-            navigation.navigate('JoinRequest');
+            navigation.navigate('GroupJoinRequest');
+          },
+          showRightIcon: true,
+          showBadge: false,
+        },
+        {
+          icon: (
+            <Icon
+              name="calendar-filled"
+              size={18}
+              color={colors.neutral.black}
+            />
+          ),
+          title: t('screens.menu.event_invitations'),
+          onPress: () => {
+            navigation.navigate('EventInvitation');
           },
           showRightIcon: true,
           showBadge: false,

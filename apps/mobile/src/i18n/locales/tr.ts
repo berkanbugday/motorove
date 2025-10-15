@@ -389,19 +389,30 @@ export default {
       no_groups_found: 'Grup bulunamadı',
     },
 
-    // Join Request screens
-    joinRequest: {
-      group_requests: 'Grup İstekleri',
-      event_invitations: 'Etkinlik davetleri',
+    // Group Join Request screens
+    groupJoinRequest: {
+      title: 'Grup Katılım İstekleri',
       no_requests: 'Henüz İstek Yok',
-      no_group_requests_yet: 'Henüz grup katılım isteği yok.',
-      no_event_invitations_yet: 'Henüz etkinlik daveti yok.',
+      no_requests_description: 'Henüz grup katılım isteği yok.',
       could_not_load_requests:
-        'Katılım istekleri yüklenemedi. Lütfen tekrar deneyin.',
+        'Grup katılım istekleri yüklenemedi. Lütfen tekrar deneyin.',
       request_accepted: 'Katılım isteği kabul edildi',
       request_rejected: 'Katılım isteği reddedildi',
-      wants_to_join_group: 'gruba katılmak istiyor.',
-      invites_to_event: 'etkinliğine davet ediyor.',
+      wants_to_join_group: 'bu gruba katılmak istiyor.',
+    },
+
+    // Event Invitation screens
+    eventInvitation: {
+      title: 'Etkinlik Davetleri',
+      no_invitations: 'Henüz Davet Yok',
+      no_invitations_description: 'Henüz etkinlik daveti yok.',
+      could_not_load_invitations:
+        'Etkinlik davetleri yüklenemedi. Lütfen tekrar deneyin.',
+      invitation_accepted: 'Davet kabul edildi',
+      error_accepting: 'Davet kabul edilirken bir hata oluştu',
+      invitation_rejected: 'Davet reddedildi',
+      error_rejecting: 'Davet reddedilirken bir hata oluştu',
+      invites_you_to_event: 'etkinliğine davet ediyor.',
     },
 
     // Follow Request screens
@@ -590,7 +601,8 @@ export default {
       posts: 'Gönderiler',
       events: 'Etkinlikler',
       requests: 'İstekler',
-      join_requests: 'Katılım İstekleri',
+      group_join_requests: 'Grup Katılım İstekleri',
+      event_invitations: 'Etkinlik Davetleri',
       follow_requests: 'Takip İstekleri',
       settings: 'Ayarlar',
       language_selection: 'Dil Seçimi',

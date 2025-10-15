@@ -58,9 +58,9 @@ export class AuthService {
       supabaseUser = data.user;
 
       // Use a transaction for database operations
-      const result = await this.prismaService.$transaction(async (prisma) => {
+      const result = await this.prismaService.$transaction(async (tx) => {
         // Create user in our database
-        const user = await prisma.user.create({
+        const user = await tx.user.create({
           data: {
             firstName,
             lastName,
@@ -78,7 +78,7 @@ export class AuthService {
         });
 
         // Create default notification settings for the new user
-        await prisma.userSetting.create({
+        await tx.userSetting.create({
           data: {
             userId: user.id,
             notificationPreferences: notificationPreferences,

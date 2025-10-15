@@ -103,7 +103,7 @@ export class EventsResolver {
   async removeEvent(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
-  ) {
+  ): Promise<boolean> {
     const userId = context.req.user.id;
     return this.eventsService.remove(id, userId);
   }
@@ -113,7 +113,7 @@ export class EventsResolver {
   async joinEvent(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
-  ) {
+  ): Promise<EventDto> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
@@ -125,7 +125,7 @@ export class EventsResolver {
   async leaveEvent(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
-  ) {
+  ): Promise<EventDto> {
     const userId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
@@ -133,21 +133,21 @@ export class EventsResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => EventInvitation)
+  @Mutation(() => Boolean)
   async acceptEventInvitation(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
-  ) {
+  ): Promise<boolean> {
     const userId = context.req.user.id;
     return this.eventsService.acceptInvitation(id, userId);
   }
 
   @UseGuards(JwtGuard)
-  @Mutation(() => EventInvitation)
+  @Mutation(() => Boolean)
   async rejectEventInvitation(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: GqlContext,
-  ) {
+  ): Promise<boolean> {
     const userId = context.req.user.id;
     return this.eventsService.rejectInvitation(id, userId);
   }

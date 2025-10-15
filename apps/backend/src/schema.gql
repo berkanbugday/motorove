@@ -705,7 +705,7 @@ type Motorcycle {
 }
 
 type Mutation {
-  acceptEventInvitation(id: ID!): EventInvitation!
+  acceptEventInvitation(id: ID!): Boolean!
   accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddMemberInput!): Boolean!
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
@@ -726,7 +726,7 @@ type Mutation {
   markAllNotificationsAsRead: [NotificationDto!]!
   markNotificationAsRead(id: ID!): NotificationDto!
   refreshToken(token: String!): AuthResponse!
-  rejectEventInvitation(id: ID!): EventInvitation!
+  rejectEventInvitation(id: ID!): Boolean!
   removeAddress(id: String!): Boolean!
   removeComment(id: ID!): CommentDto!
   removeDeviceToken: Boolean!

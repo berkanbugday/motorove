@@ -405,6 +405,32 @@ export default {
       invites_to_event: 'invites you to the event.',
     },
 
+    // Group Join Request screens
+    groupJoinRequest: {
+      title: 'Group Join Requests',
+      no_requests: 'No Pending Requests',
+      no_requests_description: 'There are no pending group join requests yet.',
+      could_not_load_requests:
+        "We couldn't load group join requests. Please try again.",
+      request_accepted: 'Request accepted successfully',
+      request_rejected: 'Request rejected successfully',
+      wants_to_join_group: 'wants to join this group.',
+    },
+
+    // Event Invitation screens
+    eventInvitation: {
+      title: 'Event Invitations',
+      no_invitations: 'No Pending Invitations',
+      no_invitations_description: 'There are no pending event invitations yet.',
+      could_not_load_invitations:
+        "We couldn't load event invitations. Please try again.",
+      invitation_accepted: 'Invitation accepted successfully',
+      error_accepting: 'Invitation accepted failed',
+      invitation_rejected: 'Invitation rejected successfully',
+      error_rejecting: 'Invitation rejected failed',
+      invites_you_to_event: 'invites you to the event.',
+    },
+
     // Follow Request screens
     followRequest: {
       follow_requests: 'Follow Requests',
@@ -591,7 +617,8 @@ export default {
       posts: 'Posts',
       events: 'Events',
       requests: 'Requests',
-      join_requests: 'Join Requests',
+      group_join_requests: 'Group Join Requests',
+      event_invitations: 'Event Invitations',
       follow_requests: 'Follow Requests',
       settings: 'Settings',
       language_selection: 'Language Selection',

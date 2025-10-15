@@ -13,21 +13,29 @@ import {
   SkeletonGroup,
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
-import {useFollowRequests} from '@services/user-following.service';
-import {FollowRequestCard} from '@components/FollowRequestCard/FollowRequestCard';
+import {useGetEventInvitations} from '@services/event.service';
+import {EventInvitationCard, EventInvitation} from '@components';
 
 /**
- * FollowRequestScreen - Displays follow requests from other users
+ * EventInvitationScreen - Displays event invitations
  * Professional implementation with single responsibility principle
  */
-export const FollowRequestScreen = () => {
+export const EventInvitationScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
-  const navigation = useNavigation<MainScreenNavigationProp<'FollowRequest'>>();
+  const navigation =
+    useNavigation<MainScreenNavigationProp<'EventInvitation'>>();
   const {t} = useTranslation();
 
-  // Fetch follow requests with comprehensive error handling
-  const {followRequests, loading, error, refetch, handleAccept, handleReject} =
-    useFollowRequests();
+  // Fetch event invitations with comprehensive error handling
+  const {
+    invitations,
+    loading,
+    error,
+    refetch,
+    loadMore,
+    handleAccept,
+    handleReject,
+  } = useGetEventInvitations();
 
   /**
    * Handle pull-to-refresh functionality
@@ -42,11 +50,11 @@ export const FollowRequestScreen = () => {
   }, [refetch]);
 
   /**
-   * Navigate to user profile
+   * Navigate to event detail screen
    */
-  const handleUserPress = useCallback(
-    (userId: string) => {
-      navigation.navigate('Profile', {userId});
+  const handleEventPress = useCallback(
+    (eventId: string) => {
+      navigation.navigate('EventDetail', {eventId});
     },
     [navigation],
   );
@@ -76,7 +84,7 @@ export const FollowRequestScreen = () => {
           {t('errors.general.something_wrong')}
         </Subtitle>
         <BodySmall align="center">
-          {t('screens.followRequest.could_not_load_requests')}
+          {t('screens.eventInvitation.could_not_load_invitations')}
         </BodySmall>
         <Button
           title={t('common.try_again')}
@@ -90,17 +98,17 @@ export const FollowRequestScreen = () => {
   );
 
   /**
-   * Render empty state when no follow requests exist
+   * Render empty state when no invitations exist
    */
   const renderEmptyState = useCallback(
     () => (
       <View style={styles.emptyState}>
-        <Icon name="user-filled" size={48} />
+        <Icon name="calendar-filled" size={48} />
         <Title weight="bold" align="center">
-          {t('screens.followRequest.no_requests')}
+          {t('screens.eventInvitation.no_invitations')}
         </Title>
         <BodySmall align="center">
-          {t('screens.followRequest.no_follow_requests_yet')}
+          {t('screens.eventInvitation.no_invitations_description')}
         </BodySmall>
       </View>
     ),
@@ -108,29 +116,26 @@ export const FollowRequestScreen = () => {
   );
 
   /**
-   * Render individual follow request item
+   * Render individual event invitation item
    */
-  const renderFollowRequest = useCallback(
-    ({item}: {item: any}) => (
-      <FollowRequestCard
-        avatarSource={item.follower?.avatar}
-        name={`${item.follower?.firstName} ${item.follower?.lastName}`}
-        city={item.follower?.city?.value}
-        timeAgo={item.updatedAt}
-        onUserPress={() => handleUserPress(item.follower.id)}
+  const renderInvitation = useCallback(
+    ({item}: {item: EventInvitation}) => (
+      <EventInvitationCard
+        invitation={item}
+        onEventPress={() => handleEventPress(item.event.id)}
         onAccept={() => handleAccept(item.id)}
         onReject={() => handleReject(item.id)}
       />
     ),
-    [handleAccept, handleReject],
+    [handleEventPress, handleAccept, handleReject],
   );
 
   // Handle loading state
-  if (loading && !refreshing && !followRequests?.length) {
+  if (loading && !refreshing && !invitations?.length) {
     return (
       <View style={styles.container}>
         <TopHeaderBar
-          title={t('screens.followRequest.follow_requests')}
+          title={t('screens.eventInvitation.title')}
           showShadow={false}
           containerStyle={styles.topHeaderBar}
           showBackButton
@@ -146,7 +151,7 @@ export const FollowRequestScreen = () => {
     return (
       <View style={styles.container}>
         <TopHeaderBar
-          title={t('screens.followRequest.follow_requests')}
+          title={t('screens.eventInvitation.title')}
           showShadow={false}
           containerStyle={styles.topHeaderBar}
           showBackButton
@@ -160,20 +165,21 @@ export const FollowRequestScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('screens.followRequest.follow_requests')}
+        title={t('screens.eventInvitation.title')}
         showShadow={false}
         containerStyle={styles.topHeaderBar}
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
       <FlatList
-        data={followRequests}
+        data={invitations}
         keyExtractor={item => item.id}
-        renderItem={renderFollowRequest}
+        renderItem={renderInvitation}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
+        onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={renderEmptyState}

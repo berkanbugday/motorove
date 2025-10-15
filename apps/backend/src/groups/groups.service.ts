@@ -298,8 +298,8 @@ export class GroupsService {
         },
       };
 
-      const group = await this.prisma.$transaction(async (prisma) => {
-        const group = await prisma.group.create({
+      const group = await this.prisma.$transaction(async (tx) => {
+        const group = await tx.group.create({
           data: prismaData,
           include: {
             createdBy: true,
@@ -308,7 +308,7 @@ export class GroupsService {
         });
 
         // Create an admin membership for the creator
-        await prisma.groupMembership.create({
+        await tx.groupMembership.create({
           data: {
             group: {
               connect: { id: group.id },

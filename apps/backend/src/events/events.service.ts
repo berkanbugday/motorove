@@ -17,6 +17,7 @@ import { Event } from './models/event.model';
 import { plainToClass } from 'class-transformer';
 import { EventStatus } from '../enums/models/event-status.enum';
 import { EventInvitationDto } from './dto/event-invitation.dto';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
 
 @Injectable()
 export class EventsService {
@@ -117,6 +118,7 @@ export class EventsService {
     try {
       const invitations = await this.prisma.eventInvitation.findMany({
         where: {
+          status: ApprovalStatus.PENDING,
           inviteeId: currentUserId,
           isActive: true,
           event: {
@@ -561,6 +563,123 @@ export class EventsService {
     }
   }
 
+  /**
+   * Accept an event invitation
+   */
+  async acceptInvitation(
+    invitationId: string,
+    currentUserId: string,
+  ): Promise<boolean> {
+    try {
+      // First, verify the invitation exists and belongs to the current user
+      const invitation = await this.prisma.eventInvitation.findFirst({
+        where: {
+          id: invitationId,
+          inviteeId: currentUserId,
+          isActive: true,
+          status: ApprovalStatus.PENDING,
+          event: {
+            isActive: true,
+            status: EventStatus.UPCOMING,
+          },
+        },
+        include: {
+          event: true,
+        },
+      });
+
+      if (!invitation) {
+        throw new NotFoundException('Invitation not found');
+      }
+
+      // Use transaction to ensure both operations succeed or fail together
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Update invitation status to ACCEPTED
+        const updatedInvitation = await tx.eventInvitation.update({
+          where: { id: invitationId },
+          data: {
+            status: ApprovalStatus.ACCEPTED,
+            updatedById: currentUserId,
+            updatedAt: new Date(),
+          },
+        });
+
+        // Add user as participant to the event
+        await tx.eventParticipant.create({
+          data: {
+            eventId: invitation.eventId,
+            status: EventParticipantStatus.JOINED,
+            createdById: currentUserId,
+          },
+        });
+
+        return updatedInvitation;
+      });
+
+      this.logger.log(
+        `User ${currentUserId} accepted invitation ${invitationId}`,
+      );
+
+      return !!result;
+    } catch (error) {
+      this.logger.error('Error accepting invitation:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Reject an event invitation
+   */
+  async rejectInvitation(
+    invitationId: string,
+    currentUserId: string,
+  ): Promise<boolean> {
+    try {
+      // First, verify the invitation exists and belongs to the current user
+      const invitation = await this.prisma.eventInvitation.findFirst({
+        where: {
+          id: invitationId,
+          inviteeId: currentUserId,
+          isActive: true,
+          status: ApprovalStatus.PENDING,
+          event: {
+            isActive: true,
+            status: EventStatus.UPCOMING,
+          },
+        },
+      });
+
+      if (!invitation) {
+        throw new NotFoundException('Invitation not found');
+      }
+
+      // Update invitation status to REJECTED
+      const updatedInvitation = await this.prisma.eventInvitation.update({
+        where: { id: invitationId },
+        data: {
+          status: ApprovalStatus.REJECTED,
+          updatedById: currentUserId,
+          updatedAt: new Date(),
+        },
+      });
+
+      this.logger.log(
+        `User ${currentUserId} rejected invitation ${invitationId}`,
+      );
+
+      return !!updatedInvitation;
+    } catch (error) {
+      this.logger.error('Error rejecting invitation:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Failed to reject invitation');
+    }
+  }
+
   // Helper method to map Prisma event to DTO with additional calculated fields
   private async mapToDto(
     event: {
@@ -679,119 +798,6 @@ export class EventsService {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
-    }
-  }
-  /**
-   * Accept an event invitation
-   */
-  async acceptInvitation(invitationId: string, currentUserId: string) {
-    try {
-      // First, verify the invitation exists and belongs to the current user
-      const invitation = await this.prisma.eventInvitation.findFirst({
-        where: {
-          id: invitationId,
-          inviteeId: currentUserId,
-          isActive: true,
-        },
-        include: {
-          event: true,
-        },
-      });
-
-      if (!invitation) {
-        throw new NotFoundException('Invitation not found');
-      }
-
-      // Update invitation status to ACCEPTED
-      const updatedInvitation = await this.prisma.eventInvitation.update({
-        where: { id: invitationId },
-        data: {
-          status: 'ACCEPTED',
-          updatedById: currentUserId,
-        },
-        include: {
-          event: {
-            include: {
-              createdBy: true,
-              organizedByGroup: true,
-            },
-          },
-          invitee: true,
-          createdBy: true,
-        },
-      });
-
-      // Add user as participant to the event
-      await this.prisma.eventParticipant.create({
-        data: {
-          eventId: invitation.eventId,
-          status: 'JOINED',
-          createdById: currentUserId,
-        },
-      });
-
-      this.logger.log(
-        `User ${currentUserId} accepted invitation ${invitationId}`,
-      );
-
-      return updatedInvitation;
-    } catch (error) {
-      this.logger.error('Error accepting invitation:', error);
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new BadRequestException('Failed to accept invitation');
-    }
-  }
-
-  /**
-   * Reject an event invitation
-   */
-  async rejectInvitation(invitationId: string, currentUserId: string) {
-    try {
-      // First, verify the invitation exists and belongs to the current user
-      const invitation = await this.prisma.eventInvitation.findFirst({
-        where: {
-          id: invitationId,
-          inviteeId: currentUserId,
-          isActive: true,
-        },
-      });
-
-      if (!invitation) {
-        throw new NotFoundException('Invitation not found');
-      }
-
-      // Update invitation status to REJECTED
-      const updatedInvitation = await this.prisma.eventInvitation.update({
-        where: { id: invitationId },
-        data: {
-          status: 'REJECTED',
-          updatedById: currentUserId,
-        },
-        include: {
-          event: {
-            include: {
-              createdBy: true,
-              organizedByGroup: true,
-            },
-          },
-          invitee: true,
-          createdBy: true,
-        },
-      });
-
-      this.logger.log(
-        `User ${currentUserId} rejected invitation ${invitationId}`,
-      );
-
-      return updatedInvitation;
-    } catch (error) {
-      this.logger.error('Error rejecting invitation:', error);
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new BadRequestException('Failed to reject invitation');
     }
   }
 

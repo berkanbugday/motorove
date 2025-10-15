@@ -8,31 +8,31 @@ import {tr, enUS} from 'date-fns/locale';
 import {useLanguage} from '@contexts/LanguageContext';
 import {Language} from '@motorove/shared';
 
-export interface JoinRequestCardProps {
+export interface GroupJoinRequest {
+  id: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
+  group: {
+    id: string;
+    name: string;
+  };
+  updatedAt: Date;
+}
+
+export interface GroupJoinRequestCardProps {
   /**
-   * Type of request (group or event)
+   * The group join request data
    */
-  type: 'group' | 'event';
+  request: GroupJoinRequest;
 
   /**
-   * User avatar image source
+   * Handler for when user avatar/name is pressed
    */
-  avatarSource?: string;
-
-  /**
-   * Name of the user
-   */
-  name: string;
-
-  /**
-   * Name of the group or event
-   */
-  groupName: string;
-
-  /**
-   * Time when the request was created
-   */
-  timeAgo: Date;
+  onUserPress: () => void;
 
   /**
    * Handler for accepting the request
@@ -48,88 +48,83 @@ export interface JoinRequestCardProps {
    * Additional styles for the card container
    */
   style?: any;
-
-  /**
-   * Handler for when the card is pressed
-   */
-  onPress?: () => void;
 }
 
 /**
- * A card component for displaying join requests
+ * GroupJoinRequestCard - Professional component for displaying group join requests
+ * Follows single responsibility principle and clean architecture
  */
-export const JoinRequestCard: React.FC<JoinRequestCardProps> = ({
-  type,
-  avatarSource,
-  name,
-  groupName,
-  timeAgo,
+export const GroupJoinRequestCard: React.FC<GroupJoinRequestCardProps> = ({
+  request,
+  onUserPress,
   onAccept,
   onReject,
   style,
-  onPress,
 }) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
 
+  const fullName = `${request.user.firstName} ${request.user.lastName}`;
+  const timeAgo = formatDistanceToNow(new Date(request.updatedAt), {
+    addSuffix: true,
+    locale: language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+  });
+
   return (
     <View style={[styles.container, style]}>
-      <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
-        <View style={styles.content}>
-          <Image
-            source={
-              avatarSource
-                ? {uri: avatarSource}
-                : require('../../assets/images/default_avatar.png')
-            }
-            style={styles.avatar}
-          />
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={onUserPress}
+        style={styles.content}
+      >
+        <Image
+          source={
+            request.user.avatar
+              ? {uri: request.user.avatar}
+              : require('../../assets/images/default_avatar.png')
+          }
+          style={styles.avatar}
+        />
 
-          <View style={styles.infoContainer}>
-            <View style={styles.headerRow}>
-              <Typography
-                variant="body"
-                weight="bold"
-                numberOfLines={1}
-                style={styles.name}>
-                {name}
-              </Typography>
-              <Typography variant="caption" color={colors.neutral.darkGrey}>
-                {formatDistanceToNow(new Date(timeAgo), {
-                  addSuffix: true,
-                  locale:
-                    language.toLowerCase() === Language.TR.toLowerCase()
-                      ? tr
-                      : enUS,
-                })}
-              </Typography>
-            </View>
-
-            <View style={styles.groupRow}>
-              <Icon
-                name={type === 'group' ? 'users-filled' : 'calendar-filled'}
-                size={14}
-                color={colors.neutral.darkGrey}
-              />
-              <Typography
-                variant="body"
-                weight="medium"
-                color={colors.neutral.darkGrey}
-                style={styles.groupText}
-                numberOfLines={1}>
-                {groupName}
-              </Typography>
-            </View>
-
+        <View style={styles.infoContainer}>
+          <View style={styles.headerRow}>
             <Typography
-              variant="caption"
-              color={colors.neutral.darkGrey}
-              numberOfLines={2}>
-              {type === 'group'
-                ? t('screens.joinRequest.wants_to_join_group')
-                : t('screens.joinRequest.invites_to_event')}
+              variant="body"
+              weight="bold"
+              numberOfLines={1}
+              style={styles.name}
+            >
+              {fullName}
+            </Typography>
+            <Typography variant="caption" color={colors.neutral.darkGrey}>
+              {timeAgo}
             </Typography>
           </View>
+
+          <View style={styles.groupRow}>
+            <Icon
+              name="users-filled"
+              size={14}
+              color={colors.neutral.darkGrey}
+            />
+            <Typography
+              variant="body"
+              weight="medium"
+              color={colors.neutral.darkGrey}
+              style={styles.groupText}
+              numberOfLines={1}
+            >
+              {request.group.name}
+            </Typography>
+          </View>
+
+          <Typography
+            variant="caption"
+            color={colors.neutral.darkGrey}
+            numberOfLines={2}
+          >
+            {t('screens.groupJoinRequest.wants_to_join_group')}
+          </Typography>
         </View>
       </TouchableOpacity>
 
@@ -160,6 +155,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
+    backgroundColor: colors.neutral.white,
   },
   content: {
     flexDirection: 'row',
@@ -195,6 +191,7 @@ const styles = StyleSheet.create({
   },
   groupText: {
     marginLeft: spacing.xs / 2,
+    flex: 1,
   },
   actionsContainer: {
     flexDirection: 'row',

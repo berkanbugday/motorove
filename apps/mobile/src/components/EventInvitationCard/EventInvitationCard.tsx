@@ -8,39 +8,44 @@ import {tr, enUS} from 'date-fns/locale';
 import {useLanguage} from '@contexts/LanguageContext';
 import {Language} from '@motorove/shared';
 
-export interface FollowRequestCardProps {
+export interface EventInvitation {
+  id: string;
+  event: {
+    id: string;
+    title: string;
+    images?: string[];
+    createdAt: Date;
+    updatedAt: Date;
+    createdBy: {
+      id: string;
+      firstName: string;
+      lastName: string;
+    };
+    organizedByGroup?: {
+      id: string;
+      name: string;
+    };
+  };
+}
+
+export interface EventInvitationCardProps {
   /**
-   * User avatar image source
+   * The event invitation data
    */
-  avatarSource?: string;
+  invitation: EventInvitation;
 
   /**
-   * Name of the user
+   * Handler for when event card is pressed
    */
-  name: string;
+  onEventPress: () => void;
 
   /**
-   * City of the requester
-   */
-  city?: string;
-
-  /**
-   * Time when the request was created
-   */
-  timeAgo: Date;
-
-  /**
-   * Handler for when user avatar/name is pressed
-   */
-  onUserPress: () => void;
-
-  /**
-   * Handler for accepting the request
+   * Handler for accepting the invitation
    */
   onAccept: () => void;
 
   /**
-   * Handler for rejecting the request
+   * Handler for rejecting the invitation
    */
   onReject: () => void;
 
@@ -51,14 +56,12 @@ export interface FollowRequestCardProps {
 }
 
 /**
- * A card component for displaying follow requests
+ * EventInvitationCard - Professional component for displaying event invitations
+ * Follows single responsibility principle and clean architecture
  */
-export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
-  avatarSource,
-  name,
-  city,
-  timeAgo,
-  onUserPress,
+export const EventInvitationCard: React.FC<EventInvitationCardProps> = ({
+  invitation,
+  onEventPress,
   onAccept,
   onReject,
   style,
@@ -66,20 +69,34 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
   const {t} = useTranslation();
   const {language} = useLanguage();
 
+  const {event} = invitation;
+
+  // Determine organizer name (group or individual user)
+  const organizerName = event.organizedByGroup
+    ? event.organizedByGroup.name
+    : `${event.createdBy.firstName} ${event.createdBy.lastName}`;
+
+  // Get event image or use default
+  const eventImage =
+    event.images && event.images.length > 0 ? event.images[0] : null;
+
+  const timeAgo = formatDistanceToNow(
+    new Date(event?.updatedAt || event.createdAt),
+    {
+      addSuffix: true,
+      locale: language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+    },
+  );
+
   return (
     <View style={[styles.container, style]}>
       <TouchableOpacity
         activeOpacity={0.7}
-        onPress={onUserPress}
-        style={styles.content}
-      >
+        onPress={onEventPress}
+        style={styles.content}>
         <Image
-          source={
-            avatarSource
-              ? {uri: avatarSource}
-              : require('../../assets/images/default_avatar.png')
-          }
-          style={styles.avatar}
+          source={eventImage ? {uri: eventImage} : undefined}
+          style={styles.eventImage}
         />
 
         <View style={styles.infoContainer}>
@@ -88,23 +105,17 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
               variant="body"
               weight="bold"
               numberOfLines={1}
-              style={styles.name}>
-              {name}
+              style={styles.organizerName}>
+              {organizerName}
             </Typography>
             <Typography variant="caption" color={colors.neutral.darkGrey}>
-              {formatDistanceToNow(new Date(timeAgo), {
-                addSuffix: true,
-                locale:
-                  language.toLowerCase() === Language.TR.toLowerCase()
-                    ? tr
-                    : enUS,
-              })}
+              {timeAgo}
             </Typography>
           </View>
 
-          <View style={styles.cityRow}>
+          <View style={styles.eventRow}>
             <Icon
-              name="map-pin-filled"
+              name="calendar-filled"
               size={14}
               color={colors.neutral.darkGrey}
             />
@@ -112,9 +123,9 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
               variant="body"
               weight="medium"
               color={colors.neutral.darkGrey}
-              style={styles.cityText}
+              style={styles.eventTitle}
               numberOfLines={1}>
-              {city}
+              {event.title}
             </Typography>
           </View>
 
@@ -122,7 +133,7 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
             variant="caption"
             color={colors.neutral.darkGrey}
             numberOfLines={2}>
-            {t('screens.followRequest.wants_to_follow')}
+            {t('screens.eventInvitation.invites_you_to_event')}
           </Typography>
         </View>
       </TouchableOpacity>
@@ -154,12 +165,13 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
+    backgroundColor: colors.neutral.white,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatar: {
+  eventImage: {
     width: 48,
     height: 48,
     borderRadius: radius.round,
@@ -178,17 +190,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.xs / 2,
   },
-  name: {
+  organizerName: {
     flex: 1,
     marginRight: spacing.xs,
   },
-  cityRow: {
+  eventRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.xs / 2,
   },
-  cityText: {
+  eventTitle: {
     marginLeft: spacing.xs / 2,
+    flex: 1,
   },
   actionsContainer: {
     flexDirection: 'row',

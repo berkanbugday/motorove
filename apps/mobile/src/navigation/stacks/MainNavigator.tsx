@@ -28,7 +28,8 @@ import {
   PrivacySettingScreen,
   NotificationSettingScreen,
   FollowRequestScreen,
-  JoinRequestScreen,
+  GroupJoinRequestScreen,
+  EventInvitationScreen,
   SupportScreen,
 } from '@screens/menu';
 import {GarageScreen} from '@screens/garage';
@@ -151,8 +152,14 @@ export function MainNavigator() {
       />
 
       <Stack.Screen
-        name="JoinRequest"
-        component={JoinRequestScreen}
+        name="GroupJoinRequest"
+        component={GroupJoinRequestScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="EventInvitation"
+        component={EventInvitationScreen}
         options={{headerShown: false}}
       />
 

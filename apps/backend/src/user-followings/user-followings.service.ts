@@ -124,9 +124,7 @@ export class UserFollowingsService {
       where: {
         followingId: userId,
         isActive: true,
-        status: {
-          in: [ApprovalStatus.PENDING],
-        },
+        status: ApprovalStatus.PENDING,
       },
       include: {
         follower: {

@@ -66,6 +66,7 @@ export const EVENT_INVITATION_FRAGMENT = gql`
       id
       title
       createdAt
+      updatedAt
       images
       createdBy {
         id

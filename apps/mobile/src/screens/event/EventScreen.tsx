@@ -148,7 +148,7 @@ export const EventScreen = () => {
         <View style={styles.loadingContainer}>
           {Array.from({length: 3}).map((_, index) => (
             <SkeletonGroup
-              key={`${tabType}-skeleton-${index}`}
+              key={`skeleton-${tabType}-${index}-${Date.now()}`}
               preset="groupCard"
               showShadow={false}
               style={styles.skeletonItem}
@@ -178,7 +178,7 @@ export const EventScreen = () => {
     return (
       <FlatList
         data={eventsList}
-        keyExtractor={item => `${tabType}-${item.id}`}
+        keyExtractor={(item, index) => `${tabType}-${item.id}-${index}`}
         renderItem={({item}) => {
           // Get the first address (if available)
           const meetingLocation =
@@ -207,7 +207,7 @@ export const EventScreen = () => {
             ? Array(Math.min(3, item.participantsCount))
                 .fill(0)
                 .map((_, i) => ({
-                  id: `${item.id}-participant-${i}`,
+                  id: `${tabType}-${item.id}-participant-${i}`,
                   name: '',
                 }))
             : [];

@@ -368,7 +368,7 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
       showToast({
         type: 'success',
         text1: t('common.success'),
-        text2: t('screens.joinRequest.invitation_accepted'),
+        text2: t('screens.eventInvitation.invitation_accepted'),
       });
       refetch();
     },
@@ -377,7 +377,7 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
       showToast({
         type: 'error',
         text1: t('common.error'),
-        text2: errorObj.message || t('screens.joinRequest.error_accepting'),
+        text2: errorObj.message || t('screens.eventInvitation.error_accepting'),
       });
     },
   });
@@ -387,7 +387,7 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
       showToast({
         type: 'success',
         text1: t('common.success'),
-        text2: t('screens.joinRequest.invitation_rejected'),
+        text2: t('screens.eventInvitation.invitation_rejected'),
       });
       refetch();
     },
@@ -396,7 +396,7 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
       showToast({
         type: 'error',
         text1: t('common.error'),
-        text2: errorObj.message || t('screens.joinRequest.error_rejecting'),
+        text2: errorObj.message || t('screens.eventInvitation.error_rejecting'),
       });
     },
   });

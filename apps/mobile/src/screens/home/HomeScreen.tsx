@@ -247,7 +247,9 @@ export const HomeScreen = ({navigation}: Props) => {
         month,
         time,
         title: event.title,
-        organizer: `${event.createdBy.firstName} ${event.createdBy.lastName}`,
+        organizer: event.organizedByGroup
+          ? event.organizedByGroup.name
+          : `${event.createdBy.firstName} ${event.createdBy.lastName}`,
         participantCount: event.participantsCount || 0,
         maxParticipants: event.maxParticipants || 0,
       };

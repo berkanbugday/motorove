@@ -233,13 +233,13 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
           showToast({
             type: 'success',
             text1: t('common.success'),
-            text2: t('screens.joinRequest.request_accepted'),
+            text2: t('screens.groupJoinRequest.request_accepted'),
           });
         } else {
           showToast({
             type: 'success',
             text1: t('common.success'),
-            text2: t('screens.joinRequest.request_rejected'),
+            text2: t('screens.groupJoinRequest.request_rejected'),
           });
         }
       },
