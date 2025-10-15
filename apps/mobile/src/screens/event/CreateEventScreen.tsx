@@ -680,10 +680,10 @@ export const CreateEventScreen: React.FC = () => {
           title: data.title,
           description: data.description,
           isPrivate: data.isPrivate,
-          invitedGroupIds: data.invitedGroups,
-          invitedUserIds: data.invitedUsers,
+          invitedGroupIds: data.isPrivate ? data.invitedGroups : [],
+          invitedUserIds: data.isPrivate ? data.invitedUsers : [],
           organizedByGroupId: data.organizedByGroupId,
-          eventType: selectedEventType?.value as EventType,
+          eventType: data.eventType as EventType,
           status: EventStatus.UPCOMING,
           addresses: addresses,
           startDateTime: new Date(
@@ -714,7 +714,7 @@ export const CreateEventScreen: React.FC = () => {
           currency: data.currency as Currency,
         };
 
-        // await createEvent(createEventInput);
+        await createEvent(createEventInput);
       } catch (error) {
         loggingService.error('Error creating event:', error);
       }
@@ -724,7 +724,6 @@ export const CreateEventScreen: React.FC = () => {
       selectedStartLocation,
       selectedFinishLocation,
       selectedImages,
-      selectedEventType,
       createEvent,
     ],
   );

@@ -106,11 +106,7 @@ export const MenuScreen = () => {
       items: [
         {
           icon: (
-            <Icon
-              name="users-filled"
-              size={18}
-              color={colors.neutral.black}
-            />
+            <Icon name="users-filled" size={18} color={colors.neutral.black} />
           ),
           title: t('screens.menu.group_join_requests'),
           onPress: () => {

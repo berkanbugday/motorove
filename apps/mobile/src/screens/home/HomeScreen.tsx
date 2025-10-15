@@ -48,6 +48,7 @@ import {
   IEvent,
   Language,
   EventStatus,
+  AddressType,
 } from '@motorove/shared';
 import {
   useGetPosts,
@@ -97,6 +98,7 @@ interface EventItem {
   time: string;
   title: string;
   organizer: string;
+  location: string;
   participantCount: number;
   maxParticipants: number;
 }
@@ -241,12 +243,34 @@ export const HomeScreen = ({navigation}: Props) => {
         hour12: false,
       });
 
+      // Get the first address (if available)
+      const startLocation =
+        event.addresses &&
+        event.addresses.find(
+          address =>
+            address.type === AddressType.EVENT_START_LOCATION &&
+            address.language.toLowerCase() === language.toLowerCase(),
+        );
+
+      const meetingLocation =
+        event.addresses &&
+        event.addresses.find(
+          address =>
+            address.type === AddressType.EVENT_MEETING_LOCATION &&
+            address.language.toLowerCase() === language.toLowerCase(),
+        );
+
+      const location = startLocation?.address
+        ? startLocation?.address
+        : meetingLocation?.address;
+
       return {
         id: event.id,
         day,
         month,
         time,
         title: event.title,
+        location: location || '',
         organizer: event.organizedByGroup
           ? event.organizedByGroup.name
           : `${event.createdBy.firstName} ${event.createdBy.lastName}`,
@@ -308,6 +332,7 @@ export const HomeScreen = ({navigation}: Props) => {
         time={item.time}
         title={item.title}
         organizer={item.organizer}
+        location={item.location}
         participantCount={item.participantCount}
         maxParticipants={item.maxParticipants}
         onPress={() =>

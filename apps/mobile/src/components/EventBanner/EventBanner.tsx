@@ -51,12 +51,12 @@ export interface EventBannerProps {
   /**
    * The number of participants who have joined
    */
-  participantCount: number;
+  participantCount?: number | null;
 
   /**
    * The total number of participants allowed
    */
-  maxParticipants?: number;
+  maxParticipants?: number | null;
 
   /**
    * Badge text to display on the banner (e.g., "UPCOMING", "CANCELLED")
@@ -137,6 +137,9 @@ const EventBanner: React.FC<EventBannerProps> = ({
   const {t} = useTranslation();
 
   const renderParticipantCount = () => {
+    if (!participantCount) {
+      return null;
+    }
     const participantCountText = maxParticipants
       ? `${participantCount} ${t(
           'components.eventBanner.participant',
@@ -177,7 +180,10 @@ const EventBanner: React.FC<EventBannerProps> = ({
         {/* Event Details Container */}
         <View style={[styles.contentContainer, contentStyle]}>
           {title && (
-            <Body weight="bold" style={[styles.title, titleStyle]}>
+            <Body
+              numberOfLines={1}
+              weight="bold"
+              style={[onChatPress ? {paddingRight: 70} : {}, titleStyle]}>
               {title}
             </Body>
           )}
@@ -189,7 +195,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
             </Caption>
           )}
           {organizer && (
-            <Caption color={colors.neutral.grey} style={styles.organizer}>
+            <Caption color={colors.neutral.darkGrey} style={styles.organizer}>
               {organizer}
             </Caption>
           )}

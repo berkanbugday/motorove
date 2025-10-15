@@ -106,7 +106,7 @@ class AuthService {
       }
 
       const authResponse = this.convertGraphQLResponse(data.signIn);
-      
+
       if (authResponse.session) {
         await this.saveAuthData(authResponse);
         this.setupBackgroundRefresh(authResponse);
@@ -214,11 +214,6 @@ class AuthService {
       this.isLoadingAuthState = true;
       this.authStatePromise = this.loadAuthState();
       return await this.authStatePromise;
-    } catch (error) {
-      loggingService.error('Error in getAuthState, clearing auth storage:', error);
-      // Clear auth storage on any error
-      await AuthStorage.clearAll();
-      return this.createEmptyAuthState();
     } finally {
       this.isLoadingAuthState = false;
       this.authStatePromise = null;
@@ -380,12 +375,7 @@ class AuthService {
 
   async isAuthenticated(): Promise<boolean> {
     const {user, accessToken, expiresAt} = await this.getAuthState();
-    return !!(
-      user &&
-      accessToken &&
-      expiresAt &&
-      expiresAt > Date.now()
-    );
+    return !!(user && accessToken && expiresAt && expiresAt > Date.now());
   }
 
   async getCurrentUser(): Promise<AuthUser | null> {
@@ -424,7 +414,7 @@ class AuthService {
 
         await this.refreshToken();
         const state = await this.getAuthState();
-        
+
         if (state.accessToken && state.expiresAt && state.user) {
           this.setupBackgroundRefresh({
             user: state.user,

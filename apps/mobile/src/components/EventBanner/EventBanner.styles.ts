@@ -32,21 +32,16 @@ export const styles = StyleSheet.create({
     padding: spacing.md,
     flex: 1,
   },
-  title: {
-    paddingRight: 70, // Make room for the chat button
-  },
   infoText: {
     paddingRight: 70,
-    marginBottom: spacing.xs,
   },
   organizer: {
-    marginBottom: spacing.xs,
+    paddingVertical: spacing.xs / 2,
     paddingRight: 70,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.xs,
   },
   locationText: {
     marginLeft: spacing.xs,

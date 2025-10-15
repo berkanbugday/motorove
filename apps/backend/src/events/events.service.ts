@@ -35,12 +35,38 @@ export class EventsService {
     status?: EventStatus,
   ): Promise<EventDto[]> {
     try {
-      const where = {
+      const baseWhere = {
         isActive: true,
         ...(status && { status }),
         ...(status === EventStatus.DRAFT &&
           currentUserId && { createdById: currentUserId }),
       };
+
+      // Apply privacy filtering based on user access
+      const where = currentUserId
+        ? {
+            ...baseWhere,
+            OR: [
+              // Public events
+              { isPrivate: false },
+              // Private events where user is the creator
+              { isPrivate: true, createdById: currentUserId },
+              // Private events where user has an invitation
+              {
+                isPrivate: true,
+                invitations: {
+                  some: {
+                    inviteeId: currentUserId,
+                    isActive: true,
+                  },
+                },
+              },
+            ],
+          }
+        : {
+            ...baseWhere,
+            isPrivate: false,
+          };
 
       const events = await this.prisma.event.findMany({
         where,
@@ -51,6 +77,14 @@ export class EventsService {
           participants: true,
           addresses: true,
           invitedGroups: true,
+          invitations: {
+            where: {
+              isActive: true,
+            },
+            include: {
+              invitee: true,
+            },
+          },
         },
         orderBy: {
           startDateTime: 'asc',
@@ -58,6 +92,10 @@ export class EventsService {
         take: limit || undefined,
         skip: skip || undefined,
       });
+
+      this.logger.log(
+        `Found ${events.length} events for user ${currentUserId || 'anonymous'} with privacy filtering`,
+      );
 
       // Map events to GraphQL format with additional fields
       return await Promise.all(
@@ -77,8 +115,36 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
+      const baseWhere = { id, isActive: true };
+
+      // Apply privacy filtering for individual event access
+      const where = currentUserId
+        ? {
+            ...baseWhere,
+            OR: [
+              // Public events
+              { isPrivate: false },
+              // Private events where user is the creator
+              { isPrivate: true, createdById: currentUserId },
+              // Private events where user has an invitation
+              {
+                isPrivate: true,
+                invitations: {
+                  some: {
+                    inviteeId: currentUserId,
+                    isActive: true,
+                  },
+                },
+              },
+            ],
+          }
+        : {
+            ...baseWhere,
+            isPrivate: false,
+          };
+
       const event = await this.prisma.event.findFirst({
-        where: { id, isActive: true },
+        where,
         include: {
           createdBy: true,
           updatedBy: true,
@@ -87,6 +153,9 @@ export class EventsService {
           addresses: true,
           invitedGroups: true,
           invitations: {
+            where: {
+              isActive: true,
+            },
             include: {
               invitee: true,
             },
@@ -95,8 +164,14 @@ export class EventsService {
       });
 
       if (!event || !event.isActive) {
-        throw new NotFoundException(`Event with ID ${id} not found`);
+        throw new NotFoundException(
+          `Event with ID ${id} not found or access denied`,
+        );
       }
+
+      this.logger.log(
+        `User ${currentUserId || 'anonymous'} accessed event ${id} (private: ${event.isPrivate})`,
+      );
 
       // Map event to GraphQL format with additional fields
       return this.mapToDto(event as Event, currentUserId, authToken);
@@ -227,75 +302,148 @@ export class EventsService {
         ).filter(Boolean) as string[];
       }
 
-      const event = await this.prisma.event.create({
-        data: {
-          title,
-          description,
-          eventType,
-          status,
-          startDateTime,
-          endDateTime,
-          maxParticipants,
-          isPrivate,
-          images: processedImages,
-          organizedByGroupId: organizedByGroupId || null,
-          roadType: roadType as RoadType,
-          difficultyLevel: difficultyLevel as DifficultyLevel,
-          routeDescription,
-          restStops,
-          campingInfo,
-          equipmentChecklist,
-          instructorInfo,
-          topicsCovered,
-          experienceLevel: experienceLevel as ExperienceLevel,
-          price: price ? parseFloat(price) : null,
-          currency,
-          createdById: userId,
-          updatedById: userId,
-          // Handle addresses
-          addresses: addresses?.length
-            ? {
-                createMany: {
-                  data: addresses.map((addr) => ({
-                    address: addr.address,
-                    language: addr.language,
-                    type: addr.type,
-                    latitude: addr.latitude,
-                    longitude: addr.longitude,
-                  })),
-                },
-              }
-            : undefined,
-          // Handle invited groups if provided
-          invitedGroups: invitedGroupIds?.length
-            ? {
-                connect: invitedGroupIds.map((id) => ({ id })),
-              }
-            : undefined,
-          // Handle invited users through invitations if provided
-          invitations: invitedUserIds?.length
-            ? {
-                createMany: {
-                  data: invitedUserIds.map((inviteeId) => ({
-                    inviteeId: inviteeId,
-                    createdById: userId,
-                  })),
-                },
-              }
-            : undefined,
-        },
-        include: {
-          createdBy: true,
-          updatedBy: true,
-          organizedByGroup: true,
-          addresses: true,
-          invitedGroups: true,
-          invitations: {
-            include: {
-              invitee: true,
+      // Use transaction to ensure atomicity
+      const event = await this.prisma.$transaction(async (tx) => {
+        // Create the event first
+        const createdEvent = await tx.event.create({
+          data: {
+            title,
+            description,
+            eventType,
+            status,
+            startDateTime,
+            endDateTime,
+            maxParticipants: isPrivate ? null : maxParticipants,
+            isPrivate,
+            images: processedImages,
+            organizedByGroupId: organizedByGroupId || null,
+            roadType: roadType as RoadType,
+            difficultyLevel: difficultyLevel as DifficultyLevel,
+            routeDescription,
+            restStops,
+            campingInfo,
+            equipmentChecklist,
+            instructorInfo,
+            topicsCovered,
+            experienceLevel: experienceLevel as ExperienceLevel,
+            price: price ? parseFloat(price) : null,
+            currency,
+            createdById: userId,
+            updatedById: userId,
+            // Handle addresses
+            addresses: addresses?.length
+              ? {
+                  createMany: {
+                    data: addresses.map((addr) => ({
+                      address: addr.address,
+                      language: addr.language,
+                      type: addr.type,
+                      latitude: addr.latitude,
+                      longitude: addr.longitude,
+                    })),
+                  },
+                }
+              : undefined,
+            // Handle invited groups if provided
+            invitedGroups: invitedGroupIds?.length
+              ? {
+                  connect: invitedGroupIds.map((id) => ({ id })),
+                }
+              : undefined,
+            // Handle invited users through invitations if provided
+            invitations: invitedUserIds?.length
+              ? {
+                  createMany: {
+                    data: invitedUserIds.map((inviteeId) => ({
+                      inviteeId: inviteeId,
+                      createdById: userId,
+                    })),
+                  },
+                }
+              : undefined,
+          },
+          include: {
+            createdBy: true,
+            updatedBy: true,
+            organizedByGroup: true,
+            addresses: true,
+            invitedGroups: true,
+            invitations: {
+              include: {
+                invitee: true,
+              },
             },
           },
-        },
+        });
+
+        // If event status is UPCOMING and there are invited groups, create invitations for all group members
+        if (status === EventStatus.UPCOMING && invitedGroupIds?.length) {
+          this.logger.log(
+            `Creating invitations for group members in event ${createdEvent.id}`,
+          );
+
+          // Get all members from invited groups with ACCEPTED status
+          const groupMembers = await tx.groupMembership.findMany({
+            where: {
+              groupId: {
+                in: invitedGroupIds,
+              },
+              group: {
+                isActive: true,
+              },
+              status: ApprovalStatus.ACCEPTED,
+              isActive: true,
+            },
+            select: {
+              userId: true,
+            },
+          });
+
+          // Extract unique user IDs (in case a user is in multiple invited groups)
+          const uniqueUserIds = [
+            ...new Set(groupMembers.map((member) => member.userId)),
+          ];
+
+          // If organized by group, don't filter out the event creator
+          // If not organized by group, filter out the event creator to avoid self-invitation
+          const inviteeIds = organizedByGroupId
+            ? uniqueUserIds
+            : uniqueUserIds.filter((id) => id !== userId);
+
+          if (inviteeIds.length > 0) {
+            // Create invitations for all group members
+            await tx.eventInvitation.createMany({
+              data: inviteeIds.map((inviteeId) => ({
+                eventId: createdEvent.id,
+                inviteeId: inviteeId,
+                createdById: userId,
+                status: ApprovalStatus.PENDING,
+              })),
+              skipDuplicates: true, // Skip if invitation already exists
+            });
+
+            this.logger.log(
+              `Created ${inviteeIds.length} invitations for group members in event ${createdEvent.id}`,
+            );
+          }
+        }
+
+        // If event is NOT organized by a group, automatically add the event creator as a participant
+        if (!organizedByGroupId) {
+          await tx.eventParticipant.create({
+            data: {
+              eventId: createdEvent.id,
+              status: EventParticipantStatus.JOINED,
+              createdById: userId,
+            },
+          });
+
+          this.logger.log(
+            `Added event creator ${userId} as participant to event ${createdEvent.id}`,
+          );
+        }
+
+        return createdEvent;
       });
 
       return this.mapToDto(event, userId, authToken);

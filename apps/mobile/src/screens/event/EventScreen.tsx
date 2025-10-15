@@ -181,14 +181,6 @@ export const EventScreen = () => {
         keyExtractor={(item, index) => `${tabType}-${item.id}-${index}`}
         renderItem={({item}) => {
           // Get the first address (if available)
-          const meetingLocation =
-            item.addresses &&
-            item.addresses.find(
-              address =>
-                address.type === AddressType.EVENT_MEETING_LOCATION &&
-                address.language.toLowerCase() === language.toLowerCase(),
-            );
-
           const startLocation =
             item.addresses &&
             item.addresses.find(
@@ -197,9 +189,17 @@ export const EventScreen = () => {
                 address.language.toLowerCase() === language.toLowerCase(),
             );
 
-          const location = meetingLocation?.address
-            ? meetingLocation.address
-            : startLocation?.address;
+          const meetingLocation =
+            item.addresses &&
+            item.addresses.find(
+              address =>
+                address.type === AddressType.EVENT_MEETING_LOCATION &&
+                address.language.toLowerCase() === language.toLowerCase(),
+            );
+
+          const location = startLocation?.address
+            ? startLocation?.address
+            : meetingLocation?.address;
 
           // For the UI we'll create a basic participants array
           // The actual data structure might be different
