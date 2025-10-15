@@ -645,6 +645,7 @@ export default {
       permission_description:
         'Bildirimler için bildirim izni gereklidir. Bildirim izni verin.',
       open_settings: 'Ayarları Aç',
+      events: 'Etkinlikler',
     },
   },
 
@@ -1154,6 +1155,7 @@ export default {
       user_leave_group: 'Kullanıcı Grupdan Ayrıldı',
       admin_removed_group_member: 'Admin Grup Üyesini Sildi',
       admin_changed_group_member_role: 'Admin Grup Üyesi Rolünü Değiştirdi',
+      event_invitation: 'Etkinlik Daveti',
     },
     supportCategory: {
       account: 'Hesap Sorunu',

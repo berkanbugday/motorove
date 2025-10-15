@@ -659,6 +659,7 @@ export default {
       permission_description:
         'Notification permission is required for notifications. Grant notification permission.',
       open_settings: 'Open Settings',
+      events: 'Events',
     },
   },
 
@@ -1165,6 +1166,7 @@ export default {
       user_leave_group: 'User Leave Group',
       admin_removed_group_member: 'Admin Removed Group Member',
       admin_changed_group_member_role: 'Admin Changed Group Member Role',
+      event_invitation: 'Event Invitation',
     },
     supportCategory: {
       account: 'Account Issue',

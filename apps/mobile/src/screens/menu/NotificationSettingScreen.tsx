@@ -88,6 +88,10 @@ export const NotificationSettingScreen = () => {
         NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE,
       ],
     },
+    {
+      title: t('screens.notificationSetting.events'),
+      types: [NotificationType.EVENT_INVITATION],
+    },
   ];
 
   // Render different UI based on permission status

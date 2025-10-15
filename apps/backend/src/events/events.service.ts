@@ -19,6 +19,9 @@ import { EventStatus } from '../enums/models/event-status.enum';
 import { EventInvitationDto } from './dto/event-invitation.dto';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { EventParticipant } from '../events/models/event-participant.model';
+import { QueueService } from '../core/queue/queue.service';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
 export class EventsService {
@@ -26,6 +29,7 @@ export class EventsService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    private queueService: QueueService,
   ) {}
 
   async findAll(
@@ -446,6 +450,26 @@ export class EventsService {
 
         return createdEvent;
       });
+
+      if (event.invitations?.length) {
+        // Send notification to the user
+        await this.queueService.addBulkNotificationJob(
+          {
+            userIds: event.invitations.map(
+              (invitation) => invitation.inviteeId,
+            ),
+            title: 'Event invitation',
+            body: `You have been invited to join event ${event.title}`,
+            type: NotificationType.EVENT_INVITATION,
+            channels: NotificationChannel.PUSH,
+            data: JSON.stringify({
+              eventId: event.id,
+              eventName: event.title,
+            }),
+          },
+          userId,
+        );
+      }
 
       return this.mapToDto(event, userId, authToken);
     } catch (error) {
