@@ -149,7 +149,10 @@ const EventBanner: React.FC<EventBannerProps> = ({
     return (
       <View style={styles.participantsContainer}>
         <Icon name="users-filled" size={14} />
-        <Caption color={colors.neutral.grey} style={styles.participantsText}>
+        <Caption
+          numberOfLines={1}
+          color={colors.neutral.grey}
+          style={styles.participantsText}>
           {participantCountText}
         </Caption>
       </View>
@@ -162,6 +165,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
         {badgeText && (
           <View style={[styles.badgeContainer, badgeStyle]}>
             <Caption
+              numberOfLines={1}
               weight="bold"
               align="center"
               color={colors.neutral.white}
@@ -189,20 +193,27 @@ const EventBanner: React.FC<EventBannerProps> = ({
           )}
           {infoText && (
             <Caption
+              numberOfLines={1}
               color={colors.neutral.grey}
               style={[styles.infoText, infoTextStyle]}>
               {infoText}
             </Caption>
           )}
           {organizer && (
-            <Caption color={colors.neutral.darkGrey} style={styles.organizer}>
+            <Caption
+              numberOfLines={1}
+              color={colors.neutral.darkGrey}
+              style={styles.organizer}>
               {organizer}
             </Caption>
           )}
           {location && (
             <View style={styles.locationContainer}>
               <Icon name="map-pin-filled" size={14} />
-              <Caption color={colors.neutral.grey} style={styles.locationText}>
+              <Caption
+                numberOfLines={1}
+                color={colors.neutral.grey}
+                style={styles.locationText}>
                 {location}
               </Caption>
             </View>

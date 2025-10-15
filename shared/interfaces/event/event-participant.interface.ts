@@ -9,8 +9,7 @@ import { IUser } from "../user/user.interface";
  */
 export interface IEventParticipant extends IBase {
   eventId: string;
-  userId: string;
   status: EventParticipantStatus;
+  createdBy: IUser;
   event?: IEvent;
-  user?: IUser;
 }

@@ -100,7 +100,6 @@ interface EventItem {
   organizer: string;
   location: string;
   participantCount: number;
-  maxParticipants: number;
 }
 
 // Group events data - now replaced with real API data
@@ -275,7 +274,6 @@ export const HomeScreen = ({navigation}: Props) => {
           ? event.organizedByGroup.name
           : `${event.createdBy.firstName} ${event.createdBy.lastName}`,
         participantCount: event.participantsCount || 0,
-        maxParticipants: event.maxParticipants || 0,
       };
     },
     [language],
@@ -334,7 +332,6 @@ export const HomeScreen = ({navigation}: Props) => {
         organizer={item.organizer}
         location={item.location}
         participantCount={item.participantCount}
-        maxParticipants={item.maxParticipants}
         onPress={() =>
           navigateToScreen(navigation, 'EventDetail', {eventId: item.id})
         }

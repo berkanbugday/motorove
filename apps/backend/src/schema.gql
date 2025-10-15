@@ -414,6 +414,7 @@ type EventDto {
   isPrivate: Boolean!
   maxParticipants: Int
   organizedByGroup: GroupDto
+  participants: [EventParticipantDto!]
   participantsCount: Int
   participationStatus: EventParticipantStatus
   price: Float
@@ -462,6 +463,17 @@ type EventParticipant {
   updatedAt: DateTime!
   updatedBy: User!
   updatedById: String!
+}
+
+type EventParticipantDto {
+  createdAt: DateTime!
+  createdBy: UserDto!
+  createdById: String!
+  eventId: String!
+  id: ID!
+  isActive: Boolean!
+  status: EventParticipantStatus!
+  updatedAt: DateTime!
 }
 
 """Status of a participant in an event"""

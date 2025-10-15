@@ -201,15 +201,13 @@ export const EventScreen = () => {
             ? startLocation?.address
             : meetingLocation?.address;
 
-          // For the UI we'll create a basic participants array
-          // The actual data structure might be different
-          const participants = item.participantsCount
-            ? Array(Math.min(3, item.participantsCount))
-                .fill(0)
-                .map((_, i) => ({
-                  id: `${tabType}-${item.id}-participant-${i}`,
-                  name: '',
-                }))
+          // Map real participant data from API
+          const participants = item.participants
+            ? item.participants.map(participant => ({
+                id: participant.id,
+                name: `${participant.createdBy.firstName} ${participant.createdBy.lastName}`,
+                avatar: participant.createdBy.avatar,
+              }))
             : [];
 
           return (
@@ -220,7 +218,6 @@ export const EventScreen = () => {
               location={location || ''}
               category={EnumUtils.convertEventType(item.eventType)}
               participants={participants}
-              maxParticipants={item.maxParticipants || undefined}
               onPress={() =>
                 navigation.navigate('EventDetail', {eventId: item.id})
               }

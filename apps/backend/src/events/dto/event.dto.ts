@@ -21,6 +21,7 @@ import { EventParticipantStatus } from '../../enums/models/event-participant-sta
 import { EventStatus } from '../../enums/models/event-status.enum';
 import { Currency } from '../../enums/models/currency.enum';
 import { GroupDto } from '../../groups/dto/group.dto';
+import { EventParticipantDto } from './event-participant.dto';
 
 @ObjectType()
 export class EventDto {
@@ -177,4 +178,10 @@ export class EventDto {
   @Type(() => GroupDto)
   @IsOptional()
   invitedGroups?: GroupDto[];
+
+  @Field(() => [EventParticipantDto], { nullable: true })
+  @ValidateNested({ each: true })
+  @Type(() => EventParticipantDto)
+  @IsOptional()
+  participants?: EventParticipantDto[];
 }

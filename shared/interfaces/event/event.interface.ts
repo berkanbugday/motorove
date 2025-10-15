@@ -10,6 +10,7 @@ import {
 import { IAddress } from "../address/address.interface";
 import { IUser } from "../user/user.interface";
 import { IGroup } from "../group/group.interface";
+import { IEventParticipant } from "./event-participant.interface";
 
 /**
  * Event Interface
@@ -43,6 +44,7 @@ export interface IEvent {
   participantsCount?: number | null;
   isParticipating?: boolean | null;
   participationStatus?: EventParticipantStatus | null;
+  participants?: IEventParticipant[] | null;
   createdBy: IUser;
   createdById: string;
   createdAt: Date | string;

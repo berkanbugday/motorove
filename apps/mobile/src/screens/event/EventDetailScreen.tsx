@@ -27,6 +27,7 @@ import {
   BottomSheetRef,
   Body,
   CollapsibleCard,
+  ParticipantAvatars,
 } from '@components';
 import {format, formatDuration, intervalToDuration} from 'date-fns';
 import {useTranslation} from '@hooks/useTranslation';
@@ -475,6 +476,19 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               </Typography>
             </View>
           )}
+
+          {/* Participants Row */}
+          {event.participants && event.participants.length > 0 && (
+            <View style={styles.infoRow}>
+              <View style={styles.participantsContent}>
+                <ParticipantAvatars
+                  participants={event.participants}
+                  maxAvatars={4}
+                  style={styles.participantAvatarsContainer}
+                />
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Participation Card */}
@@ -891,6 +905,13 @@ const styles = StyleSheet.create({
   deleteEventButton: {
     flex: 1,
     marginLeft: spacing.sm,
+  },
+  participantsContent: {
+    flex: 1,
+    marginLeft: spacing.sm,
+  },
+  participantAvatarsContainer: {
+    marginTop: spacing.xs,
   },
 });
 

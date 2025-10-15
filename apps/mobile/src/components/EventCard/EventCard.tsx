@@ -13,13 +13,14 @@ import {Typography} from '../Typography';
 import {Icon} from '../Icon';
 import {colors, getShadow, radius} from '@theme';
 import {Chip} from '../Chip';
+import {ParticipantAvatars} from '../ParticipantAvatars';
 import {styles} from './EventCard.styles';
 import {useLanguage} from '@contexts/LanguageContext';
 
 export interface ParticipantInfo {
   id: string;
   name: string;
-  avatar?: ImageSourcePropType;
+  avatar?: string;
 }
 
 export interface EventCardProps {
@@ -41,7 +42,7 @@ export interface EventCardProps {
   /**
    * Distance to the event location (optional)
    */
-  distance?: string;
+  _distance?: string;
 
   /**
    * Image for the event card
@@ -56,7 +57,7 @@ export interface EventCardProps {
   /**
    * List of participants (optional)
    */
-  participants?: ParticipantInfo[];
+  participants?: ParticipantInfo[] | null;
 
   /**
    * Maximum number of participants (optional)
@@ -101,11 +102,10 @@ const EventCard: React.FC<EventCardProps> = ({
   title,
   dateTime,
   location,
-  distance,
+  _distance,
   image,
   category,
   participants = [],
-  maxParticipants,
   featured = false,
   onPress,
   style,
@@ -132,13 +132,6 @@ const EventCard: React.FC<EventCardProps> = ({
       hour12: false,
     });
   };
-
-  // Calculate the number of participants to display
-  const displayedParticipantsCount = Math.min(participants.length, 3);
-  const remainingParticipants = Math.max(
-    0,
-    participants.length - displayedParticipantsCount,
-  );
 
   // Card header with category chip and featured badge
   const headerComponent = (
@@ -191,7 +184,11 @@ const EventCard: React.FC<EventCardProps> = ({
       {/* Date and Time */}
       <View style={styles.dateTimeContainer}>
         {dateTime && (
-          <Icon name="calendar-filled" size={14} color={colors.neutral.grey} />
+          <Icon
+            name="calendar-clock-filled"
+            size={14}
+            color={colors.neutral.grey}
+          />
         )}
         <Typography
           variant="caption"
@@ -215,42 +212,9 @@ const EventCard: React.FC<EventCardProps> = ({
       </View>
 
       {/* Participants */}
-      {participants.length > 0 && (
+      {participants && participants?.length > 0 && (
         <View style={styles.participantsContainer}>
-          <View style={styles.participantsAvatars}>
-            {participants
-              .slice(0, displayedParticipantsCount)
-              .map((participant, index) => (
-                <View
-                  key={participant.id}
-                  style={[
-                    styles.avatarContainer,
-                    {zIndex: 10 - index, marginLeft: index > 0 ? -10 : 0},
-                  ]}>
-                  <Image
-                    source={participant.avatar || undefined}
-                    style={styles.participantAvatar}
-                  />
-                </View>
-              ))}
-
-            {remainingParticipants > 0 && (
-              <View style={[styles.avatarContainer, styles.remainingAvatars]}>
-                <Typography
-                  variant="caption"
-                  color={colors.neutral.white}
-                  align="center">
-                  +{remainingParticipants}
-                </Typography>
-              </View>
-            )}
-          </View>
-
-          <Typography variant="caption" color={colors.neutral.grey}>
-            {participants.length}{' '}
-            {participants.length === 1 ? 'rider' : 'riders'}
-            {maxParticipants ? ` / ${maxParticipants}` : ''}
-          </Typography>
+          <ParticipantAvatars participants={participants} maxAvatars={4} />
         </View>
       )}
     </View>

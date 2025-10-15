@@ -811,6 +811,11 @@ export default {
       member: 'üye',
       members_capacity: 'üye kapasitesi',
     },
+    participantsList: {
+      title: 'Katılımcılar',
+      subtitle: '{{count}} katılımcı',
+      unknown_user: 'Bilinmeyen Kullanıcı',
+    },
   },
 
   // Validation messages

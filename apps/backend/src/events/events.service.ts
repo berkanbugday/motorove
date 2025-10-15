@@ -18,6 +18,7 @@ import { plainToClass } from 'class-transformer';
 import { EventStatus } from '../enums/models/event-status.enum';
 import { EventInvitationDto } from './dto/event-invitation.dto';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
+import { EventParticipant } from '../events/models/event-participant.model';
 
 @Injectable()
 export class EventsService {
@@ -74,7 +75,7 @@ export class EventsService {
           createdBy: true,
           updatedBy: true,
           organizedByGroup: true,
-          participants: true,
+          participants: { include: { createdBy: true } },
           addresses: true,
           invitedGroups: true,
           invitations: {
@@ -149,7 +150,7 @@ export class EventsService {
           createdBy: true,
           updatedBy: true,
           organizedByGroup: true,
-          participants: true,
+          participants: { include: { createdBy: true } },
           addresses: true,
           invitedGroups: true,
           invitations: {
@@ -835,11 +836,7 @@ export class EventsService {
       title: string;
       description?: string;
       images?: string[];
-      participants?: Array<{
-        id: string;
-        createdById: string;
-        status: EventParticipantStatus;
-      }>;
+      participants?: EventParticipant[];
       createdById: string;
       [key: string]: any;
     },
@@ -875,6 +872,44 @@ export class EventsService {
         }
       }
 
+      // Process participants to get signed URLs if needed
+      let processedParticipants = event.participants || [];
+
+      if (
+        Array.isArray(processedParticipants) &&
+        processedParticipants.length > 0 &&
+        authToken
+      ) {
+        try {
+          processedParticipants = await Promise.all(
+            processedParticipants.map(async (participant) => {
+              if (
+                participant.createdBy.avatar &&
+                typeof participant.createdBy.avatar === 'string'
+              ) {
+                const signedUrl = await this.storageService.getSignedUrl(
+                  participant.createdBy.avatar,
+                  3600,
+                  authToken,
+                );
+                return {
+                  ...participant,
+                  createdBy: {
+                    ...participant.createdBy,
+                    avatar: signedUrl,
+                  },
+                };
+              }
+              return participant;
+            }),
+          );
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          console.error('Error getting signed URLs:', errorMessage);
+        }
+      }
+
       // Calculate if current user is participating and their status
       let isParticipating = false;
       let participationStatus: string | null = null;
@@ -899,6 +934,7 @@ export class EventsService {
       const eventWithExtras = {
         ...event,
         images: processedImages,
+        participants: processedParticipants,
         isParticipating,
         participationStatus,
         participantsCount,

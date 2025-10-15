@@ -41,6 +41,8 @@ export * from './LanguageSelector';
 export * from './GroupFilter';
 export * from './GroupJoinRequestCard';
 export * from './EventInvitationCard';
+export * from './ParticipantAvatars';
+export * from './ParticipantsList';
 export * from './PermissionHandler';
 export * from './CollapsibleCard';
 // Skeleton components

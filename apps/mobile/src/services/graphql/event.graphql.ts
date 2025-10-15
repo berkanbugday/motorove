@@ -35,6 +35,15 @@ export const EVENT_FRAGMENT = gql`
     participantsCount
     isParticipating
     participationStatus
+    participants {
+      id
+      createdBy {
+        id
+        firstName
+        lastName
+        avatar
+      }
+    }
     organizedByGroup {
       id
       name

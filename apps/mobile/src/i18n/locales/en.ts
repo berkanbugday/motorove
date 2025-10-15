@@ -825,6 +825,11 @@ export default {
       member: 'member',
       members_capacity: 'members capacity',
     },
+    participantsList: {
+      title: 'Participants',
+      subtitle: '{{count}} participant',
+      unknown_user: 'Unknown User',
+    },
   },
 
   // Validation messages

@@ -53,30 +53,6 @@ export const styles = StyleSheet.create({
     marginLeft: spacing.xs,
   },
   participantsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     marginTop: spacing.xs,
-  },
-  participantsAvatars: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.neutral.white,
-  },
-  participantAvatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-  },
-  remainingAvatars: {
-    backgroundColor: colors.primary.main,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
