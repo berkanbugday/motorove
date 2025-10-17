@@ -12,6 +12,7 @@ import {TokenRefreshManager} from './auth/TokenRefreshManager';
 import {TokenValidator} from './auth/TokenValidator';
 import {AuthStorage} from './auth/AuthStorage';
 import {BackgroundRefreshManager} from './auth/BackgroundRefreshManager';
+import {Language} from '@motorove/shared';
 
 /**
  * Hook for resetting password
@@ -74,11 +75,14 @@ class AuthService {
     lastName: string,
     email: string,
     password: string,
+    preferredLanguage: Language,
   ): Promise<AuthResponse> {
     try {
       const {data, errors} = await apolloClient.mutate({
         mutation: SIGN_UP,
-        variables: {input: {firstName, lastName, email, password}},
+        variables: {
+          input: {firstName, lastName, email, password, preferredLanguage},
+        },
       });
 
       if (errors) {

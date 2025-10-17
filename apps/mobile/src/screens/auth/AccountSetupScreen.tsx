@@ -266,6 +266,7 @@ export const AccountSetupScreen = () => {
               error={errors.city?.message}
               showClearButton={false}
               testID="city-dropdown"
+              searchable
             />
             <DateTimePicker
               control={control}

@@ -11,6 +11,7 @@ import { AuthUser } from './models/auth-user.model';
 import { NotificationPermission } from '../enums/models/notification-permission.enum';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { StorageService } from '../core/storage/storage.service';
+import { Language } from '../enums/models/language.enum';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,7 @@ export class AuthService {
     lastName: string,
     email: string,
     password: string,
+    preferredLanguage?: Language,
   ): Promise<AuthResponse> {
     let supabaseUser: any = null;
 
@@ -82,6 +84,7 @@ export class AuthService {
           data: {
             userId: user.id,
             notificationPreferences: notificationPreferences,
+            preferredLanguage: preferredLanguage,
           },
         });
 

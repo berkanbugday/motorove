@@ -13,8 +13,14 @@ export class AuthResolver {
 
   @Mutation(() => AuthResponse)
   async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
-    const { firstName, lastName, email, password } = input;
-    return await this.authService.signUp(firstName, lastName, email, password);
+    const { firstName, lastName, email, password, preferredLanguage } = input;
+    return await this.authService.signUp(
+      firstName,
+      lastName,
+      email,
+      password,
+      preferredLanguage,
+    );
   }
 
   @Mutation(() => AuthResponse)

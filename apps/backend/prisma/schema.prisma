@@ -899,6 +899,9 @@ model UserSetting {
   // Privacy settings
   autoAcceptFollowers Boolean @default(false)
 
+  // Language preference for notifications and app content
+  preferredLanguage Language @default(TR)
+
   // Notification permission fields
   notificationPermission NotificationPermission @default(UNKNOWN)
 
@@ -911,6 +914,7 @@ model UserSetting {
 
   @@index([userId])
   @@index([notificationPermission])
+  @@index([preferredLanguage])
 }
 
 model SupportRequest {

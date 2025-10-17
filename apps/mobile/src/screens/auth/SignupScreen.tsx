@@ -26,6 +26,8 @@ import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {GraphQLFormattedError} from 'graphql';
 import {useTranslation} from '@hooks/useTranslation';
 import authService from '@services/auth.service';
+import {useLanguage} from '@contexts/LanguageContext';
+import {Language} from '@motorove/shared';
 
 export const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +38,7 @@ export const SignupScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
+  const {language} = useLanguage();
   const {signUp} = authService;
 
   // Create validation schema with translations
@@ -76,6 +79,7 @@ export const SignupScreen = () => {
         data.lastName,
         data.email,
         data.password,
+        language.toUpperCase() as Language,
       );
 
       if (response.user) {

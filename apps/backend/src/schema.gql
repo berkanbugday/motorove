@@ -983,6 +983,7 @@ input SignUpInput {
   firstName: String!
   lastName: String!
   password: String!
+  preferredLanguage: Language
 }
 
 type SocialMedia {
@@ -1103,6 +1104,7 @@ input UpdateUserSettingInput {
   autoAcceptFollowers: Boolean
   notificationPermission: NotificationPermission
   notificationPreferences: JSON
+  preferredLanguage: Language
 }
 
 type User {
@@ -1187,6 +1189,7 @@ type UserSettingDto {
   autoAcceptFollowers: Boolean!
   notificationPermission: NotificationPermission!
   notificationPreferences: JSON
+  preferredLanguage: Language!
 }
 
 type Weather {

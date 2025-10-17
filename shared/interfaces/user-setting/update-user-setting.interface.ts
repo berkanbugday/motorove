@@ -1,4 +1,8 @@
-import { NotificationPermission, NotificationType } from "../../enums";
+import {
+  NotificationPermission,
+  NotificationType,
+  Language,
+} from "../../enums";
 
 /**
  * Update User Setting Interface
@@ -9,6 +13,11 @@ export interface IUpdateUserSetting {
    * Auto accept followers
    */
   autoAcceptFollowers?: boolean;
+
+  /**
+   * Preferred language for notifications and app content
+   */
+  preferredLanguage?: Language;
 
   /**
    * Notification permission
