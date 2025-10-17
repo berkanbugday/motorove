@@ -4,6 +4,7 @@ import {gql} from '@apollo/client';
 export const USER_SETTING_FRAGMENT = gql`
   fragment UserSettingFragment on UserSettingDto {
     autoAcceptFollowers
+    preferredLanguage
     notificationPermission
     notificationPreferences
   }

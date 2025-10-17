@@ -8,6 +8,8 @@ import {colors, commonStyles, radius, spacing} from '@theme';
 import {useAuth} from '@contexts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from '@hooks/useTranslation';
+import {useUpdateUserSetting} from '@services/user-setting.service';
+import {Language} from '@motorove/shared';
 
 type MenuSection = {
   title: string;
@@ -28,13 +30,22 @@ export const MenuScreen = () => {
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
+  const {updateUserSetting} = useUpdateUserSetting();
 
   const handleLanguagePress = () => {
     openBottomSheet({
       content: (
         <LanguageSelector
-          onLanguageSelect={() => {
+          onLanguageSelect={async (languageCode: string) => {
             closeBottomSheet();
+
+            // Convert language code to Language enum
+            const preferredLanguage = languageCode.toUpperCase() as Language;
+
+            // Update user setting with preferred language
+            await updateUserSetting({
+              preferredLanguage,
+            });
           }}
         />
       ),
