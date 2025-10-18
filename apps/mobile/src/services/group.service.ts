@@ -186,11 +186,16 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
             return prev;
           }
 
+          // Create a Set of existing group IDs to prevent duplicates
+          const existingIds = new Set(prev.joinedGroups.map((group: any) => group.id));
+
+          // Filter out any groups that already exist
+          const newGroups = fetchMoreResult.joinedGroups.filter(
+            (group: any) => !existingIds.has(group.id),
+          );
+
           return {
-            joinedGroups: [
-              ...prev.joinedGroups,
-              ...fetchMoreResult.joinedGroups,
-            ],
+            joinedGroups: [...prev.joinedGroups, ...newGroups],
           };
         },
       });
@@ -287,8 +292,16 @@ export const useGetGroups = (limit = 20, skip = 0) => {
             return prev;
           }
 
+          // Create a Set of existing group IDs to prevent duplicates
+          const existingIds = new Set(prev.groups.map((group: any) => group.id));
+
+          // Filter out any groups that already exist
+          const newGroups = fetchMoreResult.groups.filter(
+            (group: any) => !existingIds.has(group.id),
+          );
+
           return {
-            groups: [...prev.groups, ...fetchMoreResult.groups],
+            groups: [...prev.groups, ...newGroups],
           };
         },
       });
@@ -368,8 +381,16 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
             return prev;
           }
 
+          // Create a Set of existing group IDs to prevent duplicates
+          const existingIds = new Set(prev.groups.map((group: any) => group.id));
+
+          // Filter out any groups that already exist
+          const newGroups = fetchMoreResult.groups.filter(
+            (group: any) => !existingIds.has(group.id),
+          );
+
           return {
-            groups: [...prev.groups, ...fetchMoreResult.groups],
+            groups: [...prev.groups, ...newGroups],
           };
         },
       });

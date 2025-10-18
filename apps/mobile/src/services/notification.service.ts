@@ -404,29 +404,49 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
   // Wrap the original refetch to reset hasMore state
   const refetch = useCallback(async () => {
     setHasMore(true);
-    return originalRefetch();
+    return await originalRefetch();
   }, [originalRefetch]);
 
   // Function to load more notifications (pagination)
-  const loadMore = useCallback(() => {
-    if (!loading && hasMore && data?.notifications) {
-      fetchMore({
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) {
+      return;
+    }
+
+    try {
+      const result = await fetchMore({
         variables: {
-          skip: data.notifications.length,
+          skip: data?.notifications?.length || 0,
           limit,
         },
-      })
-        .then(({data: newData}) => {
-          // Check if there are more items to load
-          if (newData?.notifications?.length < limit) {
-            setHasMore(false);
+        updateQuery: (prev, {fetchMoreResult}) => {
+          if (!fetchMoreResult) {
+            return prev;
           }
-        })
-        .catch(err => {
-          loggingService.error('Error loading more notifications:', err);
-        });
+
+          // Create a Set of existing notification IDs to prevent duplicates
+          const existingIds = new Set(
+            prev.notifications.map((n: INotification) => n.id),
+          );
+
+          // Filter out any notifications that already exist
+          const newNotifications = fetchMoreResult.notifications.filter(
+            (notification: INotification) => !existingIds.has(notification.id),
+          );
+
+          return {
+            notifications: [...prev.notifications, ...newNotifications],
+          };
+        },
+      });
+
+      if (result.data.notifications.length < limit) {
+        setHasMore(false);
+      }
+    } catch (errorObj) {
+      loggingService.error('Error loading more notifications:', errorObj);
     }
-  }, [loading, hasMore, data, fetchMore, limit]);
+  }, [data?.notifications?.length, fetchMore, hasMore, limit, loading]);
 
   return {
     notifications: (data?.notifications as INotification[]) || [],

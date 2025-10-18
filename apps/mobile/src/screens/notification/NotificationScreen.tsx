@@ -1,11 +1,5 @@
 import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {
-  View,
-  StyleSheet,
-  RefreshControl,
-  ActivityIndicator,
-  FlatList,
-} from 'react-native';
+import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -31,7 +25,7 @@ import {
 } from '@services/notification.service';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
-import {INotification, Language} from '@motorove/shared';
+import {formatDatesInData, INotification, Language} from '@motorove/shared';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
 
@@ -59,13 +53,8 @@ export const NotificationScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {t} = useTranslation();
   const {language} = useLanguage();
-  const {
-    notifications: apiNotifications,
-    loading,
-    refetch,
-    loadMore,
-    hasMore,
-  } = useGetNotifications(10, 0);
+  const {notifications, loading, refetch, loadMore, hasMore} =
+    useGetNotifications();
 
   const {markNotificationAsRead} = useMarkNotificationAsRead(() => {
     refetch();
@@ -82,9 +71,6 @@ export const NotificationScreen = () => {
   const {markAllNotificationsAsRead} = useMarkAllNotificationsAsRead(() => {
     refetch();
   });
-
-  // Safe cast to our Notification type
-  const notifications = apiNotifications as readonly INotification[];
 
   const [refreshing, setRefreshing] = useState(false);
   const [existingUnreadNotifications, setExistingUnreadNotifications] =
@@ -192,6 +178,20 @@ export const NotificationScreen = () => {
     // Only show mark as read action if notification is unread
     const actualLeftActions = item.read ? [] : leftActions;
 
+    // Format dates in data according to preferred language
+    const formattedData: Record<string, any> | null = (() => {
+      try {
+        const parsedData = item.data ? JSON.parse(item.data) : null;
+        return formatDatesInData(
+          parsedData,
+          language.toUpperCase() as Language,
+        );
+      } catch (error) {
+        console.warn('Failed to parse notification data:', error);
+        return null;
+      }
+    })();
+
     return (
       <SwipeableItem
         leftActions={actualLeftActions}
@@ -220,9 +220,11 @@ export const NotificationScreen = () => {
             <Subtitle
               weight={item.read ? 'medium' : 'bold'}
               style={styles.notificationTitle}>
-              {item.title}
+              {t(`notifications.${item.title}`, {...formattedData}).toString()}
             </Subtitle>
-            <BodySmall style={styles.notificationBody}>{item.body}</BodySmall>
+            <BodySmall style={styles.notificationBody}>
+              {t(`notifications.${item.body}`, {...formattedData}).toString()}
+            </BodySmall>
             <View style={styles.bottomRow}>
               <View style={styles.timeContainer}>
                 <Icon name="clock" size={12} color={colors.neutral.grey} />
@@ -307,13 +309,6 @@ export const NotificationScreen = () => {
               </Body>
             </View>
           )
-        }
-        ListFooterComponent={
-          hasMore && loading && !refreshing ? (
-            <View style={styles.footerLoader}>
-              <ActivityIndicator size="small" color={colors.neutral.black} />
-            </View>
-          ) : null
         }
       />
 

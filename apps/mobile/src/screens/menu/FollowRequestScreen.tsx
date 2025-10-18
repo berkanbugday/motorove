@@ -26,8 +26,16 @@ export const FollowRequestScreen = () => {
   const {t} = useTranslation();
 
   // Fetch follow requests with comprehensive error handling
-  const {followRequests, loading, error, refetch, handleAccept, handleReject} =
-    useFollowRequests();
+  const {
+    followRequests,
+    loading,
+    error,
+    refetch,
+    loadMore,
+    hasMore,
+    handleAccept,
+    handleReject,
+  } = useFollowRequests();
 
   /**
    * Handle pull-to-refresh functionality
@@ -174,6 +182,7 @@ export const FollowRequestScreen = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
+        onEndReached={hasMore ? loadMore : undefined}
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={renderEmptyState}

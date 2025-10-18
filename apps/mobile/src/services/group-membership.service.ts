@@ -276,11 +276,16 @@ export const useGetGroupJoinRequests = (limit?: number, skip?: number) => {
             return prev;
           }
 
+          // Create a Set of existing request IDs to prevent duplicates
+          const existingIds = new Set(prev.groupJoinRequests.map((request: any) => request.id));
+
+          // Filter out any requests that already exist
+          const newRequests = fetchMoreResult.groupJoinRequests.filter(
+            (request: any) => !existingIds.has(request.id),
+          );
+
           return {
-            groupJoinRequests: [
-              ...prev.groupJoinRequests,
-              ...fetchMoreResult.groupJoinRequests,
-            ],
+            groupJoinRequests: [...prev.groupJoinRequests, ...newRequests],
           };
         },
       });

@@ -105,11 +105,16 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
             return prev;
           }
 
+          // Create a Set of existing request IDs to prevent duplicates
+          const existingIds = new Set(prev.followRequests.map((request: any) => request.id));
+
+          // Filter out any requests that already exist
+          const newRequests = fetchMoreResult.followRequests.filter(
+            (request: any) => !existingIds.has(request.id),
+          );
+
           return {
-            followRequests: [
-              ...prev.followRequests,
-              ...fetchMoreResult.followRequests,
-            ],
+            followRequests: [...prev.followRequests, ...newRequests],
           };
         },
       });
@@ -315,11 +320,16 @@ export const useFollowingUsers = (
             return prev;
           }
 
+          // Create a Set of existing user IDs to prevent duplicates
+          const existingIds = new Set(prev.followingUsers.map((user: any) => user.id));
+
+          // Filter out any users that already exist
+          const newUsers = fetchMoreResult.followingUsers.filter(
+            (user: any) => !existingIds.has(user.id),
+          );
+
           return {
-            followingUsers: [
-              ...prev.followingUsers,
-              ...fetchMoreResult.followingUsers,
-            ],
+            followingUsers: [...prev.followingUsers, ...newUsers],
           };
         },
       });
@@ -405,11 +415,16 @@ export const useFollowerUsers = (
             return prev;
           }
 
+          // Create a Set of existing user IDs to prevent duplicates
+          const existingIds = new Set(prev.followerUsers.map((user: any) => user.id));
+
+          // Filter out any users that already exist
+          const newUsers = fetchMoreResult.followerUsers.filter(
+            (user: any) => !existingIds.has(user.id),
+          );
+
           return {
-            followerUsers: [
-              ...prev.followerUsers,
-              ...fetchMoreResult.followerUsers,
-            ],
+            followerUsers: [...prev.followerUsers, ...newUsers],
           };
         },
       });

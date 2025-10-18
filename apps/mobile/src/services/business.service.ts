@@ -70,8 +70,16 @@ export const useGetBusinesses = () => {
             return prev;
           }
 
+          // Create a Set of existing business IDs to prevent duplicates
+          const existingIds = new Set(prev.businesses.map((business: any) => business.id));
+
+          // Filter out any businesses that already exist
+          const newBusinesses = fetchMoreResult.businesses.filter(
+            (business: any) => !existingIds.has(business.id),
+          );
+
           return {
-            businesses: [...prev.businesses, ...fetchMoreResult.businesses],
+            businesses: [...prev.businesses, ...newBusinesses],
           };
         },
       });
@@ -143,8 +151,16 @@ export const useSearchBusinesses = (query: string) => {
             return prev;
           }
 
+          // Create a Set of existing business IDs to prevent duplicates
+          const existingIds = new Set(prev.businesses.map((business: any) => business.id));
+
+          // Filter out any businesses that already exist
+          const newBusinesses = fetchMoreResult.businesses.filter(
+            (business: any) => !existingIds.has(business.id),
+          );
+
           return {
-            businesses: [...prev.businesses, ...fetchMoreResult.businesses],
+            businesses: [...prev.businesses, ...newBusinesses],
           };
         },
       });
