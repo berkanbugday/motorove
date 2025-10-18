@@ -1,10 +1,17 @@
-import React, {createContext, useContext, useEffect, useState, useCallback} from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import authService from '../services/auth.service';
 import {AuthState, AuthResponse} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
 import {NotificationPermission} from '@motorove/shared';
 import {useRemoveDeviceToken} from '@services/notification.service';
 import {useUpdateUserSetting} from '@services/user-setting.service';
+import {useLanguage} from './LanguageContext';
 
 // Import refactored helpers
 import {useAppStateRefresh} from './auth/useAppStateRefresh';
@@ -24,7 +31,9 @@ export interface AuthContextType extends AuthState {
   accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loadAuthState: () => Promise<void>;
-  updateNotificationPermission: (permission: NotificationPermission) => Promise<void>;
+  updateNotificationPermission: (
+    permission: NotificationPermission,
+  ) => Promise<void>;
   isInitializing: boolean;
 }
 
@@ -70,6 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {updateUserSetting} = useUpdateUserSetting();
+  const {setLanguage} = useLanguage();
 
   // Load authentication state on mount
   useEffect(() => {
@@ -120,6 +130,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         });
 
         setAuthState(newState);
+
+        if (newState.user?.preferredLanguage) {
+          try {
+            setLanguage(newState.user.preferredLanguage.toLowerCase());
+            loggingService.info('Language set from stored user preference:', {
+              preferredLanguage: newState.user.preferredLanguage,
+            });
+          } catch (error) {
+            loggingService.error(
+              'Error setting language from stored auth:',
+              error,
+            );
+          }
+        }
       }
 
       return response;
@@ -187,9 +211,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };
 

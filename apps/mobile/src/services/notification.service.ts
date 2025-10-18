@@ -156,6 +156,7 @@ class NotificationService {
         type: 'info',
         text1: remoteMessage.notification?.title,
         text2: remoteMessage.notification?.body,
+        visibilityTime: 5000,
       });
       return Promise.resolve();
     });
