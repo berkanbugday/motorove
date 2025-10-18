@@ -2,7 +2,7 @@
  * Authentication-related types and interfaces
  */
 
-import {NotificationPermission} from '@motorove/shared';
+import {NotificationPermission, Language} from '@motorove/shared';
 
 /**
  * User entity interface
@@ -15,6 +15,7 @@ export interface AuthUser {
   avatar?: string | null;
   hasCompletedSetup?: boolean;
   notificationPermission?: NotificationPermission;
+  preferredLanguage?: Language;
 }
 
 /**

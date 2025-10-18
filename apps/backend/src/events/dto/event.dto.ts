@@ -22,9 +22,10 @@ import { EventStatus } from '../../enums/models/event-status.enum';
 import { Currency } from '../../enums/models/currency.enum';
 import { GroupDto } from '../../groups/dto/group.dto';
 import { EventParticipantDto } from './event-participant.dto';
+import { IEvent } from '@motorove/shared';
 
 @ObjectType()
-export class EventDto {
+export class EventDto implements IEvent {
   @Field(() => ID)
   @IsUUID()
   id: string;

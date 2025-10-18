@@ -52,7 +52,6 @@ export const EVENT_FRAGMENT = gql`
       id
       firstName
       lastName
-      avatar
     }
     createdById
     createdAt

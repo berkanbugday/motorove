@@ -9,6 +9,7 @@ import { ProfanityFilterModule } from './profanity-filter/profanity-filter.modul
 import { QueueModule } from './queue/queue.module';
 import { WeatherModule } from './weather/weather.module';
 import { EventStatusJobModule } from './event-status-job/event-status-job.module';
+import { I18nModule } from './i18n/i18n.module';
 @Global()
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { EventStatusJobModule } from './event-status-job/event-status-job.module
     QueueModule,
     WeatherModule,
     EventStatusJobModule,
+    I18nModule,
   ],
   providers: [CustomLogger],
   exports: [

@@ -79,7 +79,10 @@ export class EventsService {
           createdBy: true,
           updatedBy: true,
           organizedByGroup: true,
-          participants: { include: { createdBy: true } },
+          participants: {
+            where: { status: EventParticipantStatus.JOINED },
+            include: { createdBy: true },
+          },
           addresses: true,
           invitedGroups: true,
           invitations: {
@@ -154,7 +157,10 @@ export class EventsService {
           createdBy: true,
           updatedBy: true,
           organizedByGroup: true,
-          participants: { include: { createdBy: true } },
+          participants: {
+            where: { status: EventParticipantStatus.JOINED },
+            include: { createdBy: true },
+          },
           addresses: true,
           invitedGroups: true,
           invitations: {
@@ -458,12 +464,12 @@ export class EventsService {
             userIds: event.invitations.map(
               (invitation) => invitation.inviteeId,
             ),
-            title: 'Event invitation',
-            body: `You have been invited to join event ${event.title}`,
+            title: 'event.invitation.title',
+            body: 'event.invitation.body',
             type: NotificationType.EVENT_INVITATION,
             channels: NotificationChannel.PUSH,
             data: JSON.stringify({
-              eventId: event.id,
+              eventDate: event.startDateTime,
               eventName: event.title,
             }),
           },

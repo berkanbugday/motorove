@@ -100,6 +100,7 @@ export class AuthService {
           hasCompletedSetup: result.hasCompletedSetup,
           notificationPermission: result.userSetting
             ?.notificationPermission as NotificationPermission,
+          preferredLanguage: result.userSetting?.preferredLanguage as Language,
         },
         session: data.session,
       };
@@ -169,6 +170,7 @@ export class AuthService {
         hasCompletedSetup: user.hasCompletedSetup,
         notificationPermission: user.userSetting
           ?.notificationPermission as NotificationPermission,
+        preferredLanguage: user.userSetting?.preferredLanguage as Language,
       },
       session: data.session,
     };
@@ -238,6 +240,7 @@ export class AuthService {
           hasCompletedSetup: user.hasCompletedSetup,
           notificationPermission: user.userSetting
             ?.notificationPermission as NotificationPermission,
+          preferredLanguage: user.userSetting?.preferredLanguage as Language,
         },
         session: data.session,
       };
@@ -292,6 +295,7 @@ export class AuthService {
       hasCompletedSetup: user.hasCompletedSetup,
       notificationPermission: user.userSetting
         ?.notificationPermission as NotificationPermission,
+      preferredLanguage: user.userSetting?.preferredLanguage as Language,
     };
   }
 

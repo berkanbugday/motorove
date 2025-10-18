@@ -128,6 +128,7 @@ export const ParticipantAvatars: React.FC<ParticipantAvatarsProps> = ({
     borderRadius: avatarSize / 2,
     borderWidth: 1,
     borderColor: colors.neutral.black,
+    backgroundColor: colors.neutral.white,
   };
 
   // Helper function to get participant data

@@ -1,6 +1,5 @@
 import { IBase } from "../common/base.interface";
 import { EventParticipantStatus } from "../../enums";
-import { IEvent } from "./event.interface";
 import { IUser } from "../user/user.interface";
 
 /**
@@ -8,8 +7,6 @@ import { IUser } from "../user/user.interface";
  * Interface for event participants
  */
 export interface IEventParticipant extends IBase {
-  eventId: string;
   status: EventParticipantStatus;
   createdBy: IUser;
-  event?: IEvent;
 }

@@ -90,7 +90,12 @@ export const NotificationSettingScreen = () => {
     },
     {
       title: t('screens.notificationSetting.events'),
-      types: [NotificationType.EVENT_INVITATION],
+      types: [
+        NotificationType.EVENT_INVITATION,
+        NotificationType.EVENT_REMINDER,
+        NotificationType.EVENT_CANCELLED,
+        NotificationType.EVENT_UPDATED,
+      ],
     },
   ];
 

@@ -3,6 +3,7 @@ import { NotificationPermission } from '../../enums/models/notification-permissi
 import { NotificationType } from '../../enums/models/notification-type.enum';
 import { GraphQLJSON } from 'graphql-type-json';
 import { User } from '../../users/models/user.model';
+import { Language } from '../../enums/models/language.enum';
 
 @ObjectType()
 export class UserSetting {
@@ -17,6 +18,9 @@ export class UserSetting {
 
   @Field(() => Boolean)
   autoAcceptFollowers: boolean;
+
+  @Field(() => Language)
+  preferredLanguage: Language;
 
   @Field(() => NotificationPermission)
   notificationPermission: NotificationPermission;

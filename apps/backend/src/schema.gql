@@ -69,6 +69,7 @@ type AuthUser {
   id: ID!
   lastName: String!
   notificationPermission: NotificationPermission!
+  preferredLanguage: Language!
 }
 
 """Categories for motorcycle-related businesses"""
@@ -469,11 +470,12 @@ type EventParticipantDto {
   createdAt: DateTime!
   createdBy: UserDto!
   createdById: String!
-  eventId: String!
   id: ID!
   isActive: Boolean!
   status: EventParticipantStatus!
   updatedAt: DateTime!
+  updatedBy: UserDto!
+  updatedById: String!
 }
 
 """Status of a participant in an event"""
@@ -820,7 +822,10 @@ enum NotificationStatus {
 enum NotificationType {
   ADMIN_CHANGED_GROUP_MEMBER_ROLE
   ADMIN_REMOVED_GROUP_MEMBER
+  EVENT_CANCELLED
   EVENT_INVITATION
+  EVENT_REMINDER
+  EVENT_UPDATED
   GROUP_CHANGED_INFO
   GROUP_JOIN_REQUEST
   GROUP_JOIN_REQUEST_ACCEPTED
@@ -1180,6 +1185,7 @@ type UserSetting {
   id: ID!
   notificationPermission: NotificationPermission!
   notificationPreferences: JSON
+  preferredLanguage: Language!
   updatedAt: DateTime!
   user: User!
   userId: ID!

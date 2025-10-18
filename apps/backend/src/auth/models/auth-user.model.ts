@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { NotificationPermission } from '../../enums/models/notification-permission.enum';
+import { Language } from '../../enums/models/language.enum';
 
 @ObjectType()
 export class AuthUser {
@@ -25,4 +26,9 @@ export class AuthUser {
     defaultValue: NotificationPermission.UNKNOWN,
   })
   notificationPermission: NotificationPermission;
+
+  @Field(() => Language, {
+    defaultValue: Language.TR,
+  })
+  preferredLanguage: Language;
 }

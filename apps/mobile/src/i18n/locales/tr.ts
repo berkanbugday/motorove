@@ -1156,6 +1156,9 @@ export default {
       admin_removed_group_member: 'Admin Grup Üyesini Sildi',
       admin_changed_group_member_role: 'Admin Grup Üyesi Rolünü Değiştirdi',
       event_invitation: 'Etkinlik Daveti',
+      event_reminder: 'Etkinlik Hatırlatma',
+      event_cancelled: 'Etkinlik İptal Edildi',
+      event_updated: 'Etkinlik Güncellendi',
     },
     supportCategory: {
       account: 'Hesap Sorunu',

@@ -1167,6 +1167,9 @@ export default {
       admin_removed_group_member: 'Admin Removed Group Member',
       admin_changed_group_member_role: 'Admin Changed Group Member Role',
       event_invitation: 'Event Invitation',
+      event_reminder: 'Event Reminder',
+      event_cancelled: 'Event Cancelled',
+      event_updated: 'Event Updated',
     },
     supportCategory: {
       account: 'Account Issue',

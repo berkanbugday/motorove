@@ -20,6 +20,7 @@ export const AUTH_USER_FRAGMENT = gql`
     avatar
     hasCompletedSetup
     notificationPermission
+    preferredLanguage
   }
 `;
 

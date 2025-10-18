@@ -15,7 +15,6 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Request } from 'express';
 import { EventDto } from './dto/event.dto';
 import { EventStatus } from '../enums/models/event-status.enum';
-import { EventInvitation } from './models/event-invitation.model';
 import { EventInvitationDto } from './dto/event-invitation.dto';
 
 interface GqlContext {
@@ -37,7 +36,7 @@ export class EventsResolver {
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
     @Args('status', { type: () => EventStatus, nullable: true })
     status?: EventStatus,
-  ) {
+  ): Promise<EventDto[]> {
     const userId = context.req.user?.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
@@ -46,7 +45,10 @@ export class EventsResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => EventDto, { name: 'event' })
-  async findOne(@Args('id') id: string, @Context() context: GqlContext) {
+  async findOne(
+    @Args('id') id: string,
+    @Context() context: GqlContext,
+  ): Promise<EventDto> {
     const authHeader = context.req.headers.authorization;
     const userId = context.req.user?.id;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
@@ -59,7 +61,7 @@ export class EventsResolver {
     @Context() context: GqlContext,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
-  ) {
+  ): Promise<EventInvitationDto[]> {
     const authHeader = context.req.headers.authorization;
     const userId = context.req.user?.id;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
