@@ -12,6 +12,8 @@ import { UserSetting } from 'src/user-settings/models/user-setting.model';
 import { Notification } from './models/notification.model';
 import { I18nService } from '../core/i18n/i18n.service';
 import { Language } from '../enums/models/language.enum';
+import { format } from 'date-fns';
+import { tr, enUS } from 'date-fns/locale';
 
 interface UserSettingValidationResult {
   userSetting?: UserSetting | null;
@@ -175,38 +177,6 @@ export class NotificationsService {
       );
     } catch (error) {
       this.logger.error('Failed to create and send notifications', error);
-      throw error;
-    }
-  }
-
-  async createWithoutPush(
-    input: CreateNotificationInput,
-    senderUserId: string,
-  ): Promise<NotificationDto> {
-    try {
-      const createdNotification = (await this.prisma.notification.create({
-        data: {
-          title: input.title,
-          body: input.body,
-          type: input.type,
-          channel: input.channel,
-          data: input.data,
-          user: {
-            connect: { id: input.userId },
-          },
-          status: NotificationStatus.NOT_SENT,
-          createdBy: {
-            connect: { id: senderUserId },
-          },
-          updatedBy: {
-            connect: { id: senderUserId },
-          },
-        },
-      })) as unknown as Notification;
-
-      return this.mapToDto(createdNotification);
-    } catch (error) {
-      this.logger.error('Failed to create notification without push', error);
       throw error;
     }
   }
@@ -538,22 +508,24 @@ export class NotificationsService {
     }
 
     try {
-      console.log('preferredLanguage', preferredLanguage);
+      // Format dates in data according to preferred language
+      const formattedData = this.formatDatesInData(data, preferredLanguage);
+
       const translatedTitle = this.i18nService.translate(
         `notifications.${title}`,
         preferredLanguage,
-        data || {},
+        formattedData || {},
       );
       const translatedBody = this.i18nService.translate(
         `notifications.${body}`,
         preferredLanguage,
-        data || {},
+        formattedData || {},
       );
       const result = await this.firebaseService.sendMulticastPushNotification(
         tokens,
         translatedTitle,
         translatedBody,
-        data || {},
+        formattedData || {},
       );
 
       const isSuccess = notificationId
@@ -609,5 +581,58 @@ export class NotificationsService {
         );
       }
     }
+  }
+
+  /**
+   * Format date values in notification data according to preferred language
+   */
+  private formatDatesInData(
+    data: Record<string, any> | null,
+    preferredLanguage?: Language,
+  ): Record<string, any> | null {
+    if (!data) return null;
+
+    const formattedData = { ...data };
+    const locale = preferredLanguage === Language.TR ? tr : enUS;
+
+    // Check each property in data for date values
+    Object.keys(formattedData).forEach((key) => {
+      const value: any = formattedData[key];
+
+      // Check if the value is a date string or Date object
+      if (this.isDateValue(value)) {
+        try {
+          const date = new Date(value as string | Date);
+          if (!isNaN(date.getTime())) {
+            // Format according to preferred language
+            formattedData[key] = format(date, 'PPPP • HH:mm', { locale });
+          }
+        } catch (error) {
+          // If date parsing fails, keep original value
+          this.logger.warn(`Failed to format date value: ${value}`, error);
+        }
+      }
+    });
+
+    return formattedData;
+  }
+
+  /**
+   * Check if a value is likely a date
+   */
+  private isDateValue(value: any): boolean {
+    if (!value) return false;
+
+    // Check if it's a Date object
+    if (value instanceof Date) return true;
+
+    // Check if it's a string that looks like a date
+    if (typeof value === 'string') {
+      // Check for ISO date format or other common date formats
+      const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+      return dateRegex.test(value) || !isNaN(Date.parse(value));
+    }
+
+    return false;
   }
 }

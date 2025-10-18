@@ -76,7 +76,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const formatEventDate = useCallback((dateInput: string | Date) => {
     const eventDate =
       typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-    return format(eventDate, 'EEEE, MMM d • HH:mm', {
+    return format(eventDate, 'PPPP • HH:mm', {
       locale: language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
     });
   }, []);

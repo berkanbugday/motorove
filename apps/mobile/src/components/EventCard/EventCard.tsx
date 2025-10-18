@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import {
   View,
   Image,
@@ -16,6 +16,9 @@ import {Chip} from '../Chip';
 import {ParticipantAvatars} from '../ParticipantAvatars';
 import {styles} from './EventCard.styles';
 import {useLanguage} from '@contexts/LanguageContext';
+import {format} from 'date-fns';
+import {Language} from '@motorove/shared';
+import {tr, enUS} from 'date-fns/locale';
 
 export interface ParticipantInfo {
   id: string;
@@ -114,24 +117,14 @@ const EventCard: React.FC<EventCardProps> = ({
   titleStyle,
 }) => {
   const {language} = useLanguage();
-  // Format date to show only the day and month
-  const getFormattedDate = () => {
-    const date = typeof dateTime === 'string' ? new Date(dateTime) : dateTime;
-    return date.toLocaleDateString(language, {
-      month: 'short',
-      day: 'numeric',
+  // Format date for display
+  const formatEventDate = useCallback(() => {
+    const eventDate =
+      typeof dateTime === 'string' ? new Date(dateTime) : dateTime;
+    return format(eventDate, 'PPPP • HH:mm', {
+      locale: language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
     });
-  };
-
-  // Format time to show only hours and minutes
-  const getFormattedTime = () => {
-    const date = typeof dateTime === 'string' ? new Date(dateTime) : dateTime;
-    return date.toLocaleTimeString(language, {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: false,
-    });
-  };
+  }, []);
 
   // Card header with category chip and featured badge
   const headerComponent = (
@@ -194,7 +187,7 @@ const EventCard: React.FC<EventCardProps> = ({
           variant="caption"
           color={colors.neutral.grey}
           style={styles.dateTime}>
-          {getFormattedDate()} • {getFormattedTime()}
+          {formatEventDate()}
         </Typography>
       </View>
 
