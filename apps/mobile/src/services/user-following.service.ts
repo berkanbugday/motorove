@@ -105,8 +105,11 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
             return prev;
           }
 
+          const prevRequests = prev?.followRequests || [];
           // Create a Set of existing request IDs to prevent duplicates
-          const existingIds = new Set(prev.followRequests.map((request: any) => request.id));
+          const existingIds = new Set(
+            prevRequests.map((request: any) => request.id),
+          );
 
           // Filter out any requests that already exist
           const newRequests = fetchMoreResult.followRequests.filter(
@@ -114,7 +117,7 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
           );
 
           return {
-            followRequests: [...prev.followRequests, ...newRequests],
+            followRequests: [...prevRequests, ...newRequests],
           };
         },
       });
@@ -320,8 +323,9 @@ export const useFollowingUsers = (
             return prev;
           }
 
+          const prevUsers = prev?.followingUsers || [];
           // Create a Set of existing user IDs to prevent duplicates
-          const existingIds = new Set(prev.followingUsers.map((user: any) => user.id));
+          const existingIds = new Set(prevUsers.map((user: any) => user.id));
 
           // Filter out any users that already exist
           const newUsers = fetchMoreResult.followingUsers.filter(
@@ -329,7 +333,7 @@ export const useFollowingUsers = (
           );
 
           return {
-            followingUsers: [...prev.followingUsers, ...newUsers],
+            followingUsers: [...prevUsers, ...newUsers],
           };
         },
       });
@@ -415,8 +419,9 @@ export const useFollowerUsers = (
             return prev;
           }
 
+          const prevUsers = prev?.followerUsers || [];
           // Create a Set of existing user IDs to prevent duplicates
-          const existingIds = new Set(prev.followerUsers.map((user: any) => user.id));
+          const existingIds = new Set(prevUsers.map((user: any) => user.id));
 
           // Filter out any users that already exist
           const newUsers = fetchMoreResult.followerUsers.filter(
@@ -424,7 +429,7 @@ export const useFollowerUsers = (
           );
 
           return {
-            followerUsers: [...prev.followerUsers, ...newUsers],
+            followerUsers: [...prevUsers, ...newUsers],
           };
         },
       });

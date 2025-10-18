@@ -186,8 +186,9 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
             return prev;
           }
 
+          const prevGroups = prev?.joinedGroups || [];
           // Create a Set of existing group IDs to prevent duplicates
-          const existingIds = new Set(prev.joinedGroups.map((group: any) => group.id));
+          const existingIds = new Set(prevGroups.map((group: any) => group.id));
 
           // Filter out any groups that already exist
           const newGroups = fetchMoreResult.joinedGroups.filter(
@@ -195,7 +196,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
           );
 
           return {
-            joinedGroups: [...prev.joinedGroups, ...newGroups],
+            joinedGroups: [...prevGroups, ...newGroups],
           };
         },
       });
@@ -292,8 +293,9 @@ export const useGetGroups = (limit = 20, skip = 0) => {
             return prev;
           }
 
+          const prevGroups = prev?.groups || [];
           // Create a Set of existing group IDs to prevent duplicates
-          const existingIds = new Set(prev.groups.map((group: any) => group.id));
+          const existingIds = new Set(prevGroups.map((group: any) => group.id));
 
           // Filter out any groups that already exist
           const newGroups = fetchMoreResult.groups.filter(
@@ -301,7 +303,7 @@ export const useGetGroups = (limit = 20, skip = 0) => {
           );
 
           return {
-            groups: [...prev.groups, ...newGroups],
+            groups: [...prevGroups, ...newGroups],
           };
         },
       });
@@ -381,8 +383,9 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
             return prev;
           }
 
+          const prevGroups = prev?.groups || [];
           // Create a Set of existing group IDs to prevent duplicates
-          const existingIds = new Set(prev.groups.map((group: any) => group.id));
+          const existingIds = new Set(prevGroups.map((group: any) => group.id));
 
           // Filter out any groups that already exist
           const newGroups = fetchMoreResult.groups.filter(
@@ -390,7 +393,7 @@ export const useSearchGroups = (query: string, limit = 20, skip = 0) => {
           );
 
           return {
-            groups: [...prev.groups, ...newGroups],
+            groups: [...prevGroups, ...newGroups],
           };
         },
       });

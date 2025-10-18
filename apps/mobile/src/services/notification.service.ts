@@ -424,9 +424,10 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
             return prev;
           }
 
+          const prevNotifications = prev?.notifications || [];
           // Create a Set of existing notification IDs to prevent duplicates
           const existingIds = new Set(
-            prev.notifications.map((n: INotification) => n.id),
+            prevNotifications.map((n: INotification) => n.id),
           );
 
           // Filter out any notifications that already exist
@@ -435,7 +436,7 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
           );
 
           return {
-            notifications: [...prev.notifications, ...newNotifications],
+            notifications: [...prevNotifications, ...newNotifications],
           };
         },
       });

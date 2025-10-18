@@ -269,14 +269,13 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
           status,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
-          if (!fetchMoreResult) {
+          if (!fetchMoreResult || !fetchMoreResult.events) {
             return prev;
           }
 
+          const prevEvents = prev?.events || [];
           // Create a Set of existing event IDs to prevent duplicates
-          const existingIds = new Set(
-            prev.events.map((event: any) => event.id),
-          );
+          const existingIds = new Set(prevEvents.map((event: any) => event.id));
 
           // Filter out any events that already exist
           const newEvents = fetchMoreResult.events.filter(
@@ -284,7 +283,7 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
           );
 
           return {
-            events: [...prev.events, ...newEvents],
+            events: [...prevEvents, ...newEvents],
           };
         },
       });
@@ -356,9 +355,11 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
             return prev;
           }
 
+          const prevInvitations = prev?.eventInvitations || [];
+
           // Create a Set of existing invitation IDs to prevent duplicates
           const existingIds = new Set(
-            prev.eventInvitations.map((invitation: any) => invitation.id),
+            prevInvitations.map((invitation: any) => invitation.id),
           );
 
           // Filter out any invitations that already exist
@@ -367,7 +368,7 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
           );
 
           return {
-            eventInvitations: [...prev.eventInvitations, ...newInvitations],
+            eventInvitations: [...prevInvitations, ...newInvitations],
           };
         },
       });

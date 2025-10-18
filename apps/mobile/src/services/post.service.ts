@@ -223,8 +223,9 @@ export const useGetPosts = (
             return prev;
           }
 
+          const prevPosts = prev?.posts || [];
           // Create a Set of existing post IDs to prevent duplicates
-          const existingIds = new Set(prev.posts.map((post: any) => post.id));
+          const existingIds = new Set(prevPosts.map((post: any) => post.id));
 
           // Filter out any posts that already exist
           const newPosts = fetchMoreResult.posts.filter(
@@ -232,7 +233,7 @@ export const useGetPosts = (
           );
 
           return {
-            posts: [...prev.posts, ...newPosts],
+            posts: [...prevPosts, ...newPosts],
           };
         },
       });

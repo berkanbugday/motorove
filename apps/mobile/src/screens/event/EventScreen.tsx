@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -34,63 +34,65 @@ export const EventScreen = () => {
   const insets = useSafeAreaInsets();
   const {language} = useLanguage();
 
-  // Fetch upcoming events
-  const {
-    events: upcomingEvents,
-    loading: upcomingEventsLoading,
-    error: upcomingEventsError,
-    refetch: refetchUpcomingEvents,
-    loadMore: loadMoreUpcomingEvents,
-    hasMore: hasMoreUpcomingEvents,
-  } = useGetEvents(20, 0, EventStatus.UPCOMING);
+  // Get current tab's event status
+  const getCurrentEventStatus = () => {
+    switch (activeTab) {
+      case 'upcoming':
+        return EventStatus.UPCOMING;
+      case 'past':
+        return EventStatus.PAST;
+      case 'draft':
+        return EventStatus.DRAFT;
+      default:
+        return EventStatus.UPCOMING;
+    }
+  };
 
-  // Fetch past events
-  const {
-    events: pastEvents,
-    loading: pastEventsLoading,
-    error: pastEventsError,
-    refetch: refetchPastEvents,
-    loadMore: loadMorePastEvents,
-    hasMore: hasMorePastEvents,
-  } = useGetEvents(20, 0, EventStatus.PAST);
-
-  // Fetch draft events
-  const {
-    events: draftEvents,
-    loading: draftEventsLoading,
-    error: draftEventsError,
-    refetch: refetchDraftEvents,
-    loadMore: loadMoreDraftEvents,
-    hasMore: hasMoreDraftEvents,
-  } = useGetEvents(20, 0, EventStatus.DRAFT);
-
-  // Refresh draft events when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      if (activeTab === 'draft') {
-        refetchDraftEvents();
-      }
-      return () => {};
-    }, [activeTab, refetchDraftEvents]),
+  // Only fetch events for the active tab
+  const {events, loading, error, refetch, loadMore, hasMore} = useGetEvents(
+    20,
+    0,
+    getCurrentEventStatus(),
   );
 
-  const handleRefreshUpcomingEvents = useCallback(async () => {
+  // Refresh events when screen comes into focus or tab changes
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+      return () => {};
+    }, [refetch]),
+  );
+
+  // Refetch when active tab changes
+  useEffect(() => {
+    refetch();
+  }, [activeTab, refetch]);
+
+  const handleRefresh = useCallback(async () => {
     setRefreshingUpcomingEvents(true);
-    await refetchUpcomingEvents();
-    setRefreshingUpcomingEvents(false);
-  }, [refetchUpcomingEvents]);
-
-  const handleRefreshPastEvents = useCallback(async () => {
     setRefreshingPastEvents(true);
-    await refetchPastEvents();
-    setRefreshingPastEvents(false);
-  }, [refetchPastEvents]);
-
-  const handleRefreshDraftEvents = useCallback(async () => {
     setRefreshingDraftEvents(true);
-    await refetchDraftEvents();
+
+    await refetch();
+
+    setRefreshingUpcomingEvents(false);
+    setRefreshingPastEvents(false);
     setRefreshingDraftEvents(false);
-  }, [refetchDraftEvents]);
+  }, [refetch]);
+
+  // Get current refreshing state based on active tab
+  const getCurrentRefreshingState = () => {
+    switch (activeTab) {
+      case 'upcoming':
+        return refreshingUpcomingEvents;
+      case 'past':
+        return refreshingPastEvents;
+      case 'draft':
+        return refreshingDraftEvents;
+      default:
+        return false;
+    }
+  };
 
   const renderEmptyState = useCallback(
     (tabType: string, isLoading: boolean) => {
@@ -113,19 +115,7 @@ export const EventScreen = () => {
             title={t('common.try_again')}
             variant="primary"
             shape="round"
-            onPress={() => {
-              switch (tabType) {
-                case 'upcoming':
-                  handleRefreshUpcomingEvents();
-                  break;
-                case 'past':
-                  handleRefreshPastEvents();
-                  break;
-                case 'draft':
-                  handleRefreshDraftEvents();
-                  break;
-              }
-            }}
+            onPress={handleRefresh}
           />
         </View>
       );
@@ -139,8 +129,8 @@ export const EventScreen = () => {
     onRefresh: () => void,
     isLoading: boolean,
     hasError: any,
-    loadMore: () => void,
-    hasMore: boolean,
+    loadMoreFn: () => void,
+    hasMoreItems: boolean,
     tabType: string,
   ) => {
     if (isLoading && !isRefreshing && !eventsList?.length) {
@@ -234,7 +224,7 @@ export const EventScreen = () => {
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={renderEmptyState(activeTab, isLoading)}
-        onEndReached={hasMore ? loadMore : undefined}
+        onEndReached={hasMoreItems ? loadMoreFn : undefined}
         onEndReachedThreshold={0.5}
       />
     );
@@ -246,16 +236,17 @@ export const EventScreen = () => {
       label: t('screens.event.upcoming'),
       content: (
         <View style={styles.tabContent}>
-          {renderEventsList(
-            upcomingEvents,
-            refreshingUpcomingEvents,
-            handleRefreshUpcomingEvents,
-            upcomingEventsLoading,
-            upcomingEventsError,
-            loadMoreUpcomingEvents,
-            hasMoreUpcomingEvents,
-            'upcoming',
-          )}
+          {activeTab === 'upcoming' &&
+            renderEventsList(
+              events,
+              getCurrentRefreshingState(),
+              handleRefresh,
+              loading,
+              error,
+              loadMore,
+              hasMore,
+              'upcoming',
+            )}
         </View>
       ),
     },
@@ -264,16 +255,17 @@ export const EventScreen = () => {
       label: t('screens.event.past'),
       content: (
         <View style={styles.tabContent}>
-          {renderEventsList(
-            pastEvents,
-            refreshingPastEvents,
-            handleRefreshPastEvents,
-            pastEventsLoading,
-            pastEventsError,
-            loadMorePastEvents,
-            hasMorePastEvents,
-            'past',
-          )}
+          {activeTab === 'past' &&
+            renderEventsList(
+              events,
+              getCurrentRefreshingState(),
+              handleRefresh,
+              loading,
+              error,
+              loadMore,
+              hasMore,
+              'past',
+            )}
         </View>
       ),
     },
@@ -282,16 +274,17 @@ export const EventScreen = () => {
       label: t('screens.event.draft'),
       content: (
         <View style={styles.tabContent}>
-          {renderEventsList(
-            draftEvents,
-            refreshingDraftEvents,
-            handleRefreshDraftEvents,
-            draftEventsLoading,
-            draftEventsError,
-            loadMoreDraftEvents,
-            hasMoreDraftEvents,
-            'draft',
-          )}
+          {activeTab === 'draft' &&
+            renderEventsList(
+              events,
+              getCurrentRefreshingState(),
+              handleRefresh,
+              loading,
+              error,
+              loadMore,
+              hasMore,
+              'draft',
+            )}
         </View>
       ),
     },
