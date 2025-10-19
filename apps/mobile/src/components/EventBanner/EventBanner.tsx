@@ -61,7 +61,7 @@ export interface EventBannerProps {
   /**
    * Badge text to display on the banner (e.g., "UPCOMING", "CANCELLED")
    */
-  badgeText?: string;
+  badgeText?: string | null;
 
   /**
    * Function called when the chat button is pressed

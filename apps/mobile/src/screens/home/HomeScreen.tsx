@@ -100,6 +100,7 @@ interface EventItem {
   organizer: string;
   location: string;
   participantCount: number;
+  isParticipanting?: boolean | null;
 }
 
 // Group events data - now replaced with real API data
@@ -274,6 +275,7 @@ export const HomeScreen = ({navigation}: Props) => {
           ? event.organizedByGroup.name
           : `${event.createdBy.firstName} ${event.createdBy.lastName}`,
         participantCount: event.participantsCount || 0,
+        isParticipanting: event.isParticipating,
       };
     },
     [language],
@@ -332,6 +334,7 @@ export const HomeScreen = ({navigation}: Props) => {
         organizer={item.organizer}
         location={item.location}
         participantCount={item.participantCount}
+        badgeText={item.isParticipanting ? t('screens.event.going') : null}
         onPress={() =>
           navigateToScreen(navigation, 'EventDetail', {eventId: item.id})
         }
@@ -895,6 +898,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   eventBanner: {
+    marginTop: spacing.md,
     backgroundColor: colors.neutral.white,
     marginRight: spacing.sm,
     marginLeft: spacing.sm,

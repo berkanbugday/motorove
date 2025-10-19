@@ -250,10 +250,6 @@ export const CreateEventScreen: React.FC = () => {
       );
       return () => backHandler.remove();
     }
-
-    applyFilters({
-      role: GroupMemberRole.ADMIN,
-    });
   }, [navigation, isDirty]);
 
   // Navigation handlers
@@ -1302,6 +1298,9 @@ export const CreateEventScreen: React.FC = () => {
   useEffect(() => {
     setIsFirstStep(currentStepIndex === 0);
     setIsLastStep(currentStepIndex === wizardSteps.length - 1);
+    applyFilters({
+      role: GroupMemberRole.ADMIN,
+    });
   }, [currentStepIndex, wizardSteps.length]);
 
   return (
