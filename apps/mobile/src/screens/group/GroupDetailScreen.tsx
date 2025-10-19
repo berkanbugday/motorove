@@ -61,6 +61,8 @@ import {
   IUser,
   IImage,
   Language,
+  EventStatus,
+  IEvent,
 } from '@motorove/shared';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
@@ -79,6 +81,7 @@ import {
   closeBottomSheet,
   openBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
+import {useGetEvents} from '@services/event.service';
 type GroupDetailScreenRouteProp = RouteProp<MainStackParamList, 'GroupDetail'>;
 
 type Props = {
@@ -92,54 +95,7 @@ const formatAvatarSource = (imageUrl?: string) => {
     : require('@assets/images/default_avatar.png');
 };
 
-// This function will be defined inside the component
-
-interface EventItem {
-  id: string;
-  day: string;
-  month: string;
-  time: string;
-  title: string;
-  infoText?: string;
-  location: string;
-  participantCount: number;
-  membersCapacity: number;
-}
-
-// Group events data
-const upcomingEvents: EventItem[] = [
-  {
-    id: '1',
-    day: '15',
-    month: 'JUN',
-    time: '10:00',
-    title: 'Sunday Breakfast Ride',
-    infoText: "You're Going",
-    location: 'Istanbul',
-    participantCount: 10,
-    membersCapacity: 34,
-  },
-  {
-    id: '2',
-    day: '22',
-    month: 'JUN',
-    time: '09:30',
-    title: 'Mountain Pass Challenge',
-    location: 'Mountainside Trail',
-    participantCount: 16,
-    membersCapacity: 40,
-  },
-  {
-    id: '3',
-    day: '28',
-    month: 'JUN',
-    time: '14:00',
-    title: 'Evening City Tour',
-    location: 'City Park',
-    participantCount: 8,
-    membersCapacity: 25,
-  },
-];
+// EventItem interface and transformation logic moved to EventBanner component
 
 const MemberItem = React.memo(
   ({
@@ -376,16 +332,25 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
     refetch: refetchPosts,
   } = useGetPosts(groupId);
 
+  // Use the useGetEvents hook to fetch events for this group
+  const {events, refetch: refetchEvents} = useGetEvents(
+    3,
+    0,
+    EventStatus.UPCOMING,
+    groupId,
+  );
+
   // Handle pull-to-refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await refetchGroup();
       await refetchPosts();
+      await refetchEvents();
     } finally {
       setRefreshing(false);
     }
-  }, [refetchGroup, refetchPosts]);
+  }, [refetchGroup, refetchPosts, refetchEvents]);
 
   // Fetch group members
   const members = group?.memberships || [];
@@ -1065,29 +1030,17 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
 
   // Render event banner item
   const renderEventBanner = useCallback(
-    ({item}: {item: EventItem}) => (
+    ({item}: {item: IEvent}) => (
       <EventBanner
-        day={item.day}
-        month={item.month}
-        time={item.time}
-        title={item.title}
-        // infoText={item.infoText}
-        badgeText={item.infoText}
-        infoTextStyle={styles.eventBannerInfoText}
-        location={item.location}
-        participantCount={item.participantCount}
-        maxParticipants={item.membersCapacity}
-        onChatPress={() =>
-          loggingService.info(`Chat pressed for event: ${item.title}`)
+        event={item}
+        onPress={() =>
+          navigateToScreen(navigation, 'EventDetail', {eventId: item.id})
         }
         style={styles.eventBanner}
       />
     ),
     [],
   );
-
-  // Event keyExtractor
-  const eventKeyExtractor = useCallback((item: EventItem) => item.id, []);
 
   // Now just a simple render function that uses the MemberItem component
   const renderMemberItem = useCallback(
@@ -1272,41 +1225,46 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         {group?.isMember && (
           <>
             {/* Upcoming Group Events Section */}
-            <View style={styles.content}>
-              <View style={styles.sectionHeaderContainer}>
-                <Title weight="bold">
-                  {t('screens.group.upcoming_events')}
-                </Title>
+            {events.length > 0 && (
+              <View style={styles.content}>
+                <View style={styles.sectionHeaderContainer}>
+                  <Subtitle weight="bold">
+                    {t('screens.group.upcoming_events')}
+                  </Subtitle>
+                </View>
+                <FlatList
+                  ref={eventsListRef}
+                  data={events}
+                  renderItem={renderEventBanner}
+                  keyExtractor={item => item.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={Dimensions.get('window').width - spacing.xl}
+                  decelerationRate="fast"
+                  onScroll={handleEventScroll}
+                  onScrollToIndexFailed={handleScrollToIndexFailed}
+                  nestedScrollEnabled={true}
+                />
+                {events.length > 1 && (
+                  <PageIndicator
+                    totalPages={events.length}
+                    currentPage={currentEventIndex}
+                    onPageChange={handleEventPageChange}
+                    containerStyle={styles.pageIndicator}
+                    type="pill"
+                    indicatorSize={8}
+                    activeIndicatorSize={10}
+                    spacing={8}
+                  />
+                )}
               </View>
-              <FlatList
-                ref={eventsListRef}
-                data={upcomingEvents}
-                renderItem={renderEventBanner}
-                keyExtractor={eventKeyExtractor}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                snapToInterval={Dimensions.get('window').width - spacing.xl}
-                decelerationRate="fast"
-                onScroll={handleEventScroll}
-                scrollEventThrottle={16}
-                onScrollToIndexFailed={handleScrollToIndexFailed}
-                contentContainerStyle={styles.eventsListContent}
-              />
-              <PageIndicator
-                totalPages={upcomingEvents.length}
-                currentPage={currentEventIndex}
-                onPageChange={handleEventPageChange}
-                containerStyle={styles.pageIndicator}
-                type="pill"
-                indicatorSize={8}
-                activeIndicatorSize={10}
-                spacing={8}
-              />
-            </View>
+            )}
 
             {/* Recent Posts Section */}
             <View style={styles.content}>
-              <Title weight="bold">{t('screens.group.recent_posts')}</Title>
+              <Subtitle weight="bold">
+                {t('screens.group.recent_posts')}
+              </Subtitle>
               {postsLoading ? (
                 <View style={styles.postsLoadingContainer}>
                   <ActivityIndicator size="large" />
@@ -1576,6 +1534,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   eventBanner: {
+    marginTop: spacing.md,
     backgroundColor: colors.neutral.white,
     marginRight: spacing.sm,
     marginLeft: spacing.sm,

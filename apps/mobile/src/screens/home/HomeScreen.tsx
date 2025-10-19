@@ -48,7 +48,6 @@ import {
   IEvent,
   Language,
   EventStatus,
-  AddressType,
 } from '@motorove/shared';
 import {
   useGetPosts,
@@ -90,20 +89,7 @@ const recommendedRoutes = [
   },
 ];
 
-// Define event interface
-interface EventItem {
-  id: string;
-  day: string;
-  month: string;
-  time: string;
-  title: string;
-  organizer: string;
-  location: string;
-  participantCount: number;
-  isParticipanting?: boolean | null;
-}
-
-// Group events data - now replaced with real API data
+// EventItem interface and transformation logic moved to EventBanner component
 
 // Change from MainStackParamList to accepting both TabParamList and MainStackParamList
 type Props = NativeStackScreenProps<TabParamList, 'HomeTab'>;
@@ -229,61 +215,6 @@ export const HomeScreen = ({navigation}: Props) => {
     setCurrentRoute(recommendedRoutes[currentRouteIndex]);
   }, [currentRouteIndex]);
 
-  // Transform IEvent to EventItem format for GroupEventBanner
-  const transformEventToEventItem = useCallback(
-    (event: IEvent): EventItem => {
-      const startDate = new Date(event.startDateTime);
-      const day = startDate.getDate().toString().padStart(2, '0');
-      const month = startDate
-        .toLocaleDateString(language, {month: 'short'})
-        .toUpperCase();
-      const time = startDate.toLocaleTimeString(language, {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-
-      // Get the first address (if available)
-      const startLocation =
-        event.addresses &&
-        event.addresses.find(
-          address =>
-            address.type === AddressType.EVENT_START_LOCATION &&
-            address.language.toLowerCase() === language.toLowerCase(),
-        );
-
-      const meetingLocation =
-        event.addresses &&
-        event.addresses.find(
-          address =>
-            address.type === AddressType.EVENT_MEETING_LOCATION &&
-            address.language.toLowerCase() === language.toLowerCase(),
-        );
-
-      const location = startLocation?.address
-        ? startLocation?.address
-        : meetingLocation?.address;
-
-      return {
-        id: event.id,
-        day,
-        month,
-        time,
-        title: event.title,
-        location: location || '',
-        organizer: event.organizedByGroup
-          ? event.organizedByGroup.name
-          : `${event.createdBy.firstName} ${event.createdBy.lastName}`,
-        participantCount: event.participantsCount || 0,
-        isParticipanting: event.isParticipating,
-      };
-    },
-    [language],
-  );
-
-  // Transform events data to EventItem format
-  const upcomingEvents: EventItem[] = events.map(transformEventToEventItem);
-
   // Handle FlatList scroll event to update the current page
   const handleEventScroll = useCallback((event: any) => {
     const contentOffset = event.nativeEvent.contentOffset;
@@ -325,16 +256,9 @@ export const HomeScreen = ({navigation}: Props) => {
 
   // Render event banner item
   const renderEventBanner = useCallback(
-    ({item}: {item: EventItem}) => (
+    ({item}: {item: IEvent}) => (
       <EventBanner
-        day={item.day}
-        month={item.month}
-        time={item.time}
-        title={item.title}
-        organizer={item.organizer}
-        location={item.location}
-        participantCount={item.participantCount}
-        badgeText={item.isParticipanting ? t('screens.event.going') : null}
+        event={item}
         onPress={() =>
           navigateToScreen(navigation, 'EventDetail', {eventId: item.id})
         }
@@ -746,7 +670,7 @@ export const HomeScreen = ({navigation}: Props) => {
             </View>
 
             {/* Upcoming Group Events Section */}
-            {(upcomingEvents.length > 0 || eventsLoading) && (
+            {(events.length > 0 || eventsLoading) && (
               <View style={styles.sectionContainer}>
                 <View style={styles.sectionHeaderContainer}>
                   <Subtitle weight="bold" style={styles.sectionTitle}>
@@ -767,7 +691,7 @@ export const HomeScreen = ({navigation}: Props) => {
                   <>
                     <FlatList
                       ref={eventsListRef}
-                      data={upcomingEvents}
+                      data={events}
                       renderItem={renderEventBanner}
                       keyExtractor={item => item.id}
                       horizontal
@@ -780,9 +704,9 @@ export const HomeScreen = ({navigation}: Props) => {
                       onScrollToIndexFailed={handleScrollToIndexFailed}
                       nestedScrollEnabled={true}
                     />
-                    {upcomingEvents.length > 1 && (
+                    {events.length > 1 && (
                       <PageIndicator
-                        totalPages={upcomingEvents.length}
+                        totalPages={events.length}
                         currentPage={currentEventIndex}
                         onPageChange={handleEventPageChange}
                         containerStyle={styles.pageIndicator}

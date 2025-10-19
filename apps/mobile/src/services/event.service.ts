@@ -232,7 +232,7 @@ export const useGetEvent = (id: string) => {
 };
 
 // Hook for getting all events with race condition protection
-export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
+export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus, groupId?: string) => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const currentStatusRef = useRef<EventStatus | undefined>(status);
@@ -249,6 +249,7 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
       limit,
       skip,
       status,
+      groupId,
     },
     onError: errorObj => {
       loggingService.error('Error fetching all events:', errorObj);

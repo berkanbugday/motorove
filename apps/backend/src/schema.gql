@@ -915,7 +915,7 @@ type Query {
   count: Float!
   event(id: String!): EventDto!
   eventInvitations(limit: Int, skip: Int): [EventInvitationDto!]!
-  events(limit: Int, skip: Int, status: EventStatus): [EventDto!]!
+  events(groupId: String, limit: Int, skip: Int, status: EventStatus): [EventDto!]!
   followRequests(limit: Int, skip: Int): [UserFollowingDto!]!
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
   followingUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!

@@ -38,6 +38,7 @@ export class EventsService {
     currentUserId?: string,
     authToken?: string,
     status?: EventStatus,
+    groupId?: string,
   ): Promise<EventDto[]> {
     try {
       const baseWhere = {
@@ -47,30 +48,71 @@ export class EventsService {
           currentUserId && { createdById: currentUserId }),
       };
 
-      // Apply privacy filtering based on user access
-      const where = currentUserId
-        ? {
-            ...baseWhere,
-            OR: [
-              // Public events
-              { isPrivate: false },
-              // Private events where user is the creator
-              { isPrivate: true, createdById: currentUserId },
-              // Private events where user has an invitation
-              {
-                isPrivate: true,
-                invitations: {
-                  some: {
-                    inviteeId: currentUserId,
-                  },
+      // Apply privacy filtering based on user access and groupId
+      let where;
+
+      if (groupId) {
+        // If groupId is provided, filter events for that specific group
+        where = {
+          ...baseWhere,
+          OR: [
+            // Private events where the specific group is invited
+            {
+              isPrivate: true,
+              invitedGroups: {
+                some: { id: groupId },
+              },
+            },
+          ],
+        };
+      } else if (currentUserId) {
+        // Original user-based filtering
+
+        const groupIds = await this.prisma.groupMembership.findMany({
+          where: {
+            userId: currentUserId,
+            status: ApprovalStatus.ACCEPTED,
+            isActive: true,
+            group: {
+              isActive: true,
+            },
+          },
+          select: {
+            groupId: true,
+          },
+        });
+
+        where = {
+          ...baseWhere,
+          OR: [
+            // Public events
+            { isPrivate: false },
+            // Private events where user is the creator
+            { isPrivate: true, createdById: currentUserId },
+            // Private events where user has an invitation
+            {
+              isPrivate: true,
+              invitations: {
+                some: {
+                  inviteeId: currentUserId,
                 },
               },
-            ],
-          }
-        : {
-            ...baseWhere,
-            isPrivate: false,
-          };
+            },
+            {
+              isPrivate: true,
+              invitedGroups: {
+                some: { id: { in: groupIds.map((g) => g.groupId) } },
+              },
+            },
+          ],
+        };
+      } else {
+        // No user or group context, only public events
+        where = {
+          ...baseWhere,
+          isPrivate: false,
+        };
+      }
 
       const events = await this.prisma.event.findMany({
         where,
@@ -124,6 +166,20 @@ export class EventsService {
     try {
       const baseWhere = { id, isActive: true };
 
+      const groupIds = await this.prisma.groupMembership.findMany({
+        where: {
+          userId: currentUserId,
+          status: ApprovalStatus.ACCEPTED,
+          isActive: true,
+          group: {
+            isActive: true,
+          },
+        },
+        select: {
+          groupId: true,
+        },
+      });
+
       // Apply privacy filtering for individual event access
       const where = currentUserId
         ? {
@@ -140,6 +196,12 @@ export class EventsService {
                   some: {
                     inviteeId: currentUserId,
                   },
+                },
+              },
+              {
+                isPrivate: true,
+                invitedGroups: {
+                  some: { id: { in: groupIds.map((g) => g.groupId) } },
                 },
               },
             ],

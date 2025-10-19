@@ -36,11 +36,20 @@ export class EventsResolver {
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
     @Args('status', { type: () => EventStatus, nullable: true })
     status?: EventStatus,
+    @Args('groupId', { type: () => String, nullable: true })
+    groupId?: string,
   ): Promise<EventDto[]> {
     const userId = context.req.user?.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return this.eventsService.findAll(limit, skip, userId, authToken, status);
+    return this.eventsService.findAll(
+      limit,
+      skip,
+      userId,
+      authToken,
+      status,
+      groupId,
+    );
   }
 
   @UseGuards(JwtGuard)

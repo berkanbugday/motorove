@@ -118,8 +118,8 @@ export const REMOVE_EVENT = gql`
 
 // Get events query
 export const GET_EVENTS = gql`
-  query GetEvents($limit: Int, $skip: Int, $status: EventStatus) {
-    events(limit: $limit, skip: $skip, status: $status) {
+  query GetEvents($limit: Int, $skip: Int, $status: EventStatus, $groupId: String) {
+    events(limit: $limit, skip: $skip, status: $status, groupId: $groupId) {
       ...EventFragment
     }
   }

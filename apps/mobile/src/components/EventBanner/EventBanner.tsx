@@ -9,29 +9,103 @@ import {
 import {styles} from './EventBanner.styles';
 import {Icon} from '../Icon';
 import {Body, BodySmall, Caption, Title} from '../Typography';
-import {colors} from '@theme';
+import {colors, spacing} from '@theme';
 import {Button} from '../Button';
 import {useTranslation} from '@hooks/useTranslation';
+import {useLanguage} from '@contexts/LanguageContext';
+import {IEvent, AddressType} from '@motorove/shared';
+
+// Internal interface for transformed event data
+interface EventItem {
+  id: string;
+  day: string;
+  month: string;
+  time: string;
+  title: string;
+  organizer: string;
+  location: string;
+  participantCount: number;
+  isParticipanting?: boolean | null;
+}
+
+// Transform IEvent to EventItem format
+const transformEventToEventItem = (
+  event: IEvent,
+  language: string,
+): EventItem => {
+  const startDate = new Date(event.startDateTime);
+  const day = startDate.getDate().toString().padStart(2, '0');
+  const month = startDate
+    .toLocaleDateString(language, {month: 'short'})
+    .toUpperCase();
+  const time = startDate.toLocaleTimeString(language, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  // Get the first address (if available)
+  const startLocation =
+    event.addresses &&
+    event.addresses.find(
+      address =>
+        address.type === AddressType.EVENT_START_LOCATION &&
+        address.language.toLowerCase() === language.toLowerCase(),
+    );
+
+  const meetingLocation =
+    event.addresses &&
+    event.addresses.find(
+      address =>
+        address.type === AddressType.EVENT_MEETING_LOCATION &&
+        address.language.toLowerCase() === language.toLowerCase(),
+    );
+
+  const location = startLocation?.address
+    ? startLocation?.address
+    : meetingLocation?.address;
+
+  return {
+    id: event.id,
+    day,
+    month,
+    time,
+    title: event.title,
+    location: location || '',
+    organizer: event.organizedByGroup
+      ? event.organizedByGroup.name
+      : `${event.createdBy.firstName} ${event.createdBy.lastName}`,
+    participantCount: event.participantsCount || 0,
+    isParticipanting: event.isParticipating,
+  };
+};
+
 export interface EventBannerProps {
+  /**
+   * The event object to display
+   */
+  event?: IEvent;
+
+  // Legacy props for backward compatibility
   /**
    * The date of the event (e.g., "15")
    */
-  day: string;
+  day?: string;
 
   /**
    * The month of the event (e.g., "JUN")
    */
-  month: string;
+  month?: string;
 
   /**
    * The time of the event (e.g., "10:00")
    */
-  time: string;
+  time?: string;
 
   /**
    * The title of the event
    */
-  title: string;
+  title?: string;
 
   /**
    * Additional information text displayed under the title
@@ -114,6 +188,7 @@ export interface EventBannerProps {
  * participant information, and a chat button.
  */
 const EventBanner: React.FC<EventBannerProps> = ({
+  event,
   day,
   month,
   time,
@@ -135,16 +210,36 @@ const EventBanner: React.FC<EventBannerProps> = ({
   badgeTextStyle,
 }) => {
   const {t} = useTranslation();
+  const {language} = useLanguage();
+
+  // Transform event data if event prop is provided
+  const eventData = event ? transformEventToEventItem(event, language) : null;
+
+  // Use transformed data or fallback to legacy props
+  const displayData = {
+    day: eventData?.day || day || '',
+    month: eventData?.month || month || '',
+    time: eventData?.time || time || '',
+    title: eventData?.title || title || '',
+    organizer: eventData?.organizer || organizer || '',
+    location: eventData?.location || location || '',
+    participantCount: eventData?.participantCount ?? participantCount ?? 0,
+    badgeText: eventData?.isParticipanting
+      ? t('screens.event.going')
+      : badgeText,
+  };
 
   const renderParticipantCount = () => {
-    if (!participantCount) {
+    if (!displayData.participantCount) {
       return null;
     }
     const participantCountText = maxParticipants
-      ? `${participantCount} ${t(
+      ? `${displayData.participantCount} ${t(
           'components.eventBanner.participant',
         )} / ${maxParticipants} ${t('components.eventBanner.maxParticipants')}`
-      : `${participantCount} ${t('components.eventBanner.participant')}`;
+      : `${displayData.participantCount} ${t(
+          'components.eventBanner.participant',
+        )}`;
 
     return (
       <View style={styles.participantsContainer}>
@@ -162,7 +257,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
   return (
     <TouchableOpacity activeOpacity={0.7} onPress={onPress}>
       <View style={[styles.container, style]}>
-        {badgeText && (
+        {displayData.badgeText && (
           <View style={[styles.badgeContainer, badgeStyle]}>
             <Caption
               numberOfLines={1}
@@ -170,25 +265,30 @@ const EventBanner: React.FC<EventBannerProps> = ({
               align="center"
               color={colors.neutral.white}
               style={[styles.badgeText, badgeTextStyle]}>
-              {badgeText}
+              {displayData.badgeText}
             </Caption>
           </View>
         )}
         {/* Date and Time Container */}
         <View style={[styles.dateContainer, dateContainerStyle]}>
-          <Title weight="bold">{day}</Title>
-          <BodySmall weight="bold">{month}</BodySmall>
-          <Caption>{time}</Caption>
+          <Title weight="bold">{displayData.day}</Title>
+          <BodySmall weight="bold">{displayData.month}</BodySmall>
+          <Caption>{displayData.time}</Caption>
         </View>
 
         {/* Event Details Container */}
-        <View style={[styles.contentContainer, contentStyle]}>
-          {title && (
+        <View
+          style={[
+            styles.contentContainer,
+            contentStyle,
+            !displayData.participantCount ? {paddingVertical: spacing.md} : {},
+          ]}>
+          {displayData.title && (
             <Body
               numberOfLines={1}
               weight="bold"
               style={[onChatPress ? {paddingRight: 70} : {}, titleStyle]}>
-              {title}
+              {displayData.title}
             </Body>
           )}
           {infoText && (
@@ -199,22 +299,22 @@ const EventBanner: React.FC<EventBannerProps> = ({
               {infoText}
             </Caption>
           )}
-          {organizer && (
+          {displayData.organizer && (
             <Caption
               numberOfLines={1}
               color={colors.neutral.darkGrey}
               style={styles.organizer}>
-              {organizer}
+              {displayData.organizer}
             </Caption>
           )}
-          {location && (
+          {displayData.location && (
             <View style={styles.locationContainer}>
               <Icon name="map-pin-filled" size={14} />
               <Caption
                 numberOfLines={1}
                 color={colors.neutral.grey}
                 style={styles.locationText}>
-                {location}
+                {displayData.location}
               </Caption>
             </View>
           )}
