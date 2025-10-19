@@ -1,6 +1,11 @@
-import React, {useState, useCallback, useEffect} from 'react';
-import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
-import {useNavigation, useFocusEffect} from '@react-navigation/native';
+import React, {useState, useCallback} from 'react';
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {colors, spacing} from '@theme';
 import {
@@ -19,6 +24,7 @@ import {IEvent, EventStatus, AddressType} from '@motorove/shared';
 import {useGetEvents} from '@services/event.service';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
+import {FlashList} from '@shopify/flash-list';
 
 /**
  * Events Screen - Displays user events with tab navigation
@@ -49,36 +55,42 @@ export const EventScreen = () => {
   };
 
   // Only fetch events for the active tab
-  const {events, loading, error, refetch, loadMore, hasMore} = useGetEvents(
-    20,
-    0,
-    getCurrentEventStatus(),
-  );
-
-  // Refresh events when screen comes into focus or tab changes
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-      return () => {};
-    }, [refetch]),
-  );
-
-  // Refetch when active tab changes
-  useEffect(() => {
-    refetch();
-  }, [activeTab, refetch]);
+  const {events, loading, error, refetch, loadMore, isFetchingMore} =
+    useGetEvents(20, 0, getCurrentEventStatus());
 
   const handleRefresh = useCallback(async () => {
-    setRefreshingUpcomingEvents(true);
-    setRefreshingPastEvents(true);
-    setRefreshingDraftEvents(true);
+    const currentTab = activeTab;
 
-    await refetch();
+    // Set refreshing state for current tab only
+    switch (currentTab) {
+      case 'upcoming':
+        setRefreshingUpcomingEvents(true);
+        break;
+      case 'past':
+        setRefreshingPastEvents(true);
+        break;
+      case 'draft':
+        setRefreshingDraftEvents(true);
+        break;
+    }
 
-    setRefreshingUpcomingEvents(false);
-    setRefreshingPastEvents(false);
-    setRefreshingDraftEvents(false);
-  }, [refetch]);
+    try {
+      await refetch();
+    } finally {
+      // Reset refreshing state for current tab
+      switch (currentTab) {
+        case 'upcoming':
+          setRefreshingUpcomingEvents(false);
+          break;
+        case 'past':
+          setRefreshingPastEvents(false);
+          break;
+        case 'draft':
+          setRefreshingDraftEvents(false);
+          break;
+      }
+    }
+  }, [refetch, activeTab]);
 
   // Get current refreshing state based on active tab
   const getCurrentRefreshingState = () => {
@@ -130,7 +142,7 @@ export const EventScreen = () => {
     isLoading: boolean,
     hasError: any,
     loadMoreFn: () => void,
-    hasMoreItems: boolean,
+    isFetchingMoreItem: boolean,
     tabType: string,
   ) => {
     if (isLoading && !isRefreshing && !eventsList?.length) {
@@ -166,7 +178,7 @@ export const EventScreen = () => {
     }
 
     return (
-      <FlatList
+      <FlashList
         data={eventsList}
         keyExtractor={(item, index) => `${tabType}-${item.id}-${index}`}
         renderItem={({item}) => {
@@ -224,7 +236,14 @@ export const EventScreen = () => {
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={renderEmptyState(activeTab, isLoading)}
-        onEndReached={hasMoreItems ? loadMoreFn : undefined}
+        ListFooterComponent={
+          isFetchingMoreItem ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="small" color={colors.neutral.black} />
+            </View>
+          ) : null
+        }
+        onEndReached={!isFetchingMoreItem ? loadMoreFn : undefined}
         onEndReachedThreshold={0.5}
       />
     );
@@ -244,7 +263,7 @@ export const EventScreen = () => {
               loading,
               error,
               loadMore,
-              hasMore,
+              isFetchingMore,
               'upcoming',
             )}
         </View>
@@ -263,7 +282,7 @@ export const EventScreen = () => {
               loading,
               error,
               loadMore,
-              hasMore,
+              isFetchingMore,
               'past',
             )}
         </View>
@@ -282,7 +301,7 @@ export const EventScreen = () => {
               loading,
               error,
               loadMore,
-              hasMore,
+              isFetchingMore,
               'draft',
             )}
         </View>

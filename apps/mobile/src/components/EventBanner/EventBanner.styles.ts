@@ -29,7 +29,8 @@ export const styles = StyleSheet.create({
   },
   // Content section styles
   contentContainer: {
-    padding: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
     flex: 1,
   },
   infoText: {

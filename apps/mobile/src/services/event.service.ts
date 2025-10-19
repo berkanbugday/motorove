@@ -10,7 +10,7 @@ import {
   REMOVE_EVENT,
 } from './graphql/event.graphql';
 import {loggingService} from './logging.service';
-import {useState, useCallback, useEffect} from 'react';
+import {useState, useCallback, useEffect, useRef} from 'react';
 import {useTranslation} from '@hooks/useTranslation';
 import {showToast} from '@components';
 import {
@@ -229,9 +229,12 @@ export const useGetEvent = (id: string) => {
   };
 };
 
-// Hook for getting all events
+// Hook for getting all events with race condition protection
 export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
-  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const currentStatusRef = useRef<EventStatus | undefined>(status);
+  const loadMoreAbortControllerRef = useRef<AbortController | null>(null);
 
   const {
     data,
@@ -250,25 +253,84 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
     },
   });
 
-  // Wrap the original refetch to reset hasMore state
+  // Cancel ongoing requests when status changes
+  useEffect(() => {
+    if (currentStatusRef.current !== status) {
+      // Cancel any ongoing loadMore request
+      if (loadMoreAbortControllerRef.current) {
+        loadMoreAbortControllerRef.current.abort();
+        loadMoreAbortControllerRef.current = null;
+        setIsFetchingMore(false);
+      }
+
+      currentStatusRef.current = status;
+    }
+  }, [status]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (loadMoreAbortControllerRef.current) {
+        loadMoreAbortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Wrap the original refetch to reset state and cancel ongoing requests
   const refetch = useCallback(async () => {
-    setHasMore(true);
+    // Cancel any ongoing loadMore request
+    if (loadMoreAbortControllerRef.current) {
+      loadMoreAbortControllerRef.current.abort();
+      loadMoreAbortControllerRef.current = null;
+    }
+    setIsFetchingMore(false);
+
     return await originalRefetch();
   }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
-    if (!hasMore || loading) {
+    // Prevent multiple concurrent loadMore requests
+    if (isFetchingMore || loading) {
       return;
     }
 
+    // Check if status has changed since this callback was created
+    if (currentStatusRef.current !== status) {
+      return;
+    }
+
+    // Cancel any existing loadMore request
+    if (loadMoreAbortControllerRef.current) {
+      loadMoreAbortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this request
+    loadMoreAbortControllerRef.current = new AbortController();
+    const currentAbortController = loadMoreAbortControllerRef.current;
+
+    setIsFetchingMore(true);
+
     try {
-      const result = await fetchMore({
+      await fetchMore({
         variables: {
           skip: data?.events?.length || 0,
           limit,
           status,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
+          // Check if this request was aborted
+          if (currentAbortController.signal.aborted) {
+            return prev;
+          }
+
+          // Check if status has changed during the request
+          if (currentStatusRef.current !== status) {
+            return prev;
+          }
+
           if (!fetchMoreResult || !fetchMoreResult.events) {
             return prev;
           }
@@ -287,14 +349,22 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
           };
         },
       });
-
-      if (result.data.events.length < limit) {
-        setHasMore(false);
+    } catch (errorObj: any) {
+      // Don't log errors for aborted requests
+      if (
+        errorObj.name !== 'AbortError' &&
+        !currentAbortController.signal.aborted
+      ) {
+        loggingService.error('Error loading more events:', errorObj);
       }
-    } catch (errorObj) {
-      loggingService.error('Error loading more events:', errorObj);
+    } finally {
+      // Only reset loading state if this is still the current request
+      if (loadMoreAbortControllerRef.current === currentAbortController) {
+        setIsFetchingMore(false);
+        loadMoreAbortControllerRef.current = null;
+      }
     }
-  }, [data?.events?.length, fetchMore, hasMore, limit, loading, status]);
+  }, [data?.events?.length, fetchMore, isFetchingMore, limit, loading, status]);
 
   // Refetch when filters change
   useEffect(() => {
@@ -311,7 +381,7 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
     error,
     refetch,
     loadMore,
-    hasMore,
+    isFetchingMore,
   };
 };
 

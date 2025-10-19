@@ -1020,6 +1020,7 @@ export default {
       timeout: 'The request timed out. Please try again.',
       offline: 'You are offline. Please check your connection and try again.',
       no_internet_connection: 'No internet connection',
+      connection_restored: 'Network connection restored',
     },
     // Authentication errors
     auth: {

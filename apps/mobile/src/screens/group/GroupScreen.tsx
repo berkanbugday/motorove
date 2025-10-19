@@ -14,7 +14,6 @@ import {
   GroupFilter,
   GroupCard,
   SkeletonGroup,
-  Title,
   BodySmall,
 } from '@components';
 import {GroupPrivacy, IFilterGroup} from '@motorove/shared';
@@ -148,8 +147,8 @@ export const GroupScreen = () => {
     if (!joinedGroups || joinedGroups.length === 0) {
       return (
         <View style={styles.emptyState}>
-          <Icon name="users" size={48} />
-          <Title weight="bold">{t('screens.group.no_groups_yet')}</Title>
+          <Icon name="users-filled" size={48} />
+          <Subtitle weight="bold">{t('screens.group.no_groups_yet')}</Subtitle>
           <BodySmall align="center">
             {t('screens.group.join_or_create_groups')}
           </BodySmall>

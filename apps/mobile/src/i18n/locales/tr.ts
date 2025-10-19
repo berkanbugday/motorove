@@ -1008,6 +1008,7 @@ export default {
       offline:
         'Çevrimdışısınız. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
       no_internet_connection: 'İnternet bağlantısı yok',
+      connection_restored: 'Ağ bağlantısı yeniden kuruldu',
     },
     // Authentication errors
     auth: {

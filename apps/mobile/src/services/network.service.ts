@@ -4,6 +4,7 @@ import NetInfo, {
 } from '@react-native-community/netinfo';
 import {errorService} from './error.service';
 import {loggingService} from './logging.service';
+import {useTranslation} from '@hooks/useTranslation';
 
 /**
  * Network connectivity listener callback
@@ -48,6 +49,7 @@ class NetworkService {
   private handleNetInfoChange = (state: NetInfoState): void => {
     const wasConnected = this.isConnected;
     this.isConnected = Boolean(state.isConnected);
+    const {t} = useTranslation();
 
     // If connection state changed, notify listeners
     if (wasConnected !== this.isConnected) {
@@ -55,9 +57,9 @@ class NetworkService {
 
       // Show toast when connection status changes
       if (this.isConnected) {
-        errorService.showSuccessToast('Connection restored');
+        errorService.showSuccessToast(t('errors.network.connection_restored'));
       } else {
-        errorService.showErrorToast('No internet connection');
+        errorService.showErrorToast(t('errors.network.no_internet_connection'));
       }
     }
   };
