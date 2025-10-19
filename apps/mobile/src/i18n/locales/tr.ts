@@ -1161,6 +1161,7 @@ export default {
       admin_removed_group_member: 'Admin Grup Üyesini Sildi',
       admin_changed_group_member_role: 'Admin Grup Üyesi Rolünü Değiştirdi',
       event_invitation: 'Etkinlik Daveti',
+      event_invitation_reminder: 'Etkinlik Daveti Hatırlatma',
       event_reminder: 'Etkinlik Hatırlatma',
       event_cancelled: 'Etkinlik İptal Edildi',
       event_updated: 'Etkinlik Güncellendi',
@@ -1278,9 +1279,13 @@ export default {
         title: 'Etkinlik Daveti',
         body: '{{eventDate}} tarihinde {{eventName}} etkinliğine davetlisiniz',
       },
+      invitation_reminder: {
+        title: 'Etkinlik Daveti Hatırlatması',
+        body: '{{eventDate}} tarihindeki {{eventName}} etkinlik davetine yanıt vermeyi unutmayın',
+      },
       reminder: {
         title: 'Etkinlik Hatırlatması',
-        body: '{{eventName}} etkinliği {{timeUntil}} sonra başlıyor',
+        body: '{{eventName}} etkinliği {{timeUntil}} başlayacak',
       },
       cancelled: {
         title: 'Etkinlik İptal Edildi',

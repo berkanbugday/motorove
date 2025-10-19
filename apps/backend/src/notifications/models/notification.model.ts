@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { GraphQLJSON } from 'graphql-type-json';
 import { NotificationType } from '../../enums/models/notification-type.enum';
 import { NotificationStatus } from '../../enums/models/notification-status.enum';
 import { BaseModel } from '../../core/models';
@@ -15,8 +16,8 @@ export class Notification extends BaseModel {
   @Field(() => NotificationType)
   type: NotificationType;
 
-  @Field(() => String, { nullable: true })
-  data: string; // Store JSON as string in GraphQL
+  @Field(() => GraphQLJSON, { nullable: true })
+  data: Record<string, any>;
 
   @Field()
   userId: string;

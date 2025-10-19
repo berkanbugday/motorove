@@ -3,9 +3,11 @@ import {
   IsArray,
   IsEnum,
   IsNotEmpty,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { GraphQLJSON } from 'graphql-type-json';
 import { ICreateNotifications } from '@motorove/shared';
 import { NotificationType } from '../../enums/models/notification-type.enum';
 import { NotificationChannel } from '../../enums/models/notification-channel.enum';
@@ -37,8 +39,8 @@ export class CreateNotificationsInput implements ICreateNotifications {
   @IsEnum(NotificationChannel)
   channels: NotificationChannel;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
-  @IsString()
-  data?: string;
+  @IsObject()
+  data?: Record<string, any>;
 }

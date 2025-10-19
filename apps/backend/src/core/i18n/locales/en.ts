@@ -69,15 +69,19 @@ export const enTranslations = {
     event: {
       invitation: {
         title: 'Event Invitation',
-        body: "You're invited to {{eventName}} on {{eventDate}}",
+        body: "You're invited to {{eventName}} event on {{eventDate}}",
+      },
+      invitation_reminder: {
+        title: 'Event Invitation Reminder',
+        body: "Don't forget to respond to the event invitation for {{eventName}} on {{eventDate}} ",
       },
       reminder: {
         title: 'Event Reminder',
-        body: '{{eventName}} starts in {{timeUntil}}',
+        body: '{{eventName}} event will start {{timeUntil}}',
       },
       cancelled: {
         title: 'Event Cancelled',
-        body: '{{eventName}} has been cancelled',
+        body: '{{eventName}} event has been cancelled',
       },
       updated: {
         title: 'Event Updated',

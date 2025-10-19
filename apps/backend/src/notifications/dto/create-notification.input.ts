@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { GraphQLJSON } from 'graphql-type-json';
 import { ICreateNotification, NotificationChannel } from '@motorove/shared';
 import { NotificationType } from '../../enums/models/notification-type.enum';
 
@@ -36,8 +37,8 @@ export class CreateNotificationInput implements ICreateNotification {
   @IsString()
   userId: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
   @IsObject()
-  data?: string;
+  data?: Record<string, any>;
 }

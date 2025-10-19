@@ -352,6 +352,7 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
         },
       });
     } catch (errorObj: any) {
+      setIsFetchingMore(false);
       // Don't log errors for aborted requests
       if (
         errorObj.name !== 'AbortError' &&
@@ -368,15 +369,6 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
     }
   }, [data?.events?.length, fetchMore, isFetchingMore, limit, loading, status]);
 
-  // Refetch when filters change
-  useEffect(() => {
-    originalRefetch({
-      limit,
-      skip: 0,
-      status,
-    });
-  }, [limit, originalRefetch, status]);
-
   return {
     events: (data?.events as IEvent[]) || [],
     loading,
@@ -390,7 +382,7 @@ export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus) => {
 // Hook to fetch event invitations
 export const useGetEventInvitations = (limit = 20, skip = 0) => {
   const {t} = useTranslation();
-  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const {
     data,
@@ -407,15 +399,16 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
 
   // Wrap the original refetch to reset hasMore state
   const refetch = useCallback(async () => {
-    setHasMore(true);
+    setIsFetchingMore(false);
     return await originalRefetch();
   }, [originalRefetch]);
 
   const loadMore = useCallback(async () => {
-    if (!hasMore || loading) {
+    if (isFetchingMore || loading) {
       return;
     }
 
+    setIsFetchingMore(true);
     try {
       const result = await fetchMore({
         variables: {
@@ -446,12 +439,20 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
       });
 
       if (result.data.eventInvitations.length < limit) {
-        setHasMore(false);
       }
     } catch (errorObj) {
+      setIsFetchingMore(false);
       loggingService.error('Error loading more invitations:', errorObj);
+    } finally {
+      setIsFetchingMore(false);
     }
-  }, [data?.eventInvitations?.length, fetchMore, hasMore, limit, loading]);
+  }, [
+    data?.eventInvitations?.length,
+    fetchMore,
+    isFetchingMore,
+    limit,
+    loading,
+  ]);
 
   const [acceptMutation] = useMutation(ACCEPT_EVENT_INVITATION, {
     onCompleted: () => {
@@ -511,7 +512,7 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
     error,
     refetch,
     loadMore,
-    hasMore,
+    isFetchingMore,
     handleAccept,
     handleReject,
   };

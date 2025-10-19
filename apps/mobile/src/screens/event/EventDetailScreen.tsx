@@ -32,7 +32,6 @@ import {
   Body,
   CollapsibleCard,
   ParticipantAvatars,
-  FAB,
   showToast,
 } from '@components';
 import {format, formatDuration, intervalToDuration} from 'date-fns';
@@ -723,21 +722,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           </CollapsibleCard>
         )}
       </Animated.ScrollView>
-
-      {/* Chat FAB - Only show for participants */}
-      {event.isParticipating && event.status !== EventStatus.DRAFT && (
-        <FAB
-          icon={
-            <Icon
-              name="comments-filled"
-              size={20}
-              color={colors.neutral.white}
-            />
-          }
-          onPress={() => {}}
-          size="small"
-        />
-      )}
 
       <BottomSheet
         ref={deleteEventBottomSheetRef}

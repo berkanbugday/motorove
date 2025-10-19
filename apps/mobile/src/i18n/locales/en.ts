@@ -1172,6 +1172,7 @@ export default {
       admin_removed_group_member: 'Admin Removed Group Member',
       admin_changed_group_member_role: 'Admin Changed Group Member Role',
       event_invitation: 'Event Invitation',
+      event_invitation_reminder: 'Event Invitation Reminder',
       event_reminder: 'Event Reminder',
       event_cancelled: 'Event Cancelled',
       event_updated: 'Event Updated',
@@ -1287,15 +1288,19 @@ export default {
     event: {
       invitation: {
         title: 'Event Invitation',
-        body: "You're invited to {{eventName}} on {{eventDate}}",
+        body: "You're invited to {{eventName}} event on {{eventDate}}",
+      },
+      invitation_reminder: {
+        title: 'Event Invitation Reminder',
+        body: "Don't forget to respond to the event invitation for {{eventName}} on {{eventDate}} ",
       },
       reminder: {
         title: 'Event Reminder',
-        body: '{{eventName}} starts in {{timeUntil}}',
+        body: '{{eventName}} event will start {{timeUntil}}',
       },
       cancelled: {
         title: 'Event Cancelled',
-        body: '{{eventName}} has been cancelled',
+        body: '{{eventName}} event has been cancelled',
       },
       updated: {
         title: 'Event Updated',

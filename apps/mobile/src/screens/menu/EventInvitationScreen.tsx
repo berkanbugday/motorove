@@ -1,5 +1,10 @@
 import React, {useState, useCallback} from 'react';
-import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {colors, commonStyles, spacing} from '@theme';
@@ -15,6 +20,7 @@ import {
 import {useTranslation} from '@hooks/useTranslation';
 import {useGetEventInvitations} from '@services/event.service';
 import {EventInvitationCard, EventInvitation} from '@components';
+import {FlashList} from '@shopify/flash-list';
 
 /**
  * EventInvitationScreen - Displays event invitations
@@ -35,6 +41,7 @@ export const EventInvitationScreen = () => {
     loadMore,
     handleAccept,
     handleReject,
+    isFetchingMore,
   } = useGetEventInvitations();
 
   /**
@@ -171,7 +178,7 @@ export const EventInvitationScreen = () => {
         showBackButton
         onBackPress={() => navigation.goBack()}
       />
-      <FlatList
+      <FlashList
         data={invitations}
         keyExtractor={item => item.id}
         renderItem={renderInvitation}
@@ -179,7 +186,14 @@ export const EventInvitationScreen = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
-        onEndReached={loadMore}
+        onEndReached={!isFetchingMore ? loadMore : undefined}
+        ListFooterComponent={
+          isFetchingMore ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="small" color={colors.neutral.black} />
+            </View>
+          ) : null
+        }
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={renderEmptyState}
@@ -215,5 +229,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     borderBottomWidth: 1,
     borderColor: colors.neutral.veryLightGrey,
+  },
+  footerLoader: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
 });

@@ -245,7 +245,7 @@ input CreateGroupInput {
 input CreateNotificationInput {
   body: String!
   channel: NotificationChannel!
-  data: String
+  data: JSON
   title: String!
   type: NotificationType!
   userId: String!
@@ -254,7 +254,7 @@ input CreateNotificationInput {
 input CreateNotificationsInput {
   body: String!
   channels: NotificationChannel!
-  data: String
+  data: JSON
   title: String!
   type: NotificationType!
   userIds: [String!]!
@@ -771,7 +771,7 @@ type Notification {
   createdAt: DateTime!
   createdBy: User!
   createdById: String!
-  data: String
+  data: JSON
   id: ID!
   isActive: Boolean!
   read: Boolean!
@@ -794,7 +794,7 @@ enum NotificationChannel {
 type NotificationDto {
   body: String!
   createdAt: DateTime!
-  data: String
+  data: JSON
   id: ID!
   read: Boolean!
   status: NotificationStatus!
@@ -824,6 +824,7 @@ enum NotificationType {
   ADMIN_REMOVED_GROUP_MEMBER
   EVENT_CANCELLED
   EVENT_INVITATION
+  EVENT_INVITATION_REMINDER
   EVENT_REMINDER
   EVENT_UPDATED
   GROUP_CHANGED_INFO

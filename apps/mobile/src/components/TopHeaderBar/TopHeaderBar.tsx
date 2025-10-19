@@ -284,13 +284,18 @@ export function TopHeaderBar({
                         color={textColor}
                       />
                       {secondRightIconBadgeCount > 0 && (
-                        <View style={styles.badgeContainer}>
+                        <View
+                          style={
+                            secondRightIconBadgeCount > 99
+                              ? styles.badgeContainerSmall
+                              : styles.badgeContainer
+                          }>
                           <Caption
                             weight="bold"
                             color={colors.neutral.white}
                             style={styles.badgeText}>
                             {secondRightIconBadgeCount > 99
-                              ? '99+'
+                              ? ''
                               : secondRightIconBadgeCount}
                           </Caption>
                         </View>
@@ -381,6 +386,17 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 10,
+  },
+  badgeContainerSmall: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    backgroundColor: colors.primary.main,
+    borderRadius: radius.round,
+    width: 15,
+    height: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   dropdownContainer: {
     zIndex: 20,

@@ -182,15 +182,15 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
               {badge !== undefined && (
                 <View
                   style={[
-                    styles.badgeContainer,
+                    typeof badge === 'number' && badge > 99
+                      ? styles.badgeContainerSmall
+                      : styles.badgeContainer,
                     {
-                      backgroundColor: isFocused
-                        ? colors.neutral.black
-                        : colors.primary.main,
+                      backgroundColor: colors.primary.main,
                     },
                   ]}>
                   <Text style={styles.badgeText}>
-                    {typeof badge === 'number' && badge > 99 ? '99+' : badge}
+                    {typeof badge === 'number' && badge > 99 ? '' : badge}
                   </Text>
                 </View>
               )}
@@ -261,6 +261,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     minWidth: 20,
     height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeContainerSmall: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    borderRadius: 10,
+    minWidth: 15,
+    height: 15,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 4,

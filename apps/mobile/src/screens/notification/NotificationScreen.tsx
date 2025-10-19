@@ -1,5 +1,10 @@
 import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -28,6 +33,7 @@ import {tr, enUS} from 'date-fns/locale';
 import {formatDatesInData, INotification, Language} from '@motorove/shared';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
+import {FlashList} from '@shopify/flash-list';
 
 /**
  * NotificationSkeleton - Skeleton component for notification items
@@ -53,7 +59,7 @@ export const NotificationScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
   const {t} = useTranslation();
   const {language} = useLanguage();
-  const {notifications, loading, refetch, loadMore, hasMore} =
+  const {notifications, loading, refetch, loadMore, isFetchingMore} =
     useGetNotifications();
 
   const {markNotificationAsRead} = useMarkNotificationAsRead(() => {
@@ -141,13 +147,6 @@ export const NotificationScreen = () => {
     deleteAllNotifications();
   }, [deleteAllNotifications]);
 
-  // Handle end reached - load more notifications
-  const handleEndReached = useCallback(() => {
-    if (hasMore && !loading) {
-      loadMore();
-    }
-  }, [hasMore, loading, loadMore]);
-
   // Render notification item
   const renderNotificationItem = ({
     item,
@@ -179,16 +178,17 @@ export const NotificationScreen = () => {
     const actualLeftActions = item.read ? [] : leftActions;
 
     // Format dates in data according to preferred language
-    const formattedData: Record<string, any> | null = (() => {
+    const formattedData: Record<string, any> | {} = (() => {
       try {
-        const parsedData = item.data ? JSON.parse(item.data) : null;
-        return formatDatesInData(
-          parsedData,
-          language.toUpperCase() as Language,
+        return (
+          formatDatesInData(
+            item.data as Record<string, any>,
+            language.toUpperCase() as Language,
+          ) || {}
         );
       } catch (error) {
         console.warn('Failed to parse notification data:', error);
-        return null;
+        return {};
       }
     })();
 
@@ -220,10 +220,10 @@ export const NotificationScreen = () => {
             <Subtitle
               weight={item.read ? 'medium' : 'bold'}
               style={styles.notificationTitle}>
-              {t(`notifications.${item.title}`, {...formattedData}).toString()}
+              {t(`notifications.${item.title}`, formattedData).toString()}
             </Subtitle>
             <BodySmall style={styles.notificationBody}>
-              {t(`notifications.${item.body}`, {...formattedData}).toString()}
+              {t(`notifications.${item.body}`, formattedData).toString()}
             </BodySmall>
             <View style={styles.bottomRow}>
               <View style={styles.timeContainer}>
@@ -284,7 +284,7 @@ export const NotificationScreen = () => {
         containerStyle={styles.topHeaderBar}
       />
 
-      <FlatList
+      <FlashList
         data={notifications}
         keyExtractor={item => item.id}
         renderItem={renderNotificationItem}
@@ -293,7 +293,14 @@ export const NotificationScreen = () => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
-        onEndReached={handleEndReached}
+        onEndReached={!isFetchingMore ? loadMore : undefined}
+        ListFooterComponent={
+          isFetchingMore ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="small" color={colors.neutral.black} />
+            </View>
+          ) : null
+        }
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           loading ? (
@@ -429,8 +436,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
   },
   footerLoader: {
-    paddingVertical: spacing.md,
-    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   skeletonsContainer: {
     paddingTop: spacing.md,

@@ -284,11 +284,11 @@ export class GroupMembershipsService {
             body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
             type: NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE,
             channel: NotificationChannel.PUSH,
-            data: JSON.stringify({
+            data: {
               groupId: updatedMembership.group.id,
               groupName: updatedMembership.group.name,
               role: newRole,
-            }),
+            } as Record<string, any>,
           },
           adminId,
         );

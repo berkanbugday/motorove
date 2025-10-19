@@ -466,10 +466,10 @@ export class EventsService {
             body: 'event.invitation.body',
             type: NotificationType.EVENT_INVITATION,
             channels: NotificationChannel.PUSH,
-            data: JSON.stringify({
+            data: {
               eventDate: event.startDateTime,
               eventName: event.title,
-            }),
+            } as Record<string, any>,
           },
           userId,
         );

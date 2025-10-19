@@ -21,7 +21,6 @@ export class NotificationProcessor {
       this.logger.log(
         `Processing notification job ${job.id} - attempt ${job.attemptsMade + 1}`,
       );
-      console.log(job.data);
       const { input, userId } = job.data;
       await this.notificationsService.create(input, userId);
       this.logger.log(`Successfully processed notification job ${job.id}`);

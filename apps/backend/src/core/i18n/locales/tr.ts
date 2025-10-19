@@ -71,9 +71,13 @@ export const trTranslations = {
         title: 'Etkinlik Daveti',
         body: '{{eventDate}} tarihinde {{eventName}} etkinliğine davetlisiniz',
       },
+      invitation_reminder: {
+        title: 'Etkinlik Daveti Hatırlatması',
+        body: '{{eventDate}} tarihindeki {{eventName}} etkinlik davetine yanıt vermeyi unutmayın',
+      },
       reminder: {
         title: 'Etkinlik Hatırlatması',
-        body: '{{eventName}} etkinliği {{timeUntil}} sonra başlıyor',
+        body: '{{eventName}} etkinliği {{timeUntil}} başlayacak',
       },
       cancelled: {
         title: 'Etkinlik İptal Edildi',

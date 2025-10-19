@@ -386,7 +386,7 @@ export const useRemoveDeviceToken = (onSuccess?: () => void) => {
 
 // Hook for getting notifications
 export const useGetNotifications = (limit = 20, skip = 0) => {
-  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const {
     data,
@@ -403,18 +403,20 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
 
   // Wrap the original refetch to reset hasMore state
   const refetch = useCallback(async () => {
-    setHasMore(true);
+    setIsFetchingMore(false);
     return await originalRefetch();
   }, [originalRefetch]);
 
   // Function to load more notifications (pagination)
   const loadMore = useCallback(async () => {
-    if (!hasMore || loading) {
+    if (isFetchingMore || loading) {
       return;
     }
 
+    setIsFetchingMore(true);
+
     try {
-      const result = await fetchMore({
+      await fetchMore({
         variables: {
           skip: data?.notifications?.length || 0,
           limit,
@@ -440,14 +442,13 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
           };
         },
       });
-
-      if (result.data.notifications.length < limit) {
-        setHasMore(false);
-      }
     } catch (errorObj) {
+      setIsFetchingMore(false);
       loggingService.error('Error loading more notifications:', errorObj);
+    } finally {
+      setIsFetchingMore(false);
     }
-  }, [data?.notifications?.length, fetchMore, hasMore, limit, loading]);
+  }, [data?.notifications?.length, fetchMore, isFetchingMore, limit, loading]);
 
   return {
     notifications: (data?.notifications as INotification[]) || [],
@@ -455,7 +456,7 @@ export const useGetNotifications = (limit = 20, skip = 0) => {
     error,
     refetch,
     loadMore,
-    hasMore,
+    isFetchingMore,
   };
 };
 

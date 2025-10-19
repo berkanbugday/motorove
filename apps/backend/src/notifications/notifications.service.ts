@@ -73,18 +73,13 @@ export class NotificationsService {
     senderUserId: string,
   ): Promise<NotificationDto[]> {
     try {
-      const parsedData =
-        typeof input.data === 'string' && input.data
-          ? (JSON.parse(input.data) as Record<string, any>)
-          : input.data;
-
       // Prepare notification data
       const notificationData = input.userIds.map((userId) => ({
         title: input.title,
         body: input.body,
         type: input.type,
         channel: input.channels,
-        data: parsedData,
+        data: input.data,
         userId,
         status: NotificationStatus.PENDING,
         createdById: senderUserId,
@@ -147,11 +142,12 @@ export class NotificationsService {
           type: input.type,
           status: NotificationStatus.PENDING,
         };
+
         await this.sendPushNotificationToUser(
           targetUserId,
           input.title,
           input.body,
-          typeof parsedData === 'object' ? parsedData : {},
+          input.data as Record<string, any>,
           null,
           senderUserId,
           whereClause,
@@ -233,14 +229,11 @@ export class NotificationsService {
       }
 
       // Send push notification if permissions allow
-      const parsedData = input.data
-        ? (JSON.parse(input.data) as Record<string, any>)
-        : null;
       await this.sendPushNotificationToUser(
         input.userId,
         input.title,
         input.body,
-        parsedData,
+        input.data as Record<string, any>,
         createdNotification.id,
         senderUserId,
         null,
@@ -393,10 +386,7 @@ export class NotificationsService {
   }
 
   private mapToDto(notification: Notification): NotificationDto {
-    return plainToClass(NotificationDto, {
-      ...notification,
-      data: notification.data ? JSON.stringify(notification.data) : null,
-    });
+    return plainToClass(NotificationDto, notification);
   }
 
   private async getUserSettingsWithValidation(

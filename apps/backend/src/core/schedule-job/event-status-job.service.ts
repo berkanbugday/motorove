@@ -3,6 +3,10 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EventStatus } from '../../enums/models/event-status.enum';
 
+/**
+ * Service responsible for updating event statuses
+ * Automatically updates events from UPCOMING to PAST when their start time has passed
+ */
 @Injectable()
 export class EventStatusJobService {
   private readonly logger = new Logger(EventStatusJobService.name);

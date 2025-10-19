@@ -8,7 +8,7 @@ import { ImageCensorFilterModule } from './image-censor-filter/image-censor-filt
 import { ProfanityFilterModule } from './profanity-filter/profanity-filter.module';
 import { QueueModule } from './queue/queue.module';
 import { WeatherModule } from './weather/weather.module';
-import { EventStatusJobModule } from './event-status-job/event-status-job.module';
+import { ScheduleJobModule } from './schedule-job/schedule-job.module';
 import { I18nModule } from './i18n/i18n.module';
 @Global()
 @Module({
@@ -21,7 +21,7 @@ import { I18nModule } from './i18n/i18n.module';
     ProfanityFilterModule,
     QueueModule,
     WeatherModule,
-    EventStatusJobModule,
+    ScheduleJobModule,
     I18nModule,
   ],
   providers: [CustomLogger],
@@ -34,7 +34,7 @@ import { I18nModule } from './i18n/i18n.module';
     ProfanityFilterModule,
     QueueModule,
     WeatherModule,
-    EventStatusJobModule,
+    ScheduleJobModule,
   ],
 })
 export class CoreModule {}

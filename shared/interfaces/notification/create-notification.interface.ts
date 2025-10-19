@@ -28,5 +28,5 @@ export interface ICreateNotification {
   /**
    * Additional data for the notification (JSON stored as string)
    */
-  data?: string;
+  data?: Record<string, any>;
 }
