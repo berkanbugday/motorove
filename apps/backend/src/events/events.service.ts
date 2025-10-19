@@ -62,7 +62,6 @@ export class EventsService {
                 invitations: {
                   some: {
                     inviteeId: currentUserId,
-                    isActive: true,
                   },
                 },
               },
@@ -140,7 +139,6 @@ export class EventsService {
                 invitations: {
                   some: {
                     inviteeId: currentUserId,
-                    isActive: true,
                   },
                 },
               },
@@ -676,26 +674,62 @@ export class EventsService {
   ): Promise<EventDto> {
     try {
       const event = await this.prisma.event.findFirst({
-        where: { id: eventId, isActive: true },
+        where: { id: eventId, isActive: true, status: EventStatus.UPCOMING },
       });
 
       if (!event) {
         throw new NotFoundException(`Event with id ${eventId} not found`);
       }
 
-      const participant = await this.prisma.eventParticipant.create({
-        data: {
-          event: { connect: { id: eventId } },
-          createdBy: { connect: { id: userId } },
-          status: EventParticipantStatus.JOINED,
-        },
-        include: {
-          event: true,
-          createdBy: true,
+      const invitation = await this.prisma.eventInvitation.findFirst({
+        where: {
+          eventId,
+          inviteeId: userId,
+          isActive: true,
+          status: ApprovalStatus.PENDING,
+          event: {
+            isActive: true,
+            status: EventStatus.UPCOMING,
+          },
         },
       });
 
-      return this.mapToDto(participant.event, userId, authToken);
+      // Use transaction to ensure data consistency
+      await this.prisma.$transaction(async (tx) => {
+        // Create or update event participant
+        await tx.eventParticipant.upsert({
+          where: {
+            eventId_createdById: {
+              eventId,
+              createdById: userId,
+            },
+          },
+          create: {
+            event: { connect: { id: eventId } },
+            createdBy: { connect: { id: userId } },
+            status: EventParticipantStatus.JOINED,
+          },
+          update: {
+            status: EventParticipantStatus.JOINED,
+            updatedBy: { connect: { id: userId } },
+            updatedAt: new Date(),
+          },
+        });
+
+        // Update invitation status if exists
+        if (invitation) {
+          await tx.eventInvitation.update({
+            where: { id: invitation.id },
+            data: {
+              status: ApprovalStatus.ACCEPTED,
+              updatedBy: { connect: { id: userId } },
+              updatedAt: new Date(),
+            },
+          });
+        }
+      });
+
+      return await this.findOne(eventId, userId, authToken);
     } catch (error) {
       this.logger.error(`Failed to join event`, error);
       throw error;
@@ -709,7 +743,7 @@ export class EventsService {
   ): Promise<EventDto> {
     try {
       const event = await this.prisma.event.findFirst({
-        where: { id: eventId, isActive: true },
+        where: { id: eventId, isActive: true, status: EventStatus.UPCOMING },
       });
 
       if (!event) {
@@ -730,12 +764,12 @@ export class EventsService {
         where: { id: participant.id },
         data: {
           status: EventParticipantStatus.LEFT,
+          updatedBy: { connect: { id: userId } },
+          updatedAt: new Date(),
         },
       });
 
-      const eventDto = await this.findOne(eventId, userId, authToken);
-
-      return eventDto;
+      return await this.findOne(eventId, userId, authToken);
     } catch (error) {
       this.logger.error(`Failed to leave event`, error);
       throw error;

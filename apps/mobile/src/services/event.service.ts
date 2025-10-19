@@ -8,6 +8,8 @@ import {
   ACCEPT_EVENT_INVITATION,
   REJECT_EVENT_INVITATION,
   REMOVE_EVENT,
+  JOIN_EVENT,
+  LEAVE_EVENT,
 } from './graphql/event.graphql';
 import {loggingService} from './logging.service';
 import {useState, useCallback, useEffect, useRef} from 'react';
@@ -512,6 +514,82 @@ export const useGetEventInvitations = (limit = 20, skip = 0) => {
     hasMore,
     handleAccept,
     handleReject,
+  };
+};
+
+// Hook for joining an event
+export const useJoinEvent = (onSuccess?: (event: IEvent) => void) => {
+  const {t} = useTranslation();
+  const [joinEventMutation, {loading, error}] = useMutation(JOIN_EVENT, {
+    onCompleted: data => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.event.joined_successfully'),
+      });
+      if (onSuccess && data?.joinEvent) {
+        onSuccess(data.joinEvent);
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error joining event:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.event.join_failed'),
+      });
+    },
+  });
+
+  const joinEvent = useCallback(
+    (eventId: string) => {
+      joinEventMutation({variables: {id: eventId}});
+    },
+    [joinEventMutation],
+  );
+
+  return {
+    joinEvent,
+    loading,
+    error,
+  };
+};
+
+// Hook for leaving an event
+export const useLeaveEvent = (onSuccess?: (event: IEvent) => void) => {
+  const {t} = useTranslation();
+  const [leaveEventMutation, {loading, error}] = useMutation(LEAVE_EVENT, {
+    onCompleted: data => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.event.left_successfully'),
+      });
+      if (onSuccess && data?.leaveEvent) {
+        onSuccess(data.leaveEvent);
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error leaving event:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.event.leave_failed'),
+      });
+    },
+  });
+
+  const leaveEvent = useCallback(
+    (eventId: string) => {
+      leaveEventMutation({variables: {id: eventId}});
+    },
+    [leaveEventMutation],
+  );
+
+  return {
+    leaveEvent,
+    loading,
+    error,
   };
 };
 

@@ -42,10 +42,10 @@ export const getPositionStyles = (
   },
 ) => {
   // Default margin from screen edge
-  const bottomMargin = rh(90);
-  const topMargin = spacing.lg;
-  const leftMargin = spacing.lg;
-  const rightMargin = spacing.lg;
+  const bottomMargin = rh(50);
+  const topMargin = spacing.md;
+  const leftMargin = spacing.md;
+  const rightMargin = spacing.md;
 
   switch (position) {
     case 'bottomRight':

@@ -37,6 +37,7 @@ export interface ToastConfig {
   onPress?: () => void;
   props?: object;
   swipeable?: boolean;
+  showCloseButton?: boolean;
 }
 
 // Global reference to store toast functions
@@ -139,6 +140,7 @@ export const CustomToastComponent: React.FC<{
   topOffset?: number;
   bottomOffset?: number;
   swipeable?: boolean;
+  showCloseButton?: boolean;
 }> = ({
   text1,
   text2,
@@ -149,6 +151,7 @@ export const CustomToastComponent: React.FC<{
   topOffset = 60,
   bottomOffset = 40,
   swipeable = true,
+  showCloseButton = false,
 }) => {
   const translateYAnim = useRef(
     new Animated.Value(position === 'top' ? -100 : 100),
@@ -315,9 +318,11 @@ export const CustomToastComponent: React.FC<{
           ) : null}
         </View>
       </TouchableOpacity>
-      <TouchableOpacity style={toastStyles.closeButton} onPress={hideToast}>
-        <Icon name="close" color={colors.neutral.grey} size={16} />
-      </TouchableOpacity>
+      {showCloseButton && (
+        <TouchableOpacity style={toastStyles.closeButton} onPress={hideToast}>
+          <Icon name="close" color={colors.neutral.grey} size={16} />
+        </TouchableOpacity>
+      )}
     </Animated.View>
   );
 };

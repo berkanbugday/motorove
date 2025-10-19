@@ -871,7 +871,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       if (isAdmin) {
         items.push({
           id: 'edit_group',
-          label: t('screens.group.edit_group'),
+          label: t('common.edit'),
           icon: 'pen-filled',
         });
       }
@@ -884,14 +884,14 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         });
         items.push({
           id: 'leave_group',
-          label: t('screens.group.leave_group'),
+          label: t('screens.group.leave'),
           icon: 'users-slash-filled',
           isHighlighted: true,
         });
       } else {
         items.push({
           id: 'join_group',
-          label: t('screens.group.join_group'),
+          label: t('screens.group.join'),
           icon: 'user-plus-filled',
         });
       }

@@ -12,14 +12,18 @@ import {
   MainScreenNavigationProp,
   MainStackParamList,
 } from '@navigation/types/navigationTypes';
-import {useGetEvent, useRemoveEvent} from '@services/event.service';
+import {
+  useGetEvent,
+  useRemoveEvent,
+  useJoinEvent,
+  useLeaveEvent,
+} from '@services/event.service';
 import {
   Icon,
   TopHeaderBar,
   Button,
   Typography,
   Title,
-  showToast,
   Chip,
   DropdownMenuItem,
   Subtitle,
@@ -28,10 +32,13 @@ import {
   Body,
   CollapsibleCard,
   ParticipantAvatars,
+  FAB,
+  showToast,
 } from '@components';
 import {format, formatDuration, intervalToDuration} from 'date-fns';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
+
 import {
   IEvent,
   EventStatus,
@@ -60,7 +67,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const {eventId} = route.params;
   const {t} = useTranslation();
   const {language} = useLanguage();
-  const [isJoining, setIsJoining] = useState(false);
   const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
 
   // Animated value for scroll with better performance
@@ -71,6 +77,16 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const {removeEvent, loading: removeEventLoading} = useRemoveEvent(() => {
     navigation.goBack();
   });
+
+  // Join/Leave event hooks
+  const {joinEvent, loading: joinEventLoading} = useJoinEvent(_updatedEvent => {
+    refetchEvent();
+  });
+  const {leaveEvent, loading: leaveEventLoading} = useLeaveEvent(
+    _updatedEvent => {
+      refetchEvent();
+    },
+  );
 
   // Format date for display
   const formatEventDate = useCallback((dateInput: string | Date) => {
@@ -112,21 +128,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     );
   }, [event?.addresses, language]);
 
-  // Handle join event
-  const handleJoinEvent = useCallback(async () => {
-    // This would be replaced with actual join event logic
-    setIsJoining(true);
-    setTimeout(() => {
-      setIsJoining(false);
-      showToast({
-        type: 'success',
-        text1: t('common.success'),
-        text2: t('screens.event.join_request_sent'),
-      });
-      refetchEvent();
-    }, 1000);
-  }, [refetchEvent, t]);
-
   const eventDropdownMenuItems = useCallback(
     (status?: EventStatus): DropdownMenuItem[] => {
       const items: DropdownMenuItem[] = [];
@@ -143,11 +144,26 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           icon: 'trash',
           isHighlighted: true,
         });
+      } else if (status === EventStatus.UPCOMING) {
+        if (event?.isParticipating) {
+          items.push({
+            id: 'leave_event',
+            label: t('screens.event.leave'),
+            icon: 'sign-out',
+            isHighlighted: true,
+          });
+        } else {
+          items.push({
+            id: 'join_event',
+            label: t('screens.event.join'),
+            icon: 'check-filled',
+          });
+        }
       }
 
       return items;
     },
-    [t],
+    [t, event?.isParticipating],
   );
 
   const handleDropdownMenuItemSelect = useCallback(
@@ -159,13 +175,19 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         case 'delete_event':
           deleteEventBottomSheetRef.current?.open('minimal');
           break;
+        case 'join_event':
+          joinEvent(eventId);
+          break;
+        case 'leave_event':
+          leaveEvent(eventId);
+          break;
         default:
           loggingService.info(
             `Unhandled action: ${item.id} for event: ${eventId}`,
           );
       }
     },
-    [],
+    [joinEvent, leaveEvent, eventId, navigation],
   );
 
   const confirmDeleteEvent = useCallback(async () => {
@@ -178,9 +200,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
       // Error handling is already done in the service hook
     }
   }, [eventId]);
-
-  // Determine if the user is going to the event (using hardcoded values for demo)
-  const isUserGoing = false; // Replace with actual logic when backend is connected
 
   // State for route data
   const [routeInfo, setRouteInfo] = useState<string>('');
@@ -296,6 +315,15 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
       }
     }
   }, [event?.addresses, language, calculateRouteWithOSRM]);
+
+  useEffect(() => {
+    if (joinEventLoading || leaveEventLoading) {
+      showToast({
+        text2: t('common.completing'),
+        type: 'info',
+      });
+    }
+  }, [joinEventLoading, leaveEventLoading]);
 
   // Show loading while fetching initial data
   if (loading) {
@@ -490,59 +518,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             </View>
           )}
         </View>
-
-        {/* Participation Card */}
-        {event.status !== EventStatus.DRAFT && (
-          <View style={styles.eventCard}>
-            <Typography style={styles.joinQuestion}>
-              {t('screens.event.are_you_joining')}
-            </Typography>
-
-            <View style={styles.participationButtons}>
-              <Button
-                title={t('screens.event.going')}
-                onPress={handleJoinEvent}
-                disabled={isJoining}
-                loading={isJoining}
-                variant={isUserGoing ? 'dark' : 'secondary'}
-                shape="round"
-                size="small"
-                style={{flex: 1, paddingVertical: spacing.md}}
-              />
-
-              <Button
-                title={t('screens.event.not_going')}
-                // onPress={handleNotJoinEvent}
-                disabled={isJoining}
-                loading={isJoining}
-                variant={isUserGoing ? 'secondary' : 'dark'}
-                shape="round"
-                size="small"
-                style={{flex: 1, paddingVertical: spacing.md}}
-              />
-            </View>
-
-            {/* Participant Count */}
-            <View style={styles.participantInfo}>
-              <Icon name="user-check-filled" size={14} />
-              <Typography style={styles.participantCount}>
-                8 {t('screens.event.going')}
-              </Typography>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.actionButtons}>
-              <Button
-                title={t('screens.event.chat')}
-                onPress={() => {}}
-                variant="text"
-                size="small"
-                iconName="comments"
-                iconSize={16}
-              />
-            </View>
-          </View>
-        )}
 
         {/* Description Card */}
         {event.description && (
@@ -749,6 +724,21 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         )}
       </Animated.ScrollView>
 
+      {/* Chat FAB - Only show for participants */}
+      {event.isParticipating && event.status !== EventStatus.DRAFT && (
+        <FAB
+          icon={
+            <Icon
+              name="comments-filled"
+              size={20}
+              color={colors.neutral.white}
+            />
+          }
+          onPress={() => {}}
+          size="small"
+        />
+      )}
+
       <BottomSheet
         ref={deleteEventBottomSheetRef}
         closeOnBackdropPress={false}
@@ -859,32 +849,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: colors.neutral.darkGrey,
-  },
-  joinQuestion: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.neutral.black,
-  },
-  participationButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.md,
-  },
-  participantInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  participantCount: {
-    fontSize: 13,
-    color: colors.neutral.grey,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
-    paddingTop: spacing.md,
-    justifyContent: 'center',
   },
   backButton: {
     marginTop: spacing.md,

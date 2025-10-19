@@ -159,3 +159,23 @@ export const REJECT_EVENT_INVITATION = gql`
     rejectEventInvitation(id: $id)
   }
 `;
+
+// Join event mutation
+export const JOIN_EVENT = gql`
+  mutation JoinEvent($id: ID!) {
+    joinEvent(id: $id) {
+      ...EventFragment
+    }
+  }
+  ${EVENT_FRAGMENT}
+`;
+
+// Leave event mutation
+export const LEAVE_EVENT = gql`
+  mutation LeaveEvent($id: ID!) {
+    leaveEvent(id: $id) {
+      ...EventFragment
+    }
+  }
+  ${EVENT_FRAGMENT}
+`;
