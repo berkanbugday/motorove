@@ -14,10 +14,7 @@ export class Business {
   name: string;
 
   @Field(() => BusinessCategory)
-  mainCategory: BusinessCategory;
-
-  @Field(() => [BusinessCategory])
-  subCategories: BusinessCategory[];
+  category: BusinessCategory;
 
   @Field(() => String)
   phoneNumber: string;

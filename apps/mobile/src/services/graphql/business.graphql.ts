@@ -26,8 +26,7 @@ export const BUSINESS_FRAGMENT = gql`
   fragment BusinessFragment on BusinessDto {
     id
     name
-    mainCategory
-    subCategories
+    category
     areaCode
     phoneNumber
     address {

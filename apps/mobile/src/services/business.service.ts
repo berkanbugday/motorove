@@ -28,16 +28,14 @@ export const useGetBusiness = (id: string) => {
 
 // Define filter interface for businesses
 interface IFilterBusiness {
-  mainCategory?: string;
-  subCategories?: string[];
+  category?: string;
 }
 
 // Hook for getting all businesses
 export const useGetBusinesses = () => {
   const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState<IFilterBusiness>({
-    mainCategory: undefined,
-    subCategories: [],
+    category: undefined,
   });
 
   const {

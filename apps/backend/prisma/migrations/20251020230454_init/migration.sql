@@ -8,7 +8,7 @@ CREATE TYPE "GroupMemberRole" AS ENUM ('ADMIN', 'MEMBER');
 CREATE TYPE "ApprovalStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('SYSTEM', 'SHARED_POST_IN_GROUP', 'POST_LIKE', 'POST_COMMENT', 'POST_SAVE', 'USER_FOLLOW_REQUEST', 'USER_FOLLOW_REQUEST_ACCEPTED', 'NEW_FOLLOWER', 'GROUP_CHANGED_INFO', 'GROUP_JOIN_REQUEST', 'GROUP_JOIN_REQUEST_ACCEPTED', 'USER_JOINED_GROUP', 'USER_LEAVE_GROUP', 'ADMIN_REMOVED_GROUP_MEMBER', 'ADMIN_CHANGED_GROUP_MEMBER_ROLE', 'EVENT_INVITATION');
+CREATE TYPE "NotificationType" AS ENUM ('SYSTEM', 'SHARED_POST_IN_GROUP', 'POST_LIKE', 'POST_COMMENT', 'POST_SAVE', 'USER_FOLLOW_REQUEST', 'USER_FOLLOW_REQUEST_ACCEPTED', 'NEW_FOLLOWER', 'GROUP_CHANGED_INFO', 'GROUP_JOIN_REQUEST', 'GROUP_JOIN_REQUEST_ACCEPTED', 'USER_JOINED_GROUP', 'USER_LEAVE_GROUP', 'ADMIN_REMOVED_GROUP_MEMBER', 'ADMIN_CHANGED_GROUP_MEMBER_ROLE', 'EVENT_INVITATION', 'EVENT_INVITATION_REMINDER', 'EVENT_REMINDER', 'EVENT_CANCELLED', 'EVENT_UPDATED');
 
 -- CreateEnum
 CREATE TYPE "NotificationStatus" AS ENUM ('PENDING', 'SENT', 'NOT_SENT', 'DELIVERED', 'FAILED');
@@ -293,8 +293,7 @@ CREATE TABLE "Address" (
 CREATE TABLE "Business" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "mainCategory" "BusinessCategory" NOT NULL,
-    "subCategories" "BusinessCategory"[],
+    "category" "BusinessCategory" NOT NULL,
     "areaCode" TEXT,
     "phoneNumber" TEXT NOT NULL,
     "verified" BOOLEAN NOT NULL DEFAULT false,
@@ -648,7 +647,7 @@ CREATE UNIQUE INDEX "Address_businessId_language_type_key" ON "Address"("busines
 CREATE INDEX "Business_name_idx" ON "Business"("name");
 
 -- CreateIndex
-CREATE INDEX "Business_mainCategory_idx" ON "Business"("mainCategory");
+CREATE INDEX "Business_category_idx" ON "Business"("category");
 
 -- CreateIndex
 CREATE INDEX "Business_verified_idx" ON "Business"("verified");

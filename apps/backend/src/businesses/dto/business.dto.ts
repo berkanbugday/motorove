@@ -21,12 +21,7 @@ export class BusinessDto implements IBusiness {
 
   @Field(() => BusinessCategory)
   @IsEnum(BusinessCategory)
-  mainCategory: BusinessCategory;
-
-  @Field(() => [BusinessCategory])
-  @IsArray()
-  @IsEnum(BusinessCategory, { each: true })
-  subCategories: BusinessCategory[];
+  category: BusinessCategory;
 
   @Field(() => String)
   @IsString()

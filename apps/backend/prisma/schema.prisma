@@ -503,9 +503,9 @@ model Group {
   isActive    Boolean  @default(true)
 
   // Relations
-  memberships    GroupMembership[]
-  posts          Post[]
-  events         Event[]
+  memberships     GroupMembership[]
+  posts           Post[]
+  events          Event[]
   organizedEvents Event[]           @relation("EventOrganizedByGroup")
 
   @@index([cityId])
@@ -701,14 +701,13 @@ model Address {
 
 // Business model
 model Business {
-  id            String             @id @default(uuid())
-  name          String
-  mainCategory  BusinessCategory
-  subCategories BusinessCategory[]
-  areaCode      String?
-  phoneNumber   String
-  verified      Boolean            @default(false)
-  status        ApprovalStatus     @default(PENDING)
+  id          String           @id @default(uuid())
+  name        String
+  category    BusinessCategory
+  areaCode    String?
+  phoneNumber String
+  verified    Boolean          @default(false)
+  status      ApprovalStatus   @default(PENDING)
 
   // Relations
   address      Address?
@@ -721,7 +720,7 @@ model Business {
   isActive  Boolean  @default(true)
 
   @@index([name])
-  @@index([mainCategory])
+  @@index([category])
   @@index([verified])
   @@index([status])
   @@index([isActive])

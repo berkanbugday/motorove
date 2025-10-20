@@ -203,14 +203,14 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   console.log('Business data in card:', JSON.stringify(businessData));
 
   // Format business type based on original data or fallback to title content
-  const businessType = businessData?.mainCategory
-    ? businessData.mainCategory === 'REPAIR' ||
-      businessData.mainCategory === 'MAINTENANCE'
+  const businessType = businessData?.category
+    ? businessData.category === 'REPAIR' ||
+      businessData.category === 'MAINTENANCE'
       ? 'Repair Shop'
-      : businessData.mainCategory === 'DEALERSHIP' ||
-        businessData.mainCategory === 'SALES'
+      : businessData.category === 'DEALERSHIP' ||
+        businessData.category === 'SALES'
       ? 'Dealer'
-      : businessData.mainCategory === 'DETAILED_CLEANING'
+      : businessData.category === 'DETAILED_CLEANING'
       ? 'Washing Station'
       : 'Business'
     : 'Business';
@@ -460,12 +460,10 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                         <Text style={styles.nearbyRatingText}>New</Text>
                       </View>
                     )}
-                    {item.metadata?.originalData?.mainCategory && (
+                    {item.category && (
                       <Text style={styles.nearbyPrice}>
-                        {item.metadata.originalData.mainCategory.charAt(0) +
-                          item.metadata.originalData.mainCategory
-                            .slice(1)
-                            .toLowerCase()
+                        {item.category.charAt(0) +
+                          item.category.slice(1).toLowerCase()}
                             .replace('_', ' ')}
                       </Text>
                     )}

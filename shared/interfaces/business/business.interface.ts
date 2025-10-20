@@ -10,8 +10,7 @@ import { IAddress } from "../address";
 export interface IBusiness {
   id: string;
   name: string;
-  mainCategory: BusinessCategory;
-  subCategories: BusinessCategory[];
+  category: BusinessCategory;
   areaCode: string;
   phoneNumber: string;
   descriptions: IBusinessDescription[];
