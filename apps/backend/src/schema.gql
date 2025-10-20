@@ -41,7 +41,9 @@ type AddressDto {
   type: AddressType!
 }
 
-"""The types of addresses that can be associated with a post or event"""
+"""
+The types of addresses that can be associated with a post or event
+"""
 enum AddressType {
   BUSINESS_LOCATION
   EVENT_FINISH_LOCATION
@@ -72,7 +74,9 @@ type AuthUser {
   preferredLanguage: Language!
 }
 
-"""Categories for motorcycle-related businesses"""
+"""
+Categories for motorcycle-related businesses
+"""
 enum BusinessCategory {
   ACCESSORIES
   ATV
@@ -274,7 +278,9 @@ input CreateSupportRequestInput {
   subject: String!
 }
 
-"""Currency types"""
+"""
+Currency types
+"""
 enum Currency {
   EUR
   TL
@@ -286,7 +292,9 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""Days of the week for business hours and scheduling"""
+"""
+Days of the week for business hours and scheduling
+"""
 enum DayOfWeek {
   FRIDAY
   MONDAY
@@ -297,7 +305,9 @@ enum DayOfWeek {
   WEDNESDAY
 }
 
-"""Difficulty level for motorcycle rides"""
+"""
+Difficulty level for motorcycle rides
+"""
 enum DifficultyLevel {
   EASY
   HARD
@@ -329,7 +339,9 @@ type Equipment {
   year: Int
 }
 
-"""Types of motorcycle equipment"""
+"""
+Types of motorcycle equipment
+"""
 enum EquipmentType {
   AIRBAG_VEST
   ARMOR
@@ -478,20 +490,26 @@ type EventParticipantDto {
   updatedById: String!
 }
 
-"""Status of a participant in an event"""
+"""
+Status of a participant in an event
+"""
 enum EventParticipantStatus {
   JOINED
   LEFT
 }
 
-"""The status of an event"""
+"""
+The status of an event
+"""
 enum EventStatus {
   DRAFT
   PAST
   UPCOMING
 }
 
-"""The types of events that can be created"""
+"""
+The types of events that can be created
+"""
 enum EventType {
   CAMPING_RIDE
   GROUP_RIDE
@@ -502,7 +520,9 @@ enum EventType {
   TRAINING
 }
 
-"""Experience level for workshops and training events"""
+"""
+Experience level for workshops and training events
+"""
 enum ExperienceLevel {
   ADVANCED
   ALL_LEVELS
@@ -546,7 +566,9 @@ type Garage {
   updatedById: String!
 }
 
-"""Gender options"""
+"""
+Gender options
+"""
 enum Gender {
   FEMALE
   MALE
@@ -595,7 +617,9 @@ type GroupDto {
   tags: [String!]!
 }
 
-"""The role of a user in a group"""
+"""
+The role of a user in a group
+"""
 enum GroupMemberRole {
   ADMIN
   MEMBER
@@ -628,14 +652,18 @@ type GroupMembershipDto {
   user: UserDto!
 }
 
-"""Privacy levels for groups"""
+"""
+Privacy levels for groups
+"""
 enum GroupPrivacy {
   ALL
   PRIVATE
   PUBLIC
 }
 
-"""Tags for categorizing groups"""
+"""
+Tags for categorizing groups
+"""
 enum GroupTag {
   ADVENTURE
   BEGINNERS_WELCOME
@@ -671,7 +699,9 @@ type ImageDto {
   url: String!
 }
 
-"""Different interests for motorcyclists"""
+"""
+Different interests for motorcyclists
+"""
 enum Interest {
   COASTAL_RIDES
   COMMUNITY_EVENTS
@@ -694,7 +724,9 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
-"""Supported languages in the application"""
+"""
+Supported languages in the application
+"""
 enum Language {
   EN
   TR
@@ -759,10 +791,14 @@ type Mutation {
   updateComment(input: UpdateCommentInput!): CommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
-  updateGroupMembershipApprovalStatus(input: UpdateGroupMembershipApprovalStatusInput!): GroupMembershipDto!
+  updateGroupMembershipApprovalStatus(
+    input: UpdateGroupMembershipApprovalStatusInput!
+  ): GroupMembershipDto!
   updatePassword(input: UpdatePasswordInput!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
-  updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
+  updateUserFollowingApprovalStatus(
+    input: UpdateUserFollowingApprovalStatusInput!
+  ): UserFollowingDto!
   updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
 }
 
@@ -785,7 +821,9 @@ type Notification {
   userId: String!
 }
 
-"""Channel for notifications"""
+"""
+Channel for notifications
+"""
 enum NotificationChannel {
   EMAIL
   PUSH
@@ -802,14 +840,18 @@ type NotificationDto {
   type: NotificationType!
 }
 
-"""Permission for notifications"""
+"""
+Permission for notifications
+"""
 enum NotificationPermission {
   ALLOWED
   NOT_ALLOWED
   UNKNOWN
 }
 
-"""The status of a notification"""
+"""
+The status of a notification
+"""
 enum NotificationStatus {
   DELIVERED
   FAILED
@@ -818,7 +860,9 @@ enum NotificationStatus {
   SENT
 }
 
-"""The type of notification"""
+"""
+The type of notification
+"""
 enum NotificationType {
   ADMIN_CHANGED_GROUP_MEMBER_ROLE
   ADMIN_REMOVED_GROUP_MEMBER
@@ -911,11 +955,21 @@ type Query {
   cities: [CityDto!]!
   city(id: ID!): CityDto!
   comment(id: ID!): CommentDto!
-  comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
+  comments(
+    filters: FilterCommentInput
+    limit: Int
+    postId: ID!
+    skip: Int
+  ): [CommentDto!]!
   count: Float!
   event(id: String!): EventDto!
   eventInvitations(limit: Int, skip: Int): [EventInvitationDto!]!
-  events(groupId: String, limit: Int, skip: Int, status: EventStatus): [EventDto!]!
+  events(
+    groupId: String
+    limit: Int
+    skip: Int
+    status: EventStatus
+  ): [EventDto!]!
   followRequests(limit: Int, skip: Int): [UserFollowingDto!]!
   followerUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
   followingUsers(limit: Int, skip: Int, userId: ID!): [UserFollowingDto!]!
@@ -930,11 +984,22 @@ type Query {
   getRoadTypes: [EnumItem!]!
   group(id: String!): GroupDto!
   groupJoinRequests(limit: Int, skip: Int): [GroupMembershipDto!]!
-  groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
+  groups(
+    filters: FilterGroupInput
+    limit: Int
+    query: String
+    skip: Int
+  ): [GroupDto!]!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
   post(id: ID!): PostDto!
-  posts(createdById: ID, groupId: ID, limit: Int, savedById: ID, skip: Int): [PostDto!]!
+  posts(
+    createdById: ID
+    groupId: ID
+    limit: Int
+    savedById: ID
+    skip: Int
+  ): [PostDto!]!
   user(id: String!): UserDto!
   userProfile(id: String!): UserDto!
   userSetting: UserSettingDto!
@@ -951,7 +1016,9 @@ input ResetPasswordInput {
   email: String!
 }
 
-"""Different styles of motorcycle riding"""
+"""
+Different styles of motorcycle riding
+"""
 enum RidingStyle {
   ADVENTURE
   COMMUTING
@@ -965,7 +1032,9 @@ enum RidingStyle {
   TRACK
 }
 
-"""Type of road surface for motorcycle rides"""
+"""
+Type of road surface for motorcycle rides
+"""
 enum RoadType {
   ASPHALT
   MIXED
@@ -1006,7 +1075,9 @@ type SocialMedia {
   username: String!
 }
 
-"""Social media platform types"""
+"""
+Social media platform types
+"""
 enum SocialMediaPlatform {
   FACEBOOK
   INSTAGRAM
@@ -1016,7 +1087,9 @@ enum SocialMediaPlatform {
   YOUTUBE
 }
 
-"""Different categories of support requests"""
+"""
+Different categories of support requests
+"""
 enum SupportCategory {
   ACCOUNT
   BUG_REPORT
@@ -1206,7 +1279,9 @@ type Weather {
   temperature: Float!
 }
 
-"""Weather conditions"""
+"""
+Weather conditions
+"""
 enum WeatherCondition {
   CLEAR
   CLOUDY

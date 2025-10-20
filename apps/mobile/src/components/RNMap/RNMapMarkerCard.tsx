@@ -217,8 +217,8 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
 
   // Get actual data from business object
   let phoneNumber =
-    businessData?.areaCode && businessData?.phoneNumber
-      ? `${businessData.areaCode} ${businessData.phoneNumber}`
+    businessData?.countryCode && businessData?.phoneNumber
+      ? `${businessData.countryCode} ${businessData.phoneNumber}`
       : 'Not available';
 
   const address =
@@ -464,7 +464,6 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                       <Text style={styles.nearbyPrice}>
                         {item.category.charAt(0) +
                           item.category.slice(1).toLowerCase()}
-                            .replace('_', ' ')}
                       </Text>
                     )}
                   </View>

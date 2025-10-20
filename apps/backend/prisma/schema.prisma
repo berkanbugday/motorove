@@ -653,7 +653,7 @@ model Business {
   id          String           @id @default(uuid())
   name        String
   category    BusinessCategory
-  areaCode    String?
+  countryCode String?
   phoneNumber String
   verified    Boolean          @default(false)
   status      ApprovalStatus   @default(PENDING)

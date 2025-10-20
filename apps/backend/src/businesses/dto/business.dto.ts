@@ -26,7 +26,7 @@ export class BusinessDto implements IBusiness {
   @Field(() => String)
   @IsString()
   @IsNotEmpty()
-  areaCode: string;
+  countryCode: string;
 
   @Field(() => String)
   @IsString()

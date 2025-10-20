@@ -27,7 +27,7 @@ export const BUSINESS_FRAGMENT = gql`
     id
     name
     category
-    areaCode
+    countryCode
     phoneNumber
     address {
       ...AddressFragment

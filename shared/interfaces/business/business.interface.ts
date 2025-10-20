@@ -11,7 +11,7 @@ export interface IBusiness {
   id: string;
   name: string;
   category: BusinessCategory;
-  areaCode: string;
+  countryCode: string;
   phoneNumber: string;
   descriptions: IBusinessDescription[];
   workingHours: IWorkingHour[];
