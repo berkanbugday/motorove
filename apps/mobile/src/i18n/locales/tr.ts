@@ -646,6 +646,11 @@ export default {
       open_settings: 'Ayarları Aç',
       events: 'Etkinlikler',
     },
+
+    userFollowing: {
+      follow_error: 'Takip edilemedi',
+      unfollow_error: 'Takipten çıkarılamadı',
+    },
   },
 
   // Components organized by component name

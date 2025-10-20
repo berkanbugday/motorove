@@ -660,6 +660,11 @@ export default {
       open_settings: 'Open Settings',
       events: 'Events',
     },
+
+    userFollowing: {
+      follow_error: 'Follow failed',
+      unfollow_error: 'Unfollow failed',
+    },
   },
 
   // Components organized by component name

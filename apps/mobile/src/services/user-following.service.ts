@@ -181,13 +181,14 @@ export const useFollowRequests = (limit?: number, skip?: number) => {
 };
 
 /**
- * Hook for following a user
+ * Hook for following a user with optimistic updates
  * @param onSuccess Optional callback function to execute on successful follow
  * @returns A function to follow a user and loading state
  */
 export const useFollowUser = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [followUserMutation, {loading}] = useMutation(FOLLOW_USER, {
-    onCompleted: _data => {
+    onCompleted: () => {
       if (onSuccess) {
         onSuccess();
       }
@@ -196,8 +197,8 @@ export const useFollowUser = (onSuccess?: () => void) => {
       loggingService.error('Error following user:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to follow user. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.userFollowing.follow_error'),
       });
     },
   });
@@ -206,6 +207,38 @@ export const useFollowUser = (onSuccess?: () => void) => {
     try {
       const result = await followUserMutation({
         variables: {userId},
+        update: (cache, {data}) => {
+          if (data?.followUser) {
+            const newStatus = data.followUser;
+
+            // Update all cached user queries
+            cache.modify({
+              fields: {
+                users(existingUsers = [], {readField}) {
+                  return existingUsers.map((userRef: any) => {
+                    if (readField('id', userRef) === userId) {
+                      return {
+                        ...userRef,
+                        followingStatus: newStatus,
+                      };
+                    }
+                    return userRef;
+                  });
+                },
+              },
+            });
+
+            // Update specific user cache entries
+            cache.modify({
+              id: cache.identify({__typename: 'UserDto', id: userId}),
+              fields: {
+                followingStatus() {
+                  return newStatus;
+                },
+              },
+            });
+          }
+        },
       });
       return result.data?.followUser;
     } catch (err) {
@@ -221,13 +254,14 @@ export const useFollowUser = (onSuccess?: () => void) => {
 };
 
 /**
- * Hook for unfollowing a user
+ * Hook for unfollowing a user with optimistic updates
  * @param onSuccess Optional callback function to execute on successful unfollow
  * @returns A function to unfollow a user and loading state
  */
 export const useUnfollowUser = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
   const [unfollowUserMutation, {loading}] = useMutation(UNFOLLOW_USER, {
-    onCompleted: _data => {
+    onCompleted: () => {
       if (onSuccess) {
         onSuccess();
       }
@@ -236,8 +270,8 @@ export const useUnfollowUser = (onSuccess?: () => void) => {
       loggingService.error('Error unfollowing user:', errorObj);
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: errorObj.message || 'Failed to unfollow user. Please try again.',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.userFollowing.unfollow_error'),
       });
     },
   });
@@ -246,8 +280,41 @@ export const useUnfollowUser = (onSuccess?: () => void) => {
     try {
       const result = await unfollowUserMutation({
         variables: {userId},
+        optimisticResponse: {
+          unfollowUser: null,
+        },
+        update: (cache, {data: _data}) => {
+          const newStatus = _data?.unfollowUser;
+
+          // Update all cached user queries
+          cache.modify({
+            fields: {
+              users(existingUsers = [], {readField}) {
+                return existingUsers.map((userRef: any) => {
+                  if (readField('id', userRef) === userId) {
+                    return {
+                      ...userRef,
+                      followingStatus: newStatus,
+                    };
+                  }
+                  return userRef;
+                });
+              },
+            },
+          });
+
+          // Update specific user cache entries
+          cache.modify({
+            id: cache.identify({__typename: 'UserDto', id: userId}),
+            fields: {
+              followingStatus() {
+                return newStatus;
+              },
+            },
+          });
+        },
       });
-      return result.data?.unfollow;
+      return result.data?.unfollowUser;
     } catch (err) {
       loggingService.error('Error in unfollowUser:', err);
       return null;
