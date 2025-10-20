@@ -247,17 +247,18 @@ export class UserFollowingsService {
     }
 
     // Delete the follow relationship
-    await this.prisma.userFollowing.update({
+    const unfollow = await this.prisma.userFollowing.update({
       where: {
         id: userFollowing.id,
       },
       data: {
         isActive: false,
+        status: ApprovalStatus.REJECTED,
         updatedAt: new Date(),
       },
     });
 
-    return ApprovalStatus.REJECTED;
+    return unfollow.status as ApprovalStatus;
   }
 
   async updateApprovalStatus(
