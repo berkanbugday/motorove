@@ -11,6 +11,7 @@ import { IAddress } from "../address/address.interface";
 import { IUser } from "../user/user.interface";
 import { IGroup } from "../group/group.interface";
 import { IEventParticipant } from "./event-participant.interface";
+import { IImage } from "../post/image.interface";
 
 /**
  * Event Interface
@@ -26,7 +27,7 @@ export interface IEvent {
   endDateTime?: Date | string | null;
   maxParticipants?: number | null;
   isPrivate: boolean;
-  images?: string[] | null;
+  images?: IImage[] | null;
   addresses?: IAddress[] | null;
   organizedByGroupId?: string | null;
   organizedByGroup?: IGroup | null;

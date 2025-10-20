@@ -5,7 +5,12 @@ import {
   ActivityIndicator,
   Animated,
   Platform,
+  TouchableOpacity,
+  Dimensions,
+  LayoutChangeEvent,
 } from 'react-native';
+import {BlurView} from '@react-native-community/blur';
+import Carousel, {Pagination} from 'react-native-snap-carousel';
 import {colors, spacing, getShadow, commonStyles, radius} from '@theme';
 import {RouteProp} from '@react-navigation/native';
 import {
@@ -33,6 +38,7 @@ import {
   CollapsibleCard,
   ParticipantAvatars,
   showToast,
+  ImagePreviewModal,
 } from '@components';
 import {format, formatDuration, intervalToDuration} from 'date-fns';
 import {useTranslation} from '@hooks/useTranslation';
@@ -46,6 +52,7 @@ import {
   CURRENCY_SYMBOLS,
   Currency,
   CURRENCY_FORMATTING,
+  IImage,
 } from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
@@ -62,11 +69,23 @@ type Props = {
 /**
  * EventDetail Screen - Displays detailed information about a specific event
  */
+const {width: screenWidth} = Dimensions.get('window');
+
 export const EventDetailScreen = ({route, navigation}: Props) => {
   const {eventId} = route.params;
   const {t} = useTranslation();
   const {language} = useLanguage();
   const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
+
+  // Image carousel states
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [headerWidth, setHeaderWidth] = useState(0);
+  const [revealedCensoredImages, setRevealedCensoredImages] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
+  const [imagePreviewIndex, setImagePreviewIndex] = useState(0);
+  const carouselRef = useRef(null);
 
   // Animated value for scroll with better performance
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -206,6 +225,170 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
   // Add scroll optimization
   const scrollViewRef = useRef<any>(null);
+
+  // Convert images to array for backward compatibility
+  const imageArray = event?.images
+    ? Array.isArray(event.images)
+      ? event.images
+      : [event.images]
+    : [];
+
+  const handleHeaderLayout = (layoutEvent: LayoutChangeEvent) => {
+    const {width} = layoutEvent.nativeEvent.layout;
+    setHeaderWidth(width);
+  };
+
+  const handleToggleCensoredImage = (index: number) => {
+    setRevealedCensoredImages(prev => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+  const handleImagePress = (index: number) => {
+    setImagePreviewIndex(index);
+    setImagePreviewVisible(true);
+  };
+
+  const handleCloseImagePreview = () => {
+    setImagePreviewVisible(false);
+  };
+
+  const renderCarouselItem = ({item, index}: {item: IImage; index: number}) => {
+    const isCensored = item.isCensored;
+    const isRevealed = revealedCensoredImages[index];
+
+    return (
+      <View style={styles.imageContainer}>
+        <View style={{position: 'relative'}}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => handleImagePress(index)}>
+            <Animated.Image
+              source={{uri: item.url}}
+              style={[
+                styles.headerImage,
+                {
+                  opacity: headerOpacity,
+                },
+              ]}
+            />
+          </TouchableOpacity>
+          {isCensored && !isRevealed ? (
+            <TouchableOpacity
+              style={styles.blurContainer}
+              activeOpacity={0.9}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={15}
+              />
+              <View style={styles.censoredOverlay}>
+                <Icon
+                  name="eye-filled"
+                  size={32}
+                  color={colors.neutral.white}
+                />
+                <Typography
+                  variant="subtitle"
+                  weight="medium"
+                  color={colors.neutral.white}
+                  style={styles.censoredText}>
+                  {t('components.feedCard.tap_to_view')}
+                </Typography>
+              </View>
+            </TouchableOpacity>
+          ) : null}
+          {isCensored && isRevealed && (
+            <TouchableOpacity
+              style={styles.hideButton}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <Icon
+                name="eye-slash-filled"
+                size={20}
+                color={colors.neutral.white}
+              />
+              <Typography
+                variant="caption"
+                color={colors.neutral.white}
+                style={{marginLeft: 4}}>
+                {t('components.feedCard.hide')}
+              </Typography>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    );
+  };
+
+  const renderSingleImage = (image: IImage, index: number = 0) => {
+    const isCensored = image.isCensored;
+    const isRevealed = revealedCensoredImages[index];
+
+    return (
+      <View style={styles.imageContainer}>
+        <View style={{position: 'relative'}}>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => handleImagePress(index)}>
+            <Animated.Image
+              source={{uri: image.url}}
+              style={[
+                styles.headerImage,
+                {
+                  opacity: headerOpacity,
+                },
+              ]}
+            />
+          </TouchableOpacity>
+          {isCensored && !isRevealed ? (
+            <TouchableOpacity
+              style={styles.blurContainer}
+              activeOpacity={0.9}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <BlurView
+                style={styles.blurView}
+                blurType="light"
+                blurAmount={15}
+              />
+              <View style={styles.censoredOverlay}>
+                <Icon
+                  name="eye-filled"
+                  size={32}
+                  color={colors.neutral.white}
+                />
+                <Typography
+                  variant="subtitle"
+                  weight="medium"
+                  color={colors.neutral.white}
+                  style={styles.censoredText}>
+                  {t('components.feedCard.tap_to_view')}
+                </Typography>
+              </View>
+            </TouchableOpacity>
+          ) : null}
+          {isCensored && isRevealed && (
+            <TouchableOpacity
+              style={styles.hideButton}
+              onPress={() => handleToggleCensoredImage(index)}>
+              <Icon
+                name="eye-slash-filled"
+                size={20}
+                color={colors.neutral.white}
+              />
+              <Typography
+                variant="caption"
+                color={colors.neutral.white}
+                style={{marginLeft: 4}}>
+                {t('components.feedCard.hide')}
+              </Typography>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    );
+  };
 
   // Calculate route using OSRM API (OpenStreetMap Routing Machine)
   const calculateRouteWithOSRM = useCallback(
@@ -398,16 +581,50 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         removeClippedSubviews={false}
         decelerationRate={Platform.OS === 'android' ? 'fast' : 'normal'}>
         {/* Header Image as first scroll element */}
-        <Animated.View style={[styles.headerContainer, {height: headerHeight}]}>
-          <Animated.Image
-            source={{uri: event.images?.[0]}}
-            style={[
-              styles.headerImage,
-              {
-                opacity: headerOpacity,
-              },
-            ]}
-          />
+        <Animated.View
+          style={[styles.headerContainer, {height: headerHeight}]}
+          onLayout={handleHeaderLayout}>
+          {imageArray.length > 0 ? (
+            imageArray.length > 1 ? (
+              <>
+                <Carousel
+                  ref={carouselRef}
+                  data={imageArray}
+                  renderItem={renderCarouselItem}
+                  sliderWidth={headerWidth > 0 ? headerWidth : screenWidth}
+                  itemWidth={headerWidth > 0 ? headerWidth : screenWidth}
+                  onSnapToItem={(index: number) => setActiveSlide(index)}
+                  inactiveSlideScale={1}
+                  inactiveSlideOpacity={1}
+                  activeSlideAlignment="center"
+                />
+                <Pagination
+                  dotsLength={imageArray.length}
+                  activeDotIndex={activeSlide}
+                  containerStyle={styles.paginationContainer}
+                  dotStyle={styles.paginationDot}
+                  inactiveDotStyle={styles.paginationInactiveDot}
+                  inactiveDotOpacity={0.4}
+                  inactiveDotScale={1}
+                />
+              </>
+            ) : (
+              renderSingleImage(imageArray[0], 0)
+            )
+          ) : (
+            <Animated.View
+              style={[
+                styles.headerImage,
+                {
+                  opacity: headerOpacity,
+                  backgroundColor: colors.neutral.lightGrey,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                },
+              ]}>
+              <Icon name="image" size={48} color={colors.neutral.grey} />
+            </Animated.View>
+          )}
         </Animated.View>
         {/* Main Event Details Card - Overlapping background */}
         <View style={styles.eventCard}>
@@ -759,6 +976,13 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           </View>
         </View>
       </BottomSheet>
+
+      <ImagePreviewModal
+        visible={imagePreviewVisible}
+        images={imageArray}
+        initialIndex={imagePreviewIndex}
+        onClose={handleCloseImagePreview}
+      />
     </View>
   );
 };
@@ -860,6 +1084,62 @@ const styles = StyleSheet.create({
   },
   participantAvatarsContainer: {
     marginTop: spacing.xs,
+  },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+  },
+  blurContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  blurView: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  censoredOverlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  censoredText: {
+    textAlign: 'center',
+  },
+  hideButton: {
+    position: 'absolute',
+    bottom: spacing.xxl,
+    right: spacing.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  paginationContainer: {
+    position: 'absolute',
+    bottom: spacing.sm,
+    left: 0,
+    right: 0,
+    paddingVertical: 0,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.neutral.white,
+  },
+  paginationInactiveDot: {
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
 });
 

@@ -20,7 +20,7 @@ import { UserDto } from '../users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
 import { CommentDto } from '../comments/dto/comment.dto';
 import { ImageCensorFilterService } from '../core/image-censor-filter/image-censor-filter.service';
-import { ImageDto } from './dto/image.dto';
+import { ImageDto } from '../common/dto/image.dto';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 
 @Injectable()

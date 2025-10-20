@@ -407,7 +407,7 @@ type EventDto {
   eventType: EventType!
   experienceLevel: ExperienceLevel
   id: ID!
-  images: [String!]
+  images: [ImageDto!]
   instructorInfo: String
   invitedGroups: [GroupDto!]
   isActive: Boolean!

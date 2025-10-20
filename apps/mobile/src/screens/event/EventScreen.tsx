@@ -215,7 +215,7 @@ export const EventScreen = () => {
           return (
             <EventCard
               title={item.title}
-              image={{uri: item.images?.[0]}}
+              images={item.images}
               dateTime={item.startDateTime}
               location={location || ''}
               category={EnumUtils.convertEventType(item.eventType)}

@@ -14,7 +14,7 @@ import { UserDto } from '../../users/dto/user.dto';
 import { AddressDto } from '../../addresses/dto/address.dto';
 import { IPost } from '@motorove/shared';
 import { CommentDto } from '../../comments/dto/comment.dto';
-import { ImageDto } from './image.dto';
+import { ImageDto } from '../../common/dto/image.dto';
 
 @ObjectType()
 export class PostDto implements IPost {

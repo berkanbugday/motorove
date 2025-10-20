@@ -23,6 +23,7 @@ import { Currency } from '../../enums/models/currency.enum';
 import { GroupDto } from '../../groups/dto/group.dto';
 import { EventParticipantDto } from './event-participant.dto';
 import { IEvent } from '@motorove/shared';
+import { ImageDto } from '../../common/dto/image.dto';
 
 @ObjectType()
 export class EventDto implements IEvent {
@@ -62,10 +63,10 @@ export class EventDto implements IEvent {
   @IsBoolean()
   isPrivate: boolean;
 
-  @Field(() => [String], { nullable: true })
+  @Field(() => [ImageDto], { nullable: true })
   @IsOptional()
   @IsArray()
-  images?: string[];
+  images?: ImageDto[];
 
   @Field(() => [Address], { nullable: true })
   @IsOptional()

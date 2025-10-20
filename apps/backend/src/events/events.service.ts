@@ -22,6 +22,9 @@ import { EventParticipant } from '../events/models/event-participant.model';
 import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
+import { ImageCensorFilterService } from '../core/image-censor-filter/image-censor-filter.service';
+import { ImageDto } from '../common/dto/image.dto';
 
 @Injectable()
 export class EventsService {
@@ -30,6 +33,8 @@ export class EventsService {
     private prisma: PrismaService,
     private storageService: StorageService,
     private queueService: QueueService,
+    private profanityFilterService: ProfanityFilterService,
+    private imageCensorFilterService: ImageCensorFilterService,
   ) {}
 
   async findAll(
@@ -970,25 +975,25 @@ export class EventsService {
     authToken?: string,
   ): Promise<EventDto> {
     try {
-      // Process images to get signed URLs if needed
-      let processedImages = event.images || [];
+      // Process images to get signed URLs and check for censored content
+      const images: ImageDto[] = [];
 
-      if (
-        Array.isArray(processedImages) &&
-        processedImages.length > 0 &&
-        authToken
-      ) {
+      if (Array.isArray(event.images) && event.images.length > 0 && authToken) {
         try {
-          processedImages = await Promise.all(
-            processedImages.map(async (imageUrl) => {
+          await Promise.all(
+            event.images.map(async (imageUrl) => {
               if (imageUrl && typeof imageUrl === 'string') {
-                return await this.storageService.getSignedUrl(
+                const url = await this.storageService.getSignedUrl(
                   imageUrl,
                   3600,
                   authToken,
                 );
+                const { isCensored } =
+                  await this.imageCensorFilterService.checkImageCensorContent(
+                    url,
+                  );
+                images.push({ url: url, isCensored });
               }
-              return imageUrl;
             }),
           );
         } catch (error) {
@@ -1056,10 +1061,44 @@ export class EventsService {
           ).length
         : 0;
 
+      // Apply profanity filter to text content
+      const filteredTitle = event.title
+        ? this.profanityFilterService.filterText(event.title)
+        : event.title;
+      const filteredDescription = event.description
+        ? this.profanityFilterService.filterText(event.description)
+        : event.description;
+      const filteredRouteDescription = event.routeDescription
+        ? this.profanityFilterService.filterText(event.routeDescription)
+        : event.routeDescription;
+      const filteredRestStops = event.restStops
+        ? this.profanityFilterService.filterText(event.restStops)
+        : event.restStops;
+      const filteredCampingInfo = event.campingInfo
+        ? this.profanityFilterService.filterText(event.campingInfo)
+        : event.campingInfo;
+      const filteredEquipmentChecklist = event.equipmentChecklist
+        ? this.profanityFilterService.filterText(event.equipmentChecklist)
+        : event.equipmentChecklist;
+      const filteredInstructorInfo = event.instructorInfo
+        ? this.profanityFilterService.filterText(event.instructorInfo)
+        : event.instructorInfo;
+      const filteredTopicsCovered = event.topicsCovered
+        ? this.profanityFilterService.filterText(event.topicsCovered)
+        : event.topicsCovered;
+
       // Create base DTO with transformed data
       const eventWithExtras = {
         ...event,
-        images: processedImages,
+        title: filteredTitle,
+        description: filteredDescription,
+        routeDescription: filteredRouteDescription,
+        restStops: filteredRestStops,
+        campingInfo: filteredCampingInfo,
+        equipmentChecklist: filteredEquipmentChecklist,
+        instructorInfo: filteredInstructorInfo,
+        topicsCovered: filteredTopicsCovered,
+        images: images,
         participants: processedParticipants,
         isParticipating,
         participationStatus,

@@ -12,7 +12,10 @@ export const EVENT_FRAGMENT = gql`
     endDateTime
     maxParticipants
     isPrivate
-    images
+    images {
+      url
+      isCensored
+    }
     addresses {
       id
       language
@@ -75,7 +78,10 @@ export const EVENT_INVITATION_FRAGMENT = gql`
       title
       createdAt
       updatedAt
-      images
+      images {
+        url
+        isCensored
+      }
       createdBy {
         id
         firstName
@@ -118,7 +124,12 @@ export const REMOVE_EVENT = gql`
 
 // Get events query
 export const GET_EVENTS = gql`
-  query GetEvents($limit: Int, $skip: Int, $status: EventStatus, $groupId: String) {
+  query GetEvents(
+    $limit: Int
+    $skip: Int
+    $status: EventStatus
+    $groupId: String
+  ) {
     events(limit: $limit, skip: $skip, status: $status, groupId: $groupId) {
       ...EventFragment
     }

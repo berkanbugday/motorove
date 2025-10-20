@@ -6,14 +6,14 @@ import {useTranslation} from '@hooks/useTranslation';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
 import {useLanguage} from '@contexts/LanguageContext';
-import {Language} from '@motorove/shared';
+import {Language, IImage} from '@motorove/shared';
 
 export interface EventInvitation {
   id: string;
   event: {
     id: string;
     title: string;
-    images?: string[];
+    images?: IImage[];
     createdAt: Date;
     updatedAt: Date;
     createdBy: {
@@ -78,7 +78,7 @@ export const EventInvitationCard: React.FC<EventInvitationCardProps> = ({
 
   // Get event image or use default
   const eventImage =
-    event.images && event.images.length > 0 ? event.images[0] : null;
+    event.images && event.images.length > 0 ? event.images[0].url : null;
 
   const timeAgo = formatDistanceToNow(
     new Date(event?.updatedAt || event.createdAt),

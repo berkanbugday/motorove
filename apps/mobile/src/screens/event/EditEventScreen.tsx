@@ -1487,13 +1487,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
       // Set images
       if (event.images && event.images.length > 0) {
-        const imageObjects = event.images.map((imageUrl, index) => ({
+        const imageObjects = event.images.map((image, index) => ({
           id: Date.now() + index,
-          uri: imageUrl,
-          base64: imageUrl.startsWith('data:') ? imageUrl : undefined,
+          uri: image.url,
+          base64: image.url.startsWith('data:') ? image.url : undefined,
         }));
         setSelectedImages(imageObjects);
-        setValue('images', event.images);
+        setValue('images', event.images.map(img => img.url));
       }
 
       // Set organized by fields
