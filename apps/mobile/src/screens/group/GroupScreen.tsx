@@ -1,5 +1,5 @@
 import React, {useState, useCallback} from 'react';
-import {View, StyleSheet, RefreshControl, FlatList} from 'react-native';
+import {View, StyleSheet, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useGetJoinedGroups, useGetGroups} from '@services/group.service';
@@ -20,6 +20,7 @@ import {GroupPrivacy, IFilterGroup} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useTranslation} from '@hooks/useTranslation';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {FlashList} from '@shopify/flash-list';
 
 /**
  * Groups Screen - Displays user groups and allows discovery of new groups
@@ -163,7 +164,7 @@ export const GroupScreen = () => {
     }
 
     return (
-      <FlatList
+      <FlashList
         data={joinedGroups}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
@@ -249,7 +250,7 @@ export const GroupScreen = () => {
     }
 
     return (
-      <FlatList
+      <FlashList
         data={allGroups}
         keyExtractor={item => item.id}
         renderItem={({item}) => (

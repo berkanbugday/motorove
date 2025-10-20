@@ -1,5 +1,5 @@
 import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {View, StyleSheet, Keyboard, FlatList, Animated} from 'react-native';
+import {View, StyleSheet, Keyboard, Animated} from 'react-native';
 import {
   TopHeaderBar,
   Icon,
