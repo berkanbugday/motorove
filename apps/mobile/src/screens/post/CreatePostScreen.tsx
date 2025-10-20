@@ -146,7 +146,7 @@ export const CreatePostScreen = () => {
             </View>
           ) : joinedGroups.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Icon name="users" size={24} color={colors.neutral.grey} />
+              <Icon name="users-filled" size={24} color={colors.neutral.grey} />
               <Body>{t('screens.post.no_groups_joined')}</Body>
             </View>
           ) : (
