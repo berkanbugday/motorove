@@ -11,10 +11,11 @@ import {
 import {colors, commonStyles, spacing} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
-import {useGetGroups, useSearchGroups} from '@services/group.service';
+import {useSearchGroups} from '@services/group.service';
 import {IGroup} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useTranslation} from '@hooks/useTranslation';
+import {FlashList} from '@shopify/flash-list';
 
 /**
  * Group Search Screen - Allows users to search for groups by name
@@ -55,26 +56,9 @@ export const SearchGroupScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
 
-  // Fetch initial groups when no search is active
-  const {
-    groups: allGroups,
-    loading: allLoading,
-    refetch: refetchAll,
-  } = useGetGroups();
-
-  // Fetch groups based on search query
-  const {
-    groups: searchResults,
-    loading: searchLoading,
-    refetch: refetchSearch,
-    loadMore,
-    hasMore,
-  } = useSearchGroups(debouncedQuery);
-
-  // Combine results based on whether we're searching or not
-  const groups = debouncedQuery ? searchResults : allGroups;
-  const loading = debouncedQuery ? searchLoading : allLoading;
-  const refetch = debouncedQuery ? refetchSearch : refetchAll;
+  // Fetch groups based on search query only
+  const {groups, loading, refetch, loadMore, hasMore} =
+    useSearchGroups(debouncedQuery);
 
   // Debounce search query to avoid too many API calls
   useEffect(() => {
@@ -144,7 +128,7 @@ export const SearchGroupScreen = () => {
         </Body>
       </View>
     );
-  }, [loading, debouncedQuery]);
+  }, [loading, debouncedQuery, t]);
 
   // Handle end reached for pagination
   const handleEndReached = useCallback(() => {
@@ -183,12 +167,12 @@ export const SearchGroupScreen = () => {
             />
           </View>
           {searchQuery.length > 0 && (
-            <CancelButton onPress={() => Keyboard.dismiss()} />
+            <CancelButton onPress={handleClearSearch} />
           )}
         </View>
       </View>
 
-      <FlatList
+      <FlashList
         data={groups}
         renderItem={renderGroupItem}
         keyExtractor={item => item.id}

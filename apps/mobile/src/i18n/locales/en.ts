@@ -329,6 +329,7 @@ export default {
       edit_group: 'Edit Group',
       join: 'Join',
       leave: 'Leave',
+      leave_group: 'Leave Group',
       group_name: 'Group Name',
       description: 'Description',
       city: 'City',

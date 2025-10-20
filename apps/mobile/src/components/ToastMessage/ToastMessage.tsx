@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -349,26 +350,29 @@ export const ToastProvider: React.FC<{children: React.ReactNode}> = ({
 
   const showToast = useCallback(
     (config: ToastConfig) => {
-      // Hide existing toast first
-      hideToast();
+      // Use setTimeout to defer state updates and prevent useInsertionEffect errors
+      setTimeout(() => {
+        // Hide existing toast first
+        hideToast();
 
-      // Set the new toast config
-      setToast(config);
-      setVisible(true);
+        // Set the new toast config
+        setToast(config);
+        setVisible(true);
 
-      // Auto-hide if enabled
-      if (config.autoHide !== false) {
-        const visibilityTime = config.visibilityTime || 4000;
-        timeoutRef.current = setTimeout(() => {
-          hideToast();
-        }, visibilityTime);
-      }
+        // Auto-hide if enabled
+        if (config.autoHide !== false) {
+          const visibilityTime = config.visibilityTime || 4000;
+          timeoutRef.current = setTimeout(() => {
+            hideToast();
+          }, visibilityTime);
+        }
+      }, 0);
     },
     [hideToast],
   );
 
-  // Update the global toast functions
-  useEffect(() => {
+  // Update the global toast functions using useLayoutEffect to prevent timing issues
+  useLayoutEffect(() => {
     toastFunctions.showToast = showToast;
     toastFunctions.hideToast = hideToast;
 

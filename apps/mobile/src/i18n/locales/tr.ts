@@ -331,6 +331,7 @@ export default {
       edit_group: 'Grubu Düzenle',
       join: 'Katıl',
       leave: 'Ayrıl',
+      leave_group: 'Gruptan Ayrıl',
       group_name: 'Grup Adı',
       description: 'Açıklama',
       city: 'Şehir',
