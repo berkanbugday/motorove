@@ -24,23 +24,68 @@ export class UsersService {
   ): Promise<UserDto[]> {
     const searchQuery = query?.trim();
 
-    // If no search query, return empty array
-    if (!searchQuery) {
-      return [];
+    // Get current user's city information
+    let currentUserCityId: string | null = null;
+    if (currentUserId) {
+      const currentUser = await this.prisma.user.findUnique({
+        where: { id: currentUserId },
+        select: { cityId: true },
+      });
+      currentUserCityId = currentUser?.cityId || null;
     }
 
-    // Search for users by first or last name
+    // Get users that current user is already following (only ACCEPTED)
+    // Only exclude them when no search query (for default list)
+    const followingUserIds =
+      currentUserId && !searchQuery
+        ? await this.prisma.userFollowing
+            .findMany({
+              where: {
+                followerId: currentUserId,
+                isActive: true,
+                status: {
+                  in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
+                },
+              },
+              select: { followingId: true },
+            })
+            .then((followings) => followings.map((f) => f.followingId))
+        : [];
+
+    // Build base filters that always apply
+    const baseFilters: any = {
+      // Don't include the current user in results
+      id:
+        followingUserIds.length > 0
+          ? { not: { in: [currentUserId, ...followingUserIds] } }
+          : { not: currentUserId },
+      // Only include active users
+      isActive: true,
+      // Filter by same city if current user has a city
+      ...(currentUserCityId && { cityId: currentUserCityId }),
+    };
+
+    // Build where clause with proper AND/OR structure
+    const whereClause: any = {
+      AND: [
+        baseFilters,
+        // Add search conditions if query is provided
+        ...(searchQuery
+          ? [
+              {
+                OR: [
+                  { firstName: { contains: searchQuery, mode: 'insensitive' } },
+                  { lastName: { contains: searchQuery, mode: 'insensitive' } },
+                ],
+              },
+            ]
+          : []),
+      ],
+    };
+
+    // Search for users
     const users = await this.prisma.user.findMany({
-      where: {
-        OR: [
-          { firstName: { contains: searchQuery, mode: 'insensitive' } },
-          { lastName: { contains: searchQuery, mode: 'insensitive' } },
-        ],
-        // Don't include the current user in search results
-        id: { not: currentUserId },
-        // Only include active users
-        isActive: true,
-      },
+      where: whereClause,
       take: limit,
       skip: skip,
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],

@@ -559,13 +559,8 @@ export default {
     // User search screen
     searchUser: {
       search_user: 'Kullanıcı Ara',
-      search_placeholder: 'İsim veya soyisim ile ara',
+      search_placeholder: 'Ara ...',
       no_results: 'Kullanıcı bulunamadı',
-      filters: 'Filtreler',
-      near_me: 'Yakınımda',
-      followed_by: 'Takip Edenler',
-      suggested_users: 'Önerilen Kullanıcılar',
-      following_users: 'Takip Edilenler',
     },
 
     // Garage screen

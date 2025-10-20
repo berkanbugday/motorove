@@ -575,13 +575,8 @@ export default {
     // User search screen
     searchUser: {
       search_user: 'Search User',
-      search_placeholder: 'Search by name or last name',
+      search_placeholder: 'Search ...',
       no_results: 'No users found',
-      filters: 'Filters',
-      near_me: 'Near Me',
-      followed_by: 'Followed By',
-      suggested_users: 'Suggested Users',
-      following_users: 'Following',
     },
 
     // Garage screen

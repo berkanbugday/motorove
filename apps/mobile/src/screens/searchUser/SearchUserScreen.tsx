@@ -1,5 +1,5 @@
 import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {View, StyleSheet, Keyboard, FlatList, Animated} from 'react-native';
+import {View, StyleSheet, Keyboard, Animated} from 'react-native';
 import {
   TopHeaderBar,
   Icon,
@@ -12,9 +12,10 @@ import {colors, commonStyles, spacing} from '@theme';
 import {useSearchUsers} from '@services/user.service';
 import {IUser} from '@motorove/shared';
 import {useTranslation} from '@hooks/useTranslation';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/index';
 import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
+import {FlashList} from '@shopify/flash-list';
 
 /**
  * User Search Screen - Allows users to search for other users and follow/unfollow them
@@ -56,35 +57,33 @@ export const SearchUserScreen = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const {followUser, loading: followLoading} = useFollowUser();
   const {unfollowUser, loading: unfollowLoading} = useUnfollowUser();
-  const [users, setUsers] = useState<IUser[]>([]);
-
   // Fetch users based on search query
   const {
-    users: searchResults,
+    users,
     loading: searchLoading,
-    hasMore,
+    isFetchingMore,
     loadMore,
     search,
-    clearSearch,
   } = useSearchUsers(debouncedQuery);
 
-  useEffect(() => {
-    setUsers(searchResults);
-  }, [searchResults]);
+  // Reset search when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      setSearchQuery('');
+      setDebouncedQuery('');
+      search('');
+    }, [search]),
+  );
+
   // Debounce search query to avoid too many API calls
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (searchQuery.trim() !== '') {
-        setDebouncedQuery(searchQuery);
-        search(searchQuery);
-      } else {
-        setDebouncedQuery('');
-        clearSearch();
-      }
+      setDebouncedQuery(searchQuery);
+      search(searchQuery);
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, search, clearSearch]);
+  }, [searchQuery, search]);
 
   // Handle search query changes
   const handleSearchQueryChange = useCallback((text: string) => {
@@ -95,9 +94,9 @@ export const SearchUserScreen = () => {
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
     setDebouncedQuery('');
-    clearSearch();
+    search('');
     Keyboard.dismiss();
-  }, [clearSearch]);
+  }, [search]);
 
   // Render each user item
   const renderUserItem = useCallback(
@@ -110,25 +109,16 @@ export const SearchUserScreen = () => {
             navigation.navigate('Profile', {userId: item.id});
           }}
           handleFollowPress={async () => {
-            const status = await followUser(item.id);
-            setUsers(prevUsers =>
-              prevUsers.map(user =>
-                user.id === item.id ? {...user, followingStatus: status} : user,
-              ),
-            );
+            await followUser(item.id);
+            // The user list will be updated automatically via Apollo cache
           }}
           handleUnfollowPress={async () => {
-            const status = await unfollowUser(item.id);
-            setUsers(prevUsers =>
-              prevUsers.map(user =>
-                user.id === item.id ? {...user, followingStatus: status} : user,
-              ),
-            );
+            await unfollowUser(item.id);
           }}
         />
       );
     },
-    [followUser, unfollowUser, users],
+    [followUser, unfollowUser],
   );
 
   // Render empty state when no users match search query
@@ -143,24 +133,15 @@ export const SearchUserScreen = () => {
         <Body color={colors.neutral.grey} style={styles.emptyText}>
           {debouncedQuery
             ? t('screens.searchUser.no_results')
-            : t('screens.searchUser.search_placeholder')}
+            : t('screens.searchUser.search_user')}
         </Body>
       </View>
     );
-  }, [searchLoading, debouncedQuery]);
-
-  // Handle end reached for pagination
-  const handleEndReached = useCallback(() => {
-    if (debouncedQuery && hasMore) {
-      loadMore();
-    }
-  }, [debouncedQuery, hasMore, loadMore]);
+  }, [searchLoading, debouncedQuery, t]);
 
   // Function to refetch search results
   const refetchSearch = useCallback(() => {
-    if (debouncedQuery) {
-      search(debouncedQuery);
-    }
+    search(debouncedQuery);
   }, [debouncedQuery, search]);
 
   return (
@@ -191,21 +172,22 @@ export const SearchUserScreen = () => {
             />
           </View>
           {searchQuery.length > 0 && (
-            <CancelButton onPress={() => Keyboard.dismiss()} />
+            <CancelButton onPress={handleClearSearch} />
           )}
         </View>
       </View>
 
-      <FlatList
+      <FlashList
         data={users}
         renderItem={renderUserItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContainer}
+        style={{paddingBottom: 60}}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderEmptyList}
         onRefresh={refetchSearch}
         refreshing={searchLoading}
-        onEndReached={handleEndReached}
+        onEndReached={!isFetchingMore ? loadMore : undefined}
         onEndReachedThreshold={0.5}
       />
     </View>
@@ -236,6 +218,7 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingTop: spacing.md,
     paddingBottom: spacing.xxxl,
+    marginBottom: spacing.xxxl,
     paddingHorizontal: spacing.md,
   },
   emptyContainer: {
@@ -247,5 +230,9 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: spacing.md,
     textAlign: 'center',
+  },
+  footerLoader: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
 });

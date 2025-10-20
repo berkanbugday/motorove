@@ -1,114 +1,177 @@
-import {useLazyQuery, useMutation} from '@apollo/client';
+import {useQuery, useMutation} from '@apollo/client';
 import {IAccountSetup, IUser} from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {SEARCH_USERS, ACCOUNT_SETUP} from './graphql/user.graphql';
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useState, useRef} from 'react';
 import {apolloClient} from '../configs/apolloClientConfig';
 import {showToast} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 
 /**
  * Hook for searching users by name or email with pagination
- * @param initialQuery Optional initial search query
+ * @param query Search query
  * @returns Users data, loading state, error state and functions for search operations
  */
-export const useSearchUsers = (initialQuery = '') => {
-  const [users, setUsers] = useState<IUser[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [skip, setSkip] = useState<number>(0);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
+export const useSearchUsers = (query = '') => {
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const loadMoreAbortControllerRef = useRef<AbortController | null>(null);
+  const currentQueryRef = useRef<string>(query);
 
-  const [searchUsersQuery] = useLazyQuery(SEARCH_USERS, {
+  const {
+    data,
+    loading,
+    error,
+    refetch: originalRefetch,
+    fetchMore,
+  } = useQuery(SEARCH_USERS, {
+    variables: {
+      query: query || undefined,
+      limit: 20,
+      skip: 0,
+    },
     fetchPolicy: 'network-only',
     onError: errorObj => {
       loggingService.error('Error searching users:', errorObj);
-      setError(errorObj);
-      setLoading(false);
     },
   });
 
-  const fetchUsers = useCallback(
-    async (query: string, skipValue = 0, append = false) => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Only search if there's a query
-        if (query.trim() === '') {
-          setUsers([]);
-          setHasMore(false);
-          setLoading(false);
-          return;
-        }
-
-        const {data} = await searchUsersQuery({
-          variables: {
-            query,
-            limit: 20,
-            skip: skipValue,
-          },
-          fetchPolicy: 'network-only',
-        });
-
-        if (data?.users) {
-          if (append) {
-            setUsers(prevUsers => [...prevUsers, ...data.users]);
-          } else {
-            setUsers(data.users);
-          }
-          setHasMore(data.users.length === 20);
-          setSkip(skipValue + data.users.length);
-        }
-      } catch (e) {
-        loggingService.error('Error searching users:', e);
-        setError(e as Error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [searchUsersQuery],
-  );
-
-  // Effect to handle initial query if provided
+  // Cancel ongoing requests when query changes
   useEffect(() => {
-    if (initialQuery) {
-      fetchUsers(initialQuery);
+    if (currentQueryRef.current !== query) {
+      // Cancel any ongoing loadMore request
+      if (loadMoreAbortControllerRef.current) {
+        loadMoreAbortControllerRef.current.abort();
+        loadMoreAbortControllerRef.current = null;
+        setIsFetchingMore(false);
+      }
+
+      currentQueryRef.current = query;
     }
-  }, [initialQuery, fetchUsers]);
+  }, [query]);
 
-  const search = useCallback(
-    (query: string) => {
-      setSearchQuery(query);
-      setSkip(0); // Reset pagination
-      fetchUsers(query, 0, false);
-    },
-    [fetchUsers],
-  );
-
-  const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      fetchUsers(searchQuery, skip, true);
-    }
-  }, [loading, hasMore, fetchUsers, searchQuery, skip]);
-
-  const clearSearch = useCallback(() => {
-    setUsers([]);
-    setSearchQuery('');
-    setSkip(0);
-    setHasMore(true);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (loadMoreAbortControllerRef.current) {
+        loadMoreAbortControllerRef.current.abort();
+      }
+    };
   }, []);
 
+  // Wrap the original refetch to reset state and cancel ongoing requests
+  const refetch = useCallback(async () => {
+    // Cancel any ongoing loadMore request
+    if (loadMoreAbortControllerRef.current) {
+      loadMoreAbortControllerRef.current.abort();
+      loadMoreAbortControllerRef.current = null;
+    }
+    setIsFetchingMore(false);
+
+    return await originalRefetch();
+  }, [originalRefetch]);
+
+  const search = useCallback(
+    async (searchQuery: string) => {
+      // Cancel any ongoing loadMore request
+      if (loadMoreAbortControllerRef.current) {
+        loadMoreAbortControllerRef.current.abort();
+        loadMoreAbortControllerRef.current = null;
+      }
+      setIsFetchingMore(false);
+
+      return await originalRefetch({
+        query: searchQuery || undefined,
+        limit: 20,
+        skip: 0,
+      });
+    },
+    [originalRefetch],
+  );
+
+  const loadMore = useCallback(async () => {
+    // Prevent multiple concurrent loadMore requests
+    if (isFetchingMore || loading) {
+      return;
+    }
+
+    // Check if query has changed since this callback was created
+    if (currentQueryRef.current !== query) {
+      return;
+    }
+
+    // Cancel any existing loadMore request
+    if (loadMoreAbortControllerRef.current) {
+      loadMoreAbortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this request
+    loadMoreAbortControllerRef.current = new AbortController();
+    const currentAbortController = loadMoreAbortControllerRef.current;
+
+    setIsFetchingMore(true);
+
+    try {
+      await fetchMore({
+        variables: {
+          skip: data?.users?.length || 0,
+          limit: 20,
+          query: query || undefined,
+        },
+        updateQuery: (prev, {fetchMoreResult}) => {
+          // Check if this request was aborted
+          if (currentAbortController.signal.aborted) {
+            return prev;
+          }
+
+          // Check if query has changed during the request
+          if (currentQueryRef.current !== query) {
+            return prev;
+          }
+
+          if (!fetchMoreResult || !fetchMoreResult.users) {
+            return prev;
+          }
+
+          const prevUsers = prev?.users || [];
+          // Create a Set of existing user IDs to prevent duplicates
+          const existingIds = new Set(prevUsers.map((user: any) => user.id));
+
+          // Filter out any users that already exist
+          const newUsers = fetchMoreResult.users.filter(
+            (user: any) => !existingIds.has(user.id),
+          );
+
+          return {
+            users: [...prevUsers, ...newUsers],
+          };
+        },
+      });
+    } catch (errorObj: any) {
+      setIsFetchingMore(false);
+      // Don't log errors for aborted requests
+      if (
+        errorObj.name !== 'AbortError' &&
+        !currentAbortController.signal.aborted
+      ) {
+        loggingService.error('Error loading more users:', errorObj);
+      }
+    } finally {
+      // Only reset loading state if this is still the current request
+      if (loadMoreAbortControllerRef.current === currentAbortController) {
+        setIsFetchingMore(false);
+        loadMoreAbortControllerRef.current = null;
+      }
+    }
+  }, [data?.users?.length, fetchMore, isFetchingMore, loading, query]);
+
   return {
-    users,
+    users: data?.users || [],
     loading,
     error,
-    hasMore,
+    isFetchingMore,
     search,
     loadMore,
-    clearSearch,
-    searchQuery,
+    refetch,
   };
 };
 
