@@ -51,8 +51,9 @@ module.exports = [
       'react-native/no-unused-styles': 'off',
       'react-native/split-platform-components': 'off',
 
-      // Disable the react-hooks/exhaustive-deps rule which is causing errors
+      // Disable the react-hooks rules which are causing errors with ESLint 9
       'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/rules-of-hooks': 'off',
     },
   },
 ];

@@ -23,7 +23,9 @@ const LABEL_TOP_POSITION = spacing.md;
 export const createStyles = (props: StyleProps) => {
   // Create animated label style if animatedIsFocused is provided
   const getLabelStyle = (): Animated.AnimatedProps<TextStyle> | undefined => {
-    if (!props.animatedIsFocused) return undefined;
+    if (!props.animatedIsFocused) {
+      return undefined;
+    }
 
     return {
       position: 'absolute',

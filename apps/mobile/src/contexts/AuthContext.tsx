@@ -84,7 +84,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   // Load authentication state on mount
   useEffect(() => {
     loadAuthState();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle app foreground token refresh

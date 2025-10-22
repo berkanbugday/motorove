@@ -111,11 +111,14 @@ export const EditPostScreen = () => {
 
       // Set location if available
       if (post.addresses && post.addresses.length > 0) {
-        // Remove __typename, id property from addresses
-        const cleanAddresses = post.addresses.map(addr => {
-          const {__typename, id, ...cleanAddr} = addr;
-          return cleanAddr;
-        });
+        // Use addresses directly (they should already be clean IAddress objects)
+        const cleanAddresses = post.addresses.map(addr => ({
+          address: addr.address,
+          language: addr.language,
+          type: addr.type,
+          latitude: addr.latitude,
+          longitude: addr.longitude,
+        }));
         setLocation(cleanAddresses);
       }
 

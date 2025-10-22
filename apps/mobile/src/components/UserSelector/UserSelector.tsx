@@ -291,13 +291,13 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   // Extract user objects from followingUsers
   const users: IUser[] = followingUsers
     .map(following => following.following)
-    .filter((user): user is IUser => user !== undefined && user !== null);
+    .filter((followingUser): followingUser is IUser => followingUser !== undefined && followingUser !== null);
 
   // Memoize the selected user details to prevent unnecessary re-renders
   // This will only recalculate when users or selectedUsers actually change
   const selectedUserDetails = useMemo(() => {
     if (users && users.length > 0 && selectedUsers.length > 0) {
-      return users.filter(user => selectedUsers.includes(user.id));
+      return users.filter(userItem => selectedUsers.includes(userItem.id));
     }
     return [];
   }, [users, selectedUsers]);
@@ -390,17 +390,17 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
       {/* Selected Users with Plus Icon Chips */}
       <View style={styles.selectedSection}>
         <View style={styles.selectedChips}>
-          {selectedUserDetails.map(user => (
+          {selectedUserDetails.map(selectedUser => (
             <Chip
-              key={user.id}
-              label={getUserName(user, t)}
+              key={selectedUser.id}
+              label={getUserName(selectedUser, t)}
               variant="filled"
               color="dark"
               removable={true}
               onRemove={
                 !disabled
                   ? () =>
-                      onUsersChange(selectedUsers.filter(id => id !== user.id))
+                      onUsersChange(selectedUsers.filter(id => id !== selectedUser.id))
                   : undefined
               }
               style={styles.selectedChip}

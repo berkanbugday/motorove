@@ -71,7 +71,7 @@ function clearDirectory(directory) {
     execSync('watchman watch-del-all', {stdio: 'inherit'});
     console.log('✅ Watchman watches cleared');
     clearedAny = true;
-  } catch (error) {
+  } catch {
     console.log('ℹ️ Watchman not available or failed to clear watches');
   }
 
@@ -81,7 +81,7 @@ function clearDirectory(directory) {
     execSync('rm -rf $TMPDIR/react-*', {stdio: 'inherit'});
     console.log('✅ React Native cache cleared');
     clearedAny = true;
-  } catch (error) {
+  } catch {
     console.log('ℹ️ Failed to clear React Native cache');
   }
 

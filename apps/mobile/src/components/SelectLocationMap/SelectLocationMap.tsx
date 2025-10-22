@@ -129,8 +129,8 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   // Fetch location name using reverse geocoding for both Turkish and English
   const fetchLocationDetails = async (latitude: number, longitude: number) => {
     try {
-      const addressPromises = EnumUtils.getLanguages().map(async language => {
-        const languageCode = language.value.toLowerCase();
+      const addressPromises = EnumUtils.getLanguages().map(async languageItem => {
+        const languageCode = languageItem.value.toLowerCase();
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${languageCode}`,
           {
@@ -167,7 +167,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
           return {
             address: address || data.display_name,
-            language: language.value,
+            language: languageItem.value,
             type: addressType,
             latitude,
             longitude,

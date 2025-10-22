@@ -28,8 +28,8 @@ export const GarageScreen = () => {
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState('motorcycles');
-  const [motorcycles, setMotorcycles] = useState<Motorcycle[]>(mockMotorcycles);
-  const [equipment, setEquipment] = useState<Equipment[]>(mockEquipment);
+  const [motorcycles, _setMotorcycles] = useState<Motorcycle[]>(mockMotorcycles);
+  const [equipment, _setEquipment] = useState<Equipment[]>(mockEquipment);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
