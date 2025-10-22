@@ -81,7 +81,7 @@ class LoggingService {
         maxBreadcrumbs: options.maxBreadcrumbs || 100,
         enableAutoSessionTracking: options.enableAutoSessionTracking !== false,
         sessionTrackingIntervalMillis:
-          options.sessionTrackingIntervalMillis || 30000,
+          options.sessionTrackingIntervalMillis || 20000,
         // Add debug option for development
         debug: AppConfig.DEBUG_MODE,
         // Add other options as needed

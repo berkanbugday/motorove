@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {ActivityIndicator, View} from 'react-native';
+import {View, Image, ActivityIndicator} from 'react-native';
 import {NavigationContainer, LinkingOptions} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
@@ -45,11 +45,26 @@ export function RootNavigator() {
   }, [checkFirstTimeUser]);
 
   const isAuthenticated = Boolean(user) && Boolean(accessToken);
-  // Show loading indicator when checking auth, session revival, or first time status
+  // Show loading screen with logo when checking auth, session revival, or first time status
   if (isInitializing || firstTimeLoading) {
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size="large" />
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#121212',
+        }}>
+        <Image
+          source={require('@assets/images/motorove_logo_light.png')}
+          style={{
+            width: 150,
+            height: 150,
+            resizeMode: 'contain',
+            marginBottom: 30,
+          }}
+        />
+        <ActivityIndicator size="small" color="#fff" />
       </View>
     );
   }

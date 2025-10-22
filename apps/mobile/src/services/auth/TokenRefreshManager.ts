@@ -10,7 +10,7 @@ export class TokenRefreshManager {
   private static instance: TokenRefreshManager;
   private isRefreshing = false;
   private refreshPromise: Promise<AuthResponse> | null = null;
-  private static readonly REFRESH_TIMEOUT_MS = 30000; // 30 seconds
+  private static readonly REFRESH_TIMEOUT_MS = 20000; // 20 seconds
 
   private constructor() {}
 

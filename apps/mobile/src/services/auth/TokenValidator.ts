@@ -6,7 +6,7 @@ export class TokenValidator {
   // Constants for token refresh timing
   private static readonly REFRESH_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
   private static readonly REFRESH_PERCENTAGE = 0.7; // 70% of token lifetime
-  private static readonly MIN_REFRESH_BUFFER_MS = 30000; // 30 seconds
+  private static readonly MIN_REFRESH_BUFFER_MS = 20000; // 20 seconds
 
   /**
    * Check if token needs refresh (within 10 minutes of expiry)
