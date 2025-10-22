@@ -11,6 +11,7 @@ import {
   Modal,
   Dimensions,
   TextInput,
+  KeyboardEvent,
 } from 'react-native';
 import {
   createStyles,
@@ -59,6 +60,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     width: 0,
     height: 0,
   });
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const flatListRef = useRef<ScrollView>(null);
   const inputWrapperRef = useRef<View>(null);
   const searchInputRef = useRef<TextInput>(null);
@@ -68,6 +70,35 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   // Search state for searchable dropdown
   const [searchQuery, setSearchQuery] = useState(_searchQuery || '');
+
+  // Keyboard event listeners
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      (e: KeyboardEvent) => {
+        setKeyboardHeight(e.endCoordinates.height);
+        // Update modal position when keyboard shows
+        if (isOpen) {
+          setTimeout(updateModalPosition, 100);
+        }
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+        // Update modal position when keyboard hides
+        if (isOpen) {
+          setTimeout(updateModalPosition, 100);
+        }
+      },
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, [isOpen]);
 
   // Animation effect for label
   useEffect(() => {
@@ -98,16 +129,27 @@ const Dropdown: React.FC<DropdownProps> = ({
   const updateModalPosition = () => {
     if (inputWrapperRef.current && isOpen) {
       inputWrapperRef.current.measureInWindow((x, y, width, height) => {
-        // Adjust position based on device dimensions
+        // Adjust position based on device dimensions and keyboard height
         const windowHeight = Dimensions.get('window').height;
-        const remainingSpace = windowHeight - y - height;
-        const dropdownHeight = Math.min(maxHeight || 200, remainingSpace - 10); // 10px buffer
+        const availableHeight = windowHeight - keyboardHeight;
+        const remainingSpace = availableHeight - y - height;
+        const dropdownHeight = Math.min(maxHeight || 200, remainingSpace - 20); // 20px buffer
+
+        // If there's not enough space below, position above the input
+        let finalTop = y + height;
+        let finalHeight = dropdownHeight;
+
+        if (remainingSpace < 100 && y > 150) {
+          // Position above the input if there's more space above
+          finalTop = y - Math.min(maxHeight || 200, y - 20);
+          finalHeight = Math.min(maxHeight || 200, y - 20);
+        }
 
         setModalPosition({
-          top: y + height,
+          top: finalTop,
           left: x,
           width: width,
-          height: dropdownHeight,
+          height: Math.max(finalHeight, 100), // Minimum height of 100
         });
       });
     }
@@ -167,11 +209,18 @@ const Dropdown: React.FC<DropdownProps> = ({
     setIsFocused(false);
     if (searchable) {
       clearSearchQuery();
+      // Only dismiss keyboard if search input is not focused
+      if (searchInputRef.current) {
+        searchInputRef.current.blur();
+      }
     }
     if (onClose) {
       onClose();
     }
-    Keyboard.dismiss();
+    // Don't automatically dismiss keyboard for searchable dropdowns
+    if (!searchable) {
+      Keyboard.dismiss();
+    }
   }, [onClose, searchable, clearSearchQuery]);
 
   // Toggle dropdown
@@ -242,12 +291,17 @@ const Dropdown: React.FC<DropdownProps> = ({
     openDropdown();
   };
 
-  // Update position when window dimensions change
+  // Update position when window dimensions or keyboard height change
   useEffect(() => {
     if (isOpen) {
       updateModalPosition();
     }
-  }, [isOpen, Dimensions.get('window').width, Dimensions.get('window').height]);
+  }, [
+    isOpen,
+    keyboardHeight,
+    Dimensions.get('window').width,
+    Dimensions.get('window').height,
+  ]);
 
   return (
     <View style={[styles.container, containerStyle]} testID={testID}>
@@ -335,7 +389,10 @@ const Dropdown: React.FC<DropdownProps> = ({
               ]}>
               {/* Search input for searchable dropdown */}
               {searchable && (
-                <View style={styles.searchContainer}>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  onPress={() => {}} // Prevent backdrop close when touching search area
+                  style={styles.searchContainer}>
                   <TextInput
                     ref={searchInputRef}
                     style={styles.searchInput}
@@ -344,6 +401,10 @@ const Dropdown: React.FC<DropdownProps> = ({
                     onChangeText={handleSearchQueryChange}
                     autoCorrect={false}
                     autoCapitalize="none"
+                    onFocus={() => {
+                      // Update position when search input is focused
+                      setTimeout(updateModalPosition, 100);
+                    }}
                   />
                   {searchQuery.length > 0 && (
                     <TouchableOpacity
@@ -356,7 +417,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                       />
                     </TouchableOpacity>
                   )}
-                </View>
+                </TouchableOpacity>
               )}
               {loading ? (
                 <View style={styles.loadingContainer}>
@@ -379,7 +440,9 @@ const Dropdown: React.FC<DropdownProps> = ({
                   ref={flatListRef}
                   keyboardShouldPersistTaps="handled"
                   nestedScrollEnabled
-                  showsVerticalScrollIndicator={false}>
+                  showsVerticalScrollIndicator={true}
+                  style={styles.scrollViewContainer}
+                  contentContainerStyle={styles.scrollViewContent}>
                   {filteredData.map(item => {
                     const isItemSelected =
                       selectedItem && selectedItem.id === item.id;

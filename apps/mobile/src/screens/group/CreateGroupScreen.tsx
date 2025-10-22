@@ -298,19 +298,20 @@ export const CreateGroupScreen: React.FC = () => {
                 id: city.id,
               }))}
               label={t('screens.group.city')}
-              onSelect={item => {
+              onSelect={(item: DropdownItem | null) => {
                 handleCitySelect(item);
               }}
               selectedItem={selectedCity}
               error={errors.city?.message}
               loading={citiesLoading}
               showClearButton={false}
+              searchable
             />
 
             <Dropdown
               data={privacyOptions}
               label={t('screens.group.privacy')}
-              onSelect={item => {
+              onSelect={(item: DropdownItem | null) => {
                 handlePrivacySelect(item);
               }}
               selectedItem={selectedPrivacy}

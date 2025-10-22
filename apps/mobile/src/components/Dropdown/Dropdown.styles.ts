@@ -135,6 +135,12 @@ export const createStyles = (props: {
       padding: spacing.xs,
       marginLeft: spacing.sm,
     },
+    scrollViewContainer: {
+      flex: 1,
+    },
+    scrollViewContent: {
+      flexGrow: 1,
+    },
   });
 };
 
@@ -149,6 +155,7 @@ export const modalStyles = StyleSheet.create({
     borderColor: colors.neutral.lightGrey,
     borderRadius: 8,
     backgroundColor: colors.neutral.white,
+    overflow: 'hidden',
     ...getShadow('small'),
   },
 });

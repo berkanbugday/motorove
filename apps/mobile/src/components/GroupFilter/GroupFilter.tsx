@@ -12,7 +12,7 @@ import {
 } from '@components';
 import {colors, spacing} from '@theme';
 import {useGetCities} from '@services/city.service';
-import {IFilterGroup, GroupPrivacy} from '@motorove/shared';
+import {IFilterGroup, GroupPrivacy, GroupTag} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useTranslation} from '@hooks/useTranslation';
 
@@ -69,7 +69,7 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
       ...prev,
       tags:
         selectedItems.length > 0
-          ? selectedItems.map(item => item.value as string)
+          ? selectedItems.map(item => item.value as GroupTag)
           : [],
     }));
   }, []);
@@ -116,7 +116,10 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
               label={t('components.groupFilter.city')}
               data={cityDropdownItems}
               selectedItem={selectedCityItem}
-              onSelect={handleCitySelect}
+              onSelect={(item: DropdownItem | null) => {
+                handleCitySelect(item);
+              }}
+              searchable
             />
           )}
         </View>
