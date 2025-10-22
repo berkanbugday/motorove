@@ -341,10 +341,6 @@ model User {
   updatedEventParticipants EventParticipant[] @relation("EventParticipantUpdatedBy")
 
   @@index([supabaseId])
-  @@index([isActive])
-  @@index([ridingStyles])
-  @@index([gender])
-  @@index([interests])
   @@index([cityId])
 }
 
@@ -367,8 +363,6 @@ model Motorcycle {
   isActive    Boolean  @default(true)
 
   @@index([createdById])
-  @@index([brand])
-  @@index([isActive])
 }
 
 // Model for equipment
@@ -392,9 +386,6 @@ model Equipment {
   isActive    Boolean  @default(true)
 
   @@index([createdById])
-  @@index([type])
-  @@index([brand])
-  @@index([isActive])
 }
 
 // New model for social media profiles
@@ -415,8 +406,6 @@ model SocialMedia {
 
   @@unique([createdById, platform])
   @@index([createdById])
-  @@index([platform])
-  @@index([isActive])
 }
 
 model City {
@@ -427,7 +416,6 @@ model City {
   groups Group[]
   users  User[]
 
-  @@index([value])
 }
 
 model Group {
@@ -458,7 +446,7 @@ model Group {
   organizedEvents Event[]           @relation("EventOrganizedByGroup")
 
   @@index([cityId])
-  @@index([privacy])
+  @@index([createdById])
 }
 
 model GroupMembership {
@@ -480,11 +468,8 @@ model GroupMembership {
   isActive    Boolean  @default(true)
 
   @@unique([groupId, userId])
-  @@index([groupId])
   @@index([userId])
-  @@index([status])
-  @@index([role])
-  @@index([isActive])
+  @@index([createdById])
 }
 
 model Notification {
@@ -509,12 +494,7 @@ model Notification {
   isActive    Boolean  @default(true)
 
   @@index([userId])
-  @@index([type])
-  @@index([channel])
-  @@index([status])
-  @@index([read])
-  @@index([createdAt]) // Added index for filtering by creation date
-  @@index([isActive])
+  @@index([createdById])
 }
 
 model DeviceToken {
@@ -528,9 +508,6 @@ model DeviceToken {
   isActive   Boolean  @default(true)
 
   @@unique([userId])
-  @@index([userId])
-  @@index([isActive])
-  @@index([type])
 }
 
 model Post {
@@ -555,8 +532,6 @@ model Post {
 
   @@index([createdById])
   @@index([groupId])
-  @@index([createdAt]) // Added for feed sorting
-  @@index([isActive])
 }
 
 model Comment {
@@ -582,8 +557,6 @@ model Comment {
   @@index([createdById])
   @@index([postId])
   @@index([parentId])
-  @@index([createdAt]) // Added for sorting
-  @@index([isActive])
 }
 
 // New model for post likes
@@ -596,9 +569,7 @@ model PostLike {
   createdAt DateTime @default(now())
 
   @@unique([postId, userId])
-  @@index([postId])
   @@index([userId])
-  @@index([createdAt])
 }
 
 // New model for post saves
@@ -611,9 +582,7 @@ model PostSave {
   createdAt DateTime @default(now())
 
   @@unique([postId, userId])
-  @@index([postId])
   @@index([userId])
-  @@index([createdAt])
 }
 
 // New model for addresses with support for both posts and events
@@ -639,13 +608,6 @@ model Address {
   @@unique([postId, language, type]) // Ensure unique addresses per post/language/type
   @@unique([eventId, language, type]) // Ensure unique addresses per event/language/type
   @@unique([businessId, language, type]) // Ensure unique addresses per business/language/type
-  @@index([postId])
-  @@index([eventId])
-  @@index([businessId])
-  @@index([language])
-  @@index([type])
-  @@index([country])
-  @@index([latitude, longitude]) // Added for geospatial queries
 }
 
 // Business model
@@ -668,11 +630,6 @@ model Business {
   updatedAt DateTime @updatedAt
   isActive  Boolean  @default(true)
 
-  @@index([name])
-  @@index([category])
-  @@index([verified])
-  @@index([status])
-  @@index([isActive])
 }
 
 // Business description model for multi-language support
@@ -689,9 +646,6 @@ model BusinessDescription {
   isActive Boolean @default(true)
 
   @@unique([businessId, language]) // Ensure unique description per business/language
-  @@index([businessId])
-  @@index([language])
-  @@index([isActive])
 }
 
 // Working hours model for businesses
@@ -710,9 +664,6 @@ model WorkingHour {
   isActive Boolean @default(true)
 
   @@unique([businessId, dayOfWeek])
-  @@index([businessId])
-  @@index([dayOfWeek])
-  @@index([isActive])
 }
 
 // User following relationships
@@ -728,11 +679,7 @@ model UserFollowing {
   isActive    Boolean        @default(true)
 
   @@unique([followerId, followingId])
-  @@index([followerId])
   @@index([followingId])
-  @@index([createdAt])
-  @@index([status])
-  @@index([isActive])
 }
 
 // Event model
@@ -782,13 +729,8 @@ model Event {
   addresses     Address[]
   invitedGroups Group[]
 
-  @@index([eventType])
-  @@index([status])
-  @@index([startDateTime])
   @@index([createdById])
   @@index([organizedByGroupId])
-  @@index([isActive])
-  @@index([isPrivate])
 }
 
 // Event participant model
@@ -808,11 +750,7 @@ model EventParticipant {
   isActive    Boolean  @default(true)
 
   @@unique([eventId, createdById])
-  @@index([eventId])
   @@index([createdById])
-  @@index([status])
-  @@index([createdAt])
-  @@index([isActive])
 }
 
 // Event invitation model
@@ -834,12 +772,8 @@ model EventInvitation {
   isActive    Boolean  @default(true)
 
   @@unique([eventId, inviteeId])
-  @@index([eventId])
   @@index([createdById])
   @@index([inviteeId])
-  @@index([status])
-  @@index([createdAt])
-  @@index([isActive])
 }
 
 // User settings model
@@ -864,9 +798,6 @@ model UserSetting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([notificationPermission])
-  @@index([preferredLanguage])
 }
 
 model SupportRequest {
@@ -885,7 +816,5 @@ model SupportRequest {
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
 
-  @@index([category])
   @@index([createdById])
-  @@index([isActive])
 }
