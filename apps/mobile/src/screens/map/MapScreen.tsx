@@ -156,8 +156,8 @@ export const MapScreen = () => {
         initialRegion={{
           latitude: 39.9334,
           longitude: 32.8597,
-          latitudeDelta: 10,
-          longitudeDelta: 10,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
         }}
         showUserLocation={true}
         markers={markers}

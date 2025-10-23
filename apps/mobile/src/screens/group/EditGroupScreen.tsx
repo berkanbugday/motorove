@@ -406,7 +406,6 @@ export const EditGroupScreen = () => {
               error={errors.city?.message}
               loading={citiesLoading}
               showClearButton={false}
-              searchable
             />
 
             <Dropdown

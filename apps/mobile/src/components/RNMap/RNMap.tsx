@@ -43,8 +43,8 @@ import {useTranslation} from '@hooks/useTranslation';
 const DEFAULT_REGION: Region = {
   latitude: 39.9334,
   longitude: 32.8597,
-  latitudeDelta: 10,
-  longitudeDelta: 10,
+  latitudeDelta: 0.05,
+  longitudeDelta: 0.05,
 };
 
 /**
@@ -205,24 +205,16 @@ export const RNMap: React.FC<RNMapProps> = ({
           const {latitude, longitude} = position.coords;
           setUserLocation({latitude, longitude});
 
-          // If initialRegion wasn't provided, set the region to the user's location
-          if (!initialRegion && mapRef.current) {
+          // Always center on user location with animation when location is ready
+          if (mapRef.current) {
             const newRegion = {
               latitude,
               longitude,
-              latitudeDelta: DEFAULT_REGION.latitudeDelta,
-              longitudeDelta: DEFAULT_REGION.longitudeDelta,
+              latitudeDelta: initialRegion?.latitudeDelta || DEFAULT_REGION.latitudeDelta,
+              longitudeDelta: initialRegion?.longitudeDelta || DEFAULT_REGION.longitudeDelta,
             };
             setRegion(newRegion);
-            mapRef.current.animateToRegion(newRegion, 800);
-          } else if (followUserLocation && mapRef.current) {
-            const newRegion = {
-              latitude,
-              longitude,
-              latitudeDelta: region.latitudeDelta,
-              longitudeDelta: region.longitudeDelta,
-            };
-            mapRef.current.animateToRegion(newRegion, 800);
+            mapRef.current.animateToRegion(newRegion, 1000);
           }
         },
         error => console.log('Error getting location:', error),
@@ -235,10 +227,8 @@ export const RNMap: React.FC<RNMapProps> = ({
     }
   }, [
     status,
-    followUserLocation,
-    region.latitudeDelta,
-    region.longitudeDelta,
-    initialRegion,
+    initialRegion?.latitudeDelta,
+    initialRegion?.longitudeDelta,
   ]);
 
   // Get user location on mount and setup location tracking
@@ -262,7 +252,7 @@ export const RNMap: React.FC<RNMapProps> = ({
               latitudeDelta: region.latitudeDelta,
               longitudeDelta: region.longitudeDelta,
             };
-            mapRef.current.animateToRegion(newRegion, 800);
+            mapRef.current.animateToRegion(newRegion, 1000);
           }
         },
         error => console.log('Error watching location:', error),
@@ -305,8 +295,8 @@ export const RNMap: React.FC<RNMapProps> = ({
       const newRegion = {
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
-        latitudeDelta: 0.5,
-        longitudeDelta: 0.5,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
       };
       mapRef.current.animateToRegion(newRegion, 500);
       setRegion(newRegion);

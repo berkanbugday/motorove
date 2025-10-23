@@ -305,7 +305,6 @@ export const CreateGroupScreen: React.FC = () => {
               error={errors.city?.message}
               loading={citiesLoading}
               showClearButton={false}
-              searchable
             />
 
             <Dropdown

@@ -119,7 +119,6 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
               onSelect={(item: DropdownItem | null) => {
                 handleCitySelect(item);
               }}
-              searchable
             />
           )}
         </View>
