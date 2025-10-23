@@ -15,6 +15,7 @@ import {Icon} from '@components';
 import {RNMapFilter} from './RNMapFilter';
 import {MapFilterState} from '@hooks/useMapFilter';
 import {getShadow} from '@theme/shadows';
+import {useTranslation} from '@hooks/useTranslation';
 
 // Mock search results for demonstration
 const MOCK_SEARCH_RESULTS: RNMapSearchResult[] = [
@@ -45,10 +46,11 @@ export const RNMapSearch: React.FC<RNMapSearchProps> = ({
   onResultSelect,
   onSearchStart,
   onSearchEnd,
-  placeholder = 'Search location...',
+  placeholder,
   debounceMs = 500,
   showFilter = true,
 }) => {
+  const {t} = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<RNMapSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -146,7 +148,7 @@ export const RNMapSearch: React.FC<RNMapSearchProps> = ({
           />
           <TextInput
             style={styles.searchInput}
-            placeholder={placeholder}
+            placeholder={placeholder || t('screens.map.search_placeholder')}
             placeholderTextColor={colors.neutral.lightGrey}
             value={query}
             onChangeText={setQuery}

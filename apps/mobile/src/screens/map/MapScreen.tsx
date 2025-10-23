@@ -5,9 +5,11 @@ import {RNMapMarkerType} from '@components/RNMap/types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useMapMarkerCards} from '../../hooks';
 import {BusinessService} from '@services/business.service';
+import {useTranslation} from '@hooks/useTranslation';
 
 export const MapScreen = () => {
   const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
 
   // Use the business service to get business data
   const {businesses, loading, refetch} = BusinessService.useGetBusinesses();
@@ -42,7 +44,8 @@ export const MapScreen = () => {
             longitude: business.address?.longitude || 0,
           },
           title: business.name,
-          description: business.address?.address || 'No address provided',
+          description:
+            business.address?.address || t('screens.map.no_address_provided'),
           image: require('@assets/images/pin.png'),
         };
       })

@@ -37,6 +37,7 @@ import {LocationPermissionOverlay} from '@components';
 import {useComponentAnimation} from '@hooks/useComponentAnimation';
 import {Button} from '@components/Button';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from '@hooks/useTranslation';
 
 // Default region (fallback if user location cannot be determined)
 const DEFAULT_REGION: Region = {
@@ -92,6 +93,7 @@ export const RNMap: React.FC<RNMapProps> = ({
   children,
   mapRef: externalMapRef,
 }) => {
+  const {t} = useTranslation();
   // Refs - use external ref if provided, otherwise create internal ref
   const internalMapRef = useRef<MapView>(null);
   const mapRef = externalMapRef || internalMapRef;
@@ -584,7 +586,7 @@ export const RNMap: React.FC<RNMapProps> = ({
               }}>
               <RNMapSearch
                 onResultSelect={handleSearchResultSelect}
-                placeholder="Search locations..."
+                placeholder={t('screens.map.search_placeholder')}
               />
             </Animated.View>
           )}
@@ -630,7 +632,7 @@ export const RNMap: React.FC<RNMapProps> = ({
                 onPress={handleLoadMarkerPress}
                 variant="primary"
                 shape="round"
-                title="Search in this area"
+                title={t('screens.map.search_in_this_area')}
                 textStyle={{
                   color: colors.neutral.white,
                 }}

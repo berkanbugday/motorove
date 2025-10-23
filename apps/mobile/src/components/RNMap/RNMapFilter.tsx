@@ -6,12 +6,14 @@ import {Button} from '@components/Button';
 import {useBottomSheet} from '@components/BottomSheet';
 import {colors} from '@theme/colors';
 import {getShadow} from '@theme/shadows';
+import {useTranslation} from '@hooks/useTranslation';
 
 interface MapFilterProps {
   onFilterChange?: (filter: MapFilterState) => void;
 }
 
 export const RNMapFilter: React.FC<MapFilterProps> = ({onFilterChange}) => {
+  const {t} = useTranslation();
   const theme = useTheme();
   const {openBottomSheet} = useBottomSheet();
   const {filterState, updateFilter, resetFilter, toggleFilter} = useMapFilter();
@@ -23,7 +25,7 @@ export const RNMapFilter: React.FC<MapFilterProps> = ({onFilterChange}) => {
 
   const handleOpenFilter = () => {
     openBottomSheet({
-      title: 'Filter',
+      title: t('common.filter'),
       showCloseButton: true,
       closeButtonPosition: 'top-left',
       contentStyle: styles.bottomSheetContent,
@@ -55,7 +57,7 @@ export const RNMapFilter: React.FC<MapFilterProps> = ({onFilterChange}) => {
 
           <View style={styles.buttonContainer}>
             <Button
-              title="Reset"
+              title={t('common.reset')}
               variant="outline"
               shape="round"
               size="medium"
@@ -63,7 +65,7 @@ export const RNMapFilter: React.FC<MapFilterProps> = ({onFilterChange}) => {
               style={styles.button}
             />
             <Button
-              title="Apply"
+              title={t('common.apply')}
               variant="dark"
               shape="round"
               size="medium"

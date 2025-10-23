@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import {colors, spacing, radius, typography, getShadow} from '../../theme';
 import {useBottomSheet} from '../BottomSheet/BottomSheetProvider';
+import {useTranslation} from '@hooks/useTranslation';
 
 export interface RNMapMarkerCardItem {
   id: string;
@@ -21,6 +22,10 @@ export interface RNMapMarkerCardItem {
   currency: string;
   isFavorite?: boolean;
   isGuestFavorite?: boolean;
+  metadata?: {
+    originalData?: any;
+  };
+  category?: string;
 }
 
 interface RNMapMarkerCardProps {
@@ -196,6 +201,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   onCardPress,
   onFavoritePress,
 }) => {
+  const {t} = useTranslation();
   // Get original business data from metadata if available
   const businessData = selectedItem.metadata?.originalData;
 
@@ -206,38 +212,38 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
   const businessType = businessData?.category
     ? businessData.category === 'REPAIR' ||
       businessData.category === 'MAINTENANCE'
-      ? 'Repair Shop'
+      ? t('screens.map.repair_shop')
       : businessData.category === 'DEALERSHIP' ||
         businessData.category === 'SALES'
-      ? 'Dealer'
+      ? t('screens.map.dealer')
       : businessData.category === 'DETAILED_CLEANING'
-      ? 'Washing Station'
-      : 'Business'
-    : 'Business';
+      ? t('screens.map.washing_station')
+      : t('screens.map.business')
+    : t('screens.map.business');
 
   // Get actual data from business object
   let phoneNumber =
     businessData?.countryCode && businessData?.phoneNumber
       ? `${businessData.countryCode} ${businessData.phoneNumber}`
-      : 'Not available';
+      : t('screens.map.not_available');
 
   const address =
     businessData?.address?.address ||
     selectedItem.location ||
-    'Address not available';
+    t('screens.map.address_not_available');
   // Distance calculation would typically come from a geolocation service
   // For now use a calculated value based on real coordinates if available
   const distance = businessData?.distance
-    ? `${businessData.distance.toFixed(1)} km away`
+    ? `${businessData.distance.toFixed(1)} ${t('screens.map.km_away')}`
     : businessData?.address?.latitude && businessData?.address?.longitude
-    ? 'Based on your location' // Would calculate using user's coordinates
-    : 'Distance unknown';
+    ? t('screens.map.based_on_your_location') // Would calculate using user's coordinates
+    : t('screens.map.distance_unknown');
   // Get review count from business data or default to "New" for businesses without reviews
   const reviewCount = businessData?.reviews?.length || 0;
   const hasReviews = reviewCount > 0;
 
   // Format working hours if available from business data
-  let openHours = 'Hours not provided';
+  let openHours = t('screens.map.hours_not_provided');
   let isOpenNow = false;
   if (businessData?.workingHours && businessData.workingHours.length > 0) {
     const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
@@ -255,7 +261,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
 
     if (todayHours) {
       if (todayHours.isOpen24h) {
-        openHours = 'Open 24h';
+        openHours = t('screens.map.open_24h');
         isOpenNow = true;
       } else if (todayHours.startHour && todayHours.endHour) {
         openHours = `${todayHours.startHour} - ${todayHours.endHour}`;
@@ -287,7 +293,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
           currentTimeInMinutes >= startTimeInMinutes &&
           currentTimeInMinutes <= endTimeInMinutes;
       } else {
-        openHours = 'Closed today';
+        openHours = t('screens.map.closed_today');
         isOpenNow = false;
       }
     }
@@ -336,7 +342,9 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                 <Text style={styles.reviewCount}>({reviewCount})</Text>
               </>
             ) : (
-              <Text style={styles.reviewCount}>New business</Text>
+              <Text style={styles.reviewCount}>
+                {t('screens.map.new_business')}
+              </Text>
             )}
           </View>
         </View>
@@ -355,9 +363,9 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
           <Text style={styles.phoneIcon}>📞</Text>
           <Text style={styles.phoneNumber}>{phoneNumber}</Text>
           <Text style={styles.tapToCallText}>
-            {phoneNumber !== 'Not available'
-              ? 'Tap to call'
-              : 'No phone number'}
+            {phoneNumber !== t('screens.map.not_available')
+              ? t('screens.map.tap_to_call')
+              : t('screens.map.no_phone_number')}
           </Text>
         </TouchableOpacity>
 
@@ -374,7 +382,9 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                     : colors.neutral.black,
                 },
               ]}>
-              {isOpenNow ? 'Open now' : 'Closed now'}
+              {isOpenNow
+                ? t('screens.map.open_now')
+                : t('screens.map.closed_now')}
             </Text>
             <Text style={styles.hoursText}>{openHours}</Text>
           </View>
@@ -386,11 +396,13 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
             style={styles.directionsButton}
             onPress={handleDirectionsPress}>
             <Text style={styles.directionsIcon}>🧭</Text>
-            <Text style={styles.directionsText}>Get Directions</Text>
+            <Text style={styles.directionsText}>
+              {t('screens.map.get_directions')}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.callButton} onPress={handleCallPress}>
             <Text style={styles.callIcon}>📞</Text>
-            <Text style={styles.callText}>Call Now</Text>
+            <Text style={styles.callText}>{t('screens.map.call_now')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -403,8 +415,8 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
           </Text>
           <Text style={styles.saveToFavoritesText}>
             {selectedItem.isFavorite
-              ? 'Remove from Favorites'
-              : 'Save to Favorites'}
+              ? t('screens.map.remove_from_favorites')
+              : t('screens.map.save_to_favorites')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -414,8 +426,8 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
         <View style={styles.nearbySection}>
           <Text style={styles.nearbySectionTitle}>
             {nearbyItems.length === 1
-              ? '1 nearby place'
-              : `${nearbyItems.length} nearby places`}
+              ? `1 ${t('screens.map.nearby_place')}`
+              : `${nearbyItems.length} ${t('screens.map.nearby_places')}`}
           </Text>
           <ScrollView
             horizontal
@@ -457,7 +469,9 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
                       </View>
                     ) : (
                       <View style={styles.nearbyRating}>
-                        <Text style={styles.nearbyRatingText}>New</Text>
+                        <Text style={styles.nearbyRatingText}>
+                          {t('screens.map.new')}
+                        </Text>
                       </View>
                     )}
                     {item.category && (
