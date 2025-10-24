@@ -6,7 +6,9 @@ import {spacing} from '@theme/spacing';
 import {radius} from '@theme/radius';
 import {Body, Title, Caption} from '@components/Typography';
 import {Icon} from '@components/Icon';
+import {Button} from '@components/Button';
 import {BusinessCategory} from '@motorove/shared';
+import {getShadow} from '@theme/shadows';
 
 /**
  * Business marker card component
@@ -19,7 +21,6 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
   style,
   userLocation,
 }) => {
-
   // Get category display name
   const getCategoryName = () => {
     const categoryMap: Record<BusinessCategory, string> = {
@@ -34,9 +35,11 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
       [BusinessCategory.GEAR_APPAREL]: 'Gear & Apparel',
       [BusinessCategory.TRAINING_RIDING_SCHOOLS]: 'Training & Riding Schools',
       [BusinessCategory.MOTORCYCLE_CLUBS_COMMUNITIES]: 'Clubs & Communities',
-      [BusinessCategory.ELECTRIC_MOTORCYCLE_SERVICES]: 'Electric Motorcycle Services',
+      [BusinessCategory.ELECTRIC_MOTORCYCLE_SERVICES]:
+        'Electric Motorcycle Services',
       [BusinessCategory.PAINTING_BODYWORK]: 'Painting & Bodywork',
-      [BusinessCategory.INSPECTION_LEGAL_SERVICES]: 'Inspection & Legal Services',
+      [BusinessCategory.INSPECTION_LEGAL_SERVICES]:
+        'Inspection & Legal Services',
       [BusinessCategory.TRANSPORTATION_STORAGE]: 'Transportation & Storage',
     };
     return categoryMap[business.category] || 'Business';
@@ -49,8 +52,10 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
     }
 
     const R = 6371; // Earth's radius in km
-    const dLat = ((business.address.latitude - userLocation.latitude) * Math.PI) / 180;
-    const dLon = ((business.address.longitude - userLocation.longitude) * Math.PI) / 180;
+    const dLat =
+      ((business.address.latitude - userLocation.latitude) * Math.PI) / 180;
+    const dLon =
+      ((business.address.longitude - userLocation.longitude) * Math.PI) / 180;
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((userLocation.latitude * Math.PI) / 180) *
@@ -113,9 +118,15 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
       onPress={onPress}
       activeOpacity={0.95}>
       {onClose && (
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Icon name="close" size={20} color={colors.neutral.black} />
-        </TouchableOpacity>
+        <Button
+          shape="circle"
+          size="small"
+          variant="secondary"
+          iconName="close"
+          iconSize={18}
+          onPress={onClose}
+          style={styles.closeButton}
+        />
       )}
 
       {/* Business Name */}
@@ -146,9 +157,7 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
             {business.address.address}
           </Body>
           {distance && (
-            <Caption color={colors.neutral.grey}>
-              {distance} km away
-            </Caption>
+            <Caption color={colors.neutral.grey}>{distance} km away</Caption>
           )}
         </View>
       </View>
@@ -182,14 +191,24 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
         <TouchableOpacity
           style={styles.directionsButton}
           onPress={handleDirections}>
-          <Icon name="location-arrow-filled" size={16} color={colors.neutral.white} />
-          <Body color={colors.neutral.white} weight="semiBold" style={styles.buttonText}>
+          <Icon
+            name="location-arrow-filled"
+            size={16}
+            color={colors.neutral.white}
+          />
+          <Body
+            color={colors.neutral.white}
+            weight="semiBold"
+            style={styles.buttonText}>
             Get Directions
           </Body>
         </TouchableOpacity>
         <TouchableOpacity style={styles.callButton} onPress={handleCall}>
           <Icon name="phone" size={16} color={colors.neutral.white} />
-          <Body color={colors.neutral.white} weight="semiBold" style={styles.buttonText}>
+          <Body
+            color={colors.neutral.white}
+            weight="semiBold"
+            style={styles.buttonText}>
             Call Now
           </Body>
         </TouchableOpacity>
@@ -220,17 +239,9 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: spacing.md,
-    right: spacing.md,
-    zIndex: 10,
-    backgroundColor: colors.neutral.white,
-    borderRadius: radius.round,
-    padding: spacing.xs,
-    shadowColor: colors.neutral.black,
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    top: spacing.sm,
+    right: spacing.sm,
+    ...getShadow('small'),
   },
   businessName: {
     fontSize: 20,
