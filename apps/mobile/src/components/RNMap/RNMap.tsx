@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef, useMemo, useEffect} from 'react';
 import {View, StyleSheet, Dimensions, ScrollView, Platform} from 'react-native';
 import MapView, {
   PROVIDER_GOOGLE,
@@ -9,6 +9,10 @@ import {RNMapProps, RNMapMarkerItem} from './types';
 import {RNMapMarker} from './RNMapMarker';
 import {RNMapMarkerCard} from './RNMapMarkerCard';
 import {useAnimatedRegion} from '@hooks/useAnimatedRegion';
+import {Button} from '@components/Button/Button';
+import {useTranslation} from '@hooks/useTranslation';
+import {getShadow} from '@theme/shadows';
+import {colors} from '@theme/colors';
 
 const screen = Dimensions.get('window');
 const ITEM_SPACING = 10;
@@ -16,19 +20,7 @@ const ITEM_PREVIEW = 10;
 const ITEM_WIDTH = screen.width - 2 * ITEM_SPACING - 2 * ITEM_PREVIEW;
 const ITEM_PREVIEW_HEIGHT = 200;
 
-/**
- * RNMap Component
- * Advanced map component with business markers and animated regions
- *
- * Features:
- * - Business markers with custom styling and scale animations
- * - Animated region transitions (always enabled)
- * - Scrollable marker cards with snap-to-interval behavior
- * - Automatic map centering on marker selection
- * - User location tracking
- * - Bidirectional sync between map markers and cards
- */
-export const RNMap: React.FC<RNMapProps> = ({
+const RNMapComponent: React.FC<RNMapProps> = ({
   initialRegion,
   style,
   markers = [],
@@ -39,6 +31,9 @@ export const RNMap: React.FC<RNMapProps> = ({
   mapRef,
   onBusinessSelect,
   selectedBusinessId,
+  showSearchButton = false,
+  onSearchThisArea,
+  searchButtonLoading = false,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showScrollView, setShowScrollView] = useState(false);
@@ -47,6 +42,9 @@ export const RNMap: React.FC<RNMapProps> = ({
   const activeMapRef = mapRef || internalMapRef;
   const scrollViewRef = useRef<ScrollView>(null);
   const isProgrammaticChange = useRef(false);
+  const regionChangeTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastUserInteraction = useRef(false);
+  const {t} = useTranslation();
 
   // Animated region hook
   const {getRegionForIndex} = useAnimatedRegion(initialRegion, markers);
@@ -89,25 +87,32 @@ export const RNMap: React.FC<RNMapProps> = ({
     (marker: RNMapMarkerItem, index: number) => {
       updateSelectedMarker(index);
 
-      // Scroll to the selected marker card
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollTo({
-          x: index * (ITEM_WIDTH + ITEM_SPACING),
-          animated: true,
-        });
-      }
+      // Scroll to the selected marker card after a small delay to ensure ScrollView is rendered
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollTo({
+            x: index * (ITEM_WIDTH + ITEM_SPACING),
+            animated: true,
+          });
+        }
+      }, 100);
     },
     [updateSelectedMarker],
   );
 
+  // Debounced region change handler for performance
   const handleRegionChange = useCallback(
     (region: Region) => {
-      // Only hide ScrollView and reset selection on user-initiated region changes
-      if (!isProgrammaticChange.current) {
-        setShowScrollView(false);
-        setSelectedIndex(null);
+      // Determine if this is a user-initiated change
+      const isUserInitiated = !isProgrammaticChange.current;
+
+      // Debounce region change callback to prevent excessive calls
+      if (regionChangeTimeout.current) {
+        clearTimeout(regionChangeTimeout.current);
       }
-      onRegionChange?.(region);
+      regionChangeTimeout.current = setTimeout(() => {
+        onRegionChange?.(region, isUserInitiated);
+      }, 300); // 300ms debounce
     },
     [onRegionChange],
   );
@@ -138,6 +143,65 @@ export const RNMap: React.FC<RNMapProps> = ({
     setIsMapReady(true);
   }, []);
 
+  /**
+   * Handle user touch start - close marker cards and mark as user interaction
+   */
+  const handleTouchMove = useCallback(() => {
+    lastUserInteraction.current = true;
+    // Close marker cards when user touches the map
+    setShowScrollView(false);
+    setSelectedIndex(null);
+  }, []);
+
+  /**
+   * Handle programmatic region changes - reset user interaction flag after delay
+   */
+  useEffect(() => {
+    if (isProgrammaticChange.current) {
+      const timer = setTimeout(() => {
+        lastUserInteraction.current = false;
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedIndex]);
+
+  // Memoize marker rendering for performance
+  const renderedMarkers = useMemo(
+    () =>
+      markers.map((marker, index) => (
+        <RNMapMarker
+          key={marker.id}
+          marker={marker}
+          onPress={() => handleMarkerPress(marker, index)}
+          isSelected={selectedIndex !== null && index === selectedIndex}
+        />
+      )),
+    [markers, handleMarkerPress, selectedBusinessId, selectedIndex],
+  );
+
+  // Memoize card rendering for performance
+  const renderedCards = useMemo(
+    () =>
+      markers.map((marker, index) => (
+        <View
+          key={marker.id}
+          style={[
+            styles.item,
+            selectedIndex !== null &&
+              index === selectedIndex &&
+              styles.selectedItem,
+          ]}>
+          {marker.business && (
+            <RNMapMarkerCard
+              business={marker.business}
+              onPress={() => handleMarkerPress(marker, index)}
+            />
+          )}
+        </View>
+      )),
+    [markers, selectedIndex, handleMarkerPress],
+  );
+
   // Render animated map with scrollable cards
   return (
     <View style={[styles.container, style]}>
@@ -151,20 +215,25 @@ export const RNMap: React.FC<RNMapProps> = ({
         onRegionChange={handleRegionChange}
         onMapReady={handleMapReady}
         showsUserLocation={isMapReady && showUserLocation}
-        showsMyLocationButton={false}>
-        {markers.map((marker, index) => (
-          <RNMapMarker
-            key={marker.id}
-            marker={marker}
-            onPress={() => handleMarkerPress(marker, index)}
-            isSelected={
-              selectedBusinessId
-                ? marker.business?.id === selectedBusinessId
-                : selectedIndex !== null && index === selectedIndex
-            }
-          />
-        ))}
+        showsMyLocationButton={false}
+        onTouchMove={handleTouchMove}>
+        {renderedMarkers}
       </MapView>
+
+      {/* Search This Area Button - hidden when scrollview or marker is selected */}
+      {showSearchButton && !showScrollView && selectedIndex === null && (
+        <View style={styles.searchButtonContainer}>
+          <Button
+            title={t('screens.map.search_in_this_area')}
+            iconName="map-pin-filled"
+            iconColor={colors.neutral.white}
+            onPress={onSearchThisArea}
+            variant="primary"
+            shape="round"
+            loading={searchButtonLoading}
+          />
+        </View>
+      )}
 
       {/* Scrollable marker cards - only shown after marker selection */}
       {showScrollView && (
@@ -184,24 +253,9 @@ export const RNMap: React.FC<RNMapProps> = ({
           contentContainerStyle={styles.scrollViewContent}
           showsHorizontalScrollIndicator={false}
           style={styles.scrollView}
-          onMomentumScrollEnd={handleScrollEnd}>
-          {markers.map((marker, index) => (
-            <View
-              key={marker.id}
-              style={[
-                styles.item,
-                selectedIndex !== null &&
-                  index === selectedIndex &&
-                  styles.selectedItem,
-              ]}>
-              {marker.business && (
-                <RNMapMarkerCard
-                  business={marker.business}
-                  onPress={() => handleMarkerPress(marker, index)}
-                />
-              )}
-            </View>
-          ))}
+          onMomentumScrollEnd={handleScrollEnd}
+          removeClippedSubviews={true}>
+          {renderedCards}
         </ScrollView>
       )}
     </View>
@@ -239,4 +293,13 @@ const styles = StyleSheet.create({
   selectedItem: {
     // Add any additional styling for selected card if needed
   },
+  searchButtonContainer: {
+    position: 'absolute',
+    bottom: 120,
+    alignSelf: 'center',
+    ...getShadow('small'),
+  },
 });
+
+// Export memoized component for performance
+export const RNMap = React.memo(RNMapComponent);

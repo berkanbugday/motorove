@@ -26,17 +26,41 @@ export const useGetBusiness = (id: string) => {
   };
 };
 
-// Define filter interface for businesses
-interface IFilterBusiness {
-  category?: string;
+// Define map bounds interface for viewport polygon
+interface IMapBounds {
+  northEast: {
+    latitude: number;
+    longitude: number;
+  };
+  southWest: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
-// Hook for getting all businesses
-export const useGetBusinesses = () => {
+// Hook for getting all businesses within map viewport bounds
+// @param bounds - Map viewport bounds (polygon)
+// @param limit - Maximum number of businesses to return (default: 300 on backend)
+export const useGetBusinesses = (bounds?: IMapBounds, limit?: number) => {
   const [hasMore, setHasMore] = useState(true);
-  const [filters, setFilters] = useState<IFilterBusiness>({
-    category: undefined,
-  });
+  const [currentBounds, setCurrentBounds] = useState<IMapBounds | undefined>(
+    bounds,
+  );
+
+  // Update bounds when prop changes
+  useEffect(() => {
+    setCurrentBounds(bounds);
+  }, [bounds]);
+
+  // Skip query if no valid bounds provided
+  const shouldSkip =
+    !currentBounds ||
+    !currentBounds.northEast ||
+    !currentBounds.southWest ||
+    isNaN(currentBounds.northEast.latitude) ||
+    isNaN(currentBounds.northEast.longitude) ||
+    isNaN(currentBounds.southWest.latitude) ||
+    isNaN(currentBounds.southWest.longitude);
 
   const {
     data,
@@ -45,8 +69,18 @@ export const useGetBusinesses = () => {
     refetch: originalRefetch,
     fetchMore,
   } = useQuery(GET_BUSINESSES, {
+    variables: {
+      filter: {
+        northEastLat: currentBounds?.northEast.latitude,
+        northEastLng: currentBounds?.northEast.longitude,
+        southWestLat: currentBounds?.southWest.latitude,
+        southWestLng: currentBounds?.southWest.longitude,
+        limit: limit, // Optional limit for performance optimization
+      },
+    },
+    skip: shouldSkip,
     onError: errorObj => {
-      loggingService.error('Error fetching all businesses:', errorObj);
+      loggingService.error('Error fetching businesses in viewport:', errorObj);
     },
   });
 
@@ -94,16 +128,14 @@ export const useGetBusinesses = () => {
     }
   }, [data?.businesses?.length, fetchMore, hasMore, loading]);
 
-  // Apply filters and reset pagination
-  const applyFilters = useCallback((newFilters: IFilterBusiness) => {
-    setFilters(newFilters);
-    setHasMore(true);
-  }, []);
-
-  // Refetch when filters change
-  useEffect(() => {
-    originalRefetch();
-  }, [filters, originalRefetch]);
+  // Update bounds and refetch
+  const updateBounds = useCallback(
+    (newBounds: IMapBounds) => {
+      setCurrentBounds(newBounds);
+      setHasMore(true);
+    },
+    [],
+  );
 
   return {
     businesses: (data?.businesses as IBusiness[]) || [],
@@ -112,8 +144,8 @@ export const useGetBusinesses = () => {
     refetch,
     loadMore,
     hasMore,
-    filters,
-    applyFilters,
+    bounds: currentBounds,
+    updateBounds,
   };
 };
 

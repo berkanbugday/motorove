@@ -39,7 +39,7 @@ export interface RNMapProps {
 
   // Events
   onPress?: (event: {nativeEvent: {coordinate: LatLng}}) => void;
-  onRegionChange?: (region: Region) => void;
+  onRegionChange?: (region: Region, isUserInitiated: boolean) => void;
   onRegionChangeComplete?: (region: Region) => void;
 
   // Map ref
@@ -48,6 +48,11 @@ export interface RNMapProps {
   // Business-specific
   onBusinessSelect?: (business: IBusiness) => void;
   selectedBusinessId?: string;
+
+  // Search button
+  showSearchButton?: boolean;
+  onSearchThisArea?: () => void;
+  searchButtonLoading?: boolean;
 }
 
 /**

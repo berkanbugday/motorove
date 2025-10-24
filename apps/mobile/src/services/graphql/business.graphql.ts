@@ -44,10 +44,10 @@ export const BUSINESS_FRAGMENT = gql`
   ${WORKING_HOUR_FRAGMENT}
 `;
 
-// Get all businesses query
+// Get all businesses query with map viewport bounds (polygon)
 export const GET_BUSINESSES = gql`
-  query GetBusinesses {
-    businesses {
+  query GetBusinesses($filter: FilterBusinessInput!) {
+    businesses(filter: $filter) {
       ...BusinessFragment
     }
   }

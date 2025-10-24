@@ -492,6 +492,14 @@ input FilterAddressInput {
   type: AddressType
 }
 
+input FilterBusinessInput {
+  limit: Int = 300
+  northEastLat: Float
+  northEastLng: Float
+  southWestLat: Float
+  southWestLng: Float
+}
+
 input FilterCommentInput {
   createdById: ID
   isActive: Boolean
@@ -883,7 +891,7 @@ type Query {
   address(id: ID!): AddressDto!
   addresses(filters: FilterAddressInput, limit: Int, skip: Int): [AddressDto!]!
   business(id: String!): BusinessDto!
-  businesses: [BusinessDto!]!
+  businesses(filter: FilterBusinessInput!): [BusinessDto!]!
   cities: [CityDto!]!
   city(id: ID!): CityDto!
   comment(id: ID!): CommentDto!

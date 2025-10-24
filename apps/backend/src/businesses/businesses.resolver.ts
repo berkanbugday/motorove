@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { BusinessesService } from './businesses.service';
 import { BusinessDto } from './dto/business.dto';
+import { FilterBusinessInput } from './dto/filter-business.input';
 
 @Resolver(() => BusinessDto)
 export class BusinessesResolver {
@@ -10,8 +11,10 @@ export class BusinessesResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => [BusinessDto], { name: 'businesses' })
-  async findAll(): Promise<BusinessDto[]> {
-    return await this.businessesService.findAll();
+  async findAll(
+    @Args('filter') filter: FilterBusinessInput,
+  ): Promise<BusinessDto[]> {
+    return await this.businessesService.findAll(filter);
   }
 
   @UseGuards(JwtGuard)
