@@ -722,6 +722,7 @@ type Mutation {
   removeEvent(id: ID!): Boolean!
   removeMember(input: RemoveMemberInput!): Boolean!
   removePost(id: ID!): PostDto!
+  resend(email: String!): Boolean!
   resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!

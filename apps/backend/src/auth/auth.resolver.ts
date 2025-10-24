@@ -51,4 +51,9 @@ export class AuthResolver {
       input.password,
     );
   }
+
+  @Mutation(() => Boolean)
+  async resend(@Args('email') email: string): Promise<boolean> {
+    return await this.authService.resend(email);
+  }
 }

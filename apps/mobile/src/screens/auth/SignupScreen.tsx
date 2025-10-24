@@ -39,7 +39,7 @@ export const SignupScreen = () => {
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
   const {language} = useLanguage();
-  const {signUp} = authService;
+  const {signUp, resend} = authService;
 
   // Create validation schema with translations
   const {signupSchema} = authSchemas(t);
@@ -101,8 +101,12 @@ export const SignupScreen = () => {
     }
   };
 
-  const handleResendVerificationEmail = () => {
-    // TODO: Implement actual email verification
+  const handleResendVerificationEmail = async () => {
+    try {
+      await resend(userEmail);
+    } catch (error) {
+      await handleGraphQLError(error as GraphQLFormattedError);
+    }
   };
 
   const handleTermsPress = () => {

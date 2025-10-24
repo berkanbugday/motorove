@@ -81,3 +81,9 @@ export const UPDATE_PASSWORD = gql`
     updatePassword(input: $input)
   }
 `;
+
+export const RESEND = gql`
+  mutation Resend($email: String!) {
+    resend(email: $email)
+  }
+`;

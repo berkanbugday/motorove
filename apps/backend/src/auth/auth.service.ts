@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -344,6 +345,20 @@ export class AuthService {
       return true;
     } catch {
       throw new UnauthorizedException('Failed to update password');
+    }
+  }
+
+  async resend(email: string): Promise<boolean> {
+    try {
+      const { error } = await this.supabaseService.resend(email);
+
+      if (error) {
+        throw new BadRequestException(error.message);
+      }
+
+      return true;
+    } catch {
+      throw new UnauthorizedException('Failed to resend email');
     }
   }
 }

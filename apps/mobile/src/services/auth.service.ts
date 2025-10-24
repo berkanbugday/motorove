@@ -1,7 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {apolloClient} from '@configs/apolloClientConfig';
 import {useMutation} from '@apollo/client';
-import {SIGN_IN, SIGN_UP, REFRESH_TOKEN, RESET_PASSWORD} from './graphql';
+import {
+  SIGN_IN,
+  SIGN_UP,
+  REFRESH_TOKEN,
+  RESET_PASSWORD,
+  RESEND,
+} from './graphql';
 import {AuthUser, AuthResponse, AuthState} from '../types/auth.types';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
@@ -133,6 +139,25 @@ class AuthService {
       // Ensure cleanup even if error occurs
       await AuthStorage.clearAll();
       await AsyncStorage.clear();
+    }
+  }
+
+  async resend(email: string): Promise<boolean> {
+    try {
+      const {data, errors} = await apolloClient.mutate({
+        mutation: RESEND,
+        variables: {email},
+      });
+
+      if (errors) {
+        loggingService.error('Resend error:', errors[0]);
+        throw errors[0];
+      }
+
+      return data.resend;
+    } catch (error) {
+      loggingService.error('Resend error:', error);
+      throw error;
     }
   }
 

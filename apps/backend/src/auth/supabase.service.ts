@@ -81,4 +81,11 @@ export class SupabaseService {
     const { error } = await this.supabase.auth.admin.deleteUser(userId);
     return { error };
   }
+
+  async resend(email: string) {
+    return await this.supabase.auth.resend({
+      email,
+      type: 'signup',
+    });
+  }
 }
