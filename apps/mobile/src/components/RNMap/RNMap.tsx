@@ -42,6 +42,7 @@ export const RNMap: React.FC<RNMapProps> = ({
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showScrollView, setShowScrollView] = useState(false);
+  const [isMapReady, setIsMapReady] = useState(false);
   const internalMapRef = useRef<MapView>(null);
   const activeMapRef = mapRef || internalMapRef;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -130,6 +131,13 @@ export const RNMap: React.FC<RNMapProps> = ({
     [selectedIndex, markers.length, updateSelectedMarker],
   );
 
+  /**
+   * Handle map ready - enables user location on Android
+   */
+  const handleMapReady = useCallback(() => {
+    setIsMapReady(true);
+  }, []);
+
   // Render animated map with scrollable cards
   return (
     <View style={[styles.container, style]}>
@@ -141,7 +149,9 @@ export const RNMap: React.FC<RNMapProps> = ({
         onPress={onPress}
         showsCompass={false}
         onRegionChange={handleRegionChange}
-        showsUserLocation={showUserLocation}>
+        onMapReady={handleMapReady}
+        showsUserLocation={isMapReady && showUserLocation}
+        showsMyLocationButton={false}>
         {markers.map((marker, index) => (
           <RNMapMarker
             key={marker.id}
