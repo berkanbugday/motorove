@@ -1,112 +1,104 @@
-import React, {useCallback, useMemo} from 'react';
-import {StyleSheet, View, Animated} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {View, StyleSheet, Animated} from 'react-native';
 import {Marker} from 'react-native-maps';
-import {RNMapMarkerProps} from './types';
+import {RNMapMarkerItem} from './types';
+import {colors} from '@theme/colors';
+import {Icon} from '@components/Icon';
+
+interface RNMapMarkerProps {
+  marker: RNMapMarkerItem;
+  onPress?: () => void;
+  isSelected?: boolean;
+}
 
 /**
- * A component to display individual markers on the map
- * Optimized to prevent unnecessary re-renders on Android
+ * Custom map marker component for businesses
+ * Displays business icon with category-based styling
  */
-const RNMapMarkerComponent: React.FC<RNMapMarkerProps> = ({
+export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
   marker,
-  onSelect,
-  onDeselect,
-  mapRef,
+  onPress,
+  isSelected = false,
 }) => {
-  const {
-    id,
-    coordinate,
-    pinColor,
-    image,
-    icon,
-    opacity = 1,
-    zIndex = 0,
-    rotation = 0,
-  } = marker;
+  const markerColor = marker.pinColor || colors.neutral.black;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  // Memoize animation value to prevent recreation on every render
-  const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
-
-  // Stable event handlers - only recreate if dependencies actually change
-  const handlePress = useCallback(
-    (event: any) => {
-      // Prevent event from bubbling up to map onPress (Android fix)
-      event.stopPropagation && event.stopPropagation();
-
-      // First scale up
-      Animated.spring(scaleAnim, {
-        toValue: 1.5,
-        friction: 5,
-        tension: 40,
-        useNativeDriver: true,
-      }).start();
-
-      onSelect?.();
-    },
-    [coordinate.latitude, coordinate.longitude, mapRef, onSelect, scaleAnim],
-  );
-
-  const handleDeselect = useCallback(() => {
+  // Animate scale when selection changes
+  useEffect(() => {
     Animated.spring(scaleAnim, {
-      toValue: 0.8,
-      friction: 5,
-      tension: 40,
+      toValue: isSelected ? 1 : 0.8,
       useNativeDriver: true,
+      friction: 8,
+      tension: 40,
     }).start();
-
-    onDeselect?.();
-  }, [onDeselect, scaleAnim]);
-
-  // Memoize animated style to prevent recreation
-  const animatedImageStyle = useMemo(
-    () => [
-      styles.image,
-      {
-        transform: [{scale: scaleAnim}],
-      },
-    ],
-    [scaleAnim],
-  );
+  }, [isSelected, scaleAnim]);
 
   return (
     <Marker
-      identifier={id?.toString()}
-      coordinate={coordinate}
-      pinColor={pinColor}
-      opacity={opacity}
-      zIndex={zIndex}
-      rotation={rotation}
-      onPress={handlePress}
-      onDeselect={handleDeselect}
-      tracksViewChanges={false}>
-      {icon && <View style={styles.iconContainer}>{icon}</View>}
-      {image && (
-        <View style={styles.imageContainer}>
-          <Animated.Image source={image} style={animatedImageStyle} />
+      coordinate={marker.coordinate}
+      onPress={onPress}
+      zIndex={marker.zIndex || (isSelected ? 1000 : 1)}>
+      <Animated.View
+        style={[
+          styles.markerContainer,
+          {
+            transform: [{scale: scaleAnim}],
+          },
+        ]}>
+        <View
+          style={[
+            styles.markerInner,
+            {backgroundColor: markerColor},
+            isSelected && styles.markerInnerSelected,
+          ]}>
+          {marker.business ? (
+            <Icon name="wrench-filled" size={16} color={colors.neutral.white} />
+          ) : (
+            <Icon
+              name="map-pin-filled"
+              size={16}
+              color={colors.neutral.white}
+            />
+          )}
         </View>
-      )}
+      </Animated.View>
     </Marker>
   );
 };
 
-// Use simple React.memo without custom comparison for better performance
-// This will do a shallow comparison of all props
-export const RNMapMarker = React.memo(RNMapMarkerComponent);
-
 const styles = StyleSheet.create({
-  iconContainer: {
+  markerContainer: {
+    alignItems: 'center',
+  },
+  markerInner: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: colors.neutral.white,
+    shadowColor: colors.neutral.black,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  imageContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 50,
-    height: 65,
-  },
-  image: {
+  markerInnerSelected: {
     width: 40,
     height: 40,
-    resizeMode: 'contain',
+    borderRadius: 20,
+    borderWidth: 4,
+  },
+  markerLabel: {
+    marginTop: 4,
+    backgroundColor: colors.neutral.black,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    maxWidth: 120,
+  },
+  markerText: {
+    fontSize: 11,
   },
 });

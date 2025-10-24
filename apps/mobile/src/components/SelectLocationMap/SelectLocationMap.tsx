@@ -7,7 +7,7 @@ import {spacing} from '@theme/spacing';
 import {Button} from '@components/Button';
 import {Icon} from '@components/Icon';
 import Geolocation from '@react-native-community/geolocation';
-import {RNMapMarkerType} from '@components/RNMap/types';
+import {RNMapMarkerItem} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
 import {AddressType, ICreateAddress} from '@motorove/shared';
@@ -129,53 +129,59 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   // Fetch location name using reverse geocoding for both Turkish and English
   const fetchLocationDetails = async (latitude: number, longitude: number) => {
     try {
-      const addressPromises = EnumUtils.getLanguages().map(async languageItem => {
-        const languageCode = languageItem.value.toLowerCase();
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${languageCode}`,
-          {
-            headers: {
-              Accept: 'application/json',
-              'User-Agent': 'Motorove',
+      const addressPromises = EnumUtils.getLanguages().map(
+        async languageItem => {
+          const languageCode = languageItem.value.toLowerCase();
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${languageCode}`,
+            {
+              headers: {
+                Accept: 'application/json',
+                'User-Agent': 'Motorove',
+              },
             },
-          },
-        );
+          );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error(`Expected JSON response but got ${contentType}`);
-        }
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Expected JSON response but got ${contentType}`);
+          }
 
-        const data = await response.json();
+          const data = await response.json();
 
-        if (data && data.display_name) {
-          // Extract place address
-          let hamlet = data.address.hamlet ? `${data.address.hamlet}, ` : '';
-          let village = data.address.village ? `${data.address.village}, ` : '';
-          let suburb = data.address.suburb ? `${data.address.suburb}, ` : '';
-          let town = data.address.town ? `${data.address.town}, ` : '';
-          let borough = data.address.borough ? `${data.address.borough}, ` : '';
-          let province = data.address.province
-            ? `${data.address.province}, `
-            : '';
-          let country = data.address.country ? `${data.address.country}` : '';
-          const address = `${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
+          if (data && data.display_name) {
+            // Extract place address
+            let hamlet = data.address.hamlet ? `${data.address.hamlet}, ` : '';
+            let village = data.address.village
+              ? `${data.address.village}, `
+              : '';
+            let suburb = data.address.suburb ? `${data.address.suburb}, ` : '';
+            let town = data.address.town ? `${data.address.town}, ` : '';
+            let borough = data.address.borough
+              ? `${data.address.borough}, `
+              : '';
+            let province = data.address.province
+              ? `${data.address.province}, `
+              : '';
+            let country = data.address.country ? `${data.address.country}` : '';
+            const address = `${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
 
-          return {
-            address: address || data.display_name,
-            language: languageItem.value,
-            type: addressType,
-            latitude,
-            longitude,
-          } as ICreateAddress;
-        }
+            return {
+              address: address || data.display_name,
+              language: languageItem.value,
+              type: addressType,
+              latitude,
+              longitude,
+            } as ICreateAddress;
+          }
 
-        return null;
-      });
+          return null;
+        },
+      );
 
       const addresses = await Promise.all(addressPromises);
       const validAddresses = addresses.filter(
@@ -226,7 +232,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   };
 
   // Create a marker when a location is selected
-  const getMarkers = (): RNMapMarkerType[] => {
+  const getMarkers = (): RNMapMarkerItem[] => {
     if (!selectedLocation) {
       return [];
     }

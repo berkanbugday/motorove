@@ -1,689 +1,232 @@
-import React, {useRef, useState, useEffect, useCallback, useMemo} from 'react';
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  Keyboard,
-  TouchableWithoutFeedback,
-  Animated,
-} from 'react-native';
+import React, {useState, useCallback, useRef} from 'react';
+import {View, StyleSheet, Dimensions, ScrollView, Platform} from 'react-native';
 import MapView, {
   PROVIDER_GOOGLE,
   Region,
-  LatLng,
-  Circle,
-  Polyline,
   PROVIDER_DEFAULT,
 } from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
-import {styles} from './RNMap.styles';
-import {
-  RNMapProps,
-  RNMapPolyline,
-  RNMapCircle,
-  RNMapSearchResult,
-} from './types';
-import {useLocationPermission} from '@hooks/useLocationPermission';
-import {useMapState} from '@hooks/useMapState';
-import {useMapMarkers} from '@hooks/useMapMarkers';
-import {RNMapSearch} from './RNMapSearch';
-import {RNMapControls} from './RNMapControls';
-import {RNMapCluster} from './RNMapCluster';
+import {RNMapProps, RNMapMarkerItem} from './types';
 import {RNMapMarker} from './RNMapMarker';
-import {colors} from '@theme/colors';
-import {Platform} from 'react-native';
-import {LocationPermissionOverlay} from '@components';
-import {useComponentAnimation} from '@hooks/useComponentAnimation';
-import {Button} from '@components/Button';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {useTranslation} from '@hooks/useTranslation';
+import {RNMapMarkerCard} from './RNMapMarkerCard';
+import {useAnimatedRegion} from '@hooks/useAnimatedRegion';
 
-// Default region (fallback if user location cannot be determined)
-const DEFAULT_REGION: Region = {
-  latitude: 39.9334,
-  longitude: 32.8597,
-  latitudeDelta: 0.05,
-  longitudeDelta: 0.05,
-};
+const screen = Dimensions.get('window');
+const ITEM_SPACING = 10;
+const ITEM_PREVIEW = 10;
+const ITEM_WIDTH = screen.width - 2 * ITEM_SPACING - 2 * ITEM_PREVIEW;
+const ITEM_PREVIEW_HEIGHT = 200;
 
 /**
- * A comprehensive map component built with React Native Maps
+ * RNMap Component
+ * Advanced map component with business markers and animated regions
+ *
+ * Features:
+ * - Business markers with custom styling and scale animations
+ * - Animated region transitions (always enabled)
+ * - Scrollable marker cards with snap-to-interval behavior
+ * - Automatic map centering on marker selection
+ * - User location tracking
+ * - Bidirectional sync between map markers and cards
  */
 export const RNMap: React.FC<RNMapProps> = ({
   initialRegion,
-  showUserLocation = true,
-  followUserLocation = false,
-  mapType = 'standard',
-  markers = [],
-  polylines = [],
-  circles = [],
-  customMapStyle,
-  onRegionChange,
-  onRegionChangeComplete,
-  onPress,
-  onLongPress,
-  onMarkerSelect,
-  onMarkerDeselect,
-  onTouchMove,
-  onTouchEnd,
-  maxZoomLevel = 20,
-  minZoomLevel = 0,
-  showCompass = false,
-  showScale = false,
-  showIndoors = true,
-  zoomEnabled = true,
-  zoomControlEnabled = true,
-  rotateEnabled = true,
-  scrollEnabled = true,
-  pitchEnabled = false,
-  toolbarEnabled = false,
-  showsBuildings = true,
   style,
-  clusteringEnabled = false,
-  clusteringRadius = 50,
-  loadingIndicator = true,
-  loadingIndicatorColor = colors.neutral.black,
-  showSearchBar = false,
-  onSearchResultSelect,
-  tags = [],
-  maxVisibleMarkers = 100,
-  showLoadMarkerButton = false,
-  onLoadMarkerPress,
-  children,
-  mapRef: externalMapRef,
+  markers = [],
+  onPress,
+  onMarkerPress,
+  showUserLocation = false,
+  onRegionChange,
+  mapRef,
+  onBusinessSelect,
+  selectedBusinessId,
 }) => {
-  const {t} = useTranslation();
-  // Refs - use external ref if provided, otherwise create internal ref
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [showScrollView, setShowScrollView] = useState(false);
   const internalMapRef = useRef<MapView>(null);
-  const mapRef = externalMapRef || internalMapRef;
-  const insets = useSafeAreaInsets();
-  // Map state hook
-  const {
-    mapCenter,
-    dynamicRadiusKm,
-    refreshMapState,
-    handleZoomIn,
-    handleZoomOut,
-    setMapCenter,
-  } = useMapState({
-    initialCoordinates: initialRegion
-      ? {
-          latitude: initialRegion.latitude,
-          longitude: initialRegion.longitude,
-        }
-      : undefined,
-    initialZoom: initialRegion
-      ? Math.log2(360 / initialRegion.latitudeDelta)
-      : undefined,
-    mapRef: mapRef as React.RefObject<MapView>,
-  });
+  const activeMapRef = mapRef || internalMapRef;
+  const scrollViewRef = useRef<ScrollView>(null);
+  const isProgrammaticChange = useRef(false);
 
-  // Adapt markers for useMapMarkers (add coordinates property)
-  const adaptedMarkers = markers.map(marker => ({
-    ...marker,
-    coordinates: [marker.coordinate.longitude, marker.coordinate.latitude],
-  }));
+  // Animated region hook
+  const {getRegionForIndex} = useAnimatedRegion(initialRegion, markers);
 
-  // Map markers hook
-  const {visibleMarkers} = useMapMarkers({
-    markers: adaptedMarkers,
-    mapCenter,
-    dynamicRadiusKm,
-    maxVisibleMarkers,
-  });
-
-  // State
-  const [region, setRegion] = useState<Region>(initialRegion || DEFAULT_REGION);
-  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [isMapMoving, setIsMapMoving] = useState(false);
-
-  // Location permission hook
-  const {status, requestPermission, openSettings, checkPermission} =
-    useLocationPermission();
-  const [showPermissionOverlay, setShowPermissionOverlay] = useState(false);
-  const prevStatus = useRef(status);
-  const [isShowLoadMarkerButton, setIsShowLoadMarkerButton] =
-    useState(showLoadMarkerButton);
-
-  // Add component animation hook
-  const {
-    searchBarTranslate,
-    tagsTranslate,
-    zoomControlsTranslate,
-    loadButtonTranslate,
-  } = useComponentAnimation(isMapMoving);
-
-  // Handle location permission
-  useEffect(() => {
-    if (showUserLocation) {
-      if (status !== 'granted' && status !== 'requesting') {
-        // Clear user location when permissions are denied or revoked
-        setUserLocation(null);
-        // Show permission overlay if we need location but don't have it
-        if (status === 'denied' || status === 'blocked') {
-          setShowPermissionOverlay(true);
-        } else {
-          requestPermission();
-        }
-      } else if (status === 'granted' && prevStatus.current !== 'granted') {
-        // If we just received permission, hide overlay
-        setShowPermissionOverlay(false);
+  /**
+   * Update selected marker and sync map + card scroll
+   */
+  const updateSelectedMarker = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= markers.length) {
+        return;
       }
-    }
 
-    // Keep track of previous status to detect changes
-    prevStatus.current = status;
-  }, [showUserLocation, status, requestPermission]);
-
-  // Handle permission overlay allow press
-  const handleAllowLocationPress = useCallback(() => {
-    requestPermission();
-    setShowPermissionOverlay(false);
-  }, [requestPermission]);
-
-  // Handle permission overlay dismiss
-  const handleDismissOverlay = useCallback(() => {
-    setShowPermissionOverlay(false);
-  }, []);
-
-  // Handle reopening the overlay
-  const handleReopenOverlay = useCallback(() => {
-    checkPermission().then(() => {
-      if (status !== 'granted') {
-        setShowPermissionOverlay(true);
+      const marker = markers[index];
+      setSelectedIndex(index);
+      setShowScrollView(true); // Show ScrollView when marker is selected
+      onMarkerPress?.(marker);
+      if (marker.business) {
+        onBusinessSelect?.(marker.business);
       }
-    });
-  }, [checkPermission, status]);
 
-  // Get user location
-  const getUserLocation = useCallback(() => {
-    if (status === 'granted') {
-      Geolocation.getCurrentPosition(
-        position => {
-          const {latitude, longitude} = position.coords;
-          setUserLocation({latitude, longitude});
-
-          // Always center on user location with animation when location is ready
-          if (mapRef.current) {
-            const newRegion = {
-              latitude,
-              longitude,
-              latitudeDelta: initialRegion?.latitudeDelta || DEFAULT_REGION.latitudeDelta,
-              longitudeDelta: initialRegion?.longitudeDelta || DEFAULT_REGION.longitudeDelta,
-            };
-            setRegion(newRegion);
-            mapRef.current.animateToRegion(newRegion, 1000);
-          }
-        },
-        error => console.log('Error getting location:', error),
-        {
-          enableHighAccuracy: true,
-          timeout: 20000,
-          maximumAge: 5000,
-        },
-      );
-    }
-  }, [
-    status,
-    initialRegion?.latitudeDelta,
-    initialRegion?.longitudeDelta,
-  ]);
-
-  // Get user location on mount and setup location tracking
-  useEffect(() => {
-    if (showUserLocation) {
-      getUserLocation();
-    }
-
-    let watchId: number | null = null;
-
-    if (followUserLocation && status === 'granted') {
-      watchId = Geolocation.watchPosition(
-        position => {
-          const {latitude, longitude} = position.coords;
-          setUserLocation({latitude, longitude});
-
-          if (followUserLocation && mapRef.current) {
-            const newRegion = {
-              latitude,
-              longitude,
-              latitudeDelta: region.latitudeDelta,
-              longitudeDelta: region.longitudeDelta,
-            };
-            mapRef.current.animateToRegion(newRegion, 1000);
-          }
-        },
-        error => console.log('Error watching location:', error),
-        {
-          enableHighAccuracy: true,
-          distanceFilter: 20,
-          interval: 8000,
-          fastestInterval: 3000,
-        },
-      );
-    }
-
-    return () => {
-      if (watchId !== null) {
-        Geolocation.clearWatch(watchId);
-      }
-    };
-  }, [
-    showUserLocation,
-    followUserLocation,
-    status,
-    getUserLocation,
-    region.latitudeDelta,
-    region.longitudeDelta,
-  ]);
-
-  // Map event handlers
-  const handleMapReady = () => {
-    setIsMapLoaded(true);
-  };
-
-  const handleRegionChangeComplete = (newRegion: Region) => {
-    setRegion(newRegion);
-    onRegionChangeComplete?.(newRegion);
-  };
-
-  // Map control functions
-  const handleCenterUser = () => {
-    if (mapRef.current && userLocation) {
-      const newRegion = {
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      };
-      mapRef.current.animateToRegion(newRegion, 500);
-      setRegion(newRegion);
-      refreshMapState();
-    }
-  };
-
-  const handleSearchResultSelect = (result: RNMapSearchResult) => {
-    if (mapRef.current && result.location) {
-      const newRegion = {
-        latitude: result.location.latitude,
-        longitude: result.location.longitude,
-        latitudeDelta: 0.01, // Zoom in closer
-        longitudeDelta: 0.01,
-      };
-      mapRef.current.animateToRegion(newRegion, 500);
-    }
-    onSearchResultSelect?.(result);
-  };
-
-  // Add map movement handlers
-  const handleMapMoveStart = useCallback((event: any) => {
-    setIsMapMoving(true);
-    onTouchMove?.(event);
-  }, []);
-
-  const handleMapMoveEnd = useCallback((event: any) => {
-    setIsMapMoving(false);
-    onTouchEnd?.(event);
-  }, []);
-
-  // Handle load marker button press
-  const handleLoadMarkerPress = useCallback(() => {
-    if (!isMapMoving) {
-      refreshMapState();
-      onLoadMarkerPress?.();
-    }
-  }, [onLoadMarkerPress, refreshMapState]);
-
-  // Create a single stable callback that finds marker by ID to prevent re-renders
-  const handleMarkerSelectById = useCallback(
-    (markerId: string | number) => {
-      const marker = visibleMarkers.find(m => m.id === markerId);
-      if (marker && mapRef.current) {
-        // Animate to marker location
-        const newRegion = {
-          latitude: marker.coordinate.latitude - 0.02,
-          longitude: marker.coordinate.longitude,
-          latitudeDelta: 0.1, // Zoom in closer to the marker
-          longitudeDelta: 0.1,
-        };
-        mapRef.current.animateToRegion(newRegion, 500);
-
-        onMarkerSelect?.(marker);
-        setIsShowLoadMarkerButton(false);
+      // Animate map to center on marker
+      if (activeMapRef.current) {
+        isProgrammaticChange.current = true;
+        const region = getRegionForIndex(index);
+        activeMapRef.current.animateToRegion(region, 350);
+        // Reset flag after animation completes
+        setTimeout(() => {
+          isProgrammaticChange.current = false;
+        }, 400);
       }
     },
-    [onMarkerSelect, visibleMarkers],
+    [markers, onMarkerPress, onBusinessSelect, activeMapRef, getRegionForIndex],
   );
 
-  const handleMarkerDeselect = useCallback(() => {
-    onMarkerDeselect?.();
-    setIsShowLoadMarkerButton(true);
-  }, [onMarkerDeselect]);
+  /**
+   * Handle marker press - update selection and scroll to card
+   */
+  const handleMarkerPress = useCallback(
+    (marker: RNMapMarkerItem, index: number) => {
+      updateSelectedMarker(index);
 
-  // Create stable callback references for each marker using a Map
-  const markerCallbacksRef = useRef(new Map());
-  const getStableMarkerCallback = useCallback(
-    (markerId: string | number) => {
-      if (!markerCallbacksRef.current.has(markerId)) {
-        // Create a stable callback that doesn't capture the marker in closure
-        markerCallbacksRef.current.set(markerId, () =>
-          handleMarkerSelectById(markerId),
-        );
+      // Scroll to the selected marker card
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollTo({
+          x: index * (ITEM_WIDTH + ITEM_SPACING),
+          animated: true,
+        });
       }
-      return markerCallbacksRef.current.get(markerId);
     },
-    [handleMarkerSelectById],
+    [updateSelectedMarker],
   );
 
-  // Clean up callbacks for markers that are no longer visible
-  useEffect(() => {
-    const visibleMarkerIds = new Set(visibleMarkers.map(m => m.id));
-    const callbackKeys = Array.from(markerCallbacksRef.current.keys());
-    callbackKeys.forEach(key => {
-      if (!visibleMarkerIds.has(key)) {
-        markerCallbacksRef.current.delete(key);
+  const handleRegionChange = useCallback(
+    (region: Region) => {
+      // Only hide ScrollView and reset selection on user-initiated region changes
+      if (!isProgrammaticChange.current) {
+        setShowScrollView(false);
+        setSelectedIndex(null);
       }
-    });
-  }, [visibleMarkers]);
-
-  const handleClusterMarkerSelect = useCallback(
-    (clusterMarker: any) => {
-      onMarkerSelect?.(clusterMarker);
-      setIsShowLoadMarkerButton(false);
+      onRegionChange?.(region);
     },
-    [onMarkerSelect],
+    [onRegionChange],
   );
 
-  const handleClusterMarkerDeselect = useCallback(() => {
-    onMarkerDeselect?.();
-    setIsShowLoadMarkerButton(true);
-  }, [onMarkerDeselect]);
-
-  // Update map center when region changes
-  useEffect(() => {
-    if (region) {
-      setMapCenter([region.longitude, region.latitude]);
-    }
-  }, [region, setMapCenter]);
-
-  // Memoized markers rendering to prevent unnecessary re-renders
-  const memoizedMarkers = useMemo(() => {
-    if (clusteringEnabled) {
-      return (
-        <RNMapCluster
-          markers={visibleMarkers}
-          radius={clusteringRadius}
-          onMarkerSelect={handleClusterMarkerSelect}
-          onMarkerDeselect={handleClusterMarkerDeselect}
-        />
+  /**
+   * Handle card scroll end - update selected marker and center map
+   */
+  const handleScrollEnd = useCallback(
+    (event: any) => {
+      const newIndex = Math.round(
+        event.nativeEvent.contentOffset.x / (ITEM_WIDTH + ITEM_SPACING),
       );
-    }
+      if (
+        newIndex !== selectedIndex &&
+        newIndex >= 0 &&
+        newIndex < markers.length
+      ) {
+        updateSelectedMarker(newIndex);
+      }
+    },
+    [selectedIndex, markers.length, updateSelectedMarker],
+  );
 
-    return visibleMarkers.map(marker => (
-      <RNMapMarker
-        key={`marker-${marker.id}`}
-        marker={marker}
-        onSelect={getStableMarkerCallback(marker.id)}
-        onDeselect={handleMarkerDeselect}
-        mapRef={mapRef}
-      />
-    ));
-  }, [
-    clusteringEnabled,
-    visibleMarkers,
-    clusteringRadius,
-    handleClusterMarkerSelect,
-    handleClusterMarkerDeselect,
-    getStableMarkerCallback,
-    handleMarkerDeselect,
-    mapRef,
-  ]);
-
-  // Memoized polylines rendering
-  const memoizedPolylines = useMemo(() => {
-    return polylines.map((polyline: RNMapPolyline) => (
-      <Polyline
-        key={`polyline-${polyline.id}`}
-        coordinates={polyline.coordinates}
-        strokeWidth={polyline.strokeWidth || 2}
-        strokeColor={polyline.strokeColor || colors.primary.main}
-        lineCap={polyline.lineCap || 'round'}
-        lineJoin={polyline.lineJoin || 'round'}
-        geodesic={polyline.geodesic}
-        lineDashPattern={polyline.lineDashPattern}
-      />
-    ));
-  }, [polylines]);
-
-  // Memoized circles rendering
-  const memoizedCircles = useMemo(() => {
-    return circles.map((circle: RNMapCircle) => (
-      <Circle
-        key={`circle-${circle.id}`}
-        center={circle.center}
-        radius={circle.radius}
-        fillColor={circle.fillColor || 'rgba(0, 0, 255, 0.1)'}
-        strokeColor={circle.strokeColor || colors.primary.main}
-        strokeWidth={circle.strokeWidth || 1}
-      />
-    ));
-  }, [circles]);
-
-  // Render tags above map
-  const renderTags = () => {
-    if (tags.length === 0) {
-      return null;
-    }
-
-    return (
-      <View style={styles.tagsContainer}>
-        {tags.map(tag => (
-          <Button
-            key={tag.id}
-            onPress={tag.onPress}
-            variant={tag.isActive ? 'primary' : 'secondary'}
-            title={tag.name}
-            style={[
-              tagStyles.tag,
-              tag.isActive && {
-                backgroundColor: tag.color || colors.primary.main,
-              },
-            ]}
-            textStyle={{
-              ...tagStyles.tagText,
-              ...(tag.isActive ? {color: colors.neutral.white} : {}),
-            }}
+  // Render animated map with scrollable cards
+  return (
+    <View style={[styles.container, style]}>
+      <MapView
+        ref={activeMapRef}
+        provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
+        style={styles.map}
+        initialRegion={initialRegion}
+        onPress={onPress}
+        showsCompass={false}
+        onRegionChange={handleRegionChange}
+        showsUserLocation={showUserLocation}>
+        {markers.map((marker, index) => (
+          <RNMapMarker
+            key={marker.id}
+            marker={marker}
+            onPress={() => handleMarkerPress(marker, index)}
+            isSelected={
+              selectedBusinessId
+                ? marker.business?.id === selectedBusinessId
+                : selectedIndex !== null && index === selectedIndex
+            }
           />
         ))}
-      </View>
-    );
-  };
+      </MapView>
 
-  // Render loading indicator
-  if (status === 'requesting' && loadingIndicator) {
-    return (
-      <View style={[styles.container, style]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={loadingIndicatorColor} />
-          <Text>Requesting location permission...</Text>
-        </View>
-      </View>
-    );
-  }
-
-  return (
-    <>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[styles.container, style]}>
-          <MapView
-            ref={mapRef}
-            style={[styles.map, !isMapLoaded && styles.hiddenMap]}
-            provider={
-              Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
-            }
-            initialRegion={initialRegion || region}
-            region={followUserLocation ? undefined : region}
-            mapType={mapType}
-            customMapStyle={customMapStyle}
-            showsUserLocation={
-              showUserLocation && isMapLoaded && status === 'granted'
-            }
-            showsMyLocationButton={false}
-            followsUserLocation={
-              followUserLocation && isMapLoaded && status === 'granted'
-            }
-            showsCompass={showCompass}
-            showsScale={showScale}
-            showsBuildings={showsBuildings}
-            showsIndoors={showIndoors}
-            zoomEnabled={zoomEnabled}
-            zoomControlEnabled={false}
-            rotateEnabled={rotateEnabled}
-            scrollEnabled={scrollEnabled}
-            pitchEnabled={pitchEnabled}
-            toolbarEnabled={toolbarEnabled}
-            maxDelta={maxZoomLevel}
-            minDelta={minZoomLevel}
-            onMapReady={handleMapReady}
-            onRegionChange={onRegionChange}
-            onRegionChangeComplete={handleRegionChangeComplete}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            onTouchMove={handleMapMoveStart}
-            onTouchEnd={handleMapMoveEnd}>
-            {/* Render polylines */}
-            {memoizedPolylines}
-
-            {/* Render circles */}
-            {memoizedCircles}
-
-            {/* Render markers with clustering if enabled */}
-            {memoizedMarkers}
-
-            {/* Render additional children */}
-            {children}
-          </MapView>
-
-          {/* Search bar with animation */}
-          {showSearchBar && (
-            <Animated.View
-              style={{
-                position: 'absolute',
-                width: '100%',
-                transform: [{translateY: searchBarTranslate}],
-              }}>
-              <RNMapSearch
-                onResultSelect={handleSearchResultSelect}
-                placeholder={t('screens.map.search_placeholder')}
-              />
-            </Animated.View>
-          )}
-
-          {/* Tags with animation */}
-          {tags.length > 0 && (
-            <Animated.View
-              style={{
-                position: 'absolute',
-                width: '100%',
-                transform: [{translateY: tagsTranslate}],
-              }}>
-              {renderTags()}
-            </Animated.View>
-          )}
-
-          {/* Map controls with animation */}
-          {zoomControlEnabled && (
-            <Animated.View
-              style={{
-                position: 'absolute',
-                width: '100%',
-                transform: [{translateX: zoomControlsTranslate}],
-              }}>
-              <RNMapControls
-                onZoomIn={handleZoomIn}
-                onZoomOut={handleZoomOut}
-                onCenterUser={isMapLoaded ? handleCenterUser : undefined}
-                userLocationAvailable={!!userLocation}
-                onReopenOverlay={handleReopenOverlay}
-              />
-            </Animated.View>
-          )}
-
-          {/* Load marker button with animation */}
-          {isShowLoadMarkerButton && showLoadMarkerButton && (
-            <Animated.View
-              style={{
-                transform: [{translateY: loadButtonTranslate}],
-              }}>
-              <Button
-                style={[styles.loadMarkerButton, {bottom: insets.bottom + 70}]}
-                onPress={handleLoadMarkerPress}
-                variant="primary"
-                shape="round"
-                title={t('screens.map.search_in_this_area')}
-                textStyle={{
-                  color: colors.neutral.white,
-                }}
-                disabled={isMapMoving}
-              />
-            </Animated.View>
-          )}
-
-          {/* Debug info with animation */}
-          {/* {markers.length > 0 && (
-            <Animated.View
-              style={{
-                transform: [{translateY: debugInfoTranslate}],
-              }}>
-              <View style={styles.debugInfo}>
-                <Text style={styles.debugInfoText}>
-                  Visible: {visibleMarkers.length} / {markers.length}
-                </Text>
-                <Text style={styles.debugInfoText}>
-                  Radius: {dynamicRadiusKm} km
-                </Text>
-              </View>
-            </Animated.View>
-          )} */}
-
-          {/* Loading overlay */}
-          {!isMapLoaded && loadingIndicator && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={loadingIndicatorColor} />
+      {/* Scrollable marker cards - only shown after marker selection */}
+      {showScrollView && (
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          pagingEnabled={false}
+          decelerationRate="fast"
+          snapToInterval={ITEM_WIDTH + ITEM_SPACING}
+          snapToAlignment="center"
+          contentInset={{
+            top: 0,
+            left: ITEM_SPACING / 2 + ITEM_PREVIEW,
+            bottom: 0,
+            right: ITEM_SPACING / 2 + ITEM_PREVIEW,
+          }}
+          contentContainerStyle={styles.scrollViewContent}
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollView}
+          onMomentumScrollEnd={handleScrollEnd}>
+          {markers.map((marker, index) => (
+            <View
+              key={marker.id}
+              style={[
+                styles.item,
+                selectedIndex !== null &&
+                  index === selectedIndex &&
+                  styles.selectedItem,
+              ]}>
+              {marker.business && (
+                <RNMapMarkerCard
+                  business={marker.business}
+                  onPress={() => handleMarkerPress(marker, index)}
+                />
+              )}
             </View>
-          )}
-        </View>
-      </TouchableWithoutFeedback>
-
-      {/* Location Permission Overlay */}
-      <LocationPermissionOverlay
-        visible={showPermissionOverlay}
-        onAllowPress={handleAllowLocationPress}
-        onDismiss={handleDismissOverlay}
-        onOpenSettings={openSettings}
-      />
-    </>
+          ))}
+        </ScrollView>
+      )}
+    </View>
   );
 };
 
-// Additional styles for tags and buttons
-const tagStyles = StyleSheet.create({
-  tag: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: colors.neutral.white,
-    marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 1,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
   },
-  tagText: {
-    fontSize: 14,
-    color: colors.neutral.black,
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  cardContainer: {
+    position: 'absolute',
+    bottom: 100,
+    left: 0,
+    right: 0,
+  },
+  scrollView: {
+    position: 'absolute',
+    bottom: 120,
+    left: 0,
+    right: 0,
+  },
+  scrollViewContent: {
+    paddingHorizontal: ITEM_SPACING / 2,
+  },
+  item: {
+    width: ITEM_WIDTH,
+    height: ITEM_PREVIEW_HEIGHT,
+    marginHorizontal: ITEM_SPACING / 2,
+    overflow: 'hidden',
+  },
+  selectedItem: {
+    // Add any additional styling for selected card if needed
   },
 });
