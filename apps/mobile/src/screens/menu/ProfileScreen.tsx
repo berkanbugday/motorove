@@ -372,11 +372,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: spacing.sm,
     marginBottom: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...getShadow('small'),
   },
   statItemRow: {
     flexDirection: 'row',
