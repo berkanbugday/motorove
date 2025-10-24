@@ -51,6 +51,10 @@ export const MapScreen = () => {
   const [displayedBusinesses, setDisplayedBusinesses] = useState<IBusiness[]>(
     [],
   );
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const mapRef = useRef<any>(null);
   const isUserInteraction = useRef(false);
 
@@ -156,6 +160,9 @@ export const MapScreen = () => {
     Geolocation.getCurrentPosition(
       position => {
         const {latitude, longitude} = position.coords;
+
+        // Store user location for distance calculations
+        setUserLocation({latitude, longitude});
 
         // Update region to user location
         const newRegion: Region = {
@@ -264,6 +271,7 @@ export const MapScreen = () => {
         showSearchButton={showSearchButton}
         onSearchThisArea={handleSearchThisArea}
         searchButtonLoading={loading}
+        userLocation={userLocation || undefined}
       />
     </View>
   );

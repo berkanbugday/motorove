@@ -53,6 +53,12 @@ export interface RNMapProps {
   showSearchButton?: boolean;
   onSearchThisArea?: () => void;
   searchButtonLoading?: boolean;
+
+  // User location for distance calculation
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 /**
@@ -63,4 +69,8 @@ export interface RNMapMarkerCardProps {
   onPress?: () => void;
   onClose?: () => void;
   style?: StyleProp<ViewStyle>;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  };
 }

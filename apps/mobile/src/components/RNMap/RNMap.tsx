@@ -34,6 +34,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   showSearchButton = false,
   onSearchThisArea,
   searchButtonLoading = false,
+  userLocation,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showScrollView, setShowScrollView] = useState(false);
@@ -168,7 +169,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   // Memoize marker rendering for performance
   const renderedMarkers = useMemo(
     () =>
-      markers.map((marker, index) => (
+      markers.map((marker: RNMapMarkerItem, index: number) => (
         <RNMapMarker
           key={marker.id}
           marker={marker}
@@ -182,7 +183,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   // Memoize card rendering for performance
   const renderedCards = useMemo(
     () =>
-      markers.map((marker, index) => (
+      markers.map((marker: RNMapMarkerItem, index: number) => (
         <View
           key={marker.id}
           style={[
@@ -195,11 +196,13 @@ const RNMapComponent: React.FC<RNMapProps> = ({
             <RNMapMarkerCard
               business={marker.business}
               onPress={() => handleMarkerPress(marker, index)}
+              userLocation={userLocation}
+              onClose={() => handleTouchMove()}
             />
           )}
         </View>
       )),
-    [markers, selectedIndex, handleMarkerPress],
+    [markers, selectedIndex, handleMarkerPress, userLocation],
   );
 
   // Render animated map with scrollable cards
