@@ -224,19 +224,22 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       </MapView>
 
       {/* Search This Area Button - hidden when scrollview or marker is selected */}
-      {showSearchButton && !showScrollView && selectedIndex === null && (
-        <View style={styles.searchButtonContainer}>
-          <Button
-            title={t('screens.map.search_in_this_area')}
-            iconName="map-pin-filled"
-            iconColor={colors.neutral.white}
-            onPress={onSearchThisArea}
-            variant="primary"
-            shape="round"
-            loading={searchButtonLoading}
-          />
-        </View>
-      )}
+      {showSearchButton &&
+        !showScrollView &&
+        selectedIndex === null &&
+        isMapReady && (
+          <View style={styles.searchButtonContainer}>
+            <Button
+              title={t('screens.map.search_in_this_area')}
+              iconName="map-pin-filled"
+              iconColor={colors.neutral.white}
+              onPress={onSearchThisArea}
+              variant="primary"
+              shape="round"
+              loading={searchButtonLoading}
+            />
+          </View>
+        )}
 
       {/* Scrollable marker cards - only shown after marker selection */}
       {showScrollView && (
@@ -272,15 +275,9 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  cardContainer: {
-    position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
-  },
   scrollView: {
     position: 'absolute',
-    bottom: 120,
+    bottom: 110,
     left: 0,
     right: 0,
   },
@@ -289,7 +286,7 @@ const styles = StyleSheet.create({
   },
   item: {
     width: ITEM_WIDTH,
-    height: ITEM_PREVIEW_HEIGHT,
+    // height: ITEM_PREVIEW_HEIGHT,
     marginHorizontal: ITEM_SPACING / 2,
     overflow: 'hidden',
   },
@@ -298,7 +295,7 @@ const styles = StyleSheet.create({
   },
   searchButtonContainer: {
     position: 'absolute',
-    bottom: 120,
+    bottom: 110,
     alignSelf: 'center',
     ...getShadow('small'),
   },

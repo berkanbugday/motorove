@@ -1,14 +1,9 @@
 import React, {useMemo} from 'react';
 import {View, StyleSheet, TouchableOpacity, Linking} from 'react-native';
 import {RNMapMarkerCardProps} from './types';
-import {colors} from '@theme/colors';
-import {spacing} from '@theme/spacing';
-import {radius} from '@theme/radius';
-import {Body, Title, Caption} from '@components/Typography';
-import {Icon} from '@components/Icon';
-import {Button} from '@components/Button';
+import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
+import {Body, Title, Caption, Icon, Button} from '@components';
 import {BusinessCategory} from '@motorove/shared';
-import {getShadow} from '@theme/shadows';
 
 /**
  * Business marker card component
@@ -153,9 +148,7 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
       <View style={styles.infoRow}>
         <Icon name="map-pin-filled" size={16} color={colors.neutral.grey} />
         <View style={styles.infoTextContainer}>
-          <Body numberOfLines={1} style={styles.addressText}>
-            {business.address.address}
-          </Body>
+          <Body style={styles.addressText}>{business.address.address}</Body>
           {distance && (
             <Caption color={colors.neutral.grey}>{distance} km away</Caption>
           )}
@@ -164,21 +157,20 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
 
       {/* Phone Number */}
       {business.phoneNumber && (
-        <TouchableOpacity style={styles.infoRow} onPress={handleCall}>
+        <View style={styles.infoRow}>
           <Icon name="phone" size={16} color={colors.neutral.grey} />
           <View style={styles.infoTextContainer}>
-            <Body color="#007AFF" style={styles.phoneText}>
+            <Body style={styles.addressText}>
               {business.countryCode} {business.phoneNumber}
             </Body>
-            <Caption color="#007AFF">Tap to call</Caption>
           </View>
-        </TouchableOpacity>
+        </View>
       )}
 
       {/* Operating Hours */}
       {workingHours && (
         <View style={styles.infoRow}>
-          <Icon name="clock" size={16} color={colors.neutral.grey} />
+          <Icon name="clock-filled" size={16} color={colors.neutral.grey} />
           <View style={styles.infoTextContainer}>
             <Body color={colors.neutral.grey}>Open today</Body>
             <Caption color={colors.neutral.grey}>{workingHours}</Caption>
@@ -188,54 +180,32 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
 
       {/* Action Buttons */}
       <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.directionsButton}
-          onPress={handleDirections}>
-          <Icon
-            name="location-arrow-filled"
-            size={16}
-            color={colors.neutral.white}
-          />
-          <Body
-            color={colors.neutral.white}
-            weight="semiBold"
-            style={styles.buttonText}>
-            Get Directions
-          </Body>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.callButton} onPress={handleCall}>
-          <Icon name="phone" size={16} color={colors.neutral.white} />
-          <Body
-            color={colors.neutral.white}
-            weight="semiBold"
-            style={styles.buttonText}>
-            Call Now
-          </Body>
-        </TouchableOpacity>
+        <Button
+          title="Get Directions"
+          variant="dark"
+          shape="round"
+          iconName="map-location-filled"
+          onPress={handleDirections}
+        />
+        <Button
+          title="Call Now"
+          variant="primary"
+          shape="round"
+          iconName="phone"
+          onPress={handleCall}
+          style={styles.callButton}
+        />
       </View>
-
-      {/* Save to Favorites */}
-      <TouchableOpacity style={styles.favoriteButton}>
-        <Icon name="save" size={16} color={colors.neutral.grey} />
-        <Body color={colors.neutral.grey} style={styles.favoriteText}>
-          Save to Favorites
-        </Body>
-      </TouchableOpacity>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.white,
-    borderRadius: radius.xl,
+    ...commonStyles.container,
+    borderRadius: radius.lg,
     padding: spacing.lg,
-    marginHorizontal: spacing.md,
-    shadowColor: colors.neutral.black,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 5,
+    ...getShadow('small'),
   },
   closeButton: {
     position: 'absolute',
@@ -271,7 +241,7 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: spacing.md,
     gap: spacing.sm,
   },
@@ -289,43 +259,12 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  directionsButton: {
-    flex: 1,
-    backgroundColor: colors.neutral.black,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.lg,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   callButton: {
-    flex: 1,
-    backgroundColor: '#34C759',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  buttonText: {
-    fontSize: 14,
-  },
-  favoriteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.sm,
-  },
-  favoriteText: {
-    fontSize: 14,
+    backgroundColor: colors.status.successDark,
   },
 });
