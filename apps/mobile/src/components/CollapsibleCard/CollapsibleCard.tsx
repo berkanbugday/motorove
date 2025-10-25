@@ -5,19 +5,12 @@ import {
   TouchableOpacity,
   Animated,
   LayoutAnimation,
-  Platform,
-  UIManager,
 } from 'react-native';
 import {colors, spacing, getShadow, radius} from '@theme';
 import {Icon} from '../Icon';
 import {Typography} from '../Typography';
 
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
+// Layout animations are enabled by default in the New Architecture
 
 export interface CollapsibleCardProps {
   /**

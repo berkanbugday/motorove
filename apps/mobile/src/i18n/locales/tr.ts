@@ -63,6 +63,8 @@ export default {
     view_all: 'Tümünü Gör',
     select_all: 'Tümünü Seç',
     clear_all: 'Tümünü Temizle',
+    view_details: 'Detayları Görüntüle',
+    km_away: 'km uzağında',
   },
 
   // Bottom tabs navigation items
@@ -543,6 +545,12 @@ export default {
       search_placeholder: 'Konum ara...',
       search_in_this_area: 'Bu alanda ara',
       errorGettingLocation: 'Konum alınamadı. Varsayılan bölge gösteriliyor.',
+      get_directions: 'Yol Tarifi Al',
+      call: 'Ara',
+      tap_for_call: 'Aramak için dokunun',
+      no_phone_number: 'Telefon numarası mevcut değil',
+      phone_not_supported: 'Bu cihazda telefon aramaları desteklenmiyor',
+      phone_call_error: 'Telefon araması yapılamadı. Lütfen tekrar deneyin.',
     },
 
     // User search screen
@@ -1192,6 +1200,28 @@ export default {
       tl: '₺ TL',
       usd: '$ USD',
       eur: '€ EUR',
+    },
+    businessCategory: {
+      repair_maintenance: 'Bakım & Onarım',
+      dealerships_sales: 'Bayilik & Satış',
+      parts_accessories: 'Parçalar & Aksesuarlar',
+      customization_tuning: 'Kişiselleştirme & Tuning',
+      motorcycle_rental: 'Motosiklet Kiralama',
+      tires_wheels: 'Lastik & Jant',
+      detailing_wrapping: 'Detaylı Temizlik & Kaplama',
+      roadside_assistance: 'Yol Yardım',
+      gear_apparel: 'Ekipman & Giyim',
+      training_riding_schools: 'Sürüş Eğitimi',
+      motorcycle_clubs_communities: 'Motosiklet Kulüpleri & Topluluklar',
+      electric_motorcycle_services: 'Elektrikli Motosiklet Hizmetleri',
+      painting_bodywork: 'Boya & Kaporta',
+      inspection_legal_services: 'Expertize Hizmetleri',
+      transportation_storage: 'Taşıma & Depolama',
+    },
+    businessStatus: {
+      open: 'Açık',
+      closed: 'Kapalı',
+      open_24_hours: '24 Saat Açık',
     },
   },
 

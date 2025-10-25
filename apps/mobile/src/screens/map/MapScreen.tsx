@@ -234,8 +234,6 @@ export const MapScreen = () => {
 
   const handleBusinessSelect = useCallback((business: IBusiness) => {
     setSelectedBusinessId(business.id);
-    // You can navigate to business detail screen here
-    console.log('Selected business:', business.name);
   }, []);
 
   const handleMarkerPress = useCallback((marker: RNMapMarkerItem) => {

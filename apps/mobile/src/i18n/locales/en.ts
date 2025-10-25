@@ -63,6 +63,8 @@ export default {
     view_all: 'View All',
     select_all: 'Select All',
     clear_all: 'Clear All',
+    view_details: 'View Details',
+    km_away: 'km away',
   },
 
   // Bottom tabs navigation items
@@ -560,6 +562,12 @@ export default {
       search_in_this_area: 'Search in this area',
       errorGettingLocation:
         'Could not get your location. Showing default region.',
+      get_directions: 'Get Directions',
+      call: 'Call',
+      tap_for_call: 'Tap to call',
+      no_phone_number: 'No phone number available',
+      phone_not_supported: 'Phone calls are not supported on this device',
+      phone_call_error: 'Unable to make phone call. Please try again.',
     },
 
     // User search screen
@@ -1204,6 +1212,28 @@ export default {
       tl: '₺ TL',
       usd: '$ USD',
       eur: '€ EUR',
+    },
+    businessCategory: {
+      repair_maintenance: 'Repair & Maintenance',
+      dealerships_sales: 'Dealership & Sales',
+      parts_accessories: 'Parts & Accessories',
+      customization_tuning: 'Customization & Tuning',
+      motorcycle_rental: 'Motorcycle Rental',
+      tires_wheels: 'Tires & Wheels',
+      detailing_wrapping: 'Detailing & Wrapping',
+      roadside_assistance: 'Roadside Assistance',
+      gear_apparel: 'Gear & Apparel',
+      training_riding_schools: 'Riding Training',
+      motorcycle_clubs_communities: 'Motorcycle Clubs & Communities',
+      electric_motorcycle_services: 'Electric Motorcycle Services',
+      painting_bodywork: 'Painting & Bodywork',
+      inspection_legal_services: 'Expertise Services',
+      transportation_storage: 'Transportation & Storage',
+    },
+    businessStatus: {
+      open: 'Open',
+      closed: 'Closed',
+      open_24_hours: '24 Hours Open',
     },
   },
 

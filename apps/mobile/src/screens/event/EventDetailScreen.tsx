@@ -584,8 +584,8 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         <Animated.View
           style={[styles.headerContainer, {height: headerHeight}]}
           onLayout={handleHeaderLayout}>
-          {imageArray.length > 0 ? (
-            imageArray.length > 1 ? (
+          {imageArray.length > 0 &&
+            (imageArray.length > 1 ? (
               <>
                 <Carousel
                   ref={carouselRef}
@@ -610,21 +610,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               </>
             ) : (
               renderSingleImage(imageArray[0], 0)
-            )
-          ) : (
-            <Animated.View
-              style={[
-                styles.headerImage,
-                {
-                  opacity: headerOpacity,
-                  backgroundColor: colors.neutral.lightGrey,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                },
-              ]}>
-              <Icon name="image" size={48} color={colors.neutral.grey} />
-            </Animated.View>
-          )}
+            ))}
         </Animated.View>
         {/* Main Event Details Card - Overlapping background */}
         <View style={styles.eventCard}>

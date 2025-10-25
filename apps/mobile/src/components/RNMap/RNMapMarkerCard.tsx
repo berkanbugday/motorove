@@ -1,9 +1,26 @@
-import React, {useMemo} from 'react';
-import {View, StyleSheet, TouchableOpacity, Linking} from 'react-native';
+import React, {useMemo, useState, useCallback} from 'react';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Linking,
+  Platform,
+} from 'react-native';
 import {RNMapMarkerCardProps} from './types';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
-import {Body, Title, Caption, Icon, Button} from '@components';
-import {BusinessCategory} from '@motorove/shared';
+import {
+  Title,
+  Caption,
+  Icon,
+  Button,
+  BusinessDetailModal,
+  BodySmall,
+  Chip,
+  showToast,
+} from '@components';
+import {useTranslation} from '@hooks/useTranslation';
+import {EnumUtils} from '@utils/enumUtils';
+import {BusinessStatus, DayOfWeek} from '@motorove/shared';
 
 /**
  * Business marker card component
@@ -11,34 +28,74 @@ import {BusinessCategory} from '@motorove/shared';
  */
 export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
   business,
-  onPress,
   onClose,
   style,
   userLocation,
+  showDetailModal = true,
+  onDetailModalOpen,
+  onDetailModalClose,
 }) => {
-  // Get category display name
-  const getCategoryName = () => {
-    const categoryMap: Record<BusinessCategory, string> = {
-      [BusinessCategory.REPAIR_MAINTENANCE]: 'Repair & Maintenance',
-      [BusinessCategory.DEALERSHIPS_SALES]: 'Dealership & Sales',
-      [BusinessCategory.PARTS_ACCESSORIES]: 'Parts & Accessories',
-      [BusinessCategory.CUSTOMIZATION_TUNING]: 'Customization & Tuning',
-      [BusinessCategory.MOTORCYCLE_RENTAL]: 'Motorcycle Rental',
-      [BusinessCategory.TIRES_WHEELS]: 'Tires & Wheels',
-      [BusinessCategory.DETAILING_WRAPPING]: 'Detailing & Wrapping',
-      [BusinessCategory.ROADSIDE_ASSISTANCE]: 'Roadside Assistance',
-      [BusinessCategory.GEAR_APPAREL]: 'Gear & Apparel',
-      [BusinessCategory.TRAINING_RIDING_SCHOOLS]: 'Training & Riding Schools',
-      [BusinessCategory.MOTORCYCLE_CLUBS_COMMUNITIES]: 'Clubs & Communities',
-      [BusinessCategory.ELECTRIC_MOTORCYCLE_SERVICES]:
-        'Electric Motorcycle Services',
-      [BusinessCategory.PAINTING_BODYWORK]: 'Painting & Bodywork',
-      [BusinessCategory.INSPECTION_LEGAL_SERVICES]:
-        'Inspection & Legal Services',
-      [BusinessCategory.TRANSPORTATION_STORAGE]: 'Transportation & Storage',
-    };
-    return categoryMap[business.category] || 'Business';
-  };
+  const {t} = useTranslation();
+  // Modal state
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  // Address expansion state
+  const [isAddressExpanded, setIsAddressExpanded] = useState(false);
+
+  // Modal handlers
+  const handleModalOpen = useCallback(() => {
+    setIsModalVisible(true);
+    onDetailModalOpen?.(business);
+  }, [business, onDetailModalOpen]);
+
+  const handleModalClose = useCallback(() => {
+    setIsModalVisible(false);
+
+    onDetailModalClose?.();
+  }, [onDetailModalClose]);
+
+  // Handle phone number call
+  const handlePhoneNumberCall = useCallback(async () => {
+    if (!business.phoneNumber) {
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('screens.map.no_phone_number'),
+      });
+      return;
+    }
+
+    try {
+      // Format phone number (remove spaces and combine country code with number)
+      const phoneNumber =
+        `${business.countryCode}${business.phoneNumber}`.replace(/\s/g, '');
+      const phoneUrl = `tel:${phoneNumber}`;
+
+      // On Android, canOpenURL often returns false for tel: URLs even when supported
+      // So we skip the check and directly try to open the dialer
+      if (Platform.OS === 'android') {
+        await Linking.openURL(phoneUrl);
+      } else {
+        // On iOS, check if the device can make phone calls first
+        const canOpenURL = await Linking.canOpenURL(phoneUrl);
+
+        if (canOpenURL) {
+          await Linking.openURL(phoneUrl);
+        } else {
+          showToast({
+            type: 'error',
+            text1: t('common.error'),
+            text2: t('screens.map.phone_not_supported'),
+          });
+        }
+      }
+    } catch (error) {
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('screens.map.phone_call_error'),
+      });
+    }
+  }, [business.countryCode, business.phoneNumber, t]);
 
   // Calculate distance from user location
   const distance = useMemo(() => {
@@ -62,61 +119,111 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
     return d.toFixed(1);
   }, [userLocation, business.address]);
 
-  // Get working hours for today
-  const getTodayWorkingHours = () => {
-    const days = [
-      'SUNDAY',
-      'MONDAY',
-      'TUESDAY',
-      'WEDNESDAY',
-      'THURSDAY',
-      'FRIDAY',
-      'SATURDAY',
-    ];
-    const today = days[new Date().getDay()];
+  // Calculate business status based on current time and working hours
+  const businessStatus = useMemo(() => {
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
 
-    const todayHours = business.workingHours?.find(
-      wh => wh.dayOfWeek === today,
+    // Convert JavaScript day to DayOfWeek enum
+    const dayMapping: {[key: number]: DayOfWeek} = {
+      0: DayOfWeek.SUNDAY,
+      1: DayOfWeek.MONDAY,
+      2: DayOfWeek.TUESDAY,
+      3: DayOfWeek.WEDNESDAY,
+      4: DayOfWeek.THURSDAY,
+      5: DayOfWeek.FRIDAY,
+      6: DayOfWeek.SATURDAY,
+    };
+
+    const todayEnum = dayMapping[currentDay];
+    const todayWorkingHours = business.workingHours?.find(
+      wh => wh.dayOfWeek === todayEnum,
     );
 
-    if (!todayHours) {
-      return null;
+    // If no working hours for today, business is closed
+    if (!todayWorkingHours) {
+      return {
+        status: BusinessStatus.CLOSED,
+        label: t('enums.businessStatus.closed'),
+      };
     }
 
-    if (todayHours.isOpen24h) {
-      return 'Open 24 hours';
+    // Check if business is open 24 hours
+    if (todayWorkingHours.isOpen24h) {
+      return {
+        status: BusinessStatus.OPEN_24_HOURS,
+        label: t('enums.businessStatus.open_24_hours'),
+      };
     }
 
-    if (todayHours.startHour && todayHours.endHour) {
-      return `${todayHours.startHour} - ${todayHours.endHour}`;
+    // Check if current time is within working hours
+    if (todayWorkingHours.startHour && todayWorkingHours.endHour) {
+      const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes
+
+      // Parse start and end hours (format: "HH:MM")
+      const [startHour, startMinute] = todayWorkingHours.startHour
+        .split(':')
+        .map(Number);
+      const [endHour, endMinute] = todayWorkingHours.endHour
+        .split(':')
+        .map(Number);
+
+      const startTimeMinutes = startHour * 60 + startMinute;
+      const endTimeMinutes = endHour * 60 + endMinute;
+
+      // Handle overnight hours (e.g., 22:00 to 06:00)
+      if (startTimeMinutes > endTimeMinutes) {
+        // Business closes the next day
+        if (currentTime >= startTimeMinutes || currentTime <= endTimeMinutes) {
+          return {
+            status: BusinessStatus.OPEN,
+            label: t('enums.businessStatus.open'),
+          };
+        }
+      } else {
+        // Normal hours within the same day
+        if (currentTime >= startTimeMinutes && currentTime <= endTimeMinutes) {
+          return {
+            status: BusinessStatus.OPEN,
+            label: t('enums.businessStatus.open'),
+          };
+        }
+      }
     }
 
-    return null;
-  };
-
-  const workingHours = getTodayWorkingHours();
-
-  const handleCall = () => {
-    const phoneNumber = `${business.countryCode}${business.phoneNumber}`;
-    Linking.openURL(`tel:${phoneNumber}`);
-  };
-
-  const handleDirections = () => {
-    const {latitude, longitude} = business.address;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-    Linking.openURL(url);
-  };
+    // Default to closed
+    return {
+      status: BusinessStatus.CLOSED,
+      label: t('enums.businessStatus.closed'),
+    };
+  }, [business.workingHours, t]);
 
   return (
-    <TouchableOpacity
-      style={[styles.container, style]}
-      onPress={onPress}
-      activeOpacity={0.95}>
+    <View style={[styles.container, style]}>
+      {/* Status Badge - Top Left */}
+      <View style={styles.statusBadge}>
+        <Chip
+          label={businessStatus.label}
+          variant="filled"
+          color={
+            businessStatus.status === BusinessStatus.OPEN
+              ? 'success'
+              : businessStatus.status === BusinessStatus.OPEN_24_HOURS
+              ? 'info'
+              : 'error'
+          }
+          size="small"
+        />
+        {/* <View style={styles.ratingContainer}>
+          <Icon name="comments-filled" size={16} />
+          <BodySmall>(120)</BodySmall>
+        </View> */}
+      </View>
       {onClose && (
         <Button
           shape="circle"
           size="small"
-          variant="secondary"
+          variant="dark"
           iconName="close"
           iconSize={18}
           onPress={onClose}
@@ -125,86 +232,90 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
       )}
 
       {/* Business Name */}
-      <Title weight="bold" numberOfLines={1} style={styles.businessName}>
+
+      <Title weight="bold" style={styles.businessName}>
         {business.name}
       </Title>
 
       {/* Category and Rating Row */}
       <View style={styles.categoryRatingRow}>
-        <Caption color={colors.neutral.grey} style={styles.category}>
-          {getCategoryName()}
-        </Caption>
-        <View style={styles.ratingContainer}>
-          <Caption weight="semiBold" style={styles.ratingText}>
-            ⭐ 4.5
-          </Caption>
-          <Caption color={colors.neutral.grey} style={styles.reviewCount}>
-            (120)
-          </Caption>
-        </View>
+        <BodySmall>
+          {EnumUtils.convertBusinessCategory(business.category)}
+        </BodySmall>
       </View>
 
       {/* Address with Distance */}
-      <View style={styles.infoRow}>
-        <Icon name="map-pin-filled" size={16} color={colors.neutral.grey} />
-        <View style={styles.infoTextContainer}>
-          <Body style={styles.addressText}>{business.address.address}</Body>
-          {distance && (
-            <Caption color={colors.neutral.grey}>{distance} km away</Caption>
-          )}
-        </View>
-      </View>
+      {business.address.address && (
+        <TouchableOpacity
+          style={styles.infoRow}
+          onPress={() => {
+            setIsAddressExpanded(prev => !prev);
+          }}>
+          <Icon name="map-pin-filled" size={16} />
+          <View style={styles.infoTextContainer}>
+            <BodySmall numberOfLines={isAddressExpanded ? undefined : 1}>
+              {business.address.address}
+            </BodySmall>
+            {distance && (
+              <Caption color={colors.neutral.grey}>
+                {distance} {t('common.km_away')}
+              </Caption>
+            )}
+          </View>
+        </TouchableOpacity>
+      )}
 
       {/* Phone Number */}
       {business.phoneNumber && (
-        <View style={styles.infoRow}>
+        <TouchableOpacity
+          style={styles.infoRow}
+          onPress={handlePhoneNumberCall}>
           <Icon name="phone" size={16} color={colors.neutral.grey} />
           <View style={styles.infoTextContainer}>
-            <Body style={styles.addressText}>
+            <BodySmall>
               {business.countryCode} {business.phoneNumber}
-            </Body>
+            </BodySmall>
+            <Caption color={colors.neutral.grey}>
+              {t('screens.map.tap_for_call')}
+            </Caption>
           </View>
-        </View>
+        </TouchableOpacity>
       )}
 
-      {/* Operating Hours */}
-      {workingHours && (
-        <View style={styles.infoRow}>
-          <Icon name="clock-filled" size={16} color={colors.neutral.grey} />
-          <View style={styles.infoTextContainer}>
-            <Body color={colors.neutral.grey}>Open today</Body>
-            <Caption color={colors.neutral.grey}>{workingHours}</Caption>
-          </View>
-        </View>
+      {showDetailModal && (
+        <Button
+          title={t('common.view_details')}
+          variant="text"
+          shape="round"
+          size="small"
+          style={styles.viewDetailsButton}
+          onPress={handleModalOpen}
+        />
       )}
 
-      {/* Action Buttons */}
-      <View style={styles.actions}>
-        <Button
-          title="Get Directions"
-          variant="dark"
-          shape="round"
-          iconName="map-location-filled"
-          onPress={handleDirections}
+      {/* Business Detail Modal */}
+      {showDetailModal && (
+        <BusinessDetailModal
+          visible={isModalVisible}
+          business={business}
+          onClose={handleModalClose}
+          userLocation={userLocation}
+          closeOnBackdropPress={true}
         />
-        <Button
-          title="Call Now"
-          variant="primary"
-          shape="round"
-          iconName="phone"
-          onPress={handleCall}
-          style={styles.callButton}
-        />
-      </View>
-    </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: spacing.sm,
+    marginHorizontal: spacing.sm,
     ...commonStyles.container,
     borderRadius: radius.lg,
-    padding: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.lg,
     ...getShadow('small'),
   },
   closeButton: {
@@ -214,9 +325,8 @@ const styles = StyleSheet.create({
     ...getShadow('small'),
   },
   businessName: {
-    fontSize: 20,
-    marginBottom: spacing.xs,
-    color: colors.neutral.black,
+    marginVertical: spacing.xs,
+    paddingRight: spacing.sm,
   },
   categoryRatingRow: {
     flexDirection: 'row',
@@ -224,20 +334,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  category: {
-    fontSize: 13,
+  statusBadge: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: spacing.sm,
+    position: 'absolute',
+    left: spacing.md,
+    top: -spacing.sm,
+    zIndex: 10,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 13,
-    color: colors.neutral.black,
-  },
-  reviewCount: {
-    fontSize: 13,
+    gap: spacing.xs,
+    top: spacing.md - spacing.xs,
+    left: -spacing.md,
+    marginRight: spacing.md,
   },
   infoRow: {
     flexDirection: 'row',
@@ -248,15 +362,6 @@ const styles = StyleSheet.create({
   infoTextContainer: {
     flex: 1,
   },
-  addressText: {
-    fontSize: 14,
-    color: colors.neutral.black,
-    marginBottom: 2,
-  },
-  phoneText: {
-    fontSize: 14,
-    marginBottom: 2,
-  },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -266,5 +371,10 @@ const styles = StyleSheet.create({
   },
   callButton: {
     backgroundColor: colors.status.successDark,
+  },
+  viewDetailsButton: {
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
   },
 });

@@ -18,7 +18,6 @@ const screen = Dimensions.get('window');
 const ITEM_SPACING = 10;
 const ITEM_PREVIEW = 10;
 const ITEM_WIDTH = screen.width - 2 * ITEM_SPACING - 2 * ITEM_PREVIEW;
-const ITEM_PREVIEW_HEIGHT = 200;
 
 const RNMapComponent: React.FC<RNMapProps> = ({
   initialRegion,
@@ -286,7 +285,6 @@ const styles = StyleSheet.create({
   },
   item: {
     width: ITEM_WIDTH,
-    // height: ITEM_PREVIEW_HEIGHT,
     marginHorizontal: ITEM_SPACING / 2,
     overflow: 'hidden',
   },

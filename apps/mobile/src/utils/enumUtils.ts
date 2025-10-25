@@ -18,6 +18,7 @@ import {
   SocialMediaPlatform,
   SupportCategory,
   Currency,
+  BusinessCategory,
 } from '@motorove/shared';
 import {DropdownItem} from '@components/Dropdown/types';
 import {i18n} from '@/i18n';
@@ -194,5 +195,16 @@ export class EnumUtils {
   }
   static getCurrencyDropdownOptions(): DropdownItem[] {
     return this.getDropdownOptions(Currency, 'enums.currency');
+  }
+
+  static getBusinessCategoryDropdownOptions(): DropdownItem[] {
+    return this.getDropdownOptions(BusinessCategory, 'enums.businessCategory');
+  }
+
+  static convertBusinessCategory(businessCategory: BusinessCategory): string {
+    const businessCategoryItem = this.getBusinessCategoryDropdownOptions().find(
+      t => t.value.toLowerCase() === businessCategory.toLowerCase(),
+    );
+    return businessCategoryItem?.label || businessCategory;
   }
 }
