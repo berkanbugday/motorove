@@ -10,6 +10,7 @@ interface TypographyProps extends TextProps {
   weight?: keyof typeof fontWeights;
   color?: string;
   align?: 'auto' | 'left' | 'right' | 'center' | 'justify';
+  lineHeight?: number;
   children: React.ReactNode;
 }
 
@@ -18,6 +19,7 @@ export const Typography: React.FC<TypographyProps> = ({
   weight,
   color = colors.neutral.black,
   align = 'left',
+  lineHeight,
   style,
   children,
   ...props
@@ -30,6 +32,7 @@ export const Typography: React.FC<TypographyProps> = ({
       color,
       textAlign: align,
       ...(weight && {fontWeight: fontWeights[weight]}),
+      ...(lineHeight && {lineHeight}),
     } as TextStyle,
     style as TextStyle,
   );

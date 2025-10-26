@@ -40,7 +40,7 @@ interface IMapBounds {
 
 // Hook for getting all businesses within map viewport bounds
 // @param bounds - Map viewport bounds (polygon)
-// @param limit - Maximum number of businesses to return (default: 300 on backend)
+// @param limit - Maximum number of businesses to return (default: 100 on backend)
 export const useGetBusinesses = (bounds?: IMapBounds, limit?: number) => {
   const [hasMore, setHasMore] = useState(true);
   const [currentBounds, setCurrentBounds] = useState<IMapBounds | undefined>(
@@ -129,13 +129,10 @@ export const useGetBusinesses = (bounds?: IMapBounds, limit?: number) => {
   }, [data?.businesses?.length, fetchMore, hasMore, loading]);
 
   // Update bounds and refetch
-  const updateBounds = useCallback(
-    (newBounds: IMapBounds) => {
-      setCurrentBounds(newBounds);
-      setHasMore(true);
-    },
-    [],
-  );
+  const updateBounds = useCallback((newBounds: IMapBounds) => {
+    setCurrentBounds(newBounds);
+    setHasMore(true);
+  }, []);
 
   return {
     businesses: (data?.businesses as IBusiness[]) || [],

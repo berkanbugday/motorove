@@ -87,6 +87,10 @@
 		<string>sms</string>
 		<string>http</string>
 		<string>https</string>
+		<string>comgooglemaps</string>
+		<string>waze</string>
+		<string>yandexmaps</string>
+		<string>com.sygic.aura</string>
 	</array>
 </dict>
 </plist>

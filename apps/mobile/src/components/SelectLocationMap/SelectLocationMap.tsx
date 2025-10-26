@@ -271,9 +271,8 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
           <RNMap
             initialRegion={region}
             showUserLocation={true}
-            showLoadMarkerButton={false}
+            showSearchButton={false}
             showSearchBar={false}
-            zoomControlEnabled={false}
             onPress={handleMapPress}
             style={styles.map}
             markers={getMarkers()}

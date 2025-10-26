@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useCallback} from 'react';
+import React, {useMemo, useState, useCallback, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -20,7 +20,9 @@ import {
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
+import {calculateDistance} from '@utils/locationUtils';
 import {BusinessStatus, DayOfWeek} from '@motorove/shared';
+import {useLanguage} from '@contexts/LanguageContext';
 
 /**
  * Business marker card component
@@ -36,10 +38,15 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
   onDetailModalClose,
 }) => {
   const {t} = useTranslation();
+  const {language} = useLanguage();
   // Modal state
   const [isModalVisible, setIsModalVisible] = useState(false);
   // Address expansion state
   const [isAddressExpanded, setIsAddressExpanded] = useState(false);
+  // About expansion state
+  const [isAboutExpanded, setIsAboutExpanded] = useState(false);
+  // Distance state
+  const [distance, setDistance] = useState<string | null>(null);
 
   // Modal handlers
   const handleModalOpen = useCallback(() => {
@@ -97,26 +104,18 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
     }
   }, [business.countryCode, business.phoneNumber, t]);
 
-  // Calculate distance from user location
-  const distance = useMemo(() => {
+  // Calculate straight-line distance
+  useEffect(() => {
     if (!userLocation) {
-      return null;
+      setDistance(null);
+      return;
     }
 
-    const R = 6371; // Earth's radius in km
-    const dLat =
-      ((business.address.latitude - userLocation.latitude) * Math.PI) / 180;
-    const dLon =
-      ((business.address.longitude - userLocation.longitude) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((userLocation.latitude * Math.PI) / 180) *
-        Math.cos((business.address.latitude * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
-    return d.toFixed(1);
+    const straightLineDistance = calculateDistance(userLocation, {
+      latitude: business.address.latitude,
+      longitude: business.address.longitude,
+    });
+    setDistance(straightLineDistance.toFixed(1));
   }, [userLocation, business.address]);
 
   // Calculate business status based on current time and working hours
@@ -215,8 +214,8 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
           size="small"
         />
         {/* <View style={styles.ratingContainer}>
-          <Icon name="comments-filled" size={16} />
-          <BodySmall>(120)</BodySmall>
+          <Icon name="star-filled" color={colors.status.warning} size={16} />
+          <BodySmall>(120 yorum)</BodySmall>
         </View> */}
       </View>
       {onClose && (
@@ -258,7 +257,7 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
             </BodySmall>
             {distance && (
               <Caption color={colors.neutral.grey}>
-                {distance} {t('common.km_away')}
+                {distance} {t('screens.map.km_away')}
               </Caption>
             )}
           </View>
@@ -278,6 +277,28 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
             <Caption color={colors.neutral.grey}>
               {t('screens.map.tap_for_call')}
             </Caption>
+          </View>
+        </TouchableOpacity>
+      )}
+
+      {/* About Section */}
+      {business.descriptions && business.descriptions.length > 0 && (
+        <TouchableOpacity
+          style={styles.infoRow}
+          onPress={() => {
+            setIsAboutExpanded(prev => !prev);
+          }}>
+          <Icon name="file-filled" size={16} />
+          <View style={styles.infoTextContainer}>
+            <BodySmall numberOfLines={isAboutExpanded ? undefined : 1}>
+              {
+                business.descriptions.find(
+                  description =>
+                    description.language.toLowerCase() ===
+                    language.toLowerCase(),
+                )?.description
+              }
+            </BodySmall>
           </View>
         </TouchableOpacity>
       )}

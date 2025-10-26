@@ -493,7 +493,7 @@ input FilterAddressInput {
 }
 
 input FilterBusinessInput {
-  limit: Int = 300
+  limit: Int = 100
   northEastLat: Float
   northEastLng: Float
   southWestLat: Float

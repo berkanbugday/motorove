@@ -64,7 +64,6 @@ export default {
     select_all: 'Select All',
     clear_all: 'Clear All',
     view_details: 'View Details',
-    km_away: 'km away',
   },
 
   // Bottom tabs navigation items
@@ -568,6 +567,22 @@ export default {
       no_phone_number: 'No phone number available',
       phone_not_supported: 'Phone calls are not supported on this device',
       phone_call_error: 'Unable to make phone call. Please try again.',
+      km_away: 'km away',
+      working_hours: 'Working Hours',
+      address: 'Address',
+      phone: 'Phone',
+      about: 'About',
+      write_review: 'Write Review',
+      rate_this_business: 'Rate This Business',
+      share_your_experience: 'Share Your Experience',
+      submit_review: 'Submit Review',
+      choose_map_app: 'Choose Map App',
+      select_preferred_navigation: 'Select your preferred navigation app',
+      google_maps: 'Google Maps',
+      apple_maps: 'Apple Maps',
+      waze: 'Waze',
+      yandex_maps: 'Yandex Maps',
+      sygic: 'Sygic',
     },
 
     // User search screen
@@ -1234,6 +1249,15 @@ export default {
       open: 'Open',
       closed: 'Closed',
       open_24_hours: '24 Hours Open',
+    },
+    dayOfWeek: {
+      monday: 'Monday',
+      tuesday: 'Tuesday',
+      wednesday: 'Wednesday',
+      thursday: 'Thursday',
+      friday: 'Friday',
+      saturday: 'Saturday',
+      sunday: 'Sunday',
     },
   },
 

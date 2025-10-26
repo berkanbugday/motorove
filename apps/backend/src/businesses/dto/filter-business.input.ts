@@ -31,10 +31,10 @@ export class FilterBusinessInput {
   @Max(180)
   southWestLng?: number;
 
-  @Field(() => Int, { nullable: true, defaultValue: 300 })
+  @Field(() => Int, { nullable: true, defaultValue: 100 })
   @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(1000)
-  limit?: number = 300;
+  limit?: number = 100;
 }

@@ -100,6 +100,7 @@ import LocationArrowFilled from '@assets/icons/location-arrow-filled.svg';
 import MountainsFilled from '@assets/icons/mountains-filled.svg';
 import MotorcycleFilled from '@assets/icons/motorcycle-filled.svg';
 import MoneyBillFilled from '@assets/icons/money-bill-filled.svg';
+import StarFilled from '@assets/icons/star-filled.svg';
 
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
@@ -218,7 +219,8 @@ export type IconName =
   | 'location-arrow-filled'
   | 'mountains-filled'
   | 'motorcycle-filled'
-  | 'money-bill-filled';
+  | 'money-bill-filled'
+  | 'star-filled';
 
 interface IconProps {
   name: IconName;
@@ -453,6 +455,8 @@ export function Icon({
       return <MotorcycleFilled {...commonProps} />;
     case 'money-bill-filled':
       return <MoneyBillFilled {...commonProps} />;
+    case 'star-filled':
+      return <StarFilled {...commonProps} />;
     default:
       return null;
   }

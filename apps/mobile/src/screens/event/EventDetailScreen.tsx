@@ -40,7 +40,8 @@ import {
   showToast,
   ImagePreviewModal,
 } from '@components';
-import {format, formatDuration, intervalToDuration} from 'date-fns';
+import {format} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
 
@@ -56,9 +57,9 @@ import {
 } from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
-import {tr, enUS} from 'date-fns/locale';
 import {EnumUtils} from '@utils/enumUtils';
 import {formatCurrency} from '@utils/currencyUtils';
+import {calculateRouteWithOSRM, formatRouteInfo} from '@utils/routeUtils';
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
 
 type Props = {
@@ -391,7 +392,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   };
 
   // Calculate route using OSRM API (OpenStreetMap Routing Machine)
-  const calculateRouteWithOSRM = useCallback(
+  const calculateRoute = useCallback(
     async (
       startLat: number,
       startLng: number,
@@ -401,66 +402,23 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
       try {
         setIsLoadingRoute(true);
 
-        // Use the OSRM API to calculate route distance and duration
-        const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=false`;
+        const result = await calculateRouteWithOSRM(
+          startLat,
+          startLng,
+          endLat,
+          endLng,
+          language as Language,
+        );
 
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
-          const routeData = data.routes[0];
-          const distanceKm = Math.round(routeData.distance / 1000); // Convert meters to km
-          const durationHours = routeData.duration / 3600; // Convert seconds to hours
-
-          // Format duration using date-fns
-          const durationMs = routeData.duration * 1000; // Convert seconds to milliseconds
-          const duration = intervalToDuration({start: 0, end: durationMs});
-
-          // Get the correct locale based on current language setting
-          const locale =
-            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS;
-
-          let durationText;
-          if (durationHours < 1) {
-            // For durations less than 1 hour, display minutes only
-            durationText = formatDuration(
-              {minutes: duration.minutes || 0},
-              {
-                format: ['minutes'],
-                locale: locale,
-              },
-            );
-            if (!durationText && duration.seconds) {
-              // If less than a minute, use localized version of '1 minute'
-              durationText = formatDuration(
-                {minutes: 1},
-                {format: ['minutes'], locale: locale},
-              );
-            }
-          } else {
-            // For longer durations, display hours and minutes
-            durationText = formatDuration(
-              {hours: duration.hours || 0, minutes: duration.minutes || 0},
-              {
-                format: ['hours', 'minutes'],
-                delimiter: ' ',
-                locale: locale,
-              },
-            );
-          }
-
-          setRouteInfo(`${distanceKm} km • ${durationText}`);
-        } else {
-          throw new Error('Route calculation failed');
-        }
+        setRouteInfo(formatRouteInfo(result.distanceKm, result.durationText));
       } catch (error) {
         loggingService.error('Error calculating route:', error);
-
         setRouteInfo('');
       } finally {
         setIsLoadingRoute(false);
       }
     },
-    [],
+    [language],
   );
 
   // Load route data when event data is available
@@ -486,7 +444,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         finishAddress.latitude &&
         finishAddress.longitude
       ) {
-        calculateRouteWithOSRM(
+        calculateRoute(
           startAddress.latitude,
           startAddress.longitude,
           finishAddress.latitude,
@@ -496,7 +454,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         setRouteInfo('');
       }
     }
-  }, [event?.addresses, language, calculateRouteWithOSRM]);
+  }, [event?.addresses, language, calculateRoute]);
 
   useEffect(() => {
     if (joinEventLoading || leaveEventLoading) {

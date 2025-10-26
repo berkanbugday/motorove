@@ -5,3 +5,5 @@ export * from './errorUtils';
 export * from './languageUtils';
 export * from './enumUtils';
 export * from './currencyUtils';
+export * from './locationUtils';
+export * from './routeUtils';

@@ -64,7 +64,6 @@ export default {
     select_all: 'Tümünü Seç',
     clear_all: 'Tümünü Temizle',
     view_details: 'Detayları Görüntüle',
-    km_away: 'km uzağında',
   },
 
   // Bottom tabs navigation items
@@ -551,6 +550,23 @@ export default {
       no_phone_number: 'Telefon numarası mevcut değil',
       phone_not_supported: 'Bu cihazda telefon aramaları desteklenmiyor',
       phone_call_error: 'Telefon araması yapılamadı. Lütfen tekrar deneyin.',
+      km_away: 'km uzağında',
+      working_hours: 'Çalışma Saatleri',
+      address: 'Adres',
+      phone: 'Telefon',
+      about: 'Hakkında',
+      write_review: 'Yorum Yaz',
+      rate_this_business: 'Bu işletmeyi değerlendir',
+      share_your_experience: 'Deneyiminizi paylaşın...',
+      submit_review: 'Yorumu Gönder',
+      choose_map_app: 'Harita Uygulaması Seç',
+      select_preferred_navigation:
+        'Tercih ettiğiniz navigasyon uygulamasını seçin',
+      google_maps: 'Google Haritalar',
+      apple_maps: 'Apple Haritalar',
+      waze: 'Waze',
+      yandex_maps: 'Yandex Haritalar',
+      sygic: 'Sygic',
     },
 
     // User search screen
@@ -1222,6 +1238,15 @@ export default {
       open: 'Açık',
       closed: 'Kapalı',
       open_24_hours: '24 Saat Açık',
+    },
+    dayOfWeek: {
+      monday: 'Pazartesi',
+      tuesday: 'Salı',
+      wednesday: 'Çarşamba',
+      thursday: 'Perşembe',
+      friday: 'Cuma',
+      saturday: 'Cumartesi',
+      sunday: 'Pazar',
     },
   },
 

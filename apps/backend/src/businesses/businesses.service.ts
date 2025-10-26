@@ -25,7 +25,7 @@ export class BusinessesService {
       northEastLng,
       southWestLat,
       southWestLng,
-      limit = 300,
+      limit = 100,
     } = filter;
 
     // Require bounds parameters - don't return all businesses
