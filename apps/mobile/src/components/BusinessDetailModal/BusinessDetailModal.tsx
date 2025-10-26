@@ -43,6 +43,7 @@ import {
   Button,
   BottomSheet,
   BodySmall,
+  Subtitle,
 } from '@components';
 import {BusinessDetailModalProps, BusinessDetailModalRef} from './types';
 import {EnumUtils} from '@utils/enumUtils';
@@ -525,10 +526,7 @@ const BusinessDetailModal = forwardRef<
                               return (
                                 <View
                                   key={wh.dayOfWeek}
-                                  style={[
-                                    styles.workingHourRow,
-                                    isToday && styles.todayRow,
-                                  ]}>
+                                  style={[styles.workingHourRow]}>
                                   <Body style={[isToday && styles.todayDay]}>
                                     {workingHours.formatDayName(wh.dayOfWeek)}
                                   </Body>
@@ -578,25 +576,19 @@ const BusinessDetailModal = forwardRef<
               {/* Reviews Section */}
               <View style={styles.reviewsSection}>
                 <View style={styles.reviewsHeader}>
-                  <Title weight="bold" style={styles.reviewsTitle}>
-                    Reviews & Ratings
-                  </Title>
+                  <Subtitle weight="bold">Reviews & Ratings</Subtitle>
                   <TouchableOpacity
                     onPress={() => setShowAddReview(!showAddReview)}
                     style={styles.addReviewButton}>
                     <Icon
                       name={showAddReview ? 'close' : 'pen-filled'}
-                      size={16}
-                      color={colors.primary.main}
+                      size={12}
                     />
-                    <Caption
-                      color={colors.primary.main}
-                      weight="semiBold"
-                      style={styles.addReviewText}>
+                    <BodySmall weight="semiBold">
                       {showAddReview
                         ? t('common.cancel')
                         : t('screens.map.write_review')}
-                    </Caption>
+                    </BodySmall>
                   </TouchableOpacity>
                 </View>
 
@@ -988,8 +980,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.status.successDark,
   },
   reviewsSection: {
-    backgroundColor: colors.neutral.white,
-    // padding: spacing.lg,
+    paddingTop: spacing.md,
     paddingHorizontal: spacing.lg,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
@@ -1000,16 +991,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.lg,
   },
-  reviewsTitle: {
-    fontSize: 18,
-  },
   addReviewButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-  },
-  addReviewText: {
-    fontSize: 14,
+    borderWidth: 1,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderRadius: radius.round,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   addReviewForm: {
     backgroundColor: colors.neutral.lightGrey,
@@ -1133,18 +1124,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.xs,
   },
-  todayRow: {
-    backgroundColor: colors.primary.light,
-    borderRadius: radius.round,
-    marginHorizontal: -spacing.md,
-    paddingHorizontal: spacing.md,
-  },
   closedText: {
     color: colors.primary.main,
   },
   todayDay: {
     fontWeight: 'bold',
-    color: colors.neutral.white,
+    color: colors.neutral.black,
+    textDecorationLine: 'underline',
   },
   markerInner: {
     width: 36,
