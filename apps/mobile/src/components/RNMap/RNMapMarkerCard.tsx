@@ -290,15 +290,27 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
           }}>
           <Icon name="file-filled" size={16} />
           <View style={styles.infoTextContainer}>
-            <BodySmall numberOfLines={isAboutExpanded ? undefined : 1}>
-              {
-                business.descriptions.find(
-                  description =>
-                    description.language.toLowerCase() ===
-                    language.toLowerCase(),
-                )?.description
-              }
-            </BodySmall>
+            {isAboutExpanded ? (
+              <BodySmall>
+                {
+                  business.descriptions.find(
+                    description =>
+                      description.language.toLowerCase() ===
+                      language.toLowerCase(),
+                  )?.description
+                }
+              </BodySmall>
+            ) : (
+              <BodySmall numberOfLines={1}>
+                {
+                  business.descriptions.find(
+                    description =>
+                      description.language.toLowerCase() ===
+                      language.toLowerCase(),
+                  )?.description
+                }
+              </BodySmall>
+            )}
           </View>
         </TouchableOpacity>
       )}
@@ -382,16 +394,6 @@ const styles = StyleSheet.create({
   },
   infoTextContainer: {
     flex: 1,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  callButton: {
-    backgroundColor: colors.status.successDark,
   },
   viewDetailsButton: {
     paddingTop: spacing.md,

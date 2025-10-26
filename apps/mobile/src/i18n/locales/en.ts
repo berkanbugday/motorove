@@ -572,6 +572,7 @@ export default {
       address: 'Address',
       phone: 'Phone',
       about: 'About',
+      reviews: 'Reviews & Ratings',
       write_review: 'Write Review',
       rate_this_business: 'Rate This Business',
       share_your_experience: 'Share Your Experience',

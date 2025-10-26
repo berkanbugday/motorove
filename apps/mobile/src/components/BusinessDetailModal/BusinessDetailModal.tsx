@@ -17,7 +17,6 @@ import {
   ScrollView,
   Platform,
   BackHandler,
-  TextInput,
   Image,
 } from 'react-native';
 import MapView, {
@@ -25,6 +24,7 @@ import MapView, {
   PROVIDER_DEFAULT,
   PROVIDER_GOOGLE,
 } from 'react-native-maps';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -33,7 +33,7 @@ import Animated, {
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
-import {IBusiness, DayOfWeek} from '@motorove/shared';
+import {IBusiness, DayOfWeek, BusinessStatus} from '@motorove/shared';
 import {colors, radius, spacing} from '@theme';
 import {
   Body,
@@ -44,6 +44,9 @@ import {
   BottomSheet,
   BodySmall,
   Subtitle,
+  AnimatedInput,
+  showToast,
+  Chip,
 } from '@components';
 import {BusinessDetailModalProps, BusinessDetailModalRef} from './types';
 import {EnumUtils} from '@utils/enumUtils';
@@ -188,6 +191,91 @@ const BusinessDetailModal = forwardRef<
 
     const workingHours = useWorkingHours();
 
+    // Calculate business status based on current time and working hours
+    const businessStatus = React.useMemo(() => {
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+      // Convert JavaScript day to DayOfWeek enum
+      const dayMapping: {[key: number]: DayOfWeek} = {
+        0: DayOfWeek.SUNDAY,
+        1: DayOfWeek.MONDAY,
+        2: DayOfWeek.TUESDAY,
+        3: DayOfWeek.WEDNESDAY,
+        4: DayOfWeek.THURSDAY,
+        5: DayOfWeek.FRIDAY,
+        6: DayOfWeek.SATURDAY,
+      };
+
+      const todayEnum = dayMapping[currentDay];
+      const todayWorkingHours = currentBusiness?.workingHours?.find(
+        wh => wh.dayOfWeek === todayEnum,
+      );
+
+      // If no working hours for today, business is closed
+      if (!todayWorkingHours) {
+        return {
+          status: BusinessStatus.CLOSED,
+          label: t('enums.businessStatus.closed'),
+        };
+      }
+
+      // Check if business is open 24 hours
+      if (todayWorkingHours.isOpen24h) {
+        return {
+          status: BusinessStatus.OPEN_24_HOURS,
+          label: t('enums.businessStatus.open_24_hours'),
+        };
+      }
+
+      // Check if current time is within working hours
+      if (todayWorkingHours.startHour && todayWorkingHours.endHour) {
+        const currentTime = now.getHours() * 60 + now.getMinutes(); // Current time in minutes
+
+        // Parse start and end hours (format: "HH:MM")
+        const [startHour, startMinute] = todayWorkingHours.startHour
+          .split(':')
+          .map(Number);
+        const [endHour, endMinute] = todayWorkingHours.endHour
+          .split(':')
+          .map(Number);
+
+        const startTimeMinutes = startHour * 60 + startMinute;
+        const endTimeMinutes = endHour * 60 + endMinute;
+
+        // Handle overnight hours (e.g., 22:00 to 06:00)
+        if (startTimeMinutes > endTimeMinutes) {
+          // Business closes the next day
+          if (
+            currentTime >= startTimeMinutes ||
+            currentTime <= endTimeMinutes
+          ) {
+            return {
+              status: BusinessStatus.OPEN,
+              label: t('enums.businessStatus.open'),
+            };
+          }
+        } else {
+          // Normal hours within the same day
+          if (
+            currentTime >= startTimeMinutes &&
+            currentTime <= endTimeMinutes
+          ) {
+            return {
+              status: BusinessStatus.OPEN,
+              label: t('enums.businessStatus.open'),
+            };
+          }
+        }
+      }
+
+      // Default to closed
+      return {
+        status: BusinessStatus.CLOSED,
+        label: t('enums.businessStatus.closed'),
+      };
+    }, [currentBusiness?.workingHours, t]);
+
     // Animation values
     const translateY = useSharedValue(SCREEN_HEIGHT);
 
@@ -246,14 +334,52 @@ const BusinessDetailModal = forwardRef<
       return false;
     }, [isVisible, hideModal]);
 
-    // External actions
-    const handleCall = useCallback(() => {
+    // Handle phone number call
+    const handlePhoneNumberCall = useCallback(async () => {
       if (!currentBusiness?.phoneNumber) {
+        showToast({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('screens.map.no_phone_number'),
+        });
         return;
       }
-      const phoneNumber = `${currentBusiness.countryCode}${currentBusiness.phoneNumber}`;
-      Linking.openURL(`tel:${phoneNumber}`);
-    }, [currentBusiness]);
+
+      try {
+        // Format phone number (remove spaces and combine country code with number)
+        const phoneNumber =
+          `${currentBusiness?.countryCode}${currentBusiness?.phoneNumber}`.replace(
+            /\s/g,
+            '',
+          );
+        const phoneUrl = `tel:${phoneNumber}`;
+
+        // On Android, canOpenURL often returns false for tel: URLs even when supported
+        // So we skip the check and directly try to open the dialer
+        if (Platform.OS === 'android') {
+          await Linking.openURL(phoneUrl);
+        } else {
+          // On iOS, check if the device can make phone calls first
+          const canOpenURL = await Linking.canOpenURL(phoneUrl);
+
+          if (canOpenURL) {
+            await Linking.openURL(phoneUrl);
+          } else {
+            showToast({
+              type: 'error',
+              text1: t('common.error'),
+              text2: t('screens.map.phone_not_supported'),
+            });
+          }
+        }
+      } catch (error) {
+        showToast({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('screens.map.phone_call_error'),
+        });
+      }
+    }, [currentBusiness?.countryCode, currentBusiness?.phoneNumber, t]);
 
     const checkInstalledApps = async () => {
       const apps = await MapAppsService.checkInstalledApps();
@@ -362,402 +488,406 @@ const BusinessDetailModal = forwardRef<
               onPress={hideModal}
               testID="close-button"
             />
-
-            <ScrollView
+            <KeyboardAwareScrollView
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.scrollContent}
-              bounces={false}>
-              {/* Header Map Section */}
-              <View style={styles.header}>
-                <MapView
-                  style={styles.headerImage}
-                  provider={
-                    Platform.OS === 'android'
-                      ? PROVIDER_GOOGLE
-                      : PROVIDER_DEFAULT
-                  }
-                  initialRegion={{
-                    latitude: currentBusiness.address.latitude,
-                    longitude: currentBusiness.address.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }}
-                  scrollEnabled={false}
-                  zoomEnabled={false}
-                  pitchEnabled={false}
-                  rotateEnabled={false}
-                  pointerEvents="none">
-                  <Marker
-                    pinColor={colors.neutral.black}
-                    coordinate={{
+              enableOnAndroid={true}
+              enableAutomaticScroll={true}
+              keyboardShouldPersistTaps="handled">
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+                bounces={false}>
+                {/* Header Map Section */}
+                <View style={styles.header}>
+                  <MapView
+                    style={styles.headerImage}
+                    provider={
+                      Platform.OS === 'android'
+                        ? PROVIDER_GOOGLE
+                        : PROVIDER_DEFAULT
+                    }
+                    initialRegion={{
                       latitude: currentBusiness.address.latitude,
                       longitude: currentBusiness.address.longitude,
-                    }}>
-                    <View
-                      style={[
-                        styles.markerInner,
-                        {backgroundColor: colors.neutral.black},
-                      ]}>
-                      <Icon
-                        name="wrench-filled"
-                        size={16}
-                        color={colors.neutral.white}
-                      />
-                    </View>
-                  </Marker>
-                </MapView>
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }}
+                    scrollEnabled={false}
+                    zoomEnabled={false}
+                    pitchEnabled={false}
+                    rotateEnabled={false}
+                    pointerEvents="none">
+                    <Marker
+                      pinColor={colors.neutral.black}
+                      coordinate={{
+                        latitude: currentBusiness.address.latitude,
+                        longitude: currentBusiness.address.longitude,
+                      }}>
+                      <View
+                        style={[
+                          styles.markerInner,
+                          {backgroundColor: colors.neutral.black},
+                        ]}>
+                        <Icon
+                          name="wrench-filled"
+                          size={16}
+                          color={colors.neutral.white}
+                        />
+                      </View>
+                    </Marker>
+                  </MapView>
 
-                {/* Business Title Overlay */}
-                <View style={styles.headerOverlay}>
-                  <Title weight="bold" color={colors.neutral.white}>
-                    {currentBusiness.name}
-                  </Title>
+                  {/* Business Title Overlay */}
+                  <View style={styles.headerOverlay}>
+                    <Title weight="bold" color={colors.neutral.white}>
+                      {currentBusiness.name}
+                    </Title>
 
-                  <View style={styles.categoryRatingRow}>
-                    <BodySmall weight="semiBold" color={colors.neutral.white}>
-                      {EnumUtils.convertBusinessCategory(
-                        currentBusiness.category,
-                      )}
-                    </BodySmall>
-                    {/* <View style={styles.ratingContainer}>
-                      <Icon
-                        name="star-filled"
-                        size={14}
-                        color={colors.status.warning}
-                      />
-                      <Caption weight="semiBold" color={colors.neutral.white}>
-                        4.5
-                      </Caption>
-                      <Caption weight="semiBold" color={colors.neutral.white}>
-                        (120 yorum)
-                      </Caption>
-                    </View> */}
-                  </View>
-                </View>
-              </View>
-
-              {/* Business Information Section */}
-              <View style={styles.infoSection}>
-                {/* Address */}
-                <View style={styles.infoRow}>
-                  <Icon name="map-pin-filled" size={20} />
-                  <View style={styles.infoTextContainer}>
-                    <Body weight="semiBold">{t('screens.map.address')}</Body>
-                    <Body lineHeight={25}>
-                      {currentBusiness.address.address}
-                    </Body>
-                    {distance && (
-                      <Caption color={colors.neutral.grey}>
-                        {distance} {t('screens.map.km_away')}
-                      </Caption>
-                    )}
-                  </View>
-                </View>
-
-                {/* Phone Number */}
-                {currentBusiness.phoneNumber && (
-                  <View style={styles.infoRow}>
-                    <Icon name="phone" size={20} />
-                    <View style={styles.infoTextContainer}>
-                      <Body weight="semiBold">{t('screens.map.phone')}</Body>
-                      <Body>
-                        {currentBusiness.countryCode}{' '}
-                        {currentBusiness.phoneNumber}
-                      </Body>
-                    </View>
-                  </View>
-                )}
-
-                {/* Working Hours */}
-                {currentBusiness.workingHours &&
-                  currentBusiness.workingHours.length > 0 && (
-                    <View style={styles.infoRow}>
-                      <Icon name="clock-filled" size={20} />
-                      <View style={styles.infoTextContainer}>
-                        <TouchableOpacity
-                          onPress={() =>
-                            setShowAllWorkingHours(!showAllWorkingHours)
-                          }
-                          activeOpacity={0.7}
-                          style={styles.workingHoursHeader}>
-                          <Body weight="semiBold">
-                            {t('screens.map.working_hours')}
-                          </Body>
-                          <Icon
-                            name={
-                              showAllWorkingHours
-                                ? 'chevron-up'
-                                : 'chevron-down'
-                            }
-                            size={20}
-                            color={colors.neutral.grey}
-                          />
-                        </TouchableOpacity>
-
-                        {/* Today's Hours (Always Visible) */}
-                        {workingHours.today && (
-                          <View style={styles.todayHoursRow}>
-                            <Body style={styles.todayLabel}>
-                              {workingHours.formatDayName(
-                                workingHours.today.dayOfWeek,
-                              )}
-                            </Body>
-                            <Body
-                              style={[
-                                !workingHours.today.startHour &&
-                                  !workingHours.today.isOpen24h &&
-                                  styles.closedText,
-                              ]}>
-                              {workingHours.formatHours(
-                                workingHours.today.startHour,
-                                workingHours.today.endHour,
-                                workingHours.today.isOpen24h,
-                              )}
-                            </Body>
-                          </View>
+                    <View style={styles.categoryRatingRow}>
+                      <BodySmall weight="semiBold" color={colors.neutral.white}>
+                        {EnumUtils.convertBusinessCategory(
+                          currentBusiness.category,
                         )}
-
-                        {/* All Working Hours (Expandable) */}
-                        {showAllWorkingHours && (
-                          <View style={styles.allWorkingHours}>
-                            {workingHours.orderedDays.map(wh => {
-                              const isToday =
-                                workingHours.today?.dayOfWeek === wh.dayOfWeek;
-                              return (
-                                <View
-                                  key={wh.dayOfWeek}
-                                  style={[styles.workingHourRow]}>
-                                  <Body style={[isToday && styles.todayDay]}>
-                                    {workingHours.formatDayName(wh.dayOfWeek)}
-                                  </Body>
-                                  <Body
-                                    style={[
-                                      !wh.startHour &&
-                                        !wh.isOpen24h &&
-                                        styles.closedText,
-                                      isToday && styles.todayDay,
-                                    ]}>
-                                    {workingHours.formatHours(
-                                      wh.startHour,
-                                      wh.endHour,
-                                      wh.isOpen24h,
-                                    )}
-                                  </Body>
-                                </View>
-                              );
-                            })}
-                          </View>
-                        )}
+                      </BodySmall>
+                      <View style={styles.ratingContainer}>
+                        <Icon
+                          name="star-filled"
+                          size={14}
+                          color={colors.status.warning}
+                        />
+                        <Caption weight="semiBold" color={colors.neutral.white}>
+                          4.5
+                        </Caption>
+                        <Caption weight="semiBold" color={colors.neutral.white}>
+                          (120 yorum)
+                        </Caption>
                       </View>
                     </View>
-                  )}
+                  </View>
+                </View>
 
-                {/* Description */}
-                {currentBusiness.descriptions &&
-                  currentBusiness.descriptions.length > 0 && (
+                {/* Business Information Section */}
+                <View style={styles.infoSection}>
+                  {/* Address */}
+                  <View style={styles.infoRow}>
+                    <Icon name="map-pin-filled" size={20} />
+                    <View style={styles.infoTextContainer}>
+                      <Body weight="semiBold">{t('screens.map.address')}</Body>
+                      <Body lineHeight={25}>
+                        {currentBusiness.address.address}
+                      </Body>
+                      {distance && (
+                        <Caption color={colors.neutral.grey}>
+                          {distance} {t('screens.map.km_away')}
+                        </Caption>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Phone Number */}
+                  {currentBusiness.phoneNumber && (
                     <View style={styles.infoRow}>
-                      <Icon name="file-filled" size={20} />
+                      <Icon name="phone" size={20} />
                       <View style={styles.infoTextContainer}>
-                        <Body weight="semiBold">{t('screens.map.about')}</Body>
-                        <Body lineHeight={25}>
-                          {
-                            currentBusiness.descriptions.find(
-                              description =>
-                                description.language.toLowerCase() ===
-                                language.toLowerCase(),
-                            )?.description
-                          }
+                        <Body weight="semiBold">{t('screens.map.phone')}</Body>
+                        <Body>
+                          {currentBusiness.countryCode}{' '}
+                          {currentBusiness.phoneNumber}
                         </Body>
                       </View>
                     </View>
                   )}
-              </View>
 
-              {/* Reviews Section */}
-              <View style={styles.reviewsSection}>
-                <View style={styles.reviewsHeader}>
-                  <Subtitle weight="bold">Reviews & Ratings</Subtitle>
-                  <TouchableOpacity
-                    onPress={() => setShowAddReview(!showAddReview)}
-                    style={styles.addReviewButton}>
-                    <Icon
-                      name={showAddReview ? 'close' : 'pen-filled'}
-                      size={12}
-                    />
-                    <BodySmall weight="semiBold">
-                      {showAddReview
-                        ? t('common.cancel')
-                        : t('screens.map.write_review')}
-                    </BodySmall>
-                  </TouchableOpacity>
+                  {/* Working Hours */}
+                  {currentBusiness.workingHours &&
+                    currentBusiness.workingHours.length > 0 && (
+                      <View style={styles.infoRow}>
+                        <Icon name="clock-filled" size={20} />
+                        <View style={styles.infoTextContainer}>
+                          <TouchableOpacity
+                            onPress={() =>
+                              setShowAllWorkingHours(!showAllWorkingHours)
+                            }
+                            activeOpacity={0.7}
+                            style={styles.workingHoursHeader}>
+                            <Body weight="semiBold">
+                              {t('screens.map.working_hours')}
+                            </Body>
+                            <Icon
+                              name={
+                                showAllWorkingHours
+                                  ? 'chevron-up'
+                                  : 'chevron-down'
+                              }
+                              size={20}
+                              color={colors.neutral.grey}
+                            />
+                          </TouchableOpacity>
+
+                          {/* Today's Hours (Always Visible) */}
+                          {workingHours.today && (
+                            <View style={styles.todayHoursRow}>
+                              <Body style={styles.todayLabel}>
+                                {workingHours.formatDayName(
+                                  workingHours.today.dayOfWeek,
+                                )}
+                              </Body>
+                              <Chip
+                                label={businessStatus.label}
+                                variant="filled"
+                                color={
+                                  businessStatus.status === BusinessStatus.OPEN
+                                    ? 'success'
+                                    : businessStatus.status ===
+                                      BusinessStatus.OPEN_24_HOURS
+                                    ? 'info'
+                                    : 'error'
+                                }
+                                size="small"
+                              />
+                            </View>
+                          )}
+
+                          {/* All Working Hours (Expandable) */}
+                          {showAllWorkingHours && (
+                            <View style={styles.allWorkingHours}>
+                              {workingHours.orderedDays.map(wh => {
+                                const isToday =
+                                  workingHours.today?.dayOfWeek ===
+                                  wh.dayOfWeek;
+                                return (
+                                  <View
+                                    key={wh.dayOfWeek}
+                                    style={[styles.workingHourRow]}>
+                                    <Body style={[isToday && styles.todayDay]}>
+                                      {workingHours.formatDayName(wh.dayOfWeek)}
+                                    </Body>
+                                    <Body
+                                      style={[
+                                        !wh.startHour &&
+                                          !wh.isOpen24h &&
+                                          styles.closedText,
+                                        isToday && styles.todayDay,
+                                      ]}>
+                                      {workingHours.formatHours(
+                                        wh.startHour,
+                                        wh.endHour,
+                                        wh.isOpen24h,
+                                      )}
+                                    </Body>
+                                  </View>
+                                );
+                              })}
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    )}
+
+                  {/* Description */}
+                  {currentBusiness.descriptions &&
+                    currentBusiness.descriptions.length > 0 && (
+                      <View style={styles.infoRow}>
+                        <Icon name="file-filled" size={20} />
+                        <View style={styles.infoTextContainer}>
+                          <Body weight="semiBold">
+                            {t('screens.map.about')}
+                          </Body>
+                          <Body lineHeight={25}>
+                            {
+                              currentBusiness.descriptions.find(
+                                description =>
+                                  description.language.toLowerCase() ===
+                                  language.toLowerCase(),
+                              )?.description
+                            }
+                          </Body>
+                        </View>
+                      </View>
+                    )}
                 </View>
 
-                {/* Add Review Form */}
-                {showAddReview && (
-                  <View style={styles.addReviewForm}>
-                    <Body weight="semiBold" style={styles.rateLabel}>
-                      {t('screens.map.rate_this_business')}
-                    </Body>
-                    <View style={styles.userRatingStars}>
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <TouchableOpacity
-                          key={star}
-                          onPress={() => setUserRating(star)}
-                          hitSlop={{top: 10, bottom: 10, left: 5, right: 5}}>
-                          <Icon
-                            name="star-filled"
-                            size={32}
-                            color={
+                {/* Reviews Section */}
+                <View style={styles.reviewsSection}>
+                  <View style={styles.reviewsHeader}>
+                    <Subtitle weight="bold">
+                      {t('screens.map.reviews')}
+                    </Subtitle>
+                    <TouchableOpacity
+                      onPress={() => setShowAddReview(!showAddReview)}
+                      style={styles.addReviewButton}>
+                      <Icon
+                        name={showAddReview ? 'close' : 'pen-filled'}
+                        size={12}
+                      />
+                      <BodySmall weight="semiBold">
+                        {showAddReview
+                          ? t('common.cancel')
+                          : t('screens.map.write_review')}
+                      </BodySmall>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Add Review Form */}
+                  {showAddReview && (
+                    <View style={styles.addReviewForm}>
+                      <BodySmall weight="semiBold">
+                        {t('screens.map.rate_this_business')}
+                      </BodySmall>
+                      <View style={styles.userRatingStars}>
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <Button
+                            key={star}
+                            variant="text"
+                            shape="circle"
+                            size="small"
+                            onPress={() => setUserRating(star)}
+                            iconName="star-filled"
+                            iconSize={30}
+                            iconColor={
                               star <= userRating
                                 ? colors.status.warning
                                 : colors.neutral.lightGrey
                             }
                           />
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-
-                    <TextInput
-                      style={styles.commentInput}
-                      placeholder={t('screens.map.share_your_experience')}
-                      placeholderTextColor={colors.neutral.grey}
-                      value={userComment}
-                      onChangeText={setUserComment}
-                      multiline
-                      numberOfLines={4}
-                      textAlignVertical="top"
-                    />
-
-                    <Button
-                      title={t('screens.map.submit_review')}
-                      variant="primary"
-                      shape="round"
-                      onPress={() => {
-                        // Handle submit review
-                        setShowAddReview(false);
-                        setUserRating(0);
-                        setUserComment('');
-                      }}
-                      disabled={userRating === 0 || userComment.trim() === ''}
-                      style={styles.submitButton}
-                    />
-                  </View>
-                )}
-
-                {/* Sample Reviews List */}
-                <View style={styles.reviewsList}>
-                  {/* Sample Review 1 */}
-                  <View style={styles.reviewItem}>
-                    <View style={styles.reviewHeader}>
-                      <View style={styles.reviewerInfo}>
-                        <View style={styles.reviewerAvatar}>
-                          <Caption color={colors.neutral.white} weight="bold">
-                            JD
-                          </Caption>
-                        </View>
-                        <View>
-                          <Body weight="semiBold">John Doe</Body>
-                          <Caption color={colors.neutral.grey}>
-                            2 days ago
-                          </Caption>
-                        </View>
-                      </View>
-                      <View style={styles.reviewRating}>
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Icon
-                            key={star}
-                            name="star-filled"
-                            size={12}
-                            color={
-                              star <= 5
-                                ? colors.status.warning
-                                : colors.neutral.lightGrey
-                            }
-                          />
                         ))}
                       </View>
-                    </View>
-                    <Body style={styles.reviewText}>
-                      Great service and professional staff. Highly recommend for
-                      motorcycle maintenance!
-                    </Body>
-                  </View>
 
-                  {/* Sample Review 2 */}
-                  <View style={styles.reviewItem}>
-                    <View style={styles.reviewHeader}>
-                      <View style={styles.reviewerInfo}>
-                        <View style={styles.reviewerAvatar}>
-                          <Caption color={colors.neutral.white} weight="bold">
-                            AS
-                          </Caption>
-                        </View>
-                        <View>
-                          <Body weight="semiBold">Alice Smith</Body>
-                          <Caption color={colors.neutral.grey}>
-                            1 week ago
-                          </Caption>
-                        </View>
-                      </View>
-                      <View style={styles.reviewRating}>
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Icon
-                            key={star}
-                            name="star-filled"
-                            size={12}
-                            color={
-                              star <= 4
-                                ? colors.status.warning
-                                : colors.neutral.lightGrey
-                            }
-                          />
-                        ))}
-                      </View>
-                    </View>
-                    <Body style={styles.reviewText}>
-                      Good experience overall. Quick service and fair pricing.
-                    </Body>
-                  </View>
+                      <AnimatedInput
+                        showClearButton={false}
+                        label={t('screens.map.share_your_experience')}
+                        value={userComment}
+                        onChangeText={setUserComment}
+                        multiline
+                      />
 
-                  {/* Sample Review 3 */}
-                  <View style={styles.reviewItem}>
-                    <View style={styles.reviewHeader}>
-                      <View style={styles.reviewerInfo}>
-                        <View style={styles.reviewerAvatar}>
-                          <Caption color={colors.neutral.white} weight="bold">
-                            MB
-                          </Caption>
-                        </View>
-                        <View>
-                          <Body weight="semiBold">Mike Brown</Body>
-                          <Caption color={colors.neutral.grey}>
-                            2 weeks ago
-                          </Caption>
-                        </View>
-                      </View>
-                      <View style={styles.reviewRating}>
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Icon
-                            key={star}
-                            name="star-filled"
-                            size={12}
-                            color={
-                              star <= 5
-                                ? colors.status.warning
-                                : colors.neutral.lightGrey
-                            }
-                          />
-                        ))}
-                      </View>
+                      <Button
+                        title={t('screens.map.submit_review')}
+                        variant="secondary"
+                        shape="round"
+                        onPress={() => {
+                          // Handle submit review
+                          setShowAddReview(false);
+                          setUserRating(0);
+                          setUserComment('');
+                        }}
+                        disabled={userRating === 0 || userComment.trim() === ''}
+                      />
                     </View>
-                    <Body style={styles.reviewText}>
-                      Excellent work! They fixed my bike perfectly and the team
-                      was very friendly.
-                    </Body>
+                  )}
+
+                  {/* Sample Reviews List */}
+                  <View style={styles.reviewsList}>
+                    <View style={styles.reviewItem}>
+                      <View style={styles.reviewHeader}>
+                        <View style={styles.reviewerInfo}>
+                          <View style={styles.reviewerAvatar}>
+                            <Caption color={colors.neutral.white} weight="bold">
+                              JD
+                            </Caption>
+                          </View>
+                          <View>
+                            <Body weight="semiBold">John Doe</Body>
+                            <Caption color={colors.neutral.grey}>
+                              2 days ago
+                            </Caption>
+                          </View>
+                        </View>
+                        <View style={styles.reviewRating}>
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Icon
+                              key={star}
+                              name="star-filled"
+                              size={12}
+                              color={
+                                star <= 5
+                                  ? colors.status.warning
+                                  : colors.neutral.lightGrey
+                              }
+                            />
+                          ))}
+                        </View>
+                      </View>
+                      <Body style={styles.reviewText}>
+                        Great service and professional staff. Highly recommend
+                        for motorcycle maintenance!
+                      </Body>
+                    </View>
+
+                    <View style={styles.reviewItem}>
+                      <View style={styles.reviewHeader}>
+                        <View style={styles.reviewerInfo}>
+                          <View style={styles.reviewerAvatar}>
+                            <Caption color={colors.neutral.white} weight="bold">
+                              AS
+                            </Caption>
+                          </View>
+                          <View>
+                            <Body weight="semiBold">Alice Smith</Body>
+                            <Caption color={colors.neutral.grey}>
+                              1 week ago
+                            </Caption>
+                          </View>
+                        </View>
+                        <View style={styles.reviewRating}>
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Icon
+                              key={star}
+                              name="star-filled"
+                              size={12}
+                              color={
+                                star <= 4
+                                  ? colors.status.warning
+                                  : colors.neutral.lightGrey
+                              }
+                            />
+                          ))}
+                        </View>
+                      </View>
+                      <Body style={styles.reviewText}>
+                        Good experience overall. Quick service and fair pricing.
+                      </Body>
+                    </View>
+
+                    <View style={styles.reviewItem}>
+                      <View style={styles.reviewHeader}>
+                        <View style={styles.reviewerInfo}>
+                          <View style={styles.reviewerAvatar}>
+                            <Caption color={colors.neutral.white} weight="bold">
+                              MB
+                            </Caption>
+                          </View>
+                          <View>
+                            <Body weight="semiBold">Mike Brown</Body>
+                            <Caption color={colors.neutral.grey}>
+                              2 weeks ago
+                            </Caption>
+                          </View>
+                        </View>
+                        <View style={styles.reviewRating}>
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Icon
+                              key={star}
+                              name="star-filled"
+                              size={12}
+                              color={
+                                star <= 5
+                                  ? colors.status.warning
+                                  : colors.neutral.lightGrey
+                              }
+                            />
+                          ))}
+                        </View>
+                      </View>
+                      <Body style={styles.reviewText}>
+                        Excellent work! They fixed my bike perfectly and the
+                        team was very friendly.
+                      </Body>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </ScrollView>
+              </ScrollView>
+            </KeyboardAwareScrollView>
 
             {/* Action Buttons */}
             <View style={styles.actionSection}>
@@ -775,7 +905,7 @@ const BusinessDetailModal = forwardRef<
                   variant="primary"
                   shape="round"
                   iconName="phone"
-                  onPress={handleCall}
+                  onPress={handlePhoneNumberCall}
                   style={styles.callButton}
                 />
               )}
@@ -913,6 +1043,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.main,
     position: 'relative',
   },
+  statusBadgeToast: {
+    position: 'absolute',
+    top:
+      spacing.md +
+      (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 44),
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 11,
+  },
   closeButton: {
     position: 'absolute',
     top:
@@ -937,6 +1077,7 @@ const styles = StyleSheet.create({
   categoryRatingRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: spacing.md,
   },
   ratingContainer: {
@@ -1003,33 +1144,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   addReviewForm: {
-    backgroundColor: colors.neutral.lightGrey,
-    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.neutral.lightGrey,
+    borderRadius: radius.lg,
     padding: spacing.lg,
     marginBottom: spacing.lg,
-  },
-  rateLabel: {
-    fontSize: 14,
-    marginBottom: spacing.sm,
+    gap: spacing.md,
   },
   userRatingStars: {
     flexDirection: 'row',
     gap: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  commentInput: {
-    borderWidth: 1,
-    borderColor: colors.neutral.grey,
-    borderRadius: 8,
-    padding: spacing.md,
-    fontSize: 14,
-    color: colors.neutral.black,
-    backgroundColor: colors.neutral.white,
-    minHeight: 100,
-    marginBottom: spacing.md,
-  },
-  submitButton: {
-    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
   },
   reviewsList: {
     gap: spacing.md,

@@ -555,6 +555,7 @@ export default {
       address: 'Adres',
       phone: 'Telefon',
       about: 'Hakkında',
+      reviews: 'Yorumlar & Puanlar',
       write_review: 'Yorum Yaz',
       rate_this_business: 'Bu işletmeyi değerlendir',
       share_your_experience: 'Deneyiminizi paylaşın...',
