@@ -321,6 +321,8 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
           variant="text"
           shape="round"
           size="small"
+          iconName="chevron-down"
+          iconPosition="bottom"
           style={styles.viewDetailsButton}
           onPress={handleModalOpen}
         />
@@ -347,7 +349,6 @@ const styles = StyleSheet.create({
     ...commonStyles.container,
     borderRadius: radius.lg,
     paddingTop: spacing.lg,
-    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.lg,
     ...getShadow('small'),
   },
@@ -389,14 +390,14 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     gap: spacing.sm,
   },
   infoTextContainer: {
     flex: 1,
   },
   viewDetailsButton: {
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
   },
