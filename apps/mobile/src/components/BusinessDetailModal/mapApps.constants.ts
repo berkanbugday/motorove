@@ -20,6 +20,7 @@ export const APP_SCHEMES = {
     ios: 'comgooglemaps://',
     android: 'geo:0,0', // More reliable for Android
   }),
+  [MapAppType.APPLE]: 'maps://', // Apple Maps URL scheme
   [MapAppType.WAZE]: 'waze://',
   [MapAppType.YANDEX]: 'yandexmaps://',
   [MapAppType.SYGIC]: 'com.sygic.aura://',
@@ -64,7 +65,7 @@ export const getNavigationUrl = (
         `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
       );
     case MapAppType.APPLE:
-      return `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
+      return `maps://?daddr=${latitude},${longitude}&dirflg=d`;
     case MapAppType.WAZE:
       return `waze://?ll=${latitude},${longitude}&navigate=yes`;
     case MapAppType.YANDEX:

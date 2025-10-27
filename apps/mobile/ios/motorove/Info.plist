@@ -87,6 +87,7 @@
 		<string>sms</string>
 		<string>http</string>
 		<string>https</string>
+		<string>maps</string>
 		<string>comgooglemaps</string>
 		<string>waze</string>
 		<string>yandexmaps</string>
