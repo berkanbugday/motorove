@@ -6,8 +6,8 @@ import {colors, getShadow, spacing} from '@theme';
 import {
   Typography,
   FeedCard,
-  CommentItem,
-  CommentInput,
+  PostCommentItem,
+  PostCommentInput,
   TopHeaderBar,
   showToast,
   Body,
@@ -16,13 +16,13 @@ import {
   SkeletonGroup,
   Button,
 } from '@components';
-import {IComment, IImage, IPost, Language} from '@motorove/shared';
-import {Comment} from '@components/Comment/comments';
+import {IPostComment, IImage, IPost, Language} from '@motorove/shared';
+import {PostComment} from '@components/PostComment/post-comment.interface';
 import {
-  useCreateComment,
+  useCreatePostComment,
   useGetPost,
-  useUpdateComment,
-  useRemoveComment,
+  useUpdatePostComment,
+  useRemovePostComment,
 } from '@services';
 import {useAuth} from '@contexts/AuthContext';
 import {IconName} from '@components/Icon';
@@ -35,10 +35,10 @@ import {
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
 
-type Props = NativeStackScreenProps<MainStackParamList, 'Comment'>;
+type Props = NativeStackScreenProps<MainStackParamList, 'PostComment'>;
 
-// Using the Comment interface from components
-export const CommentScreen = ({navigation, route: {params}}: Props) => {
+// Using the PostComment interface from components
+export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   const {openBottomSheet} = useBottomSheet();
@@ -60,23 +60,29 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     refetch: refetchPost,
   } = useGetPost(params.postId);
 
-  // Mutations for comments
-  const {createComment, loading: createLoading} = useCreateComment(() => {
-    // Refetch comments after creating a new one
-    refetchPost();
-  });
+  // Mutations for post comments
+  const {createPostComment, loading: createLoading} = useCreatePostComment(
+    () => {
+      // Refetch post comments after creating a new one
+      refetchPost();
+    },
+  );
 
-  const {updateComment, loading: updateLoading} = useUpdateComment(() => {
-    // Refetch comments after updating
-    refetchPost();
-    // Reset editing state
-    setEditingComment(null);
-  });
+  const {updatePostComment, loading: updateLoading} = useUpdatePostComment(
+    () => {
+      // Refetch post comments after updating
+      refetchPost();
+      // Reset editing state
+      setEditingComment(null);
+    },
+  );
 
-  const {removeComment, loading: removeLoading} = useRemoveComment(() => {
-    // Refetch comments after removing
-    refetchPost();
-  });
+  const {removePostComment, loading: removeLoading} = useRemovePostComment(
+    () => {
+      // Refetch post comments after removing
+      refetchPost();
+    },
+  );
 
   useEffect(() => {
     // Check for errors
@@ -98,26 +104,26 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     }
   }, [refetchPost]);
 
-  const handleEditComment = (comment: Comment) => {
+  const handleEditPostComment = (comment: PostComment) => {
     setEditingComment({
       id: comment.id,
       content: comment.content,
     });
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEditPostComment = () => {
     setEditingComment(null);
   };
 
-  const handleDeleteComment = (commentId: string, postId: string) => {
+  const handleDeletePostComment = (commentId: string, postId: string) => {
     commentToDelete.current = {id: commentId, postId};
     openBottomSheet({
-      title: t('screens.comment.delete_comment'),
+      title: t('screens.postComment.delete_comment'),
       closeButtonPosition: 'top-left',
       enableGestureControl: false,
       content: (
         <View>
-          <Body>{t('screens.comment.delete_comment_confirmation')}</Body>
+          <Body>{t('screens.postComment.delete_comment_confirmation')}</Body>
           <View
             style={{
               flexDirection: 'row',
@@ -136,7 +142,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
               title={t('common.delete')}
               variant="primary"
               onPress={() => {
-                confirmDeleteComment();
+                confirmDeletePostComment();
                 closeBottomSheet();
               }}
               style={{width: '50%'}}
@@ -148,22 +154,22 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     });
   };
 
-  const confirmDeleteComment = async () => {
+  const confirmDeletePostComment = async () => {
     if (!commentToDelete.current) {
       return;
     }
 
     try {
-      await removeComment(
+      await removePostComment(
         commentToDelete.current.id,
         commentToDelete.current.postId,
       );
     } catch (error) {
-      console.error('Error deleting comment:', error);
+      console.error('Error deleting post comment:', error);
     }
   };
 
-  const handleSubmitComment = async (text: string) => {
+  const handleSubmitPostComment = async (text: string) => {
     if (!text.trim()) {
       return;
     }
@@ -171,19 +177,19 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     // If editing a comment
     if (editingComment) {
       try {
-        await updateComment({
+        await updatePostComment({
           id: editingComment.id,
           content: text,
         });
       } catch (error) {
-        console.error('Error updating comment:', error);
+        console.error('Error updating post comment:', error);
       }
       return;
     }
 
     // Creating a new comment
     try {
-      await createComment({
+      await createPostComment({
         content: text,
         postId: params.postId,
       });
@@ -281,7 +287,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     [user, transformPostToFeedCard],
   );
 
-  const mapCommentForUI = (comment: IComment): Comment => {
+  const mapCommentForUI = (comment: IPostComment): PostComment => {
     const userName = comment.createdBy?.firstName
       ? `${comment.createdBy.firstName} ${comment.createdBy.lastName || ''}`
       : 'Unknown User';
@@ -303,18 +309,18 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     };
   };
 
-  const isCommentOwner = (comment: Comment): boolean => {
+  const isCommentOwner = (comment: PostComment): boolean => {
     return user?.id === comment.userId;
   };
 
   const renderCommentWithSwipeable = useCallback(
-    (commentItem: Comment, style: any = {}) => {
+    (commentItem: PostComment, style: any = {}) => {
       const isOwner = isCommentOwner(commentItem);
 
       // If user is not the owner, render regular comment without swipeable
       if (!isOwner) {
         return (
-          <CommentItem
+          <PostCommentItem
             comment={commentItem}
             style={style}
             actionBarActive={false}
@@ -333,7 +339,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
               text: t('common.edit'),
               icon: <Icon name="pen" color={colors.neutral.white} size={20} />,
               backgroundColor: colors.status.success,
-              onPress: () => handleEditComment(commentItem),
+              onPress: () => handleEditPostComment(commentItem),
             },
             {
               text: t('common.delete'),
@@ -341,11 +347,12 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
                 <Icon name="trash" color={colors.neutral.white} size={20} />
               ),
               backgroundColor: colors.status.error,
-              onPress: () => handleDeleteComment(commentItem.id, params.postId),
+              onPress: () =>
+                handleDeletePostComment(commentItem.id, params.postId),
             },
           ]}
           contentContainerStyle={styles.swipeableContainer}>
-          <CommentItem
+          <PostCommentItem
             comment={commentItem}
             style={style}
             actionBarActive={false}
@@ -353,11 +360,17 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         </SwipeableItem>
       );
     },
-    [handleEditComment, handleDeleteComment, isCommentOwner, params.postId, t],
+    [
+      handleEditPostComment,
+      handleDeletePostComment,
+      isCommentOwner,
+      params.postId,
+      t,
+    ],
   );
 
   const renderItem = useCallback(
-    ({item}: {item: IComment}) => {
+    ({item}: {item: IPostComment}) => {
       const isLastComment =
         item.id === post?.comments?.[post.comments.length - 1]?.id;
       const mappedComment = mapCommentForUI(item);
@@ -376,7 +389,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     return (
       <View style={styles.container}>
         <TopHeaderBar
-          title={t('screens.comment.comments')}
+          title={t('screens.postComment.comments')}
           showBackButton
           onBackPress={() => navigation.goBack()}
         />
@@ -414,7 +427,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
     return (
       <View style={[styles.container, styles.center]}>
         <Typography variant="subtitle">
-          {t('screens.comment.post_not_found')}
+          {t('screens.postComment.post_not_found')}
         </Typography>
       </View>
     );
@@ -423,7 +436,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={`${t('screens.comment.comments')} (${
+        title={`${t('screens.postComment.comments')} (${
           post?.comments?.length || 0
         })`}
         showBackButton
@@ -439,7 +452,7 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         ListHeaderComponent={renderFeedPost(post)}
         ListEmptyComponent={
           <Body color="grey" align="center" style={{marginTop: spacing.xxxl}}>
-            {t('screens.comment.no_comments_yet')}{' '}
+            {t('screens.postComment.no_comments_yet')}{' '}
           </Body>
         }
         contentContainerStyle={styles.listContent}
@@ -448,12 +461,12 @@ export const CommentScreen = ({navigation, route: {params}}: Props) => {
         onRefresh={onRefresh}
       />
 
-      <CommentInput
-        onSubmit={handleSubmitComment}
+      <PostCommentInput
+        onSubmit={handleSubmitPostComment}
         isLoading={createLoading || updateLoading || removeLoading}
         initialValue={editingComment?.content || ''}
         editing={Boolean(editingComment)}
-        onCancelEdit={handleCancelEdit}
+        onCancelEdit={handleCancelEditPostComment}
       />
     </View>
   );

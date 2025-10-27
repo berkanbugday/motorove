@@ -3,7 +3,7 @@ import { Post } from '../../posts/models/post.model';
 import { BaseModel } from '../../core/models/base.model';
 
 @ObjectType()
-export class Comment extends BaseModel {
+export class PostComment extends BaseModel {
   @Field()
   content: string;
 
@@ -16,9 +16,9 @@ export class Comment extends BaseModel {
   @Field(() => ID, { nullable: true })
   parentId?: string;
 
-  @Field(() => Comment, { nullable: true })
-  parent?: Comment;
+  @Field(() => PostComment, { nullable: true })
+  parent?: PostComment;
 
-  @Field(() => [Comment], { nullable: true })
-  replies?: Comment[];
+  @Field(() => [PostComment], { nullable: true })
+  replies?: PostComment[];
 }

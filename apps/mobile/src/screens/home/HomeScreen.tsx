@@ -271,7 +271,7 @@ export const HomeScreen = ({navigation}: Props) => {
   // Handle navigation to comment details
   const handleCommentPress = (postId: string) => {
     // Use our utility function that handles cross-stack navigation
-    navigateToScreen(navigation, 'Comment', {postId});
+    navigateToScreen(navigation, 'PostComment', {postId});
   };
 
   // Handle like press with API call - using optimistic updates

@@ -16,7 +16,7 @@ import {colors, spacing, radius} from '@theme';
 import {Typography, Icon} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 
-interface CommentInputProps {
+interface PostCommentInputProps {
   onSubmit: (text: string) => void;
   placeholder?: string;
   style?: StyleProp<ViewStyle>;
@@ -28,7 +28,7 @@ interface CommentInputProps {
   onCancelEdit?: () => void;
 }
 
-const CommentInput: React.FC<CommentInputProps> = ({
+const PostCommentInput: React.FC<PostCommentInputProps> = ({
   onSubmit,
   placeholder,
   style,
@@ -75,10 +75,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
           <View style={styles.replyingContainer}>
             <Typography variant="caption" color={colors.neutral.grey}>
               {editing ? (
-                t('components.comment.editing_comment')
+                t('components.postComment.editing_comment')
               ) : (
                 <>
-                  {t('components.comment.replying_to')}{' '}
+                  {t('components.postComment.replying_to')}{' '}
                   <Typography variant="caption" weight="bold">
                     {replyingTo}
                   </Typography>
@@ -99,8 +99,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
             style={styles.input}
             placeholder={
               editing
-                ? t('components.comment.edit_your_comment')
-                : placeholder || t('components.comment.add_comment')
+                ? t('components.postComment.edit_your_comment')
+                : placeholder || t('components.postComment.add_comment')
             }
             multiline
             maxLength={500}
@@ -179,4 +179,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CommentInput;
+export default PostCommentInput;

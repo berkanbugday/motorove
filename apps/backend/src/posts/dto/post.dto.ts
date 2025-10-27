@@ -13,7 +13,7 @@ import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
 import { AddressDto } from '../../addresses/dto/address.dto';
 import { IPost } from '@motorove/shared';
-import { CommentDto } from '../../comments/dto/comment.dto';
+import { PostCommentDto } from '../../post-comments/dto/post-comment.dto';
 import { ImageDto } from '../../common/dto/image.dto';
 
 @ObjectType()
@@ -76,8 +76,8 @@ export class PostDto implements IPost {
   @Type(() => UserDto)
   likedUsers?: UserDto[];
 
-  @Field(() => [CommentDto], { nullable: true })
+  @Field(() => [PostCommentDto], { nullable: true })
   @ValidateNested()
-  @Type(() => CommentDto)
-  comments?: CommentDto[];
+  @Type(() => PostCommentDto)
+  comments?: PostCommentDto[];
 }

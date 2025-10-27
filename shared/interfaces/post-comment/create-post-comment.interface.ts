@@ -1,8 +1,8 @@
 /**
- * Create Comment Interface
- * Used for creating new comments
+ * Create PostComment Interface
+ * Used for creating new post comments
  */
-export interface ICreateComment {
+export interface ICreatePostComment {
   /**
    * Comment text content
    */

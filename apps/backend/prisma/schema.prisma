@@ -305,8 +305,8 @@ model User {
   deviceTokens         DeviceToken[]
   posts                Post[]
   updatedPosts         Post[]            @relation("PostUpdatedBy")
-  comments             Comment[]
-  updatedComments      Comment[]         @relation("CommentUpdatedBy")
+  postComments         PostComment[]
+  updatedPostComments  PostComment[]     @relation("PostCommentUpdatedBy")
   postLikes            PostLike[]
   postSaves            PostSave[]
   socialMediaProfiles  SocialMedia[]
@@ -415,7 +415,6 @@ model City {
   // Relations
   groups Group[]
   users  User[]
-
 }
 
 model Group {
@@ -511,12 +510,12 @@ model DeviceToken {
 }
 
 model Post {
-  id        String     @id @default(uuid())
+  id        String        @id @default(uuid())
   content   String
   images    String[]
-  group     Group?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  group     Group?        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId   String?
-  comments  Comment[]
+  comments  PostComment[]
   likes     PostLike[] // Added relation to PostLike
   saves     PostSave[] // Added relation to PostSave
   addresses Address[] // Added relation to Address
@@ -534,7 +533,7 @@ model Post {
   @@index([groupId])
 }
 
-model Comment {
+model PostComment {
   id      String @id @default(uuid())
   content String
   post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -542,15 +541,15 @@ model Comment {
 
   // Parent-child relationship for comment replies
   parentId String?
-  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
-  replies  Comment[] @relation("CommentReplies")
+  parent   PostComment?  @relation("PostCommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies  PostComment[] @relation("PostCommentReplies")
 
   // Base model fields
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id])
   createdAt   DateTime @default(now())
   updatedById String?
-  updatedBy   User?    @relation("CommentUpdatedBy", fields: [updatedById], references: [id])
+  updatedBy   User?    @relation("PostCommentUpdatedBy", fields: [updatedById], references: [id])
   updatedAt   DateTime @updatedAt
   isActive    Boolean  @default(true)
 
@@ -629,7 +628,6 @@ model Business {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isActive  Boolean  @default(true)
-
 }
 
 // Business description model for multi-language support
@@ -797,7 +795,6 @@ model UserSetting {
   // Base model fields
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 }
 
 model SupportRequest {

@@ -4,7 +4,7 @@ import { Group } from '../../groups/models/group.model';
 import { IUser } from '@motorove/shared';
 import { City } from '../../cities/models/city.model';
 import { Post } from '../../posts/models/post.model';
-import { Comment } from '../../comments/models/comment.model';
+import { PostComment } from '../../post-comments/models/post-comment.model';
 import { PostLike } from '../../posts/models/post-like.model';
 import { PostSave } from '../../posts/models/post-save.model';
 import { Garage } from './garage.model';
@@ -80,8 +80,8 @@ export class User implements IUser {
   @Field(() => [Post], { nullable: true })
   posts?: Post[];
 
-  @Field(() => [Comment], { nullable: true })
-  comments?: Comment[];
+  @Field(() => [PostComment], { nullable: true })
+  postComments?: PostComment[];
 
   @Field(() => [PostLike], { nullable: true })
   postLikes?: PostLike[];

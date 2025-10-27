@@ -124,40 +124,6 @@ type CityDto {
   value: String!
 }
 
-type Comment {
-  content: String!
-  createdAt: DateTime!
-  createdBy: User!
-  createdById: String!
-  id: ID!
-  isActive: Boolean!
-  parent: Comment
-  parentId: ID
-  post: Post!
-  postId: String!
-  replies: [Comment!]
-  updatedAt: DateTime!
-  updatedBy: User!
-  updatedById: String!
-}
-
-type CommentDto {
-  content: String!
-  createdAt: DateTime!
-  createdBy: UserDto!
-  createdById: String!
-  id: ID!
-  isActive: Boolean!
-  parent: CommentDto
-  parentId: ID
-  post: PostDto
-  postId: ID!
-  replies: [CommentDto!]
-  updatedAt: DateTime!
-  updatedBy: UserDto!
-  updatedById: String!
-}
-
 input CreateAddressInput {
   address: String!
   eventId: String
@@ -166,12 +132,6 @@ input CreateAddressInput {
   longitude: Float!
   postId: String
   type: AddressType!
-}
-
-input CreateCommentInput {
-  content: String!
-  parentId: ID
-  postId: String!
 }
 
 input CreateDeviceTokenInput {
@@ -233,6 +193,12 @@ input CreateNotificationsInput {
   title: String!
   type: NotificationType!
   userIds: [String!]!
+}
+
+input CreatePostCommentInput {
+  content: String!
+  parentId: ID
+  postId: String!
 }
 
 input CreatePostInput {
@@ -500,13 +466,6 @@ input FilterBusinessInput {
   southWestLng: Float
 }
 
-input FilterCommentInput {
-  createdById: ID
-  isActive: Boolean
-  parentId: ID
-  postId: ID
-}
-
 input FilterGroupInput {
   cityId: String
   privacy: GroupPrivacy = ALL
@@ -708,11 +667,11 @@ type Mutation {
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
   createAddress(input: CreateAddressInput!): AddressDto!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
-  createComment(input: CreateCommentInput!): CommentDto!
   createEvent(input: CreateEventInput!): EventDto!
   createGroup(input: CreateGroupInput!): GroupDto!
   createNotification(input: CreateNotificationInput!): NotificationDto!
   createPost(input: CreatePostInput!): PostDto!
+  createPostComment(input: CreatePostCommentInput!): PostCommentDto!
   createSupportRequest(input: CreateSupportRequestInput!): Boolean!
   deleteAllNotifications: [NotificationDto!]!
   deleteNotification(id: ID!): NotificationDto!
@@ -725,11 +684,11 @@ type Mutation {
   refreshToken(token: String!): AuthResponse!
   rejectEventInvitation(id: ID!): Boolean!
   removeAddress(id: String!): Boolean!
-  removeComment(id: ID!): CommentDto!
   removeDeviceToken: Boolean!
   removeEvent(id: ID!): Boolean!
   removeMember(input: RemoveMemberInput!): Boolean!
   removePost(id: ID!): PostDto!
+  removePostComment(id: ID!): PostCommentDto!
   resend(email: String!): Boolean!
   resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
@@ -740,12 +699,12 @@ type Mutation {
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
   updateAddress(input: UpdateAddressInput!): AddressDto!
-  updateComment(input: UpdateCommentInput!): CommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
   updateGroupMembershipApprovalStatus(input: UpdateGroupMembershipApprovalStatusInput!): GroupMembershipDto!
   updatePassword(input: UpdatePasswordInput!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
+  updatePostComment(input: UpdatePostCommentInput!): PostCommentDto!
   updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
   updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
 }
@@ -828,7 +787,7 @@ enum NotificationType {
 
 type Post {
   addresses: [Address!]
-  comments: [Comment!]
+  comments: [PostComment!]
   content: String!
   createdAt: DateTime!
   createdBy: User!
@@ -845,9 +804,43 @@ type Post {
   updatedById: String!
 }
 
+type PostComment {
+  content: String!
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  id: ID!
+  isActive: Boolean!
+  parent: PostComment
+  parentId: ID
+  post: Post!
+  postId: String!
+  replies: [PostComment!]
+  updatedAt: DateTime!
+  updatedBy: User!
+  updatedById: String!
+}
+
+type PostCommentDto {
+  content: String!
+  createdAt: DateTime!
+  createdBy: UserDto!
+  createdById: String!
+  id: ID!
+  isActive: Boolean!
+  parent: PostCommentDto
+  parentId: ID
+  post: PostDto
+  postId: ID!
+  replies: [PostCommentDto!]
+  updatedAt: DateTime!
+  updatedBy: UserDto!
+  updatedById: String!
+}
+
 type PostDto {
   addresses: [AddressDto!]
-  comments: [CommentDto!]
+  comments: [PostCommentDto!]
   commentsCount: Int!
   content: String!
   createdAt: DateTime!
@@ -894,8 +887,6 @@ type Query {
   businesses(filter: FilterBusinessInput!): [BusinessDto!]!
   cities: [CityDto!]!
   city(id: ID!): CityDto!
-  comment(id: ID!): CommentDto!
-  comments(filters: FilterCommentInput, limit: Int, postId: ID!, skip: Int): [CommentDto!]!
   count: Float!
   event(id: String!): EventDto!
   eventInvitations(limit: Int, skip: Int): [EventInvitationDto!]!
@@ -918,6 +909,8 @@ type Query {
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
   post(id: ID!): PostDto!
+  postComment(id: ID!): PostCommentDto!
+  postComments(limit: Int, postId: ID!, skip: Int): [PostCommentDto!]!
   posts(createdById: ID, groupId: ID, limit: Int, savedById: ID, skip: Int): [PostDto!]!
   user(id: String!): UserDto!
   userProfile(id: String!): UserDto!
@@ -1021,11 +1014,6 @@ input UpdateAddressInput {
   type: AddressType
 }
 
-input UpdateCommentInput {
-  content: String
-  id: ID!
-}
-
 input UpdateEventInput {
   addresses: [CreateAddressInput!]
   campingInfo: String
@@ -1077,6 +1065,11 @@ input UpdatePasswordInput {
   token: String!
 }
 
+input UpdatePostCommentInput {
+  content: String
+  id: ID!
+}
+
 input UpdatePostInput {
   addresses: [CreateAddressInput!]
   content: String
@@ -1102,7 +1095,6 @@ type User {
   bio: String
   city: City!
   cityId: String
-  comments: [Comment!]
   createdAt: DateTime!
   createdEventInvitations: [EventInvitation!]
   createdGroups: [Group!]
@@ -1121,6 +1113,7 @@ type User {
   isActive: Boolean!
   lastName: String!
   notifications: [Notification!]
+  postComments: [PostComment!]
   postLikes: [PostLike!]
   postSaves: [PostSave!]
   posts: [Post!]

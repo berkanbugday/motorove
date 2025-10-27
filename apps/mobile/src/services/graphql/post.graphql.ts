@@ -1,7 +1,7 @@
 import {gql} from '@apollo/client';
 import {USER_FRAGMENT} from './user.graphql';
 import {ADDRESS_FRAGMENT} from './address.graphql';
-import {COMMENT_FRAGMENT} from './comment.graphql';
+import {POST_COMMENT_FRAGMENT} from './post-comment.graphql';
 
 export const POST_FRAGMENT = gql`
   fragment PostFragment on PostDto {
@@ -28,12 +28,12 @@ export const POST_FRAGMENT = gql`
       ...UserFragment
     }
     comments {
-      ...CommentFragment
+      ...PostCommentFragment
     }
   }
   ${USER_FRAGMENT}
   ${ADDRESS_FRAGMENT}
-  ${COMMENT_FRAGMENT}
+  ${POST_COMMENT_FRAGMENT}
 `;
 
 export const GET_POSTS = gql`

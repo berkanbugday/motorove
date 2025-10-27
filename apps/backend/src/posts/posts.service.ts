@@ -18,7 +18,7 @@ import { PostDto } from './dto/post.dto';
 import { AddressDto } from '../addresses/dto/address.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
-import { CommentDto } from '../comments/dto/comment.dto';
+import { PostCommentDto } from '../post-comments/dto/post-comment.dto';
 import { ImageCensorFilterService } from '../core/image-censor-filter/image-censor-filter.service';
 import { ImageDto } from '../common/dto/image.dto';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
@@ -87,39 +87,41 @@ export class PostsService {
             }
           }
 
-          post.likes.map(async (like) => {
-            const user = like.user as UserDto;
+          await Promise.all(
+            post.likes.map(async (like) => {
+              const user = like.user as UserDto;
 
-            // Get signed URL for avatar if exists
-            if (user.avatar && authToken) {
-              try {
-                user.avatar = await this.storageService.getSignedUrl(
-                  user.avatar,
-                  3600,
-                  authToken,
-                );
-              } catch (error) {
-                this.logger.error(
-                  `Error getting signed URL for avatar: ${error.message}`,
-                );
+              // Get signed URL for avatar if exists
+              if (user.avatar && authToken) {
+                try {
+                  user.avatar = await this.storageService.getSignedUrl(
+                    user.avatar,
+                    3600,
+                    authToken,
+                  );
+                } catch (error) {
+                  this.logger.error(
+                    `Error getting signed URL for avatar: ${error.message}`,
+                  );
+                }
               }
-            }
 
-            // Check following status
-            if (currentUserId) {
-              const following = await this.prisma.userFollowing.findFirst({
-                where: {
-                  followerId: currentUserId,
-                  followingId: user.id,
-                  isActive: true,
-                },
-              });
+              // Check following status
+              if (currentUserId) {
+                const following = await this.prisma.userFollowing.findFirst({
+                  where: {
+                    followerId: currentUserId,
+                    followingId: user.id,
+                    isActive: true,
+                  },
+                });
 
-              if (following) {
-                user.followingStatus = following.status as ApprovalStatus;
+                if (following) {
+                  user.followingStatus = following.status as ApprovalStatus;
+                }
               }
-            }
-          });
+            }),
+          );
 
           return this.mapToDto(post as Post, currentUserId, authToken);
         }),
@@ -673,35 +675,35 @@ export class PostsService {
   }
 
   private async mapToDto(
-    prismaPost: Post,
+    post: Post,
     currentUserId?: string,
     authToken?: string,
   ): Promise<PostDto> {
     const likesCount = await this.prisma.postLike.count({
-      where: { postId: prismaPost.id },
+      where: { postId: post.id },
     });
 
-    const commentsCount = await this.prisma.comment.count({
-      where: { postId: prismaPost.id, parentId: null, isActive: true },
-    });
+    const commentsCount = (await this.prisma.postComment.count({
+      where: { postId: post.id, parentId: null, isActive: true },
+    })) as number;
 
     let isLiked = false;
     let isSaved = false;
 
     if (currentUserId) {
-      const like = await this.prisma.postLike.findFirst({
+      const like = (await this.prisma.postLike.findFirst({
         where: {
-          postId: prismaPost.id,
+          postId: post.id,
           userId: currentUserId,
         },
-      });
+      })) as PostLike;
 
-      const save = await this.prisma.postSave.findFirst({
+      const save = (await this.prisma.postSave.findFirst({
         where: {
-          postId: prismaPost.id,
+          postId: post.id,
           userId: currentUserId,
         },
-      });
+      })) as PostSave;
 
       isLiked = !!like;
       isSaved = !!save;
@@ -710,14 +712,10 @@ export class PostsService {
     // Process images to get signed URLs if needed
     const images: ImageDto[] = [];
 
-    if (
-      Array.isArray(prismaPost.images) &&
-      prismaPost.images.length > 0 &&
-      authToken
-    ) {
+    if (Array.isArray(post.images) && post.images.length > 0 && authToken) {
       try {
         await Promise.all(
-          prismaPost.images.map(async (imageUrl) => {
+          post.images.map(async (imageUrl) => {
             if (imageUrl && typeof imageUrl === 'string') {
               const url = await this.storageService.getSignedUrl(
                 imageUrl,
@@ -739,17 +737,17 @@ export class PostsService {
       }
     }
 
-    if (prismaPost.createdBy.avatar) {
-      prismaPost.createdBy.avatar = await this.storageService.getSignedUrl(
-        prismaPost.createdBy.avatar,
+    if (post.createdBy.avatar) {
+      post.createdBy.avatar = await this.storageService.getSignedUrl(
+        post.createdBy.avatar,
         3600,
         authToken,
       );
     }
 
-    if (prismaPost.comments?.length) {
+    if (post.comments?.length) {
       await Promise.all(
-        prismaPost.comments.map(async (comment) => {
+        post.comments.map(async (comment) => {
           if (comment.createdBy.avatar) {
             comment.createdBy.avatar = await this.storageService.getSignedUrl(
               comment.createdBy.avatar,
@@ -766,32 +764,32 @@ export class PostsService {
     }
 
     return {
-      id: prismaPost.id,
-      content: this.profanityFilterService.filterText(prismaPost.content),
+      id: post.id,
+      content: this.profanityFilterService.filterText(post.content),
       images: images,
-      groupId: prismaPost.group?.id,
-      groupName: prismaPost.group?.name,
-      addresses: prismaPost.addresses as AddressDto[],
+      groupId: post.group?.id,
+      groupName: post.group?.name,
+      addresses: post.addresses as AddressDto[],
       likesCount,
       commentsCount,
       isLiked,
       isSaved,
-      createdBy: prismaPost.createdBy as UserDto,
-      createdAt: prismaPost.createdAt,
-      likedUsers: prismaPost.likes?.map((like) => like.user) || [],
+      createdBy: post.createdBy as UserDto,
+      createdAt: post.createdAt,
+      likedUsers: post.likes?.map((like) => like.user) || [],
       comments:
-        prismaPost.comments?.map((comment) => comment as CommentDto) || [],
+        post.comments?.map((comment) => comment as PostCommentDto) || [],
     } as PostDto;
   }
 
   private mapToInteractionDto(
-    prismaInteraction: PostLike | PostSave,
+    interaction: PostLike | PostSave,
   ): PostInteractionDto {
     return {
-      id: prismaInteraction.id,
-      postId: prismaInteraction.postId,
-      userId: prismaInteraction.userId,
-      createdAt: prismaInteraction.createdAt,
+      id: interaction.id,
+      postId: interaction.postId,
+      userId: interaction.userId,
+      createdAt: interaction.createdAt,
     };
   }
 }

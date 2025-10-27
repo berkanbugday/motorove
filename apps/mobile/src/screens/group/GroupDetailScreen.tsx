@@ -578,7 +578,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
   // Handle comment press - navigate to comment screen
   const handleCommentPress = useCallback(
     (postId: string) => {
-      navigateToScreen(navigation, 'Comment', {postId});
+      navigateToScreen(navigation, 'PostComment', {postId});
     },
     [navigation],
   );

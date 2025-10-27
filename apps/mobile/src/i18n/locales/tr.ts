@@ -232,7 +232,7 @@ export default {
       select_privacy: 'Gizlilik Seç',
     },
 
-    comment: {
+    postComment: {
       comments: 'Yorumlar',
       post_not_found: 'Gönderi bulunamadı',
       no_comments_yet: 'Henüz yorum yok',
@@ -815,7 +815,7 @@ export default {
       footer_text:
         'Lokasyon erişim izni ayarlarını daha sonra uygulama tercihlerinden değiştirebilirsiniz',
     },
-    comment: {
+    postComment: {
       add_comment: 'Yorum ekle...',
       edit_your_comment: 'Yorumu düzenle...',
       editing_comment: 'Yorum düzenleniyor',

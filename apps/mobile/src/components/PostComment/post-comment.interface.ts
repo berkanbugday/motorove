@@ -1,7 +1,7 @@
 import {ImageSourcePropType} from 'react-native';
 import {IconName} from '../Icon';
 
-export interface Comment {
+export interface PostComment {
   id: string;
   userId: string;
   userName: string;
@@ -31,5 +31,5 @@ export interface PostWithComments {
     icon?: IconName;
     text: string;
   }>;
-  comments: Comment[];
+  comments: PostComment[];
 }

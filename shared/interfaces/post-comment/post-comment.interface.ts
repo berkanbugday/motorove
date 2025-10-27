@@ -2,14 +2,14 @@ import { IBase } from "../common";
 import { IPost } from "../post";
 
 /**
- * Comment Interface
+ * PostComment Interface
  * Interface for post comments
  */
-export interface IComment extends IBase {
+export interface IPostComment extends IBase {
   content: string;
   postId: string;
   parentId?: string | null;
   post?: Partial<IPost>;
-  parent?: Partial<IComment> | null;
-  replies?: Partial<IComment>[];
+  parent?: Partial<IPostComment> | null;
+  replies?: Partial<IPostComment>[];
 }

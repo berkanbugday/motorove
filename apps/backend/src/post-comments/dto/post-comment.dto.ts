@@ -2,11 +2,11 @@ import { Field, ObjectType, ID } from '@nestjs/graphql';
 import { IsUUID, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PostDto } from '../../posts/dto/post.dto';
-import { IComment } from '@motorove/shared';
+import { IPostComment } from '@motorove/shared';
 import { BaseDto } from '../../core/models/base.dto';
 
 @ObjectType()
-export class CommentDto extends BaseDto implements IComment {
+export class PostCommentDto extends BaseDto implements IPostComment {
   @Field()
   @IsString()
   content: string;
@@ -24,13 +24,13 @@ export class CommentDto extends BaseDto implements IComment {
   @IsUUID()
   parentId?: string;
 
-  @Field(() => CommentDto, { nullable: true })
+  @Field(() => PostCommentDto, { nullable: true })
   @ValidateNested()
-  @Type(() => CommentDto)
-  parent?: CommentDto;
+  @Type(() => PostCommentDto)
+  parent?: PostCommentDto;
 
-  @Field(() => [CommentDto], { nullable: true })
+  @Field(() => [PostCommentDto], { nullable: true })
   @ValidateNested({ each: true })
-  @Type(() => CommentDto)
-  replies?: CommentDto[];
+  @Type(() => PostCommentDto)
+  replies?: PostCommentDto[];
 }

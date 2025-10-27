@@ -5,7 +5,7 @@ import {MainStackParamList} from '../types/navigationTypes';
 import {TabNavigator} from '../tabs/TabNavigator';
 import {
   CreatePostScreen,
-  CommentScreen,
+  PostCommentScreen,
   EditPostScreen,
   PostScreen,
 } from '@screens/post';
@@ -84,8 +84,8 @@ export function MainNavigator() {
 
       {/* Individual screens that can be navigated to from tabs */}
       <Stack.Screen
-        name="Comment"
-        component={CommentScreen}
+        name="PostComment"
+        component={PostCommentScreen}
         options={{
           headerShown: false,
         }}

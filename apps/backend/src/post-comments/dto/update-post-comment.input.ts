@@ -1,9 +1,9 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsOptional, IsUUID } from 'class-validator';
-import { IUpdateComment } from '@motorove/shared';
+import { IUpdatePostComment } from '@motorove/shared';
 
 @InputType()
-export class UpdateCommentInput implements IUpdateComment {
+export class UpdatePostCommentInput implements IUpdatePostComment {
   @Field(() => ID)
   @IsNotEmpty()
   @IsUUID()

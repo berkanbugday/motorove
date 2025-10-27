@@ -226,7 +226,7 @@ export default {
       select_privacy: 'Select Privacy',
     },
 
-    comment: {
+    postComment: {
       comments: 'Comments',
       post_not_found: 'Post not found',
       no_comments_yet: 'No comments yet',
@@ -829,7 +829,7 @@ export default {
       footer_text:
         'You can always change location settings later in the app preferences',
     },
-    comment: {
+    postComment: {
       add_comment: 'Add a comment...',
       edit_your_comment: 'Edit your comment...',
       editing_comment: 'Editing comment',

@@ -41,7 +41,7 @@ export type TabScreenRouteProp<T extends keyof TabParamList> = RouteProp<
 // MAIN STACK
 export type MainStackParamList = {
   Tabs: undefined;
-  Comment: {postId: string};
+  PostComment: {postId: string};
   CreatePost: undefined;
   EditPost: {postId: string};
   CreateGroup: undefined;

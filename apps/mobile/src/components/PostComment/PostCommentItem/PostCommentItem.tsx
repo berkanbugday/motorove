@@ -9,20 +9,20 @@ import {
 } from 'react-native';
 import {Typography} from '../../Typography/Typography';
 import {colors, spacing} from '@theme';
-import {Comment} from '../comments';
+import {PostComment} from '../post-comment.interface';
 import {Icon} from '@components';
 
-interface CommentItemProps {
-  comment: Comment;
+interface PostCommentItemProps {
+  comment: PostComment;
   onLikePress?: (commentId: string) => void;
-  onReplyPress?: (comment: Comment) => void;
+  onReplyPress?: (comment: PostComment) => void;
   onPressAvatar?: (userId: string) => void;
   style?: StyleProp<ViewStyle>;
   isReply?: boolean;
   actionBarActive?: boolean;
 }
 
-const CommentItem: React.FC<CommentItemProps> = ({
+const PostCommentItem: React.FC<PostCommentItemProps> = ({
   comment,
   onLikePress,
   onReplyPress,
@@ -161,4 +161,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CommentItem;
+export default PostCommentItem;

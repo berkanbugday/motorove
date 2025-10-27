@@ -1,6 +1,6 @@
 import { IUser } from "../user";
 import { IAddress } from "../address";
-import { IComment } from "../comment";
+import { IPostComment } from "../post-comment";
 import { IImage } from "./image.interface";
 
 export interface IPost {
@@ -17,5 +17,5 @@ export interface IPost {
   groupName?: string;
   addresses?: IAddress[];
   likedUsers?: IUser[];
-  comments?: IComment[];
+  comments?: IPostComment[];
 }

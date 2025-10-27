@@ -17,7 +17,7 @@ import { CitiesModule } from './cities/cities.module';
 import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PostsModule } from './posts/posts.module';
-import { CommentsModule } from './comments/comments.module';
+import { PostCommentsModule } from './post-comments/post-comments.module';
 import { UserFollowingsModule } from './user-followings/user-followings.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
@@ -71,7 +71,7 @@ import { SupportsModule } from './supports/supports.module';
     CitiesModule,
     NotificationsModule,
     PostsModule,
-    CommentsModule,
+    PostCommentsModule,
     UserFollowingsModule,
     UsersModule,
     EventsModule,

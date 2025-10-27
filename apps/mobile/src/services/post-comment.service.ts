@@ -1,32 +1,32 @@
 import {useMutation, useQuery} from '@apollo/client';
 import {
-  CREATE_COMMENT,
-  GET_COMMENT,
-  GET_COMMENTS,
-  REMOVE_COMMENT,
-  UPDATE_COMMENT,
-} from './graphql/comment.graphql';
+  CREATE_POST_COMMENT,
+  GET_POST_COMMENT,
+  GET_POST_COMMENTS,
+  REMOVE_POST_COMMENT,
+  UPDATE_POST_COMMENT,
+} from './graphql/post-comment.graphql';
 import {
-  IComment,
-  ICreateComment,
-  IUpdateComment,
+  IPostComment,
+  ICreatePostComment,
+  IUpdatePostComment,
 } from '@motorove/shared/interfaces';
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
 import {useTranslation} from '@/i18n';
 
-// Hook for creating a comment
-export const useCreateComment = (onSuccess?: () => void) => {
+// Hook for creating a post comment
+export const useCreatePostComment = (onSuccess?: () => void) => {
   const {t} = useTranslation();
-  const [createCommentMutation, {loading, error}] = useMutation(
-    CREATE_COMMENT,
+  const [createPostCommentMutation, {loading, error}] = useMutation(
+    CREATE_POST_COMMENT,
     {
       onCompleted: _data => {
         showToast({
           type: 'success',
           text1: t('common.success'),
-          text2: t('screens.comment.comment_created'),
+          text2: t('screens.postComment.comment_created'),
         });
 
         if (onSuccess) {
@@ -34,27 +34,27 @@ export const useCreateComment = (onSuccess?: () => void) => {
         }
       },
       onError: errorObj => {
-        loggingService.error('Error creating comment:', errorObj);
+        loggingService.error('Error creating post comment:', errorObj);
         showToast({
           type: 'error',
           text1: t('common.error'),
           text2:
-            errorObj.message || t('screens.comment.error_creating_comment'),
+            errorObj.message || t('screens.postComment.error_creating_comment'),
         });
       },
     },
   );
 
-  const createComment = async (input: ICreateComment) => {
+  const createPostComment = async (input: ICreatePostComment) => {
     try {
-      const result = await createCommentMutation({
+      const result = await createPostCommentMutation({
         variables: {input},
         update: (cache, {data: _data}) => {
-          // Update comment count on the post
+          // Update post comment count on the post
           try {
             const postId = input.postId;
             const postData = cache.readQuery({
-              query: GET_COMMENT,
+              query: GET_POST_COMMENT,
               variables: {id: postId},
             }) as {post?: any} | null;
 
@@ -71,32 +71,32 @@ export const useCreateComment = (onSuccess?: () => void) => {
           }
         },
       });
-      return result.data?.createComment;
+      return result.data?.createPostComment;
     } catch (err) {
-      loggingService.error('Error in createComment:', err);
+      loggingService.error('Error in createPostComment:', err);
       // Error is already handled in onError callback
       return null;
     }
   };
 
   return {
-    createComment,
+    createPostComment,
     loading,
     error,
   };
 };
 
-// Hook for updating a comment
-export const useUpdateComment = (onSuccess?: () => void) => {
+// Hook for updating a post comment
+export const useUpdatePostComment = (onSuccess?: () => void) => {
   const {t} = useTranslation();
-  const [updateCommentMutation, {loading, error}] = useMutation(
-    UPDATE_COMMENT,
+  const [updatePostCommentMutation, {loading, error}] = useMutation(
+    UPDATE_POST_COMMENT,
     {
       onCompleted: _data => {
         showToast({
           type: 'success',
           text1: t('common.success'),
-          text2: t('screens.comment.comment_updated'),
+          text2: t('screens.postComment.comment_updated'),
         });
 
         if (onSuccess) {
@@ -104,48 +104,48 @@ export const useUpdateComment = (onSuccess?: () => void) => {
         }
       },
       onError: errorObj => {
-        loggingService.error('Error updating comment:', errorObj);
+        loggingService.error('Error updating post comment:', errorObj);
         showToast({
           type: 'error',
           text1: t('common.error'),
           text2:
-            errorObj.message || t('screens.comment.error_updating_comment'),
+            errorObj.message || t('screens.postComment.error_updating_comment'),
         });
       },
     },
   );
 
-  const updateComment = async (input: IUpdateComment) => {
+  const updatePostComment = async (input: IUpdatePostComment) => {
     try {
-      const result = await updateCommentMutation({
+      const result = await updatePostCommentMutation({
         variables: {input},
       });
-      return result.data?.updateComment;
+      return result.data?.updatePostComment;
     } catch (err) {
-      loggingService.error('Error in updateComment:', err);
+      loggingService.error('Error in updatePostComment:', err);
       // Error is already handled in onError callback
       return null;
     }
   };
 
   return {
-    updateComment,
+    updatePostComment,
     loading,
     error,
   };
 };
 
-// Hook for removing a comment
-export const useRemoveComment = (onSuccess?: () => void) => {
+// Hook for removing a post comment
+export const useRemovePostComment = (onSuccess?: () => void) => {
   const {t} = useTranslation();
-  const [removeCommentMutation, {loading, error}] = useMutation(
-    REMOVE_COMMENT,
+  const [removePostCommentMutation, {loading, error}] = useMutation(
+    REMOVE_POST_COMMENT,
     {
       onCompleted: _data => {
         showToast({
           type: 'success',
           text1: t('common.success'),
-          text2: t('screens.comment.comment_removed'),
+          text2: t('screens.postComment.comment_removed'),
         });
 
         if (onSuccess) {
@@ -153,26 +153,26 @@ export const useRemoveComment = (onSuccess?: () => void) => {
         }
       },
       onError: errorObj => {
-        loggingService.error('Error removing comment:', errorObj);
+        loggingService.error('Error removing post comment:', errorObj);
         showToast({
           type: 'error',
           text1: t('common.error'),
           text2:
-            errorObj.message || t('screens.comment.error_removing_comment'),
+            errorObj.message || t('screens.postComment.error_removing_comment'),
         });
       },
     },
   );
 
-  const removeComment = async (id: string, postId: string) => {
+  const removePostComment = async (id: string, postId: string) => {
     try {
-      const result = await removeCommentMutation({
+      const result = await removePostCommentMutation({
         variables: {id},
         update: cache => {
           // Update comment count on the post
           try {
             const postData = cache.readQuery({
-              query: GET_COMMENT,
+              query: GET_POST_COMMENT,
               variables: {id: postId},
             }) as {post?: any} | null;
 
@@ -189,41 +189,41 @@ export const useRemoveComment = (onSuccess?: () => void) => {
           }
         },
       });
-      return result.data?.removeComment;
+      return result.data?.removePostComment;
     } catch (err) {
-      loggingService.error('Error in removeComment:', err);
+      loggingService.error('Error in removePostComment:', err);
       // Error is already handled in onError callback
       return null;
     }
   };
 
   return {
-    removeComment,
+    removePostComment,
     loading,
     error,
   };
 };
 
-// Hook for getting a single comment
-export const useGetComment = (id: string) => {
-  const {data, loading, error, refetch} = useQuery(GET_COMMENT, {
+// Hook for getting a single post comment
+export const useGetPostComment = (id: string) => {
+  const {data, loading, error, refetch} = useQuery(GET_POST_COMMENT, {
     variables: {id},
     skip: !id,
     onError: errorObj => {
-      loggingService.error('Error fetching comment:', errorObj);
+      loggingService.error('Error fetching post comment:', errorObj);
     },
   });
 
   return {
-    comment: data?.comment as IComment | undefined,
+    postComment: data?.postComment as IPostComment | undefined,
     loading,
     error,
     refetch,
   };
 };
 
-// Hook for getting comments for a post
-export const useGetComments = (postId: string) => {
+// Hook for getting post comments for a post
+export const useGetPostComments = (postId: string) => {
   const [hasMore, setHasMore] = useState(true);
 
   const {
@@ -231,11 +231,15 @@ export const useGetComments = (postId: string) => {
     loading,
     error,
     refetch: originalRefetch,
-  } = useQuery(GET_COMMENTS, {
+  } = useQuery(GET_POST_COMMENTS, {
     variables: {postId},
     skip: !postId,
     onError: errorObj => {
-      loggingService.error('Error fetching comments:', errorObj);
+      loggingService.error(
+        'Error fetching post comments for post:',
+        {postId},
+        errorObj,
+      );
     },
   });
 
@@ -246,7 +250,7 @@ export const useGetComments = (postId: string) => {
   }, [originalRefetch]);
 
   return {
-    comments: data?.comments as IComment[] | undefined,
+    postComments: data?.postComments as IPostComment[] | undefined,
     loading,
     error,
     refetch,

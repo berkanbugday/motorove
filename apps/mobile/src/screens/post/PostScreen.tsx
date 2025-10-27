@@ -111,7 +111,7 @@ export const PostScreen = ({navigation}: Props) => {
 
   // Handle navigation to comment details
   const handleCommentPress = (postId: string) => {
-    navigateToScreen(navigation, 'Comment', {postId});
+    navigateToScreen(navigation, 'PostComment', {postId});
   };
 
   // Handle like press with API call - using optimistic updates

@@ -4,7 +4,7 @@ export * from "./group";
 export * from "./group-tag";
 export * from "./group-membership";
 export * from "./post";
-export * from "./comment";
+export * from "./post-comment";
 export * from "./notification";
 export * from "./city";
 export * from "./address";

@@ -3,7 +3,7 @@ export * from './group-membership.graphql';
 export * from './group.graphql';
 export * from './city.graphql';
 export * from './post.graphql';
-export * from './comment.graphql';
+export * from './post-comment.graphql';
 export * from './notification.graphql';
 export * from './user.graphql';
 export * from './user-following.graphql';
