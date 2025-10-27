@@ -340,6 +340,10 @@ model User {
   // EventParticipant relations
   updatedEventParticipants EventParticipant[] @relation("EventParticipantUpdatedBy")
 
+  // Business comment relations
+  businessComments        BusinessComment[]
+  updatedBusinessComments BusinessComment[] @relation("BusinessCommentUpdatedBy")
+
   @@index([supabaseId])
   @@index([cityId])
 }
@@ -558,6 +562,29 @@ model PostComment {
   @@index([parentId])
 }
 
+// Business comment model for reviews and feedback
+model BusinessComment {
+  id      String @id @default(uuid())
+  content String @db.Text
+  rating  Int    @default(5) // 1-5 star rating
+
+  // Relations
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("BusinessCommentUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([createdById])
+  @@index([businessId])
+}
+
 // New model for post likes
 model PostLike {
   id        String   @id @default(uuid())
@@ -623,6 +650,7 @@ model Business {
   address      Address?
   descriptions BusinessDescription[]
   workingHours WorkingHour[]
+  comments     BusinessComment[]
 
   // Base model fields
   createdAt DateTime @default(now())

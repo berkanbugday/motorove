@@ -23,6 +23,10 @@ import {EnumUtils} from '@utils/enumUtils';
 import {calculateDistance} from '@utils/locationUtils';
 import {BusinessStatus, DayOfWeek} from '@motorove/shared';
 import {useLanguage} from '@contexts/LanguageContext';
+import {
+  useGetBusinessAverageRating,
+  useGetBusinessCommentCount,
+} from '@services/business-comment.service';
 
 /**
  * Business marker card component
@@ -39,6 +43,9 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
 }) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
+  // Business comments hooks
+  const {averageRating} = useGetBusinessAverageRating(business.id);
+  const {commentCount} = useGetBusinessCommentCount(business.id);
   // Modal state
   const [isModalVisible, setIsModalVisible] = useState(false);
   // Address expansion state
@@ -213,10 +220,15 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
           }
           size="small"
         />
-        {/* <View style={styles.ratingContainer}>
-          <Icon name="star-filled" color={colors.status.warning} size={16} />
-          <BodySmall>(120 yorum)</BodySmall>
-        </View> */}
+        <View style={styles.ratingContainer}>
+          <Icon name="star-filled" color={colors.status.warning} size={14} />
+          <Caption weight="semiBold" color={colors.neutral.grey}>
+            {averageRating ? averageRating.toFixed(1) : '0.0'}
+          </Caption>
+          <Caption weight="semiBold" color={colors.neutral.grey}>
+            ({commentCount || 0} {t('screens.map.comment').toLowerCase()})
+          </Caption>
+        </View>
       </View>
       {onClose && (
         <Button

@@ -9,6 +9,7 @@ export * from "./notification";
 export * from "./city";
 export * from "./address";
 export * from "./business";
+export * from "./business-comment";
 export * from "./common";
 export * from "./event";
 export * from "./user-following";

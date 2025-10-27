@@ -17,7 +17,7 @@ interface ButtonProps {
   onPress?: () => void;
   variant?: 'primary' | 'dark' | 'secondary' | 'outline' | 'text';
   shape?: 'default' | 'round' | 'circle';
-  size?: 'small' | 'medium' | 'large';
+  size?: 'xsmall' | 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
   iconName?: IconName;
@@ -54,9 +54,11 @@ export function Button({
     variant === 'text' && styles.textButton,
     shape === 'round' && styles.roundButton,
     shape === 'circle' && styles.circleButton,
+    shape === 'circle' && size === 'xsmall' && styles.xsmallCircleButton,
     shape === 'circle' && size === 'small' && styles.smallCircleButton,
     shape === 'circle' && size === 'medium' && styles.mediumCircleButton,
     shape === 'circle' && size === 'large' && styles.largeCircleButton,
+    size === 'xsmall' && styles.xsmallButton,
     size === 'small' && styles.smallButton,
     size === 'medium' && styles.mediumButton,
     size === 'large' && styles.largeButton,
@@ -65,6 +67,9 @@ export function Button({
   ];
 
   const getTypographyVariant = () => {
+    if (size === 'xsmall') {
+      return 'xsmallButtonText';
+    }
     if (size === 'small') {
       return 'smallButtonText';
     }
@@ -111,6 +116,9 @@ export function Button({
       return iconSize;
     }
 
+    if (size === 'xsmall') {
+      return 12;
+    }
     if (size === 'small') {
       return 14;
     }
@@ -240,6 +248,10 @@ const styles = StyleSheet.create({
     height: spacing.xxl,
     paddingHorizontal: 0,
   },
+  xsmallCircleButton: {
+    width: spacing.lg,
+    height: spacing.lg,
+  },
   smallCircleButton: {
     width: spacing.xl,
     height: spacing.xl,
@@ -251,6 +263,10 @@ const styles = StyleSheet.create({
   largeCircleButton: {
     width: spacing.xxxxl,
     height: spacing.xxxxl,
+  },
+  xsmallButton: {
+    paddingVertical: spacing.button.paddingVertical.xsmall,
+    paddingHorizontal: spacing.button.paddingHorizontal.xsmall,
   },
   smallButton: {
     paddingVertical: spacing.button.paddingVertical.small,

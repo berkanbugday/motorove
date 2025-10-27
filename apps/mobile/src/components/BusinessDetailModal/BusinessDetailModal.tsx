@@ -43,12 +43,11 @@ import {
   Button,
   BottomSheet,
   BodySmall,
-  Subtitle,
-  AnimatedInput,
   showToast,
   Chip,
 } from '@components';
 import {BusinessDetailModalProps, BusinessDetailModalRef} from './types';
+import {BusinessComments} from './BusinessComments';
 import {EnumUtils} from '@utils/enumUtils';
 import {calculateDistance} from '@utils/locationUtils';
 import type {BottomSheetRef} from '@components';
@@ -56,6 +55,18 @@ import {useTranslation} from '@hooks/useTranslation';
 import {MapAppType} from './mapApps.constants';
 import {MapAppsService, InstalledApps} from './mapApps.service';
 import {useLanguage} from '@contexts/LanguageContext';
+import {
+  useGetBusinessComments,
+  useGetBusinessAverageRating,
+  useGetBusinessCommentCount,
+  useCreateBusinessComment,
+  useUpdateBusinessComment,
+  useRemoveBusinessComment,
+} from '@services/business-comment.service';
+import {useAuth} from '@contexts/AuthContext';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {MainStackParamList} from '@navigation/types/navigationTypes';
+import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -79,9 +90,6 @@ const BusinessDetailModal = forwardRef<
     const [currentBusiness, setCurrentBusiness] = useState<IBusiness | null>(
       business,
     );
-    const [userRating, setUserRating] = useState(0);
-    const [userComment, setUserComment] = useState('');
-    const [showAddReview, setShowAddReview] = useState(false);
     const [showAllWorkingHours, setShowAllWorkingHours] = useState(false);
     const [distance, setDistance] = useState<string | null>(null);
     const [installedApps, setInstalledApps] = useState<InstalledApps>({
@@ -91,12 +99,50 @@ const BusinessDetailModal = forwardRef<
       [MapAppType.YANDEX]: false,
       [MapAppType.SYGIC]: false,
     });
-
-    // Bottom sheet ref for map app selection
+    const navigation = useNavigation<NavigationProp<MainStackParamList>>();
+    // Bottom sheet refs
     const mapAppsBottomSheetRef = useRef<BottomSheetRef>(null);
+    const commentActionsBottomSheetRef = useRef<BottomSheetRef>(null);
+    const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
+      null,
+    );
+    const [triggerEdit, setTriggerEdit] = useState<string | null>(null);
 
     const {t} = useTranslation();
     const {language} = useLanguage();
+    const {user} = useAuth();
+
+    // Business comments hooks
+    const {
+      businessComments,
+      loading: commentsLoading,
+      refetch: refetchComments,
+    } = useGetBusinessComments(currentBusiness?.id || '');
+    const {averageRating, refetch: refetchAverageRating} =
+      useGetBusinessAverageRating(currentBusiness?.id || '');
+    const {commentCount, refetch: refetchCommentCount} =
+      useGetBusinessCommentCount(currentBusiness?.id || '');
+
+    const {createBusinessComment, loading: createLoading} =
+      useCreateBusinessComment(() => {
+        refetchComments();
+        refetchAverageRating();
+        refetchCommentCount();
+      });
+
+    const {removeBusinessComment, loading: removeLoading} =
+      useRemoveBusinessComment(() => {
+        refetchComments();
+        refetchAverageRating();
+        refetchCommentCount();
+      });
+
+    const {updateBusinessComment, loading: updateLoading} =
+      useUpdateBusinessComment(() => {
+        refetchComments();
+        refetchAverageRating();
+        refetchCommentCount();
+      });
 
     // Comprehensive working hours utility
     const useWorkingHours = useCallback(() => {
@@ -295,7 +341,10 @@ const BusinessDetailModal = forwardRef<
 
     // Animation functions
     const showModal = useCallback(() => {
-      setIsVisible(true);
+      // Defer state update to avoid conflicts with useInsertionEffect
+      queueMicrotask(() => {
+        setIsVisible(true);
+      });
 
       translateY.value = withSpring(0, {
         damping: 25,
@@ -386,6 +435,53 @@ const BusinessDetailModal = forwardRef<
       setInstalledApps(apps);
     };
 
+    // Comment handlers for BusinessComments component
+    const handleCreateComment = useCallback(
+      async (rating: number, content: string) => {
+        if (!currentBusiness?.id) {
+          return;
+        }
+
+        await createBusinessComment({
+          businessId: currentBusiness.id,
+          rating,
+          content,
+        });
+      },
+      [currentBusiness?.id, createBusinessComment],
+    );
+
+    const handleUpdateComment = useCallback(
+      async (id: string, rating: number, content: string) => {
+        await updateBusinessComment({
+          id,
+          rating,
+          content,
+        });
+      },
+      [updateBusinessComment],
+    );
+
+    const handleDeleteComment = useCallback(
+      async (commentId: string) => {
+        if (!currentBusiness?.id) {
+          return;
+        }
+
+        await removeBusinessComment(commentId, currentBusiness.id);
+      },
+      [currentBusiness?.id, removeBusinessComment],
+    );
+
+    const handleProfilePress = useCallback((userId: string | null) => {
+      if (userId) {
+        hideModal();
+        setTimeout(() => {
+          navigateToScreen(navigation, 'Profile', {userId});
+        }, 500);
+      }
+    }, []);
+
     const handleDirections = useCallback(() => {
       if (!currentBusiness?.address) {
         return;
@@ -421,7 +517,10 @@ const BusinessDetailModal = forwardRef<
     // Update visibility based on prop changes
     useEffect(() => {
       if (visible && business) {
-        setCurrentBusiness(business);
+        // Defer state update to avoid conflicts with useInsertionEffect
+        queueMicrotask(() => {
+          setCurrentBusiness(business);
+        });
         showModal();
       } else if (!visible) {
         hideModal();
@@ -444,7 +543,10 @@ const BusinessDetailModal = forwardRef<
       ref,
       () => ({
         open: (businessData: IBusiness) => {
-          setCurrentBusiness(businessData);
+          // Defer state update to avoid conflicts with useInsertionEffect
+          queueMicrotask(() => {
+            setCurrentBusiness(businessData);
+          });
           showModal();
         },
         close: hideModal,
@@ -556,10 +658,11 @@ const BusinessDetailModal = forwardRef<
                           color={colors.status.warning}
                         />
                         <Caption weight="semiBold" color={colors.neutral.white}>
-                          4.5
+                          {averageRating ? averageRating.toFixed(1) : '0.0'}
                         </Caption>
                         <Caption weight="semiBold" color={colors.neutral.white}>
-                          (120 yorum)
+                          ({commentCount || 0}{' '}
+                          {t('screens.map.comment').toLowerCase()})
                         </Caption>
                       </View>
                     </View>
@@ -707,185 +810,26 @@ const BusinessDetailModal = forwardRef<
                     )}
                 </View>
 
-                {/* Reviews Section */}
-                <View style={styles.reviewsSection}>
-                  <View style={styles.reviewsHeader}>
-                    <Subtitle weight="bold">
-                      {t('screens.map.reviews')}
-                    </Subtitle>
-                    <TouchableOpacity
-                      onPress={() => setShowAddReview(!showAddReview)}
-                      style={styles.addReviewButton}>
-                      <Icon
-                        name={showAddReview ? 'close' : 'pen-filled'}
-                        size={12}
-                      />
-                      <BodySmall weight="semiBold">
-                        {showAddReview
-                          ? t('common.cancel')
-                          : t('screens.map.write_review')}
-                      </BodySmall>
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Add Review Form */}
-                  {showAddReview && (
-                    <View style={styles.addReviewForm}>
-                      <BodySmall weight="semiBold">
-                        {t('screens.map.rate_this_business')}
-                      </BodySmall>
-                      <View style={styles.userRatingStars}>
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Button
-                            key={star}
-                            variant="text"
-                            shape="circle"
-                            size="small"
-                            onPress={() => setUserRating(star)}
-                            iconName="star-filled"
-                            iconSize={30}
-                            iconColor={
-                              star <= userRating
-                                ? colors.status.warning
-                                : colors.neutral.lightGrey
-                            }
-                          />
-                        ))}
-                      </View>
-
-                      <AnimatedInput
-                        showClearButton={false}
-                        label={t('screens.map.share_your_experience')}
-                        value={userComment}
-                        onChangeText={setUserComment}
-                        multiline
-                      />
-
-                      <Button
-                        title={t('screens.map.submit_review')}
-                        variant="secondary"
-                        shape="round"
-                        onPress={() => {
-                          // Handle submit review
-                          setShowAddReview(false);
-                          setUserRating(0);
-                          setUserComment('');
-                        }}
-                        disabled={userRating === 0 || userComment.trim() === ''}
-                      />
-                    </View>
-                  )}
-
-                  {/* Sample Reviews List */}
-                  <View style={styles.reviewsList}>
-                    <View style={styles.reviewItem}>
-                      <View style={styles.reviewHeader}>
-                        <View style={styles.reviewerInfo}>
-                          <View style={styles.reviewerAvatar}>
-                            <Caption color={colors.neutral.white} weight="bold">
-                              JD
-                            </Caption>
-                          </View>
-                          <View>
-                            <Body weight="semiBold">John Doe</Body>
-                            <Caption color={colors.neutral.grey}>
-                              2 days ago
-                            </Caption>
-                          </View>
-                        </View>
-                        <View style={styles.reviewRating}>
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <Icon
-                              key={star}
-                              name="star-filled"
-                              size={12}
-                              color={
-                                star <= 5
-                                  ? colors.status.warning
-                                  : colors.neutral.lightGrey
-                              }
-                            />
-                          ))}
-                        </View>
-                      </View>
-                      <Body style={styles.reviewText}>
-                        Great service and professional staff. Highly recommend
-                        for motorcycle maintenance!
-                      </Body>
-                    </View>
-
-                    <View style={styles.reviewItem}>
-                      <View style={styles.reviewHeader}>
-                        <View style={styles.reviewerInfo}>
-                          <View style={styles.reviewerAvatar}>
-                            <Caption color={colors.neutral.white} weight="bold">
-                              AS
-                            </Caption>
-                          </View>
-                          <View>
-                            <Body weight="semiBold">Alice Smith</Body>
-                            <Caption color={colors.neutral.grey}>
-                              1 week ago
-                            </Caption>
-                          </View>
-                        </View>
-                        <View style={styles.reviewRating}>
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <Icon
-                              key={star}
-                              name="star-filled"
-                              size={12}
-                              color={
-                                star <= 4
-                                  ? colors.status.warning
-                                  : colors.neutral.lightGrey
-                              }
-                            />
-                          ))}
-                        </View>
-                      </View>
-                      <Body style={styles.reviewText}>
-                        Good experience overall. Quick service and fair pricing.
-                      </Body>
-                    </View>
-
-                    <View style={styles.reviewItem}>
-                      <View style={styles.reviewHeader}>
-                        <View style={styles.reviewerInfo}>
-                          <View style={styles.reviewerAvatar}>
-                            <Caption color={colors.neutral.white} weight="bold">
-                              MB
-                            </Caption>
-                          </View>
-                          <View>
-                            <Body weight="semiBold">Mike Brown</Body>
-                            <Caption color={colors.neutral.grey}>
-                              2 weeks ago
-                            </Caption>
-                          </View>
-                        </View>
-                        <View style={styles.reviewRating}>
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <Icon
-                              key={star}
-                              name="star-filled"
-                              size={12}
-                              color={
-                                star <= 5
-                                  ? colors.status.warning
-                                  : colors.neutral.lightGrey
-                              }
-                            />
-                          ))}
-                        </View>
-                      </View>
-                      <Body style={styles.reviewText}>
-                        Excellent work! They fixed my bike perfectly and the
-                        team was very friendly.
-                      </Body>
-                    </View>
-                  </View>
-                </View>
+                {/* Comments Section */}
+                <BusinessComments
+                  onPressProfile={handleProfilePress}
+                  businessId={currentBusiness.id}
+                  businessComments={businessComments || []}
+                  averageRating={averageRating || 0}
+                  commentCount={commentCount || 0}
+                  commentsLoading={commentsLoading}
+                  createLoading={createLoading}
+                  updateLoading={updateLoading}
+                  currentUserId={user?.id}
+                  language={language}
+                  onCreateComment={handleCreateComment}
+                  onUpdateComment={handleUpdateComment}
+                  onDeleteComment={handleDeleteComment}
+                  commentActionsBottomSheetRef={commentActionsBottomSheetRef}
+                  onSelectComment={setSelectedCommentId}
+                  triggerEditCommentId={triggerEdit}
+                  onEditTriggered={() => setTriggerEdit(null)}
+                />
               </ScrollView>
             </KeyboardAwareScrollView>
 
@@ -1018,6 +962,52 @@ const BusinessDetailModal = forwardRef<
             </TouchableOpacity>
           </ScrollView>
         </BottomSheet>
+
+        {/* Comment Actions Bottom Sheet */}
+        <BottomSheet
+          ref={commentActionsBottomSheetRef}
+          initialSnap="closed"
+          showBackdrop
+          closeOnBackdropPress
+          hideHandle={false}
+          showCloseButton={false}
+          title={t('screens.map.comment_actions')}
+          titlePosition="center">
+          <View style={styles.commentActionsContent}>
+            <Button
+              title={t('common.edit')}
+              variant="outline"
+              shape="round"
+              iconName="pen-filled"
+              disabled={removeLoading}
+              onPress={() => {
+                if (selectedCommentId) {
+                  // Close the bottom sheet first
+                  commentActionsBottomSheetRef.current?.close();
+                  // Then trigger edit mode in BusinessComments
+                  setTriggerEdit(selectedCommentId);
+                  setSelectedCommentId(null);
+                }
+              }}
+              style={styles.commentActionButton}
+            />
+            <Button
+              title={t('common.delete')}
+              variant="primary"
+              shape="round"
+              iconName="trash"
+              loading={removeLoading}
+              onPress={async () => {
+                if (selectedCommentId) {
+                  await handleDeleteComment(selectedCommentId);
+                  commentActionsBottomSheetRef.current?.close();
+                  setSelectedCommentId(null);
+                }
+              }}
+              style={styles.commentActionButton}
+            />
+          </View>
+        </BottomSheet>
       </Modal>
     );
   },
@@ -1120,82 +1110,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.status.successDark,
   },
-  reviewsSection: {
-    paddingTop: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
-  },
-  reviewsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  addReviewButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    borderWidth: 1,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderRadius: radius.round,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  addReviewForm: {
-    borderWidth: 1,
-    borderColor: colors.neutral.lightGrey,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-    gap: spacing.md,
-  },
-  userRatingStars: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    marginBottom: spacing.xs,
-  },
-  reviewsList: {
-    gap: spacing.md,
-  },
-  reviewItem: {
-    backgroundColor: colors.neutral.white,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.neutral.lightGrey,
-  },
-  reviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-  },
-  reviewerInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    flex: 1,
-  },
-  reviewerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primary.main,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  reviewRating: {
-    flexDirection: 'row',
-    gap: 2,
-  },
-  reviewText: {
-    fontSize: 14,
-    color: colors.neutral.darkGrey,
-    lineHeight: 20,
-  },
   mapAppsScroll: {
     paddingBottom: spacing.lg,
   },
@@ -1220,6 +1134,13 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: radius.md,
+  },
+  commentActionsContent: {
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  commentActionButton: {
+    width: '100%',
   },
   workingHoursHeader: {
     flexDirection: 'row',

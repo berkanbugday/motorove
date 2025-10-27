@@ -16,11 +16,13 @@ export const spacing = {
   // Specific spacing for components
   button: {
     paddingVertical: {
+      xsmall: 4,
       small: 8,
       medium: 14,
       large: 16,
     },
     paddingHorizontal: {
+      xsmall: 12,
       small: 16,
       medium: 24,
       large: 32,

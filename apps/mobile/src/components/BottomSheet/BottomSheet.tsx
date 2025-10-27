@@ -127,14 +127,20 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
         translateY.value = SCREEN_HEIGHT - SNAP_POINTS.PARTIAL;
         backdropOpacity.value = withTiming(backDropOpacity);
         active.value = true;
-        setIsVisible(true);
-        setCurrentSnapPoint('partial');
+        // Defer state updates to avoid conflicts with useInsertionEffect
+        queueMicrotask(() => {
+          setIsVisible(true);
+          setCurrentSnapPoint('partial');
+        });
       } else if (initialSnap === 'full') {
         translateY.value = SCREEN_HEIGHT - SNAP_POINTS.FULL;
         backdropOpacity.value = withTiming(backDropOpacity);
         active.value = true;
-        setIsVisible(true);
-        setCurrentSnapPoint('full');
+        // Defer state updates to avoid conflicts with useInsertionEffect
+        queueMicrotask(() => {
+          setIsVisible(true);
+          setCurrentSnapPoint('full');
+        });
       }
     }, [initialSnap, translateY, backDropOpacity, backdropOpacity, active]);
 
@@ -143,11 +149,16 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
       translateY.value = withTiming(SCREEN_HEIGHT, {duration: 300});
       backdropOpacity.value = withTiming(0, {duration: 300});
       active.value = false;
-      setCurrentSnapPoint('closed');
+      // Defer state update to avoid conflicts with useInsertionEffect
+      queueMicrotask(() => {
+        setCurrentSnapPoint('closed');
+      });
 
       // Set isVisible to false after animation completes
       setTimeout(() => {
-        setIsVisible(false);
+        queueMicrotask(() => {
+          setIsVisible(false);
+        });
         if (onClose) {
           onClose();
         }
@@ -156,8 +167,11 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
 
     const handleOpen = useCallback(
       (snapPoint: 'minimal' | 'partial' | 'full' = 'partial') => {
-        setIsVisible(true);
-        setCurrentSnapPoint(snapPoint);
+        // Defer state updates to avoid conflicts with useInsertionEffect
+        queueMicrotask(() => {
+          setIsVisible(true);
+          setCurrentSnapPoint(snapPoint);
+        });
         let snapTo;
 
         switch (snapPoint) {
@@ -189,10 +203,15 @@ const BottomSheet = React.forwardRef<BottomSheetRef, BottomSheetProps>(
           translateY.value = withTiming(SCREEN_HEIGHT, {duration: 300});
           backdropOpacity.value = withTiming(0, {duration: 300});
           active.value = false;
-          setCurrentSnapPoint('closed');
+          // Defer state update to avoid conflicts with useInsertionEffect
+          queueMicrotask(() => {
+            setCurrentSnapPoint('closed');
+          });
 
           setTimeout(() => {
-            setIsVisible(false);
+            queueMicrotask(() => {
+              setIsVisible(false);
+            });
           }, 300);
         },
       }),

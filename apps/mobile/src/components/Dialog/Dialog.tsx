@@ -81,7 +81,10 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
     // Update visibility based on prop changes
     useEffect(() => {
       if (visible) {
-        setIsVisible(true);
+        // Defer state update to avoid conflicts with useInsertionEffect
+        queueMicrotask(() => {
+          setIsVisible(true);
+        });
         opacity.value = withTiming(1, {
           duration: animationDuration,
           easing: Easing.out(Easing.cubic),
@@ -113,7 +116,10 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
 
     // Handle animation completion
     const handleAnimationComplete = useCallback(() => {
-      setIsVisible(false);
+      // Defer state update to avoid conflicts with useInsertionEffect
+      queueMicrotask(() => {
+        setIsVisible(false);
+      });
       if (onDismiss) {
         onDismiss();
       }
@@ -121,7 +127,10 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
 
     // Dialog handlers
     const handleOpen = useCallback(() => {
-      setIsVisible(true);
+      // Defer state update to avoid conflicts with useInsertionEffect
+      queueMicrotask(() => {
+        setIsVisible(true);
+      });
       opacity.value = withTiming(1, {
         duration: animationDuration,
         easing: Easing.out(Easing.cubic),
@@ -153,7 +162,10 @@ const Dialog = forwardRef<DialogRef, DialogProps>(
     }, [opacity, scale, animationDuration, onClose]);
 
     const handleCloseComplete = useCallback(() => {
-      setIsVisible(false);
+      // Defer state update to avoid conflicts with useInsertionEffect
+      queueMicrotask(() => {
+        setIsVisible(false);
+      });
       if (onClose) {
         onClose();
       }

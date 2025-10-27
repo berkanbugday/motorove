@@ -57,6 +57,10 @@ export const typography = {
     fontSize: fontSizes.md,
     fontWeight: fontWeights.semiBold,
   },
+  xsmallButtonText: {
+    fontSize: fontSizes.xs,
+    fontWeight: fontWeights.semiBold,
+  },
   smallButtonText: {
     fontSize: fontSizes.sm,
     fontWeight: fontWeights.semiBold,

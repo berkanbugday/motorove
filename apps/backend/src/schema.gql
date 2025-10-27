@@ -91,6 +91,21 @@ enum BusinessCategory {
   TRANSPORTATION_STORAGE
 }
 
+type BusinessCommentDto {
+  business: BusinessDto
+  businessId: ID!
+  content: String!
+  createdAt: DateTime!
+  createdBy: UserDto!
+  createdById: String!
+  id: ID!
+  isActive: Boolean!
+  rating: Int!
+  updatedAt: DateTime!
+  updatedBy: UserDto!
+  updatedById: String!
+}
+
 type BusinessDescriptionDto {
   description: String!
   id: ID!
@@ -132,6 +147,12 @@ input CreateAddressInput {
   longitude: Float!
   postId: String
   type: AddressType!
+}
+
+input CreateBusinessCommentInput {
+  businessId: String!
+  content: String!
+  rating: Int!
 }
 
 input CreateDeviceTokenInput {
@@ -667,6 +688,7 @@ type Mutation {
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
   createAddress(input: CreateAddressInput!): AddressDto!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
+  createBusinessComment(input: CreateBusinessCommentInput!): BusinessCommentDto!
   createEvent(input: CreateEventInput!): EventDto!
   createGroup(input: CreateGroupInput!): GroupDto!
   createNotification(input: CreateNotificationInput!): NotificationDto!
@@ -684,6 +706,7 @@ type Mutation {
   refreshToken(token: String!): AuthResponse!
   rejectEventInvitation(id: ID!): Boolean!
   removeAddress(id: String!): Boolean!
+  removeBusinessComment(id: ID!): Boolean!
   removeDeviceToken: Boolean!
   removeEvent(id: ID!): Boolean!
   removeMember(input: RemoveMemberInput!): Boolean!
@@ -699,6 +722,7 @@ type Mutation {
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
   updateAddress(input: UpdateAddressInput!): AddressDto!
+  updateBusinessComment(input: UpdateBusinessCommentInput!): BusinessCommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
   updateGroupMembershipApprovalStatus(input: UpdateGroupMembershipApprovalStatusInput!): GroupMembershipDto!
@@ -884,6 +908,10 @@ type Query {
   address(id: ID!): AddressDto!
   addresses(filters: FilterAddressInput, limit: Int, skip: Int): [AddressDto!]!
   business(id: String!): BusinessDto!
+  businessAverageRating(businessId: ID!): Float!
+  businessComment(id: ID!): BusinessCommentDto!
+  businessCommentCount(businessId: ID!): Int!
+  businessComments(businessId: ID!, limit: Int, skip: Int): [BusinessCommentDto!]!
   businesses(filter: FilterBusinessInput!): [BusinessDto!]!
   cities: [CityDto!]!
   city(id: ID!): CityDto!
@@ -1012,6 +1040,12 @@ input UpdateAddressInput {
   longitude: Float
   postId: String
   type: AddressType
+}
+
+input UpdateBusinessCommentInput {
+  content: String
+  id: ID!
+  rating: Int
 }
 
 input UpdateEventInput {

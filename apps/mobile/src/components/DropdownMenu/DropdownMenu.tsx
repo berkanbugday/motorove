@@ -135,7 +135,10 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
 
   const openDropdown = () => {
     measureTriggerPosition();
-    setVisible(true);
+    // Defer state update to avoid conflicts with useInsertionEffect
+    queueMicrotask(() => {
+      setVisible(true);
+    });
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 150,
@@ -149,7 +152,10 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
       duration: 150,
       useNativeDriver: true,
     }).start(() => {
-      setVisible(false);
+      // Defer state update to avoid conflicts with useInsertionEffect
+      queueMicrotask(() => {
+        setVisible(false);
+      });
     });
   };
 
@@ -213,10 +219,13 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
             top = windowHeight - 210;
           }
 
-          setDropdownPosition({
-            top,
-            left,
-            width: width,
+          // Defer state update to avoid conflicts with useInsertionEffect
+          queueMicrotask(() => {
+            setDropdownPosition({
+              top,
+              left,
+              width: width,
+            });
           });
         },
       );
