@@ -51,8 +51,12 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
             {backgroundColor: markerColor},
             isSelected && styles.markerInnerSelected,
           ]}>
-          {marker.business ? (
-            <Icon name="wrench-filled" size={16} color={colors.neutral.white} />
+          {marker.iconName ? (
+            <Icon
+              name={marker.iconName}
+              size={16}
+              color={colors.neutral.white}
+            />
           ) : (
             <Icon
               name="map-pin-filled"

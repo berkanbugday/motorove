@@ -263,8 +263,8 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
       <View style={styles.mapContainer}>
         {isLoading ? (
           <ActivityIndicator
-            size="large"
-            color={colors.primary.main}
+            size="small"
+            color={colors.neutral.black}
             style={styles.loader}
           />
         ) : (
@@ -298,23 +298,21 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
                 {getDisplayAddress()}
               </BodySmall>
             </View>
-            <View style={styles.buttonContainerWrapper}>
-              <View style={styles.buttonContainer}>
-                <Button
-                  title={t('common.reset')}
-                  variant="outline"
-                  shape="round"
-                  onPress={handleResetLocation}
-                  style={styles.cancelButton}
-                />
-                <Button
-                  title={t('common.confirm')}
-                  variant="dark"
-                  shape="round"
-                  onPress={handleSelectLocation}
-                  style={styles.confirmButton}
-                />
-              </View>
+            <View style={styles.buttonContainer}>
+              <Button
+                title={t('common.reset')}
+                variant="outline"
+                shape="round"
+                onPress={handleResetLocation}
+                style={styles.cancelButton}
+              />
+              <Button
+                title={t('common.confirm')}
+                variant="dark"
+                shape="round"
+                onPress={handleSelectLocation}
+                style={styles.confirmButton}
+              />
             </View>
           </>
         ) : (
@@ -364,25 +362,20 @@ const styles = StyleSheet.create({
   locationAddress: {
     color: colors.neutral.grey,
   },
-  buttonContainerWrapper: {
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: spacing.md,
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
+    paddingTop: spacing.md,
     paddingBottom: spacing.sm,
   },
   cancelButton: {
     flex: 1,
-    marginRight: spacing.sm,
   },
   confirmButton: {
     flex: 1,
-    marginLeft: spacing.sm,
-  },
-  removeButton: {
-    backgroundColor: colors.primary.light,
   },
   tapInstructions: {
     marginVertical: spacing.sm,

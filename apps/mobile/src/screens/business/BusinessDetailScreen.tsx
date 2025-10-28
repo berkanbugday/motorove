@@ -4,17 +4,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Linking,
-  Dimensions,
   StatusBar,
   ScrollView,
   Platform,
   Image,
 } from 'react-native';
-import MapView, {
-  Marker,
-  PROVIDER_DEFAULT,
-  PROVIDER_GOOGLE,
-} from 'react-native-maps';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {IBusiness, DayOfWeek, BusinessStatus} from '@motorove/shared';
 import {colors, radius, spacing} from '@theme';
@@ -28,11 +22,12 @@ import {
   BodySmall,
   showToast,
   Chip,
+  RNMap,
 } from '@components';
 import {BusinessComments} from '@components/BusinessComments/BusinessComments';
 import {EnumUtils} from '@utils/enumUtils';
 import {calculateDistance} from '@utils/locationUtils';
-import type {BottomSheetRef} from '@components';
+import type {BottomSheetRef, RNMapMarkerItem} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {MapAppType} from '@components/BusinessComments/mapApps.constants';
 import {
@@ -60,8 +55,6 @@ type BusinessDetailScreenRouteProp = RouteProp<
   MainStackParamList,
   'BusinessDetail'
 >;
-
-const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
 export const BusinessDetailScreen: React.FC = () => {
   const route = useRoute<BusinessDetailScreenRouteProp>();
@@ -449,6 +442,20 @@ export const BusinessDetailScreen: React.FC = () => {
     return null;
   }
 
+  const getMarkers = (): RNMapMarkerItem[] => {
+    return [
+      {
+        id: '1',
+        coordinate: {
+          latitude: currentBusiness.address.latitude,
+          longitude: currentBusiness.address.longitude,
+        },
+        pinColor: colors.neutral.black,
+        iconName: 'wrench-filled',
+      },
+    ];
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -475,41 +482,16 @@ export const BusinessDetailScreen: React.FC = () => {
           bounces={false}>
           {/* Header Map Section */}
           <View style={styles.header}>
-            <MapView
+            <RNMap
               style={styles.headerImage}
-              provider={
-                Platform.OS === 'android' ? PROVIDER_GOOGLE : PROVIDER_DEFAULT
-              }
               initialRegion={{
                 latitude: currentBusiness.address.latitude,
                 longitude: currentBusiness.address.longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               }}
-              scrollEnabled={false}
-              zoomEnabled={false}
-              pitchEnabled={false}
-              rotateEnabled={false}
-              pointerEvents="none">
-              <Marker
-                pinColor={colors.neutral.black}
-                coordinate={{
-                  latitude: currentBusiness.address.latitude,
-                  longitude: currentBusiness.address.longitude,
-                }}>
-                <View
-                  style={[
-                    styles.markerInner,
-                    {backgroundColor: colors.neutral.black},
-                  ]}>
-                  <Icon
-                    name="wrench-filled"
-                    size={16}
-                    color={colors.neutral.white}
-                  />
-                </View>
-              </Marker>
-            </MapView>
+              markers={getMarkers()}
+            />
 
             {/* Business Title Overlay */}
             <View style={styles.headerOverlay}>

@@ -1,6 +1,7 @@
 import {Region, LatLng} from 'react-native-maps';
 import {IBusiness} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
+import {IconName} from '@components/Icon';
 
 /**
  * Marker item for animated map
@@ -12,6 +13,7 @@ export interface RNMapMarkerItem {
   title?: string;
   description?: string;
   pinColor?: string;
+  iconName?: IconName;
   zIndex?: number;
 }
 

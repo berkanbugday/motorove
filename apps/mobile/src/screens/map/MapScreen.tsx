@@ -220,6 +220,7 @@ export const MapScreen = () => {
         longitude: business.address.longitude,
       },
       business,
+      iconName: 'wrench-filled',
       pinColor: colors.neutral.black,
       zIndex: selectedBusinessId === business.id ? 1000 : index,
     }));
