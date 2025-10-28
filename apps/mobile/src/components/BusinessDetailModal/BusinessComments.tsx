@@ -130,24 +130,24 @@ export const BusinessComments: React.FC<BusinessCommentsProps> = ({
     <View style={styles.commentsSection}>
       <View style={styles.commentsHeader}>
         <Subtitle weight="bold">{t('screens.map.comments_ratings')}</Subtitle>
-        {businessComments.length > 0 &&
+        {(!businessComments.length ||
           !businessComments.find(
             comment => comment.createdBy?.id === currentUserId,
-          ) && (
-            <Button
-              title={
-                showAddComment
-                  ? t('common.cancel')
-                  : t('screens.map.write_comment')
-              }
-              variant="outline"
-              shape="round"
-              size="xsmall"
-              iconName={showAddComment ? 'close' : 'pen-filled'}
-              onPress={() => handleAddComment()}
-              style={styles.addCommentButton}
-            />
-          )}
+          )) && (
+          <Button
+            title={
+              showAddComment
+                ? t('common.cancel')
+                : t('screens.map.write_comment')
+            }
+            variant="outline"
+            shape="round"
+            size="xsmall"
+            iconName={showAddComment ? 'close' : 'pen-filled'}
+            onPress={() => handleAddComment()}
+            style={styles.addCommentButton}
+          />
+        )}
       </View>
 
       {/* Add Comment Form */}

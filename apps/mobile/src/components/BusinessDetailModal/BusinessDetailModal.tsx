@@ -566,7 +566,7 @@ const BusinessDetailModal = forwardRef<
       <Modal
         visible={isVisible}
         transparent
-        animationType="none"
+        animationType="slide"
         onRequestClose={handleBackPress}
         statusBarTranslucent
         testID={testID}>
@@ -1101,7 +1101,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
     paddingVertical: spacing.md,
-    marginVertical: spacing.md,
   },
   getDirectionButton: {
     flex: 1,
@@ -1137,7 +1136,6 @@ const styles = StyleSheet.create({
   },
   commentActionsContent: {
     gap: spacing.md,
-    paddingVertical: spacing.sm,
   },
   commentActionButton: {
     width: '100%',

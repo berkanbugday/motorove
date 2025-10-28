@@ -52,6 +52,8 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
   const [isAddressExpanded, setIsAddressExpanded] = useState(false);
   // About expansion state
   const [isAboutExpanded, setIsAboutExpanded] = useState(false);
+  // Title expansion state
+  const [isTitleExpanded, setIsTitleExpanded] = useState(false);
   // Distance state
   const [distance, setDistance] = useState<string | null>(null);
 
@@ -243,10 +245,17 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
       )}
 
       {/* Business Name */}
-
-      <Title weight="bold" style={styles.businessName}>
-        {business.name}
-      </Title>
+      <TouchableOpacity
+        onPress={() => {
+          setIsTitleExpanded(prev => !prev);
+        }}>
+        <Title
+          weight="bold"
+          numberOfLines={isTitleExpanded ? undefined : 1}
+          style={styles.businessName}>
+          {business.name}
+        </Title>
+      </TouchableOpacity>
 
       {/* Category and Rating Row */}
       <View style={styles.categoryRatingRow}>
@@ -372,7 +381,7 @@ const styles = StyleSheet.create({
   },
   businessName: {
     marginVertical: spacing.xs,
-    paddingRight: spacing.sm,
+    paddingRight: spacing.md,
   },
   categoryRatingRow: {
     flexDirection: 'row',
