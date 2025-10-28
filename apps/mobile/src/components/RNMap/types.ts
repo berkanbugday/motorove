@@ -47,6 +47,7 @@ export interface RNMapProps {
 
   // Business-specific
   onBusinessSelect?: (business: IBusiness) => void;
+  onDetailScreenOpen?: () => void;
   selectedBusinessId?: string;
 
   // Search button
@@ -74,16 +75,7 @@ export interface RNMapMarkerCardProps {
     longitude: number;
   };
   /**
-   * Whether to show the business detail modal on press
-   * If false, only onPress callback will be triggered
+   * Callback when business detail screen is opened
    */
-  showDetailModal?: boolean;
-  /**
-   * Callback when business detail modal is opened
-   */
-  onDetailModalOpen?: (business: IBusiness) => void;
-  /**
-   * Callback when business detail modal is closed
-   */
-  onDetailModalClose?: () => void;
+  onDetailScreenOpen?: () => void;
 }

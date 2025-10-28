@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { BusinessDto } from './dto/business.dto';
 import { FilterBusinessInput } from './dto/filter-business.input';
 import { plainToClass } from 'class-transformer';
-import { Business } from '../businesses/models/business.model';
 
 @Injectable()
 export class BusinessesService {
@@ -47,7 +46,7 @@ export class BusinessesService {
 
     // Query businesses within the bounding box (viewport polygon)
     // Limited to prevent performance issues with large result sets
-    const businesses = (await this.prisma.business.findMany({
+    const businesses = await this.prisma.business.findMany({
       where: {
         isActive: true,
         address: {
@@ -73,20 +72,44 @@ export class BusinessesService {
             isActive: true,
           },
         },
+        comments: {
+          where: {
+            isActive: true,
+          },
+          select: {
+            id: true,
+            rating: true,
+          },
+        },
       },
       // Order by name for consistent results
       orderBy: { name: 'asc' },
       // Limit results for performance optimization
       take: limit,
-    })) as Business[];
+    });
 
     this.logger.log(`Found ${businesses.length} businesses in viewport`);
 
-    return businesses.map((business) => plainToClass(BusinessDto, business));
+    return businesses.map((business) => {
+      const averageRating =
+        business.comments.length > 0
+          ? business.comments.reduce(
+              (acc, comment) => acc + comment.rating,
+              0,
+            ) / business.comments.length
+          : 0;
+      const commentsCount = business.comments.length;
+
+      return plainToClass(BusinessDto, {
+        ...business,
+        averageRating,
+        commentsCount,
+      });
+    });
   }
 
   async findOne(id: string): Promise<BusinessDto> {
-    const business = (await this.prisma.business.findFirst({
+    const business = await this.prisma.business.findFirst({
       where: {
         id,
         isActive: true,
@@ -103,13 +126,30 @@ export class BusinessesService {
             isActive: true,
           },
         },
+        comments: {
+          where: {
+            isActive: true,
+          },
+          select: {
+            id: true,
+            rating: true,
+          },
+        },
       },
-    })) as Business;
-
+    });
     if (!business) {
       throw new NotFoundException('Business not found');
     }
-
-    return plainToClass(BusinessDto, business);
+    const averageRating =
+      business.comments.length > 0
+        ? business.comments.reduce((acc, comment) => acc + comment.rating, 0) /
+          business.comments.length
+        : 0;
+    const commentsCount = business.comments.length;
+    return plainToClass(BusinessDto, {
+      ...business,
+      averageRating,
+      commentsCount,
+    });
   }
 }

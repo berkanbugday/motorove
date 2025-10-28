@@ -1,6 +1,7 @@
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
 import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
+import {IBusiness} from '@motorove/shared';
 
 // AUTH STACK
 export type AuthStackParamList = {
@@ -64,6 +65,10 @@ export type MainStackParamList = {
   Events: undefined;
   EditEvent: {eventId: string};
   Garage: undefined;
+  BusinessDetail: {
+    business: IBusiness;
+    userLocation?: {latitude: number; longitude: number};
+  };
 };
 
 export type MainScreenNavigationProp<T extends keyof MainStackParamList> =

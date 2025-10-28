@@ -16,4 +16,6 @@ export interface IBusiness {
   descriptions: IBusinessDescription[];
   workingHours: IWorkingHour[];
   address: IAddress;
+  averageRating: number;
+  commentsCount: number;
 }

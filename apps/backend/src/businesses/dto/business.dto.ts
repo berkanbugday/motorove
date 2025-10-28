@@ -1,11 +1,19 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { IBusiness } from '@motorove/shared';
 import { BusinessCategory } from '../../enums/models/business-category.enum';
 import { BusinessDescriptionDto } from './business-description.dto';
 import { WorkingHourDto } from './working-hour.dto';
 import { AddressDto } from '../../addresses/dto/address.dto';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 @ObjectType()
 export class BusinessDto implements IBusiness {
@@ -46,4 +54,14 @@ export class BusinessDto implements IBusiness {
   @Field(() => AddressDto)
   @Type(() => AddressDto)
   address: AddressDto;
+
+  @Field(() => Number)
+  @IsNumber()
+  @Type(() => Number)
+  averageRating: number;
+
+  @Field(() => Int)
+  @IsInt()
+  @Type(() => Number)
+  commentsCount: number;
 }

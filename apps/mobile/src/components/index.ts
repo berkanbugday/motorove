@@ -10,7 +10,7 @@ export * from './PostComment/PostCommentItem';
 export * from './PostComment/PostCommentInput';
 export * from './FullImageCard';
 export * from './ImagePreviewModal';
-export * from './BusinessDetailModal';
+export * from './BusinessComments';
 export * from './TopHeaderBar';
 export * from './FullscreenOverlay';
 export * from './Banner';

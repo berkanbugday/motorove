@@ -33,6 +33,7 @@ import {
   SupportScreen,
 } from '@screens/menu';
 import {GarageScreen} from '@screens/garage';
+import {BusinessDetailScreen} from '@screens/business';
 import {
   // notificationService,
   // useSaveDeviceToken,
@@ -211,6 +212,11 @@ export function MainNavigator() {
         name="Garage"
         component={GarageScreen}
         options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="BusinessDetail"
+        component={BusinessDetailScreen}
+        options={{headerShown: false, animation: 'slide_from_bottom'}}
       />
     </Stack.Navigator>
   );

@@ -114,7 +114,9 @@ type BusinessDescriptionDto {
 
 type BusinessDto {
   address: AddressDto!
+  averageRating: Float!
   category: BusinessCategory!
+  commentsCount: Int!
   countryCode: String!
   descriptions: [BusinessDescriptionDto!]!
   id: ID!

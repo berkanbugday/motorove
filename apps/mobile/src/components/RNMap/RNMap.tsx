@@ -13,6 +13,7 @@ import {Button} from '@components/Button/Button';
 import {useTranslation} from '@hooks/useTranslation';
 import {getShadow} from '@theme/shadows';
 import {colors} from '@theme/colors';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const screen = Dimensions.get('window');
 const ITEM_SPACING = 10;
@@ -29,6 +30,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   onRegionChange,
   mapRef,
   onBusinessSelect,
+  onDetailScreenOpen,
   selectedBusinessId,
   showSearchButton = false,
   onSearchThisArea,
@@ -45,7 +47,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   const regionChangeTimeout = useRef<NodeJS.Timeout | null>(null);
   const lastUserInteraction = useRef(false);
   const {t} = useTranslation();
-
+  const inset = useSafeAreaInsets();
   // Animated region hook
   const {getRegionForIndex} = useAnimatedRegion(initialRegion, markers);
 
@@ -70,11 +72,11 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       if (activeMapRef.current) {
         isProgrammaticChange.current = true;
         const region = getRegionForIndex(index);
-        activeMapRef.current.animateToRegion(region, 350);
+        activeMapRef.current.animateToRegion(region, 100);
         // Reset flag after animation completes
         setTimeout(() => {
           isProgrammaticChange.current = false;
-        }, 400);
+        }, 100);
       }
     },
     [markers, onMarkerPress, onBusinessSelect, activeMapRef, getRegionForIndex],
@@ -183,20 +185,14 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   const renderedCards = useMemo(
     () =>
       markers.map((marker: RNMapMarkerItem, index: number) => (
-        <View
-          key={marker.id}
-          style={[
-            styles.item,
-            selectedIndex !== null &&
-              index === selectedIndex &&
-              styles.selectedItem,
-          ]}>
+        <View key={marker.id} style={[styles.item]}>
           {marker.business && (
             <RNMapMarkerCard
               business={marker.business}
               onPress={() => handleMarkerPress(marker, index)}
               userLocation={userLocation}
               onClose={() => handleTouchMove()}
+              onDetailScreenOpen={onDetailScreenOpen}
             />
           )}
         </View>
@@ -227,7 +223,8 @@ const RNMapComponent: React.FC<RNMapProps> = ({
         !showScrollView &&
         selectedIndex === null &&
         isMapReady && (
-          <View style={styles.searchButtonContainer}>
+          <View
+            style={[styles.searchButtonContainer, {bottom: 80 + inset.bottom}]}>
             <Button
               title={t('screens.map.search_in_this_area')}
               iconName="map-pin-filled"
@@ -257,7 +254,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
           }}
           contentContainerStyle={styles.scrollViewContent}
           showsHorizontalScrollIndicator={false}
-          style={styles.scrollView}
+          style={[styles.scrollView, {bottom: 80 + inset.bottom}]}
           onMomentumScrollEnd={handleScrollEnd}
           removeClippedSubviews={true}>
           {renderedCards}
@@ -276,7 +273,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     position: 'absolute',
-    bottom: 110,
     left: 0,
     right: 0,
   },
@@ -288,12 +284,8 @@ const styles = StyleSheet.create({
     marginHorizontal: ITEM_SPACING / 2,
     overflow: 'hidden',
   },
-  selectedItem: {
-    // Add any additional styling for selected card if needed
-  },
   searchButtonContainer: {
     position: 'absolute',
-    bottom: 110,
     alignSelf: 'center',
     ...getShadow('small'),
   },

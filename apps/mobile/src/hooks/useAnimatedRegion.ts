@@ -32,7 +32,7 @@ export const useAnimatedRegion = (
 
       const marker = displayedMarkers[index];
       return {
-        latitude: marker.coordinate.latitude,
+        latitude: marker.coordinate.latitude - 0.005,
         longitude: marker.coordinate.longitude,
         latitudeDelta: LATITUDE_DELTA,
         longitudeDelta: LONGITUDE_DELTA,

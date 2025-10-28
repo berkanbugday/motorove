@@ -9,6 +9,9 @@ import {Region} from 'react-native-maps';
 import {Button} from '@components/Button';
 import {useTranslation} from '@hooks/useTranslation';
 import {showToast} from '@components/ToastMessage';
+import {navigateToScreen} from '@navigation/utils/navigationHelpers';
+import {useNavigation} from '@react-navigation/native';
+import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -18,30 +21,20 @@ const DEFAULT_REGION: Region = {
   longitudeDelta: 0.5,
 };
 
-// Zoom-based bounds calculation thresholds
-// When zoomed in (small delta), search wider area
-// When zoomed out (large delta), search focused center area
 const ZOOM_THRESHOLD_CLOSE = 0.05; // Very zoomed in
 const ZOOM_THRESHOLD_FAR = 0.5; // Very zoomed out
 
-/**
- * MapScreen Component
- * Displays businesses on an interactive map with animated markers
- *
- * Features:
- * - Business markers from backend service
- * - User location detection
- * - Animated region transitions
- * - Business detail cards
- * - Real-time business data
- * - Dynamic search area based on zoom level
- */
 export const MapScreen = () => {
   const {t} = useTranslation();
+  const navigation =
+    useNavigation<MainScreenNavigationProp<'BusinessDetail'>>();
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [selectedBusinessId, setSelectedBusinessId] = useState<
     string | undefined
   >();
+  const [selectedBusiness, setSelectedBusiness] = useState<
+    IBusiness | undefined
+  >(undefined);
   const [currentRegion, setCurrentRegion] = useState<Region>(DEFAULT_REGION);
   const [mapBounds, setMapBounds] = useState<{
     northEast: {latitude: number; longitude: number};
@@ -234,11 +227,22 @@ export const MapScreen = () => {
 
   const handleBusinessSelect = useCallback((business: IBusiness) => {
     setSelectedBusinessId(business.id);
+    setSelectedBusiness(business);
   }, []);
+
+  const handleDetailScreenOpen = useCallback(() => {
+    if (!selectedBusiness) {
+      return;
+    }
+    navigateToScreen(navigation, 'BusinessDetail', {
+      business: selectedBusiness,
+    });
+  }, [navigation, selectedBusiness]);
 
   const handleMarkerPress = useCallback((marker: RNMapMarkerItem) => {
     if (marker.business) {
       setSelectedBusinessId(marker.business.id);
+      setSelectedBusiness(marker.business);
     }
   }, []);
 
@@ -262,6 +266,7 @@ export const MapScreen = () => {
         showUserLocation={true}
         onMarkerPress={handleMarkerPress}
         onBusinessSelect={handleBusinessSelect}
+        onDetailScreenOpen={handleDetailScreenOpen}
         selectedBusinessId={selectedBusinessId}
         mapRef={mapRef}
         style={styles.map}

@@ -1,9 +1,10 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { BusinessCategory } from '../../enums/models/business-category.enum';
-import { BusinessDescriptionDto } from '../dto/business-description.dto';
-import { WorkingHourDto } from '../dto/working-hour.dto';
+import { BusinessDescription } from './business-description.model';
+import { WorkingHour } from './working-hour.model';
 import { Address } from '../../addresses/models/address.model';
 import { ApprovalStatus } from '../../enums/models/approval-status.enum';
+import { BusinessComment } from 'src/business-comments/models/business-comment.model';
 
 @ObjectType()
 export class Business {
@@ -28,12 +29,15 @@ export class Business {
   @Field(() => ApprovalStatus)
   status: ApprovalStatus;
 
-  @Field(() => [BusinessDescriptionDto])
-  descriptions: BusinessDescriptionDto[];
+  @Field(() => [BusinessDescription])
+  descriptions: BusinessDescription[];
 
-  @Field(() => [WorkingHourDto])
-  workingHours: WorkingHourDto[];
+  @Field(() => [WorkingHour])
+  workingHours: WorkingHour[];
 
   @Field(() => Boolean)
   isActive: boolean;
+
+  @Field(() => [BusinessComment])
+  comments: BusinessComment[];
 }

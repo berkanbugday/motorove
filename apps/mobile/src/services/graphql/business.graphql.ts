@@ -38,6 +38,8 @@ export const BUSINESS_FRAGMENT = gql`
     workingHours {
       ...WorkingHourFragment
     }
+    averageRating
+    commentsCount
   }
   ${ADDRESS_FRAGMENT}
   ${BUSINESS_DESCRIPTION_FRAGMENT}
