@@ -26,7 +26,7 @@ export class UsersService {
 
     // Get current user's city information
     let currentUserCityId: string | null = null;
-    if (currentUserId) {
+    if (currentUserId && !searchQuery) {
       const currentUser = await this.prisma.user.findUnique({
         where: { id: currentUserId },
         select: { cityId: true },
