@@ -282,8 +282,8 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   radioButton: {
-    width: 30,
-    height: 30,
+    width: 25,
+    height: 25,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: colors.neutral.black,
