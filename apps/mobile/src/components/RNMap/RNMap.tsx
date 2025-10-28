@@ -14,6 +14,7 @@ import {useTranslation} from '@hooks/useTranslation';
 import {getShadow} from '@theme/shadows';
 import {colors} from '@theme/colors';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {spacing} from '@theme/spacing';
 
 const screen = Dimensions.get('window');
 const ITEM_SPACING = 10;
@@ -36,6 +37,10 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   onSearchThisArea,
   searchButtonLoading = false,
   userLocation,
+  onMyLocationPress,
+  onFilterPress,
+  showFilterButton = false,
+  hasActiveFilters = false,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showScrollView, setShowScrollView] = useState(false);
@@ -237,6 +242,37 @@ const RNMapComponent: React.FC<RNMapProps> = ({
           </View>
         )}
 
+      {/* Filter Button - always visible */}
+      {isMapReady && showFilterButton && onFilterPress && (
+        <View style={[styles.filterButtonContainer, {top: 20 + inset.top}]}>
+          <Button
+            iconName={hasActiveFilters ? 'filter-filled' : 'filter'}
+            iconSize={20}
+            iconColor={colors.neutral.black}
+            onPress={onFilterPress}
+            variant="dark"
+            shape="circle"
+            badge={hasActiveFilters}
+            badgePosition="left"
+            style={styles.filterButton}
+          />
+        </View>
+      )}
+
+      {/* My Location Button - always visible */}
+      {isMapReady && onMyLocationPress && (
+        <View style={[styles.showMyLocationContainer, {top: 90 + inset.top}]}>
+          <Button
+            iconName="user-location"
+            iconSize={20}
+            onPress={onMyLocationPress}
+            variant="dark"
+            shape="circle"
+            style={{width: 48, height: 48}}
+          />
+        </View>
+      )}
+
       {/* Scrollable marker cards - only shown after marker selection */}
       {showScrollView && (
         <ScrollView
@@ -288,6 +324,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     ...getShadow('small'),
+  },
+  filterButtonContainer: {
+    position: 'absolute',
+    right: spacing.xl,
+    ...getShadow('small'),
+  },
+  showMyLocationContainer: {
+    position: 'absolute',
+    right: spacing.xl,
+    ...getShadow('small'),
+  },
+  filterButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: colors.neutral.white,
   },
 });
 

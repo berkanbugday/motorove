@@ -8,7 +8,7 @@ import {
   View,
   StyleProp,
 } from 'react-native';
-import {colors, spacing, componentRadius} from '@theme';
+import {colors, spacing, componentRadius, radius} from '@theme';
 import {Typography} from '../Typography';
 import {Icon, IconName} from '../Icon';
 
@@ -27,6 +27,8 @@ interface ButtonProps {
   style?: ViewStyle | StyleProp<ViewStyle>;
   textStyle?: TextStyle;
   testID?: string;
+  badge?: boolean | number; // Show badge: true for dot, number for count
+  badgePosition?: 'left' | 'right';
 }
 
 export function Button({
@@ -44,6 +46,8 @@ export function Button({
   style,
   textStyle,
   testID,
+  badge,
+  badgePosition = 'right',
 }: ButtonProps) {
   const buttonStyles = [
     styles.button,
@@ -199,15 +203,52 @@ export function Button({
     );
   };
 
+  const renderBadge = () => {
+    if (!badge) {
+      return null;
+    }
+
+    if (typeof badge === 'boolean') {
+      // Show red dot badge
+      return (
+        <View
+          style={[
+            styles.badgeDot,
+            {right: badgePosition === 'right' ? 0 : undefined},
+          ]}
+        />
+      );
+    }
+
+    // Show count badge
+    return (
+      <View
+        style={[
+          styles.badgeContainer,
+          {right: badgePosition === 'right' ? -5 : undefined},
+        ]}>
+        <Typography
+          variant="caption"
+          weight="bold"
+          color={colors.neutral.white}>
+          {badge > 99 ? '99+' : badge}
+        </Typography>
+      </View>
+    );
+  };
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      style={buttonStyles}
-      onPress={onPress}
-      disabled={disabled || loading}
-      testID={testID}>
-      {renderContent()}
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={buttonStyles}
+        onPress={onPress}
+        disabled={disabled || loading}
+        testID={testID}>
+        {renderContent()}
+      </TouchableOpacity>
+      {renderBadge()}
+    </>
   );
 }
 
@@ -301,5 +342,22 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.7,
+  },
+  badgeDot: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.primary.main,
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: -5,
+    minWidth: 20,
+    borderRadius: radius.round,
+    backgroundColor: colors.primary.main,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xs,
   },
 });

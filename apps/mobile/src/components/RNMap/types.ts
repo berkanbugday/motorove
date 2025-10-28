@@ -62,6 +62,14 @@ export interface RNMapProps {
     latitude: number;
     longitude: number;
   };
+
+  // Location button
+  onMyLocationPress?: () => void;
+
+  // Filter button
+  showFilterButton?: boolean;
+  onFilterPress?: () => void;
+  hasActiveFilters?: boolean;
 }
 
 /**

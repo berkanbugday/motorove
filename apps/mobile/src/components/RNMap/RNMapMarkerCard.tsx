@@ -200,7 +200,10 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
           }
           size="small"
         />
-        <View style={styles.ratingContainer}>
+      </View>
+
+      <View style={styles.ratingContainer}>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Icon name="star-filled" color={colors.status.warning} size={14} />
           <Caption weight="semiBold" color={colors.neutral.grey}>
             {business.averageRating ? business.averageRating.toFixed(1) : '0.0'}
@@ -210,18 +213,18 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
             {t('screens.map.comment').toLowerCase()})
           </Caption>
         </View>
+        {onClose && (
+          <Button
+            shape="circle"
+            size="small"
+            variant="dark"
+            iconName="close"
+            iconSize={18}
+            onPress={onClose}
+            style={styles.closeButton}
+          />
+        )}
       </View>
-      {onClose && (
-        <Button
-          shape="circle"
-          size="small"
-          variant="dark"
-          iconName="close"
-          iconSize={18}
-          onPress={onClose}
-          style={styles.closeButton}
-        />
-      )}
 
       {/* Business Name */}
       <TouchableOpacity
@@ -340,9 +343,7 @@ const styles = StyleSheet.create({
     ...getShadow('small'),
   },
   closeButton: {
-    position: 'absolute',
     top: spacing.sm,
-    right: spacing.sm,
     ...getShadow('small'),
   },
   businessName: {
@@ -359,20 +360,16 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.sm,
     position: 'absolute',
     left: spacing.md,
     top: -spacing.sm,
     zIndex: 10,
   },
   ratingContainer: {
+    position: 'absolute',
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    top: spacing.md - spacing.xs,
-    left: -spacing.md,
-    marginRight: spacing.md,
+    gap: spacing.md,
+    right: spacing.sm,
   },
   infoRow: {
     flexDirection: 'row',

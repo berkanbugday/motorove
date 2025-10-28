@@ -4,9 +4,9 @@ import {
   GET_BUSINESS,
   SEARCH_BUSINESSES,
 } from './graphql/business.graphql';
-import {IBusiness} from '@motorove/shared';
+import {IBusiness, IBusinessFilter} from '@motorove/shared';
 import {loggingService} from './logging.service';
-import {useState, useCallback, useEffect} from 'react';
+import {useState, useCallback} from 'react';
 
 // Hook for getting a specific business
 export const useGetBusiness = (id: string) => {
@@ -40,27 +40,24 @@ interface IMapBounds {
 
 // Hook for getting all businesses within map viewport bounds
 // @param bounds - Map viewport bounds (polygon)
+// @param filters - Filter criteria for businesses
 // @param limit - Maximum number of businesses to return (default: 100 on backend)
-export const useGetBusinesses = (bounds?: IMapBounds, limit?: number) => {
+export const useGetBusinesses = (
+  bounds?: IMapBounds,
+  filters?: IBusinessFilter,
+  limit?: number,
+) => {
   const [hasMore, setHasMore] = useState(true);
-  const [currentBounds, setCurrentBounds] = useState<IMapBounds | undefined>(
-    bounds,
-  );
-
-  // Update bounds when prop changes
-  useEffect(() => {
-    setCurrentBounds(bounds);
-  }, [bounds]);
 
   // Skip query if no valid bounds provided
   const shouldSkip =
-    !currentBounds ||
-    !currentBounds.northEast ||
-    !currentBounds.southWest ||
-    isNaN(currentBounds.northEast.latitude) ||
-    isNaN(currentBounds.northEast.longitude) ||
-    isNaN(currentBounds.southWest.latitude) ||
-    isNaN(currentBounds.southWest.longitude);
+    !bounds ||
+    !bounds.northEast ||
+    !bounds.southWest ||
+    isNaN(bounds.northEast.latitude) ||
+    isNaN(bounds.northEast.longitude) ||
+    isNaN(bounds.southWest.latitude) ||
+    isNaN(bounds.southWest.longitude);
 
   const {
     data,
@@ -71,11 +68,16 @@ export const useGetBusinesses = (bounds?: IMapBounds, limit?: number) => {
   } = useQuery(GET_BUSINESSES, {
     variables: {
       filter: {
-        northEastLat: currentBounds?.northEast.latitude,
-        northEastLng: currentBounds?.northEast.longitude,
-        southWestLat: currentBounds?.southWest.latitude,
-        southWestLng: currentBounds?.southWest.longitude,
+        northEastLat: bounds?.northEast.latitude,
+        northEastLng: bounds?.northEast.longitude,
+        southWestLat: bounds?.southWest.latitude,
+        southWestLng: bounds?.southWest.longitude,
         limit: limit, // Optional limit for performance optimization
+        categories: filters?.categories,
+        minRating: filters?.minRating,
+        searchQuery: filters?.searchQuery,
+        isOpen: filters?.isOpen,
+        isOpen24h: filters?.isOpen24h,
       },
     },
     skip: shouldSkip,
@@ -128,12 +130,6 @@ export const useGetBusinesses = (bounds?: IMapBounds, limit?: number) => {
     }
   }, [data?.businesses?.length, fetchMore, hasMore, loading]);
 
-  // Update bounds and refetch
-  const updateBounds = useCallback((newBounds: IMapBounds) => {
-    setCurrentBounds(newBounds);
-    setHasMore(true);
-  }, []);
-
   return {
     businesses: (data?.businesses as IBusiness[]) || [],
     loading,
@@ -141,8 +137,6 @@ export const useGetBusinesses = (bounds?: IMapBounds, limit?: number) => {
     refetch,
     loadMore,
     hasMore,
-    bounds: currentBounds,
-    updateBounds,
   };
 };
 

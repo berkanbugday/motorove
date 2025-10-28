@@ -482,9 +482,14 @@ input FilterAddressInput {
 }
 
 input FilterBusinessInput {
+  categories: [BusinessCategory!]
+  isOpen: Boolean
+  isOpen24h: Boolean
   limit: Int = 100
+  minRating: Float
   northEastLat: Float
   northEastLng: Float
+  searchQuery: String
   southWestLat: Float
   southWestLng: Float
 }

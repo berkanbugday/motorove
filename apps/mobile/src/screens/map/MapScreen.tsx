@@ -12,6 +12,8 @@ import {showToast} from '@components/ToastMessage';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {useBottomSheet} from '@components/BottomSheet';
+import {MapFilter, MapFilterValues} from '@components/MapFilter';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -41,27 +43,29 @@ export const MapScreen = () => {
     southWest: {latitude: number; longitude: number};
   } | null>(null);
   const [showSearchButton, setShowSearchButton] = useState(false);
-  const [displayedBusinesses, setDisplayedBusinesses] = useState<IBusiness[]>(
-    [],
-  );
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [filterValues, setFilterValues] = useState<MapFilterValues>({
+    categories: [],
+    minRating: undefined,
+    isOpen: undefined,
+    isOpen24h: undefined,
+    searchQuery: '',
+  });
   const mapRef = useRef<any>(null);
   const isUserInteraction = useRef(false);
+  const {openBottomSheet, closeBottomSheet} = useBottomSheet();
 
-  // Fetch businesses from backend based on map viewport bounds (polygon)
+  // Memoize mapBounds to prevent unnecessary re-renders
+  const memoizedMapBounds = useMemo(() => mapBounds || undefined, [mapBounds]);
+
+  // Fetch businesses from backend based on map viewport bounds (polygon) and filters
   const {businesses, loading, error, refetch} = useGetBusinesses(
-    mapBounds || undefined,
+    memoizedMapBounds,
+    filterValues,
   );
-
-  // Update displayed businesses only when new data arrives
-  useEffect(() => {
-    if (businesses.length > 0) {
-      setDisplayedBusinesses(businesses);
-    }
-  }, [businesses]);
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = useCallback(
@@ -205,7 +209,7 @@ export const MapScreen = () => {
   // Sort by geographic position (lat, long) for consistent display
   // Use displayedBusinesses to prevent map clearing while loading new data
   const markers: RNMapMarkerItem[] = useMemo(() => {
-    const sorted = [...displayedBusinesses].sort((a, b) => {
+    const sorted = [...businesses].sort((a, b) => {
       // Sort by latitude first, then longitude
       if (a.address.latitude !== b.address.latitude) {
         return a.address.latitude - b.address.latitude;
@@ -224,7 +228,7 @@ export const MapScreen = () => {
       pinColor: colors.neutral.black,
       zIndex: selectedBusinessId === business.id ? 1000 : index,
     }));
-  }, [displayedBusinesses, selectedBusinessId]);
+  }, [businesses, selectedBusinessId]);
 
   const handleBusinessSelect = useCallback((business: IBusiness) => {
     setSelectedBusinessId(business.id);
@@ -246,6 +250,51 @@ export const MapScreen = () => {
       setSelectedBusiness(marker.business);
     }
   }, []);
+
+  // Handle my location button press
+  const handleMyLocationPress = useCallback(() => {
+    getUserLocation();
+  }, [getUserLocation]);
+
+  // Handle filter button press
+  const handleFilterPress = useCallback(() => {
+    openBottomSheet({
+      content: (
+        <MapFilter
+          initialValues={filterValues}
+          onApply={newFilters => {
+            setFilterValues(newFilters);
+            // Trigger search with new filters
+            if (mapBounds) {
+              refetch();
+            }
+          }}
+          onReset={() => {
+            setFilterValues({categories: []});
+            // Trigger search with cleared filters
+            if (mapBounds) {
+              refetch();
+            }
+          }}
+          onClose={closeBottomSheet}
+        />
+      ),
+      snapPoint: 'full',
+      title: t('screens.map.filter_title'),
+      closeButtonPosition: 'top-right',
+    });
+  }, [filterValues, mapBounds, refetch, openBottomSheet, closeBottomSheet, t]);
+
+  // Check if filters are active
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filterValues.categories.length > 0 ||
+      filterValues.minRating !== undefined ||
+      (filterValues.searchQuery && filterValues.searchQuery.trim() !== '') ||
+      filterValues.isOpen !== undefined ||
+      filterValues.isOpen24h !== undefined
+    );
+  }, [filterValues]);
 
   if (error) {
     return (
@@ -276,6 +325,10 @@ export const MapScreen = () => {
         onSearchThisArea={handleSearchThisArea}
         searchButtonLoading={loading}
         userLocation={userLocation || undefined}
+        onMyLocationPress={handleMyLocationPress}
+        showFilterButton={true}
+        onFilterPress={handleFilterPress}
+        hasActiveFilters={hasActiveFilters}
       />
     </View>
   );
