@@ -52,7 +52,7 @@ export const MenuScreen = () => {
       snapPoint: 'minimal',
       title: t('screens.menu.language_selection'),
       showCloseButton: true,
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
     });
   };
 

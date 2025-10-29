@@ -186,7 +186,7 @@ export const EditPostScreen = () => {
   const openGroupSelectionBottomSheet = () => {
     openBottomSheet({
       title: t('screens.post.select_group'),
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
       closeOnBackdropPress: false,
       content: (
         <>
@@ -324,7 +324,7 @@ export const EditPostScreen = () => {
       ),
       snapPoint: 'full',
       enableGestureControl: false,
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
     });
   };
 

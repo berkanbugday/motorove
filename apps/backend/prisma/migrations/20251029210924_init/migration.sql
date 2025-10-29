@@ -65,13 +65,16 @@ CREATE TYPE "SocialMediaPlatform" AS ENUM ('INSTAGRAM', 'FACEBOOK', 'TWITTER', '
 CREATE TYPE "Interest" AS ENUM ('MOTORCYCLE_CUSTOMIZATION', 'DIY_MAINTENANCE', 'VINTAGE_MOTORCYCLES', 'ELECTRIC_MOTORCYCLES', 'RIDING_SKILLS', 'MOTO_PHOTOGRAPHY', 'CONTENT_CREATION', 'MEETING_RIDERS', 'COMMUNITY_EVENTS', 'MOTO_FESTIVALS', 'EXPLORING_NATURE', 'MOUNTAIN_ROADS', 'COASTAL_RIDES', 'CROSS_BORDER_TRIPS');
 
 -- CreateEnum
-CREATE TYPE "BusinessCategory" AS ENUM ('SALES', 'DEALERSHIP', 'USED_DEALER', 'REPAIR', 'MAINTENANCE', 'ENGINE_REPAIR', 'ENGINE_REBUILDING', 'ELECTRICAL_REPAIR', 'TIRE_SERVICE', 'OIL_CHANGE', 'BATTERY_SERVICE', 'BRAKE_SERVICE', 'SUSPENSION_REPAIR', 'TRANSMISSION_REPAIR', 'PARTS_STORE', 'ACCESSORIES', 'PROTECTIVE_GEAR', 'EXHAUST_SYSTEMS', 'ELECTRONICS', 'LIGHTING', 'INTERCOMS', 'RENTAL', 'TOWING', 'PARKING', 'STORAGE', 'CUSTOMIZATION', 'RESTORATION', 'INSPECTION', 'FINANCING', 'INSURANCE', 'TRADE_IN', 'ELECTRIC_MOTORCYCLES', 'SCOOTERS', 'ATV', 'DETAILED_CLEANING', 'TRAINING', 'TRANSPORT_SHIPPING', 'TOURS', 'OTHER');
+CREATE TYPE "BusinessCategory" AS ENUM ('REPAIR_MAINTENANCE', 'DEALERSHIPS_SALES', 'PARTS_ACCESSORIES', 'CUSTOMIZATION_TUNING', 'MOTORCYCLE_RENTAL', 'TIRES_WHEELS', 'DETAILING_WRAPPING', 'ROADSIDE_ASSISTANCE', 'GEAR_APPAREL', 'TRAINING_RIDING_SCHOOLS', 'MOTORCYCLE_CLUBS_COMMUNITIES', 'ELECTRIC_MOTORCYCLE_SERVICES', 'PAINTING_BODYWORK', 'INSPECTION_LEGAL_SERVICES', 'TRANSPORTATION_STORAGE');
 
 -- CreateEnum
 CREATE TYPE "GroupTag" AS ENUM ('ADVENTURE', 'BEGINNERS_WELCOME', 'CAMPING', 'CHOPPER', 'CLASSIC_MOTORCYCLE', 'CULTURAL_TOURS', 'CUSTOM_MOTORCYCLE', 'DAILY_RIDE', 'ELECTRIC_MOTORCYCLE', 'ENDURO', 'EVENT_ORGANIZERS', 'EXPERIENCED_RIDERS', 'EXPLORATION', 'FAMILY_FRIENDLY', 'FUN_RIDES', 'INTERNATIONAL_RIDERS', 'MUSIC_CULTURE', 'OFF_ROAD', 'PHOTOGRAPHY', 'RIDER_EDUCATION', 'SCOOTER', 'SOCIAL_RESPONSIBILITY', 'TOURING', 'TRACK', 'VINTAGE_LOVERS', 'WOMEN_RIDERS', 'YOUNG_RIDERS');
 
 -- CreateEnum
 CREATE TYPE "SupportCategory" AS ENUM ('ACCOUNT', 'TECHNICAL', 'FEEDBACK', 'FEATURE_REQUEST', 'BUG_REPORT', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "WarningType" AS ENUM ('RADAR', 'POLICE_CHECKPOINT', 'ACCIDENT', 'ROAD_CONSTRUCTION', 'ROAD_CLOSURE', 'DANGEROUS_CURVE', 'SLIPPERY_ROAD', 'PARKING_PROHIBITED', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -239,7 +242,7 @@ CREATE TABLE "Post" (
 );
 
 -- CreateTable
-CREATE TABLE "Comment" (
+CREATE TABLE "PostComment" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "postId" TEXT NOT NULL,
@@ -250,7 +253,22 @@ CREATE TABLE "Comment" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
 
-    CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "PostComment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BusinessComment" (
+    "id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "rating" INTEGER NOT NULL DEFAULT 5,
+    "businessId" TEXT NOT NULL,
+    "createdById" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedById" TEXT,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "BusinessComment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -294,7 +312,7 @@ CREATE TABLE "Business" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "category" "BusinessCategory" NOT NULL,
-    "areaCode" TEXT,
+    "countryCode" TEXT,
     "phoneNumber" TEXT NOT NULL,
     "verified" BOOLEAN NOT NULL DEFAULT false,
     "status" "ApprovalStatus" NOT NULL DEFAULT 'PENDING',
@@ -435,6 +453,44 @@ CREATE TABLE "SupportRequest" (
 );
 
 -- CreateTable
+CREATE TABLE "Warning" (
+    "id" TEXT NOT NULL,
+    "type" "WarningType" NOT NULL,
+    "status" "ApprovalStatus" NOT NULL DEFAULT 'PENDING',
+    "createdById" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedById" TEXT,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "Warning_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "WarningDescription" (
+    "id" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "language" "Language" NOT NULL,
+    "warningId" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "WarningDescription_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "WarningAddress" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "country" TEXT,
+    "language" "Language" NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "warningId" TEXT NOT NULL,
+
+    CONSTRAINT "WarningAddress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_EventToGroup" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -452,76 +508,31 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE INDEX "User_supabaseId_idx" ON "User"("supabaseId");
 
 -- CreateIndex
-CREATE INDEX "User_isActive_idx" ON "User"("isActive");
-
--- CreateIndex
-CREATE INDEX "User_ridingStyles_idx" ON "User"("ridingStyles");
-
--- CreateIndex
-CREATE INDEX "User_gender_idx" ON "User"("gender");
-
--- CreateIndex
-CREATE INDEX "User_interests_idx" ON "User"("interests");
-
--- CreateIndex
 CREATE INDEX "User_cityId_idx" ON "User"("cityId");
 
 -- CreateIndex
 CREATE INDEX "Motorcycle_createdById_idx" ON "Motorcycle"("createdById");
 
 -- CreateIndex
-CREATE INDEX "Motorcycle_brand_idx" ON "Motorcycle"("brand");
-
--- CreateIndex
-CREATE INDEX "Motorcycle_isActive_idx" ON "Motorcycle"("isActive");
-
--- CreateIndex
 CREATE INDEX "Equipment_createdById_idx" ON "Equipment"("createdById");
-
--- CreateIndex
-CREATE INDEX "Equipment_type_idx" ON "Equipment"("type");
-
--- CreateIndex
-CREATE INDEX "Equipment_brand_idx" ON "Equipment"("brand");
-
--- CreateIndex
-CREATE INDEX "Equipment_isActive_idx" ON "Equipment"("isActive");
 
 -- CreateIndex
 CREATE INDEX "SocialMedia_createdById_idx" ON "SocialMedia"("createdById");
 
 -- CreateIndex
-CREATE INDEX "SocialMedia_platform_idx" ON "SocialMedia"("platform");
-
--- CreateIndex
-CREATE INDEX "SocialMedia_isActive_idx" ON "SocialMedia"("isActive");
-
--- CreateIndex
 CREATE UNIQUE INDEX "SocialMedia_createdById_platform_key" ON "SocialMedia"("createdById", "platform");
-
--- CreateIndex
-CREATE INDEX "City_value_idx" ON "City"("value");
 
 -- CreateIndex
 CREATE INDEX "Group_cityId_idx" ON "Group"("cityId");
 
 -- CreateIndex
-CREATE INDEX "Group_privacy_idx" ON "Group"("privacy");
-
--- CreateIndex
-CREATE INDEX "GroupMembership_groupId_idx" ON "GroupMembership"("groupId");
+CREATE INDEX "Group_createdById_idx" ON "Group"("createdById");
 
 -- CreateIndex
 CREATE INDEX "GroupMembership_userId_idx" ON "GroupMembership"("userId");
 
 -- CreateIndex
-CREATE INDEX "GroupMembership_status_idx" ON "GroupMembership"("status");
-
--- CreateIndex
-CREATE INDEX "GroupMembership_role_idx" ON "GroupMembership"("role");
-
--- CreateIndex
-CREATE INDEX "GroupMembership_isActive_idx" ON "GroupMembership"("isActive");
+CREATE INDEX "GroupMembership_createdById_idx" ON "GroupMembership"("createdById");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "GroupMembership_groupId_userId_key" ON "GroupMembership"("groupId", "userId");
@@ -530,31 +541,7 @@ CREATE UNIQUE INDEX "GroupMembership_groupId_userId_key" ON "GroupMembership"("g
 CREATE INDEX "Notification_userId_idx" ON "Notification"("userId");
 
 -- CreateIndex
-CREATE INDEX "Notification_type_idx" ON "Notification"("type");
-
--- CreateIndex
-CREATE INDEX "Notification_channel_idx" ON "Notification"("channel");
-
--- CreateIndex
-CREATE INDEX "Notification_status_idx" ON "Notification"("status");
-
--- CreateIndex
-CREATE INDEX "Notification_read_idx" ON "Notification"("read");
-
--- CreateIndex
-CREATE INDEX "Notification_createdAt_idx" ON "Notification"("createdAt");
-
--- CreateIndex
-CREATE INDEX "Notification_isActive_idx" ON "Notification"("isActive");
-
--- CreateIndex
-CREATE INDEX "DeviceToken_userId_idx" ON "DeviceToken"("userId");
-
--- CreateIndex
-CREATE INDEX "DeviceToken_isActive_idx" ON "DeviceToken"("isActive");
-
--- CreateIndex
-CREATE INDEX "DeviceToken_type_idx" ON "DeviceToken"("type");
+CREATE INDEX "Notification_createdById_idx" ON "Notification"("createdById");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "DeviceToken_userId_key" ON "DeviceToken"("userId");
@@ -566,46 +553,28 @@ CREATE INDEX "Post_createdById_idx" ON "Post"("createdById");
 CREATE INDEX "Post_groupId_idx" ON "Post"("groupId");
 
 -- CreateIndex
-CREATE INDEX "Post_createdAt_idx" ON "Post"("createdAt");
+CREATE INDEX "PostComment_createdById_idx" ON "PostComment"("createdById");
 
 -- CreateIndex
-CREATE INDEX "Post_isActive_idx" ON "Post"("isActive");
+CREATE INDEX "PostComment_postId_idx" ON "PostComment"("postId");
 
 -- CreateIndex
-CREATE INDEX "Comment_createdById_idx" ON "Comment"("createdById");
+CREATE INDEX "PostComment_parentId_idx" ON "PostComment"("parentId");
 
 -- CreateIndex
-CREATE INDEX "Comment_postId_idx" ON "Comment"("postId");
+CREATE INDEX "BusinessComment_createdById_idx" ON "BusinessComment"("createdById");
 
 -- CreateIndex
-CREATE INDEX "Comment_parentId_idx" ON "Comment"("parentId");
-
--- CreateIndex
-CREATE INDEX "Comment_createdAt_idx" ON "Comment"("createdAt");
-
--- CreateIndex
-CREATE INDEX "Comment_isActive_idx" ON "Comment"("isActive");
-
--- CreateIndex
-CREATE INDEX "PostLike_postId_idx" ON "PostLike"("postId");
+CREATE INDEX "BusinessComment_businessId_idx" ON "BusinessComment"("businessId");
 
 -- CreateIndex
 CREATE INDEX "PostLike_userId_idx" ON "PostLike"("userId");
 
 -- CreateIndex
-CREATE INDEX "PostLike_createdAt_idx" ON "PostLike"("createdAt");
-
--- CreateIndex
 CREATE UNIQUE INDEX "PostLike_postId_userId_key" ON "PostLike"("postId", "userId");
 
 -- CreateIndex
-CREATE INDEX "PostSave_postId_idx" ON "PostSave"("postId");
-
--- CreateIndex
 CREATE INDEX "PostSave_userId_idx" ON "PostSave"("userId");
-
--- CreateIndex
-CREATE INDEX "PostSave_createdAt_idx" ON "PostSave"("createdAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PostSave_postId_userId_key" ON "PostSave"("postId", "userId");
@@ -614,25 +583,10 @@ CREATE UNIQUE INDEX "PostSave_postId_userId_key" ON "PostSave"("postId", "userId
 CREATE UNIQUE INDEX "Address_businessId_key" ON "Address"("businessId");
 
 -- CreateIndex
-CREATE INDEX "Address_postId_idx" ON "Address"("postId");
-
--- CreateIndex
-CREATE INDEX "Address_eventId_idx" ON "Address"("eventId");
-
--- CreateIndex
-CREATE INDEX "Address_businessId_idx" ON "Address"("businessId");
-
--- CreateIndex
-CREATE INDEX "Address_language_idx" ON "Address"("language");
-
--- CreateIndex
-CREATE INDEX "Address_type_idx" ON "Address"("type");
-
--- CreateIndex
-CREATE INDEX "Address_country_idx" ON "Address"("country");
-
--- CreateIndex
 CREATE INDEX "Address_latitude_longitude_idx" ON "Address"("latitude", "longitude");
+
+-- CreateIndex
+CREATE INDEX "Address_businessId_latitude_longitude_idx" ON "Address"("businessId", "latitude", "longitude");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Address_postId_language_type_key" ON "Address"("postId", "language", "type");
@@ -644,70 +598,16 @@ CREATE UNIQUE INDEX "Address_eventId_language_type_key" ON "Address"("eventId", 
 CREATE UNIQUE INDEX "Address_businessId_language_type_key" ON "Address"("businessId", "language", "type");
 
 -- CreateIndex
-CREATE INDEX "Business_name_idx" ON "Business"("name");
-
--- CreateIndex
-CREATE INDEX "Business_category_idx" ON "Business"("category");
-
--- CreateIndex
-CREATE INDEX "Business_verified_idx" ON "Business"("verified");
-
--- CreateIndex
-CREATE INDEX "Business_status_idx" ON "Business"("status");
-
--- CreateIndex
-CREATE INDEX "Business_isActive_idx" ON "Business"("isActive");
-
--- CreateIndex
-CREATE INDEX "BusinessDescription_businessId_idx" ON "BusinessDescription"("businessId");
-
--- CreateIndex
-CREATE INDEX "BusinessDescription_language_idx" ON "BusinessDescription"("language");
-
--- CreateIndex
-CREATE INDEX "BusinessDescription_isActive_idx" ON "BusinessDescription"("isActive");
-
--- CreateIndex
 CREATE UNIQUE INDEX "BusinessDescription_businessId_language_key" ON "BusinessDescription"("businessId", "language");
-
--- CreateIndex
-CREATE INDEX "WorkingHour_businessId_idx" ON "WorkingHour"("businessId");
-
--- CreateIndex
-CREATE INDEX "WorkingHour_dayOfWeek_idx" ON "WorkingHour"("dayOfWeek");
-
--- CreateIndex
-CREATE INDEX "WorkingHour_isActive_idx" ON "WorkingHour"("isActive");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "WorkingHour_businessId_dayOfWeek_key" ON "WorkingHour"("businessId", "dayOfWeek");
 
 -- CreateIndex
-CREATE INDEX "UserFollowing_followerId_idx" ON "UserFollowing"("followerId");
-
--- CreateIndex
 CREATE INDEX "UserFollowing_followingId_idx" ON "UserFollowing"("followingId");
 
 -- CreateIndex
-CREATE INDEX "UserFollowing_createdAt_idx" ON "UserFollowing"("createdAt");
-
--- CreateIndex
-CREATE INDEX "UserFollowing_status_idx" ON "UserFollowing"("status");
-
--- CreateIndex
-CREATE INDEX "UserFollowing_isActive_idx" ON "UserFollowing"("isActive");
-
--- CreateIndex
 CREATE UNIQUE INDEX "UserFollowing_followerId_followingId_key" ON "UserFollowing"("followerId", "followingId");
-
--- CreateIndex
-CREATE INDEX "Event_eventType_idx" ON "Event"("eventType");
-
--- CreateIndex
-CREATE INDEX "Event_status_idx" ON "Event"("status");
-
--- CreateIndex
-CREATE INDEX "Event_startDateTime_idx" ON "Event"("startDateTime");
 
 -- CreateIndex
 CREATE INDEX "Event_createdById_idx" ON "Event"("createdById");
@@ -716,31 +616,10 @@ CREATE INDEX "Event_createdById_idx" ON "Event"("createdById");
 CREATE INDEX "Event_organizedByGroupId_idx" ON "Event"("organizedByGroupId");
 
 -- CreateIndex
-CREATE INDEX "Event_isActive_idx" ON "Event"("isActive");
-
--- CreateIndex
-CREATE INDEX "Event_isPrivate_idx" ON "Event"("isPrivate");
-
--- CreateIndex
-CREATE INDEX "EventParticipant_eventId_idx" ON "EventParticipant"("eventId");
-
--- CreateIndex
 CREATE INDEX "EventParticipant_createdById_idx" ON "EventParticipant"("createdById");
 
 -- CreateIndex
-CREATE INDEX "EventParticipant_status_idx" ON "EventParticipant"("status");
-
--- CreateIndex
-CREATE INDEX "EventParticipant_createdAt_idx" ON "EventParticipant"("createdAt");
-
--- CreateIndex
-CREATE INDEX "EventParticipant_isActive_idx" ON "EventParticipant"("isActive");
-
--- CreateIndex
 CREATE UNIQUE INDEX "EventParticipant_eventId_createdById_key" ON "EventParticipant"("eventId", "createdById");
-
--- CreateIndex
-CREATE INDEX "EventInvitation_eventId_idx" ON "EventInvitation"("eventId");
 
 -- CreateIndex
 CREATE INDEX "EventInvitation_createdById_idx" ON "EventInvitation"("createdById");
@@ -749,37 +628,34 @@ CREATE INDEX "EventInvitation_createdById_idx" ON "EventInvitation"("createdById
 CREATE INDEX "EventInvitation_inviteeId_idx" ON "EventInvitation"("inviteeId");
 
 -- CreateIndex
-CREATE INDEX "EventInvitation_status_idx" ON "EventInvitation"("status");
-
--- CreateIndex
-CREATE INDEX "EventInvitation_createdAt_idx" ON "EventInvitation"("createdAt");
-
--- CreateIndex
-CREATE INDEX "EventInvitation_isActive_idx" ON "EventInvitation"("isActive");
-
--- CreateIndex
 CREATE UNIQUE INDEX "EventInvitation_eventId_inviteeId_key" ON "EventInvitation"("eventId", "inviteeId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserSetting_userId_key" ON "UserSetting"("userId");
 
 -- CreateIndex
-CREATE INDEX "UserSetting_userId_idx" ON "UserSetting"("userId");
-
--- CreateIndex
-CREATE INDEX "UserSetting_notificationPermission_idx" ON "UserSetting"("notificationPermission");
-
--- CreateIndex
-CREATE INDEX "UserSetting_preferredLanguage_idx" ON "UserSetting"("preferredLanguage");
-
--- CreateIndex
-CREATE INDEX "SupportRequest_category_idx" ON "SupportRequest"("category");
-
--- CreateIndex
 CREATE INDEX "SupportRequest_createdById_idx" ON "SupportRequest"("createdById");
 
 -- CreateIndex
-CREATE INDEX "SupportRequest_isActive_idx" ON "SupportRequest"("isActive");
+CREATE INDEX "Warning_createdById_idx" ON "Warning"("createdById");
+
+-- CreateIndex
+CREATE INDEX "Warning_type_idx" ON "Warning"("type");
+
+-- CreateIndex
+CREATE INDEX "WarningDescription_warningId_idx" ON "WarningDescription"("warningId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "WarningDescription_warningId_language_key" ON "WarningDescription"("warningId", "language");
+
+-- CreateIndex
+CREATE INDEX "WarningAddress_warningId_idx" ON "WarningAddress"("warningId");
+
+-- CreateIndex
+CREATE INDEX "WarningAddress_latitude_longitude_idx" ON "WarningAddress"("latitude", "longitude");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "WarningAddress_warningId_language_key" ON "WarningAddress"("warningId", "language");
 
 -- CreateIndex
 CREATE INDEX "_EventToGroup_B_index" ON "_EventToGroup"("B");
@@ -848,16 +724,25 @@ ALTER TABLE "Post" ADD CONSTRAINT "Post_createdById_fkey" FOREIGN KEY ("createdB
 ALTER TABLE "Post" ADD CONSTRAINT "Post_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PostComment" ADD CONSTRAINT "PostComment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Comment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "PostComment" ADD CONSTRAINT "PostComment_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "PostComment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PostComment" ADD CONSTRAINT "PostComment_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "PostComment" ADD CONSTRAINT "PostComment_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BusinessComment" ADD CONSTRAINT "BusinessComment_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BusinessComment" ADD CONSTRAINT "BusinessComment_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BusinessComment" ADD CONSTRAINT "BusinessComment_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PostLike" ADD CONSTRAINT "PostLike_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -930,6 +815,18 @@ ALTER TABLE "SupportRequest" ADD CONSTRAINT "SupportRequest_createdById_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "SupportRequest" ADD CONSTRAINT "SupportRequest_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Warning" ADD CONSTRAINT "Warning_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Warning" ADD CONSTRAINT "Warning_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WarningDescription" ADD CONSTRAINT "WarningDescription_warningId_fkey" FOREIGN KEY ("warningId") REFERENCES "Warning"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WarningAddress" ADD CONSTRAINT "WarningAddress_warningId_fkey" FOREIGN KEY ("warningId") REFERENCES "Warning"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_EventToGroup" ADD CONSTRAINT "_EventToGroup_A_fkey" FOREIGN KEY ("A") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;

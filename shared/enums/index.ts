@@ -25,3 +25,5 @@ export * from "./support-category.enum";
 export * from "./event-status.enum";
 export * from "./weather-condition.enum";
 export * from "./business-status.enum";
+export * from "./emergency-type.enum";
+export * from "./warning-type.enum";

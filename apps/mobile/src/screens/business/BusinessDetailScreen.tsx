@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   infoSection: {
     backgroundColor: colors.neutral.white,

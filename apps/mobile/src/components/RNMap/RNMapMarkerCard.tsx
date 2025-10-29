@@ -203,7 +203,8 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
       </View>
 
       <View style={styles.ratingContainer}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View
+          style={{flexDirection: 'row', alignItems: 'center', gap: spacing.xs}}>
           <Icon name="star-filled" color={colors.status.warning} size={14} />
           <Caption weight="semiBold" color={colors.neutral.grey}>
             {business.averageRating ? business.averageRating.toFixed(1) : '0.0'}

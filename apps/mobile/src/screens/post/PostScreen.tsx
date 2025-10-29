@@ -231,7 +231,7 @@ export const PostScreen = ({navigation}: Props) => {
           // Show confirmation dialog before deleting
           openBottomSheet({
             title: t('screens.post.delete_post'),
-            closeButtonPosition: 'top-left',
+            closeButtonPosition: 'top-right',
             enableGestureControl: false,
             content: (
               <View>

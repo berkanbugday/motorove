@@ -291,7 +291,10 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   // Extract user objects from followingUsers
   const users: IUser[] = followingUsers
     .map(following => following.following)
-    .filter((followingUser): followingUser is IUser => followingUser !== undefined && followingUser !== null);
+    .filter(
+      (followingUser): followingUser is IUser =>
+        followingUser !== undefined && followingUser !== null,
+    );
 
   // Memoize the selected user details to prevent unnecessary re-renders
   // This will only recalculate when users or selectedUsers actually change
@@ -321,7 +324,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
       ),
       snapPoint: 'full',
       showCloseButton: true,
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
       closeOnBackdropPress: true,
     });
   }, [
@@ -400,7 +403,9 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
               onRemove={
                 !disabled
                   ? () =>
-                      onUsersChange(selectedUsers.filter(id => id !== selectedUser.id))
+                      onUsersChange(
+                        selectedUsers.filter(id => id !== selectedUser.id),
+                      )
                   : undefined
               }
               style={styles.selectedChip}

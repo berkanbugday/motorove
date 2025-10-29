@@ -14,6 +14,13 @@ import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useBottomSheet} from '@components/BottomSheet';
 import {MapFilter, MapFilterValues} from '@components/MapFilter';
+import {EmergencyBottomSheet} from '@components/EmergencyBottomSheet';
+import {WarningBottomSheet} from '@components/WarningBottomSheet';
+import {useEmergencyService} from '@services/emergency.service';
+import {
+  useWarningService,
+  type ICreateWarning,
+} from '@services/warning.service';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -57,6 +64,8 @@ export const MapScreen = () => {
   const mapRef = useRef<any>(null);
   const isUserInteraction = useRef(false);
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
+  const {sendEmergency} = useEmergencyService();
+  const {sendWarning} = useWarningService();
 
   // Memoize mapBounds to prevent unnecessary re-renders
   const memoizedMapBounds = useMemo(() => mapBounds || undefined, [mapBounds]);
@@ -285,6 +294,41 @@ export const MapScreen = () => {
     });
   }, [filterValues, mapBounds, refetch, openBottomSheet, closeBottomSheet, t]);
 
+  // Handle emergency button press
+  const handleEmergencyPress = useCallback(() => {
+    openBottomSheet({
+      content: (
+        <EmergencyBottomSheet
+          onSendEmergency={async emergency => {
+            await sendEmergency(emergency);
+          }}
+          onClose={closeBottomSheet}
+        />
+      ),
+      snapPoint: 'full',
+      title: t('screens.map.emergency_title'),
+      closeButtonPosition: 'top-right',
+    });
+  }, [sendEmergency, openBottomSheet, closeBottomSheet, t]);
+
+  // Handle warning button press
+  const handleWarningPress = useCallback(() => {
+    openBottomSheet({
+      content: (
+        <WarningBottomSheet
+          onSubmit={async (warning: ICreateWarning) => {
+            await sendWarning(warning);
+          }}
+          onClose={closeBottomSheet}
+          initialLocation={userLocation || undefined}
+        />
+      ),
+      snapPoint: 'full',
+      title: t('screens.map.warning_title'),
+      closeButtonPosition: 'top-right',
+    });
+  }, [sendWarning, openBottomSheet, closeBottomSheet, t, userLocation]);
+
   // Check if filters are active
   const hasActiveFilters = useMemo(() => {
     return (
@@ -329,6 +373,10 @@ export const MapScreen = () => {
         showFilterButton={true}
         onFilterPress={handleFilterPress}
         hasActiveFilters={hasActiveFilters}
+        showEmergencyButton={true}
+        onEmergencyPress={handleEmergencyPress}
+        showWarningButton={true}
+        onWarningPress={handleWarningPress}
       />
     </View>
   );

@@ -79,7 +79,7 @@ export const GroupScreen = () => {
 
     openBottomSheet({
       title: t('screens.group.filter_groups'),
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
       enableGestureControl: false,
       content: (
         <GroupFilter

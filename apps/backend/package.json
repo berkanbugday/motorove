@@ -41,7 +41,10 @@
     "prisma:seed:prod": "dotenv -e .env -- prisma db seed",
     "prisma:db:push:dev": "dotenv -e .env.dev -- prisma db push --schema=./prisma/schema.prisma",
     "prisma:db:push:staging": "dotenv -e .env.staging -- prisma db push --schema=./prisma/schema.prisma",
-    "prisma:db:push:prod": "dotenv -e .env -- prisma db push --schema=./prisma/schema.prisma"
+    "prisma:db:push:prod": "dotenv -e .env -- prisma db push --schema=./prisma/schema.prisma",
+    "prisma:db:pull:dev": "dotenv -e .env.dev -- prisma db pull --schema=./prisma/schema.prisma",
+    "prisma:db:pull:staging": "dotenv -e .env.staging -- prisma db pull --schema=./prisma/schema.prisma",
+    "prisma:db:pull:prod": "dotenv -e .env -- prisma db pull --schema=./prisma/schema.prisma"
   },
   "dependencies": {
     "@apollo/server": "4.12.0",

@@ -271,6 +271,18 @@ enum SupportCategory {
   OTHER
 }
 
+enum WarningType {
+  RADAR
+  POLICE_CHECKPOINT
+  ACCIDENT
+  ROAD_CONSTRUCTION
+  ROAD_CLOSURE
+  DANGEROUS_CURVE
+  SLIPPERY_ROAD
+  PARKING_PROHIBITED
+  OTHER
+}
+
 // Models
 model User {
   id                String   @id @default(uuid())
@@ -326,6 +338,10 @@ model User {
   supportRequests        SupportRequest[]
   updatedSupportRequests SupportRequest[] @relation("SupportRequestUpdatedBy")
   following              UserFollowing[]  @relation("UserFollowing")
+
+  // Warning relations
+  createdWarnings Warning[] @relation("WarningCreatedBy")
+  updatedWarnings Warning[] @relation("WarningUpdatedBy")
 
   // Event relations
   createdEvents       Event[]            @relation("EventCreatedBy")
@@ -634,6 +650,8 @@ model Address {
   @@unique([postId, language, type]) // Ensure unique addresses per post/language/type
   @@unique([eventId, language, type]) // Ensure unique addresses per event/language/type
   @@unique([businessId, language, type]) // Ensure unique addresses per business/language/type
+  @@index([latitude, longitude]) // For location-based queries
+  @@index([businessId, latitude, longitude]) // For location-based queries
 }
 
 // Business model
@@ -842,4 +860,62 @@ model SupportRequest {
   isActive    Boolean  @default(true)
 
   @@index([createdById])
+}
+
+// Warning model
+model Warning {
+  id     String         @id @default(uuid())
+  type   WarningType
+  status ApprovalStatus @default(PENDING)
+
+  // Relations
+  descriptions WarningDescription[]
+  addresses    WarningAddress[]
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("WarningCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("WarningUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([createdById])
+  @@index([type])
+}
+
+// Warning description model for multi-language support
+model WarningDescription {
+  id          String   @id @default(uuid())
+  description String   @db.Text
+  language    Language
+
+  // Relations
+  warning   Warning @relation(fields: [warningId], references: [id], onDelete: Cascade)
+  warningId String
+
+  // Base model fields
+  isActive Boolean @default(true)
+
+  @@unique([warningId, language]) // Ensure unique description per warning/language
+  @@index([warningId])
+}
+
+// Warning address model for location information
+model WarningAddress {
+  id        String   @id @default(uuid())
+  address   String
+  country   String?
+  language  Language
+  latitude  Float
+  longitude Float
+
+  // Relations
+  warning   Warning @relation(fields: [warningId], references: [id], onDelete: Cascade)
+  warningId String
+
+  @@unique([warningId, language]) // Ensure unique address per warning/language
+  @@index([warningId])
+  @@index([latitude, longitude]) // For location-based queries
 }

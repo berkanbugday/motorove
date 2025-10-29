@@ -28,7 +28,8 @@ export const GarageScreen = () => {
   const navigation = useNavigation();
 
   const [activeTab, setActiveTab] = useState('motorcycles');
-  const [motorcycles, _setMotorcycles] = useState<Motorcycle[]>(mockMotorcycles);
+  const [motorcycles, _setMotorcycles] =
+    useState<Motorcycle[]>(mockMotorcycles);
   const [equipment, _setEquipment] = useState<Equipment[]>(mockEquipment);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -53,7 +54,7 @@ export const GarageScreen = () => {
   const handleShowAddOptions = useCallback(() => {
     openBottomSheet({
       title: t('screens.garage.add_item'),
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
       enableGestureControl: false,
       content: (
         <View style={styles.addOptionsContainer}>

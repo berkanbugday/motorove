@@ -1,5 +1,12 @@
 import React, {useState, useCallback, useRef, useMemo, useEffect} from 'react';
-import {View, StyleSheet, Dimensions, ScrollView, Platform} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  Platform,
+  Animated,
+} from 'react-native';
 import MapView, {
   PROVIDER_GOOGLE,
   Region,
@@ -40,21 +47,92 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   onMyLocationPress,
   onFilterPress,
   showFilterButton = false,
+  showMyLocationButton = true,
   hasActiveFilters = false,
+  showEmergencyButton = false,
+  onEmergencyPress,
+  showWarningButton = false,
+  onWarningPress,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showScrollView, setShowScrollView] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [isWarningExpanded, setIsWarningExpanded] = useState(false);
+  const [isEmergencyExpanded, setIsEmergencyExpanded] = useState(false);
   const internalMapRef = useRef<MapView>(null);
   const activeMapRef = mapRef || internalMapRef;
   const scrollViewRef = useRef<ScrollView>(null);
   const isProgrammaticChange = useRef(false);
   const regionChangeTimeout = useRef<NodeJS.Timeout | null>(null);
   const lastUserInteraction = useRef(false);
+  const warningButtonWidth = useRef(new Animated.Value(48)).current;
+  const emergencyButtonWidth = useRef(new Animated.Value(48)).current;
+  const warningCollapseTimeout = useRef<NodeJS.Timeout | null>(null);
+  const emergencyCollapseTimeout = useRef<NodeJS.Timeout | null>(null);
   const {t} = useTranslation();
   const inset = useSafeAreaInsets();
   // Animated region hook
   const {getRegionForIndex} = useAnimatedRegion(initialRegion, markers);
+
+  /**
+   * Generic expandable button methods
+   */
+  const expandButton = useCallback(
+    (
+      buttonWidth: Animated.Value,
+      setExpanded: (expanded: boolean) => void,
+      collapseTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
+    ) => {
+      setExpanded(true);
+
+      // Animate to expanded width
+      Animated.timing(buttonWidth, {
+        toValue: 180,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+
+      // Clear existing timeout
+      if (collapseTimeoutRef.current) {
+        clearTimeout(collapseTimeoutRef.current);
+      }
+
+      // Set new timeout for 3 seconds
+      collapseTimeoutRef.current = setTimeout(() => {
+        setExpanded(false);
+        Animated.timing(buttonWidth, {
+          toValue: 48,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      }, 3000);
+    },
+    [],
+  );
+
+  const collapseButton = useCallback(
+    (
+      buttonWidth: Animated.Value,
+      setExpanded: (expanded: boolean) => void,
+      collapseTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
+    ) => {
+      setExpanded(false);
+
+      // Clear timeout
+      if (collapseTimeoutRef.current) {
+        clearTimeout(collapseTimeoutRef.current);
+        collapseTimeoutRef.current = null;
+      }
+
+      // Animate to collapsed width
+      Animated.timing(buttonWidth, {
+        toValue: 48,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    },
+    [],
+  );
 
   /**
    * Update selected marker and sync map + card scroll
@@ -158,7 +236,74 @@ const RNMapComponent: React.FC<RNMapProps> = ({
     // Close marker cards when user touches the map
     setShowScrollView(false);
     setSelectedIndex(null);
-  }, []);
+    // Collapse expandable buttons if expanded
+    if (isWarningExpanded) {
+      collapseButton(
+        warningButtonWidth,
+        setIsWarningExpanded,
+        warningCollapseTimeout,
+      );
+    }
+    if (isEmergencyExpanded) {
+      collapseButton(
+        emergencyButtonWidth,
+        setIsEmergencyExpanded,
+        emergencyCollapseTimeout,
+      );
+    }
+  }, [
+    isWarningExpanded,
+    isEmergencyExpanded,
+    collapseButton,
+    warningButtonWidth,
+    emergencyButtonWidth,
+    warningCollapseTimeout,
+    emergencyCollapseTimeout,
+  ]);
+
+  /**
+   * Handle warning button press - toggle expansion
+   */
+  const handleWarningPress = useCallback(() => {
+    if (!isWarningExpanded) {
+      // Expand button
+      expandButton(
+        warningButtonWidth,
+        setIsWarningExpanded,
+        warningCollapseTimeout,
+      );
+    } else {
+      onWarningPress?.();
+    }
+  }, [
+    isWarningExpanded,
+    expandButton,
+    collapseButton,
+    warningButtonWidth,
+    onWarningPress,
+  ]);
+
+  /**
+   * Handle emergency button press - toggle expansion
+   */
+  const handleEmergencyPress = useCallback(() => {
+    if (!isEmergencyExpanded) {
+      // Expand button
+      expandButton(
+        emergencyButtonWidth,
+        setIsEmergencyExpanded,
+        emergencyCollapseTimeout,
+      );
+    } else {
+      onEmergencyPress?.();
+    }
+  }, [
+    isEmergencyExpanded,
+    expandButton,
+    collapseButton,
+    emergencyButtonWidth,
+    onEmergencyPress,
+  ]);
 
   /**
    * Handle programmatic region changes - reset user interaction flag after delay
@@ -171,6 +316,18 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       return () => clearTimeout(timer);
     }
   }, [selectedIndex]);
+
+  // Cleanup collapse timers on unmount
+  useEffect(() => {
+    return () => {
+      if (warningCollapseTimeout.current) {
+        clearTimeout(warningCollapseTimeout.current);
+      }
+      if (emergencyCollapseTimeout.current) {
+        clearTimeout(emergencyCollapseTimeout.current);
+      }
+    };
+  }, []);
 
   // Memoize marker rendering for performance
   const renderedMarkers = useMemo(
@@ -244,7 +401,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
 
       {/* Filter Button - always visible */}
       {isMapReady && showFilterButton && onFilterPress && (
-        <View style={[styles.filterButtonContainer, {top: 20 + inset.top}]}>
+        <View style={[styles.filterButtonContainer, {top: 150 + inset.top}]}>
           <Button
             iconName={hasActiveFilters ? 'filter-filled' : 'filter'}
             iconSize={20}
@@ -259,9 +416,51 @@ const RNMapComponent: React.FC<RNMapProps> = ({
         </View>
       )}
 
+      {/* Warning Button - expandable */}
+      {isMapReady && showWarningButton && onWarningPress && (
+        <View style={[styles.warningButtonContainer, {top: 230 + inset.top}]}>
+          <Animated.View
+            style={[styles.warningButton, {width: warningButtonWidth}]}>
+            <Button
+              title={
+                isWarningExpanded ? t('screens.map.warning_title') : undefined
+              }
+              iconName="error-filled"
+              iconSize={20}
+              onPress={handleWarningPress}
+              variant="secondary"
+              shape={isWarningExpanded ? 'round' : 'circle'}
+              style={[styles.warningButtonInner]}
+            />
+          </Animated.View>
+        </View>
+      )}
+
+      {/* Emergency Button - expandable */}
+      {isMapReady && showEmergencyButton && onEmergencyPress && (
+        <View style={[styles.emergencyButtonContainer, {top: 310 + inset.top}]}>
+          <Animated.View
+            style={[styles.emergencyButton, {width: emergencyButtonWidth}]}>
+            <Button
+              title={
+                isEmergencyExpanded
+                  ? t('screens.map.emergency_title')
+                  : undefined
+              }
+              iconName="bell-exclamation-filled"
+              iconSize={20}
+              onPress={handleEmergencyPress}
+              variant="primary"
+              shape={isEmergencyExpanded ? 'round' : 'circle'}
+              style={[styles.emergencyButtonInner]}
+            />
+          </Animated.View>
+        </View>
+      )}
+
       {/* My Location Button - always visible */}
-      {isMapReady && onMyLocationPress && (
-        <View style={[styles.showMyLocationContainer, {top: 90 + inset.top}]}>
+      {isMapReady && showMyLocationButton && onMyLocationPress && (
+        <View style={[styles.showMyLocationContainer, {top: 390 + inset.top}]}>
           <Button
             iconName="user-location"
             iconSize={20}
@@ -327,18 +526,50 @@ const styles = StyleSheet.create({
   },
   filterButtonContainer: {
     position: 'absolute',
-    right: spacing.xl,
+    right: spacing.md,
     ...getShadow('small'),
   },
   showMyLocationContainer: {
     position: 'absolute',
-    right: spacing.xl,
+    right: spacing.md,
     ...getShadow('small'),
   },
   filterButton: {
     width: 48,
     height: 48,
     backgroundColor: colors.neutral.white,
+  },
+  emergencyButtonContainer: {
+    position: 'absolute',
+    right: spacing.md,
+    ...getShadow('small'),
+  },
+  emergencyButton: {
+    height: 48,
+    backgroundColor: colors.status.error,
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  emergencyButtonInner: {
+    width: '100%',
+    height: 48,
+    backgroundColor: colors.status.error,
+  },
+  warningButtonContainer: {
+    position: 'absolute',
+    right: spacing.md,
+    ...getShadow('small'),
+  },
+  warningButton: {
+    height: 48,
+    backgroundColor: colors.status.warning,
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  warningButtonInner: {
+    width: '100%',
+    height: 48,
+    backgroundColor: colors.status.warning,
   },
 });
 

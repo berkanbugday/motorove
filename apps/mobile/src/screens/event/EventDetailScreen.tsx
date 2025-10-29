@@ -890,7 +890,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         initialSnap="closed"
         showCloseButton={true}
         enableGestureControl={false}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         header={
           <Subtitle align="center">{t('screens.event.delete_event')}</Subtitle>
         }>

@@ -1380,7 +1380,7 @@ export const CreateEventScreen: React.FC = () => {
       <BottomSheet
         ref={meetingLocationMapBottomSheetRef}
         title={t('screens.event.select_meeting_location')}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
           initialAddress={selectedMeetingLocation?.find(
@@ -1396,7 +1396,7 @@ export const CreateEventScreen: React.FC = () => {
       <BottomSheet
         ref={startLocationMapBottomSheetRef}
         title={t('screens.event.select_start_location')}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
           initialAddress={selectedStartLocation?.find(
@@ -1412,7 +1412,7 @@ export const CreateEventScreen: React.FC = () => {
       <BottomSheet
         ref={finishLocationMapBottomSheetRef}
         title={t('screens.event.select_finish_location')}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
           initialAddress={selectedFinishLocation?.find(

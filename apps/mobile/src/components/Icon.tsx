@@ -101,6 +101,15 @@ import MountainsFilled from '@assets/icons/mountains-filled.svg';
 import MotorcycleFilled from '@assets/icons/motorcycle-filled.svg';
 import MoneyBillFilled from '@assets/icons/money-bill-filled.svg';
 import StarFilled from '@assets/icons/star-filled.svg';
+import RadarFilled from '@assets/icons/radar-filled.svg';
+import SirenOnFilled from '@assets/icons/siren-on-filled.svg';
+import CarCrashFilled from '@assets/icons/car-crash-filled.svg';
+import BanParkingFilled from '@assets/icons/ban-parking-filled.svg';
+import PersonDiggingFilled from '@assets/icons/person-digging-filled.svg';
+import ScribbleFilled from '@assets/icons/scribble-filled.svg';
+import TrafficConeFilled from '@assets/icons/traffic-cone-filled.svg';
+import DoNotEnterFilled from '@assets/icons/do-not-enter-filled.svg';
+import RoadFilled from '@assets/icons/road-filled.svg';
 
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
@@ -220,7 +229,16 @@ export type IconName =
   | 'mountains-filled'
   | 'motorcycle-filled'
   | 'money-bill-filled'
-  | 'star-filled';
+  | 'star-filled'
+  | 'radar-filled'
+  | 'siren-on-filled'
+  | 'car-crash-filled'
+  | 'ban-parking-filled'
+  | 'person-digging-filled'
+  | 'scribble-filled'
+  | 'traffic-cone-filled'
+  | 'do-not-enter-filled'
+  | 'road-filled';
 
 interface IconProps {
   name: IconName;
@@ -457,6 +475,24 @@ export function Icon({
       return <MoneyBillFilled {...commonProps} />;
     case 'star-filled':
       return <StarFilled {...commonProps} />;
+    case 'radar-filled':
+      return <RadarFilled {...commonProps} />;
+    case 'siren-on-filled':
+      return <SirenOnFilled {...commonProps} />;
+    case 'car-crash-filled':
+      return <CarCrashFilled {...commonProps} />;
+    case 'ban-parking-filled':
+      return <BanParkingFilled {...commonProps} />;
+    case 'person-digging-filled':
+      return <PersonDiggingFilled {...commonProps} />;
+    case 'scribble-filled':
+      return <ScribbleFilled {...commonProps} />;
+    case 'traffic-cone-filled':
+      return <TrafficConeFilled {...commonProps} />;
+    case 'do-not-enter-filled':
+      return <DoNotEnterFilled {...commonProps} />;
+    case 'road-filled':
+      return <RoadFilled {...commonProps} />;
     default:
       return null;
   }

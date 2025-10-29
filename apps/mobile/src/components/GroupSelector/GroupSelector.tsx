@@ -332,7 +332,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
       title: t('components.groupSelector.title'),
       showCloseButton: true,
       closeOnBackdropPress: true,
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
     });
   }, [
     groups,

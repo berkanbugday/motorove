@@ -1493,7 +1493,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           base64: image.url.startsWith('data:') ? image.url : undefined,
         }));
         setSelectedImages(imageObjects);
-        setValue('images', event.images.map(img => img.url));
+        setValue(
+          'images',
+          event.images.map(img => img.url),
+        );
       }
 
       // Set organized by fields
@@ -1646,7 +1649,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       <BottomSheet
         ref={meetingLocationMapBottomSheetRef}
         title={t('screens.event.select_meeting_location')}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
           initialAddress={selectedMeetingLocation?.find(
@@ -1662,7 +1665,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       <BottomSheet
         ref={startLocationMapBottomSheetRef}
         title={t('screens.event.select_start_location')}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
           initialAddress={selectedStartLocation?.find(
@@ -1678,7 +1681,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       <BottomSheet
         ref={finishLocationMapBottomSheetRef}
         title={t('screens.event.select_finish_location')}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
           initialAddress={selectedFinishLocation?.find(

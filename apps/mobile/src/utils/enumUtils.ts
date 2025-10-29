@@ -19,6 +19,8 @@ import {
   SupportCategory,
   Currency,
   BusinessCategory,
+  WarningType,
+  EmergencyType,
 } from '@motorove/shared';
 import {DropdownItem} from '@components/Dropdown/types';
 import {i18n} from '@/i18n';
@@ -206,5 +208,27 @@ export class EnumUtils {
       t => t.value.toLowerCase() === businessCategory.toLowerCase(),
     );
     return businessCategoryItem?.label || businessCategory;
+  }
+
+  static getWarningTypeDropdownOptions(): DropdownItem[] {
+    return this.getDropdownOptions(WarningType, 'enums.warningType');
+  }
+
+  static convertWarningType(warningType: WarningType): string {
+    const warningTypeItem = this.getWarningTypeDropdownOptions().find(
+      t => t.value.toLowerCase() === warningType.toLowerCase(),
+    );
+    return warningTypeItem?.label || warningType;
+  }
+
+  static getEmergencyTypeDropdownOptions(): DropdownItem[] {
+    return this.getDropdownOptions(EmergencyType, 'enums.emergencyType');
+  }
+
+  static convertEmergencyType(emergencyType: EmergencyType): string {
+    const emergencyTypeItem = this.getEmergencyTypeDropdownOptions().find(
+      t => t.value.toLowerCase() === emergencyType.toLowerCase(),
+    );
+    return emergencyTypeItem?.label || emergencyType;
   }
 }

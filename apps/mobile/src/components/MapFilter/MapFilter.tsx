@@ -115,7 +115,7 @@ export const MapFilter: React.FC<MapFilterProps> = ({
             {t('components.mapFilter.title')}
           </Subtitle>
           <AnimatedInput
-            label={t('components.mapFilter.search_placeholder')}
+            placeholder={t('components.mapFilter.search_placeholder')}
             value={searchQuery}
             onChangeText={setSearchQuery}
             showClearButton={true}
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   statusRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   ratingColumn: {
     gap: spacing.md,
@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
     width: 15,
     height: 15,
     borderRadius: 10,
+    borderWidth: 0,
     backgroundColor: 'transparent',
   },
   radioButtonSelected: {

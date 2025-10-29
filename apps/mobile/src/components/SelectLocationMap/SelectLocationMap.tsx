@@ -152,9 +152,12 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
           }
 
           const data = await response.json();
-
+          console.log(data);
           if (data && data.display_name) {
             // Extract place address
+            let quarter = data.address.quarter
+              ? `${data.address.quarter}, `
+              : '';
             let hamlet = data.address.hamlet ? `${data.address.hamlet}, ` : '';
             let village = data.address.village
               ? `${data.address.village}, `
@@ -166,9 +169,11 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
               : '';
             let province = data.address.province
               ? `${data.address.province}, `
+              : data.address.state
+              ? `${data.address.state}, `
               : '';
             let country = data.address.country ? `${data.address.country}` : '';
-            const address = `${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
+            const address = `${quarter}${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
 
             return {
               address: address || data.display_name,

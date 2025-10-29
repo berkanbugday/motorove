@@ -64,12 +64,21 @@ export interface RNMapProps {
   };
 
   // Location button
+  showMyLocationButton?: boolean;
   onMyLocationPress?: () => void;
 
   // Filter button
   showFilterButton?: boolean;
   onFilterPress?: () => void;
   hasActiveFilters?: boolean;
+
+  // Emergency button
+  showEmergencyButton?: boolean;
+  onEmergencyPress?: () => void;
+
+  // Warning button
+  showWarningButton?: boolean;
+  onWarningPress?: () => void;
 }
 
 /**

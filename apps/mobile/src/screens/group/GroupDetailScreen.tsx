@@ -741,7 +741,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           // Show confirmation dialog before deleting
           openBottomSheet({
             title: t('screens.post.delete_post'),
-            closeButtonPosition: 'top-left',
+            closeButtonPosition: 'top-right',
             enableGestureControl: false,
             content: (
               <View>
@@ -1321,7 +1321,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         initialSnap="closed"
         showCloseButton={true}
         enableGestureControl={false}
-        closeButtonPosition="top-left"
+        closeButtonPosition="top-right"
         header={
           <Subtitle align="center">{t('screens.group.leave_group')}</Subtitle>
         }>

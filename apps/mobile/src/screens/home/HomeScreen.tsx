@@ -394,7 +394,7 @@ export const HomeScreen = ({navigation}: Props) => {
           // Show confirmation dialog before deleting
           openBottomSheet({
             title: t('screens.post.delete_post'),
-            closeButtonPosition: 'top-left',
+            closeButtonPosition: 'top-right',
             enableGestureControl: false,
             content: (
               <View>
@@ -548,7 +548,7 @@ export const HomeScreen = ({navigation}: Props) => {
   const handleShowCreateOptions = useCallback(() => {
     openBottomSheet({
       title: t('common.create'),
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
       enableGestureControl: false,
       content: (
         <View style={styles.createOptionsContainer}>

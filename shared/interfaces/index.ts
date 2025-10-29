@@ -15,3 +15,5 @@ export * from "./event";
 export * from "./user-following";
 export * from "./user-setting";
 export * from "./support";
+export * from "./emergency";
+export * from "./warning";

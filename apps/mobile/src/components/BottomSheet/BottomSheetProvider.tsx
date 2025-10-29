@@ -30,8 +30,8 @@ export interface BottomSheetConfig {
   hideHandle?: boolean;
   showCloseButton?: boolean;
   closeButtonPosition?:
-    | 'top-left'
     | 'top-right'
+    | 'top-left'
     | 'header-left'
     | 'header-right';
   closeButtonOffset?: {top?: number; left?: number; right?: number};

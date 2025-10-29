@@ -119,7 +119,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
     commentToDelete.current = {id: commentId, postId};
     openBottomSheet({
       title: t('screens.postComment.delete_comment'),
-      closeButtonPosition: 'top-left',
+      closeButtonPosition: 'top-right',
       enableGestureControl: false,
       content: (
         <View>
