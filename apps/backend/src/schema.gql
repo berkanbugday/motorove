@@ -50,6 +50,7 @@ enum AddressType {
   POST_LOCATION
 }
 
+"""Approval status for motorcycle-related businesses"""
 enum ApprovalStatus {
   ACCEPTED
   PENDING
@@ -70,6 +71,19 @@ type AuthUser {
   lastName: String!
   notificationPermission: NotificationPermission!
   preferredLanguage: Language!
+}
+
+input BaseCreateAddressInput {
+  address: String!
+  country: String
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+}
+
+input BaseCreateDescriptionInput {
+  description: String!
+  language: Language
 }
 
 """Categories for motorcycle-related businesses"""
@@ -236,6 +250,12 @@ input CreateSupportRequestInput {
   deviceInfo: JSON
   message: String!
   subject: String!
+}
+
+input CreateWarningInput {
+  addresses: [BaseCreateAddressInput!]!
+  descriptions: [BaseCreateDescriptionInput!]
+  type: WarningType!
 }
 
 """Currency types"""
@@ -501,6 +521,15 @@ input FilterGroupInput {
   tags: [GroupTag!]! = []
 }
 
+input FilterWarningInput {
+  limit: Int = 100
+  northEastLat: Float
+  northEastLng: Float
+  southWestLat: Float
+  southWestLng: Float
+  type: WarningType
+}
+
 type Garage {
   createdAt: DateTime!
   createdBy: User!
@@ -702,6 +731,7 @@ type Mutation {
   createPost(input: CreatePostInput!): PostDto!
   createPostComment(input: CreatePostCommentInput!): PostCommentDto!
   createSupportRequest(input: CreateSupportRequestInput!): Boolean!
+  createWarning(input: CreateWarningInput!): WarningDto!
   deleteAllNotifications: [NotificationDto!]!
   deleteNotification(id: ID!): NotificationDto!
   followUser(userId: ID!): ApprovalStatus!
@@ -719,6 +749,7 @@ type Mutation {
   removeMember(input: RemoveMemberInput!): Boolean!
   removePost(id: ID!): PostDto!
   removePostComment(id: ID!): PostCommentDto!
+  removeWarning(id: String!): Boolean!
   resend(email: String!): Boolean!
   resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
@@ -728,13 +759,13 @@ type Mutation {
   unfollowUser(userId: ID!): ApprovalStatus!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
+  update(input: UpdatePostInput!): PostDto!
   updateAddress(input: UpdateAddressInput!): AddressDto!
   updateBusinessComment(input: UpdateBusinessCommentInput!): BusinessCommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
   updateGroupMembershipApprovalStatus(input: UpdateGroupMembershipApprovalStatusInput!): GroupMembershipDto!
   updatePassword(input: UpdatePasswordInput!): Boolean!
-  updatePost(input: UpdatePostInput!): PostDto!
   updatePostComment(input: UpdatePostCommentInput!): PostCommentDto!
   updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
   updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
@@ -942,6 +973,7 @@ type Query {
   groupJoinRequests(limit: Int, skip: Int): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
+  myWarnings: [WarningDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
   post(id: ID!): PostDto!
   postComment(id: ID!): PostCommentDto!
@@ -951,6 +983,8 @@ type Query {
   userProfile(id: String!): UserDto!
   userSetting: UserSettingDto!
   users(limit: Int, query: String, skip: Int): [UserDto!]!
+  warning(id: String!): WarningDto!
+  warnings(filter: FilterWarningInput!): [WarningDto!]!
   weather: Weather
 }
 
@@ -1215,6 +1249,49 @@ type UserSettingDto {
   notificationPermission: NotificationPermission!
   notificationPreferences: JSON
   preferredLanguage: Language!
+}
+
+type WarningAddressDto {
+  address: String!
+  country: String
+  id: ID!
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+}
+
+type WarningDescriptionDto {
+  description: String!
+  id: ID!
+  language: Language!
+}
+
+type WarningDto {
+  addresses: [WarningAddressDto!]!
+  createdAt: DateTime!
+  createdBy: UserDto!
+  createdById: String!
+  descriptions: [WarningDescriptionDto!]
+  id: ID!
+  isActive: Boolean!
+  status: ApprovalStatus!
+  type: WarningType!
+  updatedAt: DateTime!
+  updatedBy: UserDto!
+  updatedById: String!
+}
+
+"""Type of warning for motorcycle rides"""
+enum WarningType {
+  ACCIDENT
+  DANGEROUS_CURVE
+  OTHER
+  PARKING_PROHIBITED
+  POLICE_CHECKPOINT
+  RADAR
+  ROAD_CLOSURE
+  ROAD_CONSTRUCTION
+  SLIPPERY_ROAD
 }
 
 type Weather {

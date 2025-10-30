@@ -19,7 +19,7 @@ interface SelectLocationMapProps {
   onLocationSelect: (addresses: ICreateAddress[]) => void;
   onClose: () => void;
   initialAddress?: ICreateAddress;
-  addressType: AddressType;
+  addressType?: AddressType;
 }
 
 export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
@@ -152,7 +152,6 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
           }
 
           const data = await response.json();
-          console.log(data);
           if (data && data.display_name) {
             // Extract place address
             let quarter = data.address.quarter
@@ -175,12 +174,16 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
             let country = data.address.country ? `${data.address.country}` : '';
             const address = `${quarter}${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
 
+            let countryCode = data.address.country_code
+              ? `${data.address.country_code}`
+              : '';
             return {
               address: address || data.display_name,
               language: languageItem.value,
               type: addressType,
               latitude,
               longitude,
+              country: countryCode,
             } as ICreateAddress;
           }
 

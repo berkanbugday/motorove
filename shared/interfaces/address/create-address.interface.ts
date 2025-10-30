@@ -38,4 +38,9 @@ export interface ICreateAddress {
    * Optional event ID
    */
   eventId?: string;
+
+  /**
+   * Country code
+   */
+  country?: string;
 }

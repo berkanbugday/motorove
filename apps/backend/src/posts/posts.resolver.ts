@@ -77,12 +77,12 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.createPost(input, userId, authToken);
+    return await this.postsService.create(input, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
   @Mutation(() => PostDto)
-  async updatePost(
+  async update(
     @Args('input') input: UpdatePostInput,
     @Context() context: GqlContext,
   ): Promise<PostDto> {
@@ -90,7 +90,7 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.updatePost(input, userId, authToken);
+    return await this.postsService.update(input, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
@@ -103,7 +103,7 @@ export class PostsResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.removePost(id, userId, authToken);
+    return await this.postsService.remove(id, userId, authToken);
   }
 
   @UseGuards(JwtGuard)
@@ -113,7 +113,7 @@ export class PostsResolver {
     @Context() context: GqlContext,
   ): Promise<PostInteractionDto> {
     const userId = context.req.user.id;
-    return await this.postsService.likePost(postId, userId);
+    return await this.postsService.like(postId, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -123,7 +123,7 @@ export class PostsResolver {
     @Context() context: GqlContext,
   ): Promise<PostInteractionDto> {
     const userId = context.req.user.id;
-    return await this.postsService.unlikePost(postId, userId);
+    return await this.postsService.unlike(postId, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -133,7 +133,7 @@ export class PostsResolver {
     @Context() context: GqlContext,
   ): Promise<PostInteractionDto> {
     const userId = context.req.user.id;
-    return await this.postsService.savePost(postId, userId);
+    return await this.postsService.save(postId, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -143,6 +143,6 @@ export class PostsResolver {
     @Context() context: GqlContext,
   ): Promise<PostInteractionDto> {
     const userId = context.req.user.id;
-    return await this.postsService.unsavePost(postId, userId);
+    return await this.postsService.unsave(postId, userId);
   }
 }

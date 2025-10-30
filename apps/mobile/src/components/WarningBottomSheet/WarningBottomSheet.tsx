@@ -12,22 +12,20 @@ import {
 import {colors, commonStyles, radius, spacing} from '@theme';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
-import {WarningType, AddressType, ICreateAddress} from '@motorove/shared';
+import {
+  WarningType,
+  IBaseCreateAddress,
+  IBaseCreateDescription,
+  ICreateWarning,
+  ICreateAddress,
+} from '@motorove/shared';
 
-interface ICreateWarning {
-  type: WarningType;
-  description?: string;
-  latitude: number;
-  longitude: number;
-  address?: string;
-}
 import {showToast} from '@components/ToastMessage';
 import {EnumUtils} from '@utils/enumUtils';
 
 export interface WarningBottomSheetProps {
   onSubmit: (warning: ICreateWarning) => void;
   onClose: () => void;
-  initialLocation?: {latitude: number; longitude: number};
 }
 
 const WARNING_TYPES: Array<{
@@ -48,30 +46,19 @@ const WARNING_TYPES: Array<{
 export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
   onSubmit,
   onClose,
-  initialLocation,
 }) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   const [selectedType, setSelectedType] = useState<WarningType | null>(null);
-  const [description, setDescription] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedLocation, setSelectedLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(initialLocation || null);
-  const [location, setLocation] = useState<ICreateAddress[]>([]);
+  const [description, setDescription] = useState<IBaseCreateDescription | null>(
+    null,
+  );
+  const [location, setLocation] = useState<IBaseCreateAddress[]>([]);
   const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
 
   const handleLocationSelect = useCallback(
-    (selectedAddresses: ICreateAddress[]) => {
+    (selectedAddresses: IBaseCreateAddress[]) => {
       setLocation(selectedAddresses);
-      if (selectedAddresses.length > 0) {
-        const address = selectedAddresses[0];
-        setSelectedLocation({
-          latitude: address.latitude,
-          longitude: address.longitude,
-        });
-      }
       // Close the modal
       setShowLocationModal(false);
     },
@@ -92,7 +79,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
       return;
     }
 
-    if (!selectedLocation) {
+    if (!location.length) {
       showToast({
         text1: t('common.error'),
         text2: t('components.warningBottomSheet.location_required_error'),
@@ -101,35 +88,14 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
       return;
     }
 
-    setIsLoading(true);
+    const createWarningInput: ICreateWarning = {
+      type: selectedType,
+      addresses: location,
+      descriptions: description ? [description] : [],
+    };
 
-    try {
-      const warning: ICreateWarning = {
-        type: selectedType,
-        description: description.trim() || undefined,
-        latitude: selectedLocation.latitude,
-        longitude: selectedLocation.longitude,
-      };
-
-      onSubmit(warning);
-      onClose();
-
-      showToast({
-        text1: t('components.warningBottomSheet.warning_sent'),
-        text2: t('components.warningBottomSheet.riders_notified'),
-        type: 'success',
-      });
-    } catch (error) {
-      console.error('Error sending warning:', error);
-      showToast({
-        text1: t('common.error'),
-        text2: t('components.warningBottomSheet.send_error'),
-        type: 'error',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedType, description, selectedLocation, onSubmit, onClose, t]);
+    onSubmit(createWarningInput);
+  }, [selectedType, description, location, onSubmit, t]);
 
   return (
     <View style={styles.container}>
@@ -174,10 +140,11 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
             placeholder={t(
               'components.warningBottomSheet.description_placeholder',
             )}
-            value={description}
-            onChangeText={setDescription}
+            value={description?.description || ''}
+            onChangeText={text =>
+              setDescription({...description, description: text})
+            }
             showClearButton={false}
-            onClearSearch={() => setDescription('')}
             multiline={true}
           />
         </View>
@@ -206,7 +173,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
           />
 
           {/* Location Info */}
-          {selectedLocation && (
+          {location.length > 0 && (
             <View style={styles.locationInfo}>
               <Icon name="bell" size={16} color={colors.status.info} />
               <BodySmall style={styles.locationText}>
@@ -233,8 +200,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
           variant="dark"
           shape="round"
           style={{flex: 1}}
-          loading={isLoading}
-          disabled={!selectedType || !selectedLocation}
+          disabled={!selectedType || !location.length}
         />
       </View>
 
@@ -245,11 +211,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
         onRequestClose={handleCloseLocationModal}
         presentationStyle="pageSheet">
         <SelectLocationMap
-          initialAddress={location.find(
-            address =>
-              address.language.toLowerCase() === language.toLowerCase(),
-          )}
-          addressType={AddressType.WARNING_LOCATION}
+          initialAddress={location[0] as ICreateAddress}
           onLocationSelect={handleLocationSelect}
           onClose={handleCloseLocationModal}
         />

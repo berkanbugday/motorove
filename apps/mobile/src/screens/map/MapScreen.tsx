@@ -2,7 +2,7 @@ import React, {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 import {StyleSheet, View, Platform} from 'react-native';
 import {RNMap, RNMapMarkerItem} from '@components/RNMap';
 import {useGetBusinesses} from '@services/business.service';
-import {IBusiness} from '@motorove/shared';
+import {IBusiness, ICreateWarning} from '@motorove/shared';
 import {colors} from '@theme/colors';
 import Geolocation from '@react-native-community/geolocation';
 import {Region} from 'react-native-maps';
@@ -17,10 +17,7 @@ import {MapFilter, MapFilterValues} from '@components/MapFilter';
 import {EmergencyBottomSheet} from '@components/EmergencyBottomSheet';
 import {WarningBottomSheet} from '@components/WarningBottomSheet';
 import {useEmergencyService} from '@services/emergency.service';
-import {
-  useWarningService,
-  type ICreateWarning,
-} from '@services/warning.service';
+import {useCreateWarning} from '@services/warning.service';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -65,7 +62,7 @@ export const MapScreen = () => {
   const isUserInteraction = useRef(false);
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
   const {sendEmergency} = useEmergencyService();
-  const {sendWarning} = useWarningService();
+  const {createWarning} = useCreateWarning();
 
   // Memoize mapBounds to prevent unnecessary re-renders
   const memoizedMapBounds = useMemo(() => mapBounds || undefined, [mapBounds]);
@@ -317,17 +314,19 @@ export const MapScreen = () => {
       content: (
         <WarningBottomSheet
           onSubmit={async (warning: ICreateWarning) => {
-            await sendWarning(warning);
+            const createdWarning = await createWarning(warning);
+            if (createdWarning.id) {
+              closeBottomSheet();
+            }
           }}
           onClose={closeBottomSheet}
-          initialLocation={userLocation || undefined}
         />
       ),
       snapPoint: 'full',
       title: t('screens.map.warning_title'),
       closeButtonPosition: 'top-right',
     });
-  }, [sendWarning, openBottomSheet, closeBottomSheet, t, userLocation]);
+  }, [createWarning, openBottomSheet, closeBottomSheet, t]);
 
   // Check if filters are active
   const hasActiveFilters = useMemo(() => {

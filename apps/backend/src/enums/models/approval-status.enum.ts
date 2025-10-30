@@ -1,9 +1,9 @@
 import { registerEnumType } from '@nestjs/graphql';
+import { ApprovalStatus } from '@motorove/shared';
 
-export enum ApprovalStatus {
-  PENDING = 'PENDING',
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED',
-}
+registerEnumType(ApprovalStatus, {
+  name: 'ApprovalStatus',
+  description: 'Approval status for motorcycle-related businesses',
+});
 
-registerEnumType(ApprovalStatus, { name: 'ApprovalStatus' });
+export { ApprovalStatus };

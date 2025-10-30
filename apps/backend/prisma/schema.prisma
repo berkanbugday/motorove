@@ -889,7 +889,7 @@ model Warning {
 model WarningDescription {
   id          String   @id @default(uuid())
   description String   @db.Text
-  language    Language
+  language    Language @default(TR)
 
   // Relations
   warning   Warning @relation(fields: [warningId], references: [id], onDelete: Cascade)

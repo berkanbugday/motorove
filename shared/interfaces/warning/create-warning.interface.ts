@@ -1,8 +1,8 @@
-import { WarningType } from '../../enums/warning-type.enum';
-import { IWarningAddress } from './warning-address.interface';
-import { IWarningDescription } from './warning-description.interface';
+import { WarningType } from "../../enums/warning-type.enum";
+import { IBaseCreateAddress, IBaseCreateDescription } from "../common";
 
-export interface ICreateWarning extends IWarningAddress, IWarningDescription {
+export interface ICreateWarning {
   type: WarningType;
-  expiresAt?: Date;
+  addresses: IBaseCreateAddress[];
+  descriptions?: IBaseCreateDescription[] | null;
 }

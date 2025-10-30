@@ -175,7 +175,7 @@ export class PostsService {
     return this.mapToDto(post as Post, currentUserId, authToken);
   }
 
-  async createPost(
+  async create(
     input: CreatePostInput,
     userId: string,
     authToken?: string,
@@ -268,7 +268,7 @@ export class PostsService {
     return this.mapToDto(createdPost as Post, userId, authToken);
   }
 
-  async updatePost(
+  async update(
     input: UpdatePostInput,
     userId: string,
     authToken?: string,
@@ -413,7 +413,7 @@ export class PostsService {
     return this.mapToDto(updatedPost as Post, userId, authToken);
   }
 
-  async removePost(
+  async remove(
     id: string,
     userId: string,
     authToken?: string,
@@ -465,7 +465,7 @@ export class PostsService {
     return this.mapToDto(deletedPost as Post, userId, authToken);
   }
 
-  async likePost(postId: string, userId: string): Promise<PostInteractionDto> {
+  async like(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
     const post = await this.prisma.post.findFirst({
       where: { id: postId },
@@ -506,10 +506,7 @@ export class PostsService {
     return this.mapToInteractionDto(newLike as PostLike);
   }
 
-  async unlikePost(
-    postId: string,
-    userId: string,
-  ): Promise<PostInteractionDto> {
+  async unlike(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
     const post = await this.prisma.post.findFirst({
       where: { id: postId },
@@ -544,7 +541,7 @@ export class PostsService {
     return this.mapToInteractionDto(deletedLike as PostLike);
   }
 
-  async savePost(postId: string, userId: string): Promise<PostInteractionDto> {
+  async save(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
     const post = await this.prisma.post.findFirst({
       where: { id: postId },
@@ -585,10 +582,7 @@ export class PostsService {
     return this.mapToInteractionDto(newSave as PostSave);
   }
 
-  async unsavePost(
-    postId: string,
-    userId: string,
-  ): Promise<PostInteractionDto> {
+  async unsave(postId: string, userId: string): Promise<PostInteractionDto> {
     // Check if post exists and is active
     const post = await this.prisma.post.findFirst({
       where: { id: postId },
@@ -683,27 +677,27 @@ export class PostsService {
       where: { postId: post.id },
     });
 
-    const commentsCount = (await this.prisma.postComment.count({
+    const commentsCount = await this.prisma.postComment.count({
       where: { postId: post.id, parentId: null, isActive: true },
-    })) as number;
+    });
 
     let isLiked = false;
     let isSaved = false;
 
     if (currentUserId) {
-      const like = (await this.prisma.postLike.findFirst({
+      const like = await this.prisma.postLike.findFirst({
         where: {
           postId: post.id,
           userId: currentUserId,
         },
-      })) as PostLike;
+      });
 
-      const save = (await this.prisma.postSave.findFirst({
+      const save = await this.prisma.postSave.findFirst({
         where: {
           postId: post.id,
           userId: currentUserId,
         },
-      })) as PostSave;
+      });
 
       isLiked = !!like;
       isSaved = !!save;

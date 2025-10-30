@@ -26,6 +26,7 @@ import { UserSettingsModule } from './user-settings/user-settings.module';
 import { BusinessesModule } from './businesses/businesses.module';
 import { BusinessCommentsModule } from './business-comments/business-comments.module';
 import { SupportsModule } from './supports/supports.module';
+import { WarningsModule } from './warnings/warnings.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { SupportsModule } from './supports/supports.module';
     BusinessesModule,
     BusinessCommentsModule,
     SupportsModule,
+    WarningsModule,
   ],
   controllers: [AppController],
   providers: [
