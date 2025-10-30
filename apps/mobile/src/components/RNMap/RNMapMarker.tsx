@@ -4,6 +4,8 @@ import {Marker} from 'react-native-maps';
 import {RNMapMarkerItem} from './types';
 import {colors} from '@theme/colors';
 import {Icon} from '@components/Icon';
+import {getShadow} from '@theme/shadows';
+import {radius} from '@theme/radius';
 
 interface RNMapMarkerProps {
   marker: RNMapMarkerItem;
@@ -54,14 +56,14 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
           {marker.iconName ? (
             <Icon
               name={marker.iconName}
-              size={16}
-              color={colors.neutral.white}
+              size={20}
+              color={marker.iconColor || colors.neutral.white}
             />
           ) : (
             <Icon
               name="map-pin-filled"
-              size={16}
-              color={colors.neutral.white}
+              size={20}
+              color={marker.iconColor || colors.neutral.white}
             />
           )}
         </View>
@@ -77,21 +79,17 @@ const styles = StyleSheet.create({
   markerInner: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: radius.round,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: colors.neutral.white,
-    shadowColor: colors.neutral.black,
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    ...getShadow('medium'),
   },
   markerInnerSelected: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: radius.round,
     borderWidth: 4,
   },
   markerLabel: {

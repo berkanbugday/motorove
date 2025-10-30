@@ -12,7 +12,7 @@ import MapView, {
   Region,
   PROVIDER_DEFAULT,
 } from 'react-native-maps';
-import {RNMapProps, RNMapMarkerItem} from './types';
+import {RNMapProps, RNMapMarkerItem, MapTabType} from './types';
 import {RNMapMarker} from './RNMapMarker';
 import {RNMapMarkerCard} from './RNMapMarkerCard';
 import {useAnimatedRegion} from '@hooks/useAnimatedRegion';
@@ -22,6 +22,7 @@ import {getShadow} from '@theme/shadows';
 import {colors} from '@theme/colors';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {spacing} from '@theme/spacing';
+import {Chip} from '@components/Chip';
 
 const screen = Dimensions.get('window');
 const ITEM_SPACING = 10;
@@ -53,6 +54,9 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   onEmergencyPress,
   showWarningButton = false,
   onWarningPress,
+  selectedTab,
+  onTabChange,
+  showTabs = false,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showScrollView, setShowScrollView] = useState(false);
@@ -343,15 +347,29 @@ const RNMapComponent: React.FC<RNMapProps> = ({
     [markers, handleMarkerPress, selectedBusinessId, selectedIndex],
   );
 
-  // Memoize card rendering for performance
+  // Filter markers to only show business cards (not warnings)
+  const businessMarkers = useMemo(
+    () => markers.filter(marker => marker.business),
+    [markers],
+  );
+
+  // Memoize card rendering for performance - only business markers
   const renderedCards = useMemo(
     () =>
-      markers.map((marker: RNMapMarkerItem, index: number) => (
+      businessMarkers.map((marker: RNMapMarkerItem) => (
         <View key={marker.id} style={[styles.item]}>
           {marker.business && (
             <RNMapMarkerCard
               business={marker.business}
-              onPress={() => handleMarkerPress(marker, index)}
+              onPress={() => {
+                // Find the original index in all markers
+                const originalIndex = markers.findIndex(
+                  m => m.id === marker.id,
+                );
+                if (originalIndex !== -1) {
+                  handleMarkerPress(marker, originalIndex);
+                }
+              }}
               userLocation={userLocation}
               onClose={() => handleTouchMove()}
               onDetailScreenOpen={onDetailScreenOpen}
@@ -359,12 +377,49 @@ const RNMapComponent: React.FC<RNMapProps> = ({
           )}
         </View>
       )),
-    [markers, selectedIndex, handleMarkerPress, userLocation],
+    [
+      businessMarkers,
+      markers,
+      handleMarkerPress,
+      userLocation,
+      onDetailScreenOpen,
+    ],
   );
 
   // Render animated map with scrollable cards
   return (
     <View style={[styles.container, style]}>
+      {/* Tab Chips */}
+      {showTabs && isMapReady && (
+        <View style={[styles.tabContainer, {top: 20 + inset.top}]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabScrollContent}>
+            {Object.values(MapTabType).map((tab: MapTabType) => (
+              <Chip
+                key={tab}
+                label={t(`screens.map.tabs.${tab}`)}
+                selected={selectedTab === tab}
+                onPress={() => onTabChange?.(tab)}
+                variant="filled"
+                color={selectedTab === tab ? 'dark' : 'light'}
+                size="large"
+                leadingIcon={
+                  tab === MapTabType.BUSINESSES
+                    ? 'wrench-filled'
+                    : tab === MapTabType.WARNINGS
+                    ? 'error-filled'
+                    : tab === MapTabType.HELP_REQUESTS
+                    ? 'bell-exclamation-filled'
+                    : undefined
+                }
+              />
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
       <MapView
         ref={activeMapRef}
         provider={Platform.OS === 'ios' ? PROVIDER_DEFAULT : PROVIDER_GOOGLE}
@@ -570,6 +625,18 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 48,
     backgroundColor: colors.status.warning,
+  },
+  tabContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    ...getShadow('medium'),
+  },
+  tabScrollContent: {
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+    gap: spacing.md,
   },
 });
 

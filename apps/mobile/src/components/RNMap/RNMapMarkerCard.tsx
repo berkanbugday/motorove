@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
   closeButton: {
     top: spacing.sm,
     ...getShadow('small'),
+    zIndex: 10,
   },
   businessName: {
     marginVertical: spacing.xs,

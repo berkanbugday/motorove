@@ -76,16 +76,16 @@ export const MenuScreen = () => {
           },
           showRightIcon: true,
         },
-        {
-          icon: (
-            <Icon name="garage-filled" size={18} color={colors.neutral.black} />
-          ),
-          title: t('screens.menu.my_garage'),
-          onPress: () => {
-            navigation.navigate('Garage');
-          },
-          showRightIcon: true,
-        },
+        // {
+        //   icon: (
+        //     <Icon name="garage-filled" size={18} color={colors.neutral.black} />
+        //   ),
+        //   title: t('screens.menu.my_garage'),
+        //   onPress: () => {
+        //     navigation.navigate('Garage');
+        //   },
+        //   showRightIcon: true,
+        // },
         {
           icon: (
             <Icon name="pen-filled" size={18} color={colors.neutral.black} />

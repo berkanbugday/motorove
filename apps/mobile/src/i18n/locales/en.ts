@@ -563,6 +563,11 @@ export default {
         'Could not get your location. Showing default region.',
       emergency_title: 'Request for Help',
       warning_title: 'Report Warning',
+      tabs: {
+        businesses: 'Businesses',
+        warnings: 'Warnings',
+        help_requests: 'Requests for Help',
+      },
       get_directions: 'Get Directions',
       call: 'Call',
       tap_for_call: 'Tap to call',

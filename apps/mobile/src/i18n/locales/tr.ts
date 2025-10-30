@@ -546,6 +546,11 @@ export default {
       errorGettingLocation: 'Konum alınamadı. Varsayılan bölge gösteriliyor.',
       emergency_title: 'Yardım İste',
       warning_title: 'Uyarı Bildir',
+      tabs: {
+        businesses: 'İşletmeler',
+        warnings: 'Uyarılar',
+        help_requests: 'Yardım İstekleri',
+      },
       get_directions: 'Yol Tarifi Al',
       call: 'Ara',
       tap_for_call: 'Aramak için dokunun',

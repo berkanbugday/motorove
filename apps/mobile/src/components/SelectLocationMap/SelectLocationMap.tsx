@@ -38,8 +38,8 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   const DEFAULT_REGION: Region = {
     latitude: 39.9334,
     longitude: 32.8597,
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.1,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
   };
 
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
@@ -225,8 +225,8 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
     // Animate back to default region
     const defaultRegion = {
       ...DEFAULT_REGION,
-      latitudeDelta: 0.1,
-      longitudeDelta: 0.1,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
     };
 
     if (mapRef.current) {

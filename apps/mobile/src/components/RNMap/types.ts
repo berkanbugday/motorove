@@ -1,7 +1,16 @@
 import {Region, LatLng} from 'react-native-maps';
-import {IBusiness} from '@motorove/shared';
+import {IBusiness, IWarning} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {IconName} from '@components/Icon';
+
+/**
+ * Map tab types for filtering markers
+ */
+export enum MapTabType {
+  BUSINESSES = 'businesses',
+  WARNINGS = 'warnings',
+  HELP_REQUESTS = 'help_requests',
+}
 
 /**
  * Marker item for animated map
@@ -10,10 +19,12 @@ export interface RNMapMarkerItem {
   id: string;
   coordinate: LatLng;
   business?: IBusiness;
+  warning?: IWarning;
   title?: string;
   description?: string;
   pinColor?: string;
   iconName?: IconName;
+  iconColor?: string;
   zIndex?: number;
 }
 
@@ -79,6 +90,11 @@ export interface RNMapProps {
   // Warning button
   showWarningButton?: boolean;
   onWarningPress?: () => void;
+
+  // Tab filtering
+  selectedTab?: MapTabType;
+  onTabChange?: (tab: MapTabType) => void;
+  showTabs?: boolean;
 }
 
 /**

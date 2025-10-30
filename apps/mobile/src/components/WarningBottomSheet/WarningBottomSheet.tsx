@@ -120,7 +120,9 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
                     shape="circle"
                     iconName={icon as any}
                     iconSize={30}
+                    iconColor={isSelected ? colors.neutral.black : undefined}
                     iconPosition="top"
+                    style={isSelected ? styles.selectedWarningType : undefined}
                   />
                   <BodySmall align="center" style={styles.warningTypeLabel}>
                     {EnumUtils.convertWarningType(type)}
@@ -246,6 +248,11 @@ const styles = StyleSheet.create({
     width: '25%', // 4 columns with some spacing
     alignItems: 'center',
     marginBottom: spacing.md,
+  },
+  selectedWarningType: {
+    backgroundColor: colors.status.warning,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
   warningTypeLabel: {
     marginTop: spacing.sm,
