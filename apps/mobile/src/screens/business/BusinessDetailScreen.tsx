@@ -10,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {IBusiness, DayOfWeek, BusinessStatus} from '@motorove/shared';
+import {IBusiness, DayOfWeek, BusinessStatus, Language} from '@motorove/shared';
 import {colors, radius, spacing} from '@theme';
 import {
   Body,
@@ -531,9 +531,7 @@ export const BusinessDetailScreen: React.FC = () => {
                 <Body lineHeight={25}>
                   {
                     currentBusiness.addresses.find(
-                      address =>
-                        address.language.toLowerCase() ===
-                        language.toLowerCase(),
+                      address => address.language === Language.TR,
                     )?.address
                   }
                 </Body>

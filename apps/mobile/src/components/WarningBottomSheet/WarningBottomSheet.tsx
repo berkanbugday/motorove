@@ -21,26 +21,12 @@ import {
 
 import {showToast} from '@components/ToastMessage';
 import {EnumUtils} from '@utils/enumUtils';
+import {WARNING_TYPE_CONFIGS} from '@utils/warningUtils';
 
 export interface WarningBottomSheetProps {
   onSubmit: (warning: ICreateWarning) => void;
   onClose: () => void;
 }
-
-const WARNING_TYPES: Array<{
-  type: WarningType;
-  icon: string;
-}> = [
-  {type: WarningType.RADAR, icon: 'radar-filled'},
-  {type: WarningType.POLICE_CHECKPOINT, icon: 'siren-on-filled'},
-  {type: WarningType.ACCIDENT, icon: 'car-crash-filled'},
-  {type: WarningType.ROAD_CONSTRUCTION, icon: 'person-digging-filled'},
-  {type: WarningType.ROAD_CLOSURE, icon: 'do-not-enter-filled'},
-  {type: WarningType.DANGEROUS_CURVE, icon: 'scribble-filled'},
-  {type: WarningType.SLIPPERY_ROAD, icon: 'road-filled'},
-  {type: WarningType.PARKING_PROHIBITED, icon: 'ban-parking-filled'},
-  {type: WarningType.OTHER, icon: 'error-filled'},
-];
 
 export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
   onSubmit,
@@ -109,7 +95,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
             {t('components.warningBottomSheet.select_warning_type')}
           </Subtitle>
           <View style={styles.warningTypesGrid}>
-            {WARNING_TYPES.map(({type, icon}) => {
+            {WARNING_TYPE_CONFIGS.map(({type, icon}) => {
               const isSelected = selectedType === type;
               return (
                 <View style={styles.warningTypeItem} key={type}>

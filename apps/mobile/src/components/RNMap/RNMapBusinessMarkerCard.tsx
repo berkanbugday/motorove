@@ -6,7 +6,8 @@ import {
   Linking,
   Platform,
 } from 'react-native';
-import {RNMapMarkerCardProps} from './types';
+import {IBusiness, Language} from '@motorove/shared';
+import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
   Title,
@@ -24,20 +25,32 @@ import {BusinessStatus, DayOfWeek} from '@motorove/shared';
 import {useLanguage} from '@contexts/LanguageContext';
 
 /**
+ * Business marker card props
+ */
+export interface RNMapBusinessMarkerCardProps {
+  business: IBusiness;
+  onPress?: () => void;
+  onClose?: () => void;
+  style?: StyleProp<ViewStyle>;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  };
+  /**
+   * Callback when business detail screen is opened
+   */
+  onDetailScreenOpen?: () => void;
+}
+
+/**
  * Business marker card component
  * Displays detailed business information in a card format
  */
-export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
-  business,
-  onClose,
-  style,
-  userLocation,
-  onDetailScreenOpen,
-}) => {
+export const RNMapBusinessMarkerCard: React.FC<
+  RNMapBusinessMarkerCardProps
+> = ({business, onClose, style, userLocation, onDetailScreenOpen}) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
-  // Business comments hooks
-  // Modal state
   // Address expansion state
   const [isAddressExpanded, setIsAddressExpanded] = useState(false);
   // About expansion state
@@ -259,8 +272,7 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
             <BodySmall numberOfLines={isAddressExpanded ? undefined : 1}>
               {
                 business.addresses.find(
-                  address =>
-                    address.language.toLowerCase() === language.toLowerCase(),
+                  address => address.language === Language.TR,
                 )?.address
               }
             </BodySmall>
@@ -347,6 +359,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
     ...getShadow('small'),
+    borderLeftWidth: 4,
+    borderLeftColor: colors.neutral.black,
   },
   closeButton: {
     top: spacing.sm,

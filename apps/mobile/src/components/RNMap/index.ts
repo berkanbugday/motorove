@@ -1,4 +1,6 @@
 export {RNMap} from './RNMap';
 export {RNMapMarker} from './RNMapMarker';
-export {RNMapMarkerCard} from './RNMapMarkerCard';
+export {RNMapBusinessMarkerCard} from './RNMapBusinessMarkerCard';
+export {RNMapWarningMarkerCard} from './RNMapWarningMarkerCard';
+export {RNMapEmergencyMarkerCard} from './RNMapEmergencyMarkerCard';
 export * from './types';

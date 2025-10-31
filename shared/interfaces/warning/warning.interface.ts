@@ -8,4 +8,5 @@ export interface IWarning {
   status: ApprovalStatus;
   addresses: IWarningAddress[];
   descriptions?: IWarningDescription[] | null;
+  createdAt: Date | string;
 }

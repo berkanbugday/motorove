@@ -1,5 +1,5 @@
 import {Region, LatLng} from 'react-native-maps';
-import {IBusiness, IWarning} from '@motorove/shared';
+import {IBusiness, IWarning, IEmergency} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {IconName} from '@components/Icon';
 
@@ -20,6 +20,7 @@ export interface RNMapMarkerItem {
   coordinate: LatLng;
   business?: IBusiness;
   warning?: IWarning;
+  emergency?: IEmergency;
   title?: string;
   description?: string;
   pinColor?: string;
@@ -113,4 +114,33 @@ export interface RNMapMarkerCardProps {
    * Callback when business detail screen is opened
    */
   onDetailScreenOpen?: () => void;
+}
+
+/**
+ * Warning marker card props
+ */
+export interface RNMapWarningMarkerCardProps {
+  warning: IWarning;
+  onPress?: () => void;
+  onClose?: () => void;
+  style?: StyleProp<ViewStyle>;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  };
+}
+
+/**
+ * Emergency marker card props
+ */
+export interface RNMapEmergencyMarkerCardProps {
+  emergency: IEmergency;
+  onPress?: () => void;
+  onClose?: () => void;
+  style?: StyleProp<ViewStyle>;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  };
+  onHelpPress?: () => void;
 }

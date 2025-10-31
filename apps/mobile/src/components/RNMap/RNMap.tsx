@@ -14,7 +14,9 @@ import MapView, {
 } from 'react-native-maps';
 import {RNMapProps, RNMapMarkerItem, MapTabType} from './types';
 import {RNMapMarker} from './RNMapMarker';
-import {RNMapMarkerCard} from './RNMapMarkerCard';
+import {RNMapBusinessMarkerCard} from './RNMapBusinessMarkerCard';
+import {RNMapWarningMarkerCard} from './RNMapWarningMarkerCard';
+import {RNMapEmergencyMarkerCard} from './RNMapEmergencyMarkerCard';
 import {useAnimatedRegion} from '@hooks/useAnimatedRegion';
 import {Button} from '@components/Button/Button';
 import {useTranslation} from '@hooks/useTranslation';
@@ -151,6 +153,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       setSelectedIndex(index);
       setShowScrollView(true); // Show ScrollView when marker is selected
       onMarkerPress?.(marker);
+
       if (marker.business) {
         onBusinessSelect?.(marker.business);
       }
@@ -171,20 +174,11 @@ const RNMapComponent: React.FC<RNMapProps> = ({
 
   /**
    * Handle marker press - update selection and scroll to card
+   * Note: Scroll position will be calculated based on filtered markers in useEffect
    */
   const handleMarkerPress = useCallback(
     (marker: RNMapMarkerItem, index: number) => {
       updateSelectedMarker(index);
-
-      // Scroll to the selected marker card after a small delay to ensure ScrollView is rendered
-      setTimeout(() => {
-        if (scrollViewRef.current) {
-          scrollViewRef.current.scrollTo({
-            x: index * (ITEM_WIDTH + ITEM_SPACING),
-            animated: true,
-          });
-        }
-      }, 100);
     },
     [updateSelectedMarker],
   );
@@ -204,25 +198,6 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       }, 300); // 300ms debounce
     },
     [onRegionChange],
-  );
-
-  /**
-   * Handle card scroll end - update selected marker and center map
-   */
-  const handleScrollEnd = useCallback(
-    (event: any) => {
-      const newIndex = Math.round(
-        event.nativeEvent.contentOffset.x / (ITEM_WIDTH + ITEM_SPACING),
-      );
-      if (
-        newIndex !== selectedIndex &&
-        newIndex >= 0 &&
-        newIndex < markers.length
-      ) {
-        updateSelectedMarker(newIndex);
-      }
-    },
-    [selectedIndex, markers.length, updateSelectedMarker],
   );
 
   /**
@@ -347,42 +322,166 @@ const RNMapComponent: React.FC<RNMapProps> = ({
     [markers, handleMarkerPress, selectedBusinessId, selectedIndex],
   );
 
-  // Filter markers to only show business cards (not warnings)
+  // Split markers by type for organized rendering
   const businessMarkers = useMemo(
     () => markers.filter(marker => marker.business),
     [markers],
   );
 
-  // Memoize card rendering for performance - only business markers
+  const warningMarkers = useMemo(
+    () => markers.filter(marker => marker.warning),
+    [markers],
+  );
+
+  const emergencyMarkers = useMemo(
+    () => markers.filter(marker => marker.emergency),
+    [markers],
+  );
+
+  // Determine which marker type is currently selected
+  const selectedMarkerType = useMemo(() => {
+    if (selectedIndex === null) {
+      return null;
+    }
+    const selectedMarker = markers[selectedIndex];
+    if (!selectedMarker) {
+      return null;
+    }
+
+    if (selectedMarker.business) {
+      return 'business';
+    }
+    if (selectedMarker.warning) {
+      return 'warning';
+    }
+    if (selectedMarker.emergency) {
+      return 'emergency';
+    }
+    return null;
+  }, [selectedIndex, markers]);
+
+  // Filter cards to show only the same type as selected marker
+  const filteredMarkers = useMemo(() => {
+    if (!selectedMarkerType) {
+      return [];
+    }
+
+    switch (selectedMarkerType) {
+      case 'business':
+        return businessMarkers;
+      case 'warning':
+        return warningMarkers;
+      case 'emergency':
+        return emergencyMarkers;
+      default:
+        return [];
+    }
+  }, [selectedMarkerType, businessMarkers, warningMarkers, emergencyMarkers]);
+
+  /**
+   * Handle card scroll end - update selected marker and center map
+   * Only scrolls within the same marker type (business, warning, or emergency)
+   */
+  const handleScrollEnd = useCallback(
+    (event: any) => {
+      const scrollIndex = Math.round(
+        event.nativeEvent.contentOffset.x / (ITEM_WIDTH + ITEM_SPACING),
+      );
+
+      // Get the marker from filtered list
+      if (scrollIndex >= 0 && scrollIndex < filteredMarkers.length) {
+        const scrolledMarker = filteredMarkers[scrollIndex];
+        // Find its original index in the full markers array
+        const originalIndex = markers.findIndex(m => m.id === scrolledMarker.id);
+
+        if (originalIndex !== -1 && originalIndex !== selectedIndex) {
+          updateSelectedMarker(originalIndex);
+        }
+      }
+    },
+    [filteredMarkers, markers, selectedIndex, updateSelectedMarker],
+  );
+
+  /**
+   * Scroll to selected marker within filtered list when selection changes
+   */
+  useEffect(() => {
+    if (selectedIndex !== null && scrollViewRef.current) {
+      const selectedMarker = markers[selectedIndex];
+      if (selectedMarker) {
+        // Find the index in filtered markers
+        const filteredIndex = filteredMarkers.findIndex(
+          m => m.id === selectedMarker.id,
+        );
+
+        if (filteredIndex !== -1) {
+          setTimeout(() => {
+            scrollViewRef.current?.scrollTo({
+              x: filteredIndex * (ITEM_WIDTH + ITEM_SPACING),
+              animated: true,
+            });
+          }, 100);
+        }
+      }
+    }
+  }, [selectedIndex, markers, filteredMarkers]);
+
+  // Memoize card rendering for performance - only show cards of selected type
   const renderedCards = useMemo(
     () =>
-      businessMarkers.map((marker: RNMapMarkerItem) => (
-        <View key={marker.id} style={[styles.item]}>
-          {marker.business && (
-            <RNMapMarkerCard
-              business={marker.business}
-              onPress={() => {
-                // Find the original index in all markers
-                const originalIndex = markers.findIndex(
-                  m => m.id === marker.id,
-                );
-                if (originalIndex !== -1) {
-                  handleMarkerPress(marker, originalIndex);
-                }
-              }}
-              userLocation={userLocation}
-              onClose={() => handleTouchMove()}
-              onDetailScreenOpen={onDetailScreenOpen}
-            />
-          )}
-        </View>
-      )),
+      filteredMarkers.map((marker: RNMapMarkerItem) => {
+        // Find the original index in all markers
+        const originalIndex = markers.findIndex(m => m.id === marker.id);
+
+        return (
+          <View key={marker.id} style={[styles.item]}>
+            {marker.business && (
+              <RNMapBusinessMarkerCard
+                business={marker.business}
+                onPress={() => {
+                  if (originalIndex !== -1) {
+                    handleMarkerPress(marker, originalIndex);
+                  }
+                }}
+                userLocation={userLocation}
+                onClose={() => handleTouchMove()}
+                onDetailScreenOpen={onDetailScreenOpen}
+              />
+            )}
+            {marker.warning && (
+              <RNMapWarningMarkerCard
+                warning={marker.warning}
+                onPress={() => {
+                  if (originalIndex !== -1) {
+                    handleMarkerPress(marker, originalIndex);
+                  }
+                }}
+                userLocation={userLocation}
+                onClose={() => handleTouchMove()}
+              />
+            )}
+            {marker.emergency && (
+              <RNMapEmergencyMarkerCard
+                emergency={marker.emergency}
+                onPress={() => {
+                  if (originalIndex !== -1) {
+                    handleMarkerPress(marker, originalIndex);
+                  }
+                }}
+                userLocation={userLocation}
+                onClose={() => handleTouchMove()}
+              />
+            )}
+          </View>
+        );
+      }),
     [
-      businessMarkers,
+      filteredMarkers,
       markers,
       handleMarkerPress,
       userLocation,
       onDetailScreenOpen,
+      handleTouchMove,
     ],
   );
 
