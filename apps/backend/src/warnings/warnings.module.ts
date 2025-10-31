@@ -3,9 +3,10 @@ import { WarningsService } from './warnings.service';
 import { WarningsResolver } from './warnings.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, ProfanityFilterModule],
   providers: [WarningsResolver, WarningsService],
   exports: [WarningsService],
 })

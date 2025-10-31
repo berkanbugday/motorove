@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {IWarning} from '@motorove/shared';
+import {IWarning, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {Title, Caption, Icon, Button, BodySmall, IconName} from '@components';
@@ -134,9 +134,7 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
             <BodySmall numberOfLines={isDescriptionExpanded ? undefined : 1}>
               {
                 warning.descriptions.find(
-                  description =>
-                    description.language.toLowerCase() ===
-                    language.toLowerCase(),
+                  description => description.language === Language.TR,
                 )?.description
               }
             </BodySmall>

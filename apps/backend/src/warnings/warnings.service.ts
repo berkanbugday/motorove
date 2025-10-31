@@ -11,12 +11,17 @@ import { WarningDto } from './dto/warning.dto';
 import { FilterWarningInput } from './dto/filter-warning.input';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { plainToClass } from 'class-transformer';
+import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
+import { Language } from '@motorove/shared';
 
 @Injectable()
 export class WarningsService {
   private readonly logger = new Logger(WarningsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private profanityFilterService: ProfanityFilterService,
+  ) {}
 
   /**
    * Find all warnings within map viewport bounds (polygon)
@@ -91,7 +96,18 @@ export class WarningsService {
 
     this.logger.log(`Found ${warnings.length} warnings in viewport`);
 
-    return warnings.map((warning) => plainToClass(WarningDto, warning));
+    // Filter profanity from warning descriptions
+    const filteredWarnings = warnings.map((warning) => {
+      if (warning.descriptions && warning.descriptions.length > 0) {
+        warning.descriptions = warning.descriptions.map((desc) => ({
+          ...desc,
+          description: this.profanityFilterService.filterText(desc.description),
+        }));
+      }
+      return warning;
+    });
+
+    return filteredWarnings.map((warning) => plainToClass(WarningDto, warning));
   }
 
   async findOne(id: string): Promise<WarningDto> {
@@ -113,6 +129,14 @@ export class WarningsService {
 
     if (!warning) {
       throw new NotFoundException('Warning not found');
+    }
+
+    // Filter profanity from warning descriptions
+    if (warning.descriptions && warning.descriptions.length > 0) {
+      warning.descriptions = warning.descriptions.map((desc) => ({
+        ...desc,
+        description: this.profanityFilterService.filterText(desc.description),
+      }));
     }
 
     return plainToClass(WarningDto, warning);
@@ -139,7 +163,18 @@ export class WarningsService {
       },
     });
 
-    return warnings.map((warning) => plainToClass(WarningDto, warning));
+    // Filter profanity from warning descriptions
+    const filteredWarnings = warnings.map((warning) => {
+      if (warning.descriptions && warning.descriptions.length > 0) {
+        warning.descriptions = warning.descriptions.map((desc) => ({
+          ...desc,
+          description: this.profanityFilterService.filterText(desc.description),
+        }));
+      }
+      return warning;
+    });
+
+    return filteredWarnings.map((warning) => plainToClass(WarningDto, warning));
   }
 
   async create(
@@ -155,13 +190,13 @@ export class WarningsService {
       const warning = await this.prisma.warning.create({
         data: {
           type,
-          status: ApprovalStatus.PENDING,
+          status: ApprovalStatus.ACCEPTED,
           createdById: currentUserId,
           descriptions: descriptions
             ? {
                 create: descriptions.map((desc) => ({
                   description: desc.description,
-                  language: desc.language,
+                  language: Language.TR,
                 })),
               }
             : undefined,
