@@ -51,7 +51,7 @@ import {eventSchemas, CreateEventFormValues} from '@utils/validation';
 import {useTranslation} from '@hooks/useTranslation';
 import {
   GroupMemberRole,
-  ICreateAddress,
+  ICreateEventAddress,
   AddressType,
   EventType,
   ICreateEvent,
@@ -62,6 +62,7 @@ import {
   CURRENCY_FORMATTING,
   Currency,
   DEFAULT_CURRENCY,
+  IBaseCreateAddress,
 } from '@motorove/shared';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
@@ -116,13 +117,13 @@ export const CreateEventScreen: React.FC = () => {
   const [isLastStep, setIsLastStep] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [selectedMeetingLocation, setSelectedMeetingLocation] = useState<
-    ICreateAddress[] | null
+    ICreateEventAddress[] | null
   >();
   const [selectedStartLocation, setSelectedStartLocation] = useState<
-    ICreateAddress[] | null
+    ICreateEventAddress[] | null
   >();
   const [selectedFinishLocation, setSelectedFinishLocation] = useState<
-    ICreateAddress[] | null
+    ICreateEventAddress[] | null
   >();
   const [activeInviteTab, setActiveInviteTab] = useState<string>('users');
 
@@ -291,7 +292,7 @@ export const CreateEventScreen: React.FC = () => {
     }
 
     try {
-      const addresses: ICreateAddress[] = [
+      const addresses: ICreateEventAddress[] = [
         ...(selectedMeetingLocation || []),
         ...(selectedStartLocation || []),
         ...(selectedFinishLocation || []),
@@ -371,7 +372,7 @@ export const CreateEventScreen: React.FC = () => {
   }, []);
 
   const handleMeetingLocationSelect = useCallback(
-    (addresses: ICreateAddress[]) => {
+    (addresses: IBaseCreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
         setSelectedMeetingLocation(null);
@@ -379,7 +380,11 @@ export const CreateEventScreen: React.FC = () => {
         return;
       }
 
-      setSelectedMeetingLocation(addresses);
+      const addressesWithTypes = addresses.map(addr => ({
+        ...addr,
+        type: AddressType.EVENT_MEETING_LOCATION,
+      }));
+      setSelectedMeetingLocation(addressesWithTypes);
 
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
@@ -397,7 +402,7 @@ export const CreateEventScreen: React.FC = () => {
   );
 
   const handleStartLocationSelect = useCallback(
-    (addresses: ICreateAddress[]) => {
+    (addresses: IBaseCreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
         setSelectedStartLocation(null);
@@ -405,7 +410,11 @@ export const CreateEventScreen: React.FC = () => {
         return;
       }
 
-      setSelectedStartLocation(addresses);
+      const addressesWithTypes = addresses.map(addr => ({
+        ...addr,
+        type: AddressType.EVENT_START_LOCATION,
+      }));
+      setSelectedStartLocation(addressesWithTypes);
 
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
@@ -423,7 +432,7 @@ export const CreateEventScreen: React.FC = () => {
   );
 
   const handleFinishLocationSelect = useCallback(
-    (addresses: ICreateAddress[]) => {
+    (addresses: IBaseCreateAddress[]) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
         setSelectedFinishLocation(null);
@@ -431,7 +440,11 @@ export const CreateEventScreen: React.FC = () => {
         return;
       }
 
-      setSelectedFinishLocation(addresses);
+      const addressesWithTypes = addresses.map(addr => ({
+        ...addr,
+        type: AddressType.EVENT_FINISH_LOCATION,
+      }));
+      setSelectedFinishLocation(addressesWithTypes);
 
       const displayAddress = addresses.find(
         addr => addr.language.toLowerCase() === language.toLowerCase(),
@@ -664,7 +677,7 @@ export const CreateEventScreen: React.FC = () => {
   const onSubmit = useCallback(
     async (data: CreateEventFormValues) => {
       try {
-        const addresses: ICreateAddress[] = [
+        const addresses: ICreateEventAddress[] = [
           ...(selectedMeetingLocation || []),
           ...(selectedStartLocation || []),
           ...(selectedFinishLocation || []),
@@ -1389,7 +1402,6 @@ export const CreateEventScreen: React.FC = () => {
           )}
           onLocationSelect={handleMeetingLocationSelect}
           onClose={() => meetingLocationMapBottomSheetRef.current?.close()}
-          addressType={AddressType.EVENT_MEETING_LOCATION}
         />
       </BottomSheet>
 
@@ -1405,7 +1417,6 @@ export const CreateEventScreen: React.FC = () => {
           )}
           onLocationSelect={handleStartLocationSelect}
           onClose={() => startLocationMapBottomSheetRef.current?.close()}
-          addressType={AddressType.EVENT_START_LOCATION}
         />
       </BottomSheet>
 
@@ -1421,7 +1432,6 @@ export const CreateEventScreen: React.FC = () => {
           )}
           onLocationSelect={handleFinishLocationSelect}
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
-          addressType={AddressType.EVENT_FINISH_LOCATION}
         />
       </BottomSheet>
 

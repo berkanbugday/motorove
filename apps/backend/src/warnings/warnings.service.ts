@@ -10,7 +10,6 @@ import { CreateWarningInput } from './dto/create-warning.input';
 import { WarningDto } from './dto/warning.dto';
 import { FilterWarningInput } from './dto/filter-warning.input';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
-import { Language } from '../enums/models/language.enum';
 import { plainToClass } from 'class-transformer';
 
 @Injectable()
@@ -162,7 +161,7 @@ export class WarningsService {
             ? {
                 create: descriptions.map((desc) => ({
                   description: desc.description,
-                  language: desc.language || Language.EN,
+                  language: desc.language,
                 })),
               }
             : undefined,

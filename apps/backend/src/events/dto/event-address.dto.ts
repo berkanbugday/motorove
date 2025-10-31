@@ -2,13 +2,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { IEventAddress, Language } from '@motorove/shared';
 import { AddressType } from '../../enums/models/address-type.enum';
 
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsUUID,
-  IsString,
-  IsNumber,
-} from 'class-validator';
+import { IsEnum, IsUUID, IsString, IsNumber } from 'class-validator';
 
 @ObjectType()
 export class EventAddressDto implements IEventAddress {
@@ -19,11 +13,6 @@ export class EventAddressDto implements IEventAddress {
   @Field(() => AddressType)
   @IsEnum(AddressType)
   type: AddressType;
-
-  @Field(() => String)
-  @IsUUID()
-  @IsNotEmpty()
-  eventId: string;
 
   @Field(() => String)
   @IsString()
@@ -40,5 +29,8 @@ export class EventAddressDto implements IEventAddress {
   @Field(() => Number)
   @IsNumber()
   latitude: number;
+
+  @Field(() => Number)
+  @IsNumber()
   longitude: number;
 }

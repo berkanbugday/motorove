@@ -36,12 +36,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {loggingService} from '@services/logging.service';
 import {useCreatePost} from '@services/post.service';
-import {
-  ICreatePost,
-  ICreateAddress,
-  AddressType,
-  GroupPrivacy,
-} from '@motorove/shared';
+import {ICreatePost, ICreatePostAddress, GroupPrivacy} from '@motorove/shared';
 import {useGetJoinedGroups} from '@services/group.service';
 import {useLanguage} from '@contexts/LanguageContext';
 import {useTranslation} from '@hooks/useTranslation';
@@ -62,7 +57,7 @@ export const CreatePostScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
-  const [location, setLocation] = useState<ICreateAddress[]>([]);
+  const [location, setLocation] = useState<ICreatePostAddress[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     id: string;
     name: string;
@@ -255,7 +250,6 @@ export const CreatePostScreen = () => {
             address =>
               address.language.toLowerCase() === language.toLowerCase(),
           )}
-          addressType={AddressType.POST_LOCATION}
           onLocationSelect={selectedLocation => {
             setLocation(selectedLocation);
             closeBottomSheet();

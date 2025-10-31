@@ -1,5 +1,15 @@
 import {gql} from '@apollo/client';
-import {BUSINESS_ADDRESS_FRAGMENT} from './business-address.graphql';
+
+export const BUSINESS_ADDRESS_FRAGMENT = gql`
+  fragment BusinessAddressFragment on BusinessAddressDto {
+    id
+    address
+    countryCode
+    language
+    latitude
+    longitude
+  }
+`;
 
 // Business Description Fragment
 export const BUSINESS_DESCRIPTION_FRAGMENT = gql`

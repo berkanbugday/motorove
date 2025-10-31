@@ -505,7 +505,7 @@ CREATE TABLE "WarningDescription" (
 CREATE TABLE "WarningAddress" (
     "id" TEXT NOT NULL,
     "address" TEXT NOT NULL,
-    "country" TEXT,
+    "countryCode" TEXT,
     "language" "Language" NOT NULL,
     "latitude" DOUBLE PRECISION NOT NULL,
     "longitude" DOUBLE PRECISION NOT NULL,

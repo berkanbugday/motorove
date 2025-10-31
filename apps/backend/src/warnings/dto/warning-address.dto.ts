@@ -7,10 +7,10 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Language } from '../../enums/models/language.enum';
-import { IBaseAddress } from '@motorove/shared/dist';
+import { IWarningAddress } from '@motorove/shared';
 
 @ObjectType()
-export class WarningAddressDto implements IBaseAddress {
+export class WarningAddressDto implements IWarningAddress {
   @Field(() => ID)
   @IsUUID()
   id: string;
@@ -22,7 +22,11 @@ export class WarningAddressDto implements IBaseAddress {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  country?: string;
+  countryCode?: string;
+
+  @Field(() => Language)
+  @IsEnum(Language)
+  language: Language;
 
   @Field(() => Float)
   @IsNumber()
@@ -31,8 +35,4 @@ export class WarningAddressDto implements IBaseAddress {
   @Field(() => Float)
   @IsNumber()
   longitude: number;
-
-  @Field(() => Language)
-  @IsEnum(Language)
-  language: Language;
 }

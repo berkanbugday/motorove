@@ -97,7 +97,7 @@ export function AnimatedInput<T extends FieldValues = any>(
       testID,
       multiline = false,
       shape = 'default',
-      showClearButton = true,
+      showClearButton = false,
       onClearSearch,
       editable = true,
       onPress,

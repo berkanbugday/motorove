@@ -1,5 +1,16 @@
 import {gql} from '@apollo/client';
-import {EVENT_ADDRESS_FRAGMENT} from './event-address.graphql';
+
+export const EVENT_ADDRESS_FRAGMENT = gql`
+  fragment EventAddressFragment on EventAddressDto {
+    id
+    address
+    countryCode
+    language
+    type
+    latitude
+    longitude
+  }
+`;
 
 // Event fragment
 export const EVENT_FRAGMENT = gql`

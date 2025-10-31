@@ -1,10 +1,11 @@
 import { WarningType, ApprovalStatus } from "../../enums";
-import { IBaseAddress, IBaseDescription } from "../common";
+import { IWarningAddress } from "./warning-address.interface";
+import { IWarningDescription } from "./warning-description.interface";
 
 export interface IWarning {
   id: string;
   type: WarningType;
   status: ApprovalStatus;
-  addresses: IBaseAddress[];
-  descriptions?: IBaseDescription[] | null;
+  addresses: IWarningAddress[];
+  descriptions?: IWarningDescription[] | null;
 }

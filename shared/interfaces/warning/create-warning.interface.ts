@@ -1,8 +1,9 @@
 import { WarningType } from "../../enums/warning-type.enum";
-import { IBaseCreateAddress, IBaseCreateDescription } from "../common";
+import { ICreateWarningAddress } from "./create-warning-address.interface";
+import { ICreateWarningDescription } from "./create-warning-description.interface";
 
 export interface ICreateWarning {
   type: WarningType;
-  addresses: IBaseCreateAddress[];
-  descriptions?: IBaseCreateDescription[] | null;
+  addresses: ICreateWarningAddress[];
+  descriptions?: ICreateWarningDescription[] | null;
 }

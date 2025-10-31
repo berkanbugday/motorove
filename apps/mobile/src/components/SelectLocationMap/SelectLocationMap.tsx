@@ -10,23 +10,21 @@ import Geolocation from '@react-native-community/geolocation';
 import {RNMapMarkerItem} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
 import {radius} from '@theme/radius';
-import {AddressType, ICreateAddress} from '@motorove/shared';
+import {IBaseCreateAddress} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {useTranslation} from '@hooks/useTranslation';
 
 interface SelectLocationMapProps {
-  onLocationSelect: (addresses: ICreateAddress[]) => void;
+  onLocationSelect: (addresses: IBaseCreateAddress[]) => void;
   onClose: () => void;
-  initialAddress?: ICreateAddress;
-  addressType?: AddressType;
+  initialAddress?: IBaseCreateAddress;
 }
 
 export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   onLocationSelect,
   initialAddress,
   onClose,
-  addressType,
 }) => {
   const {language} = useLanguage();
   const {t} = useTranslation();
@@ -45,9 +43,9 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [locationAddresses, setLocationAddresses] = useState<ICreateAddress[]>(
-    [],
-  );
+  const [locationAddresses, setLocationAddresses] = useState<
+    IBaseCreateAddress[]
+  >([]);
 
   // Function to animate to a specific location
   const animateToLocation = (latitude: number, longitude: number) => {
@@ -180,11 +178,10 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
             return {
               address: address || data.display_name,
               language: languageItem.value,
-              type: addressType,
               latitude,
               longitude,
-              country: countryCode,
-            } as ICreateAddress;
+              countryCode,
+            } as IBaseCreateAddress;
           }
 
           return null;
@@ -194,7 +191,7 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
       const addresses = await Promise.all(addressPromises);
       const validAddresses = addresses.filter(
         addr => addr !== null,
-      ) as ICreateAddress[];
+      ) as IBaseCreateAddress[];
       setLocationAddresses(validAddresses);
     } catch (error) {
       console.error('Error fetching location details:', error);

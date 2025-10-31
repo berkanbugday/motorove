@@ -99,11 +99,11 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
     }
 
     const straightLineDistance = calculateDistance(userLocation, {
-      latitude: business.address.latitude,
-      longitude: business.address.longitude,
+      latitude: business.addresses[0].latitude,
+      longitude: business.addresses[0].longitude,
     });
     setDistance(straightLineDistance.toFixed(1));
-  }, [userLocation, business.address]);
+  }, [userLocation, business.addresses]);
 
   // Calculate business status based on current time and working hours
   const businessStatus = useMemo(() => {
@@ -248,7 +248,7 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
       </View>
 
       {/* Address with Distance */}
-      {business.address.address && (
+      {business.addresses && (
         <TouchableOpacity
           style={styles.infoRow}
           onPress={() => {
@@ -257,7 +257,12 @@ export const RNMapMarkerCard: React.FC<RNMapMarkerCardProps> = ({
           <Icon name="map-pin-filled" size={16} />
           <View style={styles.infoTextContainer}>
             <BodySmall numberOfLines={isAddressExpanded ? undefined : 1}>
-              {business.address.address}
+              {
+                business.addresses.find(
+                  address =>
+                    address.language.toLowerCase() === language.toLowerCase(),
+                )?.address
+              }
             </BodySmall>
             {distance && (
               <Caption color={colors.neutral.grey}>

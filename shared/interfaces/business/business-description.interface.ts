@@ -1,11 +1,7 @@
-import { Language } from "../../enums";
+import { IBaseDescription } from "../common/base-description.interface";
 
 /**
  * Business Description Interface
  * Interface for multi-language business descriptions
  */
-export interface IBusinessDescription {
-  id: string;
-  description: string;
-  language: Language;
-}
+export interface IBusinessDescription extends IBaseDescription {}

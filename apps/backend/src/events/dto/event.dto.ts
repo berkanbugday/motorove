@@ -12,7 +12,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
-import { Address } from '../../addresses/models/address.model';
 import { EventType } from '../../enums/models/event-type.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
 import { DifficultyLevel } from '../../enums/models/difficulty-level.enum';
@@ -24,6 +23,7 @@ import { GroupDto } from '../../groups/dto/group.dto';
 import { EventParticipantDto } from './event-participant.dto';
 import { IEvent } from '@motorove/shared';
 import { ImageDto } from '../../common/dto/image.dto';
+import { EventAddressDto } from './event-address.dto';
 
 @ObjectType()
 export class EventDto implements IEvent {
@@ -68,11 +68,11 @@ export class EventDto implements IEvent {
   @IsArray()
   images?: ImageDto[];
 
-  @Field(() => [Address], { nullable: true })
+  @Field(() => [EventAddressDto], { nullable: true })
   @IsOptional()
   @ValidateNested({ each: true })
-  @Type(() => Address)
-  addresses?: Address[];
+  @Type(() => EventAddressDto)
+  addresses?: EventAddressDto[];
 
   @Field(() => RoadType, { nullable: true })
   @IsOptional()

@@ -5,6 +5,6 @@ import { Language } from "../../enums";
  * Common fields for entities with descriptive content
  */
 export interface IBaseCreateDescription {
-  description?: string;
+  description: string;
   language?: Language;
 }

@@ -17,7 +17,7 @@ import {
   IBaseCreateAddress,
   IBaseCreateDescription,
   ICreateWarning,
-  ICreateAddress,
+  ICreateWarningAddress,
 } from '@motorove/shared';
 
 import {showToast} from '@components/ToastMessage';
@@ -53,7 +53,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
   const [description, setDescription] = useState<IBaseCreateDescription | null>(
     null,
   );
-  const [location, setLocation] = useState<IBaseCreateAddress[]>([]);
+  const [location, setLocation] = useState<ICreateWarningAddress[]>([]);
   const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
 
   const handleLocationSelect = useCallback(
@@ -213,7 +213,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
         onRequestClose={handleCloseLocationModal}
         presentationStyle="pageSheet">
         <SelectLocationMap
-          initialAddress={location[0] as ICreateAddress}
+          initialAddress={location[0]}
           onLocationSelect={handleLocationSelect}
           onClose={handleCloseLocationModal}
         />

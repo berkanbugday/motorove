@@ -928,12 +928,12 @@ model WarningDescription {
 
 // Warning address model for location information
 model WarningAddress {
-  id        String   @id @default(uuid())
-  address   String
-  country   String?
-  language  Language
-  latitude  Float
-  longitude Float
+  id          String   @id @default(uuid())
+  address     String
+  countryCode String?
+  language    Language
+  latitude    Float
+  longitude   Float
 
   // Relations
   warning   Warning @relation(fields: [warningId], references: [id], onDelete: Cascade)

@@ -6,6 +6,6 @@ import { Language } from "../../enums";
  */
 export interface IBaseDescription {
   id: string;
-  description?: string;
+  description: string;
   language: Language;
 }

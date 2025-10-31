@@ -33,5 +33,9 @@ export class PostAddressDto implements IPostAddress {
   @IsNumber()
   @IsNotEmpty()
   latitude: number;
+
+  @Field(() => Number)
+  @IsNumber()
+  @IsNotEmpty()
   longitude: number;
 }

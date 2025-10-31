@@ -16,38 +16,11 @@ input AddMemberInput {
   userId: ID!
 }
 
-type Address {
-  address: String!
-  businessId: String
-  country: String
-  event: Event
-  eventId: String
-  id: ID!
-  language: String!
-  latitude: Float!
-  longitude: Float!
-  post: Post
-  postId: String
-  type: AddressType!
-}
-
-type AddressDto {
-  address: String!
-  country: String!
-  id: ID!
-  language: Language!
-  latitude: Float!
-  longitude: Float!
-  type: AddressType!
-}
-
 """The types of addresses that can be associated with a post or event"""
 enum AddressType {
-  BUSINESS_LOCATION
   EVENT_FINISH_LOCATION
   EVENT_MEETING_LOCATION
   EVENT_START_LOCATION
-  POST_LOCATION
 }
 
 """Approval status for motorcycle-related businesses"""
@@ -73,17 +46,13 @@ type AuthUser {
   preferredLanguage: Language!
 }
 
-input BaseCreateAddressInput {
+type BusinessAddressDto {
   address: String!
-  country: String
+  countryCode: String!
+  id: String!
   language: Language!
   latitude: Float!
   longitude: Float!
-}
-
-input BaseCreateDescriptionInput {
-  description: String!
-  language: Language
 }
 
 """Categories for motorcycle-related businesses"""
@@ -106,8 +75,6 @@ enum BusinessCategory {
 }
 
 type BusinessCommentDto {
-  business: BusinessDto
-  businessId: ID!
   content: String!
   createdAt: DateTime!
   createdBy: UserDto!
@@ -127,7 +94,7 @@ type BusinessDescriptionDto {
 }
 
 type BusinessDto {
-  address: AddressDto!
+  addresses: [BusinessAddressDto!]!
   averageRating: Float!
   category: BusinessCategory!
   commentsCount: Int!
@@ -155,16 +122,6 @@ type CityDto {
   value: String!
 }
 
-input CreateAddressInput {
-  address: String!
-  eventId: String
-  language: Language!
-  latitude: Float!
-  longitude: Float!
-  postId: String
-  type: AddressType!
-}
-
 input CreateBusinessCommentInput {
   businessId: String!
   content: String!
@@ -176,8 +133,17 @@ input CreateDeviceTokenInput {
   token: String!
 }
 
+input CreateEventAddressInput {
+  address: String!
+  countryCode: String
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+  type: AddressType!
+}
+
 input CreateEventInput {
-  addresses: [CreateAddressInput!]
+  addresses: [CreateEventAddressInput!]
   campingInfo: String
   currency: String
   description: String!
@@ -232,6 +198,14 @@ input CreateNotificationsInput {
   userIds: [String!]!
 }
 
+input CreatePostAddressInput {
+  address: String!
+  countryCode: String
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+}
+
 input CreatePostCommentInput {
   content: String!
   parentId: ID
@@ -239,7 +213,7 @@ input CreatePostCommentInput {
 }
 
 input CreatePostInput {
-  addresses: [CreateAddressInput!]
+  addresses: [CreatePostAddressInput!]
   content: String!
   groupId: String
   images: [String!]
@@ -252,9 +226,22 @@ input CreateSupportRequestInput {
   subject: String!
 }
 
+input CreateWarningAddressInput {
+  address: String!
+  countryCode: String!
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+}
+
+input CreateWarningDescriptionInput {
+  description: String!
+  language: Language
+}
+
 input CreateWarningInput {
-  addresses: [BaseCreateAddressInput!]!
-  descriptions: [BaseCreateDescriptionInput!]
+  addresses: [CreateWarningAddressInput!]!
+  descriptions: [CreateWarningDescriptionInput!]
   type: WarningType!
 }
 
@@ -337,7 +324,7 @@ enum EquipmentType {
 }
 
 type Event {
-  addresses: [Address!]
+  addresses: [EventAddress!]
   campingInfo: String
   createdAt: DateTime!
   createdBy: User!
@@ -377,8 +364,30 @@ type Event {
   updatedById: String!
 }
 
+type EventAddress {
+  address: String!
+  countryCode: String
+  event: Event
+  eventId: String!
+  id: ID!
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+  type: AddressType!
+}
+
+type EventAddressDto {
+  address: String!
+  countryCode: String!
+  id: String!
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+  type: AddressType!
+}
+
 type EventDto {
-  addresses: [Address!]
+  addresses: [EventAddressDto!]
   campingInfo: String
   createdAt: DateTime!
   createdBy: UserDto!
@@ -492,13 +501,6 @@ enum ExperienceLevel {
   ALL_LEVELS
   BEGINNER
   INTERMEDIATE
-}
-
-input FilterAddressInput {
-  eventId: String
-  language: Language
-  postId: String
-  type: AddressType
 }
 
 input FilterBusinessInput {
@@ -722,7 +724,6 @@ type Mutation {
   accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddMemberInput!): Boolean!
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
-  createAddress(input: CreateAddressInput!): AddressDto!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
   createBusinessComment(input: CreateBusinessCommentInput!): BusinessCommentDto!
   createEvent(input: CreateEventInput!): EventDto!
@@ -742,7 +743,6 @@ type Mutation {
   markNotificationAsRead(id: ID!): NotificationDto!
   refreshToken(token: String!): AuthResponse!
   rejectEventInvitation(id: ID!): Boolean!
-  removeAddress(id: String!): Boolean!
   removeBusinessComment(id: ID!): Boolean!
   removeDeviceToken: Boolean!
   removeEvent(id: ID!): Boolean!
@@ -760,7 +760,6 @@ type Mutation {
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
   update(input: UpdatePostInput!): PostDto!
-  updateAddress(input: UpdateAddressInput!): AddressDto!
   updateBusinessComment(input: UpdateBusinessCommentInput!): BusinessCommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
@@ -848,7 +847,7 @@ enum NotificationType {
 }
 
 type Post {
-  addresses: [Address!]
+  addresses: [PostAddress!]
   comments: [PostComment!]
   content: String!
   createdAt: DateTime!
@@ -864,6 +863,26 @@ type Post {
   updatedAt: DateTime!
   updatedBy: User!
   updatedById: String!
+}
+
+type PostAddress {
+  address: String!
+  countryCode: String
+  id: ID!
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+  post: Post
+  postId: String!
+}
+
+type PostAddressDto {
+  address: String!
+  countryCode: String
+  id: String!
+  language: Language!
+  latitude: Float!
+  longitude: Float!
 }
 
 type PostComment {
@@ -901,7 +920,7 @@ type PostCommentDto {
 }
 
 type PostDto {
-  addresses: [AddressDto!]
+  addresses: [PostAddressDto!]
   comments: [PostCommentDto!]
   commentsCount: Int!
   content: String!
@@ -943,8 +962,6 @@ type PostSave {
 }
 
 type Query {
-  address(id: ID!): AddressDto!
-  addresses(filters: FilterAddressInput, limit: Int, skip: Int): [AddressDto!]!
   business(id: String!): BusinessDto!
   businessAverageRating(businessId: ID!): Float!
   businessComment(id: ID!): BusinessCommentDto!
@@ -1072,17 +1089,6 @@ enum SupportCategory {
   TECHNICAL
 }
 
-input UpdateAddressInput {
-  address: String
-  eventId: String
-  id: String!
-  language: Language
-  latitude: Float
-  longitude: Float
-  postId: String
-  type: AddressType
-}
-
 input UpdateBusinessCommentInput {
   content: String
   id: ID!
@@ -1090,7 +1096,7 @@ input UpdateBusinessCommentInput {
 }
 
 input UpdateEventInput {
-  addresses: [CreateAddressInput!]
+  addresses: [CreateEventAddressInput!]
   campingInfo: String
   currency: String
   description: String
@@ -1146,7 +1152,7 @@ input UpdatePostCommentInput {
 }
 
 input UpdatePostInput {
-  addresses: [CreateAddressInput!]
+  addresses: [CreatePostAddressInput!]
   content: String
   groupId: String
   id: ID!
@@ -1253,7 +1259,7 @@ type UserSettingDto {
 
 type WarningAddressDto {
   address: String!
-  country: String
+  countryCode: String
   id: ID!
   language: Language!
   latitude: Float!

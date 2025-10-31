@@ -23,5 +23,8 @@ export class BusinessAddressDto implements IBusinessAddress {
   @Field(() => Number)
   @IsNumber()
   latitude: number;
+
+  @Field(() => Number)
+  @IsNumber()
   longitude: number;
 }

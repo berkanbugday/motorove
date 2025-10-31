@@ -1,7 +1,17 @@
 import {gql} from '@apollo/client';
 import {USER_FRAGMENT} from './user.graphql';
-import {POST_ADDRESS_FRAGMENT} from './post-address.graphql';
 import {POST_COMMENT_FRAGMENT} from './post-comment.graphql';
+
+export const POST_ADDRESS_FRAGMENT = gql`
+  fragment PostAddressFragment on PostAddressDto {
+    id
+    address
+    countryCode
+    language
+    latitude
+    longitude
+  }
+`;
 
 export const POST_FRAGMENT = gql`
   fragment PostFragment on PostDto {

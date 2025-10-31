@@ -2,9 +2,9 @@ import { InputType, Field } from '@nestjs/graphql';
 import { ValidateNested, IsEnum, IsOptional } from 'class-validator';
 import { WarningType } from '../../enums/models/warning-type.enum';
 import { ICreateWarning } from '@motorove/shared';
-import { BaseCreateAddressInput } from '../../common/dto/base-create-address.input';
-import { BaseCreateDescriptionInput } from '../../common/dto/base-create-description.input';
 import { Type } from 'class-transformer';
+import { CreateWarningAddressInput } from './create-warning-address.input';
+import { CreateWarningDescriptionInput } from './create-warning-description.input';
 
 @InputType()
 export class CreateWarningInput implements ICreateWarning {
@@ -12,14 +12,14 @@ export class CreateWarningInput implements ICreateWarning {
   @IsEnum(WarningType)
   type: WarningType;
 
-  @Field(() => [BaseCreateAddressInput])
+  @Field(() => [CreateWarningAddressInput])
   @ValidateNested({ each: true })
-  @Type(() => BaseCreateAddressInput)
-  addresses: BaseCreateAddressInput[];
+  @Type(() => CreateWarningAddressInput)
+  addresses: CreateWarningAddressInput[];
 
-  @Field(() => [BaseCreateDescriptionInput], { nullable: true })
+  @Field(() => [CreateWarningDescriptionInput], { nullable: true })
   @ValidateNested({ each: true })
-  @Type(() => BaseCreateDescriptionInput)
+  @Type(() => CreateWarningDescriptionInput)
   @IsOptional()
-  descriptions?: BaseCreateDescriptionInput[];
+  descriptions?: CreateWarningDescriptionInput[];
 }

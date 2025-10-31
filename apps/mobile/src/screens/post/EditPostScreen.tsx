@@ -38,7 +38,7 @@ import {loggingService} from '@services/logging.service';
 import {useUpdatePost, useGetPost} from '@services/post.service';
 import {useGetJoinedGroups} from '@services/group.service';
 import {MainStackParamList} from '@navigation/types/navigationTypes';
-import {ICreateAddress, AddressType, GroupPrivacy} from '@motorove/shared';
+import {ICreatePostAddress, GroupPrivacy} from '@motorove/shared';
 import {useLanguage} from '@contexts/LanguageContext';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
@@ -60,7 +60,7 @@ export const EditPostScreen = () => {
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
   >([]);
-  const [location, setLocation] = useState<ICreateAddress[]>([]);
+  const [location, setLocation] = useState<ICreatePostAddress[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<{
     id: string;
     name: string;
@@ -111,15 +111,7 @@ export const EditPostScreen = () => {
 
       // Set location if available
       if (post.addresses && post.addresses.length > 0) {
-        // Use addresses directly (they should already be clean IAddress objects)
-        const cleanAddresses = post.addresses.map(addr => ({
-          address: addr.address,
-          language: addr.language,
-          type: addr.type,
-          latitude: addr.latitude,
-          longitude: addr.longitude,
-        }));
-        setLocation(cleanAddresses);
+        setLocation(post.addresses as ICreatePostAddress[]);
       }
 
       // Set privacy and group if post is in a group
@@ -311,7 +303,6 @@ export const EditPostScreen = () => {
             address =>
               address.language.toLowerCase() === language.toLowerCase(),
           )}
-          addressType={AddressType.POST_LOCATION}
           onLocationSelect={selectedLocation => {
             setLocation(selectedLocation);
             closeBottomSheet();
