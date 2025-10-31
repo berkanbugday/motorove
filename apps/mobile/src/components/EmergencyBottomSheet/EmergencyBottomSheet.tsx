@@ -1,97 +1,57 @@
 import React, {useState, useCallback} from 'react';
-import {View, StyleSheet, ScrollView, TouchableOpacity, Alert} from 'react-native';
+import {View, StyleSheet, Modal} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {
   AnimatedInput,
   Button,
   Subtitle,
   BodySmall,
-  Icon,
+  SelectLocationMap,
 } from '@components';
 import {colors, commonStyles, spacing} from '@theme';
 import {useTranslation} from '@hooks/useTranslation';
-// Local enum and interface until shared package is updated
-enum EmergencyType {
-  ACCIDENT = 'ACCIDENT',
-  BREAKDOWN = 'BREAKDOWN',
-  MEDICAL = 'MEDICAL',
-  FUEL_SHORTAGE = 'FUEL_SHORTAGE',
-  TIRE_PROBLEM = 'TIRE_PROBLEM',
-  BATTERY_DEAD = 'BATTERY_DEAD',
-  LOST = 'LOST',
-  WEATHER_HAZARD = 'WEATHER_HAZARD',
-  ROAD_HAZARD = 'ROAD_HAZARD',
-  OTHER = 'OTHER',
-}
+import {useLanguage} from '@contexts/LanguageContext';
+import {
+  EmergencyType,
+  IBaseCreateAddress,
+  IBaseCreateDescription,
+  ICreateEmergency,
+  ICreateEmergencyAddress,
+} from '@motorove/shared';
 
-interface ICreateEmergency {
-  type: EmergencyType;
-  title: string;
-  description?: string;
-  latitude: number;
-  longitude: number;
-  address?: string;
-}
-import Geolocation from '@react-native-community/geolocation';
 import {showToast} from '@components/ToastMessage';
+import {EnumUtils} from '@utils/enumUtils';
+import {EMERGENCY_TYPE_CONFIGS} from '@utils/emergencyUtils';
 
 export interface EmergencyBottomSheetProps {
-  onSendEmergency: (emergency: ICreateEmergency) => void;
+  onSubmit: (emergency: ICreateEmergency) => void;
   onClose: () => void;
 }
 
-const EMERGENCY_TYPES: Array<{
-  type: EmergencyType;
-  icon: string;
-  color: string;
-}> = [
-  {type: EmergencyType.ACCIDENT, icon: 'alert-triangle', color: colors.status.error},
-  {type: EmergencyType.BREAKDOWN, icon: 'wrench', color: colors.status.warning},
-  {type: EmergencyType.MEDICAL, icon: 'heart', color: colors.status.error},
-  {type: EmergencyType.FUEL_SHORTAGE, icon: 'fuel', color: colors.status.warning},
-  {type: EmergencyType.TIRE_PROBLEM, icon: 'circle', color: colors.status.warning},
-  {type: EmergencyType.BATTERY_DEAD, icon: 'battery', color: colors.status.warning},
-  {type: EmergencyType.LOST, icon: 'map-pin', color: colors.status.info},
-  {type: EmergencyType.WEATHER_HAZARD, icon: 'cloud-rain', color: colors.status.info},
-  {type: EmergencyType.ROAD_HAZARD, icon: 'alert-triangle', color: colors.status.warning},
-  {type: EmergencyType.OTHER, icon: 'help-circle', color: colors.neutral.grey},
-];
-
 export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
-  onSendEmergency,
+  onSubmit,
   onClose,
 }) => {
   const {t} = useTranslation();
+  const {language} = useLanguage();
   const [selectedType, setSelectedType] = useState<EmergencyType | null>(null);
-  const [title, setTitle] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [description, setDescription] = useState<IBaseCreateDescription | null>(
+    null,
+  );
+  const [location, setLocation] = useState<ICreateEmergencyAddress[]>([]);
+  const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
 
-  const handleTypeSelect = useCallback((type: EmergencyType) => {
-    setSelectedType(type);
-    // Auto-fill title based on emergency type
-    setTitle(t(`enums.emergencyType.${type.toLowerCase()}`));
-  }, [t]);
+  const handleLocationSelect = useCallback(
+    (selectedAddresses: IBaseCreateAddress[]) => {
+      setLocation(selectedAddresses);
+      // Close the modal
+      setShowLocationModal(false);
+    },
+    [],
+  );
 
-  const getCurrentLocation = useCallback((): Promise<{latitude: number; longitude: number}> => {
-    return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition(
-        position => {
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        error => {
-          console.error('Error getting location:', error);
-          reject(error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 10000,
-        }
-      );
-    });
+  const handleCloseLocationModal = useCallback(() => {
+    setShowLocationModal(false);
   }, []);
 
   const handleSendEmergency = useCallback(async () => {
@@ -104,168 +64,137 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
       return;
     }
 
-    if (!title.trim()) {
+    if (!location.length) {
       showToast({
         text1: t('common.error'),
-        text2: t('components.emergencyBottomSheet.title_required_error'),
+        text2: t('components.emergencyBottomSheet.location_required_error'),
         type: 'error',
       });
       return;
     }
 
-    setIsLoading(true);
+    const createEmergencyInput: ICreateEmergency = {
+      type: selectedType,
+      addresses: location,
+      descriptions: description ? [description] : [],
+    };
 
-    try {
-      const location = await getCurrentLocation();
-
-      const emergency: ICreateEmergency = {
-        type: selectedType,
-        title: title.trim(),
-        description: description.trim() || undefined,
-        latitude: location.latitude,
-        longitude: location.longitude,
-      };
-
-      onSendEmergency(emergency);
-      onClose();
-      
-      showToast({
-        text1: t('components.emergencyBottomSheet.emergency_sent'),
-        text2: t('components.emergencyBottomSheet.help_on_way'),
-        type: 'success',
-      });
-    } catch (error) {
-      console.error('Error sending emergency:', error);
-      showToast({
-        text1: t('common.error'),
-        text2: t('components.emergencyBottomSheet.location_error'),
-        type: 'error',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedType, title, description, getCurrentLocation, onSendEmergency, onClose, t]);
-
-  const handleCancel = useCallback(() => {
-    Alert.alert(
-      t('components.emergencyBottomSheet.cancel_title'),
-      t('components.emergencyBottomSheet.cancel_message'),
-      [
-        {
-          text: t('common.no'),
-          style: 'cancel',
-        },
-        {
-          text: t('common.yes'),
-          style: 'destructive',
-          onPress: onClose,
-        },
-      ]
-    );
-  }, [onClose, t]);
+    onSubmit(createEmergencyInput);
+  }, [selectedType, description, location, onSubmit, t]);
 
   return (
     <View style={styles.container}>
-      <ScrollView
+      <KeyboardAwareScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}>
-
+        showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        keyboardShouldPersistTaps="handled">
         {/* Emergency Type Selection */}
         <View style={styles.section}>
           <Subtitle style={styles.sectionTitle}>
             {t('components.emergencyBottomSheet.select_emergency_type')}
           </Subtitle>
           <View style={styles.emergencyTypesGrid}>
-            {EMERGENCY_TYPES.map(({type, icon, color}) => {
+            {EMERGENCY_TYPE_CONFIGS.map(({type, icon}) => {
               const isSelected = selectedType === type;
               return (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.emergencyTypeCard,
-                    isSelected && styles.emergencyTypeCardSelected,
-                  ]}
-                  onPress={() => handleTypeSelect(type)}
-                  activeOpacity={0.7}>
-                  <Icon
-                    name={icon}
-                    size={24}
-                    color={isSelected ? colors.neutral.white : color}
+                <View style={styles.emergencyTypeItem} key={type}>
+                  <Button
+                    onPress={() => setSelectedType(type)}
+                    variant={isSelected ? 'primary' : 'outline'}
+                    shape="circle"
+                    iconName={icon as any}
+                    iconSize={30}
+                    iconColor={isSelected ? colors.neutral.white : undefined}
+                    iconPosition="top"
+                    style={
+                      isSelected ? styles.selectedEmergencyType : undefined
+                    }
                   />
-                  <BodySmall
-                    style={[
-                      styles.emergencyTypeText,
-                      isSelected && styles.emergencyTypeTextSelected,
-                    ]}>
-                    {t(`enums.emergencyType.${type.toLowerCase()}`)}
+                  <BodySmall align="center" style={styles.emergencyTypeLabel}>
+                    {EnumUtils.convertEmergencyType(type)}
                   </BodySmall>
-                </TouchableOpacity>
+                </View>
               );
             })}
           </View>
         </View>
 
-        {/* Title Input */}
-        <View style={styles.section}>
-          <Subtitle style={styles.sectionTitle}>
-            {t('components.emergencyBottomSheet.emergency_title')}
-          </Subtitle>
-          <AnimatedInput
-            label={t('components.emergencyBottomSheet.title_placeholder')}
-            value={title}
-            onChangeText={setTitle}
-            showClearButton={true}
-            onClearSearch={() => setTitle('')}
-            maxLength={100}
-          />
-        </View>
-
         {/* Description Input */}
         <View style={styles.section}>
           <Subtitle style={styles.sectionTitle}>
-            {t('components.emergencyBottomSheet.additional_details')}
+            {t('components.emergencyBottomSheet.description')}
           </Subtitle>
           <AnimatedInput
-            label={t('components.emergencyBottomSheet.description_placeholder')}
-            value={description}
-            onChangeText={setDescription}
-            showClearButton={true}
-            onClearSearch={() => setDescription('')}
+            placeholder={t(
+              'components.emergencyBottomSheet.description_placeholder',
+            )}
+            value={description?.description || ''}
+            onChangeText={text =>
+              setDescription({...description, description: text})
+            }
+            showClearButton={false}
             multiline={true}
-            numberOfLines={4}
-            maxLength={500}
           />
         </View>
 
-        {/* Location Info */}
-        <View style={styles.locationInfo}>
-          <Icon name="map-pin" size={16} color={colors.status.info} />
-          <BodySmall style={styles.locationText}>
-            {t('components.emergencyBottomSheet.location_info')}
-          </BodySmall>
+        {/* Location Selection */}
+        <View style={styles.section}>
+          <Subtitle style={styles.sectionTitle}>
+            {t('components.emergencyBottomSheet.emergency_location')}
+          </Subtitle>
+
+          {/* Select Location Button */}
+          <Button
+            title={
+              location.length > 0
+                ? location.find(
+                    address =>
+                      address.language.toLowerCase() === language.toLowerCase(),
+                  )?.address
+                : t('components.emergencyBottomSheet.select_location')
+            }
+            onPress={() => setShowLocationModal(true)}
+            variant={location.length > 0 ? 'secondary' : 'outline'}
+            shape="round"
+            iconName="map-pin-filled"
+            style={styles.locationButton}
+          />
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {/* Action Buttons */}
       <View style={styles.footer}>
         <Button
           title={t('common.cancel')}
-          onPress={handleCancel}
+          onPress={onClose}
           variant="outline"
           shape="round"
           style={{flex: 1}}
         />
 
         <Button
-          title={t('components.emergencyBottomSheet.send_emergency')}
+          title={t('common.submit')}
           onPress={handleSendEmergency}
-          variant="primary"
+          variant="dark"
           shape="round"
           style={{flex: 1}}
-          loading={isLoading}
-          disabled={!selectedType || !title.trim()}
+          disabled={!selectedType || !location.length}
         />
       </View>
+
+      {/* Location Selection Modal */}
+      <Modal
+        visible={showLocationModal}
+        animationType="slide"
+        onRequestClose={handleCloseLocationModal}
+        presentationStyle="pageSheet">
+        <SelectLocationMap
+          initialAddress={location[0]}
+          onLocationSelect={handleLocationSelect}
+          onClose={handleCloseLocationModal}
+        />
+      </Modal>
     </View>
   );
 };
@@ -290,43 +219,23 @@ const styles = StyleSheet.create({
   emergencyTypesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    justifyContent: 'space-between',
   },
-  emergencyTypeCard: {
-    width: '48%',
-    padding: spacing.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.neutral.gray300,
-    backgroundColor: colors.neutral.white,
+  emergencyTypeItem: {
+    width: '25%', // 4 columns with some spacing
     alignItems: 'center',
-    gap: spacing.xs,
+    marginBottom: spacing.md,
   },
-  emergencyTypeCardSelected: {
+  selectedEmergencyType: {
     backgroundColor: colors.status.error,
-    borderColor: colors.status.error,
+    borderWidth: 1,
+    borderColor: colors.neutral.black,
   },
-  emergencyTypeText: {
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '500',
+  emergencyTypeLabel: {
+    marginTop: spacing.sm,
   },
-  emergencyTypeTextSelected: {
-    color: colors.neutral.white,
-  },
-  locationInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    padding: spacing.md,
-    backgroundColor: colors.status.info + '10',
-    borderRadius: 8,
-    marginBottom: spacing.lg,
-  },
-  locationText: {
-    flex: 1,
-    color: colors.status.info,
-    fontSize: 12,
+  locationButton: {
+    marginBottom: spacing.md,
   },
   footer: {
     flexDirection: 'row',

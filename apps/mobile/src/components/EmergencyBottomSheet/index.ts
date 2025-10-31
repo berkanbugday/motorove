@@ -1,1 +1,1 @@
-export * from './EmergencyBottomSheet';
+export {EmergencyBottomSheet} from './EmergencyBottomSheet';

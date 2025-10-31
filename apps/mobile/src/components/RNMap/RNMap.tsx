@@ -392,7 +392,9 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       if (scrollIndex >= 0 && scrollIndex < filteredMarkers.length) {
         const scrolledMarker = filteredMarkers[scrollIndex];
         // Find its original index in the full markers array
-        const originalIndex = markers.findIndex(m => m.id === scrolledMarker.id);
+        const originalIndex = markers.findIndex(
+          m => m.id === scrolledMarker.id,
+        );
 
         if (originalIndex !== -1 && originalIndex !== selectedIndex) {
           updateSelectedMarker(originalIndex);
@@ -506,7 +508,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
                   selectedTab === tab
                     ? tab === MapTabType.WARNINGS
                       ? 'warning'
-                      : tab === MapTabType.HELP_REQUESTS
+                      : tab === MapTabType.EMERGENCIES
                       ? 'error'
                       : 'dark'
                     : 'light'
@@ -517,7 +519,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
                     ? 'wrench-filled'
                     : tab === MapTabType.WARNINGS
                     ? 'error-filled'
-                    : tab === MapTabType.HELP_REQUESTS
+                    : tab === MapTabType.EMERGENCIES
                     ? 'bell-exclamation-filled'
                     : undefined
                 }

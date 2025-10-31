@@ -9,7 +9,7 @@ import {IconName} from '@components/Icon';
 export enum MapTabType {
   BUSINESSES = 'businesses',
   WARNINGS = 'warnings',
-  HELP_REQUESTS = 'help_requests',
+  EMERGENCIES = 'emergencies',
 }
 
 /**

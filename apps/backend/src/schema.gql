@@ -133,6 +133,24 @@ input CreateDeviceTokenInput {
   token: String!
 }
 
+input CreateEmergencyAddressInput {
+  address: String!
+  countryCode: String
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+}
+
+input CreateEmergencyDescriptionInput {
+  description: String!
+}
+
+input CreateEmergencyInput {
+  addresses: [CreateEmergencyAddressInput!]!
+  descriptions: [CreateEmergencyDescriptionInput!]
+  type: EmergencyType!
+}
+
 input CreateEventAddressInput {
   address: String!
   countryCode: String
@@ -272,6 +290,48 @@ enum DifficultyLevel {
   EASY
   HARD
   MEDIUM
+}
+
+type EmergencyAddressDto {
+  address: String!
+  countryCode: String
+  id: String!
+  language: Language!
+  latitude: Float!
+  longitude: Float!
+}
+
+type EmergencyDescriptionDto {
+  description: String!
+  id: String!
+  language: Language!
+}
+
+type EmergencyDto {
+  addresses: [EmergencyAddressDto!]!
+  createdAt: DateTime!
+  createdBy: UserDto!
+  createdById: String!
+  descriptions: [EmergencyDescriptionDto!]
+  id: ID!
+  isActive: Boolean!
+  status: ApprovalStatus!
+  type: EmergencyType!
+  updatedAt: DateTime!
+  updatedBy: UserDto!
+  updatedById: String!
+}
+
+"""Type of emergency for motorcycle rides"""
+enum EmergencyType {
+  ACCIDENT
+  BATTERY_DEAD
+  BREAKDOWN
+  FUEL_SHORTAGE
+  LOST
+  MEDICAL
+  OTHER
+  TIRE_PROBLEM
 }
 
 type EnumItem {
@@ -515,6 +575,15 @@ input FilterBusinessInput {
   southWestLng: Float
 }
 
+input FilterEmergencyInput {
+  limit: Int = 100
+  northEastLat: Float
+  northEastLng: Float
+  southWestLat: Float
+  southWestLng: Float
+  type: EmergencyType
+}
+
 input FilterGroupInput {
   cityId: String
   privacy: GroupPrivacy = ALL
@@ -725,6 +794,7 @@ type Mutation {
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
   createBusinessComment(input: CreateBusinessCommentInput!): BusinessCommentDto!
+  createEmergency(input: CreateEmergencyInput!): EmergencyDto!
   createEvent(input: CreateEventInput!): EventDto!
   createGroup(input: CreateGroupInput!): GroupDto!
   createNotification(input: CreateNotificationInput!): NotificationDto!
@@ -744,6 +814,7 @@ type Mutation {
   rejectEventInvitation(id: ID!): Boolean!
   removeBusinessComment(id: ID!): Boolean!
   removeDeviceToken: Boolean!
+  removeEmergency(id: String!): Boolean!
   removeEvent(id: ID!): Boolean!
   removeMember(input: RemoveMemberInput!): Boolean!
   removePost(id: ID!): PostDto!
@@ -964,6 +1035,8 @@ type Query {
   cities: [CityDto!]!
   city(id: ID!): CityDto!
   count: Float!
+  emergencies(filter: FilterEmergencyInput!): [EmergencyDto!]!
+  emergency(id: String!): EmergencyDto!
   event(id: String!): EventDto!
   eventInvitations(limit: Int, skip: Int): [EventInvitationDto!]!
   events(groupId: String, limit: Int, skip: Int, status: EventStatus): [EventDto!]!
@@ -983,6 +1056,7 @@ type Query {
   groupJoinRequests(limit: Int, skip: Int): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
+  myEmergencies: [EmergencyDto!]!
   myWarnings: [WarningDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
   post(id: ID!): PostDto!

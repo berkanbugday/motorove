@@ -281,6 +281,17 @@ enum WarningType {
   OTHER
 }
 
+enum EmergencyType {
+  ACCIDENT
+  BREAKDOWN
+  MEDICAL
+  FUEL_SHORTAGE
+  TIRE_PROBLEM
+  BATTERY_DEAD
+  LOST
+  OTHER
+}
+
 // Models
 model User {
   id                String   @id @default(uuid())
@@ -340,6 +351,10 @@ model User {
   // Warning relations
   createdWarnings Warning[] @relation("WarningCreatedBy")
   updatedWarnings Warning[] @relation("WarningUpdatedBy")
+
+  // Emergency relations
+  createdEmergencies Emergency[] @relation("EmergencyCreatedBy")
+  updatedEmergencies Emergency[] @relation("EmergencyUpdatedBy")
 
   // Event relations
   createdEvents       Event[]            @relation("EventCreatedBy")
@@ -935,5 +950,63 @@ model WarningAddress {
 
   @@unique([warningId, language]) // Ensure unique address per warning/language
   @@index([warningId])
+  @@index([latitude, longitude]) // For location-based queries
+}
+
+// Emergency model
+model Emergency {
+  id     String         @id @default(uuid())
+  type   EmergencyType
+  status ApprovalStatus @default(ACCEPTED)
+
+  // Relations
+  descriptions EmergencyDescription[]
+  addresses    EmergencyAddress[]
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("EmergencyCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedById String?
+  updatedBy   User?    @relation("EmergencyUpdatedBy", fields: [updatedById], references: [id])
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@index([createdById])
+  @@index([type])
+}
+
+// Emergency description model for multi-language support
+model EmergencyDescription {
+  id          String   @id @default(uuid())
+  description String   @db.Text
+  language    Language @default(TR)
+
+  // Relations
+  emergency   Emergency @relation(fields: [emergencyId], references: [id], onDelete: Cascade)
+  emergencyId String
+
+  // Base model fields
+  isActive Boolean @default(true)
+
+  @@unique([emergencyId, language]) // Ensure unique description per emergency/language
+  @@index([emergencyId])
+}
+
+// Emergency address model for location information
+model EmergencyAddress {
+  id          String   @id @default(uuid())
+  address     String
+  countryCode String?
+  language    Language
+  latitude    Float
+  longitude   Float
+
+  // Relations
+  emergency   Emergency @relation(fields: [emergencyId], references: [id], onDelete: Cascade)
+  emergencyId String
+
+  @@unique([emergencyId, language]) // Ensure unique address per emergency/language
+  @@index([emergencyId])
   @@index([latitude, longitude]) // For location-based queries
 }

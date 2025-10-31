@@ -1,38 +1,12 @@
-import { EmergencyType } from '../../enums/emergency-type.enum';
+import { EmergencyType, ApprovalStatus } from "../../enums";
+import { IEmergencyAddress } from "./emergency-address.interface";
+import { IEmergencyDescription } from "./emergency-description.interface";
 
 export interface IEmergency {
   id: string;
-  userId: string;
   type: EmergencyType;
-  title: string;
-  description?: string;
-  latitude: number;
-  longitude: number;
-  address?: string;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface ICreateEmergency {
-  type: EmergencyType;
-  title: string;
-  description?: string;
-  latitude: number;
-  longitude: number;
-  address?: string;
-}
-
-export interface IEmergencyNotification {
-  emergencyId: string;
-  type: EmergencyType;
-  title: string;
-  description?: string;
-  latitude: number;
-  longitude: number;
-  address?: string;
-  userName: string;
-  userProfileImage?: string;
-  distance?: number;
-  createdAt: Date;
+  status: ApprovalStatus;
+  addresses: IEmergencyAddress[];
+  descriptions?: IEmergencyDescription[] | null;
+  createdAt: Date | string;
 }

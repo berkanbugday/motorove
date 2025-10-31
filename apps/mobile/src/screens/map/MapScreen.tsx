@@ -2,13 +2,18 @@ import React, {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 import {StyleSheet, View, Platform} from 'react-native';
 import {RNMap, RNMapMarkerItem, MapTabType} from '@components/RNMap';
 import {useGetBusinesses} from '@services/business.service';
-import {IBusiness, ICreateWarning, WarningType} from '@motorove/shared';
-import {useGetWarnings} from '@services/warning.service';
+import {
+  IBusiness,
+  ICreateWarning,
+  WarningType,
+  ICreateEmergency,
+  EmergencyType,
+} from '@motorove/shared';
+import {useGetWarnings, useCreateWarning} from '@services/warning.service';
 import {IconName} from '@components/Icon';
 import {colors} from '@theme/colors';
 import Geolocation from '@react-native-community/geolocation';
 import {Region} from 'react-native-maps';
-import {Button} from '@components/Button';
 import {useTranslation} from '@hooks/useTranslation';
 import {showToast} from '@components/ToastMessage';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
@@ -18,8 +23,11 @@ import {useBottomSheet} from '@components/BottomSheet';
 import {MapFilter, MapFilterValues} from '@components/MapFilter';
 import {EmergencyBottomSheet} from '@components/EmergencyBottomSheet';
 import {WarningBottomSheet} from '@components/WarningBottomSheet';
-import {useEmergencyService} from '@services/emergency.service';
-import {useCreateWarning} from '@services/warning.service';
+import {Button} from '@components/Button';
+import {
+  useGetEmergencies,
+  useCreateEmergency,
+} from '@services/emergency.service';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -63,7 +71,7 @@ export const MapScreen = () => {
   const mapRef = useRef<any>(null);
   const isUserInteraction = useRef(false);
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
-  const {sendEmergency} = useEmergencyService();
+  const {createEmergency} = useCreateEmergency();
   const {createWarning} = useCreateWarning();
   const [selectedTab, setSelectedTab] = useState<MapTabType>();
 
@@ -78,6 +86,9 @@ export const MapScreen = () => {
 
   // Fetch warnings from backend based on map viewport bounds
   const {warnings} = useGetWarnings(memoizedMapBounds);
+
+  // Fetch emergencies from backend based on map viewport bounds
+  const {emergencies} = useGetEmergencies(memoizedMapBounds);
 
   // Map warning type to icon name and color
   const getWarningIconAndColor = useCallback(
@@ -138,6 +149,41 @@ export const MapScreen = () => {
             iconName: 'error-filled',
             iconColor: colors.neutral.black,
             pinColor: colors.status.warning,
+          };
+      }
+    },
+    [],
+  );
+
+  // Map emergency type to icon name and color
+  const getEmergencyIconAndColor = useCallback(
+    (
+      type: EmergencyType,
+    ): {iconName: IconName; iconColor: string; pinColor: string} => {
+      switch (type) {
+        case EmergencyType.ACCIDENT:
+          return {
+            iconName: 'car-crash-filled',
+            iconColor: colors.neutral.white,
+            pinColor: colors.status.error,
+          };
+        case EmergencyType.BREAKDOWN:
+          return {
+            iconName: 'wrench-filled',
+            iconColor: colors.neutral.white,
+            pinColor: colors.status.error,
+          };
+        case EmergencyType.MEDICAL:
+          return {
+            iconName: 'bell-exclamation-filled',
+            iconColor: colors.neutral.white,
+            pinColor: colors.status.error,
+          };
+        default:
+          return {
+            iconName: 'error-filled',
+            iconColor: colors.neutral.white,
+            pinColor: colors.status.error,
           };
       }
     },
@@ -282,7 +328,7 @@ export const MapScreen = () => {
     setShowSearchButton(false);
   }, [currentRegion, calculateBounds]);
 
-  // Convert businesses and warnings to map markers - memoized for performance
+  // Convert businesses, warnings, and emergencies to map markers - memoized for performance
   const allMarkers: RNMapMarkerItem[] = useMemo(() => {
     // Business markers
     const businessMarkers: RNMapMarkerItem[] = businesses.map(
@@ -320,18 +366,50 @@ export const MapScreen = () => {
       };
     });
 
-    // Combine and sort by geographic position for consistent display
-    const combinedMarkers = [...businessMarkers, ...warningMarkers].sort(
-      (a, b) => {
-        if (a.coordinate.latitude !== b.coordinate.latitude) {
-          return a.coordinate.latitude - b.coordinate.latitude;
-        }
-        return a.coordinate.longitude - b.coordinate.longitude;
+    // Emergency markers
+    const emergencyMarkers: RNMapMarkerItem[] = emergencies.map(
+      (emergency, index) => {
+        const {iconName, iconColor, pinColor} = getEmergencyIconAndColor(
+          emergency.type,
+        );
+        const address = emergency.addresses?.[0];
+
+        return {
+          id: `emergency-${emergency.id}`,
+          coordinate: {
+            latitude: address?.latitude || 0,
+            longitude: address?.longitude || 0,
+          },
+          emergency,
+          iconName,
+          iconColor,
+          pinColor,
+          zIndex: 600 + index, // Emergencies above warnings (highest priority)
+        };
       },
     );
 
+    // Combine and sort by geographic position for consistent display
+    const combinedMarkers = [
+      ...businessMarkers,
+      ...warningMarkers,
+      ...emergencyMarkers,
+    ].sort((a, b) => {
+      if (a.coordinate.latitude !== b.coordinate.latitude) {
+        return a.coordinate.latitude - b.coordinate.latitude;
+      }
+      return a.coordinate.longitude - b.coordinate.longitude;
+    });
+
     return combinedMarkers;
-  }, [businesses, warnings, selectedBusinessId, getWarningIconAndColor]);
+  }, [
+    businesses,
+    warnings,
+    emergencies,
+    selectedBusinessId,
+    getWarningIconAndColor,
+    getEmergencyIconAndColor,
+  ]);
 
   // Filter markers based on selected tab
   const markers: RNMapMarkerItem[] = useMemo(() => {
@@ -345,9 +423,8 @@ export const MapScreen = () => {
         return allMarkers.filter(marker => marker.business);
       case MapTabType.WARNINGS:
         return allMarkers.filter(marker => marker.warning);
-      case MapTabType.HELP_REQUESTS:
-        // TODO: Add help requests filtering when implemented
-        return [];
+      case MapTabType.EMERGENCIES:
+        return allMarkers.filter(marker => marker.emergency);
       default:
         return allMarkers;
     }
@@ -429,8 +506,11 @@ export const MapScreen = () => {
     openBottomSheet({
       content: (
         <EmergencyBottomSheet
-          onSendEmergency={async emergency => {
-            await sendEmergency(emergency);
+          onSubmit={async (emergency: ICreateEmergency) => {
+            const createdEmergency = await createEmergency(emergency);
+            if (createdEmergency.id) {
+              closeBottomSheet();
+            }
           }}
           onClose={closeBottomSheet}
         />
@@ -439,7 +519,7 @@ export const MapScreen = () => {
       title: t('screens.map.emergency_title'),
       closeButtonPosition: 'top-right',
     });
-  }, [sendEmergency, openBottomSheet, closeBottomSheet, t]);
+  }, [createEmergency, openBottomSheet, closeBottomSheet, t]);
 
   // Handle warning button press
   const handleWarningPress = useCallback(() => {

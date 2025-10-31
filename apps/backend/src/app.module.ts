@@ -26,6 +26,7 @@ import { BusinessesModule } from './businesses/businesses.module';
 import { BusinessCommentsModule } from './business-comments/business-comments.module';
 import { SupportsModule } from './supports/supports.module';
 import { WarningsModule } from './warnings/warnings.module';
+import { EmergenciesModule } from './emergencies/emergencies.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { WarningsModule } from './warnings/warnings.module';
     BusinessCommentsModule,
     SupportsModule,
     WarningsModule,
+    EmergenciesModule,
   ],
   controllers: [AppController],
   providers: [
