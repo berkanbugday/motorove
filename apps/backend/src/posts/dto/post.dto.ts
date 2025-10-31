@@ -11,10 +11,10 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
-import { AddressDto } from '../../addresses/dto/address.dto';
 import { IPost } from '@motorove/shared';
 import { PostCommentDto } from '../../post-comments/dto/post-comment.dto';
 import { ImageDto } from '../../common/dto/image.dto';
+import { PostAddressDto } from './post-address.dto';
 
 @ObjectType()
 export class PostDto implements IPost {
@@ -66,10 +66,10 @@ export class PostDto implements IPost {
   @IsString()
   groupName?: string;
 
-  @Field(() => [AddressDto], { nullable: true })
+  @Field(() => [PostAddressDto], { nullable: true })
   @ValidateNested()
-  @Type(() => AddressDto)
-  addresses?: AddressDto[];
+  @Type(() => PostAddressDto)
+  addresses?: PostAddressDto[];
 
   @Field(() => [UserDto], { nullable: true })
   @ValidateNested()

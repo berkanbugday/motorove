@@ -7,7 +7,7 @@ import { Language } from "../../enums";
 export interface IBaseAddress {
   id: string;
   address: string;
-  country?: string | null;
+  countryCode?: string | null;
   language: Language;
   latitude: number;
   longitude: number;

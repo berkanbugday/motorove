@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ICreatePost } from '@motorove/shared';
-import { CreateAddressInput } from '../../addresses/dto/create-address.input';
+import { CreatePostAddressInput } from './create-post-address.input';
 
 @InputType()
 export class CreatePostInput implements ICreatePost {
@@ -27,10 +27,10 @@ export class CreatePostInput implements ICreatePost {
   @IsOptional()
   groupId?: string;
 
-  @Field(() => [CreateAddressInput], { nullable: true })
+  @Field(() => [CreatePostAddressInput], { nullable: true })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateAddressInput)
-  addresses?: CreateAddressInput[];
+  @Type(() => CreatePostAddressInput)
+  addresses?: CreatePostAddressInput[];
 }

@@ -1,7 +1,7 @@
 import { BusinessCategory } from "../../enums";
 import { IBusinessDescription } from "./business-description.interface";
 import { IWorkingHour } from "./working-hour.interface";
-import { IAddress } from "../address";
+import { IBusinessAddress } from "./business-address.interface";
 
 /**
  * Business Interface
@@ -15,7 +15,7 @@ export interface IBusiness {
   phoneNumber: string;
   descriptions: IBusinessDescription[];
   workingHours: IWorkingHour[];
-  address: IAddress;
+  addresses: IBusinessAddress[];
   averageRating: number;
   commentsCount: number;
 }

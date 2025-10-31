@@ -1,4 +1,5 @@
 import {gql} from '@apollo/client';
+import {EVENT_ADDRESS_FRAGMENT} from './event-address.graphql';
 
 // Event fragment
 export const EVENT_FRAGMENT = gql`
@@ -17,12 +18,7 @@ export const EVENT_FRAGMENT = gql`
       isCensored
     }
     addresses {
-      id
-      language
-      address
-      type
-      latitude
-      longitude
+      ...EventAddressFragment
     }
     roadType
     difficultyLevel
@@ -67,6 +63,7 @@ export const EVENT_FRAGMENT = gql`
     updatedAt
     isActive
   }
+  ${EVENT_ADDRESS_FRAGMENT}
 `;
 
 // User invitation fragment

@@ -11,11 +11,15 @@ import { UpdateBusinessCommentInput } from './dto/update-business-comment.input'
 import { BusinessComment } from './models/business-comment.model';
 import { BusinessCommentDto } from './dto/business-comment.dto';
 import { plainToClass } from 'class-transformer';
+import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 
 @Injectable()
 export class BusinessCommentsService {
   private readonly logger = new Logger(BusinessCommentsService.name);
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly profanityFilterService: ProfanityFilterService,
+  ) {}
 
   async findAll(
     businessId: string,
@@ -33,13 +37,6 @@ export class BusinessCommentsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          business: {
-            include: {
-              address: true,
-              descriptions: true,
-              workingHours: true,
-            },
-          },
         },
         orderBy: { createdAt: 'desc' },
         skip: skip || undefined,
@@ -63,13 +60,6 @@ export class BusinessCommentsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          business: {
-            include: {
-              address: true,
-              descriptions: true,
-              workingHours: true,
-            },
-          },
         },
       })) as BusinessComment;
 
@@ -131,13 +121,6 @@ export class BusinessCommentsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          business: {
-            include: {
-              address: true,
-              descriptions: true,
-              workingHours: true,
-            },
-          },
         },
       })) as BusinessComment;
 
@@ -187,13 +170,6 @@ export class BusinessCommentsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          business: {
-            include: {
-              address: true,
-              descriptions: true,
-              workingHours: true,
-            },
-          },
         },
       })) as BusinessComment;
 
@@ -282,6 +258,8 @@ export class BusinessCommentsService {
   }
 
   private mapToDto(businessComment: BusinessComment): BusinessCommentDto {
-    return plainToClass(BusinessCommentDto, businessComment);
+    const dto = plainToClass(BusinessCommentDto, businessComment);
+    dto.content = this.profanityFilterService.filterText(dto.content);
+    return dto;
   }
 }

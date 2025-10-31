@@ -6,7 +6,7 @@ import {
   EventStatus,
   Currency,
 } from "../../enums";
-import { ICreateAddress } from "../address/create-address.interface";
+import { ICreateEventAddress } from "./create-event-address.interface";
 
 /**
  * Create Event Interface
@@ -60,7 +60,7 @@ export interface ICreateEvent {
   /**
    * Optional addresses related to the event
    */
-  addresses?: ICreateAddress[];
+  addresses?: ICreateEventAddress[];
 
   /**
    * Optional array of invited group IDs

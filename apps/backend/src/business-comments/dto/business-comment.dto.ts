@@ -1,14 +1,5 @@
-import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
-import {
-  IsUUID,
-  IsString,
-  IsInt,
-  Min,
-  Max,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { BusinessDto } from '../../businesses/dto/business.dto';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
+import { IsString, IsInt, Min, Max } from 'class-validator';
 import { IBusinessComment } from '@motorove/shared';
 import { BaseDto } from '../../core/models/base.dto';
 
@@ -23,13 +14,4 @@ export class BusinessCommentDto extends BaseDto implements IBusinessComment {
   @Min(1)
   @Max(5)
   rating: number;
-
-  @Field(() => ID)
-  @IsUUID()
-  businessId: string;
-
-  @Field(() => BusinessDto, { nullable: true })
-  @ValidateNested()
-  @Type(() => BusinessDto)
-  business?: BusinessDto;
 }

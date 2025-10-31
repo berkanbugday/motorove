@@ -7,7 +7,7 @@ import {
   EventParticipantStatus,
   Currency,
 } from "../../enums";
-import { IAddress } from "../address/address.interface";
+import { IEventAddress } from "./event-address.interface";
 import { IUser } from "../user/user.interface";
 import { IGroup } from "../group/group.interface";
 import { IEventParticipant } from "./event-participant.interface";
@@ -28,7 +28,7 @@ export interface IEvent {
   maxParticipants?: number | null;
   isPrivate: boolean;
   images?: IImage[] | null;
-  addresses?: IAddress[] | null;
+  addresses?: IEventAddress[] | null;
   organizedByGroupId?: string | null;
   organizedByGroup?: IGroup | null;
   roadType?: RoadType | null;

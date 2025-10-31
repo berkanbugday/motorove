@@ -7,7 +7,6 @@ export * from "./post";
 export * from "./post-comment";
 export * from "./notification";
 export * from "./city";
-export * from "./address";
 export * from "./business";
 export * from "./business-comment";
 export * from "./common";

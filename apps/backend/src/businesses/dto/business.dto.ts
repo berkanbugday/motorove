@@ -3,7 +3,6 @@ import { IBusiness } from '@motorove/shared';
 import { BusinessCategory } from '../../enums/models/business-category.enum';
 import { BusinessDescriptionDto } from './business-description.dto';
 import { WorkingHourDto } from './working-hour.dto';
-import { AddressDto } from '../../addresses/dto/address.dto';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -14,6 +13,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { BusinessAddressDto } from './business-address.dto';
 
 @ObjectType()
 export class BusinessDto implements IBusiness {
@@ -46,14 +46,15 @@ export class BusinessDto implements IBusiness {
   @Type(() => BusinessDescriptionDto)
   descriptions: BusinessDescriptionDto[];
 
+  @Field(() => [BusinessAddressDto])
+  @IsArray()
+  @Type(() => BusinessAddressDto)
+  addresses: BusinessAddressDto[];
+
   @Field(() => [WorkingHourDto])
   @IsArray()
   @Type(() => WorkingHourDto)
   workingHours: WorkingHourDto[];
-
-  @Field(() => AddressDto)
-  @Type(() => AddressDto)
-  address: AddressDto;
 
   @Field(() => Number)
   @IsNumber()

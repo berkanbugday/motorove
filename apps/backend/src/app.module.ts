@@ -21,7 +21,6 @@ import { PostCommentsModule } from './post-comments/post-comments.module';
 import { UserFollowingsModule } from './user-followings/user-followings.module';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
-import { AddressesModule } from './addresses/addresses.module';
 import { UserSettingsModule } from './user-settings/user-settings.module';
 import { BusinessesModule } from './businesses/businesses.module';
 import { BusinessCommentsModule } from './business-comments/business-comments.module';
@@ -77,7 +76,6 @@ import { WarningsModule } from './warnings/warnings.module';
     UserFollowingsModule,
     UsersModule,
     EventsModule,
-    AddressesModule,
     UserSettingsModule,
     BusinessesModule,
     BusinessCommentsModule,

@@ -1,4 +1,4 @@
-import { ICreateAddress } from "../address";
+import { ICreatePostAddress } from "./create-post-address.interface";
 
 /**
  * Create Post Interface
@@ -22,5 +22,5 @@ export interface ICreatePost {
   /**
    * Optional addresses related to the post
    */
-  addresses?: ICreateAddress[] | null;
+  addresses?: ICreatePostAddress[] | null;
 }

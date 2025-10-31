@@ -17,7 +17,6 @@ import {enUS, tr} from 'date-fns/locale';
 import type {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 
 interface BusinessCommentsProps {
-  businessId: string;
   businessComments: IBusinessComment[];
   averageRating: number;
   commentCount: number;

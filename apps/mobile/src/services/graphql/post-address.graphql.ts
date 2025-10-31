@@ -1,13 +1,13 @@
 import {gql} from '@apollo/client';
 
-export const ADDRESS_FRAGMENT = gql`
-  fragment AddressFragment on AddressDto {
+export const POST_ADDRESS_FRAGMENT = gql`
+  fragment PostAddressFragment on PostAddressDto {
     id
     address
     countryCode
     language
-    type
     latitude
     longitude
+    postId
   }
 `;

@@ -10,7 +10,7 @@ import { ExperienceLevel } from '../../enums/models/experience-level.enum';
 import { RoadType } from '../../enums/models/road-type.enum';
 import { Currency } from '../../enums/models/currency.enum';
 import { User } from 'src/users/models/user.model';
-import { Address } from 'src/addresses/models/address.model';
+import { EventAddress } from './event-address.model';
 
 @ObjectType()
 export class Event extends BaseModel {
@@ -56,8 +56,8 @@ export class Event extends BaseModel {
   @Field(() => Group, { nullable: true })
   organizedByGroup?: Group;
 
-  @Field(() => [Address], { nullable: true })
-  addresses?: Address[];
+  @Field(() => [EventAddress], { nullable: true })
+  addresses?: EventAddress[];
 
   @Field(() => RoadType, { nullable: true })
   roadType?: RoadType;

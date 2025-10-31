@@ -124,11 +124,9 @@ enum DayOfWeek {
 }
 
 enum AddressType {
-  POST_LOCATION
   EVENT_MEETING_LOCATION
   EVENT_START_LOCATION
   EVENT_FINISH_LOCATION
-  BUSINESS_LOCATION
 }
 
 enum Currency {
@@ -538,7 +536,7 @@ model Post {
   comments  PostComment[]
   likes     PostLike[] // Added relation to PostLike
   saves     PostSave[] // Added relation to PostSave
-  addresses Address[] // Added relation to Address
+  addresses PostAddress[] // Added relation to PostAddress
 
   // Base model fields
   createdById String
@@ -627,31 +625,57 @@ model PostSave {
   @@index([userId])
 }
 
-// New model for addresses with support for both posts and events
-model Address {
-  id        String      @id @default(uuid())
-  address   String
-  country   String?
-  language  Language // Change from String to Language enum
-  type      AddressType
-  latitude  Float
-  longitude Float
+// Post address model
+model PostAddress {
+  id          String   @id @default(uuid())
+  address     String
+  countryCode String?
+  language    Language
+  latitude    Float
+  longitude   Float
 
-  // Relations - one address belongs to either a post, an event, or a business
-  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String?
+  // Relations
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
 
-  event   Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId String?
+  @@unique([postId, language])
+  @@index([latitude, longitude])
+}
 
-  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String?   @unique
+// Event address model
+model EventAddress {
+  id          String      @id @default(uuid())
+  address     String
+  countryCode String?
+  language    Language
+  type        AddressType // Only for events: MEETING, START, FINISH
+  latitude    Float
+  longitude   Float
 
-  @@unique([postId, language, type]) // Ensure unique addresses per post/language/type
-  @@unique([eventId, language, type]) // Ensure unique addresses per event/language/type
-  @@unique([businessId, language, type]) // Ensure unique addresses per business/language/type
-  @@index([latitude, longitude]) // For location-based queries
-  @@index([businessId, latitude, longitude]) // For location-based queries
+  // Relations
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+
+  @@unique([eventId, language, type])
+  @@index([latitude, longitude])
+}
+
+// Business address model
+model BusinessAddress {
+  id          String   @id @default(uuid())
+  address     String
+  countryCode String?
+  language    Language
+  latitude    Float
+  longitude   Float
+
+  // Relations
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+
+  @@unique([businessId, language])
+  @@index([latitude, longitude])
+  @@index([businessId, latitude, longitude])
 }
 
 // Business model
@@ -665,7 +689,7 @@ model Business {
   status      ApprovalStatus   @default(PENDING)
 
   // Relations
-  address      Address?
+  addresses    BusinessAddress[]
   descriptions BusinessDescription[]
   workingHours WorkingHour[]
   comments     BusinessComment[]
@@ -770,7 +794,7 @@ model Event {
   // Relationships
   participants  EventParticipant[]
   invitations   EventInvitation[]
-  addresses     Address[]
+  addresses     EventAddress[]
   invitedGroups Group[]
 
   @@index([createdById])

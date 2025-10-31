@@ -1,5 +1,5 @@
 import {gql} from '@apollo/client';
-import {ADDRESS_FRAGMENT} from './address.graphql';
+import {BUSINESS_ADDRESS_FRAGMENT} from './business-address.graphql';
 
 // Business Description Fragment
 export const BUSINESS_DESCRIPTION_FRAGMENT = gql`
@@ -29,8 +29,8 @@ export const BUSINESS_FRAGMENT = gql`
     category
     countryCode
     phoneNumber
-    address {
-      ...AddressFragment
+    addresses {
+      ...BusinessAddressFragment
     }
     descriptions {
       ...BusinessDescriptionFragment
@@ -41,7 +41,7 @@ export const BUSINESS_FRAGMENT = gql`
     averageRating
     commentsCount
   }
-  ${ADDRESS_FRAGMENT}
+  ${BUSINESS_ADDRESS_FRAGMENT}
   ${BUSINESS_DESCRIPTION_FRAGMENT}
   ${WORKING_HOUR_FRAGMENT}
 `;

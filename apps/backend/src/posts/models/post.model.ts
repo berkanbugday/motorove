@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Group } from '../../groups/models/group.model';
 import { BaseModel } from '../../core/models/base.model';
-import { Address } from '../../addresses/models/address.model';
+import { PostAddress } from './post-address.model';
 import { PostLike } from './post-like.model';
 import { PostSave } from './post-save.model';
 import { PostComment } from '../../post-comments/models/post-comment.model';
@@ -26,8 +26,8 @@ export class Post extends BaseModel {
   @Field(() => [PostSave], { nullable: true })
   saves?: PostSave[];
 
-  @Field(() => [Address], { nullable: true })
-  addresses?: Address[];
+  @Field(() => [PostAddress], { nullable: true })
+  addresses?: PostAddress[];
 
   @Field(() => [PostComment], { nullable: true })
   comments?: PostComment[];

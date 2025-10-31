@@ -2,7 +2,7 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { BusinessCategory } from '../../enums/models/business-category.enum';
 import { BusinessDescription } from './business-description.model';
 import { WorkingHour } from './working-hour.model';
-import { Address } from '../../addresses/models/address.model';
+import { BusinessAddress } from './business-address.model';
 import { ApprovalStatus } from '../../enums/models/approval-status.enum';
 import { BusinessComment } from 'src/business-comments/models/business-comment.model';
 
@@ -23,8 +23,8 @@ export class Business {
   @Field(() => Boolean)
   verified: boolean;
 
-  @Field(() => Address)
-  address: Address;
+  @Field(() => [BusinessAddress])
+  addresses: BusinessAddress[];
 
   @Field(() => ApprovalStatus)
   status: ApprovalStatus;

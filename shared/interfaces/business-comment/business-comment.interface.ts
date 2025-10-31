@@ -8,7 +8,4 @@ import { IBusiness } from "../business";
 export interface IBusinessComment extends IBase {
   content: string;
   rating: number;
-  businessId: string;
-  business?: Partial<IBusiness>;
 }
-

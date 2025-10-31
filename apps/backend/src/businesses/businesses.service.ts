@@ -54,14 +54,16 @@ export class BusinessesService {
     const whereClause: any = {
       isActive: true,
       status: ApprovalStatus.ACCEPTED,
-      address: {
-        latitude: {
-          gte: southWestLat, // Greater than or equal to southwest latitude
-          lte: northEastLat, // Less than or equal to northeast latitude
-        },
-        longitude: {
-          gte: southWestLng, // Greater than or equal to southwest longitude
-          lte: northEastLng, // Less than or equal to northeast longitude
+      addresses: {
+        some: {
+          latitude: {
+            gte: southWestLat, // Greater than or equal to southwest latitude
+            lte: northEastLat, // Less than or equal to northeast latitude
+          },
+          longitude: {
+            gte: southWestLng, // Greater than or equal to southwest longitude
+            lte: northEastLng, // Less than or equal to northeast longitude
+          },
         },
       },
     };
@@ -116,7 +118,7 @@ export class BusinessesService {
     const businesses = await this.prisma.business.findMany({
       where: whereClause,
       include: {
-        address: true,
+        addresses: true,
         descriptions: {
           where: {
             isActive: true,
@@ -185,7 +187,7 @@ export class BusinessesService {
         status: ApprovalStatus.ACCEPTED,
       },
       include: {
-        address: true,
+        addresses: true,
         descriptions: {
           where: {
             isActive: true,

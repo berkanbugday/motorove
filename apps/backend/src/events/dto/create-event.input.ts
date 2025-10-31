@@ -20,7 +20,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ICreateEvent } from '@motorove/shared';
-import { CreateAddressInput } from '../../addresses/dto/create-address.input';
+import { CreateEventAddressInput } from './create-event-address.input';
 
 @InputType()
 export class CreateEventInput implements ICreateEvent {
@@ -68,12 +68,12 @@ export class CreateEventInput implements ICreateEvent {
   @IsString({ each: true })
   images: string[];
 
-  @Field(() => [CreateAddressInput], { nullable: true })
+  @Field(() => [CreateEventAddressInput], { nullable: true })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateAddressInput)
-  addresses?: CreateAddressInput[];
+  @Type(() => CreateEventAddressInput)
+  addresses?: CreateEventAddressInput[];
 
   @Field(() => [String], { nullable: true })
   @IsArray()

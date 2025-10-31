@@ -1,49 +1,34 @@
 import { ObjectType, Field, Float, ID } from '@nestjs/graphql';
-import { IAddress } from '@motorove/shared';
 import { AddressType } from '../../enums/models/address-type.enum';
+import { Event } from './event.model';
 import { Language } from '../../enums/models/language.enum';
 
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  IsUUID,
-  IsOptional,
-} from 'class-validator';
-
 @ObjectType()
-export class AddressDto implements IAddress {
+export class EventAddress {
   @Field(() => ID)
-  @IsUUID()
-  @IsNotEmpty()
   id: string;
 
   @Field(() => String)
-  @IsString()
-  @IsNotEmpty()
   address: string;
 
-  @Field(() => String)
-  @IsString()
-  @IsOptional()
-  country?: string;
+  @Field(() => String, { nullable: true })
+  countryCode?: string;
 
   @Field(() => Language)
-  @IsEnum(Language)
   language: Language;
 
   @Field(() => AddressType)
-  @IsEnum(AddressType)
   type: AddressType;
 
   @Field(() => Float)
-  @IsNumber()
-  @IsNotEmpty()
   latitude: number;
 
   @Field(() => Float)
-  @IsNumber()
-  @IsNotEmpty()
   longitude: number;
+
+  @Field(() => Event, { nullable: true })
+  event?: Partial<Event>;
+
+  @Field(() => String)
+  eventId: string;
 }

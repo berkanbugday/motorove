@@ -15,13 +15,13 @@ import { StorageService } from '../core/storage/storage.service';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { PostDto } from './dto/post.dto';
-import { AddressDto } from '../addresses/dto/address.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { PostInteractionDto } from './dto/post-interaction.dto';
 import { PostCommentDto } from '../post-comments/dto/post-comment.dto';
 import { ImageCensorFilterService } from '../core/image-censor-filter/image-censor-filter.service';
 import { ImageDto } from '../common/dto/image.dto';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
+import { PostAddressDto } from './dto/post-address.dto';
 
 @Injectable()
 export class PostsService {
@@ -240,14 +240,14 @@ export class PostsService {
 
     // Create addresses if provided
     if (input.addresses && input.addresses.length > 0) {
-      await this.prisma.address.createMany({
+      await this.prisma.postAddress.createMany({
         data: input.addresses.map((address) => ({
           postId: createdPost.id,
-          type: address.type,
           latitude: address.latitude,
           longitude: address.longitude,
           address: address.address,
           language: address.language,
+          countryCode: address.countryCode,
         })),
       });
 
@@ -377,17 +377,16 @@ export class PostsService {
 
     // Update addresses if provided
     // Delete existing addresses
-    await this.prisma.address.deleteMany({
+    await this.prisma.postAddress.deleteMany({
       where: { postId: input.id },
     });
 
     if (input.addresses && input.addresses.length > 0) {
       // Create new addresses if any
       if (input.addresses.length > 0) {
-        await this.prisma.address.createMany({
+        await this.prisma.postAddress.createMany({
           data: input.addresses.map((address) => ({
             postId: input.id,
-            type: address.type,
             latitude: address.latitude,
             longitude: address.longitude,
             address: address.address,
@@ -763,7 +762,7 @@ export class PostsService {
       images: images,
       groupId: post.group?.id,
       groupName: post.group?.name,
-      addresses: post.addresses as AddressDto[],
+      addresses: post.addresses as PostAddressDto[],
       likesCount,
       commentsCount,
       isLiked,

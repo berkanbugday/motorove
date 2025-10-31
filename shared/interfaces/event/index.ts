@@ -4,3 +4,5 @@ export * from "./create-event.interface";
 export * from "./update-event.interface";
 export * from "./event-invitation.interface";
 export * from "./event-participant.interface";
+export * from "./event-address.interface";
+export * from "./create-event-address.interface";

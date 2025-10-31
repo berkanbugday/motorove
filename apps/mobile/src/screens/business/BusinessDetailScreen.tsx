@@ -298,8 +298,8 @@ export const BusinessDetailScreen: React.FC = () => {
     }
 
     const straightLineDistance = calculateDistance(userLocation, {
-      latitude: currentBusiness.address.latitude,
-      longitude: currentBusiness.address.longitude,
+      latitude: currentBusiness.addresses[0].latitude,
+      longitude: currentBusiness.addresses[0].longitude,
     });
     setDistance(straightLineDistance.toFixed(1));
   }, [userLocation, currentBusiness]);
@@ -404,7 +404,7 @@ export const BusinessDetailScreen: React.FC = () => {
   );
 
   const handleDirections = useCallback(() => {
-    if (!currentBusiness?.address) {
+    if (!currentBusiness?.addresses) {
       return;
     }
     mapAppsBottomSheetRef.current?.open('minimal');
@@ -412,11 +412,11 @@ export const BusinessDetailScreen: React.FC = () => {
 
   const openMapApp = useCallback(
     (appType: MapAppType) => {
-      if (!currentBusiness?.address) {
+      if (!currentBusiness?.addresses) {
         return;
       }
 
-      const {latitude, longitude} = currentBusiness.address;
+      const {latitude, longitude} = currentBusiness.addresses[0];
       const isInstalled = installedApps[appType];
 
       MapAppsService.openMapApp(appType, latitude, longitude, isInstalled, () =>
@@ -447,8 +447,8 @@ export const BusinessDetailScreen: React.FC = () => {
       {
         id: '1',
         coordinate: {
-          latitude: currentBusiness.address.latitude,
-          longitude: currentBusiness.address.longitude,
+          latitude: currentBusiness.addresses[0].latitude,
+          longitude: currentBusiness.addresses[0].longitude,
         },
         pinColor: colors.neutral.black,
         iconName: 'wrench-filled',
@@ -485,8 +485,8 @@ export const BusinessDetailScreen: React.FC = () => {
             <RNMap
               style={styles.headerImage}
               initialRegion={{
-                latitude: currentBusiness.address.latitude,
-                longitude: currentBusiness.address.longitude,
+                latitude: currentBusiness.addresses[0].latitude,
+                longitude: currentBusiness.addresses[0].longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               }}
@@ -528,7 +528,15 @@ export const BusinessDetailScreen: React.FC = () => {
               <Icon name="map-pin-filled" size={20} />
               <View style={styles.infoTextContainer}>
                 <Body weight="semiBold">{t('screens.map.address')}</Body>
-                <Body lineHeight={25}>{currentBusiness.address.address}</Body>
+                <Body lineHeight={25}>
+                  {
+                    currentBusiness.addresses.find(
+                      address =>
+                        address.language.toLowerCase() ===
+                        language.toLowerCase(),
+                    )?.address
+                  }
+                </Body>
                 {distance && (
                   <Caption color={colors.neutral.grey}>
                     {distance} {t('screens.map.km_away')}
@@ -657,7 +665,6 @@ export const BusinessDetailScreen: React.FC = () => {
           {/* Comments Section */}
           <BusinessComments
             onPressProfile={handleProfilePress}
-            businessId={currentBusiness.id}
             businessComments={businessComments || []}
             averageRating={averageRating || 0}
             commentCount={commentCount || 0}

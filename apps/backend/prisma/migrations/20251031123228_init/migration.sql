@@ -41,7 +41,7 @@ CREATE TYPE "EventStatus" AS ENUM ('DRAFT', 'UPCOMING', 'PAST');
 CREATE TYPE "DayOfWeek" AS ENUM ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');
 
 -- CreateEnum
-CREATE TYPE "AddressType" AS ENUM ('POST_LOCATION', 'EVENT_MEETING_LOCATION', 'EVENT_START_LOCATION', 'EVENT_FINISH_LOCATION', 'BUSINESS_LOCATION');
+CREATE TYPE "AddressType" AS ENUM ('EVENT_MEETING_LOCATION', 'EVENT_START_LOCATION', 'EVENT_FINISH_LOCATION');
 
 -- CreateEnum
 CREATE TYPE "Currency" AS ENUM ('TL', 'USD', 'EUR');
@@ -292,19 +292,43 @@ CREATE TABLE "PostSave" (
 );
 
 -- CreateTable
-CREATE TABLE "Address" (
+CREATE TABLE "PostAddress" (
     "id" TEXT NOT NULL,
     "address" TEXT NOT NULL,
-    "country" TEXT,
+    "countryCode" TEXT,
+    "language" "Language" NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "postId" TEXT NOT NULL,
+
+    CONSTRAINT "PostAddress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EventAddress" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "countryCode" TEXT,
     "language" "Language" NOT NULL,
     "type" "AddressType" NOT NULL,
     "latitude" DOUBLE PRECISION NOT NULL,
     "longitude" DOUBLE PRECISION NOT NULL,
-    "postId" TEXT,
-    "eventId" TEXT,
-    "businessId" TEXT,
+    "eventId" TEXT NOT NULL,
 
-    CONSTRAINT "Address_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "EventAddress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BusinessAddress" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "countryCode" TEXT,
+    "language" "Language" NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "businessId" TEXT NOT NULL,
+
+    CONSTRAINT "BusinessAddress_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -470,7 +494,7 @@ CREATE TABLE "Warning" (
 CREATE TABLE "WarningDescription" (
     "id" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "language" "Language" NOT NULL,
+    "language" "Language" NOT NULL DEFAULT 'TR',
     "warningId" TEXT NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
 
@@ -580,22 +604,25 @@ CREATE INDEX "PostSave_userId_idx" ON "PostSave"("userId");
 CREATE UNIQUE INDEX "PostSave_postId_userId_key" ON "PostSave"("postId", "userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Address_businessId_key" ON "Address"("businessId");
+CREATE INDEX "PostAddress_latitude_longitude_idx" ON "PostAddress"("latitude", "longitude");
 
 -- CreateIndex
-CREATE INDEX "Address_latitude_longitude_idx" ON "Address"("latitude", "longitude");
+CREATE UNIQUE INDEX "PostAddress_postId_language_key" ON "PostAddress"("postId", "language");
 
 -- CreateIndex
-CREATE INDEX "Address_businessId_latitude_longitude_idx" ON "Address"("businessId", "latitude", "longitude");
+CREATE INDEX "EventAddress_latitude_longitude_idx" ON "EventAddress"("latitude", "longitude");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Address_postId_language_type_key" ON "Address"("postId", "language", "type");
+CREATE UNIQUE INDEX "EventAddress_eventId_language_type_key" ON "EventAddress"("eventId", "language", "type");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Address_eventId_language_type_key" ON "Address"("eventId", "language", "type");
+CREATE INDEX "BusinessAddress_latitude_longitude_idx" ON "BusinessAddress"("latitude", "longitude");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Address_businessId_language_type_key" ON "Address"("businessId", "language", "type");
+CREATE INDEX "BusinessAddress_businessId_latitude_longitude_idx" ON "BusinessAddress"("businessId", "latitude", "longitude");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BusinessAddress_businessId_language_key" ON "BusinessAddress"("businessId", "language");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BusinessDescription_businessId_language_key" ON "BusinessDescription"("businessId", "language");
@@ -757,13 +784,13 @@ ALTER TABLE "PostSave" ADD CONSTRAINT "PostSave_postId_fkey" FOREIGN KEY ("postI
 ALTER TABLE "PostSave" ADD CONSTRAINT "PostSave_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Address" ADD CONSTRAINT "Address_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PostAddress" ADD CONSTRAINT "PostAddress_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Address" ADD CONSTRAINT "Address_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EventAddress" ADD CONSTRAINT "EventAddress_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Address" ADD CONSTRAINT "Address_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "BusinessAddress" ADD CONSTRAINT "BusinessAddress_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BusinessDescription" ADD CONSTRAINT "BusinessDescription_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "Business"("id") ON DELETE CASCADE ON UPDATE CASCADE;

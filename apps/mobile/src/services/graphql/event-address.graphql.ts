@@ -1,7 +1,7 @@
 import {gql} from '@apollo/client';
 
-export const ADDRESS_FRAGMENT = gql`
-  fragment AddressFragment on AddressDto {
+export const EVENT_ADDRESS_FRAGMENT = gql`
+  fragment EventAddressFragment on EventAddressDto {
     id
     address
     countryCode
@@ -9,5 +9,6 @@ export const ADDRESS_FRAGMENT = gql`
     type
     latitude
     longitude
+    eventId
   }
 `;

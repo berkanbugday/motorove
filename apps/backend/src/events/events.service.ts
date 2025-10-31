@@ -416,6 +416,7 @@ export class EventsService {
                       type: addr.type,
                       latitude: addr.latitude,
                       longitude: addr.longitude,
+                      countryCode: addr.countryCode,
                     })),
                   },
                 }
@@ -656,6 +657,7 @@ export class EventsService {
                     address: addr.address,
                     language: addr.language,
                     type: addr.type,
+                    countryCode: addr.countryCode,
                     latitude: addr.latitude,
                     longitude: addr.longitude,
                   })),
