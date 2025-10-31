@@ -10,7 +10,7 @@ export class WarningAddress {
   address: string;
 
   @Field(() => String, { nullable: true })
-  country?: string;
+  countryCode?: string;
 
   @Field(() => Language)
   language: Language;

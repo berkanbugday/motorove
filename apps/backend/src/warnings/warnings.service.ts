@@ -166,12 +166,7 @@ export class WarningsService {
               }
             : undefined,
           addresses: {
-            create: addresses.map((addr) => ({
-              address: addr.address,
-              latitude: addr.latitude,
-              longitude: addr.longitude,
-              language: addr.language,
-            })),
+            create: addresses,
           },
         },
         include: {

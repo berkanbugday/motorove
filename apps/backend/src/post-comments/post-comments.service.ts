@@ -36,14 +36,6 @@ export class PostCommentsService {
           createdBy: true,
           updatedBy: true,
           post: true,
-          replies: {
-            where: { isActive: true },
-            include: {
-              createdBy: true,
-              updatedBy: true,
-            },
-            orderBy: { createdAt: 'asc' },
-          },
         },
         orderBy: { createdAt: 'desc' },
         skip: skip || undefined,
@@ -67,20 +59,6 @@ export class PostCommentsService {
           createdBy: true,
           updatedBy: true,
           post: true,
-          parent: {
-            include: {
-              createdBy: true,
-              updatedBy: true,
-            },
-          },
-          replies: {
-            where: { isActive: true },
-            include: {
-              createdBy: true,
-              updatedBy: true,
-            },
-            orderBy: { createdAt: 'asc' },
-          },
         },
       })) as PostComment;
 
@@ -128,39 +106,17 @@ export class PostCommentsService {
         }
       }
 
-      // If parentId is provided, check if the parent comment exists and belongs to the same post
-      if (input.parentId) {
-        const parentPostComment = (await this.prisma.postComment.findFirst({
-          where: { id: input.parentId },
-        })) as PostComment;
-
-        if (!parentPostComment || !parentPostComment.isActive) {
-          throw new NotFoundException(
-            `Parent post comment with ID ${input.parentId} not found`,
-          );
-        }
-
-        if (parentPostComment.postId !== input.postId) {
-          throw new ForbiddenException(
-            'Parent post comment must belong to the same post',
-          );
-        }
-      }
-
       const postComment = (await this.prisma.postComment.create({
         data: {
           content: input.content,
           postId: input.postId,
           createdById: userId,
           updatedById: userId,
-          parentId: input.parentId,
         },
         include: {
           createdBy: true,
           updatedBy: true,
           post: true,
-          parent: true,
-          replies: true,
         },
       })) as PostComment;
 
@@ -227,8 +183,6 @@ export class PostCommentsService {
           createdBy: true,
           updatedBy: true,
           post: true,
-          parent: true,
-          replies: true,
         },
       })) as PostComment;
 
@@ -287,8 +241,6 @@ export class PostCommentsService {
           createdBy: true,
           updatedBy: true,
           post: true,
-          parent: true,
-          replies: true,
         },
       })) as PostComment;
 
@@ -300,18 +252,6 @@ export class PostCommentsService {
   }
 
   private mapToDto(postComment: PostComment): PostCommentDto {
-    const dto = plainToClass(PostCommentDto, postComment);
-
-    // Handle nested replies recursively
-    if (postComment.replies && postComment.replies.length > 0) {
-      dto.replies = postComment.replies.map((reply) => this.mapToDto(reply));
-    }
-
-    // Handle parent comment if exists
-    if (postComment.parent) {
-      dto.parent = this.mapToDto(postComment.parent);
-    }
-
-    return dto;
+    return plainToClass(PostCommentDto, postComment);
   }
 }

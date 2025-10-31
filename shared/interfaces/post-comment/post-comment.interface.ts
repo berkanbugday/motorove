@@ -8,8 +8,5 @@ import { IPost } from "../post";
 export interface IPostComment extends IBase {
   content: string;
   postId: string;
-  parentId?: string | null;
   post?: Partial<IPost>;
-  parent?: Partial<IPostComment> | null;
-  replies?: Partial<IPostComment>[];
 }

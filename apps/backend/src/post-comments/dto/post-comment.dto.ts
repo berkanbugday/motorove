@@ -19,18 +19,4 @@ export class PostCommentDto extends BaseDto implements IPostComment {
   @ValidateNested()
   @Type(() => PostDto)
   post?: PostDto;
-
-  @Field(() => ID, { nullable: true })
-  @IsUUID()
-  parentId?: string;
-
-  @Field(() => PostCommentDto, { nullable: true })
-  @ValidateNested()
-  @Type(() => PostCommentDto)
-  parent?: PostCommentDto;
-
-  @Field(() => [PostCommentDto], { nullable: true })
-  @ValidateNested({ each: true })
-  @Type(() => PostCommentDto)
-  replies?: PostCommentDto[];
 }

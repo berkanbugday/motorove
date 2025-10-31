@@ -1,4 +1,4 @@
-import { Field, ObjectType, ID } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Post } from '../../posts/models/post.model';
 import { BaseModel } from '../../core/models/base.model';
 
@@ -12,13 +12,4 @@ export class PostComment extends BaseModel {
 
   @Field()
   postId: string;
-
-  @Field(() => ID, { nullable: true })
-  parentId?: string;
-
-  @Field(() => PostComment, { nullable: true })
-  parent?: PostComment;
-
-  @Field(() => [PostComment], { nullable: true })
-  replies?: PostComment[];
 }

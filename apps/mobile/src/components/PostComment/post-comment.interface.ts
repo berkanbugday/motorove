@@ -11,7 +11,6 @@ export interface PostComment {
   likeCount: number;
   replyCount: number;
   isLiked: boolean;
-  parentId?: string; // If this is a reply, this will be the parent comment id
 }
 
 export interface PostWithComments {

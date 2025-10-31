@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { ICreateWarningAddress, Language } from '@motorove/shared';
-import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class CreateWarningAddressInput implements ICreateWarningAddress {
@@ -20,7 +20,8 @@ export class CreateWarningAddressInput implements ICreateWarningAddress {
   @IsEnum(Language)
   language: Language;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
+  @IsOptional()
   countryCode?: string;
 }

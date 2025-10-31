@@ -403,7 +403,15 @@ const RNMapComponent: React.FC<RNMapProps> = ({
                 selected={selectedTab === tab}
                 onPress={() => onTabChange?.(tab)}
                 variant="filled"
-                color={selectedTab === tab ? 'dark' : 'light'}
+                color={
+                  selectedTab === tab
+                    ? tab === MapTabType.WARNINGS
+                      ? 'warning'
+                      : tab === MapTabType.HELP_REQUESTS
+                      ? 'error'
+                      : 'dark'
+                    : 'light'
+                }
                 size="large"
                 leadingIcon={
                   tab === MapTabType.BUSINESSES

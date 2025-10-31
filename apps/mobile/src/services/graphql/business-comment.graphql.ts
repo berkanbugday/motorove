@@ -5,7 +5,6 @@ export const BUSINESS_COMMENT_FRAGMENT = gql`
     id
     content
     rating
-    businessId
     createdAt
     updatedAt
     createdBy {

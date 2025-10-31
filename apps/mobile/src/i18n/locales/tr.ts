@@ -839,8 +839,6 @@ export default {
       description_placeholder: 'Uyarı hakkında daha fazla detay verin...',
       warning_location: 'Uyarı Konumu',
       select_location: 'Uyarı Konumunu Seçin',
-      default_location_info:
-        'Konum seçimi yapmazsanız. Mevcut konumunuz seçilecek.',
       select_type_error: 'Lütfen bir uyarı türü seçin',
       location_required_error: 'Lütfen uyarı için bir konum seçin',
       warning_sent: 'Uyarı Gönderildi!',

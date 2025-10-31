@@ -5,7 +5,6 @@ export const POST_COMMENT_FRAGMENT = gql`
     id
     content
     postId
-    parentId
     createdAt
     updatedAt
     createdBy {
@@ -13,18 +12,6 @@ export const POST_COMMENT_FRAGMENT = gql`
       firstName
       lastName
       avatar
-    }
-    replies {
-      id
-      content
-      createdAt
-      updatedAt
-      createdBy {
-        id
-        firstName
-        lastName
-        avatar
-      }
     }
   }
 `;

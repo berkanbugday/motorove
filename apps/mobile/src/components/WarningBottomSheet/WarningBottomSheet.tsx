@@ -6,10 +6,9 @@ import {
   Button,
   Subtitle,
   BodySmall,
-  Icon,
   SelectLocationMap,
 } from '@components';
-import {colors, commonStyles, radius, spacing} from '@theme';
+import {colors, commonStyles, spacing} from '@theme';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
 import {
@@ -173,16 +172,6 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
             iconName="map-pin-filled"
             style={styles.locationButton}
           />
-
-          {/* Location Info */}
-          {location.length > 0 && (
-            <View style={styles.locationInfo}>
-              <Icon name="bell" size={16} color={colors.status.info} />
-              <BodySmall style={styles.locationText}>
-                {t('components.warningBottomSheet.default_location_info')}
-              </BodySmall>
-            </View>
-          )}
         </View>
       </KeyboardAwareScrollView>
 
@@ -259,20 +248,6 @@ const styles = StyleSheet.create({
   },
   locationButton: {
     marginBottom: spacing.md,
-  },
-  locationInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    padding: spacing.md,
-    backgroundColor: colors.status.info + '10',
-    borderRadius: radius.md,
-    marginTop: spacing.sm,
-  },
-  locationText: {
-    flex: 1,
-    color: colors.status.info,
-    fontSize: 12,
   },
   footer: {
     flexDirection: 'row',

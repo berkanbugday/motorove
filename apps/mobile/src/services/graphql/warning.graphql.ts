@@ -14,7 +14,7 @@ export const WARNING_ADDRESS_FRAGMENT = gql`
   fragment WarningAddressFragment on WarningAddressDto {
     id
     address
-    country
+    countryCode
     latitude
     longitude
     language

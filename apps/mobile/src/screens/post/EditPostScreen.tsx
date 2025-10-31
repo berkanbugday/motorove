@@ -111,7 +111,14 @@ export const EditPostScreen = () => {
 
       // Set location if available
       if (post.addresses && post.addresses.length > 0) {
-        setLocation(post.addresses as ICreatePostAddress[]);
+        // Use addresses directly (they should already be clean IAddress objects)
+        const cleanAddresses = post.addresses.map(addr => ({
+          address: addr.address,
+          language: addr.language,
+          latitude: addr.latitude,
+          longitude: addr.longitude,
+        }));
+        setLocation(cleanAddresses);
       }
 
       // Set privacy and group if post is in a group

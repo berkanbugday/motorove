@@ -82,7 +82,7 @@ export class PostsResolver {
 
   @UseGuards(JwtGuard)
   @Mutation(() => PostDto)
-  async update(
+  async updatePost(
     @Args('input') input: UpdatePostInput,
     @Context() context: GqlContext,
   ): Promise<PostDto> {

@@ -390,7 +390,9 @@ export class EventsService {
             startDateTime,
             endDateTime,
             maxParticipants: isPrivate ? null : maxParticipants,
-            isPrivate,
+            isPrivate:
+              (invitedGroupIds && invitedGroupIds?.length > 0) ||
+              (invitedUserIds && invitedUserIds?.length > 0),
             images: processedImages,
             organizedByGroupId: organizedByGroupId || null,
             roadType: roadType as RoadType,

@@ -853,8 +853,6 @@ export default {
       description_placeholder: 'Provide more details about the warning...',
       warning_location: 'Warning Location',
       select_location: 'Select Warning Location',
-      default_location_info:
-        'If you do not select a location, your current location will be selected.',
       select_type_error: 'Please select a warning type',
       location_required_error: 'Please select a location for the warning',
       warning_sent: 'Warning Sent!',

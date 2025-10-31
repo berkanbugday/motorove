@@ -208,7 +208,6 @@ input CreatePostAddressInput {
 
 input CreatePostCommentInput {
   content: String!
-  parentId: ID
   postId: String!
 }
 
@@ -228,7 +227,7 @@ input CreateSupportRequestInput {
 
 input CreateWarningAddressInput {
   address: String!
-  countryCode: String!
+  countryCode: String
   language: Language!
   latitude: Float!
   longitude: Float!
@@ -759,12 +758,12 @@ type Mutation {
   unfollowUser(userId: ID!): ApprovalStatus!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
-  update(input: UpdatePostInput!): PostDto!
   updateBusinessComment(input: UpdateBusinessCommentInput!): BusinessCommentDto!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
   updateGroupMembershipApprovalStatus(input: UpdateGroupMembershipApprovalStatusInput!): GroupMembershipDto!
   updatePassword(input: UpdatePasswordInput!): Boolean!
+  updatePost(input: UpdatePostInput!): PostDto!
   updatePostComment(input: UpdatePostCommentInput!): PostCommentDto!
   updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
   updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
@@ -892,11 +891,8 @@ type PostComment {
   createdById: String!
   id: ID!
   isActive: Boolean!
-  parent: PostComment
-  parentId: ID
   post: Post!
   postId: String!
-  replies: [PostComment!]
   updatedAt: DateTime!
   updatedBy: User!
   updatedById: String!
@@ -909,11 +905,8 @@ type PostCommentDto {
   createdById: String!
   id: ID!
   isActive: Boolean!
-  parent: PostCommentDto
-  parentId: ID
   post: PostDto
   postId: ID!
-  replies: [PostCommentDto!]
   updatedAt: DateTime!
   updatedBy: UserDto!
   updatedById: String!

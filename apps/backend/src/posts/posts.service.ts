@@ -677,7 +677,7 @@ export class PostsService {
     });
 
     const commentsCount = await this.prisma.postComment.count({
-      where: { postId: post.id, parentId: null, isActive: true },
+      where: { postId: post.id, isActive: true },
     });
 
     let isLiked = false;

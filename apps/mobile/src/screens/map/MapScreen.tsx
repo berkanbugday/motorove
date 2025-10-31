@@ -289,8 +289,8 @@ export const MapScreen = () => {
       (business, index) => ({
         id: `business-${business.id}`,
         coordinate: {
-          latitude: business.address.latitude,
-          longitude: business.address.longitude,
+          latitude: business.addresses[0].latitude,
+          longitude: business.addresses[0].longitude,
         },
         business,
         iconName: 'wrench-filled' as IconName,
