@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent overlay
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Semi-transparent overlay
   },
   smallContent: {
     padding: spacing.sm,

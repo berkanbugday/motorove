@@ -65,26 +65,26 @@ import {useTranslation} from '@hooks/useTranslation';
 const recommendedRoutes = [
   {
     id: '1',
-    title: 'Coastal Highway Ride',
-    subtitle: '80km - 2h 15m',
-    image: 'https://picsum.photos/id/88/500/300', // Coast/ocean image
+    title: 'Yapay Zeka ile Rota Planlama',
+    subtitle: 'Yakında',
+    image: 'https://picsum.photos/id/81/500/300', // Coast/ocean image
   },
   {
     id: '2',
-    title: 'Mountain Trail Adventure',
-    subtitle: '65km - 3h 30m',
+    title: 'Yapay Zeka ile Rota Planlama',
+    subtitle: 'Yakında',
     image: 'https://picsum.photos/id/29/500/300', // Mountain image
   },
   {
     id: '3',
-    title: 'City Loop Tour',
-    subtitle: '35km - 1h 45m',
-    image: 'https://picsum.photos/id/43/500/300', // Urban image
+    title: 'Yapay Zeka ile Rota Planlama',
+    subtitle: 'Yakında',
+    image: 'https://picsum.photos/id/62/500/300', // Urban image
   },
   {
     id: '4',
-    title: 'Forest Exploration Route',
-    subtitle: '50km - 2h 10m',
+    title: 'Yapay Zeka ile Rota Planlama',
+    subtitle: 'Yakında',
     image: 'https://picsum.photos/id/11/500/300', // Forest image
   },
 ];
