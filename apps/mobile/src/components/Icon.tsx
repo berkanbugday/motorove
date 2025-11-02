@@ -110,6 +110,12 @@ import ScribbleFilled from '@assets/icons/scribble-filled.svg';
 import TrafficConeFilled from '@assets/icons/traffic-cone-filled.svg';
 import DoNotEnterFilled from '@assets/icons/do-not-enter-filled.svg';
 import RoadFilled from '@assets/icons/road-filled.svg';
+import CarBatteryFilled from '@assets/icons/car-battery-filled.svg';
+import GasPumpFilled from '@assets/icons/gas-pump-filled.svg';
+import LocationQuestionFilled from '@assets/icons/location-question-filled.svg';
+import ScrewdriverFilled from '@assets/icons/screwdriver-filled.svg';
+import TireFilled from '@assets/icons/tire-filled.svg';
+import StethoscopeFilled from '@assets/icons/stethoscope-filled.svg';
 
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
@@ -238,7 +244,13 @@ export type IconName =
   | 'scribble-filled'
   | 'traffic-cone-filled'
   | 'do-not-enter-filled'
-  | 'road-filled';
+  | 'road-filled'
+  | 'car-battery-filled'
+  | 'gas-pump-filled'
+  | 'location-question-filled'
+  | 'screwdriver-filled'
+  | 'tire-filled'
+  | 'stethoscope-filled';
 
 interface IconProps {
   name: IconName;
@@ -493,6 +505,18 @@ export function Icon({
       return <DoNotEnterFilled {...commonProps} />;
     case 'road-filled':
       return <RoadFilled {...commonProps} />;
+    case 'car-battery-filled':
+      return <CarBatteryFilled {...commonProps} />;
+    case 'gas-pump-filled':
+      return <GasPumpFilled {...commonProps} />;
+    case 'location-question-filled':
+      return <LocationQuestionFilled {...commonProps} />;
+    case 'screwdriver-filled':
+      return <ScrewdriverFilled {...commonProps} />;
+    case 'tire-filled':
+      return <TireFilled {...commonProps} />;
+    case 'stethoscope-filled':
+      return <StethoscopeFilled {...commonProps} />;
     default:
       return null;
   }

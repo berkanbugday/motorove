@@ -587,6 +587,7 @@ export default {
       waze: 'Waze',
       yandex_maps: 'Yandex Haritalar',
       sygic: 'Sygic',
+      going: 'Gidiyorum',
     },
 
     // User search screen

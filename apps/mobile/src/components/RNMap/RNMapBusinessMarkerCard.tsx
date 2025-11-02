@@ -395,8 +395,8 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.sm,
-    gap: spacing.sm,
+    marginBottom: spacing.xs,
+    gap: spacing.xs,
   },
   infoTextContainer: {
     flex: 1,

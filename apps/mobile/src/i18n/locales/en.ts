@@ -603,6 +603,7 @@ export default {
       waze: 'Waze',
       yandex_maps: 'Yandex Maps',
       sygic: 'Sygic',
+      going: 'Going',
     },
 
     // User search screen

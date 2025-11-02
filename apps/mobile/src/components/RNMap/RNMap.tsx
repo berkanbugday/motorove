@@ -59,6 +59,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   selectedTab,
   onTabChange,
   showTabs = false,
+  onProfilePress,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showScrollView, setShowScrollView] = useState(false);
@@ -93,7 +94,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
 
       // Animate to expanded width
       Animated.timing(buttonWidth, {
-        toValue: 180,
+        toValue: 200,
         duration: 300,
         useNativeDriver: false,
       }).start();
@@ -470,6 +471,12 @@ const RNMapComponent: React.FC<RNMapProps> = ({
                     handleMarkerPress(marker, originalIndex);
                   }
                 }}
+                onGoingPress={() => {
+                  if (originalIndex !== -1) {
+                    handleMarkerPress(marker, originalIndex);
+                  }
+                }}
+                onProfilePress={onProfilePress}
                 userLocation={userLocation}
                 onClose={() => handleTouchMove()}
               />
@@ -484,6 +491,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       userLocation,
       onDetailScreenOpen,
       handleTouchMove,
+      onProfilePress,
     ],
   );
 

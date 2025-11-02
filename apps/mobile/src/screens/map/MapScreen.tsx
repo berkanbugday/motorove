@@ -2,16 +2,11 @@ import React, {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 import {StyleSheet, View, Platform} from 'react-native';
 import {RNMap, RNMapMarkerItem, MapTabType} from '@components/RNMap';
 import {useGetBusinesses} from '@services/business.service';
-import {
-  IBusiness,
-  ICreateWarning,
-  WarningType,
-  ICreateEmergency,
-  EmergencyType,
-} from '@motorove/shared';
+import {IBusiness, ICreateWarning, ICreateEmergency} from '@motorove/shared';
 import {useGetWarnings, useCreateWarning} from '@services/warning.service';
 import {IconName} from '@components/Icon';
 import {colors} from '@theme/colors';
+import {getWarningIconAndColor} from '@utils/warningUtils';
 import Geolocation from '@react-native-community/geolocation';
 import {Region} from 'react-native-maps';
 import {useTranslation} from '@hooks/useTranslation';
@@ -28,6 +23,7 @@ import {
   useGetEmergencies,
   useCreateEmergency,
 } from '@services/emergency.service';
+import {getEmergencyIconAndColor} from '@utils/emergencyUtils';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -89,106 +85,6 @@ export const MapScreen = () => {
 
   // Fetch emergencies from backend based on map viewport bounds
   const {emergencies} = useGetEmergencies(memoizedMapBounds);
-
-  // Map warning type to icon name and color
-  const getWarningIconAndColor = useCallback(
-    (
-      type: WarningType,
-    ): {iconName: IconName; iconColor: string; pinColor: string} => {
-      switch (type) {
-        case WarningType.RADAR:
-          return {
-            iconName: 'radar-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.POLICE_CHECKPOINT:
-          return {
-            iconName: 'siren-on-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.ACCIDENT:
-          return {
-            iconName: 'car-crash-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.ROAD_CONSTRUCTION:
-          return {
-            iconName: 'person-digging-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.ROAD_CLOSURE:
-          return {
-            iconName: 'do-not-enter-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.DANGEROUS_CURVE:
-          return {
-            iconName: 'scribble-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.SLIPPERY_ROAD:
-          return {
-            iconName: 'road-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.PARKING_PROHIBITED:
-          return {
-            iconName: 'ban-parking-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-        case WarningType.OTHER:
-          return {
-            iconName: 'error-filled',
-            iconColor: colors.neutral.black,
-            pinColor: colors.status.warning,
-          };
-      }
-    },
-    [],
-  );
-
-  // Map emergency type to icon name and color
-  const getEmergencyIconAndColor = useCallback(
-    (
-      type: EmergencyType,
-    ): {iconName: IconName; iconColor: string; pinColor: string} => {
-      switch (type) {
-        case EmergencyType.ACCIDENT:
-          return {
-            iconName: 'car-crash-filled',
-            iconColor: colors.neutral.white,
-            pinColor: colors.status.error,
-          };
-        case EmergencyType.BREAKDOWN:
-          return {
-            iconName: 'wrench-filled',
-            iconColor: colors.neutral.white,
-            pinColor: colors.status.error,
-          };
-        case EmergencyType.MEDICAL:
-          return {
-            iconName: 'bell-exclamation-filled',
-            iconColor: colors.neutral.white,
-            pinColor: colors.status.error,
-          };
-        default:
-          return {
-            iconName: 'error-filled',
-            iconColor: colors.neutral.white,
-            pinColor: colors.status.error,
-          };
-      }
-    },
-    [],
-  );
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = useCallback(
@@ -402,14 +298,7 @@ export const MapScreen = () => {
     });
 
     return combinedMarkers;
-  }, [
-    businesses,
-    warnings,
-    emergencies,
-    selectedBusinessId,
-    getWarningIconAndColor,
-    getEmergencyIconAndColor,
-  ]);
+  }, [businesses, warnings, emergencies, selectedBusinessId]);
 
   // Filter markers based on selected tab
   const markers: RNMapMarkerItem[] = useMemo(() => {
@@ -541,6 +430,14 @@ export const MapScreen = () => {
     });
   }, [createWarning, openBottomSheet, closeBottomSheet, t]);
 
+  // Handle profile press - navigate to profile screen
+  const handleProfilePress = useCallback(
+    (userId: string) => {
+      navigateToScreen(navigation, 'Profile', {userId});
+    },
+    [navigation],
+  );
+
   // Check if filters are active
   const hasActiveFilters = useMemo(() => {
     return (
@@ -592,6 +489,7 @@ export const MapScreen = () => {
         selectedTab={selectedTab}
         onTabChange={handleTabChange}
         showTabs={true}
+        onProfilePress={handleProfilePress}
       />
     </View>
   );

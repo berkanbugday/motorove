@@ -96,6 +96,9 @@ export interface RNMapProps {
   selectedTab?: MapTabType;
   onTabChange?: (tab: MapTabType) => void;
   showTabs?: boolean;
+
+  // Profile navigation
+  onProfilePress?: (userId: string) => void;
 }
 
 /**

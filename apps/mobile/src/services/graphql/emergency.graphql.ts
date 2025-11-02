@@ -31,6 +31,11 @@ export const EMERGENCY_FRAGMENT = gql`
     createdAt
     updatedAt
     createdById
+    createdBy {
+      id
+      firstName
+      lastName
+    }
     descriptions {
       ...EmergencyDescriptionFragment
     }

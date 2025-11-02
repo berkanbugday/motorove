@@ -1,12 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {IEmergency} from '@motorove/shared';
+import {IEmergency, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
-import {Title, Caption, Icon, Button, BodySmall, Chip} from '@components';
+import {Title, Caption, Icon, Button, BodySmall, IconName} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
 import {calculateDistance} from '@utils/locationUtils';
+import {getEmergencyIcon} from '@utils/emergencyUtils';
+import {useLanguage} from '@contexts/LanguageContext';
+import {formatDistanceToNow} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
 
 /**
  * Emergency marker card props
@@ -20,7 +24,8 @@ export interface RNMapEmergencyMarkerCardProps {
     latitude: number;
     longitude: number;
   };
-  onHelpPress?: () => void;
+  onGoingPress?: () => void;
+  onProfilePress?: (userId: string) => void;
 }
 
 /**
@@ -29,8 +34,18 @@ export interface RNMapEmergencyMarkerCardProps {
  */
 export const RNMapEmergencyMarkerCard: React.FC<
   RNMapEmergencyMarkerCardProps
-> = ({emergency, onClose, style, userLocation, onHelpPress}) => {
+> = ({
+  emergency,
+  onClose,
+  style,
+  userLocation,
+  onGoingPress,
+  onProfilePress,
+}) => {
   const {t} = useTranslation();
+  const {language} = useLanguage();
+  // Title expansion state
+  const [isTitleExpanded, setIsTitleExpanded] = useState(false);
   // Description expansion state
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   // Address expansion state
@@ -40,27 +55,29 @@ export const RNMapEmergencyMarkerCard: React.FC<
 
   // Calculate straight-line distance
   useEffect(() => {
-    if (!userLocation) {
+    if (
+      !userLocation ||
+      !emergency.addresses ||
+      emergency.addresses.length === 0
+    ) {
       setDistance(null);
       return;
     }
 
     const straightLineDistance = calculateDistance(userLocation, {
-      latitude: emergency.latitude,
-      longitude: emergency.longitude,
+      latitude: emergency.addresses[0].latitude,
+      longitude: emergency.addresses[0].longitude,
     });
     setDistance(straightLineDistance.toFixed(1));
-  }, [userLocation, emergency.latitude, emergency.longitude]);
+  }, [userLocation, emergency.addresses]);
 
   return (
     <View style={[styles.container, style]}>
-      {/* Emergency Type Badge - Top Left */}
+      {/* Status Badge - Top Left */}
       <View style={styles.statusBadge}>
-        <Chip
-          label={EnumUtils.convertEmergencyType(emergency.type)}
-          variant="filled"
-          color="error"
-          size="small"
+        <Icon
+          name={getEmergencyIcon(emergency.type) as IconName}
+          color={colors.neutral.white}
         />
       </View>
 
@@ -79,30 +96,43 @@ export const RNMapEmergencyMarkerCard: React.FC<
 
       {/* Emergency Icon and Title */}
       <View style={styles.headerRow}>
-        <Icon name="siren-on-filled" size={24} color={colors.status.error} />
-        <Title weight="bold" style={styles.emergencyTitle}>
-          {emergency.title}
-        </Title>
+        <TouchableOpacity
+          onPress={() => {
+            setIsTitleExpanded(prev => !prev);
+          }}>
+          <Title weight="bold" numberOfLines={isTitleExpanded ? undefined : 1}>
+            {EnumUtils.convertEmergencyType(emergency.type)}
+          </Title>
+        </TouchableOpacity>
       </View>
 
-      {/* Emergency Type */}
-      <View style={styles.typeRow}>
-        <BodySmall weight="semiBold" color={colors.status.error}>
-          {EnumUtils.convertEmergencyType(emergency.type)}
-        </BodySmall>
+      <View style={styles.emergencyInfoContainer}>
+        <Icon name="clock" size={14} />
+        <Caption color={colors.neutral.grey} style={styles.emergencyInfoText}>
+          {formatDistanceToNow(new Date(emergency.createdAt), {
+            addSuffix: true,
+            locale:
+              language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+          })}
+        </Caption>
       </View>
 
       {/* Address with Distance */}
-      {emergency.address && (
+      {emergency.addresses && emergency.addresses.length > 0 && (
         <TouchableOpacity
           style={styles.infoRow}
           onPress={() => {
             setIsAddressExpanded(prev => !prev);
           }}>
-          <Icon name="map-pin-filled" size={16} color={colors.status.error} />
+          <Icon name="map-pin-filled" size={16} />
           <View style={styles.infoTextContainer}>
             <BodySmall numberOfLines={isAddressExpanded ? undefined : 1}>
-              {emergency.address}
+              {
+                emergency.addresses.find(
+                  address =>
+                    address.language.toLowerCase() === language.toLowerCase(),
+                )?.address
+              }
             </BodySmall>
             {distance && (
               <Caption color={colors.neutral.grey}>
@@ -114,41 +144,66 @@ export const RNMapEmergencyMarkerCard: React.FC<
       )}
 
       {/* Description */}
-      {emergency.description && (
+      {emergency.descriptions && emergency.descriptions.length > 0 ? (
         <TouchableOpacity
           style={styles.infoRow}
           onPress={() => {
             setIsDescriptionExpanded(prev => !prev);
           }}>
-          <Icon name="file-filled" size={16} color={colors.status.error} />
+          <Icon name="comment-filled" size={16} />
           <View style={styles.infoTextContainer}>
-            <BodySmall numberOfLines={isDescriptionExpanded ? undefined : 2}>
-              {emergency.description}
+            <BodySmall numberOfLines={isDescriptionExpanded ? undefined : 1}>
+              {
+                emergency.descriptions.find(
+                  description => description.language === Language.TR,
+                )?.description
+              }
+            </BodySmall>
+          </View>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.infoRow}>
+          <Icon name="comment-filled" size={16} />
+          <View style={styles.infoTextContainer}>
+            <BodySmall numberOfLines={isDescriptionExpanded ? undefined : 1}>
+              -
+            </BodySmall>
+          </View>
+        </View>
+      )}
+
+      {/* Created By */}
+      {emergency.createdBy && (
+        <TouchableOpacity
+          style={styles.infoRow}
+          onPress={() => {
+            if (onProfilePress && emergency.createdBy?.id) {
+              onProfilePress(emergency.createdBy.id);
+            }
+          }}
+          disabled={!onProfilePress || !emergency.createdBy?.id}>
+          <Icon name="user-filled" size={16} />
+          <View style={styles.infoTextContainer}>
+            <BodySmall>
+              {emergency.createdBy.firstName} {emergency.createdBy.lastName}
             </BodySmall>
           </View>
         </TouchableOpacity>
       )}
 
-      {/* Help Button */}
-      {onHelpPress && (
-        <Button
-          title={t('screens.map.offer_help')}
-          variant="primary"
-          shape="round"
-          size="medium"
-          iconName="user-plus-filled"
-          iconPosition="left"
-          style={styles.helpButton}
-          onPress={onHelpPress}
-        />
-      )}
-
-      {/* Emergency Info */}
-      <View style={styles.emergencyInfoContainer}>
-        <Icon name="bell-exclamation-filled" size={14} color={colors.status.error} />
-        <Caption color={colors.neutral.grey} style={styles.emergencyInfoText}>
-          {t('screens.map.emergency_info')}
-        </Caption>
+      <View style={styles.actionButtonsContainer}>
+        {onGoingPress && (
+          <Button
+            title={t('screens.map.going')}
+            variant="dark"
+            shape="round"
+            size="small"
+            iconName="check-filled"
+            iconPosition="left"
+            style={{flex: 1}}
+            onPress={onGoingPress}
+          />
+        )}
       </View>
     </View>
   );
@@ -156,16 +211,25 @@ export const RNMapEmergencyMarkerCard: React.FC<
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.sm,
+    marginTop: spacing.lg,
     marginHorizontal: spacing.sm,
     ...commonStyles.container,
     borderRadius: radius.lg,
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
-    ...getShadow('medium'),
+    ...getShadow('small'),
     borderLeftWidth: 4,
     borderLeftColor: colors.status.error,
+  },
+  statusBadge: {
+    position: 'absolute',
+    left: spacing.md,
+    top: -spacing.lg,
+    backgroundColor: colors.status.error,
+    padding: spacing.sm,
+    borderRadius: radius.round,
+    zIndex: 10,
   },
   closeButton: {
     position: 'absolute',
@@ -174,46 +238,35 @@ const styles = StyleSheet.create({
     ...getShadow('small'),
     zIndex: 10,
   },
-  statusBadge: {
-    position: 'absolute',
-    left: spacing.md,
-    top: -spacing.sm,
-    zIndex: 10,
-  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  emergencyTitle: {
-    flex: 1,
-    color: colors.status.error,
-  },
-  typeRow: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.xs,
+    marginRight: spacing.md,
   },
   infoRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-    gap: spacing.sm,
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+    gap: spacing.xs,
   },
   infoTextContainer: {
     flex: 1,
   },
-  helpButton: {
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: spacing.sm,
-    marginBottom: spacing.sm,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
   },
   emergencyInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    marginTop: spacing.sm,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
+    marginBottom: spacing.sm,
   },
   emergencyInfoText: {
     flex: 1,
