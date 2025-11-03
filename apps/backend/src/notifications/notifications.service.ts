@@ -11,7 +11,11 @@ import { UserSetting } from 'src/user-settings/models/user-setting.model';
 import { Notification } from './models/notification.model';
 import { I18nService } from '../core/i18n/i18n.service';
 import { Language } from '../enums/models/language.enum';
-import { formatDatesInData } from '@motorove/shared';
+import {
+  formatDatesInData,
+  translateEnumsInData,
+  selectLanguageSpecificFields,
+} from '@motorove/shared';
 
 interface UserSettingValidationResult {
   userSetting?: UserSetting | null;
@@ -502,9 +506,19 @@ export class NotificationsService {
         preferredLanguage,
       );
 
-      // Translate enum types in formatted data
-      const dataWithTranslatedEnums = this.translateEnumsInData(
+      // Select language-specific address and description from arrays
+      // Use default language if preferredLanguage is not provided
+      const withLanguageSpecificFields = selectLanguageSpecificFields(
         formattedData,
+        preferredLanguage || Language.TR,
+      );
+
+      // Convert enum values to translation keys
+      const withEnumKeys = translateEnumsInData(withLanguageSpecificFields);
+
+      // Translate enum translation keys to actual translated strings
+      const dataWithTranslatedEnums = this.translateEnumKeysToStrings(
+        withEnumKeys,
         preferredLanguage,
       );
 
@@ -648,10 +662,11 @@ export class NotificationsService {
   }
 
   /**
-   * Translate enum types in notification data
-   * Handles both translation keys (e.g., "enums.emergencyType.accident") and enum values (e.g., "ACCIDENT")
+   * Translate enum translation keys to actual translated strings
+   * This uses the shared translateEnumsInData to convert enum values to keys,
+   * then translates those keys using I18nService
    */
-  private translateEnumsInData(
+  private translateEnumKeysToStrings(
     data: Record<string, any> | null,
     preferredLanguage?: Language,
   ): Record<string, any> | null {
@@ -663,26 +678,19 @@ export class NotificationsService {
     enumFields.forEach((field) => {
       if (translatedData[field] && typeof translatedData[field] === 'string') {
         const value = translatedData[field];
-        let translationKey: string;
 
-        // Check if it's already a translation key (starts with "enums.")
+        // Check if it's a translation key (starts with "enums.")
         if (value.startsWith('enums.')) {
-          translationKey = value;
-        } else {
-          // It's an enum value, construct the translation key
-          const enumValue = value.toLowerCase();
-          translationKey = `enums.${field}.${enumValue}`;
-        }
+          // Translate the enum translation key to actual translated string
+          const translated = this.i18nService.translate(
+            value,
+            preferredLanguage,
+          );
 
-        // Translate the enum value
-        const translated = this.i18nService.translate(
-          translationKey,
-          preferredLanguage,
-        );
-
-        // Only update if translation is different from the key (translation was successful)
-        if (translated !== translationKey) {
-          translatedData[field] = translated;
+          // Only update if translation is different from the key (translation was successful)
+          if (translated !== value) {
+            translatedData[field] = translated;
+          }
         }
       }
     });

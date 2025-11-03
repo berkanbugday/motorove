@@ -1442,6 +1442,10 @@ export default {
         body: '{{userName}} liked your route: {{routeName}}',
       },
     },
+    emergency: {
+      title: 'Emergency',
+      body: '{{fullName}} reported an {{emergencyType}} emergency. {{description}} {{address}} ',
+    },
     common: {
       view_details: 'View Details',
       dismiss: 'Dismiss',

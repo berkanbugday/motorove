@@ -1431,6 +1431,10 @@ export default {
         body: '{{userName}} rotanızı beğendi: {{routeName}}',
       },
     },
+    emergency: {
+      title: 'Acil Durum',
+      body: '{{fullName}} tarafından {{emergencyType}} acil durumu bildirildi. {{description}} {{address}} ',
+    },
     common: {
       view_details: 'Detayları Görüntüle',
       dismiss: 'Kapat',

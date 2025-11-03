@@ -30,7 +30,13 @@ import {
 } from '@services/notification.service';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
-import {formatDatesInData, INotification, Language} from '@motorove/shared';
+import {
+  formatDatesInData,
+  translateEnumsInData,
+  selectLanguageSpecificFields,
+  INotification,
+  Language,
+} from '@motorove/shared';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
 import {FlashList} from '@shopify/flash-list';
@@ -177,15 +183,43 @@ export const NotificationScreen = () => {
     // Only show mark as read action if notification is unread
     const actualLeftActions = item.read ? [] : leftActions;
 
-    // Format dates in data according to preferred language
+    // Format notification data: translate enums, select language-specific fields, and format dates
     const formattedData: Record<string, any> | {} = (() => {
       try {
-        return (
-          formatDatesInData(
-            item.data as Record<string, any>,
-            language.toUpperCase() as Language,
-          ) || {}
-        );
+        const userLanguage = language.toUpperCase() as Language;
+
+        // First format dates in data
+        const withFormattedDates =
+          formatDatesInData(item.data as Record<string, any>, userLanguage) ||
+          {};
+
+        // Select language-specific address and description from arrays
+        const withLanguageSpecificFields =
+          selectLanguageSpecificFields(withFormattedDates, userLanguage) || {};
+
+        // Convert enum values to translation keys
+        const withEnumKeys = translateEnumsInData(withLanguageSpecificFields);
+
+        // Translate enum translation keys to actual translated strings (like backend does)
+        const enumFields = ['emergencyType', 'warningType'];
+        const finalData = {...withEnumKeys};
+
+        enumFields.forEach(field => {
+          if (finalData[field] && typeof finalData[field] === 'string') {
+            const value = finalData[field];
+            // Check if it's a translation key (starts with "enums.")
+            if (value.startsWith('enums.')) {
+              // Translate the enum value
+              const translated = t(value);
+              // Only update if translation is different from the key (translation was successful)
+              if (translated !== value) {
+                finalData[field] = translated;
+              }
+            }
+          }
+        });
+
+        return finalData;
       } catch (error) {
         console.warn('Failed to parse notification data:', error);
         return {};
