@@ -119,11 +119,14 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
     commentToDelete.current = {id: commentId, postId};
     openBottomSheet({
       title: t('screens.postComment.delete_comment'),
-      closeButtonPosition: 'top-right',
+      showCloseButton: false,
       enableGestureControl: false,
       content: (
-        <View>
-          <Body>{t('screens.postComment.delete_comment_confirmation')}</Body>
+        <View style={styles.bottomSheetContent}>
+          <Body style={styles.bottomSheetMessage}>
+            {t('screens.postComment.delete_comment_confirmation')}
+          </Body>
+
           <View style={styles.bottomSheetButtons}>
             <Button
               title={t('common.cancel')}
@@ -498,6 +501,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderRadius: 0,
     borderBottomColor: colors.secondary.main,
+  },
+  bottomSheetContent: {
+    padding: spacing.md,
+  },
+  bottomSheetMessage: {
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   bottomSheetButtons: {
     flexDirection: 'row',

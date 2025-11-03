@@ -238,7 +238,7 @@ export default {
       no_comments_yet: 'Henüz yorum yok',
       delete_comment: 'Yorumu Sil',
       delete_comment_confirmation:
-        'Bu yorumu silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+        'Bu yorumu silmek istediğinize emin misiniz?\n Bu işlem geri alınamaz.',
       comment_created: 'Yorum başarıyla oluşturuldu!',
       comment_updated: 'Yorum başarıyla güncellendi!',
       comment_removed: 'Yorum başarıyla kaldırıldı!',
