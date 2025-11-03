@@ -4,9 +4,10 @@ import { EmergenciesResolver } from './emergencies.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter.module';
+import { QueueModule } from '../core/queue/queue.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, ProfanityFilterModule],
+  imports: [PrismaModule, AuthModule, ProfanityFilterModule, QueueModule],
   providers: [EmergenciesResolver, EmergenciesService],
   exports: [EmergenciesService],
 })

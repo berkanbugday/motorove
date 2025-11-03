@@ -471,11 +471,6 @@ const RNMapComponent: React.FC<RNMapProps> = ({
                     handleMarkerPress(marker, originalIndex);
                   }
                 }}
-                onGoingPress={() => {
-                  if (originalIndex !== -1) {
-                    handleMarkerPress(marker, originalIndex);
-                  }
-                }}
                 onProfilePress={onProfilePress}
                 userLocation={userLocation}
                 onClose={() => handleTouchMove()}

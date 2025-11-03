@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import { IsEnum, IsOptional, ValidateNested, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { IEmergency } from '@motorove/shared';
 import { EmergencyType } from '../../enums/models/emergency-type.enum';
@@ -7,6 +7,7 @@ import { ApprovalStatus } from '../../enums/models/approval-status.enum';
 import { EmergencyDescriptionDto } from './emergency-description.dto';
 import { EmergencyAddressDto } from './emergency-address.dto';
 import { BaseDto } from '../../core/models/base.dto';
+import { GroupDto } from '../../groups/dto/group.dto';
 
 @ObjectType()
 export class EmergencyDto extends BaseDto implements IEmergency {
@@ -28,4 +29,11 @@ export class EmergencyDto extends BaseDto implements IEmergency {
   @ValidateNested({ each: true })
   @Type(() => EmergencyAddressDto)
   addresses: EmergencyAddressDto[];
+
+  @Field(() => [GroupDto], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => GroupDto)
+  selectedGroups?: GroupDto[];
 }

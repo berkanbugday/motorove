@@ -148,6 +148,7 @@ input CreateEmergencyDescriptionInput {
 input CreateEmergencyInput {
   addresses: [CreateEmergencyAddressInput!]!
   descriptions: [CreateEmergencyDescriptionInput!]
+  selectedGroupIds: [String!]
   type: EmergencyType!
 }
 
@@ -315,6 +316,7 @@ type EmergencyDto {
   descriptions: [EmergencyDescriptionDto!]
   id: ID!
   isActive: Boolean!
+  selectedGroups: [GroupDto!]
   status: ApprovalStatus!
   type: EmergencyType!
   updatedAt: DateTime!
@@ -896,6 +898,7 @@ enum NotificationStatus {
 enum NotificationType {
   ADMIN_CHANGED_GROUP_MEMBER_ROLE
   ADMIN_REMOVED_GROUP_MEMBER
+  EMERGENCY
   EVENT_CANCELLED
   EVENT_INVITATION
   EVENT_INVITATION_REMINDER
@@ -914,6 +917,7 @@ enum NotificationType {
   USER_FOLLOW_REQUEST_ACCEPTED
   USER_JOINED_GROUP
   USER_LEAVE_GROUP
+  WARNING
 }
 
 type Post {

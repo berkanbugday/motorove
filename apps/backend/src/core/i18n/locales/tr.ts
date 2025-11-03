@@ -98,11 +98,38 @@ export const trTranslations = {
         body: '{{userName}} rotanızı beğendi: {{routeName}}',
       },
     },
+    emergency: {
+      title: 'Acil Durum',
+      body: '{{fullName}} tarafından {{emergencyType}} acil durumu bildirildi.',
+    },
     common: {
       view_details: 'Detayları Görüntüle',
       dismiss: 'Kapat',
       accept: 'Kabul Et',
       reject: 'Reddet',
+    },
+  },
+  enums: {
+    warningType: {
+      radar: 'Hız Radarı',
+      police_checkpoint: 'Polis Kontrol Noktası',
+      accident: 'Kaza',
+      road_construction: 'Yol Çalışması',
+      road_closure: 'Yol Kapalı',
+      dangerous_curve: 'Tehlikeli Viraj',
+      slippery_road: 'Kaygan Yol',
+      parking_prohibited: 'Park Yasağı',
+      other: 'Diğer',
+    },
+    emergencyType: {
+      accident: 'Kaza',
+      breakdown: 'Arıza',
+      medical: 'Tıbbi Acil Durum',
+      fuel_shortage: 'Yakıt Bitti',
+      tire_problem: 'Lastik Sorunu',
+      battery_dead: 'Akü Bitti',
+      lost: 'Kayboldum/Mahsur Kaldım',
+      other: 'Diğer',
     },
   },
 };

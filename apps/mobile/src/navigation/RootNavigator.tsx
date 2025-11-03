@@ -1,6 +1,10 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef, useCallback} from 'react';
 import {View, Image, ActivityIndicator} from 'react-native';
-import {NavigationContainer, LinkingOptions} from '@react-navigation/native';
+import {
+  NavigationContainer,
+  LinkingOptions,
+  NavigationContainerRef,
+} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {AuthNavigator} from './stacks/AuthNavigator';
@@ -11,6 +15,7 @@ import {RootStackParamList} from '@navigation/types/navigationTypes';
 import {AccountSetupScreen} from '@screens/auth/AccountSetupScreen';
 import {NotificationPermission} from '@motorove/shared';
 import {NotificationPermissionScreen} from '@screens/notification/NotificationPermissionScreen';
+import {notificationService} from '@services/notification.service';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -31,6 +36,8 @@ const linking: LinkingOptions<RootStackParamList> = {
  */
 export function RootNavigator() {
   const {user, accessToken, isInitializing} = useAuth();
+  const navigationRef =
+    useRef<NavigationContainerRef<RootStackParamList>>(null);
   const {
     checkFirstTimeUser,
     isFirstTime,
@@ -45,6 +52,13 @@ export function RootNavigator() {
   }, [checkFirstTimeUser]);
 
   const isAuthenticated = Boolean(user) && Boolean(accessToken);
+
+  // Set navigation ref for notification service when navigation is ready
+  const handleNavigationReady = useCallback(() => {
+    if (navigationRef.current && isAuthenticated) {
+      notificationService.service.setNavigationRef(navigationRef.current);
+    }
+  }, [isAuthenticated]);
   // Show loading screen with logo when checking auth, session revival, or first time status
   if (isInitializing || firstTimeLoading) {
     return (
@@ -70,7 +84,10 @@ export function RootNavigator() {
   }
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer
+      ref={navigationRef}
+      linking={linking}
+      onReady={handleNavigationReady}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {isAuthenticated && !isFirstTime ? (
           // User is authenticated, decide whether to show main app or account setup

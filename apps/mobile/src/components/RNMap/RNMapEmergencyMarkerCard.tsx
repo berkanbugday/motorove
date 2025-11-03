@@ -24,7 +24,6 @@ export interface RNMapEmergencyMarkerCardProps {
     latitude: number;
     longitude: number;
   };
-  onGoingPress?: () => void;
   onProfilePress?: (userId: string) => void;
 }
 
@@ -34,14 +33,7 @@ export interface RNMapEmergencyMarkerCardProps {
  */
 export const RNMapEmergencyMarkerCard: React.FC<
   RNMapEmergencyMarkerCardProps
-> = ({
-  emergency,
-  onClose,
-  style,
-  userLocation,
-  onGoingPress,
-  onProfilePress,
-}) => {
+> = ({emergency, onClose, style, userLocation, onProfilePress}) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   // Title expansion state
@@ -104,17 +96,6 @@ export const RNMapEmergencyMarkerCard: React.FC<
             {EnumUtils.convertEmergencyType(emergency.type)}
           </Title>
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.emergencyInfoContainer}>
-        <Icon name="clock" size={14} />
-        <Caption color={colors.neutral.grey} style={styles.emergencyInfoText}>
-          {formatDistanceToNow(new Date(emergency.createdAt), {
-            addSuffix: true,
-            locale:
-              language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
-          })}
-        </Caption>
       </View>
 
       {/* Address with Distance */}
@@ -191,19 +172,15 @@ export const RNMapEmergencyMarkerCard: React.FC<
         </TouchableOpacity>
       )}
 
-      <View style={styles.actionButtonsContainer}>
-        {onGoingPress && (
-          <Button
-            title={t('screens.map.going')}
-            variant="dark"
-            shape="round"
-            size="small"
-            iconName="check-filled"
-            iconPosition="left"
-            style={{flex: 1}}
-            onPress={onGoingPress}
-          />
-        )}
+      {/* Emergency Info - Time Since Creation */}
+      <View style={styles.emergencyInfoContainer}>
+        <Icon name="clock" size={14} />
+        <Caption color={colors.neutral.grey} style={styles.emergencyInfoText}>
+          {formatDistanceToNow(new Date(emergency.createdAt), {
+            addSuffix: true,
+            locale: language.toLowerCase() === 'tr' ? tr : enUS,
+          })}
+        </Caption>
       </View>
     </View>
   );
@@ -242,31 +219,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    marginBottom: spacing.xs,
-    marginRight: spacing.md,
+    marginBottom: spacing.sm,
+    marginRight: spacing.xl,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.xs,
-    gap: spacing.xs,
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
   },
   infoTextContainer: {
     flex: 1,
-  },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
   },
   emergencyInfoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
   },
   emergencyInfoText: {
     flex: 1,

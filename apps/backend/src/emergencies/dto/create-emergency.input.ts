@@ -1,5 +1,11 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { ValidateNested, IsEnum, IsOptional } from 'class-validator';
+import {
+  ValidateNested,
+  IsEnum,
+  IsOptional,
+  IsArray,
+  IsString,
+} from 'class-validator';
 import { EmergencyType } from '../../enums/models/emergency-type.enum';
 import { ICreateEmergency } from '@motorove/shared';
 import { Type } from 'class-transformer';
@@ -22,4 +28,10 @@ export class CreateEmergencyInput implements ICreateEmergency {
   @Type(() => CreateEmergencyDescriptionInput)
   @IsOptional()
   descriptions?: CreateEmergencyDescriptionInput[];
+
+  @Field(() => [String], { nullable: true })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  selectedGroupIds?: string[];
 }

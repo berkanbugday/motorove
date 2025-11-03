@@ -6,4 +6,5 @@ export interface ICreateEmergency {
   type: EmergencyType;
   descriptions?: ICreateEmergencyDescription[];
   addresses: ICreateEmergencyAddress[];
+  selectedGroupIds?: string[];
 }

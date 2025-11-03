@@ -21,6 +21,7 @@ import {
 import {INotification, ICreateDeviceToken} from '@motorove/shared/interfaces';
 import {useCallback, useState} from 'react';
 import {useTranslation} from '@hooks/useTranslation';
+import {NavigationContainerRef} from '@react-navigation/native';
 
 const DEVICE_TOKEN_KEY = 'fcm_token';
 
@@ -41,6 +42,8 @@ class NotificationService {
   private deviceToken: string | null = null;
   private isInitialized = false;
   private messageUnsubscribe: (() => void) | null = null;
+  private notificationOpenedUnsubscribe: (() => void) | null = null;
+  private navigationRef: NavigationContainerRef<any> | null = null;
 
   // Private constructor to enforce singleton pattern
   private constructor() {}
@@ -142,6 +145,36 @@ class NotificationService {
     }
   }
 
+  /**
+   * Set navigation reference for handling notification press events
+   */
+  setNavigationRef(ref: NavigationContainerRef<any>): void {
+    this.navigationRef = ref;
+  }
+
+  /**
+   * Navigate to NotificationScreen when notification is pressed
+   */
+  private navigateToNotificationScreen(): void {
+    if (this.navigationRef?.isReady()) {
+      try {
+        // Navigate to Main stack, then to Notification screen
+        this.navigationRef.navigate('Main', {
+          screen: 'Notification',
+        } as any);
+      } catch (error) {
+        loggingService.error(
+          'Failed to navigate to NotificationScreen:',
+          error,
+        );
+      }
+    } else {
+      loggingService.debug(
+        'Navigation ref not ready, cannot navigate to NotificationScreen',
+      );
+    }
+  }
+
   setupMessageHandlers(): void {
     const messagingInstance = getMessaging(getApp());
 
@@ -157,12 +190,46 @@ class NotificationService {
         text1: remoteMessage.notification?.title,
         text2: remoteMessage.notification?.body,
         visibilityTime: 5000,
+        onPress: () => {
+          // Navigate to NotificationScreen when toast is pressed
+          this.navigateToNotificationScreen();
+        },
       });
       return Promise.resolve();
     });
 
-    // Store unsubscribe function
+    // Handle notification opened when app is in background
+    const notificationOpenedUnsubscribe =
+      messagingInstance.onNotificationOpenedApp(async remoteMessage => {
+        loggingService.debug(
+          'Notification opened from background:',
+          remoteMessage,
+        );
+        this.navigateToNotificationScreen();
+      });
+
+    // Handle notification opened when app is closed/quit
+    messagingInstance
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage) {
+          loggingService.debug(
+            'Notification opened from quit state:',
+            remoteMessage,
+          );
+          // Small delay to ensure navigation is ready
+          setTimeout(() => {
+            this.navigateToNotificationScreen();
+          }, 1000);
+        }
+      })
+      .catch(error => {
+        loggingService.error('Error getting initial notification:', error);
+      });
+
+    // Store unsubscribe functions
     this.messageUnsubscribe = unsubscribe;
+    this.notificationOpenedUnsubscribe = notificationOpenedUnsubscribe;
   }
 
   // Cleanup message handlers
@@ -172,6 +239,11 @@ class NotificationService {
       this.messageUnsubscribe();
       this.messageUnsubscribe = null;
     }
+    if (this.notificationOpenedUnsubscribe) {
+      this.notificationOpenedUnsubscribe();
+      this.notificationOpenedUnsubscribe = null;
+    }
+    this.navigationRef = null;
   }
 
   // Enable or disable in-app messaging

@@ -100,8 +100,8 @@ export class GroupsService {
       }
 
       return await Promise.all(
-        filteredGroups.map(async (group) =>
-          this.mapToDto(group as Group, authToken),
+        filteredGroups.map(
+          async (group) => await this.mapToDto(group as Group, authToken),
         ),
       );
     } catch (error) {
@@ -183,8 +183,8 @@ export class GroupsService {
       }
 
       return await Promise.all(
-        filteredGroups.map(async (group) =>
-          this.mapToDto(group as Group, authToken),
+        filteredGroups.map(
+          async (group) => await this.mapToDto(group as Group, authToken),
         ),
       );
     } catch (error) {
@@ -239,6 +239,11 @@ export class GroupsService {
       const isPendingMember =
         !!membership && membership.status === ApprovalStatus.PENDING;
       const isOwner = group.createdById === userId;
+
+      console.log('isMember', isMember);
+      console.log('isAdmin', isAdmin);
+      console.log('isPendingMember', isPendingMember);
+      console.log('isOwner', isOwner);
 
       return {
         ...groupDto,
@@ -330,7 +335,7 @@ export class GroupsService {
         return group;
       });
 
-      return this.mapToDto(group as Group, authToken);
+      return await this.mapToDto(group as Group, authToken);
     } catch (error) {
       this.logger.error(`Failed to create group`, error);
       throw error;
@@ -428,7 +433,7 @@ export class GroupsService {
         },
       });
 
-      return this.mapToDto(updatedGroup as Group, authToken);
+      return await this.mapToDto(updatedGroup as Group, authToken);
     } catch (error) {
       this.logger.error(`Failed to update group`, error);
       throw error;

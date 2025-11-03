@@ -52,6 +52,8 @@ enum NotificationType {
   EVENT_REMINDER
   EVENT_CANCELLED
   EVENT_UPDATED
+  EMERGENCY
+  WARNING
 }
 
 enum NotificationStatus {
@@ -472,10 +474,11 @@ model Group {
   isActive    Boolean  @default(true)
 
   // Relations
-  memberships     GroupMembership[]
-  posts           Post[]
-  events          Event[]
-  organizedEvents Event[]           @relation("EventOrganizedByGroup")
+  memberships         GroupMembership[]
+  posts               Post[]
+  events              Event[]
+  organizedEvents     Event[]           @relation("EventOrganizedByGroup")
+  selectedEmergencies Emergency[]       @relation("EmergencySelectedGroups")
 
   @@index([cityId])
   @@index([createdById])
@@ -960,8 +963,9 @@ model Emergency {
   status ApprovalStatus @default(ACCEPTED)
 
   // Relations
-  descriptions EmergencyDescription[]
-  addresses    EmergencyAddress[]
+  descriptions   EmergencyDescription[]
+  addresses      EmergencyAddress[]
+  selectedGroups Group[]                @relation("EmergencySelectedGroups")
 
   // Base model fields
   createdById String

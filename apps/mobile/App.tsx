@@ -26,8 +26,7 @@ import BottomSheetProvider from '@components/BottomSheet/BottomSheetProvider';
 import NotificationPermissionHandler from '@components/PermissionHandler/NotificationPermissionHandler';
 
 // Import i18n configuration
-import './src/i18n';
-import {useTranslation} from 'react-i18next';
+import i18n from './src/i18n/i18n';
 
 // Initialize Sentry if DSN is provided
 if (
@@ -48,7 +47,6 @@ if (
 
 function App(): React.JSX.Element {
   const [isStorageReady, setIsStorageReady] = useState(false);
-  const {t} = useTranslation();
 
   // Initialize services
   useEffect(() => {
@@ -104,7 +102,7 @@ function App(): React.JSX.Element {
         <ApolloProvider client={apolloClient}>
           <LanguageProvider>
             <NetworkStatusBar
-              offlineMessage={t('errors.network.no_internet_connection')}
+              offlineMessage={i18n.t('errors.network.no_internet_connection')}
             />
             <NotificationPermissionHandler />
             <ToastMessage.Provider>

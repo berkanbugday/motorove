@@ -8,9 +8,11 @@ import {
   BodySmall,
   SelectLocationMap,
 } from '@components';
+import {GroupSelectorBottomSheetContent} from '@components/GroupSelector/GroupSelector';
 import {colors, commonStyles, spacing} from '@theme';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
+import {useGetJoinedGroups} from '@services/group.service';
 import {
   EmergencyType,
   IBaseCreateAddress,
@@ -40,6 +42,17 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
   );
   const [location, setLocation] = useState<ICreateEmergencyAddress[]>([]);
   const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [showGroupModal, setShowGroupModal] = useState<boolean>(false);
+
+  // Fetch groups for the selector
+  const {
+    groups,
+    loading: groupsLoading,
+    error: groupsError,
+    refetch: refetchGroups,
+    loadMore: loadMoreGroups,
+  } = useGetJoinedGroups();
 
   const handleLocationSelect = useCallback(
     (selectedAddresses: IBaseCreateAddress[]) => {
@@ -52,6 +65,14 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
 
   const handleCloseLocationModal = useCallback(() => {
     setShowLocationModal(false);
+  }, []);
+
+  const handleGroupSelect = useCallback((selectedGroupIds: string[]) => {
+    setSelectedGroups(selectedGroupIds);
+  }, []);
+
+  const handleCloseGroupModal = useCallback(() => {
+    setShowGroupModal(false);
   }, []);
 
   const handleSendEmergency = useCallback(async () => {
@@ -77,10 +98,11 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
       type: selectedType,
       addresses: location,
       descriptions: description ? [description] : [],
+      selectedGroupIds: selectedGroups.length > 0 ? selectedGroups : undefined,
     };
 
     onSubmit(createEmergencyInput);
-  }, [selectedType, description, location, onSubmit, t]);
+  }, [selectedType, description, location, selectedGroups, onSubmit, t]);
 
   return (
     <View style={styles.container}>
@@ -161,6 +183,30 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
             style={styles.locationButton}
           />
         </View>
+
+        {/* Group Selection */}
+        <View style={styles.section}>
+          <Subtitle style={styles.sectionTitle}>
+            {t('components.emergencyBottomSheet.notify_groups')}
+          </Subtitle>
+
+          {/* Select Groups Button */}
+          <Button
+            title={
+              selectedGroups.length > 0
+                ? t('components.groupSelector.selected_count', {
+                    current: selectedGroups.length,
+                    max: 10,
+                  })
+                : t('components.groupSelector.add_group')
+            }
+            onPress={() => setShowGroupModal(true)}
+            variant={selectedGroups.length > 0 ? 'secondary' : 'outline'}
+            shape="round"
+            iconName="users-filled"
+            style={styles.locationButton}
+          />
+        </View>
       </KeyboardAwareScrollView>
 
       {/* Action Buttons */}
@@ -189,11 +235,59 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
         animationType="slide"
         onRequestClose={handleCloseLocationModal}
         presentationStyle="pageSheet">
-        <SelectLocationMap
-          initialAddress={location[0]}
-          onLocationSelect={handleLocationSelect}
-          onClose={handleCloseLocationModal}
-        />
+        <>
+          <View style={styles.modalHeader}>
+            <Button
+              title={t('common.close')}
+              onPress={handleCloseLocationModal}
+              variant="text"
+              size="small"
+            />
+            <Subtitle style={styles.modalTitle}>
+              {t('components.emergencyBottomSheet.emergency_location')}
+            </Subtitle>
+            <View style={styles.modalHeaderSpacer} />
+          </View>
+
+          <SelectLocationMap
+            initialAddress={location[0]}
+            onLocationSelect={handleLocationSelect}
+            onClose={handleCloseLocationModal}
+          />
+        </>
+      </Modal>
+
+      {/* Group Selection Modal */}
+      <Modal
+        visible={showGroupModal}
+        animationType="slide"
+        onRequestClose={handleCloseGroupModal}
+        presentationStyle="pageSheet">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Button
+              title={t('common.close')}
+              onPress={handleCloseGroupModal}
+              variant="text"
+              size="small"
+            />
+            <Subtitle style={styles.modalTitle}>
+              {t('components.groupSelector.title')}
+            </Subtitle>
+            <View style={styles.modalHeaderSpacer} />
+          </View>
+          <GroupSelectorBottomSheetContent
+            groups={groups}
+            selectedGroups={selectedGroups}
+            loading={groupsLoading}
+            error={groupsError}
+            refetch={refetchGroups}
+            loadMore={loadMoreGroups}
+            onSelectionChange={handleGroupSelect}
+            disabled={false}
+            maxGroups={3}
+          />
+        </View>
       </Modal>
     </View>
   );
@@ -246,5 +340,26 @@ const styles = StyleSheet.create({
     borderTopColor: colors.secondary.main,
     paddingTop: spacing.md,
     paddingBottom: spacing.lg,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.neutral.white,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+  },
+  modalTitle: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  modalHeaderSpacer: {
+    width: 60,
   },
 });

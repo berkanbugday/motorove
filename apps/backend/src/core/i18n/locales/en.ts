@@ -98,11 +98,38 @@ export const enTranslations = {
         body: '{{userName}} liked your route: {{routeName}}',
       },
     },
+    emergency: {
+      title: 'Emergency',
+      body: '{{fullName}} reported an {{emergencyType}} emergency',
+    },
     common: {
       view_details: 'View Details',
       dismiss: 'Dismiss',
       accept: 'Accept',
       reject: 'Reject',
+    },
+  },
+  enums: {
+    warningType: {
+      radar: 'Speed Radar',
+      police_checkpoint: 'Police Checkpoint',
+      accident: 'Accident',
+      road_construction: 'Road Construction',
+      road_closure: 'Road Closure',
+      dangerous_curve: 'Dangerous Curve',
+      slippery_road: 'Slippery Road',
+      parking_prohibited: 'Parking Prohibited',
+      other: 'Other',
+    },
+    emergencyType: {
+      accident: 'Accident',
+      breakdown: 'Breakdown',
+      medical: 'Medical Emergency',
+      fuel_shortage: 'Fuel Shortage',
+      tire_problem: 'Tire Problem',
+      battery_dead: 'Battery Dead',
+      lost: 'Lost/Stranded',
+      other: 'Other',
     },
   },
 };

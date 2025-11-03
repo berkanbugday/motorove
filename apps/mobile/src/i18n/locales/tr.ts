@@ -679,6 +679,8 @@ export default {
         'Bildirimler için bildirim izni gereklidir. Bildirim izni verin.',
       open_settings: 'Ayarları Aç',
       events: 'Etkinlikler',
+      warnings: 'Uyarılar',
+      emergencies: 'Acil Durumlar',
     },
 
     userFollowing: {
@@ -843,21 +845,20 @@ export default {
       select_type_error: 'Lütfen bir uyarı türü seçin',
       location_required_error: 'Lütfen uyarı için bir konum seçin',
       warning_sent: 'Uyarı Gönderildi!',
-      riders_notified: 'Yakındaki sürücüler uyarı hakkında bilgilendirildi.',
       send_error: 'Uyarı gönderilemedi. Lütfen tekrar deneyin.',
     },
     emergencyBottomSheet: {
       select_emergency_type: 'Acil Durum Türünü Seçin',
       description: 'Açıklama',
-      description_placeholder: 'Durum hakkında daha fazla detay verin...',
+      description_placeholder:
+        'Durum hakkında daha fazla detay verin... (İletişim bilgilerinizi içerebilir)',
       emergency_location: 'Acil Durum Konumu',
       select_location: 'Acil Durum Konumunu Seçin',
       select_type_error: 'Lütfen bir acil durum türü seçin',
       location_required_error: 'Lütfen acil durum için bir konum seçin',
       emergency_sent: 'Acil Durum Gönderildi!',
-      riders_notified:
-        'Yakındaki sürücüler acil durum hakkında bilgilendirildi.',
       send_error: 'Acil durum gönderilemedi. Lütfen tekrar deneyin.',
+      notify_groups: 'Gruplara Bildirim Gönder',
     },
     locationPermissionOverlay: {
       open_settings: 'Ayarları Aç',
@@ -1235,6 +1236,8 @@ export default {
       event_reminder: 'Etkinlik Hatırlatma',
       event_cancelled: 'Etkinlik İptal Edildi',
       event_updated: 'Etkinlik Güncellendi',
+      emergency: 'Acil Durum',
+      warning: 'Uyarı',
     },
     supportCategory: {
       account: 'Hesap Sorunu',

@@ -27,4 +27,8 @@ export enum NotificationType {
   EVENT_REMINDER = "EVENT_REMINDER",
   EVENT_CANCELLED = "EVENT_CANCELLED",
   EVENT_UPDATED = "EVENT_UPDATED",
+  // Emergency notifications
+  EMERGENCY = "EMERGENCY",
+  // Warning notifications
+  WARNING = "WARNING",
 }

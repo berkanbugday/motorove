@@ -5,7 +5,6 @@ import { CreateNotificationInput } from './dto/create-notification.input';
 import { NotificationStatus } from '../enums/models/notification-status.enum';
 import { NotificationDto } from './dto/notification.dto';
 import { plainToClass } from 'class-transformer';
-import * as admin from 'firebase-admin';
 import { CreateNotificationsInput } from './dto/create-notifications.input';
 import { NotificationPermission } from '../enums/models/notification-permission.enum';
 import { UserSetting } from 'src/user-settings/models/user-setting.model';
@@ -503,26 +502,97 @@ export class NotificationsService {
         preferredLanguage,
       );
 
+      // Translate enum types in formatted data
+      const dataWithTranslatedEnums = this.translateEnumsInData(
+        formattedData,
+        preferredLanguage,
+      );
+
+      // Convert all data values to strings (Firebase requirement)
+      const stringifiedData = this.stringifyNotificationData(
+        dataWithTranslatedEnums,
+      );
+
       const translatedTitle = this.i18nService.translate(
         `notifications.${title}`,
         preferredLanguage,
-        formattedData || {},
+        dataWithTranslatedEnums || {},
       );
       const translatedBody = this.i18nService.translate(
         `notifications.${body}`,
         preferredLanguage,
-        formattedData || {},
+        dataWithTranslatedEnums || {},
       );
       const result = await this.firebaseService.sendMulticastPushNotification(
         tokens,
         translatedTitle,
         translatedBody,
-        formattedData || {},
+        stringifiedData,
       );
 
-      const isSuccess = notificationId
-        ? (result as admin.messaging.BatchResponse).successCount > 0
-        : true;
+      if (!result) {
+        this.logger.warn(
+          `Push notification failed: no result returned for user ${userId}`,
+        );
+        if (notificationId && senderUserId) {
+          await this.updateNotificationStatus(
+            notificationId,
+            NotificationStatus.FAILED,
+            senderUserId,
+          );
+        } else if (whereClause && senderUserId) {
+          await this.updateNotificationStatusBulk(
+            whereClause,
+            NotificationStatus.FAILED,
+            senderUserId,
+          );
+        }
+        return;
+      }
+
+      // Handle invalid tokens - remove them from database
+      const invalidTokens: string[] = [];
+      if (result.responses) {
+        result.responses.forEach((response, index) => {
+          if (!response.success && response.error) {
+            const errorCode = response.error.code;
+            // These error codes indicate the token is invalid and should be removed
+            if (
+              errorCode === 'messaging/invalid-registration-token' ||
+              errorCode === 'messaging/registration-token-not-registered' ||
+              errorCode === 'messaging/invalid-apns-credentials'
+            ) {
+              invalidTokens.push(tokens[index]);
+              this.logger.warn(
+                `Invalid token detected for user ${userId}: ${errorCode}`,
+              );
+            } else {
+              this.logger.warn(
+                `Token failed for user ${userId}: ${errorCode} - ${response.error.message}`,
+              );
+            }
+          }
+        });
+      }
+
+      // Remove invalid tokens from database
+      if (invalidTokens.length > 0) {
+        await this.prisma.deviceToken.updateMany({
+          where: {
+            userId,
+            token: { in: invalidTokens },
+          },
+          data: {
+            isActive: false,
+          },
+        });
+        this.logger.log(
+          `Removed ${invalidTokens.length} invalid token(s) for user ${userId}`,
+        );
+      }
+
+      // Check if at least one notification succeeded
+      const isSuccess = result.successCount > 0;
 
       if (isSuccess) {
         if (notificationId && senderUserId) {
@@ -539,7 +609,7 @@ export class NotificationsService {
           );
         }
         this.logger.log(
-          `Push notification sent successfully to user ${userId}`,
+          `Push notification sent successfully to user ${userId} (${result.successCount}/${tokens.length} succeeded)`,
         );
       } else {
         if (notificationId && senderUserId) {
@@ -555,7 +625,9 @@ export class NotificationsService {
             senderUserId,
           );
         }
-        this.logger.warn(`Push notification failed to send to user ${userId}`);
+        this.logger.warn(
+          `Push notification failed to send to user ${userId} (${result.failureCount}/${tokens.length} failed)`,
+        );
       }
     } catch (error) {
       this.logger.error(`Failed to send notification to user ${userId}`, error);
@@ -573,5 +645,87 @@ export class NotificationsService {
         );
       }
     }
+  }
+
+  /**
+   * Translate enum types in notification data
+   * Handles both translation keys (e.g., "enums.emergencyType.accident") and enum values (e.g., "ACCIDENT")
+   */
+  private translateEnumsInData(
+    data: Record<string, any> | null,
+    preferredLanguage?: Language,
+  ): Record<string, any> | null {
+    if (!data) return null;
+
+    const translatedData = { ...data };
+    const enumFields = ['emergencyType', 'warningType'];
+
+    enumFields.forEach((field) => {
+      if (translatedData[field] && typeof translatedData[field] === 'string') {
+        const value = translatedData[field];
+        let translationKey: string;
+
+        // Check if it's already a translation key (starts with "enums.")
+        if (value.startsWith('enums.')) {
+          translationKey = value;
+        } else {
+          // It's an enum value, construct the translation key
+          const enumValue = value.toLowerCase();
+          translationKey = `enums.${field}.${enumValue}`;
+        }
+
+        // Translate the enum value
+        const translated = this.i18nService.translate(
+          translationKey,
+          preferredLanguage,
+        );
+
+        // Only update if translation is different from the key (translation was successful)
+        if (translated !== translationKey) {
+          translatedData[field] = translated;
+        }
+      }
+    });
+
+    return translatedData;
+  }
+
+  /**
+   * Convert all notification data values to strings
+   * Firebase requires all data values to be strings
+   * Objects and arrays are JSON stringified
+   */
+  private stringifyNotificationData(
+    data: Record<string, any> | null,
+  ): Record<string, string> {
+    if (!data) return {};
+
+    const stringifiedData: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value === null || value === undefined) {
+        stringifiedData[key] = '';
+      } else if (typeof value === 'string') {
+        stringifiedData[key] = value;
+      } else if (typeof value === 'number' || typeof value === 'boolean') {
+        stringifiedData[key] = String(value);
+      } else if (typeof value === 'object') {
+        // Objects and arrays are JSON stringified
+        try {
+          stringifiedData[key] = JSON.stringify(value);
+        } catch (error) {
+          this.logger.warn(
+            `Failed to stringify data value for key ${key}:`,
+            error,
+          );
+          stringifiedData[key] = '';
+        }
+      } else {
+        // Fallback for any other types
+        stringifiedData[key] = String(value);
+      }
+    }
+
+    return stringifiedData;
   }
 }

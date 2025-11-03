@@ -12,7 +12,12 @@ import { FilterEmergencyInput } from './dto/filter-emergency.input';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { plainToClass } from 'class-transformer';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
-import { Language } from '@motorove/shared';
+import {
+  Language,
+  NotificationChannel,
+  NotificationType,
+} from '@motorove/shared';
+import { QueueService } from '../core/queue/queue.service';
 
 @Injectable()
 export class EmergenciesService {
@@ -21,6 +26,7 @@ export class EmergenciesService {
   constructor(
     private prisma: PrismaService,
     private profanityFilterService: ProfanityFilterService,
+    private queueService: QueueService,
   ) {}
 
   /**
@@ -173,6 +179,13 @@ export class EmergenciesService {
           },
         },
         addresses: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -202,7 +215,7 @@ export class EmergenciesService {
     try {
       this.logger.log(`Creating emergency for user ${currentUserId}`);
 
-      const { type, descriptions, addresses } = input;
+      const { type, descriptions, addresses, selectedGroupIds } = input;
 
       // Create emergency with related data
       const emergency = await this.prisma.emergency.create({
@@ -221,6 +234,12 @@ export class EmergenciesService {
           addresses: {
             create: addresses,
           },
+          // Handle selected groups if provided
+          selectedGroups: selectedGroupIds?.length
+            ? {
+                connect: selectedGroupIds.map((id) => ({ id })),
+              }
+            : undefined,
         },
         include: {
           descriptions: {
@@ -229,8 +248,65 @@ export class EmergenciesService {
             },
           },
           addresses: true,
+          createdBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       });
+
+      if (selectedGroupIds?.length) {
+        // Get all members from invited groups with ACCEPTED status
+        const groupMembers = await this.prisma.groupMembership.findMany({
+          where: {
+            groupId: {
+              in: selectedGroupIds,
+            },
+            status: ApprovalStatus.ACCEPTED,
+            isActive: true,
+          },
+          select: {
+            userId: true,
+          },
+        });
+
+        const uniqueUserIds = [
+          ...new Set(groupMembers.map((member) => member.userId)),
+        ];
+
+        const groupMemberIds = uniqueUserIds.filter(
+          (id) => id !== currentUserId,
+        );
+
+        if (groupMemberIds.length) {
+          await this.queueService.addBulkNotificationJob(
+            {
+              userIds: groupMemberIds,
+              title: 'emergency.title',
+              body: 'emergency.body',
+              type: NotificationType.EMERGENCY,
+              channels: NotificationChannel.PUSH,
+              data: {
+                emergencyType: type,
+                fullName: `${emergency.createdBy.firstName} ${emergency.createdBy.lastName}`,
+                addresses: emergency.addresses.map((addr) => ({
+                  address: addr.address,
+                  language: addr.language,
+                })),
+                descriptions:
+                  emergency.descriptions?.map((desc) => ({
+                    description: desc.description,
+                    language: desc.language,
+                  })) || [],
+              } as Record<string, any>,
+            },
+            currentUserId,
+          );
+        }
+      }
 
       return plainToClass(EmergencyDto, emergency);
     } catch (error) {

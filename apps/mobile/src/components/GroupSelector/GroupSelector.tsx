@@ -31,7 +31,7 @@ interface GroupItemProps {
   disabled?: boolean;
 }
 
-interface BottomSheetContentProps {
+export interface GroupSelectorBottomSheetContentProps {
   groups: IGroup[];
   selectedGroups: string[];
   loading: boolean;
@@ -119,7 +119,9 @@ const GroupItem: React.FC<GroupItemProps> = ({
   );
 };
 
-const BottomSheetContent: React.FC<BottomSheetContentProps> = ({
+export const GroupSelectorBottomSheetContent: React.FC<
+  GroupSelectorBottomSheetContentProps
+> = ({
   groups,
   selectedGroups,
   loading,
@@ -316,7 +318,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
   const openGroupSelectionSheet = useCallback(() => {
     openBottomSheet({
       content: (
-        <BottomSheetContent
+        <GroupSelectorBottomSheetContent
           groups={groups}
           selectedGroups={localSelectedGroups}
           loading={loading}

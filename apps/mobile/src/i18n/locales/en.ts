@@ -693,6 +693,8 @@ export default {
         'Notification permission is required for notifications. Grant notification permission.',
       open_settings: 'Open Settings',
       events: 'Events',
+      warnings: 'Warnings',
+      emergencies: 'Emergencies',
     },
 
     userFollowing: {
@@ -857,20 +859,20 @@ export default {
       select_type_error: 'Please select a warning type',
       location_required_error: 'Please select a location for the warning',
       warning_sent: 'Warning Sent!',
-      riders_notified: 'Nearby riders have been notified about the warning.',
       send_error: 'Failed to send warning. Please try again.',
     },
     emergencyBottomSheet: {
       select_emergency_type: 'Select Emergency Type',
       description: 'Description',
-      description_placeholder: 'Provide more details about the situation...',
+      description_placeholder:
+        'Provide more details about the situation... (Contact information can be included)',
       emergency_location: 'Emergency Location',
       select_location: 'Select Emergency Location',
       select_type_error: 'Please select an emergency type',
       location_required_error: 'Please select a location for the emergency',
       emergency_sent: 'Emergency Sent!',
-      riders_notified: 'Nearby riders have been notified about the emergency.',
       send_error: 'Failed to send emergency alert. Please try again.',
+      notify_groups: 'Notify Groups',
     },
     locationPermissionOverlay: {
       open_settings: 'Open Settings',
@@ -1245,6 +1247,8 @@ export default {
       event_reminder: 'Event Reminder',
       event_cancelled: 'Event Cancelled',
       event_updated: 'Event Updated',
+      emergency: 'Emergency',
+      warning: 'Warning',
     },
     supportCategory: {
       account: 'Account Issue',

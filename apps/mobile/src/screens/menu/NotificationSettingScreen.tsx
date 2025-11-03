@@ -98,6 +98,14 @@ export const NotificationSettingScreen = () => {
         NotificationType.EVENT_UPDATED,
       ],
     },
+    {
+      title: t('screens.notificationSetting.warnings'),
+      types: [NotificationType.WARNING],
+    },
+    {
+      title: t('screens.notificationSetting.emergencies'),
+      types: [NotificationType.EMERGENCY],
+    },
   ];
 
   // Render different UI based on permission status
