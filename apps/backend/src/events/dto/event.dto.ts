@@ -181,6 +181,12 @@ export class EventDto implements IEvent {
   @IsOptional()
   invitedGroups?: GroupDto[];
 
+  @Field(() => [UserDto], { nullable: true })
+  @ValidateNested({ each: true })
+  @Type(() => UserDto)
+  @IsOptional()
+  invitedUsers?: UserDto[];
+
   @Field(() => [EventParticipantDto], { nullable: true })
   @ValidateNested({ each: true })
   @Type(() => EventParticipantDto)

@@ -124,13 +124,21 @@ export class EventsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          organizedByGroup: true,
+          organizedByGroup: {
+            include: {
+              city: true,
+            },
+          },
           participants: {
             where: { status: EventParticipantStatus.JOINED },
             include: { createdBy: true },
           },
           addresses: true,
-          invitedGroups: true,
+          invitedGroups: {
+            include: {
+              city: true,
+            },
+          },
           invitations: {
             where: {
               isActive: true,
@@ -221,19 +229,34 @@ export class EventsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          organizedByGroup: true,
+          organizedByGroup: {
+            include: {
+              city: true,
+            },
+          },
           participants: {
             where: { status: EventParticipantStatus.JOINED },
             include: { createdBy: true },
           },
           addresses: true,
-          invitedGroups: true,
+          invitedGroups: {
+            include: {
+              city: true,
+            },
+          },
           invitations: {
             where: {
               isActive: true,
             },
             include: {
-              invitee: true,
+              invitee: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatar: true,
+                },
+              },
             },
           },
         },
@@ -281,7 +304,11 @@ export class EventsService {
           event: {
             include: {
               createdBy: true,
-              organizedByGroup: true,
+              organizedByGroup: {
+                include: {
+                  city: true,
+                },
+              },
             },
           },
         },
@@ -296,31 +323,23 @@ export class EventsService {
         `Found ${invitations.length} invitations for user ${currentUserId}`,
       );
 
-      if (invitations.length > 0) {
-        await Promise.all(
-          invitations.map(async (invitation) => {
-            if (invitation.event.images && authToken) {
-              try {
-                invitation.event.images[0] =
-                  await this.storageService.getSignedUrl(
-                    invitation.event.images[0],
-                    3600,
-                    authToken,
-                  );
-              } catch (error) {
-                this.logger.error(
-                  `Error getting signed URL for avatar: ${error.message}`,
-                );
-              }
-            }
-          }),
-        );
-      }
-
       return await Promise.all(
-        invitations.map((invitation) =>
-          plainToClass(EventInvitationDto, invitation),
-        ),
+        invitations.map(async (invitation) => {
+          const invitationDto = plainToClass(EventInvitationDto, invitation);
+
+          if (invitation.event.images && authToken) {
+            const url = await this.storageService.getSignedUrl(
+              invitation.event.images[0],
+              3600,
+              authToken,
+            );
+            const { isCensored } =
+              await this.imageCensorFilterService.checkImageCensorContent(url);
+            invitationDto.event.images = [{ url: url, isCensored }];
+          }
+
+          return invitationDto;
+        }),
       );
     } catch (error) {
       this.logger.error('Error finding invitations:', error);
@@ -444,9 +463,17 @@ export class EventsService {
           include: {
             createdBy: true,
             updatedBy: true,
-            organizedByGroup: true,
+            organizedByGroup: {
+              include: {
+                city: true,
+              },
+            },
             addresses: true,
-            invitedGroups: true,
+            invitedGroups: {
+              include: {
+                city: true,
+              },
+            },
             invitations: {
               include: {
                 invitee: true,
@@ -623,87 +650,159 @@ export class EventsService {
         throw new NotFoundException(`Event with id ${id} not found`);
       }
 
-      const event = await this.prisma.event.update({
-        where: { id, isActive: true },
-        data: {
-          title,
-          description,
-          eventType,
-          status,
-          startDateTime,
-          endDateTime,
-          maxParticipants,
-          isPrivate,
-          images: processedImages,
-          roadType: roadType as RoadType,
-          difficultyLevel: difficultyLevel as DifficultyLevel,
-          routeDescription,
-          restStops,
-          campingInfo,
-          equipmentChecklist,
-          instructorInfo,
-          topicsCovered,
-          experienceLevel: experienceLevel as ExperienceLevel,
-          price: price ? parseFloat(price) : null,
-          currency,
-          // Handle organized by fields
-          organizedByGroupId: organizedByGroupId || null,
-          updatedById: userId,
-          updatedAt: new Date(),
-          // Handle addresses update - delete old ones if new ones provided
-          addresses: addresses?.length
-            ? {
-                deleteMany: {}, // Delete old addresses
-                createMany: {
-                  data: addresses.map((addr) => ({
-                    address: addr.address,
-                    language: addr.language,
-                    type: addr.type,
-                    countryCode: addr.countryCode,
-                    latitude: addr.latitude,
-                    longitude: addr.longitude,
-                  })),
-                },
-              }
-            : undefined,
-          // Handle invited groups if provided
-          invitedGroups: invitedGroupIds?.length
-            ? {
-                disconnect: currentEvent.invitedGroups?.map((group) => ({
-                  id: group.id,
-                })) as { id: string }[],
-                connect: invitedGroupIds.map((id) => ({ id })),
-              }
-            : undefined,
-          // Handle invited users through invitations if provided
-          invitations: invitedUserIds?.length
-            ? {
-                deleteMany: {
+      // Use transaction to ensure atomicity
+      const event = await this.prisma.$transaction(async (tx) => {
+        // Update the event
+        const updatedEvent = await tx.event.update({
+          where: { id, isActive: true },
+          data: {
+            title,
+            description,
+            eventType,
+            status,
+            startDateTime,
+            endDateTime,
+            maxParticipants,
+            isPrivate,
+            images: processedImages,
+            roadType: roadType as RoadType,
+            difficultyLevel: difficultyLevel as DifficultyLevel,
+            routeDescription,
+            restStops,
+            campingInfo,
+            equipmentChecklist,
+            instructorInfo,
+            topicsCovered,
+            experienceLevel: experienceLevel as ExperienceLevel,
+            price: price ? parseFloat(price) : null,
+            currency,
+            // Handle organized by fields
+            organizedByGroupId: organizedByGroupId || null,
+            updatedById: userId,
+            updatedAt: new Date(),
+            // Handle addresses update - delete old ones if new ones provided
+            addresses: addresses?.length
+              ? {
+                  deleteMany: {}, // Delete old addresses
+                  createMany: {
+                    data: addresses.map((addr) => ({
+                      address: addr.address,
+                      language: addr.language,
+                      type: addr.type,
+                      countryCode: addr.countryCode,
+                      latitude: addr.latitude,
+                      longitude: addr.longitude,
+                    })),
+                  },
+                }
+              : undefined,
+            // Always remove all existing invited groups and add new ones
+            invitedGroups: {
+              disconnect: currentEvent.invitedGroups?.map((group) => ({
+                id: group.id,
+              })) as { id: string }[],
+              ...(invitedGroupIds?.length
+                ? { connect: invitedGroupIds.map((id) => ({ id })) }
+                : {}),
+            },
+            // Always remove all existing invitations and add new ones
+            invitations: {
+              updateMany: {
+                where: {
                   eventId: id,
+                  isActive: true,
                 },
-                createMany: {
-                  data: invitedUserIds.map((inviteeId) => ({
-                    inviteeId: inviteeId,
-                    inviterId: userId, // The user updating the event
-                    createdById: userId,
-                  })),
+                data: {
+                  isActive: false,
                 },
-              }
-            : undefined,
-        },
-        include: {
-          createdBy: true,
-          updatedBy: true,
-          organizedByGroup: true,
-          addresses: true,
-          participants: true,
-          invitedGroups: true,
-          invitations: {
-            include: {
-              invitee: true,
+              },
+              ...(invitedUserIds?.length
+                ? {
+                    createMany: {
+                      data: invitedUserIds.map((inviteeId) => ({
+                        inviteeId: inviteeId,
+                        createdById: userId,
+                      })),
+                    },
+                  }
+                : {}),
             },
           },
-        },
+          include: {
+            createdBy: true,
+            updatedBy: true,
+            organizedByGroup: {
+              include: {
+                city: true,
+              },
+            },
+            addresses: true,
+            invitedGroups: {
+              include: {
+                city: true,
+              },
+            },
+            invitations: {
+              include: {
+                invitee: true,
+              },
+            },
+          },
+        });
+
+        // If event status is UPCOMING and there are invited groups, create invitations for all group members
+        if (status === EventStatus.UPCOMING && invitedGroupIds?.length) {
+          this.logger.log(
+            `Creating invitations for group members in event ${updatedEvent.id} after update`,
+          );
+
+          // Get all members from invited groups with ACCEPTED status
+          const groupMembers = await tx.groupMembership.findMany({
+            where: {
+              groupId: {
+                in: invitedGroupIds,
+              },
+              group: {
+                isActive: true,
+              },
+              status: ApprovalStatus.ACCEPTED,
+              isActive: true,
+            },
+            select: {
+              userId: true,
+            },
+          });
+
+          // Extract unique user IDs (in case a user is in multiple invited groups)
+          const uniqueUserIds = [
+            ...new Set(groupMembers.map((member) => member.userId)),
+          ];
+
+          // If organized by group, don't filter out the event creator
+          // If not organized by group, filter out the event creator to avoid self-invitation
+          const inviteeIds = organizedByGroupId
+            ? uniqueUserIds
+            : uniqueUserIds.filter((id) => id !== userId);
+
+          if (inviteeIds.length > 0) {
+            // Create invitations for all group members
+            await tx.eventInvitation.createMany({
+              data: inviteeIds.map((inviteeId) => ({
+                eventId: updatedEvent.id,
+                inviteeId: inviteeId,
+                createdById: userId,
+                status: ApprovalStatus.PENDING,
+              })),
+              skipDuplicates: true, // Skip if invitation already exists
+            });
+
+            this.logger.log(
+              `Created ${inviteeIds.length} invitations for group members in event ${updatedEvent.id}`,
+            );
+          }
+        }
+
+        return updatedEvent;
       });
 
       return this.mapToDto(event as Event, userId, authToken);
@@ -1091,6 +1190,15 @@ export class EventsService {
         ? this.profanityFilterService.filterText(event.topicsCovered)
         : event.topicsCovered;
 
+      // Process invited users from invitations
+      const processedInvitedUsers =
+        event.invitations.map((invitation) => {
+          return invitation.invitee;
+        }) || [];
+
+      // Process invited groups (no avatar processing needed for groups)
+      const processedInvitedGroups = event.invitedGroups || [];
+
       // Create base DTO with transformed data
       const eventWithExtras = {
         ...event,
@@ -1104,6 +1212,8 @@ export class EventsService {
         topicsCovered: filteredTopicsCovered,
         images: images,
         participants: processedParticipants,
+        invitedUsers: processedInvitedUsers,
+        invitedGroups: processedInvitedGroups,
         isParticipating,
         participationStatus,
         participantsCount,

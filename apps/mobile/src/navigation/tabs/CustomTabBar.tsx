@@ -6,6 +6,7 @@ import {
   Dimensions,
   Animated,
   Text,
+  Platform,
 } from 'react-native';
 import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -90,147 +91,161 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          height: 60 + insets.bottom,
-          paddingBottom: insets.bottom,
-        },
-      ]}>
-      {/* Animated indicator that moves between tabs */}
-      <Animated.View
+    <View style={styles.shadowWrapper}>
+      <View
         style={[
-          // styles.slidingIndicator,
+          styles.container,
           {
-            transform: [
-              {
-                translateX: indicatorPosition.interpolate({
-                  inputRange: Array.from(
-                    {length: state.routes.length},
-                    (_, i) => i,
-                  ),
-                  outputRange: Array.from(
-                    {length: state.routes.length},
-                    (_, i) => i * tabWidth + tabWidth / 2 - 30,
-                  ),
-                }),
-              },
-            ],
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom,
           },
-        ]}
-      />
-
-      {state.routes.map((route, index) => {
-        const {options} = descriptors[route.key];
-        const isFocused = state.index === index;
-        const animatedValue = animatedValues[index];
-        const badge = options.tabBarBadge;
-
-        const scale = animatedValue.interpolate({
-          inputRange: [0, 1],
-          outputRange: [1, 1.1],
-        });
-
-        const textColor = animatedValue.interpolate({
-          inputRange: [0, 1],
-          outputRange: [colors.neutral.black, colors.primary.main],
-        });
-
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, {merge: true});
-          }
-        };
-
-        const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
-        };
-
-        return (
-          <TouchableOpacity
-            key={route.key}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? {selected: true} : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={route.name + '-tab'}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={styles.tabButton}>
-            <View style={styles.iconContainer}>
-              <Animated.View
-                style={{
-                  transform: [{scale}],
-                }}>
-                <Icon
-                  name={getIconName(route.name, isFocused)}
-                  color={isFocused ? colors.primary.main : colors.neutral.black}
-                  size={24}
-                />
-              </Animated.View>
-
-              {badge !== undefined && (
-                <View
-                  style={[
-                    typeof badge === 'number' && badge > 99
-                      ? styles.badgeContainerSmall
-                      : styles.badgeContainer,
-                    {
-                      backgroundColor: colors.primary.main,
-                    },
-                  ]}>
-                  <Text style={styles.badgeText}>
-                    {typeof badge === 'number' && badge > 99 ? '' : badge}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <Animated.Text
-              style={[
-                styles.tabLabel,
+        ]}>
+        {/* Animated indicator that moves between tabs */}
+        <Animated.View
+          style={[
+            // styles.slidingIndicator,
+            {
+              transform: [
                 {
-                  color: textColor,
-                  transform: [{scale}],
+                  translateX: indicatorPosition.interpolate({
+                    inputRange: Array.from(
+                      {length: state.routes.length},
+                      (_, i) => i,
+                    ),
+                    outputRange: Array.from(
+                      {length: state.routes.length},
+                      (_, i) => i * tabWidth + tabWidth / 2 - 30,
+                    ),
+                  }),
                 },
-              ]}>
-              {getTabBarLabel(route.name)}
-            </Animated.Text>
-          </TouchableOpacity>
-        );
-      })}
+              ],
+            },
+          ]}
+        />
+
+        {state.routes.map((route, index) => {
+          const {options} = descriptors[route.key];
+          const isFocused = state.index === index;
+          const animatedValue = animatedValues[index];
+          const badge = options.tabBarBadge;
+
+          const scale = animatedValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 1.1],
+          });
+
+          const textColor = animatedValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: [colors.neutral.black, colors.primary.main],
+          });
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name, {merge: true});
+            }
+          };
+
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
+          };
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? {selected: true} : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={route.name + '-tab'}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={styles.tabButton}>
+              <View style={styles.iconContainer}>
+                <Animated.View
+                  style={{
+                    transform: [{scale}],
+                  }}>
+                  <Icon
+                    name={getIconName(route.name, isFocused)}
+                    color={
+                      isFocused ? colors.primary.main : colors.neutral.black
+                    }
+                    size={24}
+                  />
+                </Animated.View>
+
+                {badge !== undefined && (
+                  <View
+                    style={[
+                      typeof badge === 'number' && badge > 99
+                        ? styles.badgeContainerSmall
+                        : styles.badgeContainer,
+                      {
+                        backgroundColor: colors.primary.main,
+                      },
+                    ]}>
+                    <Text style={styles.badgeText}>
+                      {typeof badge === 'number' && badge > 99 ? '' : badge}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              <Animated.Text
+                style={[
+                  styles.tabLabel,
+                  {
+                    color: textColor,
+                    transform: [{scale}],
+                  },
+                ]}>
+                {getTabBarLabel(route.name)}
+              </Animated.Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  shadowWrapper: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    // iOS shadow
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.neutral.black,
+        shadowOffset: {
+          width: 0,
+          height: -2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 16,
+      },
+    }),
+  },
+  container: {
     flexDirection: 'row',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     backgroundColor: colors.neutral.white,
-    shadowColor: colors.neutral.black,
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 5,
+    overflow: 'hidden',
   },
   tabButton: {
     flex: 1,

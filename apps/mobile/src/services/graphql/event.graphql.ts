@@ -1,4 +1,5 @@
 import {gql} from '@apollo/client';
+import {GROUP_FRAGMENT} from './group.graphql';
 
 export const EVENT_ADDRESS_FRAGMENT = gql`
   fragment EventAddressFragment on EventAddressDto {
@@ -58,6 +59,14 @@ export const EVENT_FRAGMENT = gql`
       id
       name
     }
+    invitedUsers {
+      id
+      firstName
+      lastName
+    }
+    invitedGroups {
+      ...GroupFragment
+    }
     createdBy {
       id
       firstName
@@ -75,6 +84,7 @@ export const EVENT_FRAGMENT = gql`
     isActive
   }
   ${EVENT_ADDRESS_FRAGMENT}
+  ${GROUP_FRAGMENT}
 `;
 
 // User invitation fragment

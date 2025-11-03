@@ -464,6 +464,7 @@ type EventDto {
   images: [ImageDto!]
   instructorInfo: String
   invitedGroups: [GroupDto!]
+  invitedUsers: [UserDto!]
   isActive: Boolean!
   isParticipating: Boolean
   isPrivate: Boolean!

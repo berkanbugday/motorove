@@ -313,8 +313,6 @@ export default {
       no_draft_events: 'No draft events yet',
       no_past_events: 'No past events found',
       could_not_load_events: 'Could not load events. Please try again.',
-      organized_by: 'Organized by',
-      organized_by_group: 'Organized by Group',
       going: 'Going',
       not_going: 'Not Going',
       route: 'Route',
@@ -322,6 +320,9 @@ export default {
       chat: 'Chat',
       delete_event_confirmation: 'Are you sure you want to delete this event?',
       currency: 'Currency',
+      organized_by: 'Organized by',
+      organized_by_group: 'Organized by Group',
+      error_loading_event: 'Could not load event. Please try again.',
     },
 
     // Groups screens

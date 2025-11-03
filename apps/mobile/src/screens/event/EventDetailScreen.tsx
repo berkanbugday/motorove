@@ -683,7 +683,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         {event.description && (
           <CollapsibleCard
             title={t('screens.event.description')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             <Typography style={styles.description}>
               {event.description}
             </Typography>
@@ -700,7 +700,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           event.price) && (
           <CollapsibleCard
             title={t('screens.event.event_details_title')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             {/* Start Location Row */}
             {getStartLocationAddress() && (
               <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
@@ -821,7 +821,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         {event.instructorInfo && (
           <CollapsibleCard
             title={t('screens.event.instructor_info')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             <Typography style={styles.description}>
               {event.instructorInfo}
             </Typography>
@@ -832,7 +832,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         {event.topicsCovered && (
           <CollapsibleCard
             title={t('screens.event.topics_covered')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             <Typography style={styles.description}>
               {event.topicsCovered}
             </Typography>
@@ -843,7 +843,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         {event.campingInfo && (
           <CollapsibleCard
             title={t('screens.event.camping_info')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             <Typography style={styles.description}>
               {event.campingInfo}
             </Typography>
@@ -854,7 +854,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         {event.routeDescription && (
           <CollapsibleCard
             title={t('screens.event.route_description')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             <Typography style={styles.description}>
               {event.routeDescription}
             </Typography>
@@ -865,7 +865,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         {event.restStops && (
           <CollapsibleCard
             title={t('screens.event.rest_stops')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             <Typography style={styles.description}>
               {event.restStops}
             </Typography>
@@ -876,7 +876,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         {event.equipmentChecklist && (
           <CollapsibleCard
             title={t('screens.event.equipment_checklist')}
-            initiallyExpanded={false}>
+            initiallyExpanded={true}>
             <Typography style={styles.description}>
               {event.equipmentChecklist}
             </Typography>
@@ -894,27 +894,26 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         header={
           <Subtitle align="center">{t('screens.event.delete_event')}</Subtitle>
         }>
-        <View style={{flex: 1}}>
-          <View style={{flex: 1}}>
-            <Body align="center">
-              {t('screens.event.delete_event_confirmation')}
-            </Body>
-          </View>
-          <View style={styles.deleteEventButtonsContainer}>
+        <View style={styles.bottomSheetContent}>
+          <Body style={styles.bottomSheetMessage}>
+            {t('screens.event.delete_event_confirmation')}
+          </Body>
+
+          <View style={styles.bottomSheetButtons}>
             <Button
-              title={t('common.no')}
+              title={t('common.cancel')}
               variant="outline"
               shape="round"
               onPress={() => deleteEventBottomSheetRef.current?.close()}
-              style={styles.cancelButton}
+              style={styles.bottomSheetButton}
+              disabled={removeEventLoading}
             />
             <Button
-              title={t('common.yes')}
+              title={t('common.delete')}
               variant="primary"
               shape="round"
               onPress={confirmDeleteEvent}
-              style={styles.deleteEventButton}
-              disabled={removeEventLoading}
+              style={styles.bottomSheetButton}
               loading={removeEventLoading}
             />
           </View>
@@ -1084,6 +1083,24 @@ const styles = StyleSheet.create({
   },
   paginationInactiveDot: {
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  bottomSheetContent: {
+    padding: spacing.md,
+  },
+  bottomSheetMessage: {
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  bottomSheetButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  bottomSheetButton: {
+    flex: 1,
+    width: '50%',
   },
 });
 

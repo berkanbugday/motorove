@@ -57,6 +57,7 @@ import {
   AddressType,
   EventType,
   ICreateEvent,
+  IUpdateEvent,
   EventStatus,
   RoadType,
   DifficultyLevel,
@@ -70,7 +71,6 @@ import {
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
-import {useAuth} from '@contexts/AuthContext';
 
 interface EditEventScreenProps {
   route: {
@@ -85,7 +85,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const navigation = useNavigation<MainScreenNavigationProp<'EditEvent'>>();
   const {eventId} = route.params;
   const {language} = useLanguage();
-  const {user} = useAuth();
+
   const {updateEvent, loading} = useUpdateEvent(() => {
     navigation.goBack();
   });
@@ -108,6 +108,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const finishLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const wizardRef = useRef<WizardHandle>(null);
   const isFormPopulatedRef = useRef<boolean>(false);
+  const previousEventTypeRef = useRef<string | undefined>(undefined);
 
   // State hooks
   const [selectedEventType, setSelectedEventType] =
@@ -122,7 +123,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const [selectedCurrency, setSelectedCurrency] = useState<DropdownItem | null>(
     null,
   );
-  const [selectedOrganizedBy, setSelectedOrganizedBy] =
+  const [selectedOrganizedByGroup, setSelectedOrganizedByGroup] =
     useState<DropdownItem | null>(null);
   const [selectedImages, setSelectedImages] = useState<
     {id: number; uri: string; base64?: string}[]
@@ -151,16 +152,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const experienceLevels = EnumUtils.getExperienceLevels();
   const currencies = EnumUtils.getCurrencyDropdownOptions();
 
-  // Organized by options (Me + Admin Groups)
-  const organizedByOptions = useMemo(() => {
-    const options: DropdownItem[] = [
-      {
-        id: user?.id || '',
-        label: t('screens.event.organized_by_me'),
-        value: user?.id,
-        type: 'user',
-      },
-    ];
+  // Organized by group options (Admin Groups only)
+  const organizedByGroupOptions = useMemo(() => {
+    const options: DropdownItem[] = [];
 
     // Add admin groups
     adminGroups.forEach(group => {
@@ -168,12 +162,11 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         id: group.id,
         label: group.name,
         value: group.id,
-        type: 'group',
       });
     });
 
     return options;
-  }, [adminGroups, t, user?.id]);
+  }, [adminGroups]);
 
   // Form setup with Zod validation
   const methods = useForm<UpdateEventFormValues>({
@@ -223,6 +216,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     resetField,
     trigger,
     getValues,
+    reset,
   } = methods;
 
   // Watch key form values
@@ -325,6 +319,26 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     });
   }, [navigation, isDirty, applyFilters, handleGoBack]);
 
+  // Helper function to clean addresses by removing GraphQL-specific fields
+  const cleanAddresses = useCallback(
+    (
+      addresses: ICreateEventAddress[] | null | undefined,
+    ): ICreateEventAddress[] => {
+      if (!addresses || addresses.length === 0) {
+        return [];
+      }
+      return addresses.map(addr => ({
+        type: addr.type,
+        latitude: addr.latitude,
+        longitude: addr.longitude,
+        address: addr.address,
+        language: addr.language,
+        countryCode: addr.countryCode,
+      }));
+    },
+    [],
+  );
+
   const confirmSaveDraft = useCallback(async () => {
     const formData = getValues();
 
@@ -348,23 +362,35 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
     try {
       const addresses: ICreateEventAddress[] = [
-        ...(selectedMeetingLocation || []),
-        ...(selectedStartLocation || []),
-        ...(selectedFinishLocation || []),
+        ...cleanAddresses(selectedMeetingLocation),
+        ...cleanAddresses(selectedStartLocation),
+        ...cleanAddresses(selectedFinishLocation),
       ];
       // Use base64 encoded images if available, otherwise fall back to URIs
       const images = selectedImages.map(img => img.base64 || img.uri);
+
+      // Parse maxParticipants safely
+      const maxParticipantsValue = formData.maxParticipants
+        ? parseInt(formData.maxParticipants as string, 10)
+        : undefined;
+      if (maxParticipantsValue && isNaN(maxParticipantsValue)) {
+        throw new Error('Invalid maxParticipants value');
+      }
 
       const createEventInput: ICreateEvent = {
         title: formData.title,
         description: formData.description,
         isPrivate: formData.isPrivate,
-        invitedGroupIds: formData.isPrivate ? formData.invitedGroups : [],
-        invitedUserIds: formData.isPrivate ? formData.invitedUsers : [],
-        organizedByGroupId: formData.organizedByGroupId,
+        invitedGroupIds: formData.isPrivate ? formData.invitedGroups || [] : [],
+        invitedUserIds: formData.isPrivate ? formData.invitedUsers || [] : [],
+        organizedByGroupId:
+          formData.organizedByGroupId &&
+          formData.organizedByGroupId.trim() !== ''
+            ? formData.organizedByGroupId
+            : undefined,
         eventType: formData.eventType as EventType,
         status: EventStatus.DRAFT,
-        addresses: addresses,
+        addresses: addresses.length > 0 ? addresses : [],
         startDateTime: new Date(
           `${formData.startDate.toISOString().split('T')[0]}T${
             formData.startTime.toISOString().split('T')[1]
@@ -378,19 +404,53 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                 }`,
               ).toISOString()
             : undefined,
-        maxParticipants: parseInt(formData.maxParticipants as string, 10),
+        maxParticipants: maxParticipantsValue,
         images: images,
-        roadType: formData.roadType as RoadType,
-        difficultyLevel: formData.difficultyLevel as DifficultyLevel,
-        experienceLevel: formData.experienceLevel as ExperienceLevel,
-        routeDescription: formData.routeDescription,
-        restStops: formData.restStops,
-        campingInfo: formData.campingInfo,
-        equipmentChecklist: formData.equipmentChecklist,
-        instructorInfo: formData.instructorInfo,
-        topicsCovered: formData.topicsCovered,
-        price: formData.price,
-        currency: formData.currency as Currency,
+        // Only include fields if they have values
+        ...(formData.roadType &&
+          formData.roadType.trim() !== '' && {
+            roadType: formData.roadType as RoadType,
+          }),
+        ...(formData.difficultyLevel &&
+          formData.difficultyLevel.trim() !== '' && {
+            difficultyLevel: formData.difficultyLevel as DifficultyLevel,
+          }),
+        ...(formData.experienceLevel &&
+          formData.experienceLevel.trim() !== '' && {
+            experienceLevel: formData.experienceLevel as ExperienceLevel,
+          }),
+        ...(formData.routeDescription &&
+          formData.routeDescription.trim() !== '' && {
+            routeDescription: formData.routeDescription,
+          }),
+        ...(formData.restStops &&
+          formData.restStops.trim() !== '' && {
+            restStops: formData.restStops,
+          }),
+        ...(formData.campingInfo &&
+          formData.campingInfo.trim() !== '' && {
+            campingInfo: formData.campingInfo,
+          }),
+        ...(formData.equipmentChecklist &&
+          formData.equipmentChecklist.trim() !== '' && {
+            equipmentChecklist: formData.equipmentChecklist,
+          }),
+        ...(formData.instructorInfo &&
+          formData.instructorInfo.trim() !== '' && {
+            instructorInfo: formData.instructorInfo,
+          }),
+        ...(formData.topicsCovered &&
+          formData.topicsCovered.trim() !== '' && {
+            topicsCovered: formData.topicsCovered,
+          }),
+        ...(formData.price &&
+          formData.price.trim() !== '' && {
+            price: formData.price,
+          }),
+        ...(formData.currency &&
+          formData.currency.trim() !== '' && {
+            currency: formData.currency as Currency,
+          }),
       };
 
       await updateEvent({...createEventInput, id: eventId});
@@ -406,6 +466,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     t,
     updateEvent,
     eventId,
+    cleanAddresses,
   ]);
 
   const handleSaveDraft = useCallback(() => {
@@ -470,7 +531,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
         setSelectedMeetingLocation(null);
-        setValue('meetingLocation', '', {shouldValidate: true});
+        setValue('meetingLocation', '', {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
         return;
       }
 
@@ -487,12 +551,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       // Set the meetingLocation field value
       setValue('meetingLocation', displayAddress?.address || '', {
         shouldValidate: true,
+        shouldDirty: true,
       });
 
       // Close the bottom sheet
       meetingLocationMapBottomSheetRef.current?.close();
     },
-    [setValue],
+    [setValue, language],
   );
 
   const handleStartLocationSelect = useCallback(
@@ -500,7 +565,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
         setSelectedStartLocation(null);
-        setValue('startLocation', '', {shouldValidate: true});
+        setValue('startLocation', '', {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
         return;
       }
 
@@ -517,12 +585,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       // Set the startLocation field value
       setValue('startLocation', displayAddress?.address || '', {
         shouldValidate: true,
+        shouldDirty: true,
       });
 
       // Close the bottom sheet
       startLocationMapBottomSheetRef.current?.close();
     },
-    [setValue],
+    [setValue, language],
   );
 
   const handleFinishLocationSelect = useCallback(
@@ -530,7 +599,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       if (addresses.length === 0) {
         // Reset if no addresses provided
         setSelectedFinishLocation(null);
-        setValue('finishLocation', '', {shouldValidate: true});
+        setValue('finishLocation', '', {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
         return;
       }
 
@@ -547,12 +619,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       // Set the finishLocation field value
       setValue('finishLocation', displayAddress?.address || '', {
         shouldValidate: true,
+        shouldDirty: true,
       });
 
       // Close the bottom sheet
       finishLocationMapBottomSheetRef.current?.close();
     },
-    [setValue],
+    [setValue, language],
   );
 
   // Image selection handlers
@@ -601,7 +674,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
         // Update the images array in the form
         const imageData = updatedImages.map(img => img.base64 || img.uri);
-        setValue('images', imageData, {shouldValidate: true});
+        setValue('images', imageData, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
       }
     } catch (error) {
       loggingService.error('Error selecting event image:', error);
@@ -620,7 +696,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
       // Update the images array in the form
       const imageData = updatedImages.map(img => img.base64 || img.uri);
-      setValue('images', imageData, {shouldValidate: true});
+      setValue('images', imageData, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [selectedImages, setValue],
   );
@@ -629,7 +708,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleEventTypeSelect = useCallback(
     (item: DropdownItem | null) => {
       setSelectedEventType(item);
-      setValue('eventType', item?.value || '', {shouldValidate: true});
+      setValue('eventType', item?.value || '', {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -637,7 +719,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleRoadTypeSelect = useCallback(
     (item: DropdownItem | null) => {
       setSelectedRoadType(item);
-      setValue('roadType', item?.value || '', {shouldValidate: true});
+      setValue('roadType', item?.value || '', {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -645,7 +730,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleDifficultySelect = useCallback(
     (item: DropdownItem | null) => {
       setSelectedDifficultyLevel(item);
-      setValue('difficultyLevel', item?.value || '', {shouldValidate: true});
+      setValue('difficultyLevel', item?.value || '', {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -653,7 +741,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleExperienceLevelSelect = useCallback(
     (item: DropdownItem | null) => {
       setSelectedExperienceLevel(item);
-      setValue('experienceLevel', item?.value || '', {shouldValidate: true});
+      setValue('experienceLevel', item?.value || '', {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -661,19 +752,21 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleCurrencySelect = useCallback(
     (item: DropdownItem | null) => {
       setSelectedCurrency(item);
-      setValue('currency', item?.value || '', {shouldValidate: true});
+      setValue('currency', item?.value || '', {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
 
-  const handleOrganizedBySelect = useCallback(
+  const handleOrganizedByGroupSelect = useCallback(
     (item: DropdownItem | null) => {
-      setSelectedOrganizedBy(item);
-      if (item?.type === 'group') {
-        setValue('organizedByGroupId', item.value, {shouldValidate: true});
-      } else {
-        setValue('organizedByGroupId', '', {shouldValidate: true});
-      }
+      setSelectedOrganizedByGroup(item);
+      setValue('organizedByGroupId', item?.value || '', {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -682,7 +775,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const togglePrivacy = useCallback(
     (newValue: boolean) => {
       setIsPrivate(newValue);
-      setValue('isPrivate', newValue, {shouldValidate: true});
+      setValue('isPrivate', newValue, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -691,7 +787,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleGroupsChange = useCallback(
     (groupIds: string[]) => {
       setSelectedGroups(groupIds);
-      setValue('invitedGroups', groupIds, {shouldValidate: true});
+      setValue('invitedGroups', groupIds, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -699,7 +798,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const handleUsersChange = useCallback(
     (userIds: string[]) => {
       setSelectedUsers(userIds);
-      setValue('invitedUsers', userIds, {shouldValidate: true});
+      setValue('invitedUsers', userIds, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     },
     [setValue],
   );
@@ -776,24 +878,29 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     async (data: UpdateEventFormValues) => {
       try {
         const addresses: ICreateEventAddress[] = [
-          ...(selectedMeetingLocation || []),
-          ...(selectedStartLocation || []),
-          ...(selectedFinishLocation || []),
+          ...cleanAddresses(selectedMeetingLocation),
+          ...cleanAddresses(selectedStartLocation),
+          ...cleanAddresses(selectedFinishLocation),
         ];
         // Use base64 encoded images if available, otherwise fall back to URIs
         const images = selectedImages.map(img => img.base64 || img.uri);
 
-        const updateEventInput = {
+        // Parse maxParticipants safely
+        const maxParticipantsValue = data.maxParticipants
+          ? parseInt(data.maxParticipants as string, 10)
+          : undefined;
+        if (maxParticipantsValue && isNaN(maxParticipantsValue)) {
+          throw new Error('Invalid maxParticipants value');
+        }
+
+        const updateEventInput: IUpdateEvent = {
           id: eventId,
           title: data.title,
           description: data.description,
           isPrivate: data.isPrivate,
-          invitedGroupIds: data.invitedGroups,
-          invitedUserIds: data.invitedUsers,
-          organizedByGroupId: data.organizedByGroupId,
           eventType: selectedEventType?.value as EventType,
           status: EventStatus.UPCOMING,
-          addresses: addresses,
+          addresses: addresses.length > 0 ? addresses : undefined,
           startDateTime: new Date(
             `${data.startDate.toISOString().split('T')[0]}T${
               data.startTime.toISOString().split('T')[1]
@@ -807,34 +914,66 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                   }`,
                 ).toISOString()
               : undefined,
-          maxParticipants: parseInt(data.maxParticipants as string, 10),
+          maxParticipants: maxParticipantsValue,
           images: images,
-          // Include specific fields based on event type
-          ...(data.routeDescription && {
-            routeDescription: data.routeDescription,
-          }),
-          ...(data.roadType && {roadType: data.roadType as RoadType}),
-          ...(data.difficultyLevel && {
-            difficultyLevel: data.difficultyLevel as DifficultyLevel,
-          }),
-          ...(data.restStops && {restStops: data.restStops}),
-          ...(data.campingInfo && {
-            campingInfo: data.campingInfo,
-          }),
-          ...(data.equipmentChecklist && {
-            equipmentChecklist: data.equipmentChecklist,
-          }),
-          ...(data.instructorInfo && {
-            instructorInfo: data.instructorInfo,
-          }),
-          ...(data.topicsCovered && {
-            topicsCovered: data.topicsCovered,
-          }),
-          ...(data.experienceLevel && {
-            experienceLevel: data.experienceLevel as ExperienceLevel,
-          }),
-          ...(data.price && {price: data.price}),
-          ...(data.currency && {currency: data.currency as Currency}),
+          // Only include optional fields if they have values
+          ...(data.invitedGroups &&
+            data.invitedGroups.length > 0 && {
+              invitedGroupIds: data.invitedGroups,
+            }),
+          ...(data.invitedUsers &&
+            data.invitedUsers.length > 0 && {
+              invitedUserIds: data.invitedUsers,
+            }),
+          ...(data.organizedByGroupId &&
+            data.organizedByGroupId.trim() !== '' && {
+              organizedByGroupId: data.organizedByGroupId,
+            }),
+          // Include specific fields based on event type (only if they have values)
+          ...(data.routeDescription &&
+            data.routeDescription.trim() !== '' && {
+              routeDescription: data.routeDescription,
+            }),
+          ...(data.roadType &&
+            data.roadType.trim() !== '' && {
+              roadType: data.roadType as RoadType,
+            }),
+          ...(data.difficultyLevel &&
+            data.difficultyLevel.trim() !== '' && {
+              difficultyLevel: data.difficultyLevel as DifficultyLevel,
+            }),
+          ...(data.restStops &&
+            data.restStops.trim() !== '' && {
+              restStops: data.restStops,
+            }),
+          ...(data.campingInfo &&
+            data.campingInfo.trim() !== '' && {
+              campingInfo: data.campingInfo,
+            }),
+          ...(data.equipmentChecklist &&
+            data.equipmentChecklist.trim() !== '' && {
+              equipmentChecklist: data.equipmentChecklist,
+            }),
+          ...(data.instructorInfo &&
+            data.instructorInfo.trim() !== '' && {
+              instructorInfo: data.instructorInfo,
+            }),
+          ...(data.topicsCovered &&
+            data.topicsCovered.trim() !== '' && {
+              topicsCovered: data.topicsCovered,
+            }),
+          ...(data.experienceLevel &&
+            data.experienceLevel.trim() !== '' && {
+              experienceLevel: data.experienceLevel as ExperienceLevel,
+            }),
+          ...(data.price &&
+            data.price.trim() !== '' && {
+              price: data.price,
+            }),
+          ...(data.currency &&
+            data.currency.trim() !== '' && {
+              currency: data.currency as Currency,
+            }),
         };
 
         await updateEvent(updateEventInput);
@@ -850,6 +989,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       selectedFinishLocation,
       selectedImages,
       selectedEventType,
+      cleanAddresses,
     ],
   );
 
@@ -893,14 +1033,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
                 key="eventType-dropdown"
               />
 
-              {/* Event organized by */}
+              {/* Event organized by group */}
               <Dropdown
-                data={organizedByOptions}
-                label={t('screens.event.organized_by')}
-                onSelect={handleOrganizedBySelect}
-                selectedItem={selectedOrganizedBy}
-                showClearButton={false}
-                key="organizedBy-dropdown"
+                data={organizedByGroupOptions}
+                label={t('screens.event.organized_by_group')}
+                onSelect={handleOrganizedByGroupSelect}
+                selectedItem={selectedOrganizedByGroup}
+                showClearButton={true}
+                key="organizedByGroup-dropdown"
                 loading={adminGroupsLoading}
               />
 
@@ -1383,9 +1523,18 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     [shouldShowEventDetails, baseWizardSteps],
   );
 
-  // Reset fields when event type changes
+  // Reset fields when event type changes (only if form is already populated and eventType actually changed)
   useEffect(() => {
-    if (eventType) {
+    // Only reset if:
+    // 1. Form has been populated (initial load is complete)
+    // 2. EventType has actually changed (not initial set)
+    // 3. EventType is not empty
+    if (
+      eventType &&
+      isFormPopulatedRef.current &&
+      previousEventTypeRef.current !== undefined &&
+      previousEventTypeRef.current !== eventType
+    ) {
       // Clear all event-type specific fields
       // Ride/camping specific fields
       resetField('routeDescription');
@@ -1425,7 +1574,12 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         }, 0);
       }
     }
-  }, [eventType, resetField]);
+
+    // Update the previous eventType ref
+    if (eventType) {
+      previousEventTypeRef.current = eventType;
+    }
+  }, [eventType, resetField, setValue, currentStepIndex]);
 
   // Update step status when wizard step changes
   useEffect(() => {
@@ -1436,45 +1590,77 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   // Pre-populate form with existing event data
   useEffect(() => {
     if (event && !eventLoading && !eventError && !isFormPopulatedRef.current) {
-      isFormPopulatedRef.current = true;
-      // Set basic form values
-      setValue('title', event.title || '');
-      setValue('description', event.description || '');
-      setValue('maxParticipants', event.maxParticipants?.toString() || '');
-      setValue('isPrivate', event.isPrivate || false);
-      setIsPrivate(event.isPrivate || false);
+      // Prepare form values object
+      const formValues: UpdateEventFormValues = {
+        id: eventId,
+        title: event.title || '',
+        description: event.description || '',
+        maxParticipants: event.maxParticipants?.toString() || null,
+        isPrivate: event.isPrivate || false,
+        invitedGroups: [],
+        invitedUsers: [],
+        eventType: (event.eventType as EventType) || undefined,
+        routeDescription: event.routeDescription || '',
+        roadType: event.roadType || '',
+        difficultyLevel: event.difficultyLevel || '',
+        restStops: event.restStops || '',
+        campingInfo: event.campingInfo || '',
+        equipmentChecklist: event.equipmentChecklist || '',
+        instructorInfo: event.instructorInfo || '',
+        topicsCovered: event.topicsCovered || '',
+        experienceLevel: event.experienceLevel || '',
+        price: event.price?.toString() || '',
+        currency: event.currency || '',
+        organizedByGroupId: '',
+        meetingLocation: '',
+        startLocation: '',
+        finishLocation: '',
+        images: event.images?.map(img => img.url) || [],
+        startDate: event.startDateTime
+          ? new Date(event.startDateTime)
+          : new Date(),
+        startTime: event.startDateTime
+          ? new Date(event.startDateTime)
+          : new Date(),
+        endDate: event.endDateTime ? new Date(event.endDateTime) : new Date(),
+        endTime: event.endDateTime
+          ? new Date(event.endDateTime)
+          : new Date(new Date().getTime() + 2 * 60 * 60 * 1000),
+      };
 
       // Set dates and times
       if (event.startDateTime) {
         const startDateTime = new Date(event.startDateTime);
-        setValue('startDate', startDateTime);
-        setValue('startTime', startDateTime);
+        formValues.startDate = startDateTime;
+        formValues.startTime = startDateTime;
       }
       if (event.endDateTime) {
         const endDateTime = new Date(event.endDateTime);
-        setValue('endDate', endDateTime);
-        setValue('endTime', endDateTime);
+        formValues.endDate = endDateTime;
+        formValues.endTime = endDateTime;
       }
 
-      // Set event type
+      // Set event type first (before other fields that depend on it)
+      // Initialize previousEventTypeRef to prevent reset during population
       if (event.eventType) {
+        previousEventTypeRef.current = event.eventType;
         const eventTypeItem = eventTypes.find(
           type => type.value === event.eventType,
         );
         if (eventTypeItem) {
           setSelectedEventType(eventTypeItem);
-          setValue('eventType', event.eventType);
+          formValues.eventType = event.eventType as EventType;
         }
       }
 
-      // Set event-specific fields
+      // Set event-specific fields in formValues and update UI state
       if (event.roadType) {
         const roadTypeItem = roadTypes.find(
           type => type.value === event.roadType,
         );
         if (roadTypeItem) {
           setSelectedRoadType(roadTypeItem);
-          setValue('roadType', event.roadType);
+          formValues.roadType = event.roadType;
         }
       }
 
@@ -1484,7 +1670,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         );
         if (difficultyItem) {
           setSelectedDifficultyLevel(difficultyItem);
-          setValue('difficultyLevel', event.difficultyLevel);
+          formValues.difficultyLevel = event.difficultyLevel;
         }
       }
 
@@ -1494,18 +1680,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         );
         if (experienceItem) {
           setSelectedExperienceLevel(experienceItem);
-          setValue('experienceLevel', event.experienceLevel);
+          formValues.experienceLevel = event.experienceLevel;
         }
       }
-
-      // Set optional text fields
-      setValue('routeDescription', event.routeDescription || '');
-      setValue('restStops', event.restStops || '');
-      setValue('campingInfo', event.campingInfo || '');
-      setValue('equipmentChecklist', event.equipmentChecklist || '');
-      setValue('instructorInfo', event.instructorInfo || '');
-      setValue('topicsCovered', event.topicsCovered || '');
-      setValue('price', event.price?.toString() || '');
 
       // Set currency if available
       if (event.currency) {
@@ -1514,53 +1691,70 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         );
         if (currencyItem) {
           setSelectedCurrency(currencyItem);
-          setValue('currency', event.currency);
+          formValues.currency = event.currency;
         }
       }
 
-      // Set addresses
+      // Set addresses (clean GraphQL-specific fields)
       if (event.addresses && event.addresses.length > 0) {
-        const meetingLocationAddresses = event.addresses.filter(
-          addr => addr.type === AddressType.EVENT_MEETING_LOCATION,
-        );
-        const startLocationAddresses = event.addresses.filter(
-          addr => addr.type === AddressType.EVENT_START_LOCATION,
-        );
-        const finishLocationAddresses = event.addresses.filter(
-          addr => addr.type === AddressType.EVENT_FINISH_LOCATION,
-        );
+        const meetingLocationAddresses = event.addresses
+          .filter(addr => addr.type === AddressType.EVENT_MEETING_LOCATION)
+          .map(addr => ({
+            type: addr.type,
+            latitude: addr.latitude,
+            longitude: addr.longitude,
+            address: addr.address,
+            language: addr.language,
+            countryCode: addr.countryCode,
+          })) as ICreateEventAddress[];
+
+        const startLocationAddresses = event.addresses
+          .filter(addr => addr.type === AddressType.EVENT_START_LOCATION)
+          .map(addr => ({
+            type: addr.type,
+            latitude: addr.latitude,
+            longitude: addr.longitude,
+            address: addr.address,
+            language: addr.language,
+            countryCode: addr.countryCode,
+          })) as ICreateEventAddress[];
+
+        const finishLocationAddresses = event.addresses
+          .filter(addr => addr.type === AddressType.EVENT_FINISH_LOCATION)
+          .map(addr => ({
+            type: addr.type,
+            latitude: addr.latitude,
+            longitude: addr.longitude,
+            address: addr.address,
+            language: addr.language,
+            countryCode: addr.countryCode,
+          })) as ICreateEventAddress[];
 
         if (meetingLocationAddresses.length > 0) {
-          setSelectedMeetingLocation(
-            meetingLocationAddresses as ICreateEventAddress[],
-          );
+          setSelectedMeetingLocation(meetingLocationAddresses);
           const displayAddress =
             meetingLocationAddresses.find(
               addr => addr.language.toLowerCase() === language.toLowerCase(),
-            ) || meetingLocationAddresses[0]; // Fallback to first address if no language match
-          setValue('meetingLocation', displayAddress?.address || '');
+            ) || meetingLocationAddresses[0];
+          formValues.meetingLocation = displayAddress?.address || '';
         }
 
         if (startLocationAddresses.length > 0) {
-          setSelectedStartLocation(
-            startLocationAddresses as ICreateEventAddress[],
-          );
+          setSelectedStartLocation(startLocationAddresses);
           const displayAddress =
             startLocationAddresses.find(
               addr => addr.language.toLowerCase() === language.toLowerCase(),
-            ) || startLocationAddresses[0]; // Fallback to first address if no language match
-          setValue('startLocation', displayAddress?.address || '');
+            ) || startLocationAddresses[0];
+          formValues.startLocation = displayAddress?.address || '';
         }
 
         if (finishLocationAddresses.length > 0) {
-          setSelectedFinishLocation(
-            finishLocationAddresses as ICreateEventAddress[],
-          );
+          setSelectedFinishLocation(finishLocationAddresses);
           const displayAddress =
             finishLocationAddresses.find(
               addr => addr.language.toLowerCase() === language.toLowerCase(),
-            ) || finishLocationAddresses[0]; // Fallback to first address if no language match
-          setValue('finishLocation', displayAddress?.address || '');
+            ) || finishLocationAddresses[0];
+          formValues.finishLocation = displayAddress?.address || '';
         }
       }
 
@@ -1572,52 +1766,77 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           base64: image.url.startsWith('data:') ? image.url : undefined,
         }));
         setSelectedImages(imageObjects);
-        setValue(
-          'images',
-          event.images.map(img => img.url),
-        );
+        formValues.images = event.images.map(img => img.url);
       }
 
-      // Set organized by fields
+      // Set organized by group field
       const eventData = event as any;
       if (eventData.organizedByGroup) {
-        const organizedByItem = organizedByOptions.find(
-          option =>
-            option.value === eventData.organizedByGroup.id &&
-            option.type === 'group',
+        const organizedByGroupItem = organizedByGroupOptions.find(
+          option => option.value === eventData.organizedByGroup.id,
         );
-        if (organizedByItem) {
-          setSelectedOrganizedBy(organizedByItem);
-          setValue('organizedByGroupId', eventData.organizedByGroup.id);
+        if (organizedByGroupItem) {
+          setSelectedOrganizedByGroup(organizedByGroupItem);
+          formValues.organizedByGroupId = eventData.organizedByGroup.id;
         }
       }
 
       // Set invited users and groups (if they exist in the event data)
-      // Note: These fields might not be available in the IEvent interface
-      // but could be part of the actual event data from the API
-      if (eventData.invitedUserIds) {
-        setSelectedUsers(eventData.invitedUserIds);
-        setValue('invitedUsers', eventData.invitedUserIds);
+      if (eventData.invitedUsers && Array.isArray(eventData.invitedUsers)) {
+        const invitedUserIds = eventData.invitedUsers.map(
+          (user: any) => user.id,
+        );
+        setSelectedUsers(invitedUserIds);
+        formValues.invitedUsers = invitedUserIds;
       }
-      if (eventData.invitedGroupIds) {
-        setSelectedGroups(eventData.invitedGroupIds);
-        setValue('invitedGroups', eventData.invitedGroupIds);
+      if (eventData.invitedGroups && Array.isArray(eventData.invitedGroups)) {
+        const invitedGroupIds = eventData.invitedGroups.map(
+          (group: any) => group.id,
+        );
+        setSelectedGroups(invitedGroupIds);
+        formValues.invitedGroups = invitedGroupIds;
       }
+
+      // Update privacy state
+      setIsPrivate(event.isPrivate || false);
+
+      // Reset form with loaded values - this updates default values for dirty tracking
+      reset(formValues, {keepDefaultValues: false});
+
+      // Mark form as populated AFTER all fields are set
+      // This prevents the reset useEffect from clearing fields during population
+      isFormPopulatedRef.current = true;
     } else if (eventLoading || eventError) {
       // Reset the flag if we're loading again or there's an error
       isFormPopulatedRef.current = false;
+      previousEventTypeRef.current = undefined;
     }
   }, [
     event,
     eventLoading,
     eventError,
+    eventId,
     eventTypes,
     roadTypes,
     difficultyLevels,
     experienceLevels,
     currencies,
+    organizedByGroupOptions,
     language,
-    user?.id,
+    reset,
+    setIsPrivate,
+    setSelectedEventType,
+    setSelectedRoadType,
+    setSelectedDifficultyLevel,
+    setSelectedExperienceLevel,
+    setSelectedCurrency,
+    setSelectedOrganizedByGroup,
+    setSelectedMeetingLocation,
+    setSelectedStartLocation,
+    setSelectedFinishLocation,
+    setSelectedImages,
+    setSelectedUsers,
+    setSelectedGroups,
     t,
   ]);
 
@@ -1688,7 +1907,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
               style={{flex: 1}}
             />
             <Button
-              title={t('screens.event.update_event')}
+              title={t('screens.event.create_event')}
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}

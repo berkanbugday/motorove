@@ -324,6 +324,7 @@ export default {
       currency: 'Para Birimi',
       organized_by: 'Düzenleyen',
       organized_by_group: 'Düzenleyen Grup',
+      error_loading_event: 'Etkinlik yüklenemedi. Lütfen tekrar deneyin.',
     },
 
     // Groups screens
