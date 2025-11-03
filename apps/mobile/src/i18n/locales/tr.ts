@@ -284,7 +284,7 @@ export default {
       select_event_type_prompt: 'Lütfen ilk adımda bir etkinlik türü seçin',
       discard_dialog_title: 'Değişiklikleri İptal Et?',
       discard_dialog_message:
-        'Kaydedilmemiş değişiklikleriniz var. Geri dönmek istediğinizden emin misiniz? Tüm değişiklikler kaybolacak.',
+        'Kaydedilmemiş değişiklikleriniz var.\n Geri dönmek istediğinizden emin misiniz?\n Tüm değişiklikler kaybolacak.',
       save_draft_dialog_title: 'Taslak Kaydedilsin mi?',
       save_draft_dialog_message:
         'İlerlemenizi taslak olarak kaydetmek ister misiniz?',

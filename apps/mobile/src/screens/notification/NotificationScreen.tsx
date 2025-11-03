@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect, useRef} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -19,8 +19,10 @@ import {
   TopHeaderBar,
   BodySmall,
   SkeletonGroup,
+  Button,
+  openBottomSheet,
+  closeBottomSheet,
 } from '@components';
-import Dialog, {DialogRef} from '@components/Dialog';
 import {
   useGetNotifications,
   useMarkNotificationAsRead,
@@ -87,11 +89,6 @@ export const NotificationScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [existingUnreadNotifications, setExistingUnreadNotifications] =
     useState(false);
-  const deleteConfirmationDialogRef = useRef<DialogRef>(null);
-  const deleteAllConfirmationDialogRef = useRef<DialogRef>(null);
-  const [notificationToDelete, setNotificationToDelete] = useState<
-    string | null
-  >(null);
 
   useEffect(() => {
     setExistingUnreadNotifications(
@@ -116,17 +113,44 @@ export const NotificationScreen = () => {
   );
 
   // Delete notification
-  const handleDeleteNotification = useCallback((id: string) => {
-    setNotificationToDelete(id);
-    deleteConfirmationDialogRef.current?.open();
-  }, []);
+  const handleDeleteNotification = useCallback(
+    (id: string) => {
+      openBottomSheet({
+        title: t('screens.notification.delete_notification_title'),
+        snapPoint: 'minimal',
+        showCloseButton: false,
+        closeOnBackdropPress: true,
+        content: (
+          <View style={styles.bottomSheetContent}>
+            <Body style={styles.bottomSheetMessage}>
+              {t('screens.notification.delete_notification_message')}
+            </Body>
 
-  const confirmDeleteNotification = useCallback(() => {
-    if (notificationToDelete && notifications.length > 0) {
-      deleteNotification(notificationToDelete);
-      setNotificationToDelete(null);
-    }
-  }, [deleteNotification, notificationToDelete, notifications.length]);
+            <View style={styles.bottomSheetButtons}>
+              <Button
+                title={t('common.cancel')}
+                variant="outline"
+                shape="round"
+                onPress={() => closeBottomSheet()}
+                style={styles.bottomSheetButton}
+              />
+              <Button
+                title={t('common.delete')}
+                variant="primary"
+                shape="round"
+                onPress={() => {
+                  deleteNotification(id);
+                  closeBottomSheet();
+                }}
+                style={styles.bottomSheetButton}
+              />
+            </View>
+          </View>
+        ),
+      });
+    },
+    [deleteNotification, t],
+  );
 
   // Mark all notifications as read
   const handleMarkAllAsRead = useCallback(() => {
@@ -145,13 +169,42 @@ export const NotificationScreen = () => {
       });
       return;
     } else {
-      deleteAllConfirmationDialogRef.current?.open();
-    }
-  }, [notifications.length, existingUnreadNotifications, t]);
+      openBottomSheet({
+        title: t('screens.notification.delete_all_notifications_title'),
+        snapPoint: 'minimal',
+        showCloseButton: false,
+        enableGestureControl: false,
+        closeOnBackdropPress: true,
+        content: (
+          <View style={styles.bottomSheetContent}>
+            <Body style={styles.bottomSheetMessage}>
+              {t('screens.notification.delete_all_notifications_message')}
+            </Body>
 
-  const confirmDeleteAllNotifications = useCallback(() => {
-    deleteAllNotifications();
-  }, [deleteAllNotifications]);
+            <View style={styles.bottomSheetButtons}>
+              <Button
+                title={t('common.cancel')}
+                variant="outline"
+                shape="round"
+                onPress={() => closeBottomSheet()}
+                style={styles.bottomSheetButton}
+              />
+              <Button
+                title={t('common.delete')}
+                variant="primary"
+                shape="round"
+                onPress={() => {
+                  deleteAllNotifications();
+                  closeBottomSheet();
+                }}
+                style={styles.bottomSheetButton}
+              />
+            </View>
+          </View>
+        ),
+      });
+    }
+  }, [notifications.length, deleteAllNotifications, t]);
 
   // Render notification item
   const renderNotificationItem = ({
@@ -352,40 +405,6 @@ export const NotificationScreen = () => {
           )
         }
       />
-
-      {/* Delete single notification confirmation dialog */}
-      <Dialog
-        ref={deleteConfirmationDialogRef}
-        title={t('screens.notification.delete_notification_title')}
-        message={t('screens.notification.delete_notification_message')}
-        variant="confirm"
-        confirmButton={{
-          text: t('common.delete'),
-          onPress: confirmDeleteNotification,
-          variant: 'primary',
-        }}
-        cancelButton={{
-          text: t('common.cancel'),
-          variant: 'outline',
-        }}
-      />
-
-      {/* Delete all notifications confirmation dialog */}
-      <Dialog
-        ref={deleteAllConfirmationDialogRef}
-        title={t('screens.notification.delete_all_notifications_title')}
-        message={t('screens.notification.delete_all_notifications_message')}
-        variant="confirm"
-        confirmButton={{
-          text: t('common.delete'),
-          onPress: confirmDeleteAllNotifications,
-          variant: 'primary',
-        }}
-        cancelButton={{
-          text: t('common.cancel'),
-          variant: 'outline',
-        }}
-      />
     </View>
   );
 };
@@ -484,5 +503,23 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary.main,
+  },
+  bottomSheetContent: {
+    padding: spacing.md,
+  },
+  bottomSheetMessage: {
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  bottomSheetButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  bottomSheetButton: {
+    flex: 1,
+    width: '50%',
   },
 });

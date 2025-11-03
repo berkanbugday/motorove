@@ -124,28 +124,23 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
       content: (
         <View>
           <Body>{t('screens.postComment.delete_comment_confirmation')}</Body>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              gap: spacing.md,
-              paddingTop: spacing.lg,
-              paddingBottom: spacing.lg,
-            }}>
+          <View style={styles.bottomSheetButtons}>
             <Button
               title={t('common.cancel')}
               variant="outline"
+              shape="round"
               onPress={() => closeBottomSheet()}
-              style={{width: '50%'}}
+              style={styles.bottomSheetButton}
             />
             <Button
               title={t('common.delete')}
               variant="primary"
+              shape="round"
               onPress={() => {
                 confirmDeletePostComment();
                 closeBottomSheet();
               }}
-              style={{width: '50%'}}
+              style={styles.bottomSheetButton}
             />
           </View>
         </View>
@@ -503,5 +498,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderRadius: 0,
     borderBottomColor: colors.secondary.main,
+  },
+  bottomSheetButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  bottomSheetButton: {
+    flex: 1,
+    width: '50%',
   },
 });

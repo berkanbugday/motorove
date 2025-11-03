@@ -240,11 +240,6 @@ export class GroupsService {
         !!membership && membership.status === ApprovalStatus.PENDING;
       const isOwner = group.createdById === userId;
 
-      console.log('isMember', isMember);
-      console.log('isAdmin', isAdmin);
-      console.log('isPendingMember', isPendingMember);
-      console.log('isOwner', isOwner);
-
       return {
         ...groupDto,
         isMember,

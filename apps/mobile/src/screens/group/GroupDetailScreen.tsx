@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef, useEffect} from 'react';
+import React, {useState, useCallback, useRef, useEffect, useMemo} from 'react';
 import {
   View,
   StyleSheet,
@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import {colors, getShadow, radius, rh, spacing} from '@theme';
 import {useNavigation, RouteProp} from '@react-navigation/native';
-import {useFocusEffect} from '@react-navigation/native';
 import {
   MainScreenNavigationProp,
   MainStackParamList,
@@ -63,6 +62,7 @@ import {
   Language,
   EventStatus,
   IEvent,
+  ApprovalStatus,
 } from '@motorove/shared';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
@@ -355,6 +355,52 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
   // Fetch group members
   const members = group?.memberships || [];
 
+  // Fix: Verify isMember status from memberships array if backend value is incorrect
+  const verifiedIsMember = useMemo(() => {
+    // If backend says user is a member, trust it
+    if (group?.isMember === true) {
+      return true;
+    }
+    // Otherwise, check memberships array as fallback
+    if (group?.memberships && user?.id) {
+      const userMembership = group.memberships.find(
+        m => m.user.id === user.id && m.status === ApprovalStatus.ACCEPTED,
+      );
+      return !!userMembership;
+    }
+    return group?.isMember ?? false;
+  }, [group?.isMember, group?.memberships, user?.id]);
+
+  const verifiedIsAdmin = useMemo(() => {
+    // If backend says user is admin, trust it
+    if (group?.isAdmin === true) {
+      return true;
+    }
+    // Otherwise, check memberships array as fallback
+    if (verifiedIsMember && group?.memberships && user?.id) {
+      const userMembership = group.memberships.find(
+        m => m.user.id === user.id && m.status === ApprovalStatus.ACCEPTED,
+      );
+      return !!userMembership && userMembership.role === GroupMemberRole.ADMIN;
+    }
+    return group?.isAdmin ?? false;
+  }, [group?.isAdmin, group?.memberships, user?.id, verifiedIsMember]);
+
+  const verifiedIsPendingMember = useMemo(() => {
+    // If backend says user is pending, trust it
+    if (group?.isPendingMember === true) {
+      return true;
+    }
+    // Otherwise, check memberships array as fallback
+    if (group?.memberships && user?.id) {
+      const userMembership = group.memberships.find(
+        m => m.user.id === user.id && m.status === ApprovalStatus.PENDING,
+      );
+      return !!userMembership;
+    }
+    return group?.isPendingMember ?? false;
+  }, [group?.isPendingMember, group?.memberships, user?.id]);
+
   const {addMember} = useAddMember(() => {
     if (group?.privacy === GroupPrivacy.PUBLIC) {
       showToast({
@@ -514,15 +560,15 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
   }, [activeMemberId, toggleMemberActions]);
 
   // Refetch posts when screen gains focus (when coming back from other screens)
-  useFocusEffect(
-    useCallback(() => {
-      // Always refetch group if refetch function is available
-      if (refetchGroup) {
-        loggingService.info('GroupDetailScreen: Refetching group on focus');
-        refetchGroup();
-      }
-    }, [refetchGroup]),
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     // Always refetch group if refetch function is available
+  //     if (refetchGroup) {
+  //       loggingService.info('GroupDetailScreen: Refetching group on focus');
+  //       refetchGroup();
+  //     }
+  //   }, [refetchGroup]),
+  // );
 
   const renderDescription = () => {
     const description = group?.description || t('screens.group.no_description');
@@ -884,7 +930,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
 
   const handleJoinGroup = useCallback(
     async (_group: IGroup) => {
-      if (_group?.isPendingMember) {
+      if (verifiedIsPendingMember) {
         loggingService.info(`Group: ${groupId} is pending. Cannot join.`);
         showToast({
           text1: t('common.warning'),
@@ -933,6 +979,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       refetchGroup,
       user?.id,
       t,
+      verifiedIsPendingMember,
     ],
   );
 
@@ -1052,8 +1099,8 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       return (
         <MemberItem
           item={item}
-          isAdmin={group?.isAdmin}
-          isMember={group?.isMember}
+          isAdmin={verifiedIsAdmin}
+          isMember={verifiedIsMember}
           user={user}
           onChangeRole={handleOpenChangeRoleDialog}
           onRemoveMember={handleOpenRemoveMemberDialog}
@@ -1061,8 +1108,8 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       );
     },
     [
-      group?.isAdmin,
-      group?.isMember,
+      verifiedIsAdmin,
+      verifiedIsMember,
       user,
       handleOpenChangeRoleDialog,
       handleOpenRemoveMemberDialog,
@@ -1086,8 +1133,8 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         containerStyle={styles.topHeaderBar}
         onBackPress={() => navigation.goBack()}
         dropdownMenuItems={groupDropdownMenuItems(
-          group?.isAdmin,
-          group?.isMember,
+          verifiedIsAdmin,
+          verifiedIsMember,
         )}
         onDropdownItemSelect={item =>
           handleDropdownMenuItemSelect(item, group as IGroup)
@@ -1095,7 +1142,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       />
       <Animated.View style={{height: headerHeight}}>
         <Image
-          source={{uri: group?.cover || ''}}
+          source={{uri: group?.cover ? group?.cover : undefined}}
           style={styles.cover}
           resizeMode="cover"
         />
@@ -1222,7 +1269,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           )}
         </View> */}
 
-        {group?.isMember && (
+        {verifiedIsMember ? (
           <>
             {/* Upcoming Group Events Section */}
             {events.length > 0 && (
@@ -1284,6 +1331,14 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
               )}
             </View>
           </>
+        ) : (
+          <View style={styles.content}>
+            <Subtitle weight="bold">
+              {verifiedIsMember
+                ? t('screens.group.joined')
+                : t('screens.group.not_joined')}
+            </Subtitle>
+          </View>
         )}
       </Animated.ScrollView>
 
@@ -1317,9 +1372,9 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
 
       <BottomSheet
         ref={leaveGroupBottomSheetRef}
-        closeOnBackdropPress={false}
+        closeOnBackdropPress={true}
         initialSnap="closed"
-        showCloseButton={true}
+        showCloseButton={false}
         enableGestureControl={false}
         closeButtonPosition="top-right"
         header={
@@ -1327,11 +1382,11 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         }>
         <View style={styles.leaveGroupContainer}>
           <View style={styles.leaveGroupContent}>
-            <BodySmall align="center">
+            <Body align="center">
               {t('screens.group.leave_group_confirmation', {
                 groupName: group?.name || '',
               })}
-            </BodySmall>
+            </Body>
           </View>
           <View style={styles.leaveGroupButtonsContainer}>
             <Button
@@ -1620,20 +1675,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.md,
   },
-  leaveGroupContent: {
-    flex: 1,
-  },
   leaveGroupContainer: {
-    flex: 1,
+    padding: spacing.md,
+    gap: spacing.xxxl,
+  },
+  leaveGroupContent: {
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   leaveGroupButtonsContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    marginVertical: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
     flexDirection: 'row',
     justifyContent: 'center',
+    gap: spacing.md,
+    // paddingTop: spacing.lg,
+    // paddingBottom: spacing.lg,
   },
   cancelButton: {
     flex: 1,

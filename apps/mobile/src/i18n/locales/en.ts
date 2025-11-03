@@ -278,7 +278,7 @@ export default {
       select_event_type_prompt: 'Please select an event type in the first step',
       discard_dialog_title: 'Discard Changes?',
       discard_dialog_message:
-        'You have unsaved changes. Are you sure you want to go back? All changes will be lost.',
+        'You have unsaved changes.\n Are you sure you want to go back?\n All changes will be lost.',
       save_draft_dialog_title: 'Save Draft?',
       save_draft_dialog_message:
         'Would you like to save your progress as a draft?',

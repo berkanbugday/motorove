@@ -27,6 +27,7 @@ import {
   NumberAnimatedInput,
   Button,
   Typography,
+  Body,
   Dropdown,
   DropdownItem,
   showToast,
@@ -39,8 +40,9 @@ import {
   UserSelector,
   Wizard,
   Tabs,
-  Dialog,
   BottomSheetRef,
+  openBottomSheet,
+  closeBottomSheet,
 } from '@components';
 import {colors, commonStyles, radius, spacing} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -88,8 +90,6 @@ export const CreateEventScreen: React.FC = () => {
   const startLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const finishLocationMapBottomSheetRef = useRef<BottomSheetRef>(null);
   const wizardRef = useRef<WizardHandle>(null);
-  const exitDialogRef = useRef<any>(null);
-  const draftDialogRef = useRef<any>(null);
 
   // State hooks
   const [selectedEventType, setSelectedEventType] =
@@ -230,6 +230,47 @@ export const CreateEventScreen: React.FC = () => {
     [isRideOrCamping, isWorkshop],
   );
 
+  // Navigation handlers
+  const handleGoBack = useCallback(() => {
+    if (isDirty) {
+      openBottomSheet({
+        title: t('screens.event.discard_dialog_title'),
+        snapPoint: 'minimal',
+        showCloseButton: false,
+        closeOnBackdropPress: true,
+        enableGestureControl: false,
+        content: (
+          <View style={styles.bottomSheetContent}>
+            <Body style={styles.bottomSheetMessage}>
+              {t('screens.event.discard_dialog_message')}
+            </Body>
+            <View style={styles.bottomSheetButtons}>
+              <Button
+                title={t('common.cancel')}
+                variant="outline"
+                shape="round"
+                onPress={() => closeBottomSheet()}
+                style={styles.bottomSheetButton}
+              />
+              <Button
+                title={t('common.confirm')}
+                variant="primary"
+                shape="round"
+                onPress={() => {
+                  closeBottomSheet();
+                  navigation.goBack();
+                }}
+                style={styles.bottomSheetButton}
+              />
+            </View>
+          </View>
+        ),
+      });
+    } else {
+      navigation.goBack();
+    }
+  }, [navigation, isDirty, t]);
+
   // Set navigation options to disable iOS swipe back gesture when dirty
   useLayoutEffect(() => {
     if (Platform.OS === 'ios') {
@@ -243,7 +284,7 @@ export const CreateEventScreen: React.FC = () => {
         'hardwareBackPress',
         () => {
           if (isDirty) {
-            exitDialogRef.current?.open();
+            handleGoBack();
             return true; // Prevent default behavior
           }
           return false; // Allow default behavior
@@ -251,24 +292,7 @@ export const CreateEventScreen: React.FC = () => {
       );
       return () => backHandler.remove();
     }
-  }, [navigation, isDirty]);
-
-  // Navigation handlers
-  const handleGoBack = useCallback(() => {
-    if (isDirty) {
-      exitDialogRef.current?.open();
-    } else {
-      navigation.goBack();
-    }
-  }, [navigation, isDirty]);
-
-  const confirmExit = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-
-  const handleSaveDraft = useCallback(() => {
-    draftDialogRef.current?.open();
-  }, []);
+  }, [navigation, isDirty, handleGoBack]);
 
   const confirmSaveDraft = useCallback(async () => {
     const formData = getValues();
@@ -348,7 +372,45 @@ export const CreateEventScreen: React.FC = () => {
     selectedStartLocation,
     selectedFinishLocation,
     selectedImages,
+    createEvent,
+    t,
   ]);
+
+  const handleSaveDraft = useCallback(() => {
+    openBottomSheet({
+      title: t('screens.event.save_draft_dialog_title'),
+      snapPoint: 'minimal',
+      showCloseButton: false,
+      closeOnBackdropPress: true,
+      enableGestureControl: false,
+      content: (
+        <View style={styles.bottomSheetContent}>
+          <Body style={styles.bottomSheetMessage}>
+            {t('screens.event.save_draft_dialog_message')}
+          </Body>
+          <View style={styles.bottomSheetButtons}>
+            <Button
+              title={t('common.cancel')}
+              variant="outline"
+              shape="round"
+              onPress={() => closeBottomSheet()}
+              style={styles.bottomSheetButton}
+            />
+            <Button
+              title={t('common.save')}
+              variant="primary"
+              shape="round"
+              onPress={async () => {
+                closeBottomSheet();
+                await confirmSaveDraft();
+              }}
+              style={styles.bottomSheetButton}
+            />
+          </View>
+        </View>
+      ),
+    });
+  }, [t, confirmSaveDraft]);
 
   const handleNextStep = useCallback(async () => {
     wizardRef.current?.nextStep();
@@ -1434,41 +1496,6 @@ export const CreateEventScreen: React.FC = () => {
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
         />
       </BottomSheet>
-
-      {/* Exit Confirmation Dialog */}
-      <Dialog
-        ref={exitDialogRef}
-        variant="confirm"
-        title={t('screens.event.discard_dialog_title')}
-        message={t('screens.event.discard_dialog_message')}
-        confirmButton={{
-          text: t('common.confirm'),
-          variant: 'primary',
-          onPress: confirmExit,
-        }}
-        cancelButton={{
-          text: t('common.cancel'),
-          variant: 'outline',
-          onPress: () => exitDialogRef.current?.close(),
-        }}
-      />
-
-      {/* Save Draft Confirmation Dialog */}
-      <Dialog
-        ref={draftDialogRef}
-        variant="confirm"
-        title={t('screens.event.save_draft_dialog_title')}
-        message={t('screens.event.save_draft_dialog_message')}
-        confirmButton={{
-          text: t('common.save'),
-          variant: 'primary',
-          onPress: confirmSaveDraft,
-        }}
-        cancelButton={{
-          text: t('common.cancel'),
-          variant: 'outline',
-        }}
-      />
     </View>
   );
 };
@@ -1584,6 +1611,23 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     marginTop: spacing.md,
+  },
+  bottomSheetContent: {
+    padding: spacing.sm,
+  },
+  bottomSheetMessage: {
+    textAlign: 'center',
+  },
+  bottomSheetButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  bottomSheetButton: {
+    flex: 1,
+    width: '50%',
   },
 });
 
