@@ -46,6 +46,7 @@ export const styles = StyleSheet.create({
   },
   locationText: {
     marginLeft: spacing.xs,
+    marginRight: spacing.md,
   },
   participantsContainer: {
     flexDirection: 'row',

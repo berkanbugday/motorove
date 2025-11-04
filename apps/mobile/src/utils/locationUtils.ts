@@ -1,10 +1,21 @@
 /**
- * Location utility functions
+ * Location and route utility functions
  */
+
+import {intervalToDuration, formatDuration} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
+import {Language} from '@motorove/shared';
+import {AppConfig} from '@configs/appConfig';
 
 export interface Coordinates {
   latitude: number;
   longitude: number;
+}
+
+export interface RouteResult {
+  distanceKm: number;
+  durationText: string;
+  durationSeconds: number;
 }
 
 /**
@@ -42,4 +53,129 @@ export const formatDistance = (
   unit: string = 'km',
 ): string => {
   return `${distanceKm.toFixed(1)} ${unit}`;
+};
+
+/**
+ * Calculate route distance and duration using Google Maps Routes API (v2)
+ * @param startLat - Starting latitude
+ * @param startLng - Starting longitude
+ * @param endLat - Destination latitude
+ * @param endLng - Destination longitude
+ * @param language - Language for duration formatting (default: Turkish)
+ * @returns Route information including distance and formatted duration
+ * @throws Error if route calculation fails
+ */
+export const calculateRoute = async (
+  startLat: number,
+  startLng: number,
+  endLat: number,
+  endLng: number,
+  language: Language = Language.TR,
+): Promise<RouteResult> => {
+  // Use Google Maps Routes API (v2) to calculate route distance and duration
+  const url = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+
+  const requestBody = {
+    origin: {
+      location: {
+        latLng: {
+          latitude: startLat,
+          longitude: startLng,
+        },
+      },
+    },
+    destination: {
+      location: {
+        latLng: {
+          latitude: endLat,
+          longitude: endLng,
+        },
+      },
+    },
+    travelMode: 'DRIVE',
+    routingPreference: 'TRAFFIC_AWARE',
+    computeAlternativeRoutes: false,
+    languageCode: language.toLowerCase(),
+    units: 'METRIC',
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': AppConfig.ROUTES_API_KEY,
+      'X-Goog-FieldMask':
+        'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  const data = await response.json();
+
+  if (!data.routes || data.routes.length === 0) {
+    throw new Error(
+      `Route calculation failed: ${data.error?.message || 'No routes found'}`,
+    );
+  }
+
+  const route = data.routes[0];
+  const distanceKm = Math.round(route.distanceMeters / 1000); // Convert meters to km
+  const durationSeconds = parseInt(route.duration.replace('s', ''), 10); // Parse duration string (e.g., "1234s")
+  const durationHours = durationSeconds / 3600; // Convert seconds to hours
+
+  // Format duration using date-fns
+  const durationMs = durationSeconds * 1000; // Convert seconds to milliseconds
+  const duration = intervalToDuration({start: 0, end: durationMs});
+
+  // Get the correct locale based on language setting
+  const locale =
+    language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS;
+
+  let durationText: string;
+  if (durationHours < 1) {
+    // For durations less than 1 hour, display minutes only
+    durationText = formatDuration(
+      {minutes: duration.minutes || 0},
+      {
+        format: ['minutes'],
+        locale: locale,
+      },
+    );
+    if (!durationText && duration.seconds) {
+      // If less than a minute, use localized version of '1 minute'
+      durationText = formatDuration(
+        {minutes: 1},
+        {format: ['minutes'], locale: locale},
+      );
+    }
+  } else {
+    // For longer durations, display hours and minutes
+    durationText = formatDuration(
+      {hours: duration.hours || 0, minutes: duration.minutes || 0},
+      {
+        format: ['hours', 'minutes'],
+        delimiter: ' ',
+        locale: locale,
+      },
+    );
+  }
+
+  return {
+    distanceKm,
+    durationText,
+    durationSeconds,
+  };
+};
+
+/**
+ * Format route information as a display string
+ * @param distanceKm - Distance in kilometers
+ * @param durationText - Formatted duration text
+ * @returns Formatted route info string (e.g., "15 km • 20 minutes")
+ */
+export const formatRouteInfo = (
+  distanceKm: number,
+  durationText: string,
+): string => {
+  return `${distanceKm} km • ${durationText}`;
 };

@@ -27,6 +27,13 @@ export const AppConfig = {
   ENABLE_LOGS: Config.ENABLE_LOGS === 'true',
 
   /**
+   * Google Maps & Geocoding API key
+   */
+  GOOGLE_MAPS_API_KEY: Config.GOOGLE_MAPS_API_KEY,
+  GEOCODING_API_KEY: Config.GEOCODING_API_KEY,
+  ROUTES_API_KEY: Config.ROUTES_API_KEY,
+
+  /**
    * API request timeout in milliseconds
    */
   API_TIMEOUT: parseInt(Config.API_TIMEOUT || '15000', 10),

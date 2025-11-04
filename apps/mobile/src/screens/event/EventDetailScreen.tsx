@@ -39,6 +39,7 @@ import {
   ParticipantAvatars,
   showToast,
   ImagePreviewModal,
+  openMapAppsBottomSheet,
 } from '@components';
 import {format} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
@@ -59,7 +60,7 @@ import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
 import {EnumUtils} from '@utils/enumUtils';
 import {formatCurrency} from '@utils/currencyUtils';
-import {calculateRouteWithOSRM, formatRouteInfo} from '@utils/routeUtils';
+import {calculateRoute, formatRouteInfo} from '@utils/locationUtils';
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
 
 type Props = {
@@ -255,6 +256,30 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     setImagePreviewVisible(false);
   };
 
+  const handleDirections = useCallback(
+    (locationType: 'meeting' | 'start') => {
+      if (!event?.addresses) {
+        return;
+      }
+
+      const addressType =
+        locationType === 'meeting'
+          ? AddressType.EVENT_MEETING_LOCATION
+          : AddressType.EVENT_START_LOCATION;
+
+      const address = event.addresses.find(
+        addr =>
+          addr.language.toLowerCase() === language.toLowerCase() &&
+          addr.type === addressType,
+      );
+
+      if (address?.latitude && address?.longitude) {
+        openMapAppsBottomSheet(address.latitude, address.longitude, t);
+      }
+    },
+    [event?.addresses, language],
+  );
+
   const renderCarouselItem = ({item, index}: {item: IImage; index: number}) => {
     const isCensored = item.isCensored;
     const isRevealed = revealedCensoredImages[index];
@@ -391,8 +416,8 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     );
   };
 
-  // Calculate route using OSRM API (OpenStreetMap Routing Machine)
-  const calculateRoute = useCallback(
+  // Calculate route using Google Maps Routes API (v2)
+  const handleCalculateRoute = useCallback(
     async (
       startLat: number,
       startLng: number,
@@ -402,7 +427,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
       try {
         setIsLoadingRoute(true);
 
-        const result = await calculateRouteWithOSRM(
+        const result = await calculateRoute(
           startLat,
           startLng,
           endLat,
@@ -444,7 +469,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         finishAddress.latitude &&
         finishAddress.longitude
       ) {
-        calculateRoute(
+        handleCalculateRoute(
           startAddress.latitude,
           startAddress.longitude,
           finishAddress.latitude,
@@ -454,7 +479,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         setRouteInfo('');
       }
     }
-  }, [event?.addresses, language, calculateRoute]);
+  }, [event?.addresses, language, handleCalculateRoute]);
 
   useEffect(() => {
     if (joinEventLoading || leaveEventLoading) {
@@ -578,7 +603,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               label={EnumUtils.convertEventType(event.eventType)}
               variant="filled"
               color="primary"
-              style={styles.rideBadge}
               size="small"
             />
 
@@ -617,7 +641,10 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
           {/* Meeting Location Row */}
           {getMeetingLocationAddress() && (
-            <View style={styles.infoRow}>
+            <TouchableOpacity
+              style={styles.infoRow}
+              onPress={() => handleDirections('meeting')}
+              activeOpacity={0.7}>
               <Icon
                 name="user-location"
                 size={16}
@@ -626,7 +653,12 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               <Typography style={styles.infoText}>
                 {getMeetingLocationAddress()}
               </Typography>
-            </View>
+              <Icon
+                name="location-arrow-filled"
+                size={16}
+                color={colors.primary.main}
+              />
+            </TouchableOpacity>
           )}
 
           {/* Distance/Duration/Difficulty Row */}
@@ -703,7 +735,10 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             initiallyExpanded={true}>
             {/* Start Location Row */}
             {getStartLocationAddress() && (
-              <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
+              <TouchableOpacity
+                style={[styles.infoRow, {paddingVertical: spacing.xs}]}
+                onPress={() => handleDirections('start')}
+                activeOpacity={0.7}>
                 <Icon
                   name="map-pin-filled"
                   size={16}
@@ -715,7 +750,12 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
                   </Typography>
                   {getStartLocationAddress()}
                 </Typography>
-              </View>
+                <Icon
+                  name="location-arrow-filled"
+                  size={16}
+                  color={colors.primary.main}
+                />
+              </TouchableOpacity>
             )}
 
             {/* Finish Location Row */}
@@ -739,7 +779,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
             {event.roadType && (
               <View style={[styles.infoRow, {paddingVertical: spacing.xs}]}>
                 <Icon
-                  name="route-filled"
+                  name="road-filled"
                   size={20}
                   color={colors.neutral.grey}
                 />
@@ -974,9 +1014,6 @@ const styles = StyleSheet.create({
   eventCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  rideBadge: {
-    backgroundColor: colors.primary.light,
   },
   infoRow: {
     flexDirection: 'row',

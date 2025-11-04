@@ -6,6 +6,5 @@ export * from './languageUtils';
 export * from './enumUtils';
 export * from './currencyUtils';
 export * from './locationUtils';
-export * from './routeUtils';
 export * from './warningUtils';
 export * from './emergencyUtils';

@@ -1,16 +1,28 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import {IEmergency, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
-import {Title, Caption, Icon, Button, BodySmall, IconName} from '@components';
+import {
+  Title,
+  Caption,
+  Icon,
+  Button,
+  BodySmall,
+  IconName,
+  openMapAppsBottomSheet,
+} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
-import {calculateDistance} from '@utils/locationUtils';
 import {getEmergencyIcon} from '@utils/emergencyUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
+import {calculateRoute} from '@utils/locationUtils';
 
 /**
  * Emergency marker card props
@@ -45,7 +57,7 @@ export const RNMapEmergencyMarkerCard: React.FC<
   // Distance state
   const [distance, setDistance] = useState<string | null>(null);
 
-  // Calculate straight-line distance
+  // Calculate route distance
   useEffect(() => {
     if (
       !userLocation ||
@@ -56,12 +68,35 @@ export const RNMapEmergencyMarkerCard: React.FC<
       return;
     }
 
-    const straightLineDistance = calculateDistance(userLocation, {
-      latitude: emergency.addresses[0].latitude,
-      longitude: emergency.addresses[0].longitude,
-    });
-    setDistance(straightLineDistance.toFixed(1));
-  }, [userLocation, emergency.addresses]);
+    const fetchRouteDistance = async () => {
+      try {
+        const route = await calculateRoute(
+          userLocation.latitude,
+          userLocation.longitude,
+          emergency.addresses[0].latitude,
+          emergency.addresses[0].longitude,
+          language as Language,
+        );
+        setDistance(route.distanceKm.toString());
+      } catch (error) {
+        console.error('Error calculating route distance:', error);
+        setDistance(null);
+      }
+    };
+
+    fetchRouteDistance();
+  }, [userLocation, emergency.addresses, language]);
+
+  const handleGetDirections = () => {
+    if (!emergency.addresses || emergency.addresses.length === 0) {
+      return;
+    }
+    openMapAppsBottomSheet(
+      emergency.addresses[0].latitude,
+      emergency.addresses[0].longitude,
+      t,
+    );
+  };
 
   return (
     <View style={[styles.container, style]}>
@@ -181,7 +216,19 @@ export const RNMapEmergencyMarkerCard: React.FC<
             locale: language.toLowerCase() === 'tr' ? tr : enUS,
           })}
         </Caption>
+        {/* Get Directions Button */}
+        {emergency.addresses && emergency.addresses.length > 0 && (
+          <Button
+            title={t('screens.map.get_directions')}
+            variant="dark"
+            shape="round"
+            size="small"
+            iconName="location-arrow-filled"
+            onPress={handleGetDirections}
+          />
+        )}
       </View>
+
     </View>
   );
 };
@@ -242,5 +289,6 @@ const styles = StyleSheet.create({
   },
   emergencyInfoText: {
     flex: 1,
+    marginRight: spacing.sm,
   },
 });

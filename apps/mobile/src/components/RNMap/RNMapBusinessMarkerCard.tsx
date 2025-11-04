@@ -20,9 +20,9 @@ import {
 } from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
-import {calculateDistance} from '@utils/locationUtils';
 import {BusinessStatus, DayOfWeek} from '@motorove/shared';
 import {useLanguage} from '@contexts/LanguageContext';
+import {calculateRoute} from '@utils/locationUtils';
 
 /**
  * Business marker card props
@@ -104,19 +104,31 @@ export const RNMapBusinessMarkerCard: React.FC<
     }
   }, [business.countryCode, business.phoneNumber, t]);
 
-  // Calculate straight-line distance
+  // Calculate route distance
   useEffect(() => {
     if (!userLocation) {
       setDistance(null);
       return;
     }
 
-    const straightLineDistance = calculateDistance(userLocation, {
-      latitude: business.addresses[0].latitude,
-      longitude: business.addresses[0].longitude,
-    });
-    setDistance(straightLineDistance.toFixed(1));
-  }, [userLocation, business.addresses]);
+    const fetchRouteDistance = async () => {
+      try {
+        const route = await calculateRoute(
+          userLocation.latitude,
+          userLocation.longitude,
+          business.addresses[0].latitude,
+          business.addresses[0].longitude,
+          language as Language,
+        );
+        setDistance(route.distanceKm.toString());
+      } catch (error) {
+        console.error('Error calculating route distance:', error);
+        setDistance(null);
+      }
+    };
+
+    fetchRouteDistance();
+  }, [userLocation, business.addresses, language]);
 
   // Calculate business status based on current time and working hours
   const businessStatus = useMemo(() => {

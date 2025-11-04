@@ -1,16 +1,28 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import {IWarning, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
-import {Title, Caption, Icon, Button, BodySmall, IconName} from '@components';
+import {
+  Title,
+  Caption,
+  Icon,
+  Button,
+  BodySmall,
+  IconName,
+  openMapAppsBottomSheet,
+} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
-import {calculateDistance} from '@utils/locationUtils';
 import {getWarningIcon} from '@utils/warningUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
+import {calculateRoute} from '@utils/locationUtils';
 
 /**
  * Warning marker card props
@@ -24,6 +36,7 @@ export interface RNMapWarningMarkerCardProps {
     latitude: number;
     longitude: number;
   };
+  onGetDirections?: () => void;
 }
 
 /**
@@ -47,19 +60,42 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
   // Distance state
   const [distance, setDistance] = useState<string | null>(null);
 
-  // Calculate straight-line distance
+  // Calculate route distance
   useEffect(() => {
     if (!userLocation || !warning.addresses || warning.addresses.length === 0) {
       setDistance(null);
       return;
     }
 
-    const straightLineDistance = calculateDistance(userLocation, {
-      latitude: warning.addresses[0].latitude,
-      longitude: warning.addresses[0].longitude,
-    });
-    setDistance(straightLineDistance.toFixed(1));
-  }, [userLocation, warning.addresses]);
+    const fetchRouteDistance = async () => {
+      try {
+        const route = await calculateRoute(
+          userLocation.latitude,
+          userLocation.longitude,
+          warning.addresses[0].latitude,
+          warning.addresses[0].longitude,
+          language as Language,
+        );
+        setDistance(route.distanceKm.toString());
+      } catch (error) {
+        console.error('Error calculating route distance:', error);
+        setDistance(null);
+      }
+    };
+
+    fetchRouteDistance();
+  }, [userLocation, warning.addresses, language]);
+
+  const handleGetDirections = () => {
+    if (!warning.addresses || warning.addresses.length === 0) {
+      return;
+    }
+    openMapAppsBottomSheet(
+      warning.addresses[0].latitude,
+      warning.addresses[0].longitude,
+      t,
+    );
+  };
 
   return (
     <View style={[styles.container, style]}>
@@ -160,7 +196,20 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
             locale: language.toLowerCase() === 'tr' ? tr : enUS,
           })}
         </Caption>
+
+        {/* Get Directions Button */}
+        {warning.addresses && warning.addresses.length > 0 && (
+          <Button
+            title={t('screens.map.get_directions')}
+            variant="dark"
+            shape="round"
+            size="small"
+            iconName="location-arrow-filled"
+            onPress={handleGetDirections}
+          />
+        )}
       </View>
+
     </View>
   );
 };

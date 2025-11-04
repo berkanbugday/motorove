@@ -7,7 +7,6 @@ import {
   StatusBar,
   ScrollView,
   Platform,
-  Image,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {IBusiness, DayOfWeek, BusinessStatus, Language} from '@motorove/shared';
@@ -23,17 +22,13 @@ import {
   showToast,
   Chip,
   RNMap,
+  openMapAppsBottomSheet,
 } from '@components';
 import {BusinessComments} from '@components/BusinessComments/BusinessComments';
 import {EnumUtils} from '@utils/enumUtils';
-import {calculateDistance} from '@utils/locationUtils';
+import {calculateRoute} from '@utils/locationUtils';
 import type {BottomSheetRef, RNMapMarkerItem} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
-import {MapAppType} from '@components/BusinessComments/mapApps.constants';
-import {
-  MapAppsService,
-  InstalledApps,
-} from '@components/BusinessComments/mapApps.service';
 import {useLanguage} from '@contexts/LanguageContext';
 import {
   useGetBusinessComments,
@@ -67,16 +62,8 @@ export const BusinessDetailScreen: React.FC = () => {
   );
   const [showAllWorkingHours, setShowAllWorkingHours] = useState(false);
   const [distance, setDistance] = useState<string | null>(null);
-  const [installedApps, setInstalledApps] = useState<InstalledApps>({
-    [MapAppType.GOOGLE]: false,
-    [MapAppType.APPLE]: Platform.OS === 'ios', // Apple Maps always available on iOS
-    [MapAppType.WAZE]: false,
-    [MapAppType.YANDEX]: false,
-    [MapAppType.SYGIC]: false,
-  });
 
   // Bottom sheet refs
-  const mapAppsBottomSheetRef = useRef<BottomSheetRef>(null);
   const commentActionsBottomSheetRef = useRef<BottomSheetRef>(null);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
     null,
@@ -290,19 +277,31 @@ export const BusinessDetailScreen: React.FC = () => {
     };
   }, [currentBusiness?.workingHours, t]);
 
-  // Calculate distance with delayed OSRM calculation
+  // Calculate route distance
   useEffect(() => {
     if (!userLocation || !currentBusiness) {
       setDistance(null);
       return;
     }
 
-    const straightLineDistance = calculateDistance(userLocation, {
-      latitude: currentBusiness.addresses[0].latitude,
-      longitude: currentBusiness.addresses[0].longitude,
-    });
-    setDistance(straightLineDistance.toFixed(1));
-  }, [userLocation, currentBusiness]);
+    const fetchRouteDistance = async () => {
+      try {
+        const routeResult = await calculateRoute(
+          userLocation.latitude,
+          userLocation.longitude,
+          currentBusiness.addresses[0].latitude,
+          currentBusiness.addresses[0].longitude,
+          language as Language,
+        );
+        setDistance(routeResult.distanceKm.toString());
+      } catch (error) {
+        console.error('Error calculating route distance:', error);
+        setDistance(null);
+      }
+    };
+
+    fetchRouteDistance();
+  }, [userLocation, currentBusiness, language]);
 
   // Handle phone number call
   const handlePhoneNumberCall = useCallback(async () => {
@@ -351,10 +350,6 @@ export const BusinessDetailScreen: React.FC = () => {
     }
   }, [currentBusiness?.countryCode, currentBusiness?.phoneNumber, t]);
 
-  const checkInstalledApps = async () => {
-    const apps = await MapAppsService.checkInstalledApps();
-    setInstalledApps(apps);
-  };
 
   // Comment handlers for BusinessComments component
   const handleCreateComment = useCallback(
@@ -403,33 +398,16 @@ export const BusinessDetailScreen: React.FC = () => {
     [navigation],
   );
 
-  const handleDirections = useCallback(() => {
-    if (!currentBusiness?.addresses) {
+  const handleGetDirections = useCallback(() => {
+    if (!currentBusiness?.addresses || !currentBusiness.addresses[0]) {
       return;
     }
-    mapAppsBottomSheetRef.current?.open('minimal');
-  }, [currentBusiness]);
-
-  const openMapApp = useCallback(
-    (appType: MapAppType) => {
-      if (!currentBusiness?.addresses) {
-        return;
-      }
-
-      const {latitude, longitude} = currentBusiness.addresses[0];
-      const isInstalled = installedApps[appType];
-
-      MapAppsService.openMapApp(appType, latitude, longitude, isInstalled, () =>
-        mapAppsBottomSheetRef.current?.close(),
-      );
-    },
-    [currentBusiness, installedApps],
-  );
-
-  // Check installed apps once on mount only
-  useEffect(() => {
-    checkInstalledApps();
-  }, []);
+    openMapAppsBottomSheet(
+      currentBusiness.addresses[0].latitude,
+      currentBusiness.addresses[0].longitude,
+      t,
+    );
+  }, [currentBusiness, t]);
 
   // Update business if params change
   useEffect(() => {
@@ -689,7 +667,7 @@ export const BusinessDetailScreen: React.FC = () => {
           variant="dark"
           shape="round"
           iconName="location-arrow-filled"
-          onPress={handleDirections}
+          onPress={handleGetDirections}
           style={styles.getDirectionButton}
         />
         {currentBusiness.phoneNumber && (
@@ -704,111 +682,6 @@ export const BusinessDetailScreen: React.FC = () => {
         )}
       </View>
 
-      {/* Map Apps Selection Bottom Sheet */}
-      <BottomSheet
-        ref={mapAppsBottomSheetRef}
-        showCloseButton={false}
-        closeOnBackdropPress={true}
-        closeButtonPosition="top-right"
-        title={t('screens.map.choose_map_app')}
-        subtitle={t('screens.map.select_preferred_navigation')}>
-        <ScrollView
-          horizontal
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.mapAppsScrollContent}
-          style={styles.mapAppsScroll}>
-          {/* Google Maps */}
-          <TouchableOpacity
-            style={[
-              styles.mapAppCard,
-              !installedApps[MapAppType.GOOGLE] && styles.mapAppCardDisabled,
-            ]}
-            onPress={() => openMapApp(MapAppType.GOOGLE)}
-            activeOpacity={0.7}>
-            <Image
-              source={require('@assets/images/logos/google-maps.png')}
-              resizeMode="center"
-              style={styles.mapLogo}
-            />
-
-            <Body weight="semiBold" style={styles.mapAppName}>
-              {t('screens.map.google_maps')}
-            </Body>
-          </TouchableOpacity>
-
-          {/* Apple Maps */}
-          {Platform.OS === 'ios' && (
-            <TouchableOpacity
-              style={styles.mapAppCard}
-              onPress={() => openMapApp(MapAppType.APPLE)}
-              activeOpacity={0.7}>
-              <Image
-                source={require('@assets/images/logos/apple-maps.png')}
-                resizeMode="center"
-                style={styles.mapLogo}
-              />
-              <Body weight="semiBold" style={styles.mapAppName}>
-                {t('screens.map.apple_maps')}
-              </Body>
-            </TouchableOpacity>
-          )}
-
-          {/* Waze */}
-          <TouchableOpacity
-            style={[
-              styles.mapAppCard,
-              !installedApps[MapAppType.WAZE] && styles.mapAppCardDisabled,
-            ]}
-            onPress={() => openMapApp(MapAppType.WAZE)}
-            activeOpacity={0.7}>
-            <Image
-              source={require('@assets/images/logos/waze.png')}
-              resizeMode="center"
-              style={styles.mapLogo}
-            />
-            <Body weight="semiBold" style={styles.mapAppName}>
-              {t('screens.map.waze')}
-            </Body>
-          </TouchableOpacity>
-
-          {/* Yandex Maps */}
-          <TouchableOpacity
-            style={[
-              styles.mapAppCard,
-              !installedApps[MapAppType.YANDEX] && styles.mapAppCardDisabled,
-            ]}
-            onPress={() => openMapApp(MapAppType.YANDEX)}
-            activeOpacity={0.7}>
-            <Image
-              source={require('@assets/images/logos/yandex-maps.png')}
-              resizeMode="center"
-              style={styles.mapLogo}
-            />
-            <Body weight="semiBold" style={styles.mapAppName}>
-              {t('screens.map.yandex_maps')}
-            </Body>
-          </TouchableOpacity>
-
-          {/* Sygic */}
-          <TouchableOpacity
-            style={[
-              styles.mapAppCard,
-              !installedApps[MapAppType.SYGIC] && styles.mapAppCardDisabled,
-            ]}
-            onPress={() => openMapApp(MapAppType.SYGIC)}
-            activeOpacity={0.7}>
-            <Image
-              source={require('@assets/images/logos/sygic.png')}
-              resizeMode="center"
-              style={styles.mapLogo}
-            />
-            <Body weight="semiBold" style={styles.mapAppName}>
-              {t('screens.map.sygic')}
-            </Body>
-          </TouchableOpacity>
-        </ScrollView>
-      </BottomSheet>
 
       {/* Comment Actions Bottom Sheet */}
       <BottomSheet
@@ -996,12 +869,11 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   closedText: {
-    color: colors.primary.main,
+    color: colors.neutral.grey,
   },
   todayDay: {
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: colors.neutral.black,
-    textDecorationLine: 'underline',
   },
   markerInner: {
     width: 36,

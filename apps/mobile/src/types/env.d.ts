@@ -29,6 +29,12 @@ declare module 'react-native-config' {
     FIREBASE_MESSAGING_SENDER_ID: string;
     FIREBASE_APP_ID: string;
     FIREBASE_DATABASE_URL: string;
+
+    // Google Maps
+    GOOGLE_MAPS_API_KEY: string;
+    GEOCODING_API_KEY: string;
+    ROUTES_API_KEY: string;
+
     // Allow for additional keys
     [key: string]: string | undefined;
   }

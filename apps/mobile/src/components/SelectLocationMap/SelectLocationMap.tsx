@@ -14,6 +14,7 @@ import {IBaseCreateAddress} from '@motorove/shared';
 import {EnumUtils} from '@utils/enumUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {useTranslation} from '@hooks/useTranslation';
+import Config from 'react-native-config';
 
 interface SelectLocationMapProps {
   onLocationSelect: (addresses: IBaseCreateAddress[]) => void;
@@ -31,6 +32,8 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
   // Add map ref for animation
   const mapRef = useRef<any>(null);
+  // Track if component has been initialized to prevent re-fetching
+  const isInitialized = useRef(false);
 
   // Default region (Turkey)
   const DEFAULT_REGION: Region = {
@@ -67,6 +70,13 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
 
   // Get user location on mount
   useEffect(() => {
+    // Only run on initial mount, not when initialAddress changes
+    if (isInitialized.current) {
+      return;
+    }
+
+    isInitialized.current = true;
+
     if (initialAddress) {
       // Use the initial location if provided
       const newRegion = {
@@ -122,61 +132,70 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
         },
       );
     }
-  }, [initialAddress]);
+  }, []);
 
-  // Fetch location name using reverse geocoding for both Turkish and English
+  // Fetch location name using Google Maps Geocoding API for both Turkish and English
   const fetchLocationDetails = async (latitude: number, longitude: number) => {
     try {
+      const apiKey = Config.GEOCODING_API_KEY;
+      if (!apiKey) {
+        console.error('Google Maps API key not found');
+        setLocationAddresses([]);
+        return;
+      }
+
       const addressPromises = EnumUtils.getLanguages().map(
         async languageItem => {
           const languageCode = languageItem.value.toLowerCase();
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1&accept-language=${languageCode}`,
-            {
-              headers: {
-                Accept: 'application/json',
-                'User-Agent': 'Motorove',
-              },
-            },
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&language=${languageCode}&key=${apiKey}`,
           );
 
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
 
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            throw new Error(`Expected JSON response but got ${contentType}`);
-          }
-
           const data = await response.json();
-          if (data && data.display_name) {
-            // Extract place address
-            let quarter = data.address.quarter
-              ? `${data.address.quarter}, `
-              : '';
-            let hamlet = data.address.hamlet ? `${data.address.hamlet}, ` : '';
-            let village = data.address.village
-              ? `${data.address.village}, `
-              : '';
-            let suburb = data.address.suburb ? `${data.address.suburb}, ` : '';
-            let town = data.address.town ? `${data.address.town}, ` : '';
-            let borough = data.address.borough
-              ? `${data.address.borough}, `
-              : '';
-            let province = data.address.province
-              ? `${data.address.province}, `
-              : data.address.state
-              ? `${data.address.state}, `
-              : '';
-            let country = data.address.country ? `${data.address.country}` : '';
-            const address = `${quarter}${hamlet}${village}${suburb}${town}${borough}${province}${country}`;
 
-            let countryCode = data.address.country_code
-              ? `${data.address.country_code}`
-              : '';
+          if (data.status === 'OK' && data.results && data.results.length > 0) {
+            const result = data.results[0];
+            const addressComponents = result.address_components;
+
+            // Extract country code
+            const countryComponent = addressComponents.find((component: any) =>
+              component.types.includes('country'),
+            );
+            const countryCode = countryComponent?.short_name || '';
+
+            // Build formatted address from components
+            const neighborhood = addressComponents.find(
+              (c: any) =>
+                c.types.includes('neighborhood') ||
+                c.types.includes('sublocality'),
+            )?.long_name;
+            const administrativeAreaLevel4 = addressComponents.find((c: any) =>
+              c.types.includes('administrative_area_level_4'),
+            )?.long_name;
+            const district = addressComponents.find((c: any) =>
+              c.types.includes('administrative_area_level_2'),
+            )?.long_name;
+            const city = addressComponents.find((c: any) =>
+              c.types.includes('administrative_area_level_1'),
+            )?.long_name;
+            const country = countryComponent?.long_name;
+
+            // Build address string with available components
+            const addressParts = [
+              neighborhood,
+              administrativeAreaLevel4,
+              district,
+              city,
+              country,
+            ].filter(part => part);
+            const address = addressParts.join(', ') || result.formatted_address;
+
             return {
-              address: address || data.display_name,
+              address,
               language: languageItem.value,
               latitude,
               longitude,
