@@ -1,15 +1,21 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { BaseModel } from '../../core/models/base.model';
 import { SocialMediaPlatform } from '../../enums/models/social-media-platform.enum';
+import { User } from './user.model';
 
 @ObjectType()
-export class SocialMedia extends BaseModel {
+export class UserSocialMediaProfile {
   @Field(() => SocialMediaPlatform)
   platform: SocialMediaPlatform;
 
   @Field(() => String)
   username: string;
 
-  @Field(() => String)
-  url: string;
+  @Field(() => User)
+  createdBy: Partial<User>;
+
+  @Field()
+  createdById: string;
+
+  @Field()
+  createdAt: Date;
 }

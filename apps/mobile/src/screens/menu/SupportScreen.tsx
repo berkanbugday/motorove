@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 import {View, StyleSheet, SafeAreaView} from 'react-native';
 import {
   TopHeaderBar,
@@ -9,12 +9,17 @@ import {
   showToast,
   AnimatedInput,
   DropdownItem,
+  Icon,
+  Caption,
 } from '@components';
 import {colors, commonStyles, spacing} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useTranslation} from '@hooks/useTranslation';
-import {useCreateSupportRequest} from '@services/support.service';
+import {
+  useCreateSupportRequest,
+  getDeviceInfo,
+} from '@services/support.service';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -34,6 +39,9 @@ export const SupportScreen = () => {
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem | null>(
     null,
   );
+
+  // Get device info for display
+  const deviceInfo = useMemo(() => getDeviceInfo(), []);
 
   const {createSupportRequest, loading: isLoading} = useCreateSupportRequest(
     () => {
@@ -104,10 +112,10 @@ export const SupportScreen = () => {
       />
       <SafeAreaView style={styles.container}>
         <KeyboardAwareScrollView
-          snapToStart={true}
           showsVerticalScrollIndicator={false}
           enableOnAndroid={true}
           enableAutomaticScroll={true}
+          enableResetScrollToCoords={false}
           keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
             <Title style={styles.screenTitle}>
@@ -141,6 +149,46 @@ export const SupportScreen = () => {
                 error={errors.message}
                 multiline
               />
+            </View>
+          </View>
+          {/* Device Info Section */}
+          <View style={styles.deviceInfoContainer}>
+            <View style={styles.infoRow}>
+              <View style={styles.iconContainer}>
+                <Icon
+                  name="mobile-phone-filled"
+                  size={20}
+                  color={colors.neutral.grey}
+                />
+              </View>
+              <View style={styles.infoContent}>
+                <Caption style={styles.infoLabel}>
+                  {t('screens.support.app_version')}
+                </Caption>
+                <Body style={styles.infoValue}>
+                  v{deviceInfo.appVersion} (build {deviceInfo.buildNumber})
+                </Body>
+              </View>
+            </View>
+
+            <View style={styles.infoRow}>
+              <View style={styles.iconContainer}>
+                <Icon
+                  name="microchip-filled"
+                  size={20}
+                  color={colors.neutral.grey}
+                />
+              </View>
+              <View style={styles.infoContent}>
+                <Caption style={styles.infoLabel}>
+                  {t('screens.support.device_info')}
+                </Caption>
+                <Body style={styles.infoValue}>
+                  {deviceInfo.brand} {deviceInfo.model},{' '}
+                  {deviceInfo.platform.toUpperCase()}{' '}
+                  {deviceInfo.platformVersion}
+                </Body>
+              </View>
             </View>
           </View>
         </KeyboardAwareScrollView>
@@ -188,5 +236,38 @@ const styles = StyleSheet.create({
     marginVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.secondary.main,
+  },
+  deviceInfoContainer: {
+    backgroundColor: colors.secondary.light,
+    borderRadius: spacing.sm,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.lg,
+    padding: spacing.md,
+    gap: spacing.md,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: spacing.sm,
+    backgroundColor: colors.neutral.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoContent: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  infoLabel: {
+    color: colors.neutral.grey,
+    fontSize: 12,
+  },
+  infoValue: {
+    color: colors.neutral.black,
+    fontSize: 14,
   },
 });

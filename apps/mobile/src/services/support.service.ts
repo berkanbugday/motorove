@@ -10,7 +10,7 @@ import {ICreateSupportRequest} from '@motorove/shared';
 /**
  * Get device information for troubleshooting
  */
-const getDeviceInfo = (): Record<string, string> => {
+export const getDeviceInfo = (): Record<string, string> => {
   try {
     const deviceInfo = {
       platform: Platform.OS.toString(),

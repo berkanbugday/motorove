@@ -8,6 +8,11 @@ import EnvelopeFilled from '@assets/icons/envelope-filled.svg';
 import Google from '@assets/icons/brands/google.svg';
 import Apple from '@assets/icons/brands/apple.svg';
 import Facebook from '@assets/icons/brands/facebook.svg';
+import Instagram from '@assets/icons/brands/instagram.svg';
+import Youtube from '@assets/icons/brands/youtube.svg';
+import Tiktok from '@assets/icons/brands/tiktok.svg';
+import Linkedin from '@assets/icons/brands/linkedin.svg';
+import X from '@assets/icons/brands/x.svg';
 // Common Icons
 import ArrowLeft from '@assets/icons/arrow-left.svg';
 import User from '@assets/icons/user.svg';
@@ -116,6 +121,8 @@ import LocationQuestionFilled from '@assets/icons/location-question-filled.svg';
 import ScrewdriverFilled from '@assets/icons/screwdriver-filled.svg';
 import TireFilled from '@assets/icons/tire-filled.svg';
 import StethoscopeFilled from '@assets/icons/stethoscope-filled.svg';
+import MobilePhoneFilled from '@assets/icons/mobile-phone-filled.svg';
+import MicrochipFilled from '@assets/icons/microchip-filled.svg';
 
 //Weather Icons
 import Sunny from '@assets/icons/weather/sunny.svg';
@@ -136,6 +143,11 @@ export type IconName =
   | 'google'
   | 'apple'
   | 'facebook'
+  | 'instagram'
+  | 'youtube'
+  | 'tiktok'
+  | 'linkedin'
+  | 'x'
   | 'arrow-left'
   | 'user'
   | 'user-filled'
@@ -250,7 +262,9 @@ export type IconName =
   | 'location-question-filled'
   | 'screwdriver-filled'
   | 'tire-filled'
-  | 'stethoscope-filled';
+  | 'stethoscope-filled'
+  | 'mobile-phone-filled'
+  | 'microchip-filled';
 
 interface IconProps {
   name: IconName;
@@ -287,6 +301,16 @@ export function Icon({
       return <Apple {...commonProps} />;
     case 'facebook':
       return <Facebook {...commonProps} />;
+    case 'instagram':
+      return <Instagram {...commonProps} />;
+    case 'youtube':
+      return <Youtube {...commonProps} />;
+    case 'tiktok':
+      return <Tiktok {...commonProps} />;
+    case 'linkedin':
+      return <Linkedin {...commonProps} />;
+    case 'x':
+      return <X {...commonProps} />;
     case 'arrow-left':
       return <ArrowLeft {...commonProps} />;
     case 'user':
@@ -517,6 +541,10 @@ export function Icon({
       return <TireFilled {...commonProps} />;
     case 'stethoscope-filled':
       return <StethoscopeFilled {...commonProps} />;
+    case 'mobile-phone-filled':
+      return <MobilePhoneFilled {...commonProps} />;
+    case 'microchip-filled':
+      return <MicrochipFilled {...commonProps} />;
     default:
       return null;
   }

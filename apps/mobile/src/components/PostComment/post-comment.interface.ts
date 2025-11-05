@@ -4,7 +4,7 @@ import {IconName} from '../Icon';
 export interface PostComment {
   id: string;
   userId: string;
-  userName: string;
+  fullName: string;
   avatarSource: ImageSourcePropType;
   content: string;
   timeAgo: string;
@@ -15,7 +15,7 @@ export interface PostComment {
 
 export interface PostWithComments {
   id: string;
-  userName: string;
+  fullName: string;
   avatarSource: ImageSourcePropType;
   timeAgo: string;
   content: string;

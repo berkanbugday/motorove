@@ -815,6 +815,7 @@ export const CreateEventScreen: React.FC = () => {
             showsVerticalScrollIndicator={false}
             enableOnAndroid={true}
             enableAutomaticScroll={true}
+            enableResetScrollToCoords={false}
             keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             <View style={styles.formFields}>
@@ -942,6 +943,7 @@ export const CreateEventScreen: React.FC = () => {
             showsVerticalScrollIndicator={false}
             enableOnAndroid={true}
             enableAutomaticScroll={true}
+            enableResetScrollToCoords={false}
             keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             <View style={styles.formFields}>
@@ -1079,6 +1081,7 @@ export const CreateEventScreen: React.FC = () => {
             showsVerticalScrollIndicator={false}
             enableOnAndroid={true}
             enableAutomaticScroll={true}
+            enableResetScrollToCoords={false}
             keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             {eventType ? (

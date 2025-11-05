@@ -743,6 +743,12 @@ type ImageDto {
   url: String!
 }
 
+input InsertUserSocialMediaProfileInput {
+  id: String
+  platform: SocialMediaPlatform!
+  username: String!
+}
+
 """Different interests for motorcyclists"""
 enum Interest {
   COASTAL_RIDES
@@ -840,6 +846,7 @@ type Mutation {
   updatePost(input: UpdatePostInput!): PostDto!
   updatePostComment(input: UpdatePostCommentInput!): PostCommentDto!
   updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
+  updateUserProfile(input: UpdateUserProfileInput!): ProfileDto!
   updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
 }
 
@@ -1030,6 +1037,21 @@ type PostSave {
   userId: String!
 }
 
+type ProfileDto {
+  avatar: String
+  bio: String
+  city: CityDto
+  dateOfBirth: DateTime
+  email: String!
+  firstName: String!
+  gender: Gender
+  id: ID!
+  interests: [Interest!]
+  lastName: String!
+  ridingStyles: [RidingStyle!]
+  socialMediaProfiles: [UserSocialMediaProfileDto!]
+}
+
 type Query {
   business(id: String!): BusinessDto!
   businessAverageRating(businessId: ID!): Float!
@@ -1060,7 +1082,7 @@ type Query {
   group(id: String!): GroupDto!
   groupJoinRequests(limit: Int, skip: Int): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
-  joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int): [GroupDto!]!
+  joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int, userId: String): [GroupDto!]!
   myEmergencies: [EmergencyDto!]!
   myWarnings: [WarningDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
@@ -1069,8 +1091,9 @@ type Query {
   postComments(limit: Int, postId: ID!, skip: Int): [PostCommentDto!]!
   posts(createdById: ID, groupId: ID, limit: Int, savedById: ID, skip: Int): [PostDto!]!
   user(id: String!): UserDto!
-  userProfile(id: String!): UserDto!
+  userProfile(id: String!): ProfileDto!
   userSetting: UserSettingDto!
+  userStats(userId: String!): UserStatsDto!
   users(limit: Int, query: String, skip: Int): [UserDto!]!
   warning(id: String!): WarningDto!
   warnings(filter: FilterWarningInput!): [WarningDto!]!
@@ -1127,27 +1150,13 @@ input SignUpInput {
   preferredLanguage: Language
 }
 
-type SocialMedia {
-  createdAt: DateTime!
-  createdBy: User!
-  createdById: String!
-  id: ID!
-  isActive: Boolean!
-  platform: SocialMediaPlatform!
-  updatedAt: DateTime!
-  updatedBy: User!
-  updatedById: String!
-  url: String!
-  username: String!
-}
-
 """Social media platform types"""
 enum SocialMediaPlatform {
   FACEBOOK
   INSTAGRAM
   LINKEDIN
   TIKTOK
-  TWITTER
+  X
   YOUTUBE
 }
 
@@ -1236,6 +1245,19 @@ input UpdateUserFollowingApprovalStatusInput {
   status: ApprovalStatus!
 }
 
+input UpdateUserProfileInput {
+  avatar: String
+  bio: String
+  cityId: String
+  dateOfBirth: String
+  firstName: String
+  gender: Gender
+  interests: [Interest!]
+  lastName: String
+  ridingStyles: [RidingStyle!]
+  socialMediaProfiles: [InsertUserSocialMediaProfileInput!]
+}
+
 input UpdateUserSettingInput {
   autoAcceptFollowers: Boolean
   notificationPermission: NotificationPermission
@@ -1272,7 +1294,7 @@ type User {
   posts: [Post!]
   receivedInvitations: [EventInvitation!]
   ridingStyles: [RidingStyle!]
-  socialMediaProfiles: [SocialMedia!]
+  socialMediaProfiles: [UserSocialMediaProfile!]
   supabaseId: String!
   updatedAt: DateTime!
   userSetting: UserSetting
@@ -1327,6 +1349,27 @@ type UserSettingDto {
   notificationPermission: NotificationPermission!
   notificationPreferences: JSON
   preferredLanguage: Language!
+}
+
+type UserSocialMediaProfile {
+  createdAt: DateTime!
+  createdBy: User!
+  createdById: String!
+  platform: SocialMediaPlatform!
+  username: String!
+}
+
+type UserSocialMediaProfileDto {
+  id: ID!
+  platform: SocialMediaPlatform!
+  username: String!
+}
+
+type UserStatsDto {
+  eventsCount: Int!
+  followersCount: Int!
+  followingCount: Int!
+  postsCount: Int!
 }
 
 type WarningAddressDto {

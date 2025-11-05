@@ -64,6 +64,8 @@ export default {
     select_all: 'Tümünü Seç',
     clear_all: 'Tümünü Temizle',
     view_details: 'Detayları Görüntüle',
+    read_more: 'Devamını Oku...',
+    show_less: 'Daha Az Göster...',
   },
 
   // Bottom tabs navigation items
@@ -104,6 +106,7 @@ export default {
       sign_up: 'Kayıt Ol',
       sign_in: 'Giriş Yap',
     },
+
     // Reset Password screen
     resetPassword: {
       reset_password: 'Şifre Sıfırla',
@@ -114,7 +117,8 @@ export default {
       email_send_failed:
         'Sıfırlama e-postası gönderilemedi. Lütfen tekrar deneyin.',
     },
-    // signup screen
+
+    // Signup screen
     signUp: {
       create_account_intro: 'Başlamak için bir hesap oluşturun',
       first_name: 'Ad',
@@ -151,7 +155,7 @@ export default {
       success_completed_account_setup: 'Profil ayarları başarıyla tamamlandı',
     },
 
-    userSettings: {
+    userSetting: {
       update_failed: 'Ayarlar güncellenemedi',
     },
 
@@ -189,7 +193,9 @@ export default {
       recent_activity: 'Son Aktiviteler',
       view_all: 'Tümünü Gör',
       hello: 'Merhaba,',
-      recommended_route_of_the_week: 'Haftanın Önerilen Rotası',
+      recommended_routes: 'Önerilen Rotalar',
+      plan_route_with_ai: 'Yapay Zeka ile Rota Planla',
+      coming_soon: 'Yakında',
       upcoming_events: 'Yaklaşan Etkinlikler',
       shared_posts: 'Paylaşılan Gönderiler',
       no_posts_found: 'Gönderi bulunamadı',
@@ -241,10 +247,10 @@ export default {
         'Bu yorumu silmek istediğinize emin misiniz?\n Bu işlem geri alınamaz.',
       comment_created: 'Yorum başarıyla oluşturuldu!',
       comment_updated: 'Yorum başarıyla güncellendi!',
-      comment_removed: 'Yorum başarıyla kaldırıldı!',
-      error_creating_comment: 'Yorum oluşturulamadı. Lütfen tekrar deneyin.',
-      error_updating_comment: 'Yorum güncellenemedi. Lütfen tekrar deneyin.',
-      error_removing_comment: 'Yorum kaldırılamadı. Lütfen tekrar deneyin.',
+      comment_deleted: 'Yorum başarıyla silindi!',
+      comment_created_failed: 'Yorum oluşturulamadı. Lütfen tekrar deneyin.',
+      comment_updated_failed: 'Yorum güncellenemedi. Lütfen tekrar deneyin.',
+      comment_deleted_failed: 'Yorum silinemedi. Lütfen tekrar deneyin.',
     },
 
     // Events screens
@@ -364,8 +370,6 @@ export default {
       image_too_large: 'Resim çok büyük (maksimum boyut: 10MB)',
       member_role_updated: 'Üye rolü başarıyla güncellendi',
       no_description: 'Açıklama yok',
-      show_less: 'Daha az göster',
-      read_more: 'Daha fazla göster',
       group_full: 'Grup dolu. Katılım yapamazsınız.',
       join_success: 'Gruba başarıyla katıldınız!',
       people: 'Kişi',
@@ -436,82 +440,22 @@ export default {
 
     // Profile screens
     profile: {
-      edit_profile: 'Profili Düzenle',
-      followers: 'Takipçiler',
-      following: 'Takip Edilenler',
+      about: 'Hakkında',
+      groups: 'Gruplar',
+      riding_styles: 'Sürüş Stilleri',
+      interests: 'İlgi Alanları',
       posts: 'Gönderiler',
       events: 'Etkinlikler',
-      groups: 'Gruplar',
-      bio: 'Hakkımda',
-      website: 'Web Sitesi',
-      location: 'Konum',
-      garage: 'Garaj',
-      settings: 'Profil Ayarları',
-      follow: 'Takip Et',
-      unfollow: 'Takibi Bırak',
-      message: 'Mesaj',
-      report_user: 'Kullanıcıyı Bildir',
-      block_user: 'Kullanıcıyı Engelle',
-      unblock_user: 'Kullanıcı Engelini Kaldır',
-      user_types: {
-        rider: 'Sürücü',
-        mechanic: 'Tamirci',
-        dealer: 'Satıcı',
-        enthusiast: 'Meraklı',
-      },
-      my_posts: 'Gönderilerim',
-      my_events: 'Etkinliklerim',
-      my_groups: 'Gruplarım',
-      saved_posts: 'Kaydedilen Gönderiler',
-      account_info: 'Hesap Bilgileri',
-      add_vehicle: 'Araç Ekle',
-      edit_vehicle: 'Aracı Düzenle',
-      remove_vehicle: 'Aracı Kaldır',
-      vehicle_details: 'Araç Detayları',
+      following: 'Takip Edilen',
+      followers: 'Takipçi',
+      country: 'Türkiye',
+      bio: 'Biyografi',
+      city: 'Şehir',
       social_media: 'Sosyal Medya',
-      change_photo: 'Fotoğraf Değiştir',
-      upload_photos: 'Fotoğraf Yükle',
-    },
-
-    // Settings screens
-    settings: {
-      account: 'Hesap',
-      notifications: 'Bildirimler',
-      privacy: 'Gizlilik',
-      language: 'Dil',
-      theme: 'Tema',
-      dark_mode: 'Karanlık Mod',
-      help: 'Yardım ve Destek',
-      about: 'Hakkında',
-      terms_of_service: 'Kullanım Şartları',
-      privacy_policy: 'Gizlilik Politikası',
-      contact_us: 'Bize Ulaşın',
-      version: 'Versiyon',
-      delete_account: 'Hesabı Sil',
-      change_email: 'E-posta Değiştir',
-      change_password: 'Şifre Değiştir',
-      change_phone_number: 'Telefon Numarası Değiştir',
-      notification_preferences: 'Bildirim Tercihleri',
-      push_notifications: 'Push Bildirimleri',
-      email_notifications: 'E-posta Bildirimleri',
-      account_visibility: 'Hesap Görünürlüğü',
-      block_list: 'Engellenenler Listesi',
-      data_usage: 'Veri Kullanımı',
-      logout: 'Çıkış Yap',
-      languages: {
-        english: 'İngilizce',
-        turkish: 'Türkçe',
-      },
-      notification_types: {
-        likes: 'Beğeniler',
-        comments: 'Yorumlar',
-        follows: 'Takipler',
-        mentions: 'Etiketlemeler',
-        messages: 'Mesajlar',
-        event_invites: 'Etkinlik Davetleri',
-        group_invites: 'Grup Davetleri',
-        updates: 'Güncellemeler',
-      },
+      complete_profile_message:
+        'Sürüş stilleri ve ilgi alanları eklemek için profilinizi tamamlayın',
+      groups_empty_message: 'Gruplarınız burada görünecek',
+      no_posts: 'Henüz gönderi yok',
     },
 
     // Notifications screen
@@ -521,9 +465,6 @@ export default {
       delete_failed: 'Bildirim silinemedi. Lütfen tekrar deneyin.',
       all_deleted: 'Tüm bildirimler silindi',
       delete_all_failed: 'Tüm bildirimler silinemedi',
-      device_register_failed: 'Cihaz kaydedilemedi. Lütfen tekrar deneyin.',
-      device_unregister_failed:
-        'Cihaz kaydı kaldırılamadı. Lütfen tekrar deneyin.',
       marked_as_read: 'Bildirim okundu olarak işaretlendi',
       mark_read_failed: 'Bildirim okundu olarak işaretlenemedi',
       all_marked_as_read: 'Tüm bildirimler okundu olarak işaretlendi',
@@ -544,7 +485,7 @@ export default {
     map: {
       search_placeholder: 'Konum ara...',
       search_in_this_area: 'Bu alanda ara',
-      errorGettingLocation: 'Konum alınamadı. Varsayılan bölge gösteriliyor.',
+      error_getting_location: 'Konum alınamadı. Varsayılan bölge gösteriliyor.',
       emergency_title: 'Acil Durum Bildir',
       warning_title: 'Uyarı Bildir',
       tabs: {
@@ -657,6 +598,8 @@ export default {
       category: 'Kategori',
       subject: 'Konu',
       message: 'Mesaj',
+      app_version: 'Uygulama Sürümü',
+      device_info: 'Cihaz Bilgisi',
       success_created_support_request:
         'Destek talebiniz başarıyla oluşturuldu.',
       error_creating_support_request:
@@ -701,42 +644,13 @@ export default {
       tap_to_view: 'Görüntülemek için dokunun',
       hide: 'Gizle',
     },
-    animatedInput: {
-      optional: 'Opsiyonel',
-    },
-    button: {
-      loading: 'Yükleniyor...',
-    },
+
     dropdown: {
       no_results: 'Sonuç bulunamadı',
       search_placeholder: 'Ara...',
       no_search_results: 'Arama sonucu bulunamadı',
     },
-    datePicker: {
-      select: 'Tarih Seç',
-      today: 'Bugün',
-      clear: 'Temizle',
-    },
-    timePicker: {
-      select: 'Saat Seç',
-      now: 'Şimdi',
-      clear: 'Temizle',
-    },
-    imageSelector: {
-      add_image: 'Fotoğraf Ekle',
-      camera: 'Kamera',
-      gallery: 'Galeri',
-      remove: 'Kaldır',
-    },
-    locationSelector: {
-      search: 'Konum ara',
-      current_location: 'Mevcut Konum',
-      select_location: 'Konum Seç',
-      confirm_location: 'Konumu Onayla',
-    },
-    modal: {
-      close: 'Kapat',
-    },
+
     userSelector: {
       no_results: 'Kullanıcı bulunamadı',
       unknown_user: 'Bilinmeyen Kullanıcı',
@@ -766,13 +680,6 @@ export default {
       select_groups_description:
         'Özel etkinliğinize davet etmek için grup seçin (maks {{max}})',
     },
-    tabBar: {
-      home: 'Ana Sayfa',
-      search: 'Ara',
-      create: 'Oluştur',
-      notifications: 'Bildirimler',
-      profile: 'Profil',
-    },
     weatherWidget: {
       title: 'Bugünün Hava Durumu',
       conditions: {
@@ -786,23 +693,7 @@ export default {
         windy: 'Rüzgarlı',
       },
     },
-    dialog: {
-      confirm: 'Onayla',
-      cancel: 'İptal',
-    },
-    checkbox: {
-      checked: 'İşaretli',
-      unchecked: 'İşaretli Değil',
-    },
-    chip: {
-      close: 'Kaldır',
-    },
-    skeleton: {
-      loading: 'Yükleniyor...',
-    },
-    bottomSheet: {
-      close: 'Kapat',
-    },
+
     multiSelect: {
       no_results: 'Sonuç bulunamadı',
       max_items_reached: 'En fazla {{count}} öğe seçilebilir',
@@ -819,13 +710,7 @@ export default {
       group_tags: 'Grup Etiketleri',
       privacy_filter: 'Gizlilik',
     },
-    eventFilter: {
-      location: 'Konum',
-      city: 'Şehir',
-      event_types: 'Etkinlik Türleri',
-      difficulty_filter: 'Zorluk Seviyesi',
-      status_filter: 'Durum',
-    },
+
     mapFilter: {
       title: 'Ara',
       search_placeholder: 'İşletme açıklamasında ara...',
@@ -892,6 +777,10 @@ export default {
       title: 'Katılımcılar',
       subtitle: '{{count}} katılımcı',
       unknown_user: 'Bilinmeyen Kullanıcı',
+    },
+    profileCompletionWidget: {
+      complete_your_profile: 'Profilinizi Tamamlayın',
+      missing: 'Eksik Bilgiler',
     },
   },
 
@@ -1004,21 +893,10 @@ export default {
       required: 'Soyad gereklidir',
       min_length: 'Soyad en az 2 karakter olmalıdır',
     },
-    userType: {
-      required: 'Kullanıcı türü gereklidir',
-      select: 'Lütfen bir kullanıcı türü seçin',
-    },
     bio: {
-      max_length: 'Biyografi 150 karakteri geçemez',
+      max_length: 'Biyografi 300 karakteri geçemez',
     },
-    phoneNumber: {
-      invalid: 'Lütfen geçerli bir telefon numarası girin',
-    },
-    birthDate: {
-      invalid: 'Lütfen geçerli bir tarih seçin',
-      too_old: 'Tarih çok geçmişte',
-      future: 'Tarih gelecekte olamaz',
-    },
+
     dateOfBirth: {
       invalid: 'Lütfen geçerli bir tarih seçin',
       too_old: 'Tarih çok geçmişte',
@@ -1065,6 +943,25 @@ export default {
         required: 'Logo gereklidir',
       },
     },
+    profile: {
+      firstName: {
+        max_length: 'Ad en fazla 50 karakter olmalıdır',
+      },
+      lastName: {
+        max_length: 'Soyad en fazla 50 karakter olmalıdır',
+      },
+      riding_styles: {
+        max: 'En fazla 3 sürüş stili seçebilirsiniz',
+      },
+      interests: {
+        max: 'En fazla 3 ilgi alanı seçebilirsiniz',
+      },
+      social_media: {
+        username_required: 'Kullanıcı adı gereklidir',
+        username_max_length: 'Kullanıcı adı en fazla 200 karakter olmalıdır',
+        max: 'En fazla 6 sosyal medya hesabı ekleyebilirsiniz',
+      },
+    },
   },
 
   // Error messages
@@ -1090,28 +987,16 @@ export default {
     auth: {
       session_expired: 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.',
       invalid_credentials: 'Geçersiz e-posta veya şifre!',
-      unauthorized: 'Bu özelliğe erişmek için giriş yapmanız gerekiyor.',
-      forbidden: 'Bu işlemi gerçekleştirme izniniz yok.',
-      already_used: 'Bu e-posta zaten kullanımda.',
       email_not_confirmed: 'Lütfen e-posta adresinizi onaylayın.',
       email_already_exists: 'Bu e-posta adresi zaten kullanımda.',
     },
     // API errors
     api: {
       default: 'İsteğiniz işlenirken bir hata oluştu.',
-      server_error:
-        'Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
-      bad_request: 'Geçersiz istek. Lütfen bilgilerinizi kontrol edin.',
       not_found: 'İstenen bilgi bulunamadı.',
-      service_unavailable:
-        'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
-      conflict: 'Bir çakışma oluştu. Bu kaynak zaten mevcut olabilir.',
-      bad_user_input: 'Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.',
     },
     // GraphQL specific errors
     graphql: {
-      unauthenticated: 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.',
-      unauthorized: 'Bu işlemi gerçekleştirme izniniz yok.',
       forbidden: 'Erişim yasak. Bu işlem için izniniz yok.',
       conflict: 'Bir çakışma oluştu. Bu kaynak zaten mevcut olabilir.',
       bad_user_input: 'Lütfen bilgilerinizi kontrol edin ve tekrar deneyin.',
@@ -1126,9 +1011,7 @@ export default {
       404: 'İstenen bilgi bulunamadı.',
       408: 'İstek zaman aşımına uğradı. Lütfen tekrar deneyin.',
       500: 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.',
-      502: 'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
       503: 'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
-      504: 'Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.',
     },
   },
 
@@ -1443,4 +1326,62 @@ export default {
       reject: 'Reddet',
     },
   },
+  // editProfile: {
+  //   title: 'Profili Düzenle',
+  //   avatar: 'Profil Fotoğrafı',
+  //   basicInfo: 'Temel Bilgiler',
+  //   firstName: 'Ad',
+  //   firstNamePlaceholder: 'Adınızı girin',
+  //   lastName: 'Soyad',
+  //   lastNamePlaceholder: 'Soyadınızı girin',
+  //   bio: 'Hakkında',
+  //   bioPlaceholder: 'Kendiniz hakkında bilgi verin...',
+  //   gender: 'Cinsiyet',
+  //   genders: {
+  //     male: 'Erkek',
+  //     female: 'Kadın',
+  //     prefer_not_to_say: 'Belirtmek istemiyorum',
+  //   },
+  //   ridingStyles: 'Sürüş Tarzları',
+  //   ridingStyleOptions: {
+  //     touring: 'Tur',
+  //     commuting: 'Günlük Kullanım',
+  //     off_road: 'Arazi',
+  //     adventure: 'Macera',
+  //     track: 'Pist',
+  //     sport: 'Spor',
+  //     stunt: 'Gösteri',
+  //     group_ride: 'Grup Sürüşü',
+  //     solo_ride: 'Solo Sürüş',
+  //     touring_with_camping: 'Kamp ile Tur',
+  //   },
+  //   interests: 'İlgi Alanları',
+  //   interestOptions: {
+  //     motorcycle_customization: 'Motor Özelleştirme',
+  //     diy_maintenance: 'Kendi Bakımını Yapma',
+  //     vintage_motorcycles: 'Klasik Motorlar',
+  //     electric_motorcycles: 'Elektrikli Motorlar',
+  //     riding_skills: 'Sürüş Becerileri',
+  //     moto_photography: 'Motor Fotoğrafçılığı',
+  //     content_creation: 'İçerik Üretimi',
+  //     meeting_riders: 'Motorcularla Tanışma',
+  //     community_events: 'Topluluk Etkinlikleri',
+  //     moto_festivals: 'Motor Festivalleri',
+  //     exploring_nature: 'Doğa Keşfi',
+  //     mountain_roads: 'Dağ Yolları',
+  //     coastal_rides: 'Sahil Sürüşleri',
+  //     cross_border_trips: 'Sınır Ötesi Geziler',
+  //   },
+  //   socialMedia: 'Sosyal Medya',
+  //   url: 'URL',
+  //   save: 'Değişiklikleri Kaydet',
+  //   success: 'Başarılı',
+  //   profileUpdated: 'Profiliniz başarıyla güncellendi',
+  //   error: 'Hata',
+  //   updateFailed: 'Profil güncellenemedi. Lütfen tekrar deneyin.',
+  //   imageTooLarge: "Görsel boyutu 10MB'dan küçük olmalıdır",
+  //   errorSelectingImage: 'Görsel seçilemedi. Lütfen tekrar deneyin.',
+  //   dateOfBirth: 'Doğum Tarihi',
+  //   selectGender: 'Cinsiyet Seçin',
+  // },
 };

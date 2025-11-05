@@ -238,7 +238,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
 
       return {
         id: postData.id,
-        userName: `${postData.createdBy.firstName} ${postData.createdBy.lastName}`,
+        fullName: `${postData.createdBy.firstName} ${postData.createdBy.lastName}`,
         avatarSource: formatAvatarSource(postData.createdBy.avatar),
         timeAgo: formatDistanceToNow(new Date(postData.createdAt), {
           addSuffix: true,
@@ -267,7 +267,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
       return (
         <FeedCard
           avatarSource={feedCardProps.avatarSource}
-          userName={feedCardProps.userName}
+          fullName={feedCardProps.fullName}
           timeAgo={feedCardProps.timeAgo}
           labels={feedCardProps.labels}
           content={feedCardProps.content}
@@ -286,14 +286,14 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
   );
 
   const mapCommentForUI = (comment: IPostComment): PostComment => {
-    const userName = comment.createdBy?.firstName
+    const fullName = comment.createdBy?.firstName
       ? `${comment.createdBy.firstName} ${comment.createdBy.lastName || ''}`
       : 'Unknown User';
 
     return {
       id: comment.id,
       userId: comment.createdBy?.id || '',
-      userName: userName.trim(),
+      fullName: fullName.trim(),
       avatarSource: formatAvatarSource(comment.createdBy?.avatar),
       content: comment.content,
       timeAgo: formatDistanceToNow(new Date(comment.createdAt), {

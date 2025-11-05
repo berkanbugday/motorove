@@ -166,6 +166,7 @@ export const SignupScreen = () => {
           showsVerticalScrollIndicator={false}
           enableOnAndroid={true}
           enableAutomaticScroll={true}
+          enableResetScrollToCoords={false}
           keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
             <View style={styles.logoContainer}>

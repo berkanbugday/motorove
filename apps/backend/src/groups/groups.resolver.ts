@@ -51,8 +51,11 @@ export class GroupsResolver {
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
     @Args('filters', { type: () => FilterGroupInput, nullable: true })
     filters?: FilterGroupInput,
+    @Args('userId', { type: () => String, nullable: true })
+    targetUserId?: string,
   ): Promise<GroupDto[]> {
-    const userId = context.req.user.id;
+    const currentUserId = context.req.user.id;
+    const userId = targetUserId ? targetUserId : currentUserId;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.groupsService.findJoinedGroups(

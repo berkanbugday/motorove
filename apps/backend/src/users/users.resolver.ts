@@ -4,7 +4,10 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { UsersService } from './users.service';
 import { Request } from 'express';
 import { UserDto } from './dto/user.dto';
+import { ProfileDto } from './dto/profile.dto';
 import { AccountSetupInput } from './dto/account-setup.input';
+import { UpdateUserProfileInput } from './dto/update-user-profile.input';
+import { UserStatsDto } from './dto/user-stats.dto';
 
 interface GqlContext {
   req: Request & {
@@ -44,9 +47,20 @@ export class UsersResolver {
   }
 
   @UseGuards(JwtGuard)
-  @Query(() => UserDto)
-  async userProfile(@Args('id') id: string): Promise<UserDto> {
-    return await this.usersService.userProfile(id);
+  @Query(() => ProfileDto)
+  async userProfile(
+    @Context() context: GqlContext,
+    @Args('id', { type: () => String }) id: string,
+  ): Promise<ProfileDto> {
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return await this.usersService.userProfile(id, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Query(() => UserStatsDto)
+  async userStats(@Args('userId') userId: string): Promise<UserStatsDto> {
+    return await this.usersService.getUserStats(userId);
   }
 
   @UseGuards(JwtGuard)
@@ -59,5 +73,17 @@ export class UsersResolver {
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.usersService.accountSetup(input, userId, authToken);
+  }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => ProfileDto)
+  async updateUserProfile(
+    @Context() context: GqlContext,
+    @Args('input') input: UpdateUserProfileInput,
+  ): Promise<ProfileDto> {
+    const userId = context.req.user.id;
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return await this.usersService.updateUserProfile(input, userId, authToken);
   }
 }

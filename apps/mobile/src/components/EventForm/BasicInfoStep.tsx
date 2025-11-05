@@ -56,6 +56,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
       showsVerticalScrollIndicator={false}
       enableOnAndroid={true}
       enableAutomaticScroll={true}
+      enableResetScrollToCoords={false}
       keyboardShouldPersistTaps="handled"
       style={styles.scrollView}>
       <View style={styles.formFields}>

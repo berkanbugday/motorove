@@ -31,7 +31,7 @@ export interface FeedCardProps {
   /**
    * User's full name
    */
-  userName: string;
+  fullName: string;
 
   /**
    * Time when the post was created (e.g., "2h ago")
@@ -187,7 +187,7 @@ const FeedCard: React.FC<FeedCardProps> = props => {
   const {t} = useTranslation();
   const {
     avatarSource,
-    userName,
+    fullName,
     timeAgo,
     labels = [],
     content,
@@ -211,7 +211,6 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     style,
     contentStyle,
     imageStyle,
-
     actionBarDisabled = false,
   } = props;
   const [activeSlide, setActiveSlide] = useState(0);
@@ -462,9 +461,11 @@ const FeedCard: React.FC<FeedCardProps> = props => {
         <Image source={avatarSource} style={styles.avatar} />
 
         <View style={styles.headerInfo}>
-          <TouchableOpacity onPress={onProfilePress}>
+          <TouchableOpacity
+            activeOpacity={onProfilePress ? 0.7 : 1}
+            onPress={onProfilePress}>
             <Typography variant="subtitle" weight="medium">
-              {userName}
+              {fullName}
             </Typography>
             <Typography variant="caption" color={colors.neutral.grey}>
               {timeAgo}

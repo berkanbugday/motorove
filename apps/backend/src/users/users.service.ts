@@ -1,11 +1,20 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserDto } from './dto/user.dto';
+import { ProfileDto } from './dto/profile.dto';
 import { AccountSetupInput } from './dto/account-setup.input';
+import { UpdateUserProfileInput } from './dto/update-user-profile.input';
 import { StorageService } from '../core/storage/storage.service';
 import { CityDto } from '../cities/dto/city.dto';
 import { plainToClass } from 'class-transformer';
-import { ApprovalStatus } from '@motorove/shared';
+import { ApprovalStatus } from '../enums/models/approval-status.enum';
+import { Interest } from '../enums/models/interest.enum';
+import { RidingStyle } from '../enums/models/riding-style.enum';
+import { UserStatsDto } from './dto/user-stats.dto';
+import { UserSocialMediaProfileDto } from './dto/user-social-media-profile.dto';
+import { EventParticipantStatus } from '../enums/models/event-participant-status.enum';
+import { EventStatus } from '../enums/models/event-status.enum';
+import { Gender } from '../enums/models/gender.enum';
 
 @Injectable()
 export class UsersService {
@@ -145,27 +154,12 @@ export class UsersService {
     };
   }
 
-  async userProfile(userId: string): Promise<UserDto> {
+  async userProfile(userId: string, authToken?: string): Promise<ProfileDto> {
     const user = await this.prisma.user.findFirst({
       where: { id: userId },
       include: {
         city: true,
-        followers: {
-          where: {
-            isActive: true,
-            status: {
-              in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
-            },
-          },
-        },
-        following: {
-          where: {
-            isActive: true,
-            status: {
-              in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
-            },
-          },
-        },
+        socialMediaProfiles: true,
       },
     });
 
@@ -173,12 +167,35 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    // Get signed URL for avatar if exists
+    if (user.avatar && authToken) {
+      try {
+        user.avatar = await this.storageService.getSignedUrl(
+          user.avatar,
+          3600,
+          authToken,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Error getting signed URL for avatar: ${error.message}`,
+        );
+      }
+    }
+
     return {
-      ...user,
+      id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
+      email: user.email,
       avatar: user.avatar || undefined,
+      gender: (user.gender as Gender) || undefined,
+      dateOfBirth: user.dateOfBirth || undefined,
       city: user.city as CityDto,
+      bio: user.bio || undefined,
+      ridingStyles: user.ridingStyles as RidingStyle[],
+      interests: user.interests as Interest[],
+      socialMediaProfiles:
+        user.socialMediaProfiles as UserSocialMediaProfileDto[],
     };
   }
 
@@ -220,6 +237,149 @@ export class UsersService {
       return user.hasCompletedSetup;
     } catch (error) {
       this.logger.error(`Failed to account setup`, error);
+      throw error;
+    }
+  }
+
+  async getUserStats(userId: string): Promise<UserStatsDto> {
+    try {
+      // Get posts count
+      const postsCount = await this.prisma.post.count({
+        where: {
+          createdById: userId,
+          isActive: true,
+        },
+      });
+
+      // Get events count (events user is a participant in)
+      const eventsCount = await this.prisma.eventParticipant.count({
+        where: {
+          createdById: userId,
+          status: EventParticipantStatus.JOINED,
+          isActive: true,
+          event: {
+            isActive: true,
+            status: { not: EventStatus.DRAFT },
+          },
+        },
+      });
+
+      // Get followers count (users following this user)
+      const followersCount = await this.prisma.userFollowing.count({
+        where: {
+          followingId: userId,
+          isActive: true,
+          status: ApprovalStatus.ACCEPTED,
+        },
+      });
+
+      // Get following count (users this user is following)
+      const followingCount = await this.prisma.userFollowing.count({
+        where: {
+          followerId: userId,
+          isActive: true,
+          status: ApprovalStatus.ACCEPTED,
+        },
+      });
+
+      return {
+        postsCount,
+        eventsCount,
+        followersCount,
+        followingCount,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to get user stats for user ${userId}`, error);
+      throw error;
+    }
+  }
+
+  async updateUserProfile(
+    input: UpdateUserProfileInput,
+    userId: string,
+    authToken?: string,
+  ): Promise<ProfileDto> {
+    try {
+      // Process avatar if present and is base64
+
+      let avatarUrl: string | undefined;
+      if (input.avatar?.includes('base64')) {
+        avatarUrl = await this.storageService.processImageUpload(
+          input.avatar,
+          'users/avatars',
+          `avatar-${userId}`,
+          authToken,
+        );
+      } else {
+        delete input.avatar;
+      }
+
+      const userResult = await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          ...(input.firstName && { firstName: input.firstName }),
+          ...(input.lastName && { lastName: input.lastName }),
+          ...(input.bio !== undefined && { bio: input.bio }),
+          ...(avatarUrl && { avatar: avatarUrl }),
+          ...(input.dateOfBirth && { dateOfBirth: input.dateOfBirth }),
+          ...(input.gender && { gender: input.gender }),
+          ...(input.cityId && { city: { connect: { id: input.cityId } } }),
+          ...(input.ridingStyles && { ridingStyles: input.ridingStyles }),
+          ...(input.interests && { interests: input.interests }),
+          ...(input.socialMediaProfiles && {
+            socialMediaProfiles: {
+              deleteMany: { createdById: userId },
+              createMany: {
+                data: input.socialMediaProfiles.map((sm) => ({
+                  platform: sm.platform,
+                  username: sm.username,
+                })),
+              },
+            },
+          }),
+          updatedAt: new Date(),
+        },
+        include: {
+          city: true,
+          socialMediaProfiles: true,
+        },
+      });
+
+      if (!userResult) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Get signed URL for avatar if exists
+      let finalAvatar = userResult.avatar;
+      if (finalAvatar && authToken) {
+        try {
+          finalAvatar = await this.storageService.getSignedUrl(
+            finalAvatar,
+            3600,
+            authToken,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Error getting signed URL for avatar: ${error.message}`,
+          );
+        }
+      }
+
+      return {
+        id: userResult.id,
+        firstName: userResult.firstName,
+        lastName: userResult.lastName,
+        email: userResult.email,
+        avatar: finalAvatar || undefined,
+        city: (userResult.city as CityDto) || undefined,
+        bio: userResult.bio || undefined,
+        ridingStyles: userResult.ridingStyles as RidingStyle[],
+        interests: userResult.interests as Interest[],
+        socialMediaProfiles:
+          userResult.socialMediaProfiles as UserSocialMediaProfileDto[],
+      };
+    } catch (error) {
+      this.logger.error(`Failed to update user profile`, error);
       throw error;
     }
   }

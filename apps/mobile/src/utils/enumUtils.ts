@@ -138,6 +138,13 @@ export class EnumUtils {
     return this.getDropdownOptions(RidingStyle, 'enums.ridingStyle');
   }
 
+  static convertRidingStyle(ridingStyle: RidingStyle): string {
+    const ridingStyleItem = this.getRidingStyleDropdownOptions().find(
+      t => t.value.toLowerCase() === ridingStyle.toLowerCase(),
+    );
+    return ridingStyleItem?.label || ridingStyle;
+  }
+
   static getEquipmentTypes(): DropdownItem[] {
     return this.getDropdownOptions(EquipmentType, 'enums.equipmentType');
   }
@@ -151,6 +158,13 @@ export class EnumUtils {
 
   static getInterestDropdownOptions(): DropdownItem[] {
     return this.getDropdownOptions(Interest, 'enums.interest');
+  }
+
+  static convertInterest(interest: Interest): string {
+    const interestItem = this.getInterestDropdownOptions().find(
+      t => t.value.toLowerCase() === interest.toLowerCase(),
+    );
+    return interestItem?.label || interest;
   }
 
   static getEventParticipantStatuses(): DropdownItem[] {

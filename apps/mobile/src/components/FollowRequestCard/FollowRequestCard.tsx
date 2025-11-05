@@ -71,8 +71,7 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
       <TouchableOpacity
         activeOpacity={0.7}
         onPress={onUserPress}
-        style={styles.content}
-      >
+        style={styles.content}>
         <Image
           source={
             avatarSource

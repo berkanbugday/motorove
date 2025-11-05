@@ -190,10 +190,10 @@ enum EquipmentType {
 enum SocialMediaPlatform {
   INSTAGRAM
   FACEBOOK
-  TWITTER
   YOUTUBE
   TIKTOK
   LINKEDIN
+  X
 }
 
 enum Interest {
@@ -332,8 +332,7 @@ model User {
   updatedPostComments  PostComment[]     @relation("PostCommentUpdatedBy")
   postLikes            PostLike[]
   postSaves            PostSave[]
-  socialMediaProfiles  SocialMedia[]
-  updatedSocialMedia   SocialMedia[]     @relation("SocialMediaUpdatedBy")
+  socialMediaProfiles  UserSocialMediaProfile[]
 
   // Motorcycle and Equipment relations
   motorcycles        Motorcycle[]
@@ -424,20 +423,15 @@ model Equipment {
 }
 
 // New model for social media profiles
-model SocialMedia {
+model UserSocialMediaProfile {
   id       String              @id @default(uuid())
   platform SocialMediaPlatform
   username String
-  url      String
 
   // Base model fields
   createdById String
   createdBy   User     @relation(fields: [createdById], references: [id])
   createdAt   DateTime @default(now())
-  updatedById String?
-  updatedBy   User?    @relation("SocialMediaUpdatedBy", fields: [updatedById], references: [id])
-  updatedAt   DateTime @updatedAt
-  isActive    Boolean  @default(true)
 
   @@unique([createdById, platform])
   @@index([createdById])

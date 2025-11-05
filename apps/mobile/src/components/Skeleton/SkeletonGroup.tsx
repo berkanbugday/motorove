@@ -1,8 +1,7 @@
 import React from 'react';
 import {View, StyleSheet, ViewStyle, StyleProp} from 'react-native';
-import {colors, spacing} from '@theme';
+import {colors, getShadow, spacing} from '@theme';
 import Skeleton from './Skeleton';
-import {getShadowStyle} from '@components/FAB/FAB.styles';
 
 export type SkeletonPreset =
   | 'post'
@@ -33,7 +32,7 @@ export interface SkeletonGroupProps {
   showAvatar?: boolean;
 
   /**
-   * Show header (username, time)
+   * Show header (fullName, time)
    * @default true for 'post', 'profile', 'comment', 'messageRow' presets
    */
   showHeader?: boolean;
@@ -219,7 +218,7 @@ export const SkeletonGroup: React.FC<SkeletonGroupProps> = ({
               variant="text"
               size="medium"
               width={120}
-              style={styles.username}
+              style={styles.fullName}
             />
             <Skeleton variant="text" size="small" width={80} />
           </View>
@@ -320,7 +319,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.white,
   },
   shadow: {
-    ...getShadowStyle('small'),
+    ...getShadow('small'),
   },
   header: {
     flexDirection: 'row',
@@ -333,7 +332,7 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1,
   },
-  username: {
+  fullName: {
     marginBottom: spacing.xs,
   },
   content: {

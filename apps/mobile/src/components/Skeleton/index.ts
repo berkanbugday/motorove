@@ -1,5 +1,6 @@
 export {default as Skeleton} from './Skeleton';
 export {default as SkeletonGroup} from './SkeletonGroup';
+export {default as ProfileSkeleton} from './ProfileSkeleton';
 export type {
   SkeletonProps,
   SkeletonShape,

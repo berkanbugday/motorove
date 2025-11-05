@@ -15,6 +15,7 @@ export * from './TopHeaderBar';
 export * from './FullscreenOverlay';
 export * from './Banner';
 export * from './WeatherWidget';
+export * from './ProfileCompletionWidget';
 export * from './PageIndicator';
 export * from './EventBanner';
 export * from './EventCard';
@@ -52,6 +53,7 @@ export * from './MapAppsBottomSheet';
 // Skeleton components
 export * from './Skeleton';
 export * from './Skeleton/SkeletonGroup';
+export * from './Skeleton/ProfileSkeleton';
 
 export {default as Dialog} from './Dialog';
 export type {

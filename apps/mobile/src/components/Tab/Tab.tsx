@@ -367,7 +367,7 @@ export const Tabs: React.FC<TabsProps> = ({
   };
 
   const renderTabs = () => {
-    if (scrollable) {
+    if (scrollable && items.length > 1) {
       return (
         <ScrollView
           ref={scrollViewRef}
@@ -382,16 +382,21 @@ export const Tabs: React.FC<TabsProps> = ({
     }
 
     return (
-      <View
-        style={[styles.tabsContainer, getTabsContainerStyle(variant, align)]}
-        testID={`${testID}-container`}>
-        {items.map(renderTab)}
-        {renderTabIndicator()}
-      </View>
+      items.length > 0 && (
+        <View
+          style={[styles.tabsContainer, getTabsContainerStyle(variant, align)]}
+          testID={`${testID}-container`}>
+          {items.map(renderTab)}
+          {renderTabIndicator()}
+        </View>
+      )
     );
   };
 
   const renderContent = () => {
+    if (items.length === 0) {
+      return null;
+    }
     const activeItem = items.find(item => item.key === activeKey);
     if (!activeItem?.content) {
       return null;
@@ -445,10 +450,17 @@ const getTabsContainerStyle = (
 ): ViewStyle[] => {
   const containerStyles: ViewStyle[] = [styles.tabsContainer];
 
-  containerStyles.push(styles[`${variant}Container`]);
-  containerStyles.push(
-    styles[`align${align.charAt(0).toUpperCase() + align.slice(1)}`],
-  );
+  // Add variant container style
+  const variantKey = `${variant}Container`;
+  if (variantKey in styles) {
+    containerStyles.push(styles[variantKey as keyof typeof styles] as ViewStyle);
+  }
+
+  // Add alignment style
+  const alignmentKey = `align${align.charAt(0).toUpperCase() + align.slice(1)}`;
+  if (alignmentKey in styles) {
+    containerStyles.push(styles[alignmentKey as keyof typeof styles] as ViewStyle);
+  }
 
   return containerStyles;
 };

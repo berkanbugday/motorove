@@ -1,7 +1,19 @@
 import {useQuery, useMutation} from '@apollo/client';
-import {IAccountSetup, IUser} from '@motorove/shared/interfaces';
+import {
+  IAccountSetup,
+  IUser,
+  IUpdateUser,
+  IProfile,
+  IUserStats,
+} from '@motorove/shared';
 import {loggingService} from './logging.service';
-import {SEARCH_USERS, ACCOUNT_SETUP} from './graphql/user.graphql';
+import {
+  SEARCH_USERS,
+  ACCOUNT_SETUP,
+  GET_USER_PROFILE,
+  GET_USER_STATS,
+  UPDATE_USER_PROFILE,
+} from './graphql/user.graphql';
 import {useCallback, useEffect, useState, useRef} from 'react';
 import {apolloClient} from '../configs/apolloClientConfig';
 import {showToast} from '@components';
@@ -175,6 +187,52 @@ export const useSearchUsers = (query = '') => {
   };
 };
 
+/**
+ * Hook for fetching user profile data
+ * @param userId User ID to fetch profile for
+ * @returns User profile data, loading state, error state
+ */
+export const useGetUserProfile = (userId: string) => {
+  const {data, loading, error, refetch} = useQuery(GET_USER_PROFILE, {
+    variables: {id: userId},
+    skip: !userId,
+    fetchPolicy: 'cache-and-network',
+    onError: errorObj => {
+      loggingService.error('Error fetching user profile:', errorObj);
+    },
+  });
+
+  return {
+    profile: data?.userProfile as IProfile,
+    loading,
+    error,
+    refetch,
+  };
+};
+
+/**
+ * Hook for fetching user statistics (posts, events, followers, following counts)
+ * @param userId User ID to fetch stats for
+ * @returns User stats, loading state, error state
+ */
+export const useGetUserStats = (userId: string) => {
+  const {data, loading, error, refetch} = useQuery(GET_USER_STATS, {
+    variables: {userId},
+    skip: !userId,
+    fetchPolicy: 'cache-and-network',
+    onError: errorObj => {
+      loggingService.error('Error fetching user stats:', errorObj);
+    },
+  });
+
+  return {
+    stats: data?.userStats as IUserStats,
+    loading,
+    error,
+    refetch,
+  };
+};
+
 export const useAccountSetup = (onSuccess?: () => void) => {
   const {t} = useTranslation();
   const [accountSetupMutation, {loading, error}] = useMutation(ACCOUNT_SETUP, {
@@ -218,6 +276,59 @@ export const useAccountSetup = (onSuccess?: () => void) => {
     error,
   };
 };
+
+/**
+ * Hook for updating user profile
+ * @param onSuccess Optional callback to execute on successful update
+ * @returns Update function, loading state, and error state
+ */
+export const useUpdateUserProfile = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
+  const [updateUserProfileMutation, {loading, error}] = useMutation(
+    UPDATE_USER_PROFILE,
+    {
+      onCompleted: _data => {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.editProfile.profile_updated'),
+        });
+
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+      onError: errorObj => {
+        loggingService.error('Error updating user profile:', errorObj);
+        showToast({
+          type: 'error',
+          text1: t('common.error'),
+          text2:
+            errorObj.message || t('screens.editProfile.profile_updated_failed'),
+        });
+      },
+    },
+  );
+
+  const updateUserProfile = async (input: IUpdateUser) => {
+    try {
+      const result = await updateUserProfileMutation({
+        variables: {input},
+      });
+      return result.data?.updateUserProfile;
+    } catch (err) {
+      loggingService.error('Error in updateUserProfile:', err);
+      // Error is already handled in onError callback
+      return null;
+    }
+  };
+
+  return {
+    updateUserProfile,
+    loading,
+    error,
+  };
+};
 /**
  * User service for handling user-related operations
  */
@@ -255,7 +366,10 @@ export const userService = {
  */
 export const UserService = {
   useSearchUsers,
+  useGetUserProfile,
+  useGetUserStats,
   useAccountSetup,
+  useUpdateUserProfile,
 };
 
 export default UserService;

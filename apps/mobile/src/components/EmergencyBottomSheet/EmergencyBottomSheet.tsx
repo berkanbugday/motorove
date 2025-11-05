@@ -110,6 +110,7 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         enableOnAndroid={true}
+        enableResetScrollToCoords={false}
         keyboardShouldPersistTaps="handled">
         {/* Emergency Type Selection */}
         <View style={styles.section}>

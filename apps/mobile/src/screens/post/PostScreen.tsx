@@ -316,7 +316,7 @@ export const PostScreen = ({navigation}: Props) => {
 
       return {
         id: post.id,
-        userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
+        fullName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
         timeAgo: formatDistanceToNow(new Date(post.createdAt), {
           addSuffix: true,
@@ -347,7 +347,7 @@ export const PostScreen = ({navigation}: Props) => {
       return (
         <FeedCard
           avatarSource={feedCardProps.avatarSource}
-          userName={feedCardProps.userName}
+          fullName={feedCardProps.fullName}
           timeAgo={feedCardProps.timeAgo}
           labels={feedCardProps.labels}
           content={feedCardProps.content}

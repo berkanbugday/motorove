@@ -83,7 +83,7 @@ interface StandaloneDateTimePickerProps extends BaseDateTimePickerProps {
   /**
    * Currently selected date
    */
-  value: Date;
+  value?: Date | null;
   /**
    * Callback function when date changes
    */
@@ -100,7 +100,7 @@ interface FormDateTimePickerProps<T extends FieldValues>
   extends BaseDateTimePickerProps {
   control: Control<T>;
   name: Path<T>;
-  value?: Date;
+  value?: Date | null;
   onChange?: (date: Date) => void;
   error?: FieldError;
 }
@@ -216,7 +216,7 @@ export function DateTimePicker<T extends FieldValues = any>(
 
 // The base date picker component without form integration
 interface DateTimePickerBaseProps {
-  value: Date;
+  value?: Date | null;
   onChange: (date: Date) => void;
   placeholder?: string;
   displayFormat?: 'short' | 'medium' | 'long' | 'full';

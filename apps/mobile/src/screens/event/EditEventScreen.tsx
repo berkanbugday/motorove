@@ -1009,6 +1009,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
             showsVerticalScrollIndicator={false}
             enableOnAndroid={true}
             enableAutomaticScroll={true}
+            enableResetScrollToCoords={false}
             keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             <View style={styles.formFields}>
@@ -1138,6 +1139,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
             showsVerticalScrollIndicator={false}
             enableOnAndroid={true}
             enableAutomaticScroll={true}
+            enableResetScrollToCoords={false}
             keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             <View style={styles.formFields}>
@@ -1275,6 +1277,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
             showsVerticalScrollIndicator={false}
             enableOnAndroid={true}
             enableAutomaticScroll={true}
+            enableResetScrollToCoords={false}
             keyboardShouldPersistTaps="handled"
             style={styles.scrollView}>
             {eventType ? (

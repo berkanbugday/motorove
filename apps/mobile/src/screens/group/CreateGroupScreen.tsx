@@ -222,10 +222,10 @@ export const CreateGroupScreen: React.FC = () => {
       />
       <SafeAreaView style={styles.container}>
         <KeyboardAwareScrollView
-          snapToStart={true}
           showsVerticalScrollIndicator={false}
           enableOnAndroid={true}
           enableAutomaticScroll={true}
+          enableResetScrollToCoords={false}
           keyboardShouldPersistTaps="handled">
           <TouchableOpacity
             style={styles.coverContainer}

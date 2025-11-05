@@ -64,6 +64,8 @@ export default {
     select_all: 'Select All',
     clear_all: 'Clear All',
     view_details: 'View Details',
+    read_more: 'Read More...',
+    show_less: 'Show Less...',
   },
 
   // Bottom tabs navigation items
@@ -104,6 +106,7 @@ export default {
       sign_up: 'Sign Up',
       sign_in: 'Sign In',
     },
+
     // Reset Password screen
     resetPassword: {
       reset_password: 'Reset Password',
@@ -113,6 +116,7 @@ export default {
       email_sent: 'Password reset email sent successfully!',
       email_send_failed: 'Failed to send reset email. Please try again.',
     },
+
     // Signup screen
     signUp: {
       create_account_intro: 'Create an account to get started',
@@ -150,7 +154,7 @@ export default {
       success_completed_account_setup: 'Profile setup completed successfully',
     },
 
-    userSettings: {
+    userSetting: {
       update_failed: 'Settings updated failed',
     },
 
@@ -187,7 +191,9 @@ export default {
       recent_activity: 'Recent Activity',
       view_all: 'View All',
       hello: 'Hello,',
-      recommended_route_of_the_week: 'Recommended Route of the Week',
+      recommended_routes: 'Recommended Routes',
+      plan_route_with_ai: 'Plan Route with AI',
+      coming_soon: 'Coming Soon',
       upcoming_events: 'Upcoming Events',
       shared_posts: 'Shared Posts',
       no_posts_found: 'No posts found',
@@ -221,6 +227,10 @@ export default {
       select_group: 'Select Group',
       no_groups_joined: "You haven't joined any groups yet",
       add_location: 'Add location',
+      limit_reached: 'Limit reached',
+      max_images_message: 'You can select up to 3 images',
+      file_too_large: 'File too large',
+      image_size_limit: 'Please select an image smaller than 10MB',
       enter_content: 'Please enter some content for your post',
       what_do_you_want_to_write: 'What do you want to write?',
       select_privacy: 'Select Privacy',
@@ -235,10 +245,10 @@ export default {
         'Are you sure you want to delete this comment? This action cannot be undone.',
       comment_created: 'Comment created successfully!',
       comment_updated: 'Comment updated successfully!',
-      comment_removed: 'Comment removed successfully!',
-      error_creating_comment: 'Failed to create comment. Please try again.',
-      error_updating_comment: 'Failed to update comment. Please try again.',
-      error_removing_comment: 'Failed to remove comment. Please try again.',
+      comment_deleted: 'Comment deleted successfully!',
+      comment_created_failed: 'Failed to create comment. Please try again.',
+      comment_updated_failed: 'Failed to update comment. Please try again.',
+      comment_deleted_failed: 'Failed to delete comment. Please try again.',
     },
 
     // Events screens
@@ -363,8 +373,6 @@ export default {
       image_too_large: 'Image is too large (maximum size: 10MB)',
       member_role_updated: 'Member role updated successfully',
       no_description: 'No description available',
-      show_less: 'Show less',
-      read_more: 'Read more',
       group_full: 'Group is full. Cannot join.',
       join_success: 'You have successfully joined the group!',
       people: 'people',
@@ -395,21 +403,6 @@ export default {
       search_groups: 'Search Groups',
       search_groups_by_name: 'Search groups by name',
       no_groups_found: 'No groups found',
-    },
-
-    // Join Request screens
-    joinRequest: {
-      group_requests: 'Group Requests',
-      event_invitations: 'Event Invitations',
-      no_requests: 'No Pending Requests',
-      no_group_requests_yet: 'There are no pending group join requests yet.',
-      no_event_invitations_yet: 'There are no pending event invitations yet.',
-      could_not_load_requests:
-        "We couldn't load join requests. Please try again.",
-      request_accepted: 'Request accepted successfully',
-      request_rejected: 'Request rejected successfully',
-      wants_to_join_group: 'wants to join group.',
-      invites_to_event: 'invites you to the event.',
     },
 
     // Group Join Request screens
@@ -452,82 +445,22 @@ export default {
 
     // Profile screens
     profile: {
-      edit_profile: 'Edit Profile',
-      followers: 'Followers',
-      following: 'Following',
+      about: 'About',
+      groups: 'Groups',
+      riding_styles: 'Riding Styles',
+      interests: 'Interests',
       posts: 'Posts',
       events: 'Events',
-      groups: 'Groups',
+      following: 'Following',
+      followers: 'Followers',
+      country: 'Turkey',
       bio: 'Bio',
-      website: 'Website',
-      location: 'Location',
-      garage: 'Garage',
-      settings: 'Profile Settings',
-      follow: 'Follow',
-      unfollow: 'Unfollow',
-      message: 'Message',
-      report_user: 'Report User',
-      block_user: 'Block User',
-      unblock_user: 'Unblock User',
-      user_types: {
-        rider: 'Rider',
-        mechanic: 'Mechanic',
-        dealer: 'Dealer',
-        enthusiast: 'Enthusiast',
-      },
-      my_posts: 'My Posts',
-      my_events: 'My Events',
-      my_groups: 'My Groups',
-      saved_posts: 'Saved Posts',
-      account_info: 'Account Information',
-      add_vehicle: 'Add Vehicle',
-      edit_vehicle: 'Edit Vehicle',
-      remove_vehicle: 'Remove Vehicle',
-      vehicle_details: 'Vehicle Details',
+      city: 'City',
       social_media: 'Social Media',
-      change_photo: 'Change Photo',
-      upload_photos: 'Upload Photos',
-    },
-
-    // Settings screens
-    settings: {
-      account: 'Account',
-      notifications: 'Notifications',
-      privacy: 'Privacy',
-      language: 'Language',
-      theme: 'Theme',
-      dark_mode: 'Dark Mode',
-      help: 'Help & Support',
-      about: 'About',
-      terms_of_service: 'Terms of Service',
-      privacy_policy: 'Privacy Policy',
-      contact_us: 'Contact Us',
-      version: 'Version',
-      delete_account: 'Delete Account',
-      change_email: 'Change Email',
-      change_password: 'Change Password',
-      change_phone_number: 'Change Phone Number',
-      notification_preferences: 'Notification Preferences',
-      push_notifications: 'Push Notifications',
-      email_notifications: 'Email Notifications',
-      account_visibility: 'Account Visibility',
-      block_list: 'Block List',
-      data_usage: 'Data Usage',
-      logout: 'Logout',
-      languages: {
-        english: 'English',
-        turkish: 'Turkish',
-      },
-      notification_types: {
-        likes: 'Likes',
-        comments: 'Comments',
-        follows: 'Follows',
-        mentions: 'Mentions',
-        messages: 'Messages',
-        event_invites: 'Event Invitations',
-        group_invites: 'Group Invitations',
-        updates: 'Updates',
-      },
+      complete_profile_message:
+        'Complete your profile to add riding styles and interests',
+      groups_empty_message: 'Your groups will appear here',
+      no_posts: 'No posts yet',
     },
 
     // Notifications screen
@@ -537,9 +470,6 @@ export default {
       delete_failed: 'Failed to delete notification. Please try again.',
       all_deleted: 'All notifications deleted',
       delete_all_failed: 'Failed to delete all notifications',
-      device_register_failed: 'Failed to register device. Please try again.',
-      device_unregister_failed:
-        'Failed to unregister device. Please try again.',
       marked_as_read: 'Notification marked as read',
       mark_read_failed: 'Failed to mark notification as read',
       all_marked_as_read: 'All notifications marked as read',
@@ -560,7 +490,7 @@ export default {
     map: {
       search_placeholder: 'Search locations...',
       search_in_this_area: 'Search in this area',
-      errorGettingLocation:
+      error_getting_location:
         'Could not get your location. Showing default region.',
       emergency_title: 'Report Emergency',
       warning_title: 'Report Warning',
@@ -673,6 +603,8 @@ export default {
       category: 'Category',
       subject: 'Subject',
       message: 'Message',
+      app_version: 'App Version',
+      device_info: 'Device Info',
       success_created_support_request: 'Support request created successfully',
       error_creating_support_request: 'Failed to create support request',
     },
@@ -715,42 +647,13 @@ export default {
       tap_to_view: 'Tap to view',
       hide: 'Hide',
     },
-    animatedInput: {
-      optional: 'Optional',
-    },
-    button: {
-      loading: 'Loading...',
-    },
+
     dropdown: {
       no_results: 'No results found',
       search_placeholder: 'Search...',
       no_search_results: 'No search results found',
     },
-    datePicker: {
-      select: 'Select Date',
-      today: 'Today',
-      clear: 'Clear',
-    },
-    timePicker: {
-      select: 'Select Time',
-      now: 'Now',
-      clear: 'Clear',
-    },
-    imageSelector: {
-      add_image: 'Add Image',
-      camera: 'Camera',
-      gallery: 'Gallery',
-      remove: 'Remove',
-    },
-    locationSelector: {
-      search: 'Search for a location',
-      current_location: 'Current Location',
-      select_location: 'Select Location',
-      confirm_location: 'Confirm Location',
-    },
-    modal: {
-      close: 'Close',
-    },
+
     userSelector: {
       no_results: 'No users found',
       unknown_user: 'Unknown User',
@@ -780,13 +683,7 @@ export default {
       select_groups_description:
         'Select groups to invite to your private event (max {{max}})',
     },
-    tabBar: {
-      home: 'Home',
-      search: 'Search',
-      create: 'Create',
-      notifications: 'Notifications',
-      profile: 'Profile',
-    },
+
     weatherWidget: {
       title: "Today's Weather",
       conditions: {
@@ -800,23 +697,7 @@ export default {
         windy: 'Windy',
       },
     },
-    dialog: {
-      confirm: 'Confirm',
-      cancel: 'Cancel',
-    },
-    checkbox: {
-      checked: 'Checked',
-      unchecked: 'Unchecked',
-    },
-    chip: {
-      close: 'Remove',
-    },
-    skeleton: {
-      loading: 'Loading...',
-    },
-    bottomSheet: {
-      close: 'Close',
-    },
+
     multiSelect: {
       no_results: 'No results found',
       max_items_reached: 'Maximum {{count}} items can be selected',
@@ -833,13 +714,7 @@ export default {
       group_tags: 'Group Tags',
       privacy_filter: 'Privacy',
     },
-    eventFilter: {
-      location: 'Location',
-      city: 'City',
-      event_types: 'Event Types',
-      difficulty_filter: 'Difficulty Level',
-      status_filter: 'Status',
-    },
+
     mapFilter: {
       title: 'Search',
       search_placeholder: 'Search in business description...',
@@ -906,6 +781,10 @@ export default {
       title: 'Participants',
       subtitle: '{{count}} participant',
       unknown_user: 'Unknown User',
+    },
+    profileCompletionWidget: {
+      complete_your_profile: 'Complete Your Profile',
+      missing: 'Missing Informations',
     },
   },
 
@@ -1018,21 +897,10 @@ export default {
       required: 'Last name is required',
       min_length: 'Last name must be at least 2 characters',
     },
-    userType: {
-      required: 'User type is required',
-      select: 'Please select a user type',
-    },
     bio: {
       max_length: 'Bio cannot exceed 150 characters',
     },
-    phoneNumber: {
-      invalid: 'Please enter a valid phone number',
-    },
-    birthDate: {
-      invalid: 'Please select a valid date',
-      too_old: 'Date is too far in the past',
-      future: 'Date cannot be in the future',
-    },
+
     dateOfBirth: {
       invalid: 'Please select a valid date',
       too_old: 'Date is too far in the past',
@@ -1079,6 +947,25 @@ export default {
         required: 'Logo is required',
       },
     },
+    profile: {
+      firstName: {
+        max_length: 'First name must be at most 50 characters',
+      },
+      lastName: {
+        max_length: 'Last name must be at most 50 characters',
+      },
+      riding_styles: {
+        max: 'You can select up to 3 riding styles',
+      },
+      interests: {
+        max: 'You can select up to 3 interests',
+      },
+      social_media: {
+        username_required: 'Username is required',
+        username_max_length: 'Username must be at most 200 characters',
+        max: 'You can add up to 6 social media accounts',
+      },
+    },
   },
 
   // Error messages
@@ -1102,27 +989,16 @@ export default {
     auth: {
       session_expired: 'Your session has expired. Please sign in again.',
       invalid_credentials: 'Invalid email or password!',
-      unauthorized: 'You need to sign in to access this feature.',
-      forbidden: 'You do not have permission to perform this action.',
-      already_used: 'This email is already in use.',
       email_not_confirmed: 'Please confirm your email address.',
       email_already_exists: 'This email address is already in use.',
     },
     // API errors
     api: {
       default: 'An error occurred while processing your request.',
-      server_error: 'Something went wrong on our end. Please try again later.',
-      bad_request: 'Invalid request. Please check your information.',
       not_found: 'The requested information could not be found.',
-      service_unavailable:
-        'The service is temporarily unavailable. Please try again later.',
-      conflict: 'A conflict occurred. This resource may already exist.',
-      bad_user_input: 'Please check your information and try again.',
     },
     // GraphQL specific errors
     graphql: {
-      unauthenticated: 'Your session has expired. Please sign in again.',
-      unauthorized: 'You do not have permission to perform this action.',
       forbidden:
         'Access forbidden. You do not have permission for this operation.',
       conflict: 'A conflict occurred. This resource may already exist.',
@@ -1138,9 +1014,7 @@ export default {
       404: 'The requested information could not be found.',
       408: 'The request timed out. Please try again.',
       500: 'Server error. Please try again later.',
-      502: 'The service is temporarily unavailable. Please try again later.',
       503: 'The service is temporarily unavailable. Please try again later.',
-      504: 'The service is temporarily unavailable. Please try again later.',
     },
   },
 
@@ -1454,4 +1328,62 @@ export default {
       reject: 'Reject',
     },
   },
+  // editProfile: {
+  //   title: 'Edit Profile',
+  //   avatar: 'Profile Picture',
+  //   basicInfo: 'Basic Information',
+  //   firstName: 'First Name',
+  //   firstNamePlaceholder: 'Enter your first name',
+  //   lastName: 'Last Name',
+  //   lastNamePlaceholder: 'Enter your last name',
+  //   bio: 'Bio',
+  //   bioPlaceholder: 'Tell us about yourself...',
+  //   gender: 'Gender',
+  //   genders: {
+  //     male: 'Male',
+  //     female: 'Female',
+  //     prefer_not_to_say: 'Prefer not to say',
+  //   },
+  //   ridingStyles: 'Riding Styles',
+  //   ridingStyleOptions: {
+  //     touring: 'Touring',
+  //     commuting: 'Commuting',
+  //     off_road: 'Off-Road',
+  //     adventure: 'Adventure',
+  //     track: 'Track',
+  //     sport: 'Sport',
+  //     stunt: 'Stunt',
+  //     group_ride: 'Group Ride',
+  //     solo_ride: 'Solo Ride',
+  //     touring_with_camping: 'Touring with Camping',
+  //   },
+  //   interests: 'Interests',
+  //   interestOptions: {
+  //     motorcycle_customization: 'Motorcycle Customization',
+  //     diy_maintenance: 'DIY Maintenance',
+  //     vintage_motorcycles: 'Vintage Motorcycles',
+  //     electric_motorcycles: 'Electric Motorcycles',
+  //     riding_skills: 'Riding Skills',
+  //     moto_photography: 'Moto Photography',
+  //     content_creation: 'Content Creation',
+  //     meeting_riders: 'Meeting Riders',
+  //     community_events: 'Community Events',
+  //     moto_festivals: 'Moto Festivals',
+  //     exploring_nature: 'Exploring Nature',
+  //     mountain_roads: 'Mountain Roads',
+  //     coastal_rides: 'Coastal Rides',
+  //     cross_border_trips: 'Cross-Border Trips',
+  //   },
+  //   socialMedia: 'Social Media',
+  //   url: 'URL',
+  //   save: 'Save Changes',
+  //   success: 'Success',
+  //   profileUpdated: 'Your profile has been updated successfully',
+  //   error: 'Error',
+  //   updateFailed: 'Failed to update profile. Please try again.',
+  //   imageTooLarge: 'Image size must be less than 10MB',
+  //   errorSelectingImage: 'Failed to select image. Please try again.',
+  //   dateOfBirth: 'Date of Birth',
+  //   selectGender: 'Select Gender',
+  // },
 };

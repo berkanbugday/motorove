@@ -55,6 +55,7 @@ export const DateTimeStep: React.FC<DateTimeStepProps> = ({
       showsVerticalScrollIndicator={false}
       enableOnAndroid={true}
       enableAutomaticScroll={true}
+      enableResetScrollToCoords={false}
       keyboardShouldPersistTaps="handled"
       style={styles.scrollView}>
       <View style={styles.formFields}>

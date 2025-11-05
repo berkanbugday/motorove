@@ -582,7 +582,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         <TouchableOpacity onPress={toggleDescription}>
           <BodySmall style={styles.description}>{description}</BodySmall>
           <BodySmall align="center" weight="bold" color={colors.neutral.black}>
-            {t('screens.group.show_less')}
+            {t('common.show_less')}
           </BodySmall>
         </TouchableOpacity>
       );
@@ -599,7 +599,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         <BodySmall style={styles.description}>{truncatedDescription}</BodySmall>
         {description.length > 100 && (
           <BodySmall align="center" weight="bold" color={colors.neutral.black}>
-            {t('screens.group.read_more')}
+            {t('common.read_more')}
           </BodySmall>
         )}
       </TouchableOpacity>
@@ -724,7 +724,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
 
       return {
         id: post.id,
-        userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
+        fullName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
         timeAgo: formatDistanceToNow(new Date(post.createdAt), {
           addSuffix: true,
@@ -840,7 +840,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       return (
         <FeedCard
           avatarSource={feedCardProps.avatarSource}
-          userName={feedCardProps.userName}
+          fullName={feedCardProps.fullName}
           timeAgo={feedCardProps.timeAgo}
           labels={feedCardProps.labels}
           content={feedCardProps.content}

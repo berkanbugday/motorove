@@ -92,6 +92,12 @@
 		<string>waze</string>
 		<string>yandexmaps</string>
 		<string>com.sygic.aura</string>
+		<string>instagram</string>
+		<string>fb</string>
+		<string>tiktok</string>
+		<string>youtube</string>
+		<string>linkedin</string>
+		<string>twitter</string>
 	</array>
 </dict>
 </plist>

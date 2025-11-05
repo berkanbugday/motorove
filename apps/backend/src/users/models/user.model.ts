@@ -13,7 +13,7 @@ import { UserFollowing } from '../../user-followings/models/user-following.model
 import { Gender } from '../../enums/models/gender.enum';
 import { RidingStyle } from '../../enums/models/riding-style.enum';
 import { Interest } from '../../enums/models/interest.enum';
-import { SocialMedia } from './social-media.model';
+import { UserSocialMediaProfile } from './user-social-media-profile.model';
 import { EventParticipant } from '../../events/models/event-participant.model';
 import { EventInvitation } from '../../events/models/event-invitation.model';
 import { UserSetting } from '../../user-settings/models/user-setting.model';
@@ -95,8 +95,8 @@ export class User implements IUser {
   @Field(() => [Notification], { nullable: true })
   notifications?: Notification[];
 
-  @Field(() => [SocialMedia], { nullable: true })
-  socialMediaProfiles?: SocialMedia[];
+  @Field(() => [UserSocialMediaProfile], { nullable: true })
+  socialMediaProfiles?: UserSocialMediaProfile[];
 
   @Field(() => [UserFollowing], { nullable: true })
   followers?: UserFollowing[];

@@ -58,7 +58,7 @@ const PostCommentItem: React.FC<PostCommentItemProps> = ({
           onPress={() => onPressAvatar?.(comment.userId)}
           style={styles.header}>
           <Typography variant="bodySmall" weight="semiBold">
-            {comment.userName}
+            {comment.fullName}
           </Typography>
           <Typography
             variant="caption"

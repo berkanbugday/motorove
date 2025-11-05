@@ -24,7 +24,6 @@ import {
 } from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 import {
-  ProfileScreen,
   PrivacySettingScreen,
   NotificationSettingScreen,
   FollowRequestScreen,
@@ -32,13 +31,10 @@ import {
   EventInvitationScreen,
   SupportScreen,
 } from '@screens/menu';
+import {ProfileScreen, EditProfileScreen} from '@screens/profile';
 import {GarageScreen} from '@screens/garage';
 import {BusinessDetailScreen} from '@screens/business';
-import {
-  // notificationService,
-  // useSaveDeviceToken,
-  useRemoveDeviceToken,
-} from '@services/notification.service';
+import {useRemoveDeviceToken} from '@services/notification.service';
 import {useAuth} from '@contexts/AuthContext';
 import {NotificationPermission} from '@motorove/shared';
 import {useNotificationPermission} from '@hooks/useNotificationPermission';
@@ -51,7 +47,6 @@ const Stack = createNativeStackNavigator<MainStackParamList>();
  */
 export function MainNavigator() {
   const {updateNotificationPermission} = useAuth();
-  // const {saveDeviceToken} = useSaveDeviceToken();
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {status, requestPermission} = useNotificationPermission();
 
@@ -149,6 +144,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
         options={{headerShown: false}}
       />
 

@@ -39,7 +39,7 @@ export const useCreatePostComment = (onSuccess?: () => void) => {
           type: 'error',
           text1: t('common.error'),
           text2:
-            errorObj.message || t('screens.postComment.error_creating_comment'),
+            errorObj.message || t('screens.postComment.comment_created_failed'),
         });
       },
     },
@@ -109,7 +109,7 @@ export const useUpdatePostComment = (onSuccess?: () => void) => {
           type: 'error',
           text1: t('common.error'),
           text2:
-            errorObj.message || t('screens.postComment.error_updating_comment'),
+            errorObj.message || t('screens.postComment.comment_updated_failed'),
         });
       },
     },
@@ -145,7 +145,7 @@ export const useRemovePostComment = (onSuccess?: () => void) => {
         showToast({
           type: 'success',
           text1: t('common.success'),
-          text2: t('screens.postComment.comment_removed'),
+          text2: t('screens.postComment.comment_deleted'),
         });
 
         if (onSuccess) {
@@ -158,7 +158,7 @@ export const useRemovePostComment = (onSuccess?: () => void) => {
           type: 'error',
           text1: t('common.error'),
           text2:
-            errorObj.message || t('screens.postComment.error_removing_comment'),
+            errorObj.message || t('screens.postComment.comment_deleted_failed'),
         });
       },
     },

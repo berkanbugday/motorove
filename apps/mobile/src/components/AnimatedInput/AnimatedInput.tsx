@@ -16,7 +16,7 @@ import {
 } from 'react-hook-form';
 import {Icon} from '@components/Icon';
 import {colors, spacing, radius, fontSizes} from '@theme';
-import {Caption} from '@components/Typography';
+import {Caption, Body} from '@components/Typography';
 
 // Animation constants
 const ANIMATION_DURATION = 200;
@@ -51,6 +51,8 @@ interface BaseAnimatedInputProps {
   editable?: boolean;
   onPress?: () => void;
   onEndEditing?: () => void;
+  prefix?: string;
+  autoFocus?: boolean;
 }
 
 interface StandaloneAnimatedInputProps extends BaseAnimatedInputProps {
@@ -102,6 +104,8 @@ export function AnimatedInput<T extends FieldValues = any>(
       editable = true,
       onPress,
       onEndEditing,
+      prefix,
+      autoFocus = false,
     } = props as FormAnimatedInputProps<T>;
 
     return (
@@ -132,6 +136,8 @@ export function AnimatedInput<T extends FieldValues = any>(
             editable={editable}
             onPress={onPress}
             onEndEditing={onEndEditing}
+            prefix={prefix}
+            autoFocus={autoFocus}
           />
         )}
       />
@@ -159,6 +165,8 @@ export function AnimatedInput<T extends FieldValues = any>(
     editable = true,
     onPress,
     onEndEditing,
+    prefix,
+    autoFocus = false,
   } = props as StandaloneAnimatedInputProps;
 
   return (
@@ -185,6 +193,8 @@ export function AnimatedInput<T extends FieldValues = any>(
       editable={editable}
       onPress={onPress}
       onEndEditing={onEndEditing}
+      prefix={prefix}
+      autoFocus={autoFocus}
     />
   );
 }
@@ -210,6 +220,8 @@ interface AnimatedInputBaseProps {
   editable?: boolean;
   onPress?: () => void;
   onEndEditing?: () => void;
+  prefix?: string;
+  autoFocus?: boolean;
 }
 
 function AnimatedInputBase({
@@ -232,18 +244,34 @@ function AnimatedInputBase({
   editable = true,
   onPress,
   onEndEditing,
+  prefix,
+  autoFocus = false,
 }: AnimatedInputBaseProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const animatedIsFocused = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const [prefixWidth, setPrefixWidth] = useState(0);
+  const animatedIsFocused = useRef(
+    new Animated.Value(value || prefix ? 1 : 0),
+  ).current;
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     Animated.timing(animatedIsFocused, {
-      toValue: isFocused || value ? 1 : 0,
+      toValue: isFocused || value || prefix ? 1 : 0,
       duration: ANIMATION_DURATION,
       useNativeDriver: false,
     }).start();
-  }, [animatedIsFocused, isFocused, value]);
+  }, [animatedIsFocused, isFocused, value, prefix]);
+
+  // Auto-focus input when autoFocus is enabled
+  useEffect(() => {
+    if (autoFocus && editable) {
+      // Small delay to ensure component is mounted
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [autoFocus, editable]);
 
   const labelStyle: Animated.AnimatedProps<TextStyle> = {
     position: 'absolute',
@@ -297,6 +325,12 @@ function AnimatedInputBase({
 
     if (shape === 'round') {
       baseStyles.push(styles.roundInput);
+    }
+
+    if (prefix && prefixWidth > 0) {
+      baseStyles.push({
+        paddingLeft: spacing.form.inputPaddingHorizontal + prefixWidth + 4,
+      });
     }
 
     return baseStyles;
@@ -353,6 +387,17 @@ function AnimatedInputBase({
   return (
     <View style={styles.inputContainer} testID={testID}>
       {label && renderLabelView()}
+      {prefix && (
+        <Body
+          style={styles.prefixText}
+          weight="semiBold"
+          onLayout={event => {
+            const {width} = event.nativeEvent.layout;
+            setPrefixWidth(width);
+          }}>
+          {prefix}
+        </Body>
+      )}
       <TextInput
         ref={inputRef}
         placeholder={placeholder}
@@ -362,7 +407,12 @@ function AnimatedInputBase({
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onBlur={() => {
+          // Don't blur if prefix exists
+          if (!prefix) {
+            setIsFocused(false);
+          }
+        }}
         autoCapitalize="none"
         testID={`${testID}-input`}
         multiline={multiline}
@@ -476,5 +526,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'transparent',
     zIndex: zIndex.base,
+  },
+  prefixText: {
+    position: 'absolute',
+    left: spacing.md,
+    zIndex: zIndex.elevated,
+    lineHeight: spacing.form.inputHeight,
   },
 });

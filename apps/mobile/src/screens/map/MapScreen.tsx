@@ -199,7 +199,7 @@ export const MapScreen = () => {
         console.error('Error getting user location:', err);
         showToast({
           text1: t('common.error'),
-          text2: t('screens.map.errorGettingLocation'),
+          text2: t('screens.map.error_getting_location'),
           type: 'error',
         });
       },

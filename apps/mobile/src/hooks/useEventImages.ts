@@ -63,7 +63,10 @@ export const useEventImages = ({
         setSelectedImages(updatedImages);
 
         const imageData = updatedImages.map(img => img.base64 || img.uri);
-        setValue('images', imageData, {shouldValidate: true, shouldDirty: true});
+        setValue('images', imageData, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
       }
     } catch (error) {
       loggingService.error('Error selecting event image:', error);

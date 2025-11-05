@@ -61,8 +61,8 @@ export const GET_GROUPS = gql`
 
 // Get user groups query
 export const GET_JOINED_GROUPS = gql`
-  query GetJoinedGroups($limit: Int, $skip: Int, $filters: FilterGroupInput) {
-    joinedGroups(limit: $limit, skip: $skip, filters: $filters) {
+  query GetJoinedGroups($limit: Int, $skip: Int, $filters: FilterGroupInput, $userId: String) {
+    joinedGroups(limit: $limit, skip: $skip, filters: $filters, userId: $userId) {
       ...GroupFragment
     }
   }

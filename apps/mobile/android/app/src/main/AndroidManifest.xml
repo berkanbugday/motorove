@@ -20,6 +20,14 @@
         <!-- Sygic -->
         <package android:name="com.sygic.aura" />
         
+        <!-- Social Media Apps -->
+        <package android:name="com.instagram.android" />
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.zhiliaoapp.musically" />
+        <package android:name="com.google.android.youtube" />
+        <package android:name="com.linkedin.android" />
+        <package android:name="com.twitter.android" />
+        
         <!-- Intent filters for navigation apps -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
@@ -40,6 +48,16 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="com.sygic.aura" />
+        </intent>
+        
+        <!-- Intent filters for social media apps -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
         </intent>
     </queries>
     

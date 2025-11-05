@@ -104,7 +104,7 @@ class LoggingService {
   /**
    * Set user information for error tracking
    */
-  setUser(user: {id?: string; email?: string; username?: string} | null): void {
+  setUser(user: {id?: string; email?: string} | null): void {
     Sentry.setUser(user);
   }
 

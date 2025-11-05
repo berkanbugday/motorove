@@ -177,6 +177,7 @@ export const useGetPosts = (
   savedById?: string,
   limit = 20,
   skip = 0,
+  skipQuery = false,
 ) => {
   const [hasMore, setHasMore] = useState(true);
 
@@ -194,6 +195,7 @@ export const useGetPosts = (
       limit,
       skip,
     },
+    skip: skipQuery,
     onError: errorObj => {
       loggingService.error('Error fetching posts:', errorObj);
     },

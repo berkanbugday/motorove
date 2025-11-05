@@ -132,7 +132,12 @@ export const useGetGroup = (id: string) => {
 };
 
 // Hook for getting user's groups
-export const useGetJoinedGroups = (limit = 20, skip = 0) => {
+export const useGetJoinedGroups = (
+  limit = 20,
+  skip = 0,
+  userId?: string,
+  skipQuery = false,
+) => {
   const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState<IFilterGroup>({
     cityId: null,
@@ -152,7 +157,9 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
       limit,
       skip,
       filters,
+      userId,
     },
+    skip: skipQuery,
     fetchPolicy: 'network-only',
     nextFetchPolicy: 'network-only',
     onError: errorObj => {
@@ -180,6 +187,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
           skip: data?.joinedGroups?.length || 0,
           limit,
           filters,
+          userId,
         },
         updateQuery: (prev, {fetchMoreResult}) => {
           if (!fetchMoreResult) {
@@ -214,6 +222,7 @@ export const useGetJoinedGroups = (limit = 20, skip = 0) => {
     limit,
     loading,
     filters,
+    userId,
     originalRefetch,
   ]);
 

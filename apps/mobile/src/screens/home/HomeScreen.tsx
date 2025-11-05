@@ -61,34 +61,6 @@ import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
 import {useTranslation} from '@hooks/useTranslation';
 
-// Route data
-const recommendedRoutes = [
-  {
-    id: '1',
-    title: 'Yapay Zeka ile Rota Planlama',
-    subtitle: 'Yakında',
-    image: 'https://picsum.photos/id/81/500/300', // Coast/ocean image
-  },
-  {
-    id: '2',
-    title: 'Yapay Zeka ile Rota Planlama',
-    subtitle: 'Yakında',
-    image: 'https://picsum.photos/id/29/500/300', // Mountain image
-  },
-  {
-    id: '3',
-    title: 'Yapay Zeka ile Rota Planlama',
-    subtitle: 'Yakında',
-    image: 'https://picsum.photos/id/62/500/300', // Urban image
-  },
-  {
-    id: '4',
-    title: 'Yapay Zeka ile Rota Planlama',
-    subtitle: 'Yakında',
-    image: 'https://picsum.photos/id/11/500/300', // Forest image
-  },
-];
-
 // EventItem interface and transformation logic moved to EventBanner component
 
 // Change from MainStackParamList to accepting both TabParamList and MainStackParamList
@@ -99,7 +71,6 @@ export const HomeScreen = ({navigation}: Props) => {
   const [showLocationPermission, setShowLocationPermission] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
-  const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const {user} = useAuth();
   const {count: notificationsCount, refetch: refetchCount} = useGetCount();
@@ -128,6 +99,36 @@ export const HomeScreen = ({navigation}: Props) => {
 
   // Get weather data from the service
   const {weatherData, refetch: refetchWeather} = useGetWeather();
+
+  // Route data
+  const recommendedRoutes = [
+    {
+      id: '1',
+      title: t('screens.home.plan_route_with_ai'),
+      subtitle: t('screens.home.coming_soon'),
+      image: 'https://picsum.photos/id/81/500/300', // Coast/ocean image
+    },
+    {
+      id: '2',
+      title: t('screens.home.plan_route_with_ai'),
+      subtitle: t('screens.home.coming_soon'),
+      image: 'https://picsum.photos/id/29/500/300', // Mountain image
+    },
+    {
+      id: '3',
+      title: t('screens.home.plan_route_with_ai'),
+      subtitle: t('screens.home.coming_soon'),
+      image: 'https://picsum.photos/id/62/500/300', // Urban image
+    },
+    {
+      id: '4',
+      title: t('screens.home.plan_route_with_ai'),
+      subtitle: t('screens.home.coming_soon'),
+      image: 'https://picsum.photos/id/11/500/300', // Forest image
+    },
+  ];
+
+  const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
 
   // Get events data with limit of 3
   const {
@@ -479,7 +480,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
       return {
         id: post.id,
-        userName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
+        fullName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
         timeAgo: formatDistanceToNow(new Date(post.createdAt), {
           addSuffix: true,
@@ -510,7 +511,7 @@ export const HomeScreen = ({navigation}: Props) => {
       return (
         <FeedCard
           avatarSource={feedCardProps.avatarSource}
-          userName={feedCardProps.userName}
+          fullName={feedCardProps.fullName}
           timeAgo={feedCardProps.timeAgo}
           labels={feedCardProps.labels}
           content={feedCardProps.content}
@@ -657,7 +658,7 @@ export const HomeScreen = ({navigation}: Props) => {
             {/* Recommended Routes Section */}
             <View style={styles.sectionContainer}>
               <Subtitle weight="bold" style={styles.sectionTitle}>
-                {t('screens.home.recommended_route_of_the_week')}
+                {t('screens.home.recommended_routes')}
               </Subtitle>
               <FullImageCard
                 title={currentRoute.title}

@@ -88,6 +88,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         enableOnAndroid={true}
+        enableResetScrollToCoords={false}
         keyboardShouldPersistTaps="handled">
         {/* Warning Type Selection */}
         <View style={styles.section}>

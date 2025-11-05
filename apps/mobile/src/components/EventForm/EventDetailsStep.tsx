@@ -68,6 +68,7 @@ export const EventDetailsStep: React.FC<EventDetailsStepProps> = ({
       showsVerticalScrollIndicator={false}
       enableOnAndroid={true}
       enableAutomaticScroll={true}
+      enableResetScrollToCoords={false}
       keyboardShouldPersistTaps="handled"
       style={styles.scrollView}>
       {eventType ? (

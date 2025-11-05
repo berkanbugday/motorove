@@ -45,7 +45,7 @@ interface BottomSheetContentProps {
 }
 
 // Utility function to get user's display name
-const getUserName = (user: IUser, t: any): string => {
+const getFullName = (user: IUser, t: any): string => {
   if (user.firstName && user.lastName) {
     return `${user.firstName} ${user.lastName}`;
   }
@@ -107,8 +107,8 @@ const UserItem: React.FC<UserItemProps> = ({
           />
         </View>
         <View style={styles.userInfo}>
-          <Typography variant="body" style={styles.userName} numberOfLines={1}>
-            {getUserName(user, t)}
+          <Typography variant="body" style={styles.fullName} numberOfLines={1}>
+            {getFullName(user, t)}
           </Typography>
         </View>
       </View>
@@ -396,7 +396,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
           {selectedUserDetails.map(selectedUser => (
             <Chip
               key={selectedUser.id}
-              label={getUserName(selectedUser, t)}
+              label={getFullName(selectedUser, t)}
               variant="filled"
               color="dark"
               removable={true}
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
   },
-  userName: {
+  fullName: {
     fontWeight: '500',
     marginBottom: 2,
   },

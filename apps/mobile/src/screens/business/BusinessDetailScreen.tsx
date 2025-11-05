@@ -350,7 +350,6 @@ export const BusinessDetailScreen: React.FC = () => {
     }
   }, [currentBusiness?.countryCode, currentBusiness?.phoneNumber, t]);
 
-
   // Comment handlers for BusinessComments component
   const handleCreateComment = useCallback(
     async (rating: number, content: string) => {
@@ -453,6 +452,7 @@ export const BusinessDetailScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         enableOnAndroid={true}
         enableAutomaticScroll={true}
+        enableResetScrollToCoords={false}
         keyboardShouldPersistTaps="handled">
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -681,7 +681,6 @@ export const BusinessDetailScreen: React.FC = () => {
           />
         )}
       </View>
-
 
       {/* Comment Actions Bottom Sheet */}
       <BottomSheet
