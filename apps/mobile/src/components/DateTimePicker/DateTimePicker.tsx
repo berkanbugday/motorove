@@ -36,7 +36,7 @@ interface BaseDateTimePickerProps {
   /**
    * Default value
    */
-  defaultValue?: Date;
+  defaultValue?: Date | null;
   /**
    * Whether the date picker is disabled
    */
@@ -222,7 +222,7 @@ interface DateTimePickerBaseProps {
   displayFormat?: 'short' | 'medium' | 'long' | 'full';
   minimumDate?: Date;
   maximumDate?: Date;
-  defaultValue?: Date;
+  defaultValue?: Date | null;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   testID?: string;

@@ -15,6 +15,7 @@ import { UserSocialMediaProfileDto } from './dto/user-social-media-profile.dto';
 import { EventParticipantStatus } from '../enums/models/event-participant-status.enum';
 import { EventStatus } from '../enums/models/event-status.enum';
 import { Gender } from '../enums/models/gender.enum';
+import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +23,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    private profanityFilterService: ProfanityFilterService,
   ) {}
 
   async findAll(
@@ -181,6 +183,8 @@ export class UsersService {
         );
       }
     }
+
+    user.bio = this.profanityFilterService.filterText(user.bio!);
 
     return {
       id: user.id,
@@ -364,6 +368,8 @@ export class UsersService {
           );
         }
       }
+
+      userResult.bio = this.profanityFilterService.filterText(userResult.bio!);
 
       return {
         id: userResult.id,

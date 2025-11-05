@@ -4,9 +4,10 @@ import { UsersResolver } from './users.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { StorageModule } from '../core/storage/storage.module';
+import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, StorageModule],
+  imports: [PrismaModule, AuthModule, StorageModule, ProfanityFilterModule],
   providers: [UsersResolver, UsersService],
   exports: [UsersService],
 })

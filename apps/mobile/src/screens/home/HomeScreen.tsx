@@ -41,14 +41,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {
-  IPost,
-  IUser,
-  IImage,
-  IEvent,
-  Language,
-  EventStatus,
-} from '@motorove/shared';
+import {IPost, IUser, IImage, IEvent, EventStatus} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -57,8 +50,6 @@ import {
   useUnsavePost,
   useRemovePost,
 } from '@services/post.service';
-import {formatDistanceToNow} from 'date-fns';
-import {tr, enUS} from 'date-fns/locale';
 import {useTranslation} from '@hooks/useTranslation';
 
 // EventItem interface and transformation logic moved to EventBanner component
@@ -482,11 +473,7 @@ export const HomeScreen = ({navigation}: Props) => {
         id: post.id,
         fullName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
-        timeAgo: formatDistanceToNow(new Date(post.createdAt), {
-          addSuffix: true,
-          locale:
-            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
-        }),
+        createdAt: post.createdAt,
         content: post.content,
         images,
         likeCount: post.likesCount,
@@ -512,7 +499,7 @@ export const HomeScreen = ({navigation}: Props) => {
         <FeedCard
           avatarSource={feedCardProps.avatarSource}
           fullName={feedCardProps.fullName}
-          timeAgo={feedCardProps.timeAgo}
+          createdAt={feedCardProps.createdAt}
           labels={feedCardProps.labels}
           content={feedCardProps.content}
           images={feedCardProps.images}

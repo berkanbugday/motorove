@@ -38,10 +38,6 @@ export interface ProfileCompletionData {
    * Whether the profile has social media
    */
   hasSocialMedia: boolean;
-  /**
-   * Whether the profile has a city
-   */
-  hasCity: boolean;
 }
 
 export interface ProfileCompletionWidgetProps {

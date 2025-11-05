@@ -240,11 +240,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
         id: postData.id,
         fullName: `${postData.createdBy.firstName} ${postData.createdBy.lastName}`,
         avatarSource: formatAvatarSource(postData.createdBy.avatar),
-        timeAgo: formatDistanceToNow(new Date(postData.createdAt), {
-          addSuffix: true,
-          locale:
-            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
-        }),
+        createdAt: postData.createdAt,
         content: postData.content,
         images,
         likeCount: postData.likesCount,
@@ -268,7 +264,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
         <FeedCard
           avatarSource={feedCardProps.avatarSource}
           fullName={feedCardProps.fullName}
-          timeAgo={feedCardProps.timeAgo}
+          createdAt={feedCardProps.createdAt}
           labels={feedCardProps.labels}
           content={feedCardProps.content}
           images={feedCardProps.images}

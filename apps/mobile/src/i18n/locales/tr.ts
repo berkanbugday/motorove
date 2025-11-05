@@ -148,7 +148,7 @@ export default {
       riding_styles: 'Sürüş Stilleri',
       interests: 'İlgi Alanları',
       avatar: 'Profil Fotoğrafı',
-      image_too_large: 'Resim çok büyük (maksimum boyut: 5MB)',
+      image_too_large: 'Resim çok büyük (maksimum boyut: 10MB)',
       failed_to_select_image: 'Resim seçilemedi. Lütfen tekrar deneyin.',
       upload_photo: 'Fotoğraf yükle',
       setup_failed: 'Profil ayarları güncellenemedi',
@@ -440,22 +440,33 @@ export default {
 
     // Profile screens
     profile: {
-      about: 'Hakkında',
       groups: 'Gruplar',
-      riding_styles: 'Sürüş Stilleri',
       interests: 'İlgi Alanları',
       posts: 'Gönderiler',
       events: 'Etkinlikler',
       following: 'Takip Edilen',
       followers: 'Takipçi',
       country: 'Türkiye',
-      bio: 'Biyografi',
-      city: 'Şehir',
-      social_media: 'Sosyal Medya',
-      complete_profile_message:
-        'Sürüş stilleri ve ilgi alanları eklemek için profilinizi tamamlayın',
-      groups_empty_message: 'Gruplarınız burada görünecek',
+      groups_empty_message: 'Henüz Grup Yok',
       no_posts: 'Henüz gönderi yok',
+    },
+
+    // Edit Profile screen
+    editProfile: {
+      title: 'Profil Düzenle',
+      basic_info: 'Temel Bilgiler',
+      first_name: 'Ad',
+      last_name: 'Soyad',
+      bio: 'Biografi',
+      gender: 'Cinsiyet',
+      date_of_birth: 'Doğum Tarihi',
+      riding_styles: 'Sürüş Stilleri',
+      interests: 'İlgi Alanları',
+      social_media: 'Sosyal Medya',
+      image_too_large: 'Resim çok büyük (maksimum boyut: 10MB)',
+      failed_to_select_image: 'Resim seçilemedi. Lütfen tekrar deneyin.',
+      profile_updated: 'Profil başarıyla güncellendi',
+      profile_updated_failed: 'Profil güncellenemedi. Lütfen tekrar deneyin.',
     },
 
     // Notifications screen

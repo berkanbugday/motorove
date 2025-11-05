@@ -147,7 +147,7 @@ export default {
       riding_styles: 'Riding Styles',
       interests: 'Interests',
       avatar: 'Profile Photo',
-      image_too_large: 'Image is too large (maximum size: 5MB)',
+      image_too_large: 'Image is too large (maximum size: 10MB)',
       failed_to_select_image: 'Failed to select image. Please try again.',
       upload_photo: 'Upload photo',
       setup_failed: 'Profile setup failed',
@@ -445,22 +445,33 @@ export default {
 
     // Profile screens
     profile: {
-      about: 'About',
       groups: 'Groups',
-      riding_styles: 'Riding Styles',
       interests: 'Interests',
       posts: 'Posts',
       events: 'Events',
       following: 'Following',
       followers: 'Followers',
       country: 'Turkey',
-      bio: 'Bio',
-      city: 'City',
-      social_media: 'Social Media',
-      complete_profile_message:
-        'Complete your profile to add riding styles and interests',
-      groups_empty_message: 'Your groups will appear here',
+      groups_empty_message: 'No groups yet',
       no_posts: 'No posts yet',
+    },
+
+    // Edit Profile screen
+    editProfile: {
+      title: 'Edit Profile',
+      basic_info: 'Basic Information',
+      first_name: 'First Name',
+      last_name: 'Last Name',
+      bio: 'Biography',
+      gender: 'Gender',
+      date_of_birth: 'Date of Birth',
+      riding_styles: 'Riding Styles',
+      interests: 'Interests',
+      social_media: 'Social Media',
+      image_too_large: 'Image is too large (maximum size: 10MB)',
+      failed_to_select_image: 'Image selection failed. Please try again.',
+      profile_updated: 'Profile updated successfully',
+      profile_updated_failed: 'Profile update failed. Please try again.',
     },
 
     // Notifications screen

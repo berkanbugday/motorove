@@ -20,7 +20,10 @@ import {Button, Chip, Icon, ImagePreviewModal} from '@components';
 import {IconName} from '@components/Icon';
 import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {useTranslation} from '@hooks/useTranslation';
-import {IImage} from '@motorove/shared';
+import {IImage, Language} from '@motorove/shared';
+import {formatDistanceToNow} from 'date-fns';
+import {tr, enUS} from 'date-fns/locale';
+import {useLanguage} from '@contexts/LanguageContext';
 
 export interface FeedCardProps {
   /**
@@ -34,9 +37,9 @@ export interface FeedCardProps {
   fullName: string;
 
   /**
-   * Time when the post was created (e.g., "2h ago")
+   * ISO date string when the post was created
    */
-  timeAgo: string;
+  createdAt: Date;
 
   /**
    * Labels for the post (e.g., club name, location)
@@ -185,10 +188,11 @@ const {width: screenWidth} = Dimensions.get('window');
  */
 const FeedCard: React.FC<FeedCardProps> = props => {
   const {t} = useTranslation();
+  const {language} = useLanguage();
   const {
     avatarSource,
     fullName,
-    timeAgo,
+    createdAt,
     labels = [],
     content,
     images,
@@ -223,6 +227,12 @@ const FeedCard: React.FC<FeedCardProps> = props => {
   const carouselRef = useRef(null);
   const likeAnimatedValue = useRef(new Animated.Value(1)).current;
   const saveAnimatedValue = useRef(new Animated.Value(1)).current;
+
+  // Calculate time ago based on language
+  const timeAgo = formatDistanceToNow(new Date(createdAt), {
+    addSuffix: true,
+    locale: language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+  });
 
   // For backward compatibility, convert single image to array
   const imageArray = images ? (Array.isArray(images) ? images : [images]) : [];
