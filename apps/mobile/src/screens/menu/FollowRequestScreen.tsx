@@ -15,6 +15,7 @@ import {
 import {useTranslation} from '@hooks/useTranslation';
 import {useFollowRequests} from '@services/user-following.service';
 import {FollowRequestCard} from '@components/FollowRequestCard/FollowRequestCard';
+import {useAuth} from '@contexts';
 
 /**
  * FollowRequestScreen - Displays follow requests from other users
@@ -24,6 +25,7 @@ export const FollowRequestScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'FollowRequest'>>();
   const {t} = useTranslation();
+  const {user} = useAuth();
 
   // Fetch follow requests with comprehensive error handling
   const {
@@ -54,9 +56,11 @@ export const FollowRequestScreen = () => {
    */
   const handleUserPress = useCallback(
     (userId: string) => {
-      navigation.navigate('Profile', {userId});
+      if (userId !== user?.id) {
+        navigation.navigate('Profile', {userId});
+      }
     },
-    [navigation],
+    [navigation, user],
   );
 
   /**

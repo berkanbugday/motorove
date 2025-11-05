@@ -1,7 +1,7 @@
 import { ICity } from "../city/city.interface";
 import { RidingStyle } from "../../enums/riding-style.enum";
 import { Interest } from "../../enums/interest.enum";
-import { Gender } from "../../enums";
+import { Gender, ApprovalStatus } from "../../enums";
 import { IUserSocialMediaProfile } from "./user-social-media-profile.interface";
 
 /**
@@ -21,4 +21,5 @@ export interface IProfile {
   ridingStyles?: RidingStyle[];
   interests?: Interest[];
   socialMediaProfiles?: IUserSocialMediaProfile[];
+  followingStatus?: ApprovalStatus;
 }

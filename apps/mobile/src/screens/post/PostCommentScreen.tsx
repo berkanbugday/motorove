@@ -318,9 +318,11 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
             comment={commentItem}
             style={style}
             actionBarActive={false}
-            onPressAvatar={() =>
-              navigation.navigate('Profile', {userId: commentItem.userId})
-            }
+            onPressAvatar={() => {
+              if (commentItem.userId !== user?.id) {
+                navigation.navigate('Profile', {userId: commentItem.userId});
+              }
+            }}
           />
         );
       }

@@ -59,15 +59,11 @@ import {
   GroupPrivacy,
   IUser,
   IImage,
-  Language,
   EventStatus,
   IEvent,
   ApprovalStatus,
 } from '@motorove/shared';
-import {formatDistanceToNow} from 'date-fns';
-import {tr, enUS} from 'date-fns/locale';
-import {useAuth} from '@contexts';
-import {useLanguage} from '@contexts/LanguageContext';
+import {useAuth, useLanguage} from '@contexts';
 import {
   useAddMember,
   useChangeMemberRole,
@@ -255,9 +251,11 @@ const MemberItem = React.memo(
               shape="round"
               size="small"
               onPress={() => {
-                navigateToScreen(navigation, 'Profile', {
-                  userId: item.user.id,
-                });
+                if (item.user.id !== user.id) {
+                  navigateToScreen(navigation, 'Profile', {
+                    userId: item.user.id,
+                  });
+                }
               }}
             />
           </Animated.View>
@@ -726,11 +724,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         id: post.id,
         fullName: `${post.createdBy.firstName} ${post.createdBy.lastName}`,
         avatarSource: formatAvatarSource(post.createdBy.avatar),
-        timeAgo: formatDistanceToNow(new Date(post.createdAt), {
-          addSuffix: true,
-          locale:
-            language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
-        }),
+        createdAt: post.createdAt,
         content: post.content,
         images,
         likeCount: post.likesCount,
@@ -841,7 +835,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
         <FeedCard
           avatarSource={feedCardProps.avatarSource}
           fullName={feedCardProps.fullName}
-          timeAgo={feedCardProps.timeAgo}
+          createdAt={feedCardProps.createdAt}
           labels={feedCardProps.labels}
           content={feedCardProps.content}
           images={feedCardProps.images}

@@ -52,9 +52,10 @@ export class UsersResolver {
     @Context() context: GqlContext,
     @Args('id', { type: () => String }) id: string,
   ): Promise<ProfileDto> {
+    const currentUserId = context.req.user.id;
     const authHeader = context.req.headers.authorization;
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.usersService.userProfile(id, authToken);
+    return await this.usersService.userProfile(id, authToken, currentUserId);
   }
 
   @UseGuards(JwtGuard)

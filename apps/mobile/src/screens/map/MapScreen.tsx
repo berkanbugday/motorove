@@ -4,26 +4,29 @@ import {RNMap, RNMapMarkerItem, MapTabType} from '@components/RNMap';
 import {useGetBusinesses} from '@services/business.service';
 import {IBusiness, ICreateWarning, ICreateEmergency} from '@motorove/shared';
 import {useGetWarnings, useCreateWarning} from '@services/warning.service';
-import {IconName} from '@components/Icon';
+import {
+  IconName,
+  Button,
+  useBottomSheet,
+  EmergencyBottomSheet,
+  WarningBottomSheet,
+  showToast,
+} from '@components';
 import {colors} from '@theme/colors';
 import {getWarningIconAndColor} from '@utils/warningUtils';
 import Geolocation from '@react-native-community/geolocation';
 import {Region} from 'react-native-maps';
 import {useTranslation} from '@hooks/useTranslation';
-import {showToast} from '@components/ToastMessage';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
-import {useBottomSheet} from '@components/BottomSheet';
 import {MapFilter, MapFilterValues} from '@components/MapFilter';
-import {EmergencyBottomSheet} from '@components/EmergencyBottomSheet';
-import {WarningBottomSheet} from '@components/WarningBottomSheet';
-import {Button} from '@components/Button';
 import {
   useGetEmergencies,
   useCreateEmergency,
 } from '@services/emergency.service';
 import {getEmergencyIconAndColor} from '@utils/emergencyUtils';
+import {useAuth} from '@contexts';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -38,6 +41,7 @@ const ZOOM_THRESHOLD_FAR = 0.5; // Very zoomed out
 
 export const MapScreen = () => {
   const {t} = useTranslation();
+  const {user} = useAuth();
   const navigation =
     useNavigation<MainScreenNavigationProp<'BusinessDetail'>>();
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
@@ -433,9 +437,11 @@ export const MapScreen = () => {
   // Handle profile press - navigate to profile screen
   const handleProfilePress = useCallback(
     (userId: string) => {
-      navigateToScreen(navigation, 'Profile', {userId});
+      if (userId !== user?.id) {
+        navigateToScreen(navigation, 'Profile', {userId});
+      }
     },
-    [navigation],
+    [navigation, user],
   );
 
   // Check if filters are active

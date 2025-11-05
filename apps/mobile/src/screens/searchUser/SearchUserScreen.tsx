@@ -16,6 +16,7 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/index';
 import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
 import {FlashList} from '@shopify/flash-list';
+import {useAuth} from '@contexts';
 
 /**
  * User Search Screen - Allows users to search for other users and follow/unfollow them
@@ -53,6 +54,8 @@ const CancelButton = ({onPress}: {onPress: () => void}) => {
 export const SearchUserScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'SearchUser'>>();
   const {t} = useTranslation();
+  const {user} = useAuth();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const {followUser, loading: followLoading} = useFollowUser();
@@ -106,7 +109,9 @@ export const SearchUserScreen = () => {
           user={item}
           loading={followLoading || unfollowLoading}
           onPress={() => {
-            navigation.navigate('Profile', {userId: item.id});
+            if (item.id !== user?.id) {
+              navigation.navigate('Profile', {userId: item.id});
+            }
           }}
           handleFollowPress={async () => {
             await followUser(item.id);
@@ -118,7 +123,7 @@ export const SearchUserScreen = () => {
         />
       );
     },
-    [followUser, unfollowUser],
+    [followUser, unfollowUser, user],
   );
 
   // Render empty state when no users match search query

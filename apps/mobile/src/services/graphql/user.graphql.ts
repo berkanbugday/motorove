@@ -31,6 +31,7 @@ export const PROFILE_FRAGMENT = gql`
     dateOfBirth
     ridingStyles
     interests
+    followingStatus
     socialMediaProfiles {
       id
       platform

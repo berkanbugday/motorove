@@ -514,9 +514,13 @@ export const HomeScreen = ({navigation}: Props) => {
           onCommentPress={() => handleCommentPress(item.id)}
           onSavePress={() => handleSavePress(item.id, item.isSaved)}
           onLikesPress={() => handleLikesPress(item.likedUsers)}
-          onProfilePress={() =>
-            navigateToScreen(navigation, 'Profile', {userId: item.createdBy.id})
-          }
+          onProfilePress={() => {
+            if (item.createdBy.id !== user?.id) {
+              navigateToScreen(navigation, 'Profile', {
+                userId: item.createdBy.id,
+              });
+            }
+          }}
           style={styles.feedCard}
         />
       );

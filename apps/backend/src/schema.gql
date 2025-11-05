@@ -1044,6 +1044,7 @@ type ProfileDto {
   dateOfBirth: DateTime
   email: String!
   firstName: String!
+  followingStatus: ApprovalStatus
   gender: Gender
   id: ID!
   interests: [Interest!]

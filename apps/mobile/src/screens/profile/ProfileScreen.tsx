@@ -31,7 +31,8 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {useGetUserProfile, useGetUserStats} from '@services/user.service';
 import {useGetPosts} from '@services/post.service';
 import {useGetJoinedGroups} from '@services/group.service';
-import {IGroup, SocialMediaPlatform} from '@motorove/shared';
+import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
+import {IGroup, SocialMediaPlatform, ApprovalStatus} from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {
   MainScreenNavigationProp,
@@ -62,7 +63,11 @@ export const ProfileScreen = () => {
   const [bioExpanded, setBioExpanded] = useState(false);
 
   // Fetch real user data
-  const {profile, loading: profileLoading} = useGetUserProfile(profileUserId);
+  const {
+    profile,
+    loading: profileLoading,
+    refetch: refetchProfile,
+  } = useGetUserProfile(profileUserId);
 
   const {stats, loading: statsLoading} = useGetUserStats(profileUserId);
 
@@ -94,7 +99,16 @@ export const ProfileScreen = () => {
     hasMore: hasMoreGroups,
   } = useGetJoinedGroups(20, 0, profileUserId, !shouldFetchGroups);
 
+  // Follow/unfollow hooks
+  const {followUser, loading: followLoading} = useFollowUser(() =>
+    refetchProfile(),
+  );
+  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser(() =>
+    refetchProfile(),
+  );
+
   const loading = profileLoading || statsLoading;
+  const followActionLoading = followLoading || unfollowLoading;
 
   // Calculate profile completion
   const calculateProfileCompletion = () => {
@@ -230,6 +244,35 @@ export const ProfileScreen = () => {
 
   const handleGroupPress = (group: IGroup) => {
     navigateToScreen(navigation, 'GroupDetail', {groupId: group.id});
+  };
+
+  const handleFollowToggle = async () => {
+    if (!profile || followActionLoading) {
+      return;
+    }
+
+    // If already following (ACCEPTED status), unfollow
+    if (profile.followingStatus === ApprovalStatus.ACCEPTED) {
+      await unfollowUser(profileUserId);
+    } else {
+      // If not following or pending, follow
+      await followUser(profileUserId);
+    }
+  };
+
+  const getFollowButtonText = () => {
+    if (!profile?.followingStatus) {
+      return t('common.follow');
+    }
+
+    switch (profile.followingStatus) {
+      case ApprovalStatus.ACCEPTED:
+        return t('common.following');
+      case ApprovalStatus.PENDING:
+        return t('common.pending_approval');
+      default:
+        return t('common.follow');
+    }
   };
 
   const renderPostsTab = () => (
@@ -443,6 +486,35 @@ export const ProfileScreen = () => {
             </View>
           </View>
 
+          {!isOwnProfile && (
+            <Button
+              title={getFollowButtonText()}
+              onPress={handleFollowToggle}
+              variant={
+                profile?.followingStatus === ApprovalStatus.ACCEPTED
+                  ? 'dark'
+                  : profile?.followingStatus === ApprovalStatus.PENDING
+                  ? 'secondary'
+                  : 'primary'
+              }
+              size="small"
+              shape="round"
+              iconName={
+                profile?.followingStatus === ApprovalStatus.ACCEPTED
+                  ? 'user-check-filled'
+                  : profile?.followingStatus === ApprovalStatus.PENDING
+                  ? 'clock-filled'
+                  : 'user-plus-filled'
+              }
+              loading={followActionLoading}
+              disabled={
+                followActionLoading ||
+                profile?.followingStatus === ApprovalStatus.PENDING
+              }
+              style={styles.followButton}
+            />
+          )}
+
           {profile?.bio && (
             <View style={{marginBottom: spacing.md}}>
               <Body>{getBioText()}</Body>
@@ -649,5 +721,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     borderRadius: radius.lg,
     ...getShadow('small'),
+  },
+  followButton: {
+    marginBottom: spacing.md,
+    width: '70%',
+    alignSelf: 'center',
   },
 });

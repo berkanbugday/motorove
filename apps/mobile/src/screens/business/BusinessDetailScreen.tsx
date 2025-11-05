@@ -390,7 +390,7 @@ export const BusinessDetailScreen: React.FC = () => {
 
   const handleProfilePress = useCallback(
     (userId: string | null) => {
-      if (userId) {
+      if (userId && userId !== user?.id) {
         navigateToScreen(navigation, 'Profile', {userId});
       }
     },

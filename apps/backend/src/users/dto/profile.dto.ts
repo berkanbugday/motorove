@@ -12,6 +12,7 @@ import { CityDto } from 'src/cities/dto/city.dto';
 import { RidingStyle } from '../../enums/models/riding-style.enum';
 import { Interest } from '../../enums/models/interest.enum';
 import { Gender } from '../../enums/models/gender.enum';
+import { ApprovalStatus } from '../../enums/models/approval-status.enum';
 import { UserSocialMediaProfileDto } from './user-social-media-profile.dto';
 
 @ObjectType()
@@ -71,4 +72,9 @@ export class ProfileDto {
   @IsOptional()
   @IsArray()
   socialMediaProfiles?: UserSocialMediaProfileDto[];
+
+  @Field(() => ApprovalStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(ApprovalStatus)
+  followingStatus?: ApprovalStatus;
 }

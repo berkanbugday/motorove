@@ -156,12 +156,25 @@ export class UsersService {
     };
   }
 
-  async userProfile(userId: string, authToken?: string): Promise<ProfileDto> {
+  async userProfile(
+    userId: string,
+    authToken?: string,
+    currentUserId?: string,
+  ): Promise<ProfileDto> {
     const user = await this.prisma.user.findFirst({
       where: { id: userId },
       include: {
         city: true,
         socialMediaProfiles: true,
+        following: {
+          where: {
+            followerId: currentUserId,
+            isActive: true,
+          },
+          select: {
+            status: true,
+          },
+        },
       },
     });
 
@@ -186,6 +199,12 @@ export class UsersService {
 
     user.bio = this.profanityFilterService.filterText(user.bio!);
 
+    // Get following status if currentUserId is provided
+    const followingStatus =
+      currentUserId && user.following.length > 0
+        ? user.following[0].status
+        : undefined;
+
     return {
       id: user.id,
       firstName: user.firstName,
@@ -200,6 +219,7 @@ export class UsersService {
       interests: user.interests as Interest[],
       socialMediaProfiles:
         user.socialMediaProfiles as UserSocialMediaProfileDto[],
+      followingStatus: followingStatus as ApprovalStatus,
     };
   }
 

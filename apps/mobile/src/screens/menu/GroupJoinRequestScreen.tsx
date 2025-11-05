@@ -15,6 +15,7 @@ import {
 import {useTranslation} from '@hooks/useTranslation';
 import {useGetGroupJoinRequests} from '@services/group-membership.service';
 import {GroupJoinRequestCard, GroupJoinRequest} from '@components';
+import {useAuth} from '@contexts';
 
 /**
  * GroupJoinRequestScreen - Displays join requests for groups
@@ -25,6 +26,7 @@ export const GroupJoinRequestScreen = () => {
   const navigation =
     useNavigation<MainScreenNavigationProp<'GroupJoinRequest'>>();
   const {t} = useTranslation();
+  const {user} = useAuth();
 
   // Fetch group join requests with comprehensive error handling
   const {
@@ -54,9 +56,11 @@ export const GroupJoinRequestScreen = () => {
    */
   const handleUserPress = useCallback(
     (userId: string) => {
-      navigation.navigate('Profile', {userId});
+      if (userId !== user?.id) {
+        navigation.navigate('Profile', {userId});
+      }
     },
-    [navigation],
+    [navigation, user],
   );
 
   /**
