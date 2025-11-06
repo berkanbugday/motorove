@@ -1,9 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {IWarning, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
@@ -36,6 +32,7 @@ export interface RNMapWarningMarkerCardProps {
     latitude: number;
     longitude: number;
   };
+  showGetDirectionsButton?: boolean;
   onGetDirections?: () => void;
 }
 
@@ -48,6 +45,7 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
   onClose,
   style,
   userLocation,
+  showGetDirectionsButton = false,
 }) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
@@ -76,7 +74,7 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
           warning.addresses[0].longitude,
           language as Language,
         );
-        setDistance(route.distanceKm.toString());
+        setDistance(route.distanceKm.toString().replace('NaN', '0'));
       } catch (error) {
         console.error('Error calculating route distance:', error);
         setDistance(null);
@@ -198,18 +196,19 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
         </Caption>
 
         {/* Get Directions Button */}
-        {warning.addresses && warning.addresses.length > 0 && (
-          <Button
-            title={t('screens.map.get_directions')}
-            variant="dark"
-            shape="round"
-            size="small"
-            iconName="location-arrow-filled"
-            onPress={handleGetDirections}
-          />
-        )}
+        {warning.addresses &&
+          warning.addresses.length > 0 &&
+          showGetDirectionsButton && (
+            <Button
+              title={t('screens.map.get_directions')}
+              variant="dark"
+              shape="round"
+              size="small"
+              iconName="location-arrow-filled"
+              onPress={handleGetDirections}
+            />
+          )}
       </View>
-
     </View>
   );
 };

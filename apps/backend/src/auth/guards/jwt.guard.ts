@@ -9,7 +9,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
 
 interface GqlContext {
-  req: Request & { user?: any };
+  req: Request & { user?: any; accessToken?: string };
 }
 
 @Injectable()
@@ -35,6 +35,7 @@ export class JwtGuard implements CanActivate {
     try {
       const user = await this.authService.validateUser(token);
       req.user = user;
+      req.accessToken = token; // Store access token for Supabase operations
       return true;
     } catch {
       throw new UnauthorizedException('Invalid token');

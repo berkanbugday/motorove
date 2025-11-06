@@ -185,11 +185,11 @@ export const MenuScreen = () => {
         },
         {
           icon: (
-            <Icon name="lock-filled" size={18} color={colors.neutral.black} />
+            <Icon name="gear-filled" size={18} color={colors.neutral.black} />
           ),
-          title: t('screens.menu.privacy_settings'),
+          title: t('screens.menu.account_settings'),
           onPress: () => {
-            navigation.navigate('PrivacySetting');
+            navigation.navigate('AccountSetting');
           },
           showRightIcon: true,
         },

@@ -6,7 +6,10 @@ import {
   SIGN_UP,
   REFRESH_TOKEN,
   RESET_PASSWORD,
+  UPDATE_EMAIL,
+  UPDATE_PASSWORD,
   RESEND,
+  SIGN_OUT,
 } from './graphql';
 import {AuthUser, AuthResponse, AuthState} from '../types/auth.types';
 import {loggingService} from './logging.service';
@@ -61,6 +64,92 @@ export const useResetPassword = (onSuccess?: () => void) => {
   };
 
   return {resetPassword, loading, error};
+};
+
+/**
+ * Hook for updating email
+ */
+export const useUpdateEmail = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
+  const [updateEmailMutation, {loading, error}] = useMutation(UPDATE_EMAIL, {
+    onCompleted: _data => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.changeEmail.success_updated'),
+      });
+      onSuccess?.();
+    },
+    onError: errorObj => {
+      loggingService.error('Error updating email:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.changeEmail.update_failed'),
+      });
+    },
+  });
+
+  const updateEmail = async (
+    email: string,
+    newEmail: string,
+  ): Promise<boolean> => {
+    try {
+      const result = await updateEmailMutation({
+        variables: {input: {email, newEmail}},
+      });
+      return result.data?.updateEmail;
+    } catch (err) {
+      loggingService.error('Error in updateEmail:', err);
+      return false;
+    }
+  };
+
+  return {updateEmail, loading, error};
+};
+
+/**
+ * Hook for updating password
+ */
+export const useUpdatePassword = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
+  const [updatePasswordMutation, {loading, error}] = useMutation(
+    UPDATE_PASSWORD,
+    {
+      onCompleted: _data => {
+        showToast({
+          type: 'success',
+          text1: t('common.success'),
+          text2: t('screens.changePassword.success_updated'),
+        });
+        onSuccess?.();
+      },
+      onError: errorObj => {
+        loggingService.error('Error updating password:', errorObj);
+        showToast({
+          type: 'error',
+          text1: t('common.error'),
+          text2: errorObj.message || t('screens.changePassword.update_failed'),
+        });
+      },
+    },
+  );
+
+  const updatePassword = async (newPassword: string): Promise<boolean> => {
+    try {
+      const result = await updatePasswordMutation({
+        variables: {
+          newPassword,
+        },
+      });
+      return result.data?.updatePassword;
+    } catch (err) {
+      loggingService.error('Error in updatePassword:', err);
+      return false;
+    }
+  };
+
+  return {updatePassword, loading, error};
 };
 
 /**
@@ -131,14 +220,41 @@ class AuthService {
 
   async signOut(): Promise<void> {
     try {
+      // Clear background refresh first
       this.backgroundRefreshManager.clear();
+
+      // Stop all active queries to prevent errors during cleanup
+      apolloClient.stop();
+
+      // Clear auth storage
       await AuthStorage.clearAll();
-      await apolloClient.clearStore();
+
+      // Reset Apollo client cache (use resetStore instead of clearStore)
+      // This will refetch active queries after reset, but since we're logged out, they'll fail gracefully
+      await apolloClient.resetStore();
+
+      // Call sign out mutation (best effort - don't block on errors)
+      try {
+        await apolloClient.mutate({
+          mutation: SIGN_OUT,
+          context: {skipAuth: true},
+        });
+      } catch (signOutError) {
+        loggingService.info(
+          'Sign out mutation failed (expected after token cleared)',
+        );
+      }
     } catch (error) {
       loggingService.error('Signout error:', error);
       // Ensure cleanup even if error occurs
-      await AuthStorage.clearAll();
-      await AsyncStorage.clear();
+      try {
+        apolloClient.stop();
+        await AuthStorage.clearAll();
+        await AsyncStorage.clear();
+        await apolloClient.resetStore();
+      } catch (cleanupError) {
+        loggingService.error('Cleanup error during signout:', cleanupError);
+      }
     }
   }
 
@@ -542,4 +658,6 @@ export default authService;
 // Export hooks
 export const AuthHooks = {
   useResetPassword,
+  useUpdateEmail,
+  useUpdatePassword,
 };

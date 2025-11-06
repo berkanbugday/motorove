@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, ScrollView} from 'react-native';
+import {View, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
 import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, radius} from '@theme';
-import {Switch, TopHeaderBar} from '@components';
+import {Switch, TopHeaderBar, Body, Icon} from '@components';
 import {
   useGetUserSetting,
   useUpdateUserSetting,
@@ -10,9 +10,12 @@ import {
 // import {useAuth} from '@contexts/AuthContext';
 import {loggingService} from '@services/logging.service';
 import {useNavigation} from '@react-navigation/native';
+import {navigateToScreen} from '@navigation/utils/navigationHelpers';
+import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 
-export const PrivacySettingScreen = () => {
-  const navigation = useNavigation();
+export const AccountSettingScreen = () => {
+  const navigation =
+    useNavigation<MainScreenNavigationProp<'AccountSetting'>>();
   const {t} = useTranslation();
   const {userSetting, refetch} = useGetUserSetting();
   const {updateUserSetting} = useUpdateUserSetting(() => refetch());
@@ -54,7 +57,7 @@ export const PrivacySettingScreen = () => {
   return (
     <View style={styles.container}>
       <TopHeaderBar
-        title={t('screens.menu.privacy_settings')}
+        title={t('screens.menu.account_settings')}
         showBackButton
         onBackPress={() => navigation.goBack()}
         showShadow={false}
@@ -70,12 +73,57 @@ export const PrivacySettingScreen = () => {
             <Switch
               value={autoAcceptFollowers}
               onValueChange={handleAutoAcceptFollowersChange}
-              label={t('screens.privacySetting.auto_accept_followers_label')}
+              label={t('screens.accountSetting.auto_accept_followers_label')}
               description={t(
-                'screens.privacySetting.auto_accept_followers_description',
+                'screens.accountSetting.auto_accept_followers_description',
               )}
               activeColor={colors.neutral.black}
             />
+          </View>
+
+          {/* Menu Items */}
+          <View style={styles.menuContainer}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                // Navigate to change email screen or handle action
+                navigateToScreen(navigation, 'ChangeEmail');
+              }}>
+              <View style={styles.menuItemContent}>
+                <Icon
+                  name="envelope-filled"
+                  size={18}
+                  color={colors.neutral.black}
+                />
+                <Body style={styles.menuItemText}>
+                  {t('screens.changeEmail.title')}
+                </Body>
+              </View>
+              <View style={styles.menuItemRight}>
+                <Icon name="chevron-right" size={18} />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.menuItem, {borderBottomWidth: 0}]}
+              onPress={() => {
+                // Navigate to change password screen or handle action
+                navigateToScreen(navigation, 'ChangePassword');
+              }}>
+              <View style={styles.menuItemContent}>
+                <Icon
+                  name="lock-filled"
+                  size={18}
+                  color={colors.neutral.black}
+                />
+                <Body style={styles.menuItemText}>
+                  {t('screens.changePassword.title')}
+                </Body>
+              </View>
+              <View style={styles.menuItemRight}>
+                <Icon name="chevron-right" size={18} />
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -98,6 +146,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing.md,
+    gap: spacing.md,
   },
   groupContainer: {
     marginBottom: spacing.lg,
@@ -108,5 +157,29 @@ const styles = StyleSheet.create({
   settingsContainer: {
     backgroundColor: colors.neutral.white,
     borderRadius: radius.sm,
+  },
+  menuContainer: {
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.sm,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+  },
+  menuItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuItemText: {
+    marginLeft: spacing.md,
+  },
+  menuItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

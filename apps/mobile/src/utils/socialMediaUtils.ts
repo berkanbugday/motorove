@@ -110,8 +110,7 @@ export const openSocialMediaUrl = async (
       return;
     }
   } catch (appErr) {
-    // App link failed, will fall back to web URL
-    console.log('App link not available, opening in browser');
+    console.error('Failed to open app link:', appErr);
   }
 
   // Fallback to web URL

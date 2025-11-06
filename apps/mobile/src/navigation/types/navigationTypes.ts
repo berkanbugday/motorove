@@ -58,7 +58,7 @@ export type MainStackParamList = {
   JoinRequest: undefined;
   GroupJoinRequest: undefined;
   EventInvitation: undefined;
-  PrivacySetting: undefined;
+  AccountSetting: undefined;
   NotificationSetting: undefined;
   FollowRequest: undefined;
   Support: undefined;
@@ -70,6 +70,8 @@ export type MainStackParamList = {
     business: IBusiness;
     userLocation?: {latitude: number; longitude: number};
   };
+  ChangeEmail: undefined;
+  ChangePassword: undefined;
 };
 
 export type MainScreenNavigationProp<T extends keyof MainStackParamList> =

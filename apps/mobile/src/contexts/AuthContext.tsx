@@ -167,11 +167,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
    */
   const signOut = useCallback(async (): Promise<void> => {
     try {
-      await removeDeviceToken();
-      await authService.signOut();
+      // Clear auth state first to stop any active queries
       setAuthState(createEmptyAuthState());
+
+      // Remove device token
+      await removeDeviceToken();
+
+      // Perform sign out cleanup
+      await authService.signOut();
     } catch (error) {
       loggingService.error('Error signing out:', error);
+      // Ensure state is cleared even on error
+      setAuthState(createEmptyAuthState());
       throw error;
     }
   }, [removeDeviceToken]);

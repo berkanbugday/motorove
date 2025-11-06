@@ -143,7 +143,7 @@ export class AuthService {
 
     // Get user from our database
     const user = await this.prismaService.user.findFirst({
-      where: { email },
+      where: { supabaseId: data.user.id },
       include: {
         userSetting: true,
       },
@@ -151,6 +151,14 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('User not found');
+    }
+
+    if (user.email !== data.user.email) {
+      const updateUser = await this.prismaService.user.update({
+        where: { id: user.id },
+        data: { email: data.user.email },
+      });
+      user.email = updateUser.email;
     }
 
     const avatar = user.avatar
@@ -175,6 +183,10 @@ export class AuthService {
       },
       session: data.session,
     };
+  }
+
+  async signOut(): Promise<void> {
+    await this.supabaseService.signOut();
   }
 
   async refreshToken(token: string): Promise<AuthResponse> {
@@ -326,16 +338,60 @@ export class AuthService {
     }
   }
 
-  async updatePassword(
+  async updateEmail(
+    accessToken: string,
     email: string,
-    token: string,
-    password: string,
+    newEmail: string,
+  ): Promise<boolean> {
+    try {
+      // First, verify the user exists with the old email
+      const existingUser = await this.prismaService.user.findFirst({
+        where: { email },
+      });
+
+      if (!existingUser) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      // Check if new email is already in use
+      const emailInUse = await this.prismaService.user.findFirst({
+        where: { email: newEmail },
+      });
+
+      if (emailInUse) {
+        throw new ConflictException('Email already in use');
+      }
+
+      // Update email in Supabase with access token
+      const { error } = await this.supabaseService.updateEmail(
+        accessToken,
+        newEmail,
+      );
+
+      if (error) {
+        throw new UnauthorizedException(error.message);
+      }
+
+      return true;
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Failed to update email');
+    }
+  }
+
+  async updatePassword(
+    accessToken: string,
+    newPassword: string,
   ): Promise<boolean> {
     try {
       const { error } = await this.supabaseService.updatePassword(
-        email,
-        token,
-        password,
+        accessToken,
+        newPassword,
       );
 
       if (error) {

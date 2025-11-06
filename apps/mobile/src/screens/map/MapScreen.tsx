@@ -223,7 +223,6 @@ export const MapScreen = () => {
   // Handle "Search This Area" button press
   const handleSearchThisArea = useCallback(() => {
     const bounds = calculateBounds(currentRegion);
-    console.log('Searching area with bounds:', bounds);
     setMapBounds(bounds);
     setShowSearchButton(false);
   }, [currentRegion, calculateBounds]);

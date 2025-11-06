@@ -54,6 +54,7 @@ export const styles = StyleSheet.create({
   },
   participantsContainer: {
     marginTop: spacing.xs,
+    width: '30%',
   },
   imageContainer: {
     position: 'relative',

@@ -58,6 +58,13 @@ export const SIGN_IN = gql`
   ${AUTH_RESPONSE_FRAGMENT}
 `;
 
+// Sign out mutation
+export const SIGN_OUT = gql`
+  mutation SignOut {
+    signOut
+  }
+`;
+
 // Refresh token mutation (if your backend supports it)
 export const REFRESH_TOKEN = gql`
   mutation RefreshToken($token: String!) {
@@ -75,10 +82,17 @@ export const RESET_PASSWORD = gql`
   }
 `;
 
+// Update email mutation
+export const UPDATE_EMAIL = gql`
+  mutation UpdateEmail($input: UpdateEmailInput!) {
+    updateEmail(input: $input)
+  }
+`;
+
 // Update password mutation
 export const UPDATE_PASSWORD = gql`
-  mutation UpdatePassword($input: UpdatePasswordInput!) {
-    updatePassword(input: $input)
+  mutation UpdatePassword($newPassword: String!) {
+    updatePassword(newPassword: $newPassword)
   }
 `;
 

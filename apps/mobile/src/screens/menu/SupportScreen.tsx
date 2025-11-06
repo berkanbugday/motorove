@@ -4,13 +4,14 @@ import {
   TopHeaderBar,
   Button,
   Body,
-  Title,
   Dropdown,
   showToast,
   AnimatedInput,
   DropdownItem,
   Icon,
   Caption,
+  Subtitle,
+  BodySmall,
 } from '@components';
 import {colors, commonStyles, spacing} from '@theme';
 import {useNavigation} from '@react-navigation/native';
@@ -118,12 +119,12 @@ export const SupportScreen = () => {
           enableResetScrollToCoords={false}
           keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
-            <Title style={styles.screenTitle}>
+            <Subtitle weight="bold" align="center" style={styles.screenTitle}>
               {t('screens.support.heading')}
-            </Title>
-            <Body style={styles.description}>
+            </Subtitle>
+            <BodySmall align="center" style={styles.description}>
               {t('screens.support.description')}
-            </Body>
+            </BodySmall>
 
             <View style={styles.form}>
               <Dropdown
@@ -220,11 +221,13 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   screenTitle: {
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.md,
   },
   description: {
     color: colors.neutral.grey,
     marginBottom: spacing.xl,
+    marginHorizontal: spacing.xl,
   },
   form: {
     flex: 1,

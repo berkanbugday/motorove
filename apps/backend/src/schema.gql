@@ -834,15 +834,17 @@ type Mutation {
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
   signIn(input: SignInInput!): AuthResponse!
+  signOut: Boolean!
   signUp(input: SignUpInput!): AuthResponse!
   unfollowUser(userId: ID!): ApprovalStatus!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
   updateBusinessComment(input: UpdateBusinessCommentInput!): BusinessCommentDto!
+  updateEmail(input: UpdateEmailInput!): Boolean!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
   updateGroupMembershipApprovalStatus(input: UpdateGroupMembershipApprovalStatusInput!): GroupMembershipDto!
-  updatePassword(input: UpdatePasswordInput!): Boolean!
+  updatePassword(newPassword: String!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
   updatePostComment(input: UpdatePostCommentInput!): PostCommentDto!
   updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
@@ -1177,6 +1179,11 @@ input UpdateBusinessCommentInput {
   rating: Int
 }
 
+input UpdateEmailInput {
+  email: String!
+  newEmail: String!
+}
+
 input UpdateEventInput {
   addresses: [CreateEventAddressInput!]
   campingInfo: String
@@ -1220,12 +1227,6 @@ input UpdateGroupInput {
 input UpdateGroupMembershipApprovalStatusInput {
   id: ID!
   status: ApprovalStatus!
-}
-
-input UpdatePasswordInput {
-  email: String!
-  password: String!
-  token: String!
 }
 
 input UpdatePostCommentInput {

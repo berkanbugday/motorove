@@ -1,9 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {IEmergency, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
@@ -77,7 +73,7 @@ export const RNMapEmergencyMarkerCard: React.FC<
           emergency.addresses[0].longitude,
           language as Language,
         );
-        setDistance(route.distanceKm.toString());
+        setDistance(route.distanceKm.toString().replace('NaN', '0'));
       } catch (error) {
         console.error('Error calculating route distance:', error);
         setDistance(null);
@@ -228,7 +224,6 @@ export const RNMapEmergencyMarkerCard: React.FC<
           />
         )}
       </View>
-
     </View>
   );
 };

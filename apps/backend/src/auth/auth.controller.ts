@@ -18,17 +18,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async updatePassword(@Body() updatePasswordDto: UpdatePasswordInput) {
     try {
-      const { email, token, password } = updatePasswordDto;
+      const { token, password } = updatePasswordDto;
 
-      if (!email || !token || !password) {
-        throw new BadRequestException('Email, token and password are required');
+      if (!token || !password) {
+        throw new BadRequestException('Token and password are required');
       }
 
-      const result = await this.authService.updatePassword(
-        email,
-        token,
-        password,
-      );
+      // Use the token (access token from password reset email) to update password
+      const result = await this.authService.updatePassword(token, password);
 
       if (result) {
         return { success: true, message: 'Password updated successfully' };

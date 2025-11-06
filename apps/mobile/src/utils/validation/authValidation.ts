@@ -82,11 +82,50 @@ export const authSchemas = (t: TFunction) => {
     avatar: z.string().nullable().optional(),
   });
 
+  // Change email form schema
+  const changeEmailSchema = z
+    .object({
+      email: z.string().email(),
+      newEmail: z
+        .string({required_error: t('validation.email.required')})
+        .nonempty(t('validation.email.required'))
+        .email(t('validation.email.invalid')),
+      confirmEmail: z
+        .string({required_error: t('validation.email.required')})
+        .nonempty(t('validation.email.required'))
+        .email(t('validation.email.invalid')),
+    })
+    .refine(data => data.newEmail === data.confirmEmail, {
+      message: t('validation.email.mismatch'),
+      path: ['confirmEmail'],
+    });
+
+  // Change password form schema
+  const changePasswordSchema = z
+    .object({
+      newPassword: z
+        .string({required_error: t('validation.password.required')})
+        .nonempty(t('validation.password.required'))
+        .min(6, t('validation.password.min_length'))
+        .regex(/^\S*$/, t('validation.password.no_spaces')),
+      confirmPassword: z
+        .string({required_error: t('validation.password.required')})
+        .nonempty(t('validation.password.required'))
+        .min(6, t('validation.password.min_length'))
+        .regex(/^\S*$/, t('validation.password.no_spaces')),
+    })
+    .refine(data => data.newPassword === data.confirmPassword, {
+      message: t('validation.password.mismatch'),
+      path: ['confirmPassword'],
+    });
+
   return {
     signinSchema,
     resetPasswordSchema,
     signupSchema,
     accountSetupSchema,
+    changeEmailSchema,
+    changePasswordSchema,
   };
 };
 
@@ -102,4 +141,10 @@ export type SignupFormValues = z.infer<
 >;
 export type AccountSetupFormValues = z.infer<
   ReturnType<typeof authSchemas>['accountSetupSchema']
+>;
+export type ChangeEmailFormValues = z.infer<
+  ReturnType<typeof authSchemas>['changeEmailSchema']
+>;
+export type ChangePasswordFormValues = z.infer<
+  ReturnType<typeof authSchemas>['changePasswordSchema']
 >;

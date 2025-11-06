@@ -244,7 +244,7 @@ export default {
       no_comments_yet: 'Henüz yorum yok',
       delete_comment: 'Yorumu Sil',
       delete_comment_confirmation:
-        'Bu yorumu silmek istediğinize emin misiniz?\n Bu işlem geri alınamaz.',
+        'Bu yorumu silmek istediğinize emin misiniz? \nBu işlem geri alınamaz.',
       comment_created: 'Yorum başarıyla oluşturuldu!',
       comment_updated: 'Yorum başarıyla güncellendi!',
       comment_deleted: 'Yorum başarıyla silindi!',
@@ -290,7 +290,7 @@ export default {
       select_event_type_prompt: 'Lütfen ilk adımda bir etkinlik türü seçin',
       discard_dialog_title: 'Değişiklikleri İptal Et?',
       discard_dialog_message:
-        'Kaydedilmemiş değişiklikleriniz var.\n Geri dönmek istediğinizden emin misiniz?\n Tüm değişiklikler kaybolacak.',
+        'Kaydedilmemiş değişiklikleriniz var. \nGeri dönmek istediğinizden emin misiniz? \nTüm değişiklikler kaybolacak.',
       save_draft_dialog_title: 'Taslak Kaydedilsin mi?',
       save_draft_dialog_message:
         'İlerlemenizi taslak olarak kaydetmek ister misiniz?',
@@ -593,7 +593,7 @@ export default {
       settings: 'Ayarlar',
       language_selection: 'Dil Seçimi',
       notification_settings: 'Bildirim Ayarları',
-      privacy_settings: 'Gizlilik Ayarları',
+      account_settings: 'Hesap Ayarları',
       support_legal: 'Destek ve Yasal Bilgiler',
       support_request: 'Destek Talebi',
       terms_of_service: 'Kullanım Şartları',
@@ -604,8 +604,7 @@ export default {
 
     support: {
       heading: 'Size nasıl yardımcı olabiliriz?',
-      description:
-        'Destek ekibimizle iletişime geçmek için bu formu doldurun. En kısa sürede size yardımcı olacağız.',
+      description: 'Destek ekibimiz genellikle 1-2 iş günü içinde yanıt verir',
       category: 'Kategori',
       subject: 'Konu',
       message: 'Mesaj',
@@ -617,7 +616,26 @@ export default {
         'Destek talebi oluşturulurken hata oluştu.',
     },
 
-    privacySetting: {
+    changeEmail: {
+      title: 'E-posta Değiştir',
+      email: 'E-posta',
+      new_email: 'Yeni E-posta',
+      again_new_email: 'Yeni E-posta Tekrarı',
+      info_message:
+        'Değişikliğin geçerli olabilmesi için yeni e-posta adresinizi onaylamanız gerekmektedir.',
+      success_updated: 'Onay e-postası gönderildi',
+      update_failed: 'Onay e-postası gönderilemedi',
+    },
+
+    changePassword: {
+      title: 'Şifre Değiştir',
+      new_password: 'Yeni Şifre',
+      again_new_password: 'Yeni Şifre Tekrarı',
+      success_updated: 'Şifre başarıyla güncellendi',
+      update_failed: 'Şifre güncellenemedi',
+    },
+
+    accountSetting: {
       auto_accept_followers_label: 'Otomatik Takip',
       auto_accept_followers_description:
         'Yeni takipçilerin takip isteklerini otomatik olarak kabul et',
@@ -890,11 +908,13 @@ export default {
     email: {
       required: 'E-posta gereklidir',
       invalid: 'Geçersiz e-posta',
+      mismatch: 'E-postalar eşleşmiyor',
     },
     password: {
       required: 'Şifre gereklidir',
       min_length: 'Şifre en az 6 karakter olmalıdır',
       no_spaces: 'Şifre boşluk içeremez',
+      mismatch: 'Şifreler eşleşmiyor',
     },
     firstName: {
       required: 'Ad gereklidir',
@@ -1337,62 +1357,4 @@ export default {
       reject: 'Reddet',
     },
   },
-  // editProfile: {
-  //   title: 'Profili Düzenle',
-  //   avatar: 'Profil Fotoğrafı',
-  //   basicInfo: 'Temel Bilgiler',
-  //   firstName: 'Ad',
-  //   firstNamePlaceholder: 'Adınızı girin',
-  //   lastName: 'Soyad',
-  //   lastNamePlaceholder: 'Soyadınızı girin',
-  //   bio: 'Hakkında',
-  //   bioPlaceholder: 'Kendiniz hakkında bilgi verin...',
-  //   gender: 'Cinsiyet',
-  //   genders: {
-  //     male: 'Erkek',
-  //     female: 'Kadın',
-  //     prefer_not_to_say: 'Belirtmek istemiyorum',
-  //   },
-  //   ridingStyles: 'Sürüş Tarzları',
-  //   ridingStyleOptions: {
-  //     touring: 'Tur',
-  //     commuting: 'Günlük Kullanım',
-  //     off_road: 'Arazi',
-  //     adventure: 'Macera',
-  //     track: 'Pist',
-  //     sport: 'Spor',
-  //     stunt: 'Gösteri',
-  //     group_ride: 'Grup Sürüşü',
-  //     solo_ride: 'Solo Sürüş',
-  //     touring_with_camping: 'Kamp ile Tur',
-  //   },
-  //   interests: 'İlgi Alanları',
-  //   interestOptions: {
-  //     motorcycle_customization: 'Motor Özelleştirme',
-  //     diy_maintenance: 'Kendi Bakımını Yapma',
-  //     vintage_motorcycles: 'Klasik Motorlar',
-  //     electric_motorcycles: 'Elektrikli Motorlar',
-  //     riding_skills: 'Sürüş Becerileri',
-  //     moto_photography: 'Motor Fotoğrafçılığı',
-  //     content_creation: 'İçerik Üretimi',
-  //     meeting_riders: 'Motorcularla Tanışma',
-  //     community_events: 'Topluluk Etkinlikleri',
-  //     moto_festivals: 'Motor Festivalleri',
-  //     exploring_nature: 'Doğa Keşfi',
-  //     mountain_roads: 'Dağ Yolları',
-  //     coastal_rides: 'Sahil Sürüşleri',
-  //     cross_border_trips: 'Sınır Ötesi Geziler',
-  //   },
-  //   socialMedia: 'Sosyal Medya',
-  //   url: 'URL',
-  //   save: 'Değişiklikleri Kaydet',
-  //   success: 'Başarılı',
-  //   profileUpdated: 'Profiliniz başarıyla güncellendi',
-  //   error: 'Hata',
-  //   updateFailed: 'Profil güncellenemedi. Lütfen tekrar deneyin.',
-  //   imageTooLarge: "Görsel boyutu 10MB'dan küçük olmalıdır",
-  //   errorSelectingImage: 'Görsel seçilemedi. Lütfen tekrar deneyin.',
-  //   dateOfBirth: 'Doğum Tarihi',
-  //   selectGender: 'Cinsiyet Seçin',
-  // },
 };

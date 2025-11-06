@@ -24,7 +24,6 @@ import {
 } from '@screens/event';
 import {NotificationScreen} from '@screens/notification';
 import {
-  PrivacySettingScreen,
   NotificationSettingScreen,
   FollowRequestScreen,
   GroupJoinRequestScreen,
@@ -34,6 +33,11 @@ import {
 import {ProfileScreen, EditProfileScreen} from '@screens/profile';
 import {GarageScreen} from '@screens/garage';
 import {BusinessDetailScreen} from '@screens/business';
+import {
+  AccountSettingScreen,
+  ChangeEmailScreen,
+  ChangePasswordScreen,
+} from '@screens/accountSettings';
 import {useRemoveDeviceToken} from '@services/notification.service';
 import {useAuth} from '@contexts/AuthContext';
 import {NotificationPermission} from '@motorove/shared';
@@ -166,8 +170,8 @@ export function MainNavigator() {
       />
 
       <Stack.Screen
-        name="PrivacySetting"
-        component={PrivacySettingScreen}
+        name="AccountSetting"
+        component={AccountSettingScreen}
         options={{headerShown: false}}
       />
 
@@ -218,6 +222,16 @@ export function MainNavigator() {
         name="BusinessDetail"
         component={BusinessDetailScreen}
         options={{headerShown: false, animation: 'slide_from_bottom'}}
+      />
+      <Stack.Screen
+        name="ChangeEmail"
+        component={ChangeEmailScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

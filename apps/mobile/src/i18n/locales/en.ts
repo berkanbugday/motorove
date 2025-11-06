@@ -242,7 +242,7 @@ export default {
       no_comments_yet: 'No comments yet',
       delete_comment: 'Delete Comment',
       delete_comment_confirmation:
-        'Are you sure you want to delete this comment? This action cannot be undone.',
+        'Are you sure you want to delete this comment? \nThis action cannot be undone.',
       comment_created: 'Comment created successfully!',
       comment_updated: 'Comment updated successfully!',
       comment_deleted: 'Comment deleted successfully!',
@@ -288,7 +288,7 @@ export default {
       select_event_type_prompt: 'Please select an event type in the first step',
       discard_dialog_title: 'Discard Changes?',
       discard_dialog_message:
-        'You have unsaved changes.\n Are you sure you want to go back?\n All changes will be lost.',
+        'You have unsaved changes. \nAre you sure you want to go back? \nAll changes will be lost.',
       save_draft_dialog_title: 'Save Draft?',
       save_draft_dialog_message:
         'Would you like to save your progress as a draft?',
@@ -598,7 +598,7 @@ export default {
       settings: 'Settings',
       language_selection: 'Language Selection',
       notification_settings: 'Notification Settings',
-      privacy_settings: 'Privacy Settings',
+      account_settings: 'Account Settings',
       support_legal: 'Support & Legal',
       support_request: 'Support Request',
       terms_of_service: 'Terms of Service',
@@ -610,7 +610,7 @@ export default {
     support: {
       heading: 'How can we help you?',
       description:
-        "Fill out this form to contact our support team. We'll help you as soon as possible.",
+        'Our support team typically respond within 1-2 business days',
       category: 'Category',
       subject: 'Subject',
       message: 'Message',
@@ -620,7 +620,26 @@ export default {
       error_creating_support_request: 'Failed to create support request',
     },
 
-    privacySetting: {
+    changeEmail: {
+      title: 'Change Email',
+      email: 'Email',
+      new_email: 'New Email',
+      again_new_email: 'New Email Again',
+      info_message:
+        'You must confirm your new email address for the change to take effect.',
+      success_updated: 'Confirmation email sent',
+      update_failed: 'Failed to send confirmation email',
+    },
+
+    changePassword: {
+      title: 'Change Password',
+      new_password: 'New Password',
+      again_new_password: 'New Password Again',
+      success_updated: 'Password updated successfully',
+      update_failed: 'Failed to update password',
+    },
+
+    accountSetting: {
       auto_accept_followers_label: 'Auto Accept Followers',
       auto_accept_followers_description:
         'Automatically accept new followers follow requests',
@@ -894,11 +913,13 @@ export default {
     email: {
       required: 'Email is required',
       invalid: 'Email is invalid',
+      mismatch: 'Emails do not match',
     },
     password: {
       required: 'Password is required',
       min_length: 'Password must be at least 6 characters',
       no_spaces: 'Password cannot contain spaces',
+      mismatch: 'Passwords do not match',
     },
     firstName: {
       required: 'First name is required',
@@ -1339,62 +1360,4 @@ export default {
       reject: 'Reject',
     },
   },
-  // editProfile: {
-  //   title: 'Edit Profile',
-  //   avatar: 'Profile Picture',
-  //   basicInfo: 'Basic Information',
-  //   firstName: 'First Name',
-  //   firstNamePlaceholder: 'Enter your first name',
-  //   lastName: 'Last Name',
-  //   lastNamePlaceholder: 'Enter your last name',
-  //   bio: 'Bio',
-  //   bioPlaceholder: 'Tell us about yourself...',
-  //   gender: 'Gender',
-  //   genders: {
-  //     male: 'Male',
-  //     female: 'Female',
-  //     prefer_not_to_say: 'Prefer not to say',
-  //   },
-  //   ridingStyles: 'Riding Styles',
-  //   ridingStyleOptions: {
-  //     touring: 'Touring',
-  //     commuting: 'Commuting',
-  //     off_road: 'Off-Road',
-  //     adventure: 'Adventure',
-  //     track: 'Track',
-  //     sport: 'Sport',
-  //     stunt: 'Stunt',
-  //     group_ride: 'Group Ride',
-  //     solo_ride: 'Solo Ride',
-  //     touring_with_camping: 'Touring with Camping',
-  //   },
-  //   interests: 'Interests',
-  //   interestOptions: {
-  //     motorcycle_customization: 'Motorcycle Customization',
-  //     diy_maintenance: 'DIY Maintenance',
-  //     vintage_motorcycles: 'Vintage Motorcycles',
-  //     electric_motorcycles: 'Electric Motorcycles',
-  //     riding_skills: 'Riding Skills',
-  //     moto_photography: 'Moto Photography',
-  //     content_creation: 'Content Creation',
-  //     meeting_riders: 'Meeting Riders',
-  //     community_events: 'Community Events',
-  //     moto_festivals: 'Moto Festivals',
-  //     exploring_nature: 'Exploring Nature',
-  //     mountain_roads: 'Mountain Roads',
-  //     coastal_rides: 'Coastal Rides',
-  //     cross_border_trips: 'Cross-Border Trips',
-  //   },
-  //   socialMedia: 'Social Media',
-  //   url: 'URL',
-  //   save: 'Save Changes',
-  //   success: 'Success',
-  //   profileUpdated: 'Your profile has been updated successfully',
-  //   error: 'Error',
-  //   updateFailed: 'Failed to update profile. Please try again.',
-  //   imageTooLarge: 'Image size must be less than 10MB',
-  //   errorSelectingImage: 'Failed to select image. Please try again.',
-  //   dateOfBirth: 'Date of Birth',
-  //   selectGender: 'Select Gender',
-  // },
 };

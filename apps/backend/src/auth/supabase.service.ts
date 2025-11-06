@@ -59,22 +59,28 @@ export class SupabaseService {
     return await this.supabase.auth.resetPasswordForEmail(email);
   }
 
-  async updatePassword(email: string, token: string, password: string) {
-    const { error: verifyError } = await this.supabase.auth.verifyOtp({
-      email,
-      token,
-      type: 'recovery',
+  async updateEmail(accessToken: string, newEmail: string) {
+    // Set the session with the access token before updating
+    await this.supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: '', // Not needed for update operations
     });
 
-    if (verifyError) {
-      throw new Error(verifyError.message);
-    }
+    return await this.supabase.auth.updateUser({
+      email: newEmail,
+    });
+  }
 
-    const { error } = await this.supabase.auth.updateUser({
-      password,
+  async updatePassword(accessToken: string, newPassword: string) {
+    // Set the session with the access token before updating
+    await this.supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: '', // Not needed for update operations
     });
 
-    return { error };
+    return await this.supabase.auth.updateUser({
+      password: newPassword,
+    });
   }
 
   async deleteUser(userId: string) {
