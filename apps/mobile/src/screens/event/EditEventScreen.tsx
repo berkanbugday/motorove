@@ -82,6 +82,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     error: eventError,
   } = useGetEvent(eventId);
 
+  // Check if event is upcoming to restrict certain fields
+  const isEventUpcoming = event?.status === EventStatus.UPCOMING;
+
   // Get user admin groups for organized by dropdown
   const {
     groups: adminGroups,
@@ -508,6 +511,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
             onSelectImage={handleSelectImage}
             onRemoveImage={handleRemoveImage}
             onOpenLocationMap={handleOpenLocationMap}
+            disableRestrictedFields={isEventUpcoming}
           />
         ),
       },
@@ -532,6 +536,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
             onUsersChange={eventHandlers.handleUsersChange}
             selectedGroups={eventFormState.selectedGroups}
             onGroupsChange={eventHandlers.handleGroupsChange}
+            disableRestrictedFields={isEventUpcoming}
           />
         ),
       },
@@ -590,6 +595,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       currencies,
       handleOpenStartLocationMap,
       handleOpenFinishLocationMap,
+      isEventUpcoming,
     ],
   );
 
@@ -939,8 +945,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         showBackButton
         showShadow={false}
         onBackPress={handleGoBack}
-        rightIconName={isDirty ? 'check' : undefined}
-        onRightButtonPress={isDirty ? handleSaveDraft : undefined}
+        rightIconName={
+          isDirty && event?.status === EventStatus.DRAFT ? 'check' : undefined
+        }
+        onRightButtonPress={
+          isDirty && event?.status === EventStatus.DRAFT
+            ? handleSaveDraft
+            : undefined
+        }
       />
       <SafeAreaView style={styles.container}>
         <FormProvider {...methods}>
@@ -967,7 +979,11 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
               style={{flex: 1}}
             />
             <Button
-              title={t('screens.event.create_event')}
+              title={
+                isEventUpcoming
+                  ? t('common.update')
+                  : t('screens.event.create_event')
+              }
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}

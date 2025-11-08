@@ -630,10 +630,6 @@ export class EventsService {
       // First get the current event to handle relationships properly
       const currentEvent = await this.prisma.event.findFirst({
         where: { id, isActive: true },
-        include: {
-          invitedGroups: true,
-          invitations: true,
-        },
       });
 
       if (!currentEvent) {
@@ -649,12 +645,16 @@ export class EventsService {
             data: {
               title,
               description,
-              eventType,
-              status,
+              ...(currentEvent.status === EventStatus.DRAFT
+                ? { eventType }
+                : {}),
+              ...(currentEvent.status === EventStatus.DRAFT ? { status } : {}),
               startDateTime,
               endDateTime,
               maxParticipants,
-              isPrivate,
+              ...(currentEvent.status === EventStatus.DRAFT
+                ? { isPrivate }
+                : {}),
               images: processedImages,
               roadType: roadType as RoadType,
               difficultyLevel: difficultyLevel as DifficultyLevel,
@@ -668,7 +668,9 @@ export class EventsService {
               price: price ? parseFloat(price) : null,
               currency,
               // Handle organized by fields
-              organizedByGroupId: organizedByGroupId || null,
+              ...(currentEvent.status === EventStatus.DRAFT
+                ? { organizedByGroupId: organizedByGroupId || null }
+                : {}),
               updatedById: userId,
               updatedAt: new Date(),
               // Handle addresses update - delete old ones if new ones provided
@@ -687,12 +689,15 @@ export class EventsService {
                     },
                   }
                 : undefined,
-              invitedGroups:
-                invitedGroupIds !== undefined
-                  ? {
-                      set: invitedGroupIds.map((groupId) => ({ id: groupId })),
-                    }
-                  : undefined,
+              ...(currentEvent.status === EventStatus.DRAFT
+                ? {
+                    invitedGroups: {
+                      set:
+                        invitedGroupIds?.map((groupId) => ({ id: groupId })) ||
+                        [],
+                    },
+                  }
+                : {}),
             },
             include: {
               createdBy: true,
@@ -717,7 +722,10 @@ export class EventsService {
           });
 
           // Handle direct user invitations separately for better performance
-          if (invitedUserIds !== undefined) {
+          if (
+            invitedUserIds !== undefined &&
+            currentEvent.status === EventStatus.DRAFT
+          ) {
             // First, deactivate all existing invitations in a single query
             await tx.eventInvitation.updateMany({
               where: {
@@ -730,7 +738,10 @@ export class EventsService {
             });
 
             // Then create new invitations if any
-            if (invitedUserIds.length > 0) {
+            if (
+              invitedUserIds.length > 0 &&
+              currentEvent.status === EventStatus.DRAFT
+            ) {
               await tx.eventInvitation.createMany({
                 data: invitedUserIds.map((inviteeId) => ({
                   eventId: id,
@@ -744,7 +755,11 @@ export class EventsService {
           }
 
           // If event status is UPCOMING and there are invited groups, create invitations for all group members
-          if (status === EventStatus.UPCOMING && invitedGroupIds?.length) {
+          if (
+            currentEvent.status === EventStatus.DRAFT &&
+            status === EventStatus.UPCOMING &&
+            invitedGroupIds?.length
+          ) {
             this.logger.log(
               `Creating invitations for group members in event ${updatedEvent.id} after update`,
             );

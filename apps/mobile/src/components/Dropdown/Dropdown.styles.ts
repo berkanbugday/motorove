@@ -29,9 +29,7 @@ export const createStyles = (props: {
       borderRadius: radius.sm,
       paddingHorizontal: spacing.form.inputPaddingHorizontal,
       height: spacing.form.inputHeight,
-      backgroundColor: props.disabled
-        ? colors.neutral.veryLightGrey
-        : colors.neutral.white,
+      backgroundColor: colors.neutral.white,
     },
     input: {
       flex: 1,

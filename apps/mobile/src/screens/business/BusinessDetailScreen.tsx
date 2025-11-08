@@ -293,7 +293,7 @@ export const BusinessDetailScreen: React.FC = () => {
           currentBusiness.addresses[0].longitude,
           language as Language,
         );
-        setDistance(routeResult.distanceKm.toString());
+        setDistance(routeResult.distanceKm.toString().replace('NaN', '0'));
       } catch (error) {
         console.error('Error calculating route distance:', error);
         setDistance(null);

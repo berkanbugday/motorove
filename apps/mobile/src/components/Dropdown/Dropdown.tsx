@@ -48,7 +48,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   onClose,
   onOpen,
   testID,
-  showClearButton = true,
+  showClearButton = false,
   searchable = false,
 }) => {
   const {t} = useTranslation();
@@ -359,9 +359,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               <Icon
                 name={isOpen ? 'chevron-up' : 'chevron-down'}
                 size={16}
-                color={
-                  disabled ? colors.neutral.lightGrey : colors.neutral.grey
-                }
+                color={colors.neutral.grey}
               />
             </TouchableOpacity>
           </View>

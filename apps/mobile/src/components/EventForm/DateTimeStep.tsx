@@ -29,6 +29,7 @@ interface DateTimeStepProps {
   onUsersChange: (userIds: string[]) => void;
   selectedGroups: string[];
   onGroupsChange: (groupIds: string[]) => void;
+  disableRestrictedFields?: boolean;
 }
 
 export const DateTimeStep: React.FC<DateTimeStepProps> = ({
@@ -47,6 +48,7 @@ export const DateTimeStep: React.FC<DateTimeStepProps> = ({
   onUsersChange,
   selectedGroups,
   onGroupsChange,
+  disableRestrictedFields = false,
 }) => {
   const {t} = useTranslation();
 
@@ -142,9 +144,10 @@ export const DateTimeStep: React.FC<DateTimeStepProps> = ({
               label={t('screens.event.private_event')}
               description={t('screens.event.private_event_description')}
               style={{paddingVertical: spacing.md}}
+              disabled={disableRestrictedFields}
             />
             {/* Group/User Selectors for Private Events */}
-            {isPrivate && (
+            {isPrivate && !disableRestrictedFields && (
               <View style={styles.privateEventSection}>
                 <Tabs
                   items={[
@@ -163,6 +166,7 @@ export const DateTimeStep: React.FC<DateTimeStepProps> = ({
                       selectedUsers={selectedUsers}
                       onUsersChange={onUsersChange}
                       maxUsers={10}
+                      disabled={disableRestrictedFields}
                     />
                   </View>
                 )}
@@ -173,6 +177,7 @@ export const DateTimeStep: React.FC<DateTimeStepProps> = ({
                       selectedGroups={selectedGroups}
                       onGroupsChange={onGroupsChange}
                       maxGroups={3}
+                      disabled={disableRestrictedFields}
                     />
                   </View>
                 )}

@@ -32,6 +32,7 @@ interface BasicInfoStepProps {
   onSelectImage: () => void;
   onRemoveImage: (id: number) => void;
   onOpenLocationMap: () => void;
+  disableRestrictedFields?: boolean;
 }
 
 export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
@@ -48,6 +49,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
   onSelectImage,
   onRemoveImage,
   onOpenLocationMap,
+  disableRestrictedFields = false,
 }) => {
   const {t} = useTranslation();
 
@@ -78,6 +80,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
           selectedItem={selectedEventType}
           error={errors.eventType?.message as string}
           key="eventType-dropdown"
+          disabled={disableRestrictedFields}
         />
 
         {/* Event organized by group */}
@@ -89,6 +92,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({
           showClearButton={true}
           key="organizedByGroup-dropdown"
           loading={adminGroupsLoading}
+          disabled={disableRestrictedFields}
         />
 
         {/* Meeting Point */}

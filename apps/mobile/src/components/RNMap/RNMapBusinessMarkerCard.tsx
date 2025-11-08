@@ -120,7 +120,7 @@ export const RNMapBusinessMarkerCard: React.FC<
           business.addresses[0].longitude,
           language as Language,
         );
-        setDistance(route.distanceKm.toString());
+        setDistance(route.distanceKm.toString().replace('NaN', '0'));
       } catch (error) {
         console.error('Error calculating route distance:', error);
         setDistance(null);

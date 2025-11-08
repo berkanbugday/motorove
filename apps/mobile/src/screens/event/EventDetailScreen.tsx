@@ -62,7 +62,7 @@ import {EnumUtils} from '@utils/enumUtils';
 import {formatCurrency} from '@utils/currencyUtils';
 import {calculateRoute, formatRouteInfo} from '@utils/locationUtils';
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
-
+import {useAuth} from '@contexts/AuthContext';
 type Props = {
   route: EventDetailScreenRouteProp;
   navigation: MainScreenNavigationProp<'EventDetail'>;
@@ -78,7 +78,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
-
+  const {user} = useAuth();
   // Image carousel states
   const [activeSlide, setActiveSlide] = useState(0);
   const [headerWidth, setHeaderWidth] = useState(0);
@@ -165,6 +165,13 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           isHighlighted: true,
         });
       } else if (status === EventStatus.UPCOMING) {
+        if (event?.createdBy.id === user?.id) {
+          items.push({
+            id: 'edit_event',
+            label: t('common.edit'),
+            icon: 'pen-filled',
+          });
+        }
         if (event?.isParticipating) {
           items.push({
             id: 'leave_event',
@@ -665,7 +672,9 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           {!isLoadingRoute && routeInfo && (
             <View style={styles.infoRow}>
               <Icon name="route-filled" size={16} color={colors.neutral.grey} />
-              <Typography style={styles.infoText}>{routeInfo}</Typography>
+              <Typography style={styles.infoText}>
+                {routeInfo.replace('NaN', '0')}
+              </Typography>
             </View>
           )}
 
