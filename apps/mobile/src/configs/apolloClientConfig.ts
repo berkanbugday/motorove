@@ -207,6 +207,140 @@ export const apolloClient = new ApolloClient({
           },
         },
       },
+      EventDto: {
+        fields: {
+          images: {
+            // Custom merge function to properly handle image arrays
+            merge(existing, incoming) {
+              // If no existing data, just return incoming
+              if (!existing) {
+                return incoming;
+              }
+
+              // If incoming is null/undefined, keep existing
+              if (!incoming) {
+                return existing;
+              }
+
+              // Both exist - merge them properly
+              // Apollo stores arrays as objects with numeric keys, so we need to handle that
+              const existingArray = Array.isArray(existing)
+                ? existing
+                : Object.values(existing || {});
+              const incomingArray = Array.isArray(incoming)
+                ? incoming
+                : Object.values(incoming || {});
+
+              // Create a map to deduplicate images by URL
+              const imageMap = new Map();
+
+              // Add existing images
+              existingArray.forEach((img: any) => {
+                if (img && img.url) {
+                  imageMap.set(img.url, img);
+                }
+              });
+
+              // Add/update with incoming images
+              incomingArray.forEach((img: any) => {
+                if (img && img.url) {
+                  imageMap.set(img.url, img);
+                }
+              });
+
+              // Return as array
+              return Array.from(imageMap.values());
+            },
+          },
+          participants: {
+            // Custom merge function to properly handle participants array
+            merge(existing, incoming) {
+              // If no existing data, just return incoming
+              if (!existing) {
+                return incoming;
+              }
+
+              // If incoming is null/undefined, keep existing
+              if (!incoming) {
+                return existing;
+              }
+
+              // Both exist - merge them properly
+              // Apollo stores arrays as objects with numeric keys, so we need to handle that
+              const existingArray = Array.isArray(existing)
+                ? existing
+                : Object.values(existing || {});
+              const incomingArray = Array.isArray(incoming)
+                ? incoming
+                : Object.values(incoming || {});
+
+              // Create a map to deduplicate participants by reference ID
+              const participantMap = new Map();
+
+              // Add existing participants
+              existingArray.forEach((participant: any) => {
+                if (participant && participant.__ref) {
+                  participantMap.set(participant.__ref, participant);
+                }
+              });
+
+              // Add/update with incoming participants
+              incomingArray.forEach((participant: any) => {
+                if (participant && participant.__ref) {
+                  participantMap.set(participant.__ref, participant);
+                }
+              });
+
+              // Return as array
+              return Array.from(participantMap.values());
+            },
+          },
+          participantsCount: {
+            merge(_, incoming) {
+              return incoming;
+            },
+          },
+        },
+      },
+      PostDto: {
+        fields: {
+          images: {
+            // Same merge strategy for PostDto images
+            merge(existing, incoming) {
+              if (!existing) {
+                return incoming;
+              }
+
+              if (!incoming) {
+                return existing;
+              }
+
+              const existingArray = Array.isArray(existing)
+                ? existing
+                : Object.values(existing || {});
+              const incomingArray = Array.isArray(incoming)
+                ? incoming
+                : Object.values(incoming || {});
+
+              const imageMap = new Map();
+
+              existingArray.forEach((img: any) => {
+                if (img && img.url) {
+                  imageMap.set(img.url, img);
+                }
+              });
+
+              incomingArray.forEach((img: any) => {
+                if (img && img.url) {
+                  imageMap.set(img.url, img);
+                }
+              });
+
+              return Array.from(imageMap.values());
+            },
+          },
+        },
+      },
     },
   }),
   defaultOptions: {

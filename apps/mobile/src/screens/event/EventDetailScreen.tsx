@@ -203,10 +203,14 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           deleteEventBottomSheetRef.current?.open('minimal');
           break;
         case 'join_event':
-          joinEvent(eventId);
+          if (!joinEventLoading) {
+            joinEvent(eventId);
+          }
           break;
         case 'leave_event':
-          leaveEvent(eventId);
+          if (!leaveEventLoading) {
+            leaveEvent(eventId);
+          }
           break;
         default:
           loggingService.info(

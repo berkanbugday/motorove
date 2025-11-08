@@ -205,7 +205,10 @@ export const CustomToastComponent: React.FC<{
         useNativeDriver: true,
       }),
     ]).start(() => {
-      onHide();
+      // Use queueMicrotask to defer state update and avoid useInsertionEffect warning
+      queueMicrotask(() => {
+        onHide();
+      });
     });
   }, [translateYAnim, opacityAnim, onHide, position]);
 
@@ -247,7 +250,10 @@ export const CustomToastComponent: React.FC<{
             duration: 200,
             useNativeDriver: true,
           }).start(() => {
-            onHide();
+            // Use queueMicrotask to defer state update and avoid useInsertionEffect warning
+            queueMicrotask(() => {
+              onHide();
+            });
           });
         } else {
           // Swipe was not strong enough or in wrong direction, snap back
@@ -407,7 +413,10 @@ export const ToastProvider: React.FC<{children: React.ReactNode}> = ({
 
   // Define onHide as a separate callback to prevent issues with useInsertionEffect
   const handleToastHide = useCallback(() => {
-    setVisible(false);
+    // Use queueMicrotask to defer state update and avoid useInsertionEffect warning
+    queueMicrotask(() => {
+      setVisible(false);
+    });
   }, []);
 
   return (
