@@ -131,6 +131,38 @@ const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 // Swipe threshold to consider a successful swipe
 const SWIPE_THRESHOLD = SCREEN_HEIGHT * 0.1; // 10% of screen height
 
+// Static styles created outside component to prevent useInsertionEffect warnings
+const toastStyles = StyleSheet.create({
+  baseContainer: {
+    position: 'absolute',
+    left: '5%',
+    width: '90%',
+    borderRadius: radius.md,
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderLeftWidth: 5,
+    zIndex: 9999,
+  },
+  iconContainer: {
+    marginRight: spacing.sm,
+  },
+  contentContainer: {
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  closeButton: {
+    padding: spacing.xs,
+  },
+  touchableContent: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  text2Spacing: {
+    marginTop: spacing.xs,
+  },
+});
+
 export const CustomToastComponent: React.FC<{
   text1?: string;
   text2?: string;
@@ -253,41 +285,22 @@ export const CustomToastComponent: React.FC<{
     };
   }, [translateYAnim, opacityAnim, swipeAnim, position]);
 
-  const toastStyles = StyleSheet.create({
-    container: {
-      position: 'absolute',
-      [position]: position === 'top' ? topOffset : bottomOffset,
-      left: '5%',
-      width: '90%',
-      backgroundColor: getToastBackgroundColor(type),
-      borderRadius: radius.md,
-      padding: spacing.md,
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderLeftWidth: 5,
-      borderLeftColor: getToastBorderColor(type),
-      ...getShadow('large'),
-      zIndex: 9999,
-    } as ViewStyle,
-    iconContainer: {
-      marginRight: spacing.sm,
-    },
-    contentContainer: {
-      flex: 1,
-      marginRight: spacing.sm,
-    },
-    closeButton: {
-      padding: spacing.xs,
-    },
-  });
-
   const icon = getToastIcon(type);
+
+  // Dynamic styles as inline object to avoid StyleSheet.create in render
+  const containerStyle: ViewStyle = {
+    ...toastStyles.baseContainer,
+    [position]: position === 'top' ? topOffset : bottomOffset,
+    backgroundColor: getToastBackgroundColor(type),
+    borderLeftColor: getToastBorderColor(type),
+    ...getShadow('large'),
+  };
 
   return (
     <Animated.View
       {...(swipeable ? panResponder.panHandlers : {})}
       style={[
-        toastStyles.container,
+        containerStyle,
         {
           transform: [{translateY: Animated.add(translateYAnim, swipeAnim)}],
           opacity: opacityAnim,
@@ -296,7 +309,7 @@ export const CustomToastComponent: React.FC<{
       <TouchableOpacity
         activeOpacity={onPress ? 0.7 : 1}
         onPress={onPress}
-        style={{flexDirection: 'row', flex: 1}}>
+        style={toastStyles.touchableContent}>
         <View style={toastStyles.iconContainer}>
           <Icon name={icon.name} color={icon.color} size={24} />
         </View>
@@ -313,7 +326,7 @@ export const CustomToastComponent: React.FC<{
             <Typography
               variant="bodySmall"
               color={colors.neutral.grey}
-              style={{marginTop: text1 ? spacing.xs : 0}}>
+              style={text1 ? toastStyles.text2Spacing : undefined}>
               {text2}
             </Typography>
           ) : null}

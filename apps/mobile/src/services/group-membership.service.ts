@@ -46,6 +46,35 @@ export const useAddMember = (onSuccess?: () => void) => {
           },
         },
       });
+
+      // Update GET_GROUP query cache if it exists
+      if (addMember?.group?.id) {
+        try {
+          cache.modify({
+            id: cache.identify({
+              __typename: 'GroupDto',
+              id: addMember.group.id,
+            }),
+            fields: {
+              memberships(existingMemberships = []) {
+                const newMemberRef = cache.writeFragment({
+                  data: addMember,
+                  fragment: GROUP_MEMBERSHIP_FRAGMENT,
+                });
+                return [...existingMemberships, newMemberRef];
+              },
+              membersCount(existingCount = 0) {
+                return (existingCount as number) + 1;
+              },
+              isMember() {
+                return true;
+              },
+            },
+          });
+        } catch (e) {
+          // Cache might not exist yet, that's okay
+        }
+      }
     },
     onCompleted: () => {
       if (onSuccess) {
@@ -100,6 +129,36 @@ export const useRemoveMember = (onSuccess?: () => void) => {
           },
         },
       });
+
+      // Update GET_GROUP query cache if it exists
+      if (removeMember?.group?.id) {
+        try {
+          cache.modify({
+            id: cache.identify({
+              __typename: 'GroupDto',
+              id: removeMember.group.id,
+            }),
+            fields: {
+              memberships(existingMemberships = [], {readField}) {
+                return existingMemberships.filter(
+                  (memberRef: Reference) =>
+                    readField('id', memberRef) !== removeMember.id,
+                );
+              },
+              membersCount(existingCount = 0) {
+                return Math.max(0, (existingCount as number) - 1);
+              },
+              isMember() {
+                // Only set to false if removing current user
+                // This is a simplified check - in production you'd check the actual user
+                return undefined; // Let backend determine this
+              },
+            },
+          });
+        } catch (e) {
+          // Cache might not exist yet, that's okay
+        }
+      }
     },
     onCompleted: () => {
       if (onSuccess) {
@@ -144,6 +203,36 @@ export const useChangeMemberRole = (onSuccess?: () => void) => {
   const [changeMemberRoleMutation, {loading, error}] = useMutation(
     CHANGE_MEMBER_ROLE,
     {
+      update(cache, {data: {changeMemberRole}}) {
+        // Update GET_GROUP query cache if it exists
+        if (changeMemberRole?.group?.id) {
+          try {
+            cache.modify({
+              id: cache.identify({
+                __typename: 'GroupDto',
+                id: changeMemberRole.group.id,
+              }),
+              fields: {
+                memberships(existingMemberships = [], {readField}) {
+                  return existingMemberships.map((memberRef: Reference) => {
+                    const memberId = readField('id', memberRef);
+                    if (memberId === changeMemberRole.id) {
+                      // Update the role for this member
+                      return cache.writeFragment({
+                        data: changeMemberRole,
+                        fragment: GROUP_MEMBERSHIP_FRAGMENT,
+                      });
+                    }
+                    return memberRef;
+                  });
+                },
+              },
+            });
+          } catch (e) {
+            // Cache might not exist yet, that's okay
+          }
+        }
+      },
       onCompleted: () => {
         showToast({
           type: 'success',

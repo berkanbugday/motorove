@@ -66,6 +66,7 @@ export default {
     view_details: 'Detayları Görüntüle',
     read_more: 'Devamını Oku...',
     show_less: 'Daha Az Göster...',
+    country: 'Türkiye',
   },
 
   // Bottom tabs navigation items
@@ -378,7 +379,6 @@ export default {
         '{{memberName}} üyesini gruptan çıkarmak istediğinize emin misiniz?',
       remove_member_confirmation_generic:
         'Üyeyi gruptan çıkarmak istediğinize emin misiniz?',
-      no_location: 'Konum yok',
       recent_posts: 'Son Gönderiler',
       no_posts_yet: 'Henüz gönderi yok.',
       upcoming_events: 'Yaklaşan Etkinlikler',
@@ -446,7 +446,6 @@ export default {
       events: 'Etkinlikler',
       following: 'Takip Edilen',
       followers: 'Takipçi',
-      country: 'Türkiye',
       groups_empty_message: 'Henüz Grup Yok',
       no_posts: 'Henüz gönderi yok',
     },

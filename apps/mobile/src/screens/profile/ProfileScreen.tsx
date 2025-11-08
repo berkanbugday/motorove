@@ -452,7 +452,7 @@ export const ProfileScreen = () => {
                 <View style={styles.locationContainer}>
                   <Icon name="map-pin-filled" size={16} />
                   <BodySmall color={colors.neutral.grey}>
-                    {profile.city.value}, {t('screens.profile.country')}
+                    {profile.city.value}, {t('common.country')}
                   </BodySmall>
                 </View>
               )}

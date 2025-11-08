@@ -66,6 +66,7 @@ export default {
     view_details: 'View Details',
     read_more: 'Read More...',
     show_less: 'Show Less...',
+    country: 'Turkey',
   },
 
   // Bottom tabs navigation items
@@ -381,7 +382,6 @@ export default {
         'Are you sure you want to remove {{memberName}} from the group?',
       remove_member_confirmation_generic:
         'Are you sure you want to remove this member?',
-      no_location: 'No location',
       recent_posts: 'Recent Posts',
       no_posts_yet: 'No posts yet.',
       upcoming_events: 'Upcoming Events',
@@ -451,7 +451,6 @@ export default {
       events: 'Events',
       following: 'Following',
       followers: 'Followers',
-      country: 'Turkey',
       groups_empty_message: 'No groups yet',
       no_posts: 'No posts yet',
     },

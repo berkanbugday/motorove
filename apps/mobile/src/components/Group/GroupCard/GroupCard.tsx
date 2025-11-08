@@ -7,9 +7,7 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import {Typography} from '../Typography';
-import {Button} from '../Button';
-import {Icon, IconName} from '../Icon';
+import {Typography, Button, Icon, IconName} from '@components';
 import {colors} from '@theme';
 import {styles} from './GroupCard.styles';
 import {GroupPrivacy} from '@motorove/shared';
@@ -229,16 +227,22 @@ export const GroupCard: React.FC<GroupCardProps> = ({
           <Typography variant="subtitle" weight="bold" numberOfLines={1}>
             {name}
           </Typography>
-          <View style={styles.locationContainer}>
-            <Icon name="map-pin-filled" size={12} color={colors.neutral.grey} />
-            <Typography
-              variant="caption"
-              color={colors.neutral.darkGrey}
-              style={styles.infoText}
-              numberOfLines={1}>
-              {location}
-            </Typography>
-          </View>
+          {location && (
+            <View style={styles.locationContainer}>
+              <Icon
+                name="map-pin-filled"
+                size={12}
+                color={colors.neutral.grey}
+              />
+              <Typography
+                variant="caption"
+                color={colors.neutral.darkGrey}
+                style={styles.infoText}
+                numberOfLines={1}>
+                {location}, {t('common.country')}
+              </Typography>
+            </View>
+          )}
           {renderTags()}
           <View style={styles.bottomRow}>
             {renderMemberCount()}

@@ -19,7 +19,6 @@ export * from './ProfileCompletionWidget';
 export * from './PageIndicator';
 export * from './EventBanner';
 export * from './EventCard';
-export * from './GroupCard';
 export * from './LocationPermissionOverlay';
 export * from './Checkbox';
 export * from './Chip';
@@ -39,7 +38,6 @@ export * from './GroupSelector';
 export * from './UserSelector';
 export * from './UserCard';
 export * from './LanguageSelector';
-export * from './GroupFilter';
 export * from './GroupJoinRequestCard';
 export * from './EventInvitationCard';
 export * from './ParticipantAvatars';
@@ -50,18 +48,11 @@ export * from './RNMap';
 export * from './EmergencyBottomSheet';
 export * from './WarningBottomSheet';
 export * from './MapAppsBottomSheet';
+export * from './Group';
 // Skeleton components
 export * from './Skeleton';
 export * from './Skeleton/SkeletonGroup';
 export * from './Skeleton/ProfileSkeleton';
-
-export {default as Dialog} from './Dialog';
-export type {
-  DialogRef,
-  DialogProps,
-  DialogButtonProps,
-  DialogVariant,
-} from './Dialog';
 
 // Higher-order components
 export * from './withErrorHandling';
