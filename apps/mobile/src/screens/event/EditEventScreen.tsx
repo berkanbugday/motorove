@@ -1,71 +1,58 @@
 import React, {
-  useState,
   useRef,
   useCallback,
   useEffect,
   useMemo,
   useLayoutEffect,
+  useState,
 } from 'react';
 import {
   View,
   StyleSheet,
-  ScrollView,
   SafeAreaView,
-  Image,
-  TouchableOpacity,
   BackHandler,
   Platform,
   ActivityIndicator,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {useForm, FormProvider} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {
   TopHeaderBar,
-  AnimatedInput,
-  NumberAnimatedInput,
   Button,
-  Typography,
   Body,
-  Dropdown,
-  DropdownItem,
+  Typography,
   showToast,
-  Icon,
-  DateTimePicker,
-  Switch,
-  GroupSelector,
   BottomSheet,
   SelectLocationMap,
-  UserSelector,
   Wizard,
-  Tabs,
   BottomSheetRef,
   openBottomSheet,
   closeBottomSheet,
+  LoadingIndicator,
 } from '@components';
-import {colors, commonStyles, radius, spacing} from '@theme';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {
+  BasicInfoStep,
+  DateTimeStep,
+  EventDetailsStep,
+} from '@components/EventForm';
+import {colors, commonStyles, spacing} from '@theme';
 import {loggingService} from '@services/logging.service';
 import {useUpdateEvent, useGetEvent} from '@services/event.service';
 import {useGetJoinedGroups} from '@services/group.service';
 import {eventSchemas, UpdateEventFormValues} from '@utils/validation';
 import {useTranslation} from '@hooks/useTranslation';
+import {useEventForm} from '@hooks/useEventForm';
+import {useEventImages} from '@hooks/useEventImages';
+import {useEventLocations} from '@hooks/useEventLocations';
+import {useEventHandlers} from '@hooks/useEventHandlers';
+import {buildEventInput} from '@utils/eventFormHelpers';
 import {
   GroupMemberRole,
   AddressType,
   EventType,
-  ICreateEvent,
-  IUpdateEvent,
   EventStatus,
-  RoadType,
-  DifficultyLevel,
-  ExperienceLevel,
-  CURRENCY_FORMATTING,
-  Currency,
-  DEFAULT_CURRENCY,
-  IBaseCreateAddress,
   ICreateEventAddress,
 } from '@motorove/shared';
 import {WizardHandle, WizardStep} from '@components/Wizard/Wizard';
@@ -86,7 +73,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const {eventId} = route.params;
   const {language} = useLanguage();
 
-  const {updateEvent, loading} = useUpdateEvent(() => {
+  const {updateEvent, loading: updateEventLoading} = useUpdateEvent(() => {
     navigation.goBack();
   });
   const {
@@ -110,40 +97,13 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
   const isFormPopulatedRef = useRef<boolean>(false);
   const previousEventTypeRef = useRef<string | undefined>(undefined);
 
-  // State hooks
-  const [selectedEventType, setSelectedEventType] =
-    useState<DropdownItem | null>(null);
-  const [selectedRoadType, setSelectedRoadType] = useState<DropdownItem | null>(
-    null,
-  );
-  const [selectedDifficultyLevel, setSelectedDifficultyLevel] =
-    useState<DropdownItem | null>(null);
-  const [selectedExperienceLevel, setSelectedExperienceLevel] =
-    useState<DropdownItem | null>(null);
-  const [selectedCurrency, setSelectedCurrency] = useState<DropdownItem | null>(
-    null,
-  );
-  const [selectedOrganizedByGroup, setSelectedOrganizedByGroup] =
-    useState<DropdownItem | null>(null);
-  const [selectedImages, setSelectedImages] = useState<
-    {id: number; uri: string; base64?: string}[]
-  >([]);
-  const [isPrivate, setIsPrivate] = useState(false);
-  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  // Wizard step state
   const [isFirstStep, setIsFirstStep] = useState(true);
   const [isLastStep, setIsLastStep] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [selectedMeetingLocation, setSelectedMeetingLocation] = useState<
-    ICreateEventAddress[] | null
-  >();
-  const [selectedStartLocation, setSelectedStartLocation] = useState<
-    ICreateEventAddress[] | null
-  >();
-  const [selectedFinishLocation, setSelectedFinishLocation] = useState<
-    ICreateEventAddress[] | null
-  >();
-  const [activeInviteTab, setActiveInviteTab] = useState<string>('users');
+
+  // Use shared event form hook
+  const eventFormState = useEventForm();
 
   // Enum hooks
   const eventTypes = EnumUtils.getEventTypes();
@@ -154,17 +114,11 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
   // Organized by group options (Admin Groups only)
   const organizedByGroupOptions = useMemo(() => {
-    const options: DropdownItem[] = [];
-
-    // Add admin groups
-    adminGroups.forEach(group => {
-      options.push({
-        id: group.id,
-        label: group.name,
-        value: group.id,
-      });
-    });
-
+    const options = adminGroups.map(group => ({
+      id: group.id,
+      label: group.name,
+      value: group.id,
+    }));
     return options;
   }, [adminGroups]);
 
@@ -219,37 +173,47 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     reset,
   } = methods;
 
-  // Watch key form values
-  const eventType = watch('eventType');
+  // Watch key form values with fallback defaults
+  const startDate = watch('startDate') ?? new Date();
+  const endDate = watch('endDate') ?? new Date();
+  const startTime = watch('startTime') ?? new Date();
+  const endTime =
+    watch('endTime') ?? new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
 
-  const startDate = watch('startDate');
-  const endDate = watch('endDate');
-  const startTime = watch('startTime');
-  const endTime = watch('endTime');
+  // Use shared image handling hook
+  const {handleSelectImage, handleRemoveImage} = useEventImages({
+    selectedImages: eventFormState.selectedImages,
+    setSelectedImages: eventFormState.setSelectedImages,
+    setValue: setValue as (name: string, value: any, options?: any) => void,
+  });
 
-  // Memoized derived values
-  const isSoloRide = useMemo(
-    () => eventType === EventType.SOLO_RIDE,
-    [eventType],
-  );
-  const isRideOrCamping = useMemo(
-    () =>
-      [
-        EventType.SOLO_RIDE,
-        EventType.GROUP_RIDE,
-        EventType.CAMPING_RIDE,
-        EventType.SOCIAL_RESPONSIBILITY,
-      ].includes((eventType as EventType) || ''),
-    [eventType],
-  );
-  const isWorkshop = useMemo(
-    () => eventType === EventType.TRAINING,
-    [eventType],
-  );
-  const shouldShowEventDetails = useMemo(
-    () => isRideOrCamping || isWorkshop,
-    [isRideOrCamping, isWorkshop],
-  );
+  // Use shared location handling hook
+  const {
+    handleMeetingLocationSelect,
+    handleStartLocationSelect,
+    handleFinishLocationSelect,
+  } = useEventLocations({
+    setValue: setValue as (name: string, value: any, options?: any) => void,
+    setSelectedMeetingLocation: eventFormState.setSelectedMeetingLocation,
+    setSelectedStartLocation: eventFormState.setSelectedStartLocation,
+    setSelectedFinishLocation: eventFormState.setSelectedFinishLocation,
+    language,
+  });
+
+  // Use shared event handlers hook
+  const eventHandlers = useEventHandlers({
+    setValue: setValue as (name: string, value: any, options?: any) => void,
+    setSelectedEventType: eventFormState.setSelectedEventType,
+    setSelectedRoadType: eventFormState.setSelectedRoadType,
+    setSelectedDifficultyLevel: eventFormState.setSelectedDifficultyLevel,
+    setSelectedExperienceLevel: eventFormState.setSelectedExperienceLevel,
+    setSelectedCurrency: eventFormState.setSelectedCurrency,
+    setSelectedOrganizedByGroup: eventFormState.setSelectedOrganizedByGroup,
+    setIsPrivate: eventFormState.setIsPrivate,
+    setSelectedGroups: eventFormState.setSelectedGroups,
+    setSelectedUsers: eventFormState.setSelectedUsers,
+    setActiveInviteTab: eventFormState.setActiveInviteTab,
+  });
 
   // Navigation handlers
   const handleGoBack = useCallback(() => {
@@ -319,26 +283,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     });
   }, [navigation, isDirty, applyFilters, handleGoBack]);
 
-  // Helper function to clean addresses by removing GraphQL-specific fields
-  const cleanAddresses = useCallback(
-    (
-      addresses: ICreateEventAddress[] | null | undefined,
-    ): ICreateEventAddress[] => {
-      if (!addresses || addresses.length === 0) {
-        return [];
-      }
-      return addresses.map(addr => ({
-        type: addr.type,
-        latitude: addr.latitude,
-        longitude: addr.longitude,
-        address: addr.address,
-        language: addr.language,
-        countryCode: addr.countryCode,
-      }));
-    },
-    [],
-  );
-
   const confirmSaveDraft = useCallback(async () => {
     const formData = getValues();
 
@@ -351,7 +295,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       return;
     }
 
-    if (!selectedImages.length) {
+    if (!eventFormState.selectedImages.length) {
       showToast({
         type: 'error',
         text1: t('validation.event.images.required'),
@@ -361,112 +305,28 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     }
 
     try {
-      const addresses: ICreateEventAddress[] = [
-        ...cleanAddresses(selectedMeetingLocation),
-        ...cleanAddresses(selectedStartLocation),
-        ...cleanAddresses(selectedFinishLocation),
-      ];
-      // Use base64 encoded images if available, otherwise fall back to URIs
-      const images = selectedImages.map(img => img.base64 || img.uri);
+      const eventInput = buildEventInput(
+        formData,
+        eventFormState.selectedImages,
+        eventFormState.selectedMeetingLocation,
+        eventFormState.selectedStartLocation,
+        eventFormState.selectedFinishLocation,
+        EventStatus.DRAFT,
+      );
 
-      // Parse maxParticipants safely
-      const maxParticipantsValue = formData.maxParticipants
-        ? parseInt(formData.maxParticipants as string, 10)
-        : undefined;
-      if (maxParticipantsValue && isNaN(maxParticipantsValue)) {
-        throw new Error('Invalid maxParticipants value');
-      }
-
-      const createEventInput: ICreateEvent = {
-        title: formData.title,
-        description: formData.description,
-        isPrivate: formData.isPrivate,
-        invitedGroupIds: formData.isPrivate ? formData.invitedGroups || [] : [],
-        invitedUserIds: formData.isPrivate ? formData.invitedUsers || [] : [],
-        organizedByGroupId:
-          formData.organizedByGroupId &&
-          formData.organizedByGroupId.trim() !== ''
-            ? formData.organizedByGroupId
-            : undefined,
-        eventType: formData.eventType as EventType,
-        status: EventStatus.DRAFT,
-        addresses: addresses.length > 0 ? addresses : [],
-        startDateTime: new Date(
-          `${formData.startDate.toISOString().split('T')[0]}T${
-            formData.startTime.toISOString().split('T')[1]
-          }`,
-        ).toISOString(),
-        endDateTime:
-          formData.endDate && formData.endTime
-            ? new Date(
-                `${formData.endDate.toISOString().split('T')[0]}T${
-                  formData.endTime.toISOString().split('T')[1]
-                }`,
-              ).toISOString()
-            : undefined,
-        maxParticipants: maxParticipantsValue,
-        images: images,
-        // Only include fields if they have values
-        ...(formData.roadType &&
-          formData.roadType.trim() !== '' && {
-            roadType: formData.roadType as RoadType,
-          }),
-        ...(formData.difficultyLevel &&
-          formData.difficultyLevel.trim() !== '' && {
-            difficultyLevel: formData.difficultyLevel as DifficultyLevel,
-          }),
-        ...(formData.experienceLevel &&
-          formData.experienceLevel.trim() !== '' && {
-            experienceLevel: formData.experienceLevel as ExperienceLevel,
-          }),
-        ...(formData.routeDescription &&
-          formData.routeDescription.trim() !== '' && {
-            routeDescription: formData.routeDescription,
-          }),
-        ...(formData.restStops &&
-          formData.restStops.trim() !== '' && {
-            restStops: formData.restStops,
-          }),
-        ...(formData.campingInfo &&
-          formData.campingInfo.trim() !== '' && {
-            campingInfo: formData.campingInfo,
-          }),
-        ...(formData.equipmentChecklist &&
-          formData.equipmentChecklist.trim() !== '' && {
-            equipmentChecklist: formData.equipmentChecklist,
-          }),
-        ...(formData.instructorInfo &&
-          formData.instructorInfo.trim() !== '' && {
-            instructorInfo: formData.instructorInfo,
-          }),
-        ...(formData.topicsCovered &&
-          formData.topicsCovered.trim() !== '' && {
-            topicsCovered: formData.topicsCovered,
-          }),
-        ...(formData.price &&
-          formData.price.trim() !== '' && {
-            price: formData.price,
-          }),
-        ...(formData.currency &&
-          formData.currency.trim() !== '' && {
-            currency: formData.currency as Currency,
-          }),
-      };
-
-      await updateEvent({...createEventInput, id: eventId});
+      await updateEvent({...eventInput, id: eventId});
     } catch (error) {
       loggingService.error('Error saving draft:', error);
     }
   }, [
     getValues,
-    selectedMeetingLocation,
-    selectedStartLocation,
-    selectedFinishLocation,
-    selectedImages,
-    t,
+    eventFormState.selectedImages,
+    eventFormState.selectedMeetingLocation,
+    eventFormState.selectedStartLocation,
+    eventFormState.selectedFinishLocation,
     updateEvent,
     eventId,
-    cleanAddresses,
+    t,
   ]);
 
   const handleSaveDraft = useCallback(() => {
@@ -526,294 +386,9 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     finishLocationMapBottomSheetRef.current?.open('full');
   }, []);
 
-  const handleMeetingLocationSelect = useCallback(
-    (addresses: IBaseCreateAddress[]) => {
-      if (addresses.length === 0) {
-        // Reset if no addresses provided
-        setSelectedMeetingLocation(null);
-        setValue('meetingLocation', '', {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-        return;
-      }
-
-      const addressesWithTypes = addresses.map(addr => ({
-        ...addr,
-        type: AddressType.EVENT_MEETING_LOCATION,
-      }));
-      setSelectedMeetingLocation(addressesWithTypes);
-
-      const displayAddress = addresses.find(
-        addr => addr.language.toLowerCase() === language.toLowerCase(),
-      );
-
-      // Set the meetingLocation field value
-      setValue('meetingLocation', displayAddress?.address || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-
-      // Close the bottom sheet
-      meetingLocationMapBottomSheetRef.current?.close();
-    },
-    [setValue, language],
-  );
-
-  const handleStartLocationSelect = useCallback(
-    (addresses: IBaseCreateAddress[]) => {
-      if (addresses.length === 0) {
-        // Reset if no addresses provided
-        setSelectedStartLocation(null);
-        setValue('startLocation', '', {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-        return;
-      }
-
-      const addressesWithTypes = addresses.map(addr => ({
-        ...addr,
-        type: AddressType.EVENT_START_LOCATION,
-      }));
-      setSelectedStartLocation(addressesWithTypes);
-
-      const displayAddress = addresses.find(
-        addr => addr.language.toLowerCase() === language.toLowerCase(),
-      );
-
-      // Set the startLocation field value
-      setValue('startLocation', displayAddress?.address || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-
-      // Close the bottom sheet
-      startLocationMapBottomSheetRef.current?.close();
-    },
-    [setValue, language],
-  );
-
-  const handleFinishLocationSelect = useCallback(
-    (addresses: IBaseCreateAddress[]) => {
-      if (addresses.length === 0) {
-        // Reset if no addresses provided
-        setSelectedFinishLocation(null);
-        setValue('finishLocation', '', {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-        return;
-      }
-
-      const addressesWithTypes = addresses.map(addr => ({
-        ...addr,
-        type: AddressType.EVENT_FINISH_LOCATION,
-      }));
-      setSelectedFinishLocation(addressesWithTypes);
-
-      const displayAddress = addresses.find(
-        addr => addr.language.toLowerCase() === language.toLowerCase(),
-      );
-
-      // Set the finishLocation field value
-      setValue('finishLocation', displayAddress?.address || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-
-      // Close the bottom sheet
-      finishLocationMapBottomSheetRef.current?.close();
-    },
-    [setValue, language],
-  );
-
-  // Image selection handlers
-  const handleSelectImage = useCallback(async () => {
-    try {
-      // Check if image limit is reached
-      if (selectedImages.length >= 3) {
-        showToast({
-          type: 'error',
-          text1: t('validation.event.images.limit_reached'),
-          text2: t('validation.event.images.max_images_limit'),
-        });
-        return;
-      }
-
-      const result = await launchImageLibrary({
-        mediaType: 'photo',
-        quality: 0.8,
-        selectionLimit: 1,
-        includeBase64: true,
-      });
-
-      if (result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
-
-        // Check file size - 10MB limit
-        if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
-          showToast({
-            type: 'error',
-            text1: t('validation.event.images.file_too_large'),
-            text2: t('validation.event.images.image_size_limit'),
-          });
-          return;
-        }
-
-        // Add new image to array
-        const newImage = {
-          id: Date.now(),
-          uri: asset.uri || '',
-          base64: asset.base64
-            ? `data:image/jpeg;base64,${asset.base64}`
-            : undefined,
-        };
-        const updatedImages = [...selectedImages, newImage];
-        setSelectedImages(updatedImages);
-
-        // Update the images array in the form
-        const imageData = updatedImages.map(img => img.base64 || img.uri);
-        setValue('images', imageData, {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      }
-    } catch (error) {
-      loggingService.error('Error selecting event image:', error);
-      showToast({
-        type: 'error',
-        text1: t('common.error'),
-        text2: t('screens.event.image_selection_failed'),
-      });
-    }
-  }, [selectedImages, setValue]);
-
-  const handleRemoveImage = useCallback(
-    (id: number) => {
-      const updatedImages = selectedImages.filter(image => image.id !== id);
-      setSelectedImages(updatedImages);
-
-      // Update the images array in the form
-      const imageData = updatedImages.map(img => img.base64 || img.uri);
-      setValue('images', imageData, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [selectedImages, setValue],
-  );
-
-  // Dropdown selection handlers
-  const handleEventTypeSelect = useCallback(
-    (item: DropdownItem | null) => {
-      setSelectedEventType(item);
-      setValue('eventType', item?.value || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  const handleRoadTypeSelect = useCallback(
-    (item: DropdownItem | null) => {
-      setSelectedRoadType(item);
-      setValue('roadType', item?.value || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  const handleDifficultySelect = useCallback(
-    (item: DropdownItem | null) => {
-      setSelectedDifficultyLevel(item);
-      setValue('difficultyLevel', item?.value || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  const handleExperienceLevelSelect = useCallback(
-    (item: DropdownItem | null) => {
-      setSelectedExperienceLevel(item);
-      setValue('experienceLevel', item?.value || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  const handleCurrencySelect = useCallback(
-    (item: DropdownItem | null) => {
-      setSelectedCurrency(item);
-      setValue('currency', item?.value || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  const handleOrganizedByGroupSelect = useCallback(
-    (item: DropdownItem | null) => {
-      setSelectedOrganizedByGroup(item);
-      setValue('organizedByGroupId', item?.value || '', {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  // Toggle handlers
-  const togglePrivacy = useCallback(
-    (newValue: boolean) => {
-      setIsPrivate(newValue);
-      setValue('isPrivate', newValue, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  // Group and user selection handlers
-  const handleGroupsChange = useCallback(
-    (groupIds: string[]) => {
-      setSelectedGroups(groupIds);
-      setValue('invitedGroups', groupIds, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
-  const handleUsersChange = useCallback(
-    (userIds: string[]) => {
-      setSelectedUsers(userIds);
-      setValue('invitedUsers', userIds, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    },
-    [setValue],
-  );
-
   // Step change handler
   const handleStepChange = useCallback((index: number) => {
     setCurrentStepIndex(index);
-  }, []);
-
-  // Tab change handler for invite tabs
-  const handleTabChange = useCallback((key: string) => {
-    setActiveInviteTab(key);
   }, []);
 
   // Form validation functions
@@ -837,16 +412,15 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       'isPrivate',
     ];
 
-    // Add conditional fields based on privacy settings
-    if (isPrivate) {
+    if (eventFormState.isPrivate) {
       fieldsToValidate.push('invitedUsers', 'invitedGroups');
     }
 
     return await trigger(fieldsToValidate as (keyof UpdateEventFormValues)[]);
-  }, [trigger, isPrivate]);
+  }, [trigger, eventFormState.isPrivate]);
 
   const validateEventSpecificDetails = useCallback(async () => {
-    if (isRideOrCamping) {
+    if (eventFormState.isRideOrCamping) {
       const fieldsToValidate: (keyof UpdateEventFormValues)[] = [
         'roadType',
         'difficultyLevel',
@@ -854,14 +428,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         'finishLocation',
       ];
 
-      if (eventType === EventType.CAMPING_RIDE) {
+      if (eventFormState.eventType === EventType.CAMPING_RIDE) {
         fieldsToValidate.push('campingInfo');
       }
 
       fieldsToValidate.push('equipmentChecklist');
 
-      return await trigger(fieldsToValidate as (keyof UpdateEventFormValues)[]);
-    } else if (isWorkshop) {
+      return await trigger(fieldsToValidate);
+    } else if (eventFormState.isWorkshop) {
       return await trigger([
         'instructorInfo',
         'topicsCovered',
@@ -871,125 +445,38 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       ] as const);
     }
     return true;
-  }, [isRideOrCamping, isWorkshop, eventType, trigger]);
+  }, [
+    eventFormState.isRideOrCamping,
+    eventFormState.isWorkshop,
+    eventFormState.eventType,
+    trigger,
+  ]);
 
   // Form submission handler
   const onSubmit = useCallback(
     async (data: UpdateEventFormValues) => {
       try {
-        const addresses: ICreateEventAddress[] = [
-          ...cleanAddresses(selectedMeetingLocation),
-          ...cleanAddresses(selectedStartLocation),
-          ...cleanAddresses(selectedFinishLocation),
-        ];
-        // Use base64 encoded images if available, otherwise fall back to URIs
-        const images = selectedImages.map(img => img.base64 || img.uri);
+        const eventInput = buildEventInput(
+          data,
+          eventFormState.selectedImages,
+          eventFormState.selectedMeetingLocation,
+          eventFormState.selectedStartLocation,
+          eventFormState.selectedFinishLocation,
+          EventStatus.UPCOMING,
+        );
 
-        // Parse maxParticipants safely
-        const maxParticipantsValue = data.maxParticipants
-          ? parseInt(data.maxParticipants as string, 10)
-          : undefined;
-        if (maxParticipantsValue && isNaN(maxParticipantsValue)) {
-          throw new Error('Invalid maxParticipants value');
-        }
-
-        const updateEventInput: IUpdateEvent = {
-          id: eventId,
-          title: data.title,
-          description: data.description,
-          isPrivate: data.isPrivate,
-          eventType: selectedEventType?.value as EventType,
-          status: EventStatus.UPCOMING,
-          addresses: addresses.length > 0 ? addresses : undefined,
-          startDateTime: new Date(
-            `${data.startDate.toISOString().split('T')[0]}T${
-              data.startTime.toISOString().split('T')[1]
-            }`,
-          ).toISOString(),
-          endDateTime:
-            data.endDate && data.endTime
-              ? new Date(
-                  `${data.endDate.toISOString().split('T')[0]}T${
-                    data.endTime.toISOString().split('T')[1]
-                  }`,
-                ).toISOString()
-              : undefined,
-          maxParticipants: maxParticipantsValue,
-          images: images,
-          // Only include optional fields if they have values
-          ...(data.invitedGroups &&
-            data.invitedGroups.length > 0 && {
-              invitedGroupIds: data.invitedGroups,
-            }),
-          ...(data.invitedUsers &&
-            data.invitedUsers.length > 0 && {
-              invitedUserIds: data.invitedUsers,
-            }),
-          ...(data.organizedByGroupId &&
-            data.organizedByGroupId.trim() !== '' && {
-              organizedByGroupId: data.organizedByGroupId,
-            }),
-          // Include specific fields based on event type (only if they have values)
-          ...(data.routeDescription &&
-            data.routeDescription.trim() !== '' && {
-              routeDescription: data.routeDescription,
-            }),
-          ...(data.roadType &&
-            data.roadType.trim() !== '' && {
-              roadType: data.roadType as RoadType,
-            }),
-          ...(data.difficultyLevel &&
-            data.difficultyLevel.trim() !== '' && {
-              difficultyLevel: data.difficultyLevel as DifficultyLevel,
-            }),
-          ...(data.restStops &&
-            data.restStops.trim() !== '' && {
-              restStops: data.restStops,
-            }),
-          ...(data.campingInfo &&
-            data.campingInfo.trim() !== '' && {
-              campingInfo: data.campingInfo,
-            }),
-          ...(data.equipmentChecklist &&
-            data.equipmentChecklist.trim() !== '' && {
-              equipmentChecklist: data.equipmentChecklist,
-            }),
-          ...(data.instructorInfo &&
-            data.instructorInfo.trim() !== '' && {
-              instructorInfo: data.instructorInfo,
-            }),
-          ...(data.topicsCovered &&
-            data.topicsCovered.trim() !== '' && {
-              topicsCovered: data.topicsCovered,
-            }),
-          ...(data.experienceLevel &&
-            data.experienceLevel.trim() !== '' && {
-              experienceLevel: data.experienceLevel as ExperienceLevel,
-            }),
-          ...(data.price &&
-            data.price.trim() !== '' && {
-              price: data.price,
-            }),
-          ...(data.currency &&
-            data.currency.trim() !== '' && {
-              currency: data.currency as Currency,
-            }),
-        };
-
-        await updateEvent(updateEventInput);
+        await updateEvent({...eventInput, id: eventId});
       } catch (error) {
         loggingService.error('Error updating event:', error);
       }
     },
     [
+      eventFormState.selectedImages,
+      eventFormState.selectedMeetingLocation,
+      eventFormState.selectedStartLocation,
+      eventFormState.selectedFinishLocation,
       updateEvent,
       eventId,
-      selectedMeetingLocation,
-      selectedStartLocation,
-      selectedFinishLocation,
-      selectedImages,
-      selectedEventType,
-      cleanAddresses,
     ],
   );
 
@@ -997,7 +484,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     handleSubmit(onSubmit)();
   }, [handleSubmit, onSubmit]);
 
-  // Define wizard steps
+  // Define wizard steps using shared components
   const baseWizardSteps = useMemo<WizardStep[]>(
     () => [
       {
@@ -1005,129 +492,23 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         title: t('screens.event.basic_info_title'),
         validate: validateBasicInfo,
         content: (
-          <KeyboardAwareScrollView
-            showsVerticalScrollIndicator={false}
-            enableOnAndroid={true}
-            enableAutomaticScroll={true}
-            enableResetScrollToCoords={false}
-            keyboardShouldPersistTaps="handled"
-            style={styles.scrollView}>
-            <View style={styles.formFields}>
-              {/* Event Title */}
-              <AnimatedInput
-                control={control}
-                name="title"
-                label={t('screens.event.event_title')}
-                error={errors.title}
-                key="title-input"
-              />
-
-              {/* Event Type Dropdown */}
-              <Dropdown
-                data={eventTypes}
-                label={t('screens.event.event_type')}
-                onSelect={handleEventTypeSelect}
-                placeholder=""
-                selectedItem={selectedEventType}
-                error={errors.eventType?.message}
-                showClearButton={false}
-                key="eventType-dropdown"
-              />
-
-              {/* Event organized by group */}
-              <Dropdown
-                data={organizedByGroupOptions}
-                label={t('screens.event.organized_by_group')}
-                onSelect={handleOrganizedByGroupSelect}
-                selectedItem={selectedOrganizedByGroup}
-                showClearButton={true}
-                key="organizedByGroup-dropdown"
-                loading={adminGroupsLoading}
-              />
-
-              {/* Meeting Point */}
-              <AnimatedInput
-                control={control}
-                name="meetingLocation"
-                label={t('screens.event.meeting_location')}
-                error={errors.meetingLocation}
-                icon={
-                  <Icon
-                    name="map-pin-filled"
-                    size={20}
-                    color={colors.neutral.grey}
-                  />
-                }
-                iconPosition="right"
-                onPress={handleOpenLocationMap}
-                showClearButton={false}
-                editable={false}
-                key="meetingLocation-input"
-                testID="meetingLocation-input"
-              />
-
-              {/* Max Participants */}
-              <AnimatedInput
-                control={control}
-                name="maxParticipants"
-                label={t('screens.event.max_participants')}
-                error={errors.maxParticipants}
-                keyboardType="numeric"
-                key="maxParticipants-input"
-                testID="maxParticipants-input"
-              />
-
-              {/* Event Description */}
-              <AnimatedInput
-                control={control}
-                name="description"
-                label={t('screens.event.description')}
-                multiline
-                showClearButton={false}
-                error={errors.description}
-                key="description-input"
-              />
-            </View>
-
-            {/* Event Images Section */}
-            <View style={styles.imagesSection}>
-              <Typography variant="body" style={styles.sectionTitle}>
-                {t('screens.event.event_images')}
-              </Typography>
-              {errors.images && (
-                <Typography variant="caption" color={colors.status.error}>
-                  {errors.images.message}
-                </Typography>
-              )}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.imageScrollContainer}>
-                {selectedImages.map(image => (
-                  <View key={image.id} style={styles.imageContainer}>
-                    <Image source={{uri: image.uri}} style={styles.image} />
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => handleRemoveImage(image.id)}>
-                      <Icon
-                        name="close"
-                        size={14}
-                        color={colors.neutral.white}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-                {selectedImages.length < 3 && (
-                  <TouchableOpacity
-                    style={styles.addImageButton}
-                    onPress={handleSelectImage}
-                    activeOpacity={0.8}>
-                    <Icon name="plus" size={24} color={colors.neutral.grey} />
-                  </TouchableOpacity>
-                )}
-              </ScrollView>
-            </View>
-          </KeyboardAwareScrollView>
+          <BasicInfoStep
+            control={control}
+            errors={errors}
+            eventTypes={eventTypes}
+            selectedEventType={eventFormState.selectedEventType}
+            onEventTypeSelect={eventHandlers.handleEventTypeSelect}
+            organizedByGroupOptions={organizedByGroupOptions}
+            selectedOrganizedByGroup={eventFormState.selectedOrganizedByGroup}
+            onOrganizedByGroupSelect={
+              eventHandlers.handleOrganizedByGroupSelect
+            }
+            adminGroupsLoading={adminGroupsLoading}
+            selectedImages={eventFormState.selectedImages}
+            onSelectImage={handleSelectImage}
+            onRemoveImage={handleRemoveImage}
+            onOpenLocationMap={handleOpenLocationMap}
+          />
         ),
       },
       {
@@ -1135,411 +516,101 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         title: t('screens.event.date_time_title'),
         validate: validateDateTime,
         content: (
-          <KeyboardAwareScrollView
-            showsVerticalScrollIndicator={false}
-            enableOnAndroid={true}
-            enableAutomaticScroll={true}
-            enableResetScrollToCoords={false}
-            keyboardShouldPersistTaps="handled"
-            style={styles.scrollView}>
-            <View style={styles.formFields}>
-              <View style={styles.dateTimeContainer}>
-                <DateTimePicker
-                  control={control}
-                  name="startDate"
-                  placeholder={t('screens.event.start_date')}
-                  cancelText={t('common.cancel')}
-                  confirmText={t('common.confirm')}
-                  displayFormat="long"
-                  mode="date"
-                  defaultValue={startDate}
-                  minimumDate={new Date()}
-                  style={styles.dateTimePicker}
-                  error={errors.startDate}
-                  key="startDate-picker"
-                  locale={language}
-                />
-                <DateTimePicker
-                  control={control}
-                  name="startTime"
-                  placeholder={t('screens.event.start_time')}
-                  cancelText={t('common.cancel')}
-                  confirmText={t('common.confirm')}
-                  mode="time"
-                  defaultValue={startTime}
-                  minuteInterval={15}
-                  style={styles.dateTimePicker}
-                  error={errors.startTime}
-                  key="startTime-picker"
-                  locale={language}
-                />
-              </View>
-
-              {/* End Date and Time */}
-              <View style={styles.dateTimeContainer}>
-                <DateTimePicker
-                  control={control}
-                  name="endDate"
-                  placeholder={t('screens.event.end_date')}
-                  cancelText={t('common.cancel')}
-                  confirmText={t('common.confirm')}
-                  displayFormat="long"
-                  mode="date"
-                  defaultValue={endDate}
-                  minimumDate={new Date()}
-                  style={styles.dateTimePicker}
-                  error={errors.endDate}
-                  key="endDate-picker"
-                  locale={language}
-                />
-                <DateTimePicker
-                  control={control}
-                  name="endTime"
-                  placeholder={t('screens.event.end_time')}
-                  cancelText={t('common.cancel')}
-                  confirmText={t('common.confirm')}
-                  mode="time"
-                  defaultValue={endTime}
-                  minuteInterval={15}
-                  style={styles.dateTimePicker}
-                  error={errors.endTime}
-                  key="endTime-picker"
-                  locale={language}
-                />
-              </View>
-
-              {/* Privacy Settings */}
-              <View>
-                <Typography
-                  variant="body"
-                  weight="semiBold"
-                  style={styles.subSectionTitle}>
-                  {t('screens.event.privacy_settings')}
-                </Typography>
-
-                {/* Privacy Switch */}
-                <View style={styles.privacySwitchContainer}>
-                  <Switch
-                    value={isPrivate}
-                    onValueChange={togglePrivacy}
-                    label={t('screens.event.private_event')}
-                    description={t('screens.event.private_event_description')}
-                    style={{paddingVertical: spacing.md}}
-                  />
-                  {/* Group/User Selectors for Private Events */}
-                  {isPrivate && (
-                    <View style={styles.privateEventSection}>
-                      <Tabs
-                        items={[
-                          {key: 'users', label: t('screens.event.users')},
-                          {key: 'groups', label: t('screens.event.groups')},
-                        ]}
-                        selectedKey={activeInviteTab}
-                        onTabChange={handleTabChange}
-                        variant="minimal"
-                        equalWidth={true}
-                      />
-
-                      {activeInviteTab === 'users' && (
-                        <View style={styles.tabContent}>
-                          <UserSelector
-                            selectedUsers={selectedUsers}
-                            onUsersChange={handleUsersChange}
-                            maxUsers={10}
-                          />
-                        </View>
-                      )}
-
-                      {activeInviteTab === 'groups' && (
-                        <View style={styles.tabContent}>
-                          <GroupSelector
-                            selectedGroups={selectedGroups}
-                            onGroupsChange={handleGroupsChange}
-                            maxGroups={3}
-                          />
-                        </View>
-                      )}
-                    </View>
-                  )}
-                </View>
-              </View>
-            </View>
-          </KeyboardAwareScrollView>
+          <DateTimeStep
+            control={control}
+            errors={errors}
+            startDate={startDate}
+            startTime={startTime}
+            endDate={endDate}
+            endTime={endTime}
+            language={language}
+            isPrivate={eventFormState.isPrivate}
+            onTogglePrivacy={eventHandlers.togglePrivacy}
+            activeInviteTab={eventFormState.activeInviteTab}
+            onTabChange={eventHandlers.handleTabChange}
+            selectedUsers={eventFormState.selectedUsers}
+            onUsersChange={eventHandlers.handleUsersChange}
+            selectedGroups={eventFormState.selectedGroups}
+            onGroupsChange={eventHandlers.handleGroupsChange}
+          />
         ),
       },
-
       {
         id: 'event-details',
         title: t('screens.event.event_details_title'),
         validate: validateEventSpecificDetails,
         content: (
-          <KeyboardAwareScrollView
-            showsVerticalScrollIndicator={false}
-            enableOnAndroid={true}
-            enableAutomaticScroll={true}
-            enableResetScrollToCoords={false}
-            keyboardShouldPersistTaps="handled"
-            style={styles.scrollView}>
-            {eventType ? (
-              <View style={styles.formFields}>
-                {/* Ride & Camping Specific Fields */}
-                {isRideOrCamping && (
-                  <>
-                    <AnimatedInput
-                      control={control}
-                      name="startLocation"
-                      label={t('screens.event.start_location')}
-                      error={errors.startLocation}
-                      icon={
-                        <Icon
-                          name="map-pin-filled"
-                          size={20}
-                          color={colors.neutral.grey}
-                        />
-                      }
-                      iconPosition="right"
-                      onPress={handleOpenStartLocationMap}
-                      editable={false}
-                      key="startLocation-input"
-                      testID="startLocation-input"
-                    />
-
-                    <AnimatedInput
-                      control={control}
-                      name="finishLocation"
-                      label={t('screens.event.finish_location')}
-                      error={errors.finishLocation}
-                      icon={
-                        <Icon
-                          name="map-pin-filled"
-                          size={20}
-                          color={colors.neutral.grey}
-                        />
-                      }
-                      iconPosition="right"
-                      onPress={handleOpenFinishLocationMap}
-                      editable={false}
-                      key="finishLocation-input"
-                      testID="finishLocation-input"
-                    />
-
-                    <Dropdown
-                      data={roadTypes}
-                      label={t('screens.event.road_type')}
-                      onSelect={handleRoadTypeSelect}
-                      placeholder=""
-                      selectedItem={selectedRoadType}
-                      error={errors.roadType?.message}
-                      key="roadType-dropdown"
-                    />
-
-                    <Dropdown
-                      data={difficultyLevels}
-                      label={t('screens.event.difficulty_level')}
-                      onSelect={handleDifficultySelect}
-                      placeholder=""
-                      selectedItem={selectedDifficultyLevel}
-                      error={errors.difficultyLevel?.message}
-                      key="difficultyLevel-dropdown"
-                    />
-
-                    {/* Camping specific */}
-                    {eventType === 'CAMPING_RIDE' && (
-                      <AnimatedInput
-                        control={control}
-                        name="campingInfo"
-                        label={t('screens.event.camping_info')}
-                        multiline
-                        showClearButton={false}
-                        error={errors.campingInfo}
-                        key="campingInfo-input"
-                      />
-                    )}
-
-                    <AnimatedInput
-                      control={control}
-                      name="routeDescription"
-                      label={t('screens.event.route_description')}
-                      multiline
-                      showClearButton={false}
-                      error={errors.routeDescription}
-                      key="routeDescription-input"
-                    />
-
-                    <AnimatedInput
-                      control={control}
-                      name="restStops"
-                      label={t('screens.event.rest_stops')}
-                      multiline
-                      showClearButton={false}
-                      error={errors.restStops}
-                      key="restStops-input"
-                    />
-
-                    <AnimatedInput
-                      control={control}
-                      name="equipmentChecklist"
-                      label={t('screens.event.equipment_checklist')}
-                      multiline
-                      showClearButton={false}
-                      error={errors.equipmentChecklist}
-                      key="equipmentChecklist-input"
-                    />
-                  </>
-                )}
-
-                {/* Workshop Specific Fields */}
-                {isWorkshop && (
-                  <>
-                    <AnimatedInput
-                      control={control}
-                      name="instructorInfo"
-                      label={t('screens.event.instructor_info')}
-                      multiline
-                      showClearButton={false}
-                      error={errors.instructorInfo}
-                      key="instructorInfo-input"
-                    />
-
-                    <AnimatedInput
-                      control={control}
-                      name="topicsCovered"
-                      label={t('screens.event.topics_covered')}
-                      multiline
-                      showClearButton={false}
-                      error={errors.topicsCovered}
-                      key="topicsCovered-input"
-                    />
-
-                    <Dropdown
-                      data={experienceLevels}
-                      label={t('screens.event.experience_level')}
-                      onSelect={handleExperienceLevelSelect}
-                      placeholder=""
-                      selectedItem={selectedExperienceLevel}
-                      error={errors.experienceLevel?.message}
-                      key="experienceLevel-dropdown"
-                    />
-
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        gap: spacing.md,
-                      }}>
-                      <View style={{flex: 1}}>
-                        <NumberAnimatedInput
-                          control={control}
-                          decimalSeparator={
-                            CURRENCY_FORMATTING[
-                              (selectedCurrency?.value as Currency) ||
-                                DEFAULT_CURRENCY
-                            ].decimalSeparator
-                          }
-                          thousandSeparator={
-                            CURRENCY_FORMATTING[
-                              (selectedCurrency?.value as Currency) ||
-                                DEFAULT_CURRENCY
-                            ].thousandSeparator
-                          }
-                          name="price"
-                          label={t('screens.event.price')}
-                          error={errors.price}
-                          testID="price-input"
-                        />
-                      </View>
-                      <View style={{flex: 1}}>
-                        <Dropdown
-                          data={currencies}
-                          label={t('screens.event.currency')}
-                          onSelect={handleCurrencySelect}
-                          selectedItem={selectedCurrency}
-                          showClearButton={false}
-                          error={errors.currency?.message}
-                          key="currency-dropdown"
-                        />
-                      </View>
-                    </View>
-                  </>
-                )}
-              </View>
-            ) : (
-              <View style={styles.eventTypeWarning}>
-                <Typography variant="body" color={colors.neutral.darkGrey}>
-                  {t('screens.event.select_event_type_prompt')}
-                </Typography>
-              </View>
-            )}
-          </KeyboardAwareScrollView>
+          <EventDetailsStep
+            control={control}
+            errors={errors}
+            eventType={eventFormState.eventType}
+            isRideOrCamping={eventFormState.isRideOrCamping}
+            isWorkshop={eventFormState.isWorkshop}
+            roadTypes={roadTypes}
+            selectedRoadType={eventFormState.selectedRoadType}
+            onRoadTypeSelect={eventHandlers.handleRoadTypeSelect}
+            difficultyLevels={difficultyLevels}
+            selectedDifficultyLevel={eventFormState.selectedDifficultyLevel}
+            onDifficultySelect={eventHandlers.handleDifficultySelect}
+            experienceLevels={experienceLevels}
+            selectedExperienceLevel={eventFormState.selectedExperienceLevel}
+            onExperienceLevelSelect={eventHandlers.handleExperienceLevelSelect}
+            currencies={currencies}
+            selectedCurrency={eventFormState.selectedCurrency}
+            onCurrencySelect={eventHandlers.handleCurrencySelect}
+            onOpenStartLocationMap={handleOpenStartLocationMap}
+            onOpenFinishLocationMap={handleOpenFinishLocationMap}
+          />
         ),
       },
     ],
     [
+      t,
       validateBasicInfo,
       validateDateTime,
       validateEventSpecificDetails,
       control,
       errors,
       eventTypes,
-      selectedEventType,
-      loading,
-      selectedImages,
-      handleRemoveImage,
+      eventFormState,
+      eventHandlers,
+      organizedByGroupOptions,
+      adminGroupsLoading,
       handleSelectImage,
-      handleEventTypeSelect,
+      handleRemoveImage,
+      handleOpenLocationMap,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      language,
       roadTypes,
       difficultyLevels,
       experienceLevels,
-      selectedRoadType,
-      selectedDifficultyLevel,
-      selectedExperienceLevel,
-      handleRoadTypeSelect,
-      handleDifficultySelect,
-      handleExperienceLevelSelect,
-      isPrivate,
-      togglePrivacy,
-      isSoloRide,
-      selectedUsers,
-      selectedGroups,
-      handleUsersChange,
-      handleGroupsChange,
-      eventType,
-      isRideOrCamping,
-      isWorkshop,
-      handleOpenLocationMap,
+      currencies,
       handleOpenStartLocationMap,
       handleOpenFinishLocationMap,
-      selectedFinishLocation,
-      activeInviteTab,
-      handleTabChange,
-      currencies,
-      selectedCurrency,
-      handleCurrencySelect,
     ],
   );
 
   // Filter steps based on event type
   const wizardSteps = useMemo(
     () =>
-      shouldShowEventDetails
+      eventFormState.shouldShowEventDetails
         ? baseWizardSteps
         : baseWizardSteps.filter(step => step.id !== 'event-details'),
-    [shouldShowEventDetails, baseWizardSteps],
+    [eventFormState.shouldShowEventDetails, baseWizardSteps],
   );
 
-  // Reset fields when event type changes (only if form is already populated and eventType actually changed)
+  // Reset fields when event type changes
   useEffect(() => {
-    // Only reset if:
-    // 1. Form has been populated (initial load is complete)
-    // 2. EventType has actually changed (not initial set)
-    // 3. EventType is not empty
     if (
-      eventType &&
+      eventFormState.eventType &&
       isFormPopulatedRef.current &&
       previousEventTypeRef.current !== undefined &&
-      previousEventTypeRef.current !== eventType
+      previousEventTypeRef.current !== eventFormState.eventType
     ) {
       // Clear all event-type specific fields
-      // Ride/camping specific fields
       resetField('routeDescription');
       resetField('roadType');
       resetField('difficultyLevel');
@@ -1548,27 +619,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
       resetField('equipmentChecklist');
       resetField('startLocation');
       resetField('finishLocation');
-
-      // Workshop specific fields
       resetField('instructorInfo');
       resetField('topicsCovered');
       resetField('experienceLevel');
       resetField('price');
       resetField('currency');
 
-      // Reset UI state for dropdowns and locations
-      setSelectedRoadType(null);
-      setValue('roadType', '', {shouldValidate: false});
-      setSelectedDifficultyLevel(null);
-      setValue('difficultyLevel', '', {shouldValidate: false});
-      setSelectedExperienceLevel(null);
-      setValue('experienceLevel', '', {shouldValidate: false});
-      setSelectedStartLocation(null);
-      setValue('startLocation', '', {shouldValidate: false});
-      setSelectedFinishLocation(null);
-      setValue('finishLocation', '', {shouldValidate: false});
-      setSelectedCurrency(null);
-      setValue('currency', '', {shouldValidate: false});
+      // Reset UI state using shared hook's reset function
+      eventFormState.resetEventTypeSpecificFields();
 
       // If we're past the first step, jump back to first step
       if (currentStepIndex > 0) {
@@ -1579,10 +637,10 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     }
 
     // Update the previous eventType ref
-    if (eventType) {
-      previousEventTypeRef.current = eventType;
+    if (eventFormState.eventType) {
+      previousEventTypeRef.current = eventFormState.eventType;
     }
-  }, [eventType, resetField, setValue, currentStepIndex]);
+  }, [eventFormState.eventType, resetField, currentStepIndex]);
 
   // Update step status when wizard step changes
   useEffect(() => {
@@ -1651,7 +709,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           type => type.value === event.eventType,
         );
         if (eventTypeItem) {
-          setSelectedEventType(eventTypeItem);
+          eventFormState.setSelectedEventType(eventTypeItem);
           formValues.eventType = event.eventType as EventType;
         }
       }
@@ -1662,7 +720,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           type => type.value === event.roadType,
         );
         if (roadTypeItem) {
-          setSelectedRoadType(roadTypeItem);
+          eventFormState.setSelectedRoadType(roadTypeItem);
           formValues.roadType = event.roadType;
         }
       }
@@ -1672,7 +730,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           level => level.value === event.difficultyLevel,
         );
         if (difficultyItem) {
-          setSelectedDifficultyLevel(difficultyItem);
+          eventFormState.setSelectedDifficultyLevel(difficultyItem);
           formValues.difficultyLevel = event.difficultyLevel;
         }
       }
@@ -1682,7 +740,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           level => level.value === event.experienceLevel,
         );
         if (experienceItem) {
-          setSelectedExperienceLevel(experienceItem);
+          eventFormState.setSelectedExperienceLevel(experienceItem);
           formValues.experienceLevel = event.experienceLevel;
         }
       }
@@ -1693,7 +751,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           curr => curr.value === event.currency,
         );
         if (currencyItem) {
-          setSelectedCurrency(currencyItem);
+          eventFormState.setSelectedCurrency(currencyItem);
           formValues.currency = event.currency;
         }
       }
@@ -1734,7 +792,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           })) as ICreateEventAddress[];
 
         if (meetingLocationAddresses.length > 0) {
-          setSelectedMeetingLocation(meetingLocationAddresses);
+          eventFormState.setSelectedMeetingLocation(meetingLocationAddresses);
           const displayAddress =
             meetingLocationAddresses.find(
               addr => addr.language.toLowerCase() === language.toLowerCase(),
@@ -1743,7 +801,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         }
 
         if (startLocationAddresses.length > 0) {
-          setSelectedStartLocation(startLocationAddresses);
+          eventFormState.setSelectedStartLocation(startLocationAddresses);
           const displayAddress =
             startLocationAddresses.find(
               addr => addr.language.toLowerCase() === language.toLowerCase(),
@@ -1752,7 +810,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         }
 
         if (finishLocationAddresses.length > 0) {
-          setSelectedFinishLocation(finishLocationAddresses);
+          eventFormState.setSelectedFinishLocation(finishLocationAddresses);
           const displayAddress =
             finishLocationAddresses.find(
               addr => addr.language.toLowerCase() === language.toLowerCase(),
@@ -1768,7 +826,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           uri: image.url,
           base64: image.url.startsWith('data:') ? image.url : undefined,
         }));
-        setSelectedImages(imageObjects);
+        eventFormState.setSelectedImages(imageObjects);
         formValues.images = event.images.map(img => img.url);
       }
 
@@ -1779,7 +837,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
           option => option.value === eventData.organizedByGroup.id,
         );
         if (organizedByGroupItem) {
-          setSelectedOrganizedByGroup(organizedByGroupItem);
+          eventFormState.setSelectedOrganizedByGroup(organizedByGroupItem);
           formValues.organizedByGroupId = eventData.organizedByGroup.id;
         }
       }
@@ -1789,19 +847,19 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         const invitedUserIds = eventData.invitedUsers.map(
           (user: any) => user.id,
         );
-        setSelectedUsers(invitedUserIds);
+        eventFormState.setSelectedUsers(invitedUserIds);
         formValues.invitedUsers = invitedUserIds;
       }
       if (eventData.invitedGroups && Array.isArray(eventData.invitedGroups)) {
         const invitedGroupIds = eventData.invitedGroups.map(
           (group: any) => group.id,
         );
-        setSelectedGroups(invitedGroupIds);
+        eventFormState.setSelectedGroups(invitedGroupIds);
         formValues.invitedGroups = invitedGroupIds;
       }
 
       // Update privacy state
-      setIsPrivate(event.isPrivate || false);
+      eventFormState.setIsPrivate(event.isPrivate || false);
 
       // Reset form with loaded values - this updates default values for dirty tracking
       reset(formValues, {keepDefaultValues: false});
@@ -1827,20 +885,19 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
     organizedByGroupOptions,
     language,
     reset,
-    setIsPrivate,
-    setSelectedEventType,
-    setSelectedRoadType,
-    setSelectedDifficultyLevel,
-    setSelectedExperienceLevel,
-    setSelectedCurrency,
-    setSelectedOrganizedByGroup,
-    setSelectedMeetingLocation,
-    setSelectedStartLocation,
-    setSelectedFinishLocation,
-    setSelectedImages,
-    setSelectedUsers,
-    setSelectedGroups,
-    t,
+    eventFormState.setIsPrivate,
+    eventFormState.setSelectedEventType,
+    eventFormState.setSelectedRoadType,
+    eventFormState.setSelectedDifficultyLevel,
+    eventFormState.setSelectedExperienceLevel,
+    eventFormState.setSelectedCurrency,
+    eventFormState.setSelectedOrganizedByGroup,
+    eventFormState.setSelectedMeetingLocation,
+    eventFormState.setSelectedStartLocation,
+    eventFormState.setSelectedFinishLocation,
+    eventFormState.setSelectedImages,
+    eventFormState.setSelectedUsers,
+    eventFormState.setSelectedGroups,
   ]);
 
   // Show loading state while fetching event data
@@ -1914,7 +971,6 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}
-              loading={loading}
               style={{flex: 1}}
             />
           </>
@@ -1953,11 +1009,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
-          initialAddress={selectedMeetingLocation?.find(
+          initialAddress={eventFormState.selectedMeetingLocation?.find(
             address =>
               address.language.toLowerCase() === language.toLowerCase(),
           )}
-          onLocationSelect={handleMeetingLocationSelect}
+          onLocationSelect={addresses => {
+            handleMeetingLocationSelect(addresses);
+            meetingLocationMapBottomSheetRef.current?.close();
+          }}
           onClose={() => meetingLocationMapBottomSheetRef.current?.close()}
         />
       </BottomSheet>
@@ -1968,11 +1027,14 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
-          initialAddress={selectedStartLocation?.find(
+          initialAddress={eventFormState.selectedStartLocation?.find(
             address =>
               address.language.toLowerCase() === language.toLowerCase(),
           )}
-          onLocationSelect={handleStartLocationSelect}
+          onLocationSelect={addresses => {
+            handleStartLocationSelect(addresses);
+            startLocationMapBottomSheetRef.current?.close();
+          }}
           onClose={() => startLocationMapBottomSheetRef.current?.close()}
         />
       </BottomSheet>
@@ -1983,14 +1045,18 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
         closeButtonPosition="top-right"
         enableGestureControl={false}>
         <SelectLocationMap
-          initialAddress={selectedFinishLocation?.find(
+          initialAddress={eventFormState.selectedFinishLocation?.find(
             address =>
               address.language.toLowerCase() === language.toLowerCase(),
           )}
-          onLocationSelect={handleFinishLocationSelect}
+          onLocationSelect={addresses => {
+            handleFinishLocationSelect(addresses);
+            finishLocationMapBottomSheetRef.current?.close();
+          }}
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
         />
       </BottomSheet>
+      <LoadingIndicator visible={updateEventLoading} />
     </View>
   );
 };
@@ -2007,46 +1073,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.md,
   },
-  content: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-  },
-  topHeaderBar: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.secondary.main,
-  },
-  scrollView: {
-    borderTopWidth: 1,
-    borderTopColor: colors.secondary.main,
-  },
-  formFields: {
-    marginTop: spacing.lg,
-    marginBottom: spacing.xs,
-    gap: spacing.lg,
-  },
-  dateTimeContainer: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  dateTimePicker: {
-    flex: 1,
-    marginBottom: spacing.xs,
-  },
-  privacySwitchContainer: {
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.lightGrey,
-  },
-  privateEventSection: {
-    margin: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.neutral.lightGrey,
-    paddingVertical: spacing.md,
-  },
-  privateEventTitle: {
-    marginBottom: spacing.sm,
-    color: colors.neutral.darkGrey,
-  },
   buttonContainer: {
     flexDirection: 'row',
     gap: spacing.md,
@@ -2056,60 +1082,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.secondary.main,
     paddingVertical: spacing.md,
     marginVertical: spacing.md,
-  },
-  conditionalFieldsContainer: {
-    marginTop: spacing.md,
-    gap: spacing.lg,
-  },
-  sectionTitle: {
-    marginBottom: spacing.xs,
-    color: colors.neutral.darkGrey,
-  },
-  subSectionTitle: {
-    marginBottom: spacing.xs,
-  },
-  eventTypeWarning: {
-    padding: spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // Styles for multiple image selection
-  imagesSection: {
-    marginTop: spacing.md,
-  },
-  imageScrollContainer: {
-    paddingVertical: spacing.md,
-    gap: spacing.md,
-  },
-  imageContainer: {
-    position: 'relative',
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: radius.md,
-  },
-  addImageButton: {
-    width: 100,
-    height: 100,
-    borderRadius: radius.md,
-    backgroundColor: colors.secondary.light,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteButton: {
-    position: 'absolute',
-    top: -10,
-    right: -10,
-    backgroundColor: colors.primary.light,
-    borderRadius: radius.round,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tabContent: {
-    marginTop: spacing.md,
   },
   bottomSheetContent: {
     padding: spacing.sm,

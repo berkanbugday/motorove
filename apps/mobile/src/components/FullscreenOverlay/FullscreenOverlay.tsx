@@ -44,6 +44,14 @@ export interface FullscreenOverlayProps {
    */
   backdropStyle?: StyleProp<ViewStyle>;
   /**
+   * Background color for the backdrop
+   */
+  backdropColor?: string;
+  /**
+   * Opacity of the backdrop (0-1)
+   */
+  backdropOpacity?: number;
+  /**
    * Animation type for showing/hiding the overlay
    */
   animationType?: 'fade' | 'slide' | 'none';
@@ -85,6 +93,8 @@ export function FullscreenOverlay({
   closeOnBackButton = true,
   contentContainerStyle,
   backdropStyle,
+  backdropColor = 'white',
+  backdropOpacity = 1,
   animationType = 'fade',
   position = 'center',
   blockContentTouches = true,
@@ -169,35 +179,35 @@ export function FullscreenOverlay({
   };
 
   // Calculate animation styles
-  const getAnimationStyle = () => {
-    switch (animationType) {
-      case 'fade':
-        return {opacity: contentAnimation};
-      case 'slide':
-        return {
-          opacity: contentAnimation,
-          transform: [
-            {
-              translateY:
-                position === 'top'
-                  ? slideAnimation.interpolate({
-                      inputRange: [0, Dimensions.get('window').height],
-                      outputRange: [0, -Dimensions.get('window').height],
-                    })
-                  : position === 'bottom'
-                  ? slideAnimation
-                  : slideAnimation.interpolate({
-                      inputRange: [0, Dimensions.get('window').height],
-                      outputRange: [0, Dimensions.get('window').height / 2],
-                    }),
-            },
-          ],
-        };
-      case 'none':
-      default:
-        return {};
-    }
-  };
+  // const getAnimationStyle = () => {
+  //   switch (animationType) {
+  //     case 'fade':
+  //       return {opacity: contentAnimation};
+  //     case 'slide':
+  //       return {
+  //         opacity: contentAnimation,
+  //         transform: [
+  //           {
+  //             translateY:
+  //               position === 'top'
+  //                 ? slideAnimation.interpolate({
+  //                     inputRange: [0, Dimensions.get('window').height],
+  //                     outputRange: [0, -Dimensions.get('window').height],
+  //                   })
+  //                 : position === 'bottom'
+  //                 ? slideAnimation
+  //                 : slideAnimation.interpolate({
+  //                     inputRange: [0, Dimensions.get('window').height],
+  //                     outputRange: [0, Dimensions.get('window').height / 2],
+  //                   }),
+  //           },
+  //         ],
+  //       };
+  //     case 'none':
+  //     default:
+  //       return {};
+  //   }
+  // };
 
   // Get close button position style
   const getCloseButtonPositionStyle = (): ViewStyle => {
@@ -239,16 +249,23 @@ export function FullscreenOverlay({
       visible={visible}
       onRequestClose={handleBackPress}
       statusBarTranslucent={true}
-      animationType="none"
+      animationType={animationType}
+      transparent={animationType !== 'none' && backdropOpacity < 1}
       testID={testID}>
       <View style={styles.container}>
-        <View style={[styles.backdrop, backdropStyle]} />
+        <View
+          style={[
+            styles.backdrop,
+            {backgroundColor: backdropColor, opacity: backdropOpacity},
+            backdropStyle,
+          ]}
+        />
 
         <Animated.View
           style={[
             styles.contentContainer,
             getPositionStyle(),
-            getAnimationStyle(),
+            // getAnimationStyle(),
             contentContainerStyle,
           ]}>
           {blockContentTouches ? (
@@ -282,7 +299,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'white',
   },
   contentContainer: {
     width: '100%',

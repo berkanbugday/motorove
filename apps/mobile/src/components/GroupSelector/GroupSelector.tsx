@@ -99,7 +99,7 @@ const GroupItem: React.FC<GroupItemProps> = ({
             variant="caption"
             color={colors.neutral.grey}
             numberOfLines={1}>
-            {group.city?.value || t('components.groupSelector.no_city')} •{' '}
+            {group.city?.value}, {t('common.country')} •{' '}
             {group.memberships?.length || 0}{' '}
             {t('components.groupSelector.members')}
           </Typography>

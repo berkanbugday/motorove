@@ -75,7 +75,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
           />
         </View>
         <View style={styles.participantInfo}>
-          <Typography variant="body" style={styles.participantName}>
+          <Typography variant="body">
             {participantData.name ||
               t('components.participantsList.unknown_user')}
           </Typography>

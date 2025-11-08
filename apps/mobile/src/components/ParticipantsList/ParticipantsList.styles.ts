@@ -29,8 +29,4 @@ export const styles = StyleSheet.create({
   participantInfo: {
     flex: 1,
   },
-  participantName: {
-    color: colors.neutral.black,
-    fontWeight: '500',
-  },
 });

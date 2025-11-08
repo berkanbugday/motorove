@@ -20,6 +20,7 @@ export * from './PageIndicator';
 export * from './EventBanner';
 export * from './EventCard';
 export * from './LocationPermissionOverlay';
+export * from './LoadingIndicator';
 export * from './Checkbox';
 export * from './Chip';
 export * from './Typography';

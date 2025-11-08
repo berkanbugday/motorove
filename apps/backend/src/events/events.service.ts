@@ -640,160 +640,167 @@ export class EventsService {
         throw new NotFoundException(`Event with id ${id} not found`);
       }
 
-      // Use transaction to ensure atomicity
-      const event = await this.prisma.$transaction(async (tx) => {
-        // Update the event
-        const updatedEvent = await tx.event.update({
-          where: { id, isActive: true },
-          data: {
-            title,
-            description,
-            eventType,
-            status,
-            startDateTime,
-            endDateTime,
-            maxParticipants,
-            isPrivate,
-            images: processedImages,
-            roadType: roadType as RoadType,
-            difficultyLevel: difficultyLevel as DifficultyLevel,
-            routeDescription,
-            restStops,
-            campingInfo,
-            equipmentChecklist,
-            instructorInfo,
-            topicsCovered,
-            experienceLevel: experienceLevel as ExperienceLevel,
-            price: price ? parseFloat(price) : null,
-            currency,
-            // Handle organized by fields
-            organizedByGroupId: organizedByGroupId || null,
-            updatedById: userId,
-            updatedAt: new Date(),
-            // Handle addresses update - delete old ones if new ones provided
-            addresses: addresses?.length
-              ? {
-                  deleteMany: {}, // Delete old addresses
-                  createMany: {
-                    data: addresses.map((addr) => ({
-                      address: addr.address,
-                      language: addr.language,
-                      type: addr.type,
-                      countryCode: addr.countryCode,
-                      latitude: addr.latitude,
-                      longitude: addr.longitude,
-                    })),
-                  },
-                }
-              : undefined,
-            // Always remove all existing invited groups and add new ones
-            invitedGroups: {
-              disconnect: currentEvent.invitedGroups?.map((group) => ({
-                id: group.id,
-              })) as { id: string }[],
-              ...(invitedGroupIds?.length
-                ? { connect: invitedGroupIds.map((id) => ({ id })) }
-                : {}),
-            },
-            // Always remove all existing invitations and add new ones
-            invitations: {
-              updateMany: {
-                where: {
-                  eventId: id,
-                  isActive: true,
-                },
-                data: {
-                  isActive: false,
-                },
-              },
-              ...(invitedUserIds?.length
+      // Use transaction to ensure atomicity with increased timeout
+      const event = await this.prisma.$transaction(
+        async (tx) => {
+          // Update the event
+          const updatedEvent = await tx.event.update({
+            where: { id, isActive: true },
+            data: {
+              title,
+              description,
+              eventType,
+              status,
+              startDateTime,
+              endDateTime,
+              maxParticipants,
+              isPrivate,
+              images: processedImages,
+              roadType: roadType as RoadType,
+              difficultyLevel: difficultyLevel as DifficultyLevel,
+              routeDescription,
+              restStops,
+              campingInfo,
+              equipmentChecklist,
+              instructorInfo,
+              topicsCovered,
+              experienceLevel: experienceLevel as ExperienceLevel,
+              price: price ? parseFloat(price) : null,
+              currency,
+              // Handle organized by fields
+              organizedByGroupId: organizedByGroupId || null,
+              updatedById: userId,
+              updatedAt: new Date(),
+              // Handle addresses update - delete old ones if new ones provided
+              addresses: addresses?.length
                 ? {
+                    deleteMany: {}, // Delete old addresses
                     createMany: {
-                      data: invitedUserIds.map((inviteeId) => ({
-                        inviteeId: inviteeId,
-                        createdById: userId,
+                      data: addresses.map((addr) => ({
+                        address: addr.address,
+                        language: addr.language,
+                        type: addr.type,
+                        countryCode: addr.countryCode,
+                        latitude: addr.latitude,
+                        longitude: addr.longitude,
                       })),
                     },
                   }
-                : {}),
+                : undefined,
+              invitedGroups:
+                invitedGroupIds !== undefined
+                  ? {
+                      set: invitedGroupIds.map((groupId) => ({ id: groupId })),
+                    }
+                  : undefined,
             },
-          },
-          include: {
-            createdBy: true,
-            updatedBy: true,
-            organizedByGroup: {
-              include: {
-                city: true,
+            include: {
+              createdBy: true,
+              updatedBy: true,
+              organizedByGroup: {
+                include: {
+                  city: true,
+                },
               },
-            },
-            addresses: true,
-            invitedGroups: {
-              include: {
-                city: true,
+              addresses: true,
+              invitedGroups: {
+                include: {
+                  city: true,
+                },
               },
-            },
-            invitations: {
-              include: {
-                invitee: true,
+              invitations: {
+                include: {
+                  invitee: true,
+                },
               },
-            },
-          },
-        });
-
-        // If event status is UPCOMING and there are invited groups, create invitations for all group members
-        if (status === EventStatus.UPCOMING && invitedGroupIds?.length) {
-          this.logger.log(
-            `Creating invitations for group members in event ${updatedEvent.id} after update`,
-          );
-
-          // Get all members from invited groups with ACCEPTED status
-          const groupMembers = await tx.groupMembership.findMany({
-            where: {
-              groupId: {
-                in: invitedGroupIds,
-              },
-              group: {
-                isActive: true,
-              },
-              status: ApprovalStatus.ACCEPTED,
-              isActive: true,
-            },
-            select: {
-              userId: true,
             },
           });
 
-          // Extract unique user IDs (in case a user is in multiple invited groups)
-          const uniqueUserIds = [
-            ...new Set(groupMembers.map((member) => member.userId)),
-          ];
-
-          // If organized by group, don't filter out the event creator
-          // If not organized by group, filter out the event creator to avoid self-invitation
-          const inviteeIds = organizedByGroupId
-            ? uniqueUserIds
-            : uniqueUserIds.filter((id) => id !== userId);
-
-          if (inviteeIds.length > 0) {
-            // Create invitations for all group members
-            await tx.eventInvitation.createMany({
-              data: inviteeIds.map((inviteeId) => ({
-                eventId: updatedEvent.id,
-                inviteeId: inviteeId,
-                createdById: userId,
-                status: ApprovalStatus.PENDING,
-              })),
-              skipDuplicates: true, // Skip if invitation already exists
+          // Handle direct user invitations separately for better performance
+          if (invitedUserIds !== undefined) {
+            // First, deactivate all existing invitations in a single query
+            await tx.eventInvitation.updateMany({
+              where: {
+                eventId: id,
+                isActive: true,
+              },
+              data: {
+                isActive: false,
+              },
             });
 
-            this.logger.log(
-              `Created ${inviteeIds.length} invitations for group members in event ${updatedEvent.id}`,
-            );
+            // Then create new invitations if any
+            if (invitedUserIds.length > 0) {
+              await tx.eventInvitation.createMany({
+                data: invitedUserIds.map((inviteeId) => ({
+                  eventId: id,
+                  inviteeId: inviteeId,
+                  createdById: userId,
+                  status: ApprovalStatus.PENDING,
+                })),
+                skipDuplicates: true,
+              });
+            }
           }
-        }
 
-        return updatedEvent;
-      });
+          // If event status is UPCOMING and there are invited groups, create invitations for all group members
+          if (status === EventStatus.UPCOMING && invitedGroupIds?.length) {
+            this.logger.log(
+              `Creating invitations for group members in event ${updatedEvent.id} after update`,
+            );
+
+            // Get all members from invited groups with ACCEPTED status
+            const groupMembers = await tx.groupMembership.findMany({
+              where: {
+                groupId: {
+                  in: invitedGroupIds,
+                },
+                group: {
+                  isActive: true,
+                },
+                status: ApprovalStatus.ACCEPTED,
+                isActive: true,
+              },
+              select: {
+                userId: true,
+              },
+            });
+
+            // Extract unique user IDs (in case a user is in multiple invited groups)
+            const uniqueUserIds = [
+              ...new Set(groupMembers.map((member) => member.userId)),
+            ];
+
+            // If organized by group, don't filter out the event creator
+            // If not organized by group, filter out the event creator to avoid self-invitation
+            const inviteeIds = organizedByGroupId
+              ? uniqueUserIds
+              : uniqueUserIds.filter((id) => id !== userId);
+
+            if (inviteeIds.length > 0) {
+              // Create invitations for all group members
+              await tx.eventInvitation.createMany({
+                data: inviteeIds.map((inviteeId) => ({
+                  eventId: updatedEvent.id,
+                  inviteeId: inviteeId,
+                  createdById: userId,
+                  status: ApprovalStatus.PENDING,
+                })),
+                skipDuplicates: true, // Skip if invitation already exists
+              });
+
+              this.logger.log(
+                `Created ${inviteeIds.length} invitations for group members in event ${updatedEvent.id}`,
+              );
+            }
+          }
+
+          return updatedEvent;
+        },
+        {
+          timeout: 30000, // Increase timeout to 30 seconds for complex updates
+        },
+      );
 
       return this.mapToDto(event as Event, userId, authToken);
     } catch (error) {

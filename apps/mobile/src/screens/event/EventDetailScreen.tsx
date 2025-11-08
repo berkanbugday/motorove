@@ -705,6 +705,13 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
                   participants={event.participants}
                   maxAvatars={4}
                   style={styles.participantAvatarsContainer}
+                  onParticipantPress={participant => {
+                    if (participant.createdBy?.id) {
+                      navigateToScreen(navigation, 'Profile', {
+                        userId: participant.createdBy.id,
+                      });
+                    }
+                  }}
                 />
               </View>
             </View>

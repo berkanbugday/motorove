@@ -9,7 +9,10 @@ import {
 import {Typography} from '../Typography';
 import {colors, getShadow} from '@theme';
 import {IEventParticipant} from '@motorove/shared';
-import {useBottomSheet} from '../BottomSheet/BottomSheetProvider';
+import {
+  closeBottomSheet,
+  useBottomSheet,
+} from '../BottomSheet/BottomSheetProvider';
 import {ParticipantsList} from '../ParticipantsList';
 import {styles} from './ParticipantAvatars.styles';
 import {useTranslation} from '@hooks/useTranslation';
@@ -91,7 +94,10 @@ export const ParticipantAvatars: React.FC<ParticipantAvatarsProps> = ({
       content: (
         <ParticipantsList
           participants={participants}
-          onParticipantPress={onParticipantPress}
+          onParticipantPress={participant => {
+            closeBottomSheet();
+            onParticipantPress?.(participant);
+          }}
         />
       ),
       snapPoint: 'partial',

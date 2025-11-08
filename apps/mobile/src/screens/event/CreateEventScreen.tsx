@@ -28,6 +28,7 @@ import {
   BottomSheetRef,
   openBottomSheet,
   closeBottomSheet,
+  LoadingIndicator,
 } from '@components';
 import {
   BasicInfoStep,
@@ -54,7 +55,7 @@ export const CreateEventScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'CreateEvent'>>();
   const {language} = useLanguage();
-  const {createEvent, loading} = useCreateEvent(() => {
+  const {createEvent, loading: createEventLoading} = useCreateEvent(() => {
     navigation.goBack();
   });
 
@@ -642,7 +643,6 @@ export const CreateEventScreen: React.FC = () => {
               variant="dark"
               shape="round"
               onPress={handleSubmit(onSubmit)}
-              loading={loading}
               style={{flex: 1}}
             />
           </>
@@ -652,7 +652,6 @@ export const CreateEventScreen: React.FC = () => {
             variant="dark"
             shape="round"
             onPress={handleNextStep}
-            loading={loading}
             style={{flex: 1}}
           />
         ) : (
@@ -669,7 +668,6 @@ export const CreateEventScreen: React.FC = () => {
               variant="dark"
               shape="round"
               onPress={handleNextStep}
-              loading={loading}
               style={{flex: 1}}
             />
           </>
@@ -730,6 +728,7 @@ export const CreateEventScreen: React.FC = () => {
           onClose={() => finishLocationMapBottomSheetRef.current?.close()}
         />
       </BottomSheet>
+      <LoadingIndicator visible={createEventLoading} />
     </View>
   );
 };
