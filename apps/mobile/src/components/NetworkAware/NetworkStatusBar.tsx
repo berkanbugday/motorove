@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Animated, StyleSheet, Text} from 'react-native';
 import {networkService} from '@services/network.service';
 import {colors} from '@theme/colors';
+import i18n from '../../i18n/i18n';
 
 interface Props {
   offlineMessage?: string;
@@ -13,7 +14,7 @@ interface Props {
  * Component that displays a banner when the device goes offline
  */
 const NetworkStatusBar: React.FC<Props> = ({
-  offlineMessage = 'No internet connection',
+  offlineMessage = i18n.t('errors.network.no_internet_connection'),
   offlineBackgroundColor = colors.status.warning,
   offlineTextColor = colors.neutral.black,
 }) => {

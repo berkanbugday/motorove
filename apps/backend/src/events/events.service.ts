@@ -124,21 +124,11 @@ export class EventsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          organizedByGroup: {
-            include: {
-              city: true,
-            },
-          },
           participants: {
             where: { status: EventParticipantStatus.JOINED },
             include: { createdBy: true },
           },
           addresses: true,
-          invitedGroups: {
-            include: {
-              city: true,
-            },
-          },
           invitations: {
             where: {
               isActive: true,

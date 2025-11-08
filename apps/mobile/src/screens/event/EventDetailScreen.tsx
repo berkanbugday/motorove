@@ -558,7 +558,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           {useNativeDriver: false},
         )}
         scrollEventThrottle={Platform.OS === 'android' ? 16 : 8}
-        bounces={Platform.OS === 'ios'}
+        bounces={false}
         overScrollMode={Platform.OS === 'android' ? 'never' : 'auto'}
         nestedScrollEnabled={Platform.OS === 'android'}
         removeClippedSubviews={false}

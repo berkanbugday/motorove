@@ -25,9 +25,6 @@ import NetworkStatusBar from '@components/NetworkAware';
 import BottomSheetProvider from '@components/BottomSheet/BottomSheetProvider';
 import NotificationPermissionHandler from '@components/PermissionHandler/NotificationPermissionHandler';
 
-// Import i18n configuration
-import i18n from './src/i18n/i18n';
-
 // Initialize Sentry if DSN is provided
 if (
   AppConfig.ENABLE_LOGS &&
@@ -101,9 +98,7 @@ function App(): React.JSX.Element {
       <GestureHandlerRootView style={{flex: 1}}>
         <ApolloProvider client={apolloClient}>
           <LanguageProvider>
-            <NetworkStatusBar
-              offlineMessage={i18n.t('errors.network.no_internet_connection')}
-            />
+            <NetworkStatusBar />
             <NotificationPermissionHandler />
             <ToastMessage.Provider>
               <SafeAreaProvider>
