@@ -1,10 +1,5 @@
 import React, {useState, useCallback} from 'react';
-import {
-  View,
-  StyleSheet,
-  RefreshControl,
-  ActivityIndicator,
-} from 'react-native';
+import {View, StyleSheet, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {colors, commonStyles, spacing} from '@theme';
@@ -187,13 +182,6 @@ export const EventInvitationScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         onEndReached={!isFetchingMore ? loadMore : undefined}
-        ListFooterComponent={
-          isFetchingMore ? (
-            <View style={styles.footerLoader}>
-              <ActivityIndicator size="small" color={colors.neutral.black} />
-            </View>
-          ) : null
-        }
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={renderEmptyState}

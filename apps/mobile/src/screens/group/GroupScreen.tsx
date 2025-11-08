@@ -192,20 +192,13 @@ export const GroupScreen = () => {
         }
         onEndReached={loadMoreJoinedGroups}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          joinedGroupsLoading && hasMoreJoinedGroups ? (
-            <View style={styles.footerLoader}>
-              <SkeletonGroup preset="groupCard" style={styles.skeletonItem} />
-            </View>
-          ) : null
-        }
       />
     );
   };
 
   // Render all groups list
   const renderAllGroups = () => {
-    if (allGroupsLoading && !refreshingAllGroups && !allGroups?.length) {
+    if (allGroupsLoading && !refreshingAllGroups && hasMoreAllGroups) {
       return (
         <View style={styles.loadingContainer}>{renderGroupSkeletons()}</View>
       );
@@ -277,13 +270,6 @@ export const GroupScreen = () => {
         }
         onEndReached={loadMoreAllGroups}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          allGroupsLoading && hasMoreAllGroups ? (
-            <View style={styles.footerLoader}>
-              <SkeletonGroup preset="groupCard" style={styles.skeletonItem} />
-            </View>
-          ) : null
-        }
       />
     );
   };

@@ -1,10 +1,5 @@
 import React, {useState, useCallback, useEffect} from 'react';
-import {
-  View,
-  StyleSheet,
-  RefreshControl,
-  ActivityIndicator,
-} from 'react-native';
+import {View, StyleSheet, RefreshControl} from 'react-native';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -381,13 +376,6 @@ export const NotificationScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         onEndReached={!isFetchingMore ? loadMore : undefined}
-        ListFooterComponent={
-          isFetchingMore ? (
-            <View style={styles.footerLoader}>
-              <ActivityIndicator size="small" color={colors.neutral.black} />
-            </View>
-          ) : null
-        }
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           loading ? (
