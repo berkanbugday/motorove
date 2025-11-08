@@ -112,6 +112,7 @@ enum EventParticipantStatus {
 enum EventStatus {
   DRAFT
   UPCOMING
+  CANCELLED
   PAST
 }
 
@@ -317,19 +318,19 @@ model User {
   interests    Interest[]    @default([])
 
   // Relations
-  createdGroups        Group[]           @relation("GroupCreatedBy")
-  updatedGroups        Group[]           @relation("GroupUpdatedBy")
-  groupMemberships     GroupMembership[] @relation("UserGroupMembership")
-  createdMemberships   GroupMembership[] @relation("MembershipCreatedBy")
-  updatedMemberships   GroupMembership[] @relation("MembershipUpdatedBy")
+  createdGroups        Group[]                  @relation("GroupCreatedBy")
+  updatedGroups        Group[]                  @relation("GroupUpdatedBy")
+  groupMemberships     GroupMembership[]        @relation("UserGroupMembership")
+  createdMemberships   GroupMembership[]        @relation("MembershipCreatedBy")
+  updatedMemberships   GroupMembership[]        @relation("MembershipUpdatedBy")
   notifications        Notification[]
-  createdNotifications Notification[]    @relation("NotificationCreatedBy")
-  updatedNotifications Notification[]    @relation("NotificationUpdatedBy")
+  createdNotifications Notification[]           @relation("NotificationCreatedBy")
+  updatedNotifications Notification[]           @relation("NotificationUpdatedBy")
   deviceTokens         DeviceToken[]
   posts                Post[]
-  updatedPosts         Post[]            @relation("PostUpdatedBy")
+  updatedPosts         Post[]                   @relation("PostUpdatedBy")
   postComments         PostComment[]
-  updatedPostComments  PostComment[]     @relation("PostCommentUpdatedBy")
+  updatedPostComments  PostComment[]            @relation("PostCommentUpdatedBy")
   postLikes            PostLike[]
   postSaves            PostSave[]
   socialMediaProfiles  UserSocialMediaProfile[]

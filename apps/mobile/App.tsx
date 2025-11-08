@@ -42,6 +42,18 @@ if (
   });
 }
 
+// Load Apollo Client error messages in development
+if (__DEV__) {
+  import('@apollo/client/dev')
+    .then(({loadDevMessages, loadErrorMessages}) => {
+      loadDevMessages();
+      loadErrorMessages();
+    })
+    .catch(err => {
+      console.warn('Failed to load Apollo Client error messages:', err);
+    });
+}
+
 function App(): React.JSX.Element {
   const [isStorageReady, setIsStorageReady] = useState(false);
 

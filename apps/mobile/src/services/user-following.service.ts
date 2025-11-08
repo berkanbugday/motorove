@@ -214,16 +214,18 @@ export const useFollowUser = (onSuccess?: () => void) => {
             // Update all cached user queries
             cache.modify({
               fields: {
-                users(existingUsers = [], {readField}) {
-                  return existingUsers.map((userRef: any) => {
-                    if (readField('id', userRef) === userId) {
-                      return {
-                        ...userRef,
-                        followingStatus: newStatus,
-                      };
-                    }
-                    return userRef;
-                  });
+                users(existingUsers = [], {readField, canRead}) {
+                  return existingUsers
+                    .filter((userRef: any) => canRead(userRef))
+                    .map((userRef: any) => {
+                      if (readField('id', userRef) === userId) {
+                        return {
+                          ...userRef,
+                          followingStatus: newStatus,
+                        };
+                      }
+                      return userRef;
+                    });
                 },
               },
             });
@@ -289,16 +291,18 @@ export const useUnfollowUser = (onSuccess?: () => void) => {
           // Update all cached user queries
           cache.modify({
             fields: {
-              users(existingUsers = [], {readField}) {
-                return existingUsers.map((userRef: any) => {
-                  if (readField('id', userRef) === userId) {
-                    return {
-                      ...userRef,
-                      followingStatus: newStatus,
-                    };
-                  }
-                  return userRef;
-                });
+              users(existingUsers = [], {readField, canRead}) {
+                return existingUsers
+                  .filter((userRef: any) => canRead(userRef))
+                  .map((userRef: any) => {
+                    if (readField('id', userRef) === userId) {
+                      return {
+                        ...userRef,
+                        followingStatus: newStatus,
+                      };
+                    }
+                    return userRef;
+                  });
               },
             },
           });

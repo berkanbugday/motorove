@@ -125,7 +125,7 @@ export class EventsService {
           createdBy: true,
           updatedBy: true,
           participants: {
-            where: { status: EventParticipantStatus.JOINED },
+            where: { status: EventParticipantStatus.JOINED, isActive: true },
             include: { createdBy: true },
           },
           addresses: true,
@@ -225,7 +225,7 @@ export class EventsService {
             },
           },
           participants: {
-            where: { status: EventParticipantStatus.JOINED },
+            where: { status: EventParticipantStatus.JOINED, isActive: true },
             include: { createdBy: true },
           },
           addresses: true,
@@ -824,27 +824,176 @@ export class EventsService {
     }
   }
 
-  async remove(id: string, userId: string): Promise<boolean> {
+  async remove(id: string, userId: string): Promise<string> {
     try {
-      const event = await this.prisma.event.update({
-        where: { id, isActive: true },
-        data: {
-          isActive: false,
-          updatedBy: { connect: { id: userId } },
-          updatedAt: new Date(),
-        },
+      // Use transaction to ensure all related data is updated atomically
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Check if event is draft
+        const draftEvent = await tx.event.findFirst({
+          where: {
+            id,
+            isActive: true,
+            status: EventStatus.DRAFT,
+            createdById: userId,
+          },
+        });
+
+        if (!draftEvent) {
+          throw new NotFoundException(`Event with id ${id} not found`);
+        }
+
+        if (draftEvent?.createdById !== userId) {
+          throw new BadRequestException('You cannot remove this event');
+        }
+
+        // Update event to inactive
+        const updatedEvent = await tx.event.update({
+          where: {
+            id,
+            isActive: true,
+            status: EventStatus.DRAFT,
+            createdById: userId,
+          },
+          data: {
+            isActive: false,
+            updatedBy: { connect: { id: userId } },
+            updatedAt: new Date(),
+          },
+        });
+
+        // Update all related invitations to inactive
+        await tx.eventInvitation.updateMany({
+          where: {
+            eventId: id,
+            isActive: true,
+          },
+          data: {
+            isActive: false,
+            updatedAt: new Date(),
+          },
+        });
+
+        // Update all related participants to inactive
+        await tx.eventParticipant.updateMany({
+          where: {
+            eventId: id,
+            isActive: true,
+          },
+          data: {
+            isActive: false,
+            updatedAt: new Date(),
+          },
+        });
+
+        this.logger.log(
+          `Event ${id} and all related invitations and participants set to inactive`,
+        );
+
+        return updatedEvent;
+      });
+
+      return result.isActive === false ? id : '';
+    } catch (error) {
+      this.logger.error(`Failed to remove event`, error);
+      throw error;
+    }
+  }
+
+  async cancel(eventId: string, userId: string): Promise<string> {
+    try {
+      const event = await this.prisma.event.findFirst({
+        where: { id: eventId, isActive: true, status: EventStatus.UPCOMING },
         include: {
-          createdBy: true,
-          updatedBy: true,
-          participants: true,
-          addresses: true,
-          invitedGroups: true,
+          participants: {
+            where: { status: EventParticipantStatus.JOINED, isActive: true },
+            select: { createdById: true },
+          },
         },
       });
 
-      return event.isActive === false;
+      if (!event) {
+        throw new NotFoundException(`Event with id ${eventId} not found`);
+      }
+
+      // Check if user is the event creator
+      if (event.createdById !== userId) {
+        throw new BadRequestException(
+          'Only the event creator can cancel the event',
+        );
+      }
+
+      // Use transaction to ensure all related data is updated atomically
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Update event status to CANCELLED
+        const updatedEvent = await tx.event.update({
+          where: { id: eventId },
+          data: {
+            status: EventStatus.CANCELLED,
+            isActive: false,
+            updatedBy: { connect: { id: userId } },
+            updatedAt: new Date(),
+          },
+        });
+
+        // Update all related invitations to inactive
+        await tx.eventInvitation.updateMany({
+          where: {
+            eventId: eventId,
+            isActive: true,
+          },
+          data: {
+            isActive: false,
+            updatedAt: new Date(),
+          },
+        });
+
+        // Update all related participants to inactive
+        await tx.eventParticipant.updateMany({
+          where: {
+            eventId: eventId,
+            isActive: true,
+          },
+          data: {
+            isActive: false,
+            updatedAt: new Date(),
+          },
+        });
+
+        this.logger.log(
+          `Event ${eventId} cancelled and all related invitations and participants set to inactive`,
+        );
+
+        return updatedEvent;
+      });
+
+      // Send notifications to all participants
+      if (event.participants && event.participants.length > 0) {
+        const participantIds = event.participants.map((p) => p.createdById);
+
+        await this.queueService.addBulkNotificationJob(
+          {
+            userIds: participantIds,
+            title: 'event.cancelled.title',
+            body: 'event.cancelled.body',
+            type: NotificationType.EVENT_CANCELLED,
+            channels: NotificationChannel.PUSH,
+            data: {
+              eventId: event.id,
+              eventName: event.title,
+              eventDate: event.startDateTime,
+            } as Record<string, any>,
+          },
+          userId,
+        );
+
+        this.logger.log(
+          `Sent cancellation notifications to ${participantIds.length} participants for event ${eventId}`,
+        );
+      }
+
+      return result.isActive === false ? eventId : '';
     } catch (error) {
-      this.logger.error(`Failed to remove event`, error);
+      this.logger.error(`Failed to cancel event`, error);
       throw error;
     }
   }
@@ -925,11 +1074,22 @@ export class EventsService {
   ): Promise<EventDto> {
     try {
       const event = await this.prisma.event.findFirst({
-        where: { id: eventId, isActive: true, status: EventStatus.UPCOMING },
+        where: {
+          id: eventId,
+          isActive: true,
+          status: EventStatus.UPCOMING,
+        },
+        include: {
+          createdBy: true,
+        },
       });
 
       if (!event) {
         throw new NotFoundException(`Event with id ${eventId} not found`);
+      }
+
+      if (event.createdBy.id === userId && !event.organizedByGroupId) {
+        throw new BadRequestException('You cannot leave your own event');
       }
       const participant = await this.prisma.eventParticipant.findFirst({
         where: {

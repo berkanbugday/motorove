@@ -22,6 +22,7 @@ import {
   useRemoveEvent,
   useJoinEvent,
   useLeaveEvent,
+  useCancelEvent,
 } from '@services/event.service';
 import {
   Icon,
@@ -40,6 +41,7 @@ import {
   showToast,
   ImagePreviewModal,
   openMapAppsBottomSheet,
+  LoadingIndicator,
 } from '@components';
 import {format} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
@@ -78,6 +80,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
+  const cancelEventBottomSheetRef = useRef<BottomSheetRef>(null);
   const {user} = useAuth();
   // Image carousel states
   const [activeSlide, setActiveSlide] = useState(0);
@@ -107,6 +110,9 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
       refetchEvent();
     },
   );
+  const {cancelEvent, loading: cancelEventLoading} = useCancelEvent(() => {
+    navigation.goBack();
+  });
 
   // Format date for display
   const formatEventDate = useCallback((dateInput: string | Date) => {
@@ -156,7 +162,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         items.push({
           id: 'edit_event',
           label: t('common.edit'),
-          icon: 'pen-filled',
+          icon: 'calendar-pen-filled',
         });
         items.push({
           id: 'delete_event',
@@ -169,16 +175,24 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           items.push({
             id: 'edit_event',
             label: t('common.edit'),
-            icon: 'pen-filled',
+            icon: 'calendar-pen-filled',
+          });
+          items.push({
+            id: 'cancel_event',
+            label: t('screens.event.cancel'),
+            icon: 'calendar-x-mark-filled',
+            isHighlighted: true,
           });
         }
         if (event?.isParticipating) {
-          items.push({
-            id: 'leave_event',
-            label: t('screens.event.leave'),
-            icon: 'sign-out',
-            isHighlighted: true,
-          });
+          if (event?.createdBy.id !== user?.id || !event?.organizedByGroupId) {
+            items.push({
+              id: 'leave_event',
+              label: t('screens.event.leave'),
+              icon: 'sign-out',
+              isHighlighted: true,
+            });
+          }
         } else {
           items.push({
             id: 'join_event',
@@ -190,7 +204,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
       return items;
     },
-    [t, event?.isParticipating],
+    [t, event?.isParticipating, event?.createdBy.id, user?.id],
   );
 
   const handleDropdownMenuItemSelect = useCallback(
@@ -201,6 +215,9 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           break;
         case 'delete_event':
           deleteEventBottomSheetRef.current?.open('minimal');
+          break;
+        case 'cancel_event':
+          cancelEventBottomSheetRef.current?.open('minimal');
           break;
         case 'join_event':
           if (!joinEventLoading) {
@@ -221,16 +238,34 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     [joinEvent, leaveEvent, eventId, navigation],
   );
 
-  const confirmDeleteEvent = useCallback(async () => {
-    try {
-      if (event && event.id) {
-        await removeEvent(event.id);
+  const confirmDeleteEvent = useCallback(
+    async (id: string) => {
+      try {
+        if (id) {
+          deleteEventBottomSheetRef.current?.close();
+          await removeEvent(id);
+        }
+      } catch (error) {
+        loggingService.error(`Error deleting event: ${id}`, error);
       }
-    } catch (error) {
-      loggingService.error(`Error deleting event: ${eventId}`, error);
-      // Error handling is already done in the service hook
-    }
-  }, [eventId]);
+    },
+    [removeEvent],
+  );
+
+  const confirmCancelEvent = useCallback(
+    async (id: string) => {
+      try {
+        if (id) {
+          // Close bottom sheet and navigate only after successful cancellation
+          cancelEventBottomSheetRef.current?.close();
+          await cancelEvent(id);
+        }
+      } catch (error) {
+        loggingService.error(`Error canceling event: ${id}`, error);
+      }
+    },
+    [cancelEvent],
+  );
 
   // State for route data
   const [routeInfo, setRouteInfo] = useState<string>('');
@@ -946,16 +981,16 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
       <BottomSheet
         ref={deleteEventBottomSheetRef}
-        closeOnBackdropPress={false}
+        closeOnBackdropPress={true}
         initialSnap="closed"
-        showCloseButton={true}
+        showCloseButton={false}
         enableGestureControl={false}
         closeButtonPosition="top-right"
         header={
           <Subtitle align="center">{t('screens.event.delete_event')}</Subtitle>
         }>
-        <View style={styles.bottomSheetContent}>
-          <Body style={styles.bottomSheetMessage}>
+        <View style={styles.bottomSheetContainer}>
+          <Body align="center">
             {t('screens.event.delete_event_confirmation')}
           </Body>
 
@@ -966,19 +1001,55 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               shape="round"
               onPress={() => deleteEventBottomSheetRef.current?.close()}
               style={styles.bottomSheetButton}
-              disabled={removeEventLoading}
             />
             <Button
               title={t('common.delete')}
               variant="primary"
               shape="round"
-              onPress={confirmDeleteEvent}
+              onPress={() => confirmDeleteEvent(eventId)}
               style={styles.bottomSheetButton}
-              loading={removeEventLoading}
             />
           </View>
         </View>
       </BottomSheet>
+
+      <BottomSheet
+        ref={cancelEventBottomSheetRef}
+        closeOnBackdropPress={true}
+        initialSnap="closed"
+        showCloseButton={false}
+        enableGestureControl={false}
+        closeButtonPosition="top-right"
+        header={
+          <Subtitle align="center">{t('screens.event.cancel_event')}</Subtitle>
+        }>
+        <View style={styles.bottomSheetContainer}>
+          <Body align="center">
+            {t('screens.event.cancel_event_confirmation')}
+          </Body>
+
+          <View style={styles.bottomSheetButtons}>
+            <Button
+              title={t('common.no')}
+              variant="outline"
+              shape="round"
+              onPress={() => cancelEventBottomSheetRef.current?.close()}
+              style={styles.bottomSheetButton}
+              disabled={cancelEventLoading}
+            />
+            <Button
+              title={t('common.yes')}
+              variant="primary"
+              shape="round"
+              onPress={() => confirmCancelEvent(eventId)}
+              style={styles.bottomSheetButton}
+              loading={cancelEventLoading}
+            />
+          </View>
+        </View>
+      </BottomSheet>
+
+      <LoadingIndicator visible={cancelEventLoading || removeEventLoading} />
 
       <ImagePreviewModal
         visible={imagePreviewVisible}
@@ -1141,22 +1212,24 @@ const styles = StyleSheet.create({
   paginationInactiveDot: {
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
-  bottomSheetContent: {
-    padding: spacing.md,
+  bottomSheetContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
-  bottomSheetMessage: {
-    marginBottom: spacing.sm,
-    textAlign: 'center',
+  bottomSheetContent: {
+    padding: spacing.sm,
   },
   bottomSheetButtons: {
     flexDirection: 'row',
-    justifyContent: 'center',
     gap: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.lg,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.secondary.main,
+    paddingVertical: spacing.md,
+    marginVertical: spacing.md,
   },
   bottomSheetButton: {
-    flex: 1,
     width: '50%',
   },
 });

@@ -26,23 +26,27 @@ export const useAddMember = (onSuccess?: () => void) => {
       // Update the cache to include the new group membership
       cache.modify({
         fields: {
-          groupMembers(existingMembers = [], {readField}) {
+          groupMembers(existingMembers = [], {readField, canRead}) {
             const newMemberRef = cache.writeFragment({
               data: addMember,
               fragment: GROUP_MEMBERSHIP_FRAGMENT,
             });
 
-            // Check if this member already exists in the cache
+            // Filter out invalid references and check if this member already exists
+            const validMembers = existingMembers.filter((memberRef: Reference) =>
+              canRead(memberRef),
+            );
+
             if (
-              existingMembers.some(
+              validMembers.some(
                 (memberRef: Reference) =>
                   readField('id', memberRef) === readField('id', newMemberRef),
               )
             ) {
-              return existingMembers;
+              return validMembers;
             }
 
-            return [...existingMembers, newMemberRef];
+            return [...validMembers, newMemberRef];
           },
         },
       });
@@ -121,11 +125,14 @@ export const useRemoveMember = (onSuccess?: () => void) => {
       // Update the cache to remove the member
       cache.modify({
         fields: {
-          groupMembers(existingMembers = [], {readField}) {
-            return existingMembers.filter(
-              (memberRef: Reference) =>
-                readField('id', memberRef) !== removeMember.id,
-            );
+          groupMembers(existingMembers = [], {readField, canRead}) {
+            return existingMembers.filter((memberRef: Reference) => {
+              // Only keep valid references that aren't the removed member
+              if (!canRead(memberRef)) {
+                return false;
+              }
+              return readField('id', memberRef) !== removeMember.id;
+            });
           },
         },
       });
@@ -139,11 +146,14 @@ export const useRemoveMember = (onSuccess?: () => void) => {
               id: removeMember.group.id,
             }),
             fields: {
-              memberships(existingMemberships = [], {readField}) {
-                return existingMemberships.filter(
-                  (memberRef: Reference) =>
-                    readField('id', memberRef) !== removeMember.id,
-                );
+              memberships(existingMemberships = [], {readField, canRead}) {
+                return existingMemberships.filter((memberRef: Reference) => {
+                  // Only keep valid references that aren't the removed member
+                  if (!canRead(memberRef)) {
+                    return false;
+                  }
+                  return readField('id', memberRef) !== removeMember.id;
+                });
               },
               membersCount(existingCount = 0) {
                 return Math.max(0, (existingCount as number) - 1);

@@ -189,6 +189,62 @@ export const apolloClient = new ApolloClient({
   link: from([retryLink, errorLink, authLink, httpLink]),
   cache: new InMemoryCache({
     typePolicies: {
+      Query: {
+        fields: {
+          events: {
+            // Custom merge function for events query to handle pagination and updates
+            merge(existing, incoming, {args, canRead, isReference}) {
+              // If no existing data or different query params, just return incoming
+              if (!existing || !args) {
+                return incoming;
+              }
+
+              // If incoming is null/undefined, keep existing
+              if (!incoming) {
+                return existing;
+              }
+
+              // If skip is 0, it's a fresh fetch (refetch or initial load)
+              if (args.skip === 0) {
+                return incoming;
+              }
+
+              // For pagination (skip > 0), merge the arrays
+              const existingArray = Array.isArray(existing)
+                ? existing
+                : Object.values(existing || {});
+              const incomingArray = Array.isArray(incoming)
+                ? incoming
+                : Object.values(incoming || {});
+
+              // Deduplicate by event ID using a Map
+              const eventMap = new Map();
+              
+              existingArray.forEach((event: any) => {
+                // Only include valid references that exist in the cache
+                if (event && isReference(event) && canRead(event)) {
+                  const id = event.__ref.split(':')[1];
+                  if (id) {
+                    eventMap.set(id, event);
+                  }
+                }
+              });
+
+              incomingArray.forEach((event: any) => {
+                // Incoming data should always be valid, but check just in case
+                if (event && isReference(event)) {
+                  const id = event.__ref.split(':')[1];
+                  if (id) {
+                    eventMap.set(id, event);
+                  }
+                }
+              });
+
+              return Array.from(eventMap.values());
+            },
+          },
+        },
+      },
       Post: {
         // Handle nullable ids with a custom key field function
         keyFields: (object: any) => {

@@ -140,6 +140,13 @@ export const REMOVE_EVENT = gql`
   }
 `;
 
+// Cancel event mutation
+export const CANCEL_EVENT = gql`
+  mutation CancelEvent($id: ID!) {
+    cancelEvent(id: $id)
+  }
+`;
+
 // Get events query
 export const GET_EVENTS = gql`
   query GetEvents(

@@ -10,6 +10,7 @@ import {
   REMOVE_EVENT,
   JOIN_EVENT,
   LEAVE_EVENT,
+  CANCEL_EVENT,
 } from './graphql/event.graphql';
 import {loggingService} from './logging.service';
 import {useState, useCallback, useEffect, useRef} from 'react';
@@ -172,6 +173,56 @@ export const useUpdateEvent = (onSuccess?: () => void) => {
 export const useRemoveEvent = (onSuccess?: () => void) => {
   const {t} = useTranslation();
   const [removeEventMutation, {loading, error}] = useMutation(REMOVE_EVENT, {
+    update: (cache, {data}) => {
+      if (!data?.removeEvent) {
+        return;
+      }
+
+      const removedEventId = data.removeEvent;
+
+      try {
+        // First, update all GET_EVENTS queries to remove the deleted event
+        // This must be done BEFORE evicting to avoid reference errors
+        cache.modify({
+          fields: {
+            events(existingEventRefs = [], {readField, canRead}) {
+              return existingEventRefs.filter((eventRef: any) => {
+                // Use canRead to check if the reference is valid and in the store
+                if (!canRead(eventRef)) {
+                  loggingService.debug(
+                    'Filtering invalid event reference from cache',
+                    {eventRef},
+                  );
+                  return false;
+                }
+                
+                // Check if this is the event we want to remove
+                const id = readField('id', eventRef);
+                return id !== removedEventId;
+              });
+            },
+          },
+        });
+
+        // Then, evict the event from cache
+        const cacheId = cache.identify({
+          __typename: 'EventDto',
+          id: removedEventId,
+        });
+
+        if (cacheId) {
+          cache.evict({id: cacheId});
+        }
+
+        // Clean up any dangling references
+        cache.gc();
+      } catch (cacheError) {
+        loggingService.error(
+          'Error updating cache after event removal:',
+          cacheError,
+        );
+      }
+    },
     onCompleted: _data => {
       showToast({
         type: 'success',
@@ -213,6 +264,99 @@ export const useRemoveEvent = (onSuccess?: () => void) => {
   };
 };
 
+// Hook for canceling an event
+export const useCancelEvent = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
+  const [cancelEventMutation, {loading, error}] = useMutation(CANCEL_EVENT, {
+    update: (cache, {data}) => {
+      if (!data?.cancelEvent) {
+        return;
+      }
+
+      const cancelledEventId = data.cancelEvent;
+
+      try {
+        // First, update all GET_EVENTS queries to remove the cancelled event
+        // This must be done BEFORE evicting to avoid reference errors
+        cache.modify({
+          fields: {
+            events(existingEventRefs = [], {readField, canRead}) {
+              return existingEventRefs.filter((eventRef: any) => {
+                // Use canRead to check if the reference is valid and in the store
+                if (!canRead(eventRef)) {
+                  loggingService.debug(
+                    'Filtering invalid event reference from cache',
+                    {eventRef},
+                  );
+                  return false;
+                }
+                
+                // Check if this is the event we want to remove
+                const id = readField('id', eventRef);
+                return id !== cancelledEventId;
+              });
+            },
+          },
+        });
+
+        // Then, evict the event from cache
+        const cacheId = cache.identify({
+          __typename: 'EventDto',
+          id: cancelledEventId,
+        });
+
+        if (cacheId) {
+          cache.evict({id: cacheId});
+        }
+
+        // Clean up any dangling references
+        cache.gc();
+      } catch (cacheError) {
+        loggingService.error(
+          'Error updating cache after event cancellation:',
+          cacheError,
+        );
+      }
+    },
+    onCompleted: () => {
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.event.cancelled_successfully'),
+      });
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error canceling event:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: errorObj.message || t('screens.event.cancelled_failed'),
+      });
+    },
+  });
+
+  const cancelEvent = useCallback(
+    async (eventId: string) => {
+      try {
+        const result = await cancelEventMutation({variables: {id: eventId}});
+        return result.data?.cancelEvent;
+      } catch (errorObj) {
+        loggingService.error('Error canceling event:', errorObj);
+      }
+    },
+    [cancelEventMutation],
+  );
+
+  return {
+    cancelEvent,
+    loading,
+    error,
+  };
+};
+
 // Hook for getting a specific event
 export const useGetEvent = (id: string) => {
   const {data, loading, error, refetch} = useQuery(GET_EVENT, {
@@ -232,7 +376,12 @@ export const useGetEvent = (id: string) => {
 };
 
 // Hook for getting all events with race condition protection
-export const useGetEvents = (limit = 20, skip = 0, status?: EventStatus, groupId?: string) => {
+export const useGetEvents = (
+  limit = 20,
+  skip = 0,
+  status?: EventStatus,
+  groupId?: string,
+) => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const currentStatusRef = useRef<EventStatus | undefined>(status);
@@ -544,8 +693,13 @@ export const useJoinEvent = (onSuccess?: (event: IEvent) => void) => {
   });
 
   const joinEvent = useCallback(
-    (eventId: string) => {
-      joinEventMutation({variables: {id: eventId}});
+    async (eventId: string) => {
+      try {
+        const result = await joinEventMutation({variables: {id: eventId}});
+        return result.data?.joinEvent;
+      } catch (errorObj) {
+        loggingService.error('Error joining event:', errorObj);
+      }
     },
     [joinEventMutation],
   );
@@ -582,8 +736,13 @@ export const useLeaveEvent = (onSuccess?: (event: IEvent) => void) => {
   });
 
   const leaveEvent = useCallback(
-    (eventId: string) => {
-      leaveEventMutation({variables: {id: eventId}});
+    async (eventId: string) => {
+      try {
+        const result = await leaveEventMutation({variables: {id: eventId}});
+        return result.data?.leaveEvent;
+      } catch (errorObj) {
+        loggingService.error('Error leaving event:', errorObj);
+      }
     },
     [leaveEventMutation],
   );

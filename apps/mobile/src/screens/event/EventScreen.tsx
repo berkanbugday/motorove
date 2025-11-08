@@ -30,7 +30,7 @@ export const EventScreen = () => {
     useState(false);
   const [refreshingPastEvents, setRefreshingPastEvents] = useState(false);
   const [refreshingDraftEvents, setRefreshingDraftEvents] = useState(false);
-  const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
+  const navigation = useNavigation<MainScreenNavigationProp<'Events'>>();
   const {t} = useTranslation();
   const insets = useSafeAreaInsets();
   const {language} = useLanguage();
@@ -54,10 +54,8 @@ export const EventScreen = () => {
     useGetEvents(20, 0, getCurrentEventStatus());
 
   const handleRefresh = useCallback(async () => {
-    const currentTab = activeTab;
-
     // Set refreshing state for current tab only
-    switch (currentTab) {
+    switch (activeTab) {
       case 'upcoming':
         setRefreshingUpcomingEvents(true);
         break;
@@ -73,7 +71,7 @@ export const EventScreen = () => {
       await refetch();
     } finally {
       // Reset refreshing state for current tab
-      switch (currentTab) {
+      switch (activeTab) {
         case 'upcoming':
           setRefreshingUpcomingEvents(false);
           break;

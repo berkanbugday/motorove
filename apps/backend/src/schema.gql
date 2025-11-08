@@ -541,6 +541,7 @@ enum EventParticipantStatus {
 
 """The status of an event"""
 enum EventStatus {
+  CANCELLED
   DRAFT
   PAST
   UPCOMING
@@ -800,6 +801,7 @@ type Mutation {
   acceptEventInvitation(id: ID!): Boolean!
   accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddMemberInput!): Boolean!
+  cancelEvent(id: ID!): String!
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
   createBusinessComment(input: CreateBusinessCommentInput!): BusinessCommentDto!
@@ -824,7 +826,7 @@ type Mutation {
   removeBusinessComment(id: ID!): Boolean!
   removeDeviceToken: Boolean!
   removeEmergency(id: String!): Boolean!
-  removeEvent(id: ID!): Boolean!
+  removeEvent(id: ID!): String!
   removeMember(input: RemoveMemberInput!): Boolean!
   removePost(id: ID!): PostDto!
   removePostComment(id: ID!): PostCommentDto!

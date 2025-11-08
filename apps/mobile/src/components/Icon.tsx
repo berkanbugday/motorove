@@ -74,6 +74,9 @@ import Clock from '@assets/icons/clock.svg';
 import ClockFilled from '@assets/icons/clock-filled.svg';
 import Calendar from '@assets/icons/calendar.svg';
 import CalendarFilled from '@assets/icons/calendar-filled.svg';
+import CalendarClockFilled from '@assets/icons/calendar-clock-filled.svg';
+import CalendarPenFilled from '@assets/icons/calendar-pen-filled.svg';
+import CalendarXMarkFilled from '@assets/icons/calendar-xmark-filled.svg';
 import Phone from '@assets/icons/phone.svg';
 import Lock from '@assets/icons/lock.svg';
 import LockFilled from '@assets/icons/lock-filled.svg';
@@ -99,7 +102,6 @@ import FileFilled from '@assets/icons/file-filled.svg';
 import SignOut from '@assets/icons/sign-out.svg';
 import QuestionFilled from '@assets/icons/question-filled.svg';
 import ShareFilled from '@assets/icons/share-filled.svg';
-import CalendarClockFilled from '@assets/icons/calendar-clock-filled.svg';
 import MapPinSlashFilled from '@assets/icons/map-pin-slash-filled.svg';
 import LocationArrowFilled from '@assets/icons/location-arrow-filled.svg';
 import MountainsFilled from '@assets/icons/mountains-filled.svg';
@@ -216,6 +218,9 @@ export type IconName =
   | 'clock-filled'
   | 'calendar'
   | 'calendar-filled'
+  | 'calendar-clock-filled'
+  | 'calendar-pen-filled'
+  | 'calendar-x-mark-filled'
   | 'phone'
   | 'lock'
   | 'lock-filled'
@@ -241,7 +246,6 @@ export type IconName =
   | 'sign-out'
   | 'question-filled'
   | 'share-filled'
-  | 'calendar-clock-filled'
   | 'map-pin-slash-filled'
   | 'location-arrow-filled'
   | 'mountains-filled'
@@ -447,6 +451,12 @@ export function Icon({
       return <Calendar {...commonProps} />;
     case 'calendar-filled':
       return <CalendarFilled {...commonProps} />;
+    case 'calendar-clock-filled':
+      return <CalendarClockFilled {...commonProps} />;
+    case 'calendar-pen-filled':
+      return <CalendarPenFilled {...commonProps} />;
+    case 'calendar-x-mark-filled':
+      return <CalendarXMarkFilled {...commonProps} />;
     case 'phone':
       return <Phone {...commonProps} />;
     case 'lock':
@@ -497,8 +507,7 @@ export function Icon({
       return <QuestionFilled {...commonProps} />;
     case 'share-filled':
       return <ShareFilled {...commonProps} />;
-    case 'calendar-clock-filled':
-      return <CalendarClockFilled {...commonProps} />;
+
     case 'map-pin-slash-filled':
       return <MapPinSlashFilled {...commonProps} />;
     case 'location-arrow-filled':
