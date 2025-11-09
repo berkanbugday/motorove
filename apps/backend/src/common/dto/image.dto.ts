@@ -1,8 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { IsBoolean, IsString } from 'class-validator';
+import { IImage } from '@motorove/shared';
 
 @ObjectType()
-export class ImageDto {
+export class ImageDto implements IImage {
   @Field(() => String)
   @IsString()
   url: string;
