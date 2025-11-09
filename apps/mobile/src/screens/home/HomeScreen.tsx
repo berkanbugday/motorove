@@ -51,6 +51,7 @@ import {
   useRemovePost,
 } from '@services/post.service';
 import {useTranslation} from '@hooks/useTranslation';
+import {FlashList} from '@shopify/flash-list';
 
 // EventItem interface and transformation logic moved to EventBanner component
 
@@ -720,7 +721,7 @@ export const HomeScreen = ({navigation}: Props) => {
               </Subtitle>
 
               <View style={styles.postsContainer}>
-                <FlatList
+                <FlashList
                   style={styles.postsList}
                   data={posts}
                   keyExtractor={item => item.id}
