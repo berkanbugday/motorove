@@ -10,38 +10,39 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-neutral-black text-white pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {/* Logo and Description */}
-          <div className="col-span-1">
-            <div className="flex items-center mb-4">
-              <Image
-                src="/assets/images/logo.png"
-                alt="Motorove Logo"
-                width={50}
-                height={50}
-                className="mr-2"
-              />
-              <span className="text-xl font-heading font-bold">Motorove</span>
-            </div>
-            <p className="text-neutral-lightGrey mb-4">
-              {t("footer.description")}
-            </p>
-            <div className="flex space-x-4">
-              <SocialIcon
-                icon="facebook"
-                href="https://facebook.com/motorove"
-              />
-              <SocialIcon
-                icon="instagram"
-                href="https://instagram.com/motorove"
-              />
-              <SocialIcon icon="twitter" href="https://twitter.com/motorove" />
-              <SocialIcon icon="youtube" href="https://youtube.com/motorove" />
-            </div>
+        {/* Logo and Description - Full width on mobile */}
+        <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <Image
+              src="/assets/images/logo.png"
+              alt="Motorove Logo"
+              width={50}
+              height={50}
+              className="mr-2"
+            />
+            <span className="text-xl font-heading font-bold">Motorove</span>
           </div>
+          <p className="text-neutral-lightGrey mb-4">
+            {t("footer.description")}
+          </p>
+          <div className="flex space-x-4">
+            <SocialIcon
+              icon="facebook"
+              href="https://facebook.com/motorove"
+            />
+            <SocialIcon
+              icon="instagram"
+              href="https://instagram.com/motorove"
+            />
+            <SocialIcon icon="twitter" href="https://twitter.com/motorove" />
+            <SocialIcon icon="youtube" href="https://youtube.com/motorove" />
+          </div>
+        </div>
 
+        {/* Quick Links and Resources - Side by side on all screens */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
           {/* Quick Links */}
-          <div className="col-span-1">
+          <div>
             <h3 className="font-bold text-lg mb-4">{t("footer.quickLinks")}</h3>
             <ul className="space-y-2">
               <FooterLink href="#features">
@@ -57,7 +58,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Resources */}
-          <div className="col-span-1">
+          <div>
             <h3 className="font-bold text-lg mb-4">{t("footer.resources")}</h3>
             <ul className="space-y-2">
               <FooterLink href="/help">{t("footer.links.help")}</FooterLink>
@@ -69,8 +70,11 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
+          {/* Empty third column for desktop spacing */}
+          <div className="hidden md:block"></div>
+
           {/* Download - Hidden until app is ready */}
-          {/* <div className="col-span-1">
+          {/* <div>
             <h3 className="font-bold text-lg mb-4">
               {t("footer.downloadApp")}
             </h3>
@@ -158,7 +162,7 @@ const SocialIcon: React.FC<SocialIconProps> = ({ icon, href }) => {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="bg-neutral-darkGrey hover:bg-primary-main w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+      className="glass-card glass-hover w-10 h-10 rounded-full flex items-center justify-center"
     >
       <span className="sr-only">{icon}</span>
       {/* Simple icon placeholder */}

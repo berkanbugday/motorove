@@ -5,12 +5,18 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: 'class', // or 'media' for OS preference-based dark mode
+  darkMode: 'class', // Uses 'dark' class for dark mode, 'light' class for light mode
   theme: {
     extend: {
       colors: {
+        // Adaptive color system for light/dark themes
+        background: {
+          primary: 'rgb(var(--color-background-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--color-background-secondary) / <alpha-value>)',
+          tertiary: 'rgb(var(--color-background-tertiary) / <alpha-value>)',
+        },
         primary: {
-          main: '#FF3B30',
+          main: '#FF3B30', // Motorove brand red
           light: '#FF6B60',
           dark: '#D32F2F',
         },
@@ -21,12 +27,12 @@ module.exports = {
         },
         neutral: {
           black: '#121212',
-          darkGrey: '#1C1C1E',
-          grey: '#666666',
+          darkGrey: 'rgb(var(--color-neutral-dark-grey) / <alpha-value>)',
+          grey: 'rgb(var(--color-neutral-grey) / <alpha-value>)',
           lightGrey: '#C4C4C4',
           veryLightGrey: '#E0E0E0',
-          white: '#FFFFFF',
-          background: '#121212', // Dark background
+          white: 'rgb(var(--color-neutral-white) / <alpha-value>)',
+          offWhite: '#FAFAFA',
         },
         dark: {
           100: '#333333',
@@ -37,10 +43,10 @@ module.exports = {
           600: '#0D0D0D',
           700: '#080808',
           800: '#050505',
-          900: '#020202',
+          900: '#101010', // Rich deep black
         },
         accent: {
-          blue: '#3366FF',
+          blue: '#007BFF',
           purple: '#9966FF',
           teal: '#33CCCC',
         },
@@ -53,8 +59,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        heading: ['Montserrat', 'sans-serif'],
+        sans: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
+        rounded: ['Poppins', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         xs: '0.75rem',
@@ -87,6 +94,8 @@ module.exports = {
         'float-slow': 'float 6s ease-in-out infinite',
         'spin-slow': 'spin 8s linear infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
+        'shimmer': 'shimmer 3s ease-in-out infinite',
+        'shimmer-slow': 'shimmer 8s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -114,9 +123,20 @@ module.exports = {
           '50%': { transform: 'translateY(-10px)' },
         },
         glow: {
-          '0%': { boxShadow: '0 0 5px rgba(255, 59, 48, 0.5)' },
-          '100%': { boxShadow: '0 0 20px rgba(255, 59, 48, 0.8)' },
+          '0%': { boxShadow: '0 0 5px rgba(255, 69, 0, 0.5)' },
+          '100%': { boxShadow: '0 0 20px rgba(255, 69, 0, 0.8)' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% center' },
+          '100%': { backgroundPosition: '200% center' },
+        },
+      },
+      borderRadius: {
+        sharp: '4px', // Linear's sharp, minimal radius
+        xl: '12px',
+        '2xl': '16px',
+        '3xl': '24px',
+        '4xl': '32px',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

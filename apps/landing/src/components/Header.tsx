@@ -29,10 +29,8 @@ const Header: React.FC = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`fixed w-full z-50 backdrop-blur-lg transition-all duration-300 ${
-        scrolled
-          ? "bg-dark-500/80 shadow-lg shadow-dark-900/30"
-          : "bg-transparent"
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled ? "glass-card shadow-lg shadow-black/30" : "glass"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -160,9 +158,10 @@ const Header: React.FC = () => {
               >
                 {t("header.events")}
               </MobileNavLink>
+
               {/* Language Switcher - Mobile */}
               <div className="pt-2 pb-2">
-                <div className="flex justify-center">
+                <div className="flex justify-center items-center">
                   <LanguageSwitcher />
                 </div>
               </div>
@@ -197,36 +196,54 @@ interface NavLinkProps {
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ href, children }) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const target = document.querySelector(href);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       className="relative inline-block"
     >
-      <Link
+      <a
         href={href}
-        className="text-gray-300 hover:text-white font-medium transition-colors relative group"
+        onClick={handleClick}
+        className="text-gray-300 hover:text-white font-medium transition-colors relative group cursor-pointer"
       >
         <span>{children}</span>
         <motion.span
           className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-main group-hover:w-full transition-all duration-300"
           whileHover={{ width: "100%" }}
         />
-      </Link>
+      </a>
     </motion.div>
   );
 };
 
 const MobileNavLink: React.FC<NavLinkProps> = ({ href, children, onClick }) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const target = document.querySelector(href);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (onClick) onClick();
+  };
+
   return (
     <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.97 }}>
-      <Link
+      <a
         href={href}
-        className="block px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-dark-300/50 rounded-md transition-all duration-200"
-        onClick={onClick}
+        onClick={handleClick}
+        className="block px-3 py-2 text-base font-medium text-gray-300 hover:text-white hover:bg-dark-300/50 rounded-md transition-all duration-200 cursor-pointer"
       >
         {children}
-      </Link>
+      </a>
     </motion.div>
   );
 };

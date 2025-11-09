@@ -12,12 +12,13 @@
   "dependencies": {
     "@motorove/shared": "workspace:*",
     "accept-language": "3.0.20",
-    "framer-motion": "10.16.4",
+    "framer-motion": "11.15.0",
     "i18next": "25.3.2",
     "i18next-browser-languagedetector": "8.2.0",
     "i18next-resources-to-backend": "1.2.1",
     "next": "14.0.4",
     "next-i18next": "15.4.2",
+    "next-themes": "0.4.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-i18next": "15.6.0",
@@ -25,7 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "0.5.10",
-    "@types/node": "20.5.7",
+    "@types/node": "22.10.7",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",
     "autoprefixer": "10.4.15",
@@ -33,6 +34,7 @@
     "eslint-config-next": "14.0.4",
     "postcss": "8.4.29",
     "tailwindcss": "3.3.3",
-    "typescript": "5.2.2"
-  }
+    "typescript": "5.7.3"
+  },
+  "packageManager": "pnpm@9.6.0"
 }

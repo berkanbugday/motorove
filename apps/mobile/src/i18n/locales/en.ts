@@ -191,7 +191,7 @@ export default {
       suggested_users: 'Suggested Users',
       recent_activity: 'Recent Activity',
       view_all: 'View All',
-      hello: 'Hello,',
+      hello: 'Hi,',
       recommended_routes: 'Recommended Routes',
       plan_route_with_ai: 'Plan Route with AI',
       coming_soon: 'Coming Soon',
