@@ -47,7 +47,7 @@ const PhoneMockup: React.FC<PhoneMockupProps> = ({
         {/* Side buttons */}
         <div className="absolute -left-1 top-20 sm:top-24 w-0.5 sm:w-1 h-6 sm:h-7 bg-neutral-darkGrey rounded-l-sm" />
         <div className="absolute -left-1 top-32 sm:top-40 w-0.5 sm:w-1 h-8 sm:h-10 bg-neutral-darkGrey rounded-l-sm" />
-        <div className="absolute -left-1 top-48 sm:top-60 w-0.5 sm:w-1 h-8 sm:h-10 bg-neutral-darkGrey rounded-l-sm" />
+        <div className="absolute -left-1 top-44 sm:top-56 w-0.5 sm:w-1 h-8 sm:h-10 bg-neutral-darkGrey rounded-l-sm" />
         <div className="absolute -right-1 top-28 sm:top-32 w-0.5 sm:w-1 h-8 sm:h-10 bg-neutral-darkGrey rounded-r-sm" />
       </div>
     </div>

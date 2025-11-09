@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import PhoneMockup from "./PhoneMockup";
 
-const LinearHero: React.FC = () => {
+const Hero: React.FC = () => {
   return (
     <section className="relative min-h-screen bg-neutral-white dark:bg-background-primary overflow-hidden flex items-center">
       {/* Impressive Background */}
@@ -28,13 +28,6 @@ const LinearHero: React.FC = () => {
                   strokeWidth="2"
                   strokeDasharray="30,15"
                   opacity="0.5"
-                />
-                <path
-                  d="M60 0 L60 120"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeDasharray="30,15"
-                  opacity="0.3"
                 />
                 {/* Motorcycle icons as dots */}
                 <circle
@@ -169,4 +162,4 @@ const LinearHero: React.FC = () => {
   );
 };
 
-export default LinearHero;
+export default Hero;

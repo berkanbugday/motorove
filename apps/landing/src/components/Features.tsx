@@ -242,7 +242,7 @@ const FeatureBlock: React.FC<FeatureBlockProps> = ({
   );
 };
 
-const FeatureBlocks: React.FC = () => {
+const Features: React.FC = () => {
   const features = [
     {
       heading: "Discover roads, not just routes.",
@@ -338,4 +338,4 @@ const FeatureBlocks: React.FC = () => {
   );
 };
 
-export default FeatureBlocks;
+export default Features;

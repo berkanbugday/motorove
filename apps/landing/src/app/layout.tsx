@@ -1,6 +1,5 @@
 import "../styles/globals.css";
 import type { Metadata, Viewport } from "next";
-import { I18nProvider } from "./i18n";
 import { Language } from "@motorove/shared";
 import { ThemeProvider } from "@components/ThemeProvider";
 
@@ -70,13 +69,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: { locale?: string };
 }) {
   return (
-    <html lang={params.locale || Language.TR.toLowerCase()} suppressHydrationWarning>
+    <html lang={Language.TR.toLowerCase()} suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
@@ -85,7 +82,7 @@ export default function RootLayout({
           enableColorScheme={false}
           disableTransitionOnChange={false}
         >
-          <I18nProvider locale={params.locale}>{children}</I18nProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>

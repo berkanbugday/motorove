@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const LinearMagic: React.FC = () => {
+const Map: React.FC = () => {
   return (
     <section className="bg-neutral-offWhite dark:bg-background-secondary py-16 sm:py-24 lg:py-32 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -93,4 +93,4 @@ const LinearMagic: React.FC = () => {
   );
 };
 
-export default LinearMagic;
+export default Map;

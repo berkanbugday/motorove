@@ -1,13 +1,12 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@components/Header";
-import LinearHero from "@components/LinearHero";
+import Hero from "@components/Hero";
 import SocialProof from "@components/SocialProof";
-import FeatureBlocks from "@components/FeatureBlocks";
-import LinearMagic from "@components/LinearMagic";
+import Features from "@components/Features";
+import Map from "@components/Map";
 import FinalCTA from "@components/FinalCTA";
 import Footer from "@components/Footer";
-import { I18nProvider } from "../i18n";
 import { Language } from "@motorove/shared";
 
 // Define the params type
@@ -59,19 +58,15 @@ export function generateStaticParams() {
 }
 
 export default function Home({ params }: HomePageProps) {
-  const { locale } = params;
-
   return (
-    <I18nProvider locale={locale}>
-      <main className="bg-neutral-white dark:bg-background-primary">
-        <Header />
-        <LinearHero />
-        <SocialProof />
-        <FeatureBlocks />
-        <LinearMagic />
-        <FinalCTA />
-        <Footer />
-      </main>
-    </I18nProvider>
+    <main className="bg-neutral-white dark:bg-background-primary">
+      <Header />
+      <Hero />
+      <SocialProof />
+      <Features />
+      <Map />
+      <FinalCTA />
+      <Footer />
+    </main>
   );
 }

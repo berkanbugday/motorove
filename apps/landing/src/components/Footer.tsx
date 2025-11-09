@@ -10,37 +10,37 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-neutral-black text-white pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Logo and Description - Full width on mobile */}
-        <div className="mb-8">
-          <div className="flex items-center mb-4">
-            <Image
-              src="/assets/images/logo.png"
-              alt="Motorove Logo"
-              width={50}
-              height={50}
-              className="mr-2"
-            />
-            <span className="text-xl font-heading font-bold">Motorove</span>
-          </div>
-          <p className="text-neutral-lightGrey mb-4">
-            {t("footer.description")}
-          </p>
-          <div className="flex space-x-4">
-            <SocialIcon
-              icon="facebook"
-              href="https://facebook.com/motorove"
-            />
-            <SocialIcon
-              icon="instagram"
-              href="https://instagram.com/motorove"
-            />
-            <SocialIcon icon="twitter" href="https://twitter.com/motorove" />
-            <SocialIcon icon="youtube" href="https://youtube.com/motorove" />
-          </div>
-        </div>
-
-        {/* Quick Links and Resources - Side by side on all screens */}
+        {/* Three Column Layout - Motorove full width on mobile, Quick Links and Resources in 2 columns on mobile */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
+          {/* Motorove Branding - Full width on mobile */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center mb-4">
+              <Image
+                src="/assets/images/logo.png"
+                alt="Motorove Logo"
+                width={50}
+                height={50}
+                className="mr-2"
+              />
+              <span className="text-xl font-heading font-bold">Motorove</span>
+            </div>
+            <p className="text-neutral-lightGrey mb-4">
+              {t("footer.description")}
+            </p>
+            <div className="flex space-x-4">
+              <SocialIcon
+                icon="facebook"
+                href="https://facebook.com/motorove"
+              />
+              <SocialIcon
+                icon="instagram"
+                href="https://instagram.com/motorove"
+              />
+              <SocialIcon icon="twitter" href="https://twitter.com/motorove" />
+              <SocialIcon icon="youtube" href="https://youtube.com/motorove" />
+            </div>
+          </div>
+
           {/* Quick Links */}
           <div>
             <h3 className="font-bold text-lg mb-4">{t("footer.quickLinks")}</h3>
@@ -69,36 +69,6 @@ const Footer: React.FC = () => {
               </FooterLink>
             </ul>
           </div>
-
-          {/* Empty third column for desktop spacing */}
-          <div className="hidden md:block"></div>
-
-          {/* Download - Hidden until app is ready */}
-          {/* <div>
-            <h3 className="font-bold text-lg mb-4">
-              {t("footer.downloadApp")}
-            </h3>
-            <div className="flex flex-col space-y-3">
-              <Link href="https://apps.apple.com/app/motorove">
-                <Image
-                  src="/assets/images/app-store-badge.png"
-                  alt={t("download.appStore")}
-                  width={150}
-                  height={50}
-                  className="h-auto"
-                />
-              </Link>
-              <Link href="https://play.google.com/store/apps/details?id=com.motorove">
-                <Image
-                  src="/assets/images/google-play-badge.png"
-                  alt={t("download.googlePlay")}
-                  width={150}
-                  height={50}
-                  className="h-auto"
-                />
-              </Link>
-            </div>
-          </div> */}
         </div>
 
         <div className="border-t border-neutral-darkGrey mt-12 pt-8">

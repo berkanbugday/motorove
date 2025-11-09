@@ -200,7 +200,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, children }) => {
     e.preventDefault();
     const target = document.querySelector(href);
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -230,7 +230,7 @@ const MobileNavLink: React.FC<NavLinkProps> = ({ href, children, onClick }) => {
     e.preventDefault();
     const target = document.querySelector(href);
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
     if (onClick) onClick();
   };

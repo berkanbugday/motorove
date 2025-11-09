@@ -1,4 +1,5 @@
 import { Language } from "@motorove/shared";
+import { I18nProvider } from "../i18n";
 
 export function generateStaticParams() {
   return Object.values(Language).map(lang => ({
@@ -13,5 +14,5 @@ export default function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  return <>{children}</>;
+  return <I18nProvider locale={params.locale}>{children}</I18nProvider>;
 }
