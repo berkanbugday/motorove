@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import PhoneMockup from "./PhoneMockup";
+import { useTranslation } from "../app/i18n";
 
 interface FeatureThumbnail {
   image: string;
@@ -243,83 +244,85 @@ const FeatureBlock: React.FC<FeatureBlockProps> = ({
 };
 
 const Features: React.FC = () => {
+  const { t } = useTranslation();
+  
   const features = [
     {
-      heading: "Discover roads, not just routes.",
-      body: 'Ditch the car maps. Our "Twisty Roads" algorithm finds the curves and scenic byways you crave. Plan, save, and share your perfect ride in seconds.',
+      heading: t("features.discoverRoads.heading"),
+      body: t("features.discoverRoads.body"),
       visual: "/assets/images/app-screen-1.png",
-      visualAlt: "Route planning interface showing twisty roads",
+      visualAlt: t("features.discoverRoads.visualAlt"),
       reverse: false,
       thumbnails: [
-        { image: "/assets/images/app-screen-1.png", label: "Twisty Roads", alt: "Twisty roads algorithm interface" },
-        { image: "/assets/images/app-screen-2.png", label: "Waypoints", alt: "Waypoint planning feature" },
-        { image: "/assets/images/app-screen-1.png", label: "Offline Maps", alt: "Offline maps feature" },
-        { image: "/assets/images/app-screen-2.png", label: "Share Routes", alt: "Route sharing feature" },
+        { image: "/assets/images/app-screen-1.png", label: t("features.discoverRoads.thumbnails.twistyRoads.label"), alt: t("features.discoverRoads.thumbnails.twistyRoads.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.discoverRoads.thumbnails.waypoints.label"), alt: t("features.discoverRoads.thumbnails.waypoints.alt") },
+        { image: "/assets/images/app-screen-1.png", label: t("features.discoverRoads.thumbnails.offlineMaps.label"), alt: t("features.discoverRoads.thumbnails.offlineMaps.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.discoverRoads.thumbnails.shareRoutes.label"), alt: t("features.discoverRoads.thumbnails.shareRoutes.alt") },
       ],
     },
     {
-      heading: "Ride together. Even when apart.",
-      body: "Create your ride group. See your crew's location in real-time. Share routes, track your stats (like lean angle and elevation), and build a logbook of your best rides.",
+      heading: t("features.rideTogether.heading"),
+      body: t("features.rideTogether.body"),
       visual: "/assets/images/app-screen-2.png",
-      visualAlt: "Group ride tracking with real-time locations",
+      visualAlt: t("features.rideTogether.visualAlt"),
       reverse: true,
       thumbnails: [
-        { image: "/assets/images/app-screen-1.png", label: "Live Tracking", alt: "Real-time location tracking" },
-        { image: "/assets/images/app-screen-2.png", label: "Group Rides", alt: "Group ride management" },
-        { image: "/assets/images/app-screen-1.png", label: "Statistics", alt: "Ride statistics dashboard" },
-        { image: "/assets/images/app-screen-2.png", label: "Logbook", alt: "Ride logbook feature" },
+        { image: "/assets/images/app-screen-1.png", label: t("features.rideTogether.thumbnails.liveTracking.label"), alt: t("features.rideTogether.thumbnails.liveTracking.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.rideTogether.thumbnails.groupRides.label"), alt: t("features.rideTogether.thumbnails.groupRides.alt") },
+        { image: "/assets/images/app-screen-1.png", label: t("features.rideTogether.thumbnails.statistics.label"), alt: t("features.rideTogether.thumbnails.statistics.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.rideTogether.thumbnails.logbook.label"), alt: t("features.rideTogether.thumbnails.logbook.alt") },
       ],
     },
     {
-      heading: "Focus on the road.",
-      body: 'Built for the ride. Our high-contrast, minimalist "Ride Mode" gives you only what you need. Glove-friendly buttons and zero distractions mean your eyes stay where they matter.',
+      heading: t("features.focusOnRoad.heading"),
+      body: t("features.focusOnRoad.body"),
       visual: "/assets/images/app-screen-1.png",
-      visualAlt: "Ride Mode interface comparison",
+      visualAlt: t("features.focusOnRoad.visualAlt"),
       reverse: false,
       thumbnails: [
-        { image: "/assets/images/app-screen-1.png", label: "Ride Mode", alt: "High-contrast ride mode UI" },
-        { image: "/assets/images/app-screen-2.png", label: "Glove-Friendly", alt: "Glove-friendly interface" },
-        { image: "/assets/images/app-screen-1.png", label: "Voice Nav", alt: "Voice navigation feature" },
-        { image: "/assets/images/app-screen-2.png", label: "Battery Saver", alt: "Battery optimization" },
+        { image: "/assets/images/app-screen-1.png", label: t("features.focusOnRoad.thumbnails.rideMode.label"), alt: t("features.focusOnRoad.thumbnails.rideMode.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.focusOnRoad.thumbnails.gloveFriendly.label"), alt: t("features.focusOnRoad.thumbnails.gloveFriendly.alt") },
+        { image: "/assets/images/app-screen-1.png", label: t("features.focusOnRoad.thumbnails.voiceNav.label"), alt: t("features.focusOnRoad.thumbnails.voiceNav.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.focusOnRoad.thumbnails.batterySaver.label"), alt: t("features.focusOnRoad.thumbnails.batterySaver.alt") },
       ],
     },
     {
-      heading: "Find what you need, when you need it.",
-      body: "Running low on fuel? Need a repair? Our smart business finder shows nearby motorcycle services, gas stations, and shops with filters for your exact needs.",
+      heading: t("features.findWhatYouNeed.heading"),
+      body: t("features.findWhatYouNeed.body"),
       visual: "/assets/images/app-screen-2.png",
-      visualAlt: "Nearby businesses and services finder",
+      visualAlt: t("features.findWhatYouNeed.visualAlt"),
       reverse: true,
       thumbnails: [
-        { image: "/assets/images/app-screen-1.png", label: "Gas Stations", alt: "Nearby gas stations finder" },
-        { image: "/assets/images/app-screen-2.png", label: "Repair Shops", alt: "Motorcycle repair shops" },
-        { image: "/assets/images/app-screen-1.png", label: "Moto Shops", alt: "Motorcycle shops and dealers" },
-        { image: "/assets/images/app-screen-2.png", label: "Smart Search", alt: "Smart filter system" },
+        { image: "/assets/images/app-screen-1.png", label: t("features.findWhatYouNeed.thumbnails.gasStations.label"), alt: t("features.findWhatYouNeed.thumbnails.gasStations.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.findWhatYouNeed.thumbnails.repairShops.label"), alt: t("features.findWhatYouNeed.thumbnails.repairShops.alt") },
+        { image: "/assets/images/app-screen-1.png", label: t("features.findWhatYouNeed.thumbnails.motoShops.label"), alt: t("features.findWhatYouNeed.thumbnails.motoShops.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.findWhatYouNeed.thumbnails.smartSearch.label"), alt: t("features.findWhatYouNeed.thumbnails.smartSearch.alt") },
       ],
     },
     {
-      heading: "Stay safe, stay connected.",
-      body: "Share warnings about hazards, accidents, or road conditions with the community. One-tap emergency alerts notify your group and contacts when you need help most.",
+      heading: t("features.staySafe.heading"),
+      body: t("features.staySafe.body"),
       visual: "/assets/images/app-screen-1.png",
-      visualAlt: "Safety features and emergency alerts",
+      visualAlt: t("features.staySafe.visualAlt"),
       reverse: false,
       thumbnails: [
-        { image: "/assets/images/app-screen-1.png", label: "Hazard Alerts", alt: "Hazard warning system" },
-        { image: "/assets/images/app-screen-2.png", label: "Emergency SOS", alt: "Emergency SOS feature" },
-        { image: "/assets/images/app-screen-1.png", label: "Contact Alerts", alt: "Emergency contact alerts" },
-        { image: "/assets/images/app-screen-2.png", label: "Map Markers", alt: "Hazard map markers" },
+        { image: "/assets/images/app-screen-1.png", label: t("features.staySafe.thumbnails.hazardAlerts.label"), alt: t("features.staySafe.thumbnails.hazardAlerts.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.staySafe.thumbnails.emergencySOS.label"), alt: t("features.staySafe.thumbnails.emergencySOS.alt") },
+        { image: "/assets/images/app-screen-1.png", label: t("features.staySafe.thumbnails.contactAlerts.label"), alt: t("features.staySafe.thumbnails.contactAlerts.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.staySafe.thumbnails.mapMarkers.label"), alt: t("features.staySafe.thumbnails.mapMarkers.alt") },
       ],
     },
     {
-      heading: "Your rides, your memories.",
-      body: "Capture and share your best moments. Browse community posts, discover new routes, and connect with riders who share your passion for the open road.",
+      heading: t("features.yourMemories.heading"),
+      body: t("features.yourMemories.body"),
       visual: "/assets/images/app-screen-2.png",
-      visualAlt: "Social feed and community posts",
+      visualAlt: t("features.yourMemories.visualAlt"),
       reverse: true,
       thumbnails: [
-        { image: "/assets/images/app-screen-1.png", label: "Photo Sharing", alt: "Photo sharing feature" },
-        { image: "/assets/images/app-screen-2.png", label: "Social Feed", alt: "Like and comment on posts" },
-        { image: "/assets/images/app-screen-1.png", label: "Discover", alt: "Discover new routes" },
-        { image: "/assets/images/app-screen-2.png", label: "Follow Riders", alt: "Follow other riders" },
+        { image: "/assets/images/app-screen-1.png", label: t("features.yourMemories.thumbnails.photoSharing.label"), alt: t("features.yourMemories.thumbnails.photoSharing.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.yourMemories.thumbnails.socialFeed.label"), alt: t("features.yourMemories.thumbnails.socialFeed.alt") },
+        { image: "/assets/images/app-screen-1.png", label: t("features.yourMemories.thumbnails.discover.label"), alt: t("features.yourMemories.thumbnails.discover.alt") },
+        { image: "/assets/images/app-screen-2.png", label: t("features.yourMemories.thumbnails.followRiders.label"), alt: t("features.yourMemories.thumbnails.followRiders.alt") },
       ],
     },
   ];

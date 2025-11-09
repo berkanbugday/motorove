@@ -5,6 +5,17 @@
     "routes": "Routes",
     "events": "Events"
   },
+  "hero": {
+    "headline": {
+      "line1": "Your ride.",
+      "line2": "Perfected."
+    },
+    "subheadline": "Stop just navigating. Start riding. The all-in-one app for epic routes, ride tracking, and community.",
+    "cta": {
+      "button": "Join Beta",
+      "badge": "BETA"
+    }
+  },
   "footer": {
     "description": "The ultimate motorcycle app for connecting riders, discovering routes, and joining events.",
     "quickLinks": "Quick Links",
@@ -30,6 +41,193 @@
   "language": {
     "en": "English",
     "tr": "Turkish"
+  },
+  "finalCTA": {
+    "heading": "Your next great ride is waiting.",
+    "subheading": "Free to download. Built by riders, for riders.",
+    "button": "Join Beta",
+    "badge": "BETA",
+    "features": {
+      "free": {
+        "title": "Free",
+        "description": "No subscriptions, no hidden costs"
+      },
+      "platforms": {
+        "title": "iOS & Android",
+        "description": "Available on both platforms"
+      },
+      "offlineMaps": {
+        "title": "Offline Maps",
+        "description": "Navigate without signal"
+      }
+    }
+  },
+  "socialProof": {
+    "text": "Powering rides from the mountains to the coast"
+  },
+  "map": {
+    "heading": "Find. Warn. Protect.",
+    "subheading": "More than just navigation. Find services when you need them, warn fellow riders about hazards, and get help in emergencies.",
+    "features": {
+      "findNearby": {
+        "title": "Find Nearby Businesses",
+        "description": "Discover repair shops, gas stations, and motorcycle services nearby with smart filters for your needs."
+      },
+      "sharedWarnings": {
+        "title": "Shared Warnings",
+        "description": "Alert other riders about road hazards, accidents, or dangerous conditions in real-time on the map."
+      },
+      "emergency": {
+        "title": "Emergency",
+        "description": "One-tap emergency alerts to your riding group and emergency contacts when you need help."
+      }
+    }
+  },
+  "notFound": {
+    "title": "404",
+    "heading": "Page Not Found",
+    "description": "The page you are looking for does not exist.",
+    "button": "Go Home"
+  },
+  "features": {
+    "discoverRoads": {
+      "heading": "Discover roads, not just routes.",
+      "body": "Ditch the car maps. Our \"Twisty Roads\" algorithm finds the curves and scenic byways you crave. Plan, save, and share your perfect ride in seconds.",
+      "visualAlt": "Route planning interface showing twisty roads",
+      "thumbnails": {
+        "twistyRoads": {
+          "label": "Twisty Roads",
+          "alt": "Twisty roads algorithm interface"
+        },
+        "waypoints": {
+          "label": "Waypoints",
+          "alt": "Waypoint planning feature"
+        },
+        "offlineMaps": {
+          "label": "Offline Maps",
+          "alt": "Offline maps feature"
+        },
+        "shareRoutes": {
+          "label": "Share Routes",
+          "alt": "Route sharing feature"
+        }
+      }
+    },
+    "rideTogether": {
+      "heading": "Ride together. Even when apart.",
+      "body": "Create your ride group. See your crew's location in real-time. Share routes, track your stats (like lean angle and elevation), and build a logbook of your best rides.",
+      "visualAlt": "Group ride tracking with real-time locations",
+      "thumbnails": {
+        "liveTracking": {
+          "label": "Live Tracking",
+          "alt": "Real-time location tracking"
+        },
+        "groupRides": {
+          "label": "Group Rides",
+          "alt": "Group ride management"
+        },
+        "statistics": {
+          "label": "Statistics",
+          "alt": "Ride statistics dashboard"
+        },
+        "logbook": {
+          "label": "Logbook",
+          "alt": "Ride logbook feature"
+        }
+      }
+    },
+    "focusOnRoad": {
+      "heading": "Focus on the road.",
+      "body": "Built for the ride. Our high-contrast, minimalist \"Ride Mode\" gives you only what you need. Glove-friendly buttons and zero distractions mean your eyes stay where they matter.",
+      "visualAlt": "Ride Mode interface comparison",
+      "thumbnails": {
+        "rideMode": {
+          "label": "Ride Mode",
+          "alt": "High-contrast ride mode UI"
+        },
+        "gloveFriendly": {
+          "label": "Glove-Friendly",
+          "alt": "Glove-friendly interface"
+        },
+        "voiceNav": {
+          "label": "Voice Nav",
+          "alt": "Voice navigation feature"
+        },
+        "batterySaver": {
+          "label": "Battery Saver",
+          "alt": "Battery optimization"
+        }
+      }
+    },
+    "findWhatYouNeed": {
+      "heading": "Find what you need, when you need it.",
+      "body": "Running low on fuel? Need a repair? Our smart business finder shows nearby motorcycle services, gas stations, and shops with filters for your exact needs.",
+      "visualAlt": "Nearby businesses and services finder",
+      "thumbnails": {
+        "gasStations": {
+          "label": "Gas Stations",
+          "alt": "Nearby gas stations finder"
+        },
+        "repairShops": {
+          "label": "Repair Shops",
+          "alt": "Motorcycle repair shops"
+        },
+        "motoShops": {
+          "label": "Moto Shops",
+          "alt": "Motorcycle shops and dealers"
+        },
+        "smartSearch": {
+          "label": "Smart Search",
+          "alt": "Smart filter system"
+        }
+      }
+    },
+    "staySafe": {
+      "heading": "Stay safe, stay connected.",
+      "body": "Share warnings about hazards, accidents, or road conditions with the community. One-tap emergency alerts notify your group and contacts when you need help most.",
+      "visualAlt": "Safety features and emergency alerts",
+      "thumbnails": {
+        "hazardAlerts": {
+          "label": "Hazard Alerts",
+          "alt": "Hazard warning system"
+        },
+        "emergencySOS": {
+          "label": "Emergency SOS",
+          "alt": "Emergency SOS feature"
+        },
+        "contactAlerts": {
+          "label": "Contact Alerts",
+          "alt": "Emergency contact alerts"
+        },
+        "mapMarkers": {
+          "label": "Map Markers",
+          "alt": "Hazard map markers"
+        }
+      }
+    },
+    "yourMemories": {
+      "heading": "Your rides, your memories.",
+      "body": "Capture and share your best moments. Browse community posts, discover new routes, and connect with riders who share your passion for the open road.",
+      "visualAlt": "Social feed and community posts",
+      "thumbnails": {
+        "photoSharing": {
+          "label": "Photo Sharing",
+          "alt": "Photo sharing feature"
+        },
+        "socialFeed": {
+          "label": "Social Feed",
+          "alt": "Like and comment on posts"
+        },
+        "discover": {
+          "label": "Discover",
+          "alt": "Discover new routes"
+        },
+        "followRiders": {
+          "label": "Follow Riders",
+          "alt": "Follow other riders"
+        }
+      }
+    }
   },
   "legal": {
     "cookies": {

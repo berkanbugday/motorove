@@ -2,8 +2,11 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "../app/i18n";
 
 const Map: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="bg-neutral-offWhite dark:bg-background-secondary py-16 sm:py-24 lg:py-32 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -15,10 +18,10 @@ const Map: React.FC = () => {
           className="max-w-5xl mx-auto text-center space-y-8 sm:space-y-12"
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-neutral-black dark:text-neutral-white leading-tight">
-            Find. Warn. Protect.
+            {t("map.heading")}
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-neutral-darkGrey dark:text-neutral-grey leading-relaxed max-w-3xl mx-auto px-4">
-            More than just navigation. Find services when you need them, warn fellow riders about hazards, and get help in emergencies.
+            {t("map.subheading")}
           </p>
 
           {/* Feature Grid - Larger Rounded Cards */}
@@ -35,10 +38,10 @@ const Map: React.FC = () => {
               <div className="relative glass-strong glass-hover rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <div className="text-5xl sm:text-6xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">🔧</div>
                 <h3 className="text-xl sm:text-2xl font-bold text-neutral-black dark:text-neutral-white mb-3 sm:mb-4">
-                  Find Nearby Businesses
+                  {t("map.features.findNearby.title")}
                 </h3>
                 <p className="text-sm sm:text-base text-neutral-darkGrey dark:text-neutral-grey leading-relaxed">
-                  Discover repair shops, gas stations, and motorcycle services nearby with smart filters for your needs.
+                  {t("map.features.findNearby.description")}
                 </p>
               </div>
             </motion.div>
@@ -55,10 +58,10 @@ const Map: React.FC = () => {
               <div className="relative glass-strong glass-hover rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <div className="text-5xl sm:text-6xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">⚠️</div>
                 <h3 className="text-xl sm:text-2xl font-bold text-neutral-black dark:text-neutral-white mb-3 sm:mb-4">
-                  Shared Warnings
+                  {t("map.features.sharedWarnings.title")}
                 </h3>
                 <p className="text-sm sm:text-base text-neutral-darkGrey dark:text-neutral-grey leading-relaxed">
-                  Alert other riders about road hazards, accidents, or dangerous conditions in real-time on the map.
+                  {t("map.features.sharedWarnings.description")}
                 </p>
               </div>
             </motion.div>
@@ -75,10 +78,10 @@ const Map: React.FC = () => {
               <div className="relative glass-strong glass-hover rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <div className="text-5xl sm:text-6xl mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300">🆘</div>
                 <h3 className="text-xl sm:text-2xl font-bold text-neutral-black dark:text-neutral-white mb-3 sm:mb-4">
-                  Emergency
+                  {t("map.features.emergency.title")}
                 </h3>
                 <p className="text-sm sm:text-base text-neutral-darkGrey dark:text-neutral-grey leading-relaxed">
-                  One-tap emergency alerts to your riding group and emergency contacts when you need help.
+                  {t("map.features.emergency.description")}
                 </p>
               </div>
             </motion.div>

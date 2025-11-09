@@ -5,6 +5,17 @@
     "routes": "Rotalar",
     "events": "Etkinlikler"
   },
+  "hero": {
+    "headline": {
+      "line1": "Sürüşün.",
+      "line2": "Mükemmelleşti."
+    },
+    "subheadline": "Sadece navigasyon yapmayı bırak. Sürmeye başla. Epik rotalar, sürüş takibi ve topluluk için hepsi bir arada uygulama.",
+    "cta": {
+      "button": "Beta'ya Katıl",
+      "badge": "BETA"
+    }
+  },
   "footer": {
     "description": "Motorcuları birbirine bağlayan, rotaları keşfeden ve etkinliklere katılan nihai motosiklet uygulaması.",
     "quickLinks": "Hızlı Bağlantılar",
@@ -30,6 +41,193 @@
   "language": {
     "en": "İngilizce",
     "tr": "Türkçe"
+  },
+  "finalCTA": {
+    "heading": "Bir sonraki harika sürüşün seni bekliyor.",
+    "subheading": "İndirmesi ücretsiz. Motorcular tarafından, motorcular için yapıldı.",
+    "button": "Beta'ya Katıl",
+    "badge": "BETA",
+    "features": {
+      "free": {
+        "title": "Ücretsiz",
+        "description": "Abonelik yok, gizli ücret yok"
+      },
+      "platforms": {
+        "title": "iOS & Android",
+        "description": "Her iki platformda da mevcut"
+      },
+      "offlineMaps": {
+        "title": "Çevrimdışı Haritalar",
+        "description": "Sinyal olmadan navigasyon"
+      }
+    }
+  },
+  "socialProof": {
+    "text": "Dağlardan sahile kadar sürüşlere güç veriyor"
+  },
+  "map": {
+    "heading": "Bul. Uyar. Koru.",
+    "subheading": "Sadece navigasyondan daha fazlası. İhtiyacın olduğunda hizmetleri bul, diğer sürücüleri tehlikeler hakkında uyar ve acil durumlarda yardım al.",
+    "features": {
+      "findNearby": {
+        "title": "Yakındaki İşletmeleri Bul",
+        "description": "İhtiyaçlarına göre akıllı filtrelerle yakındaki tamir atölyeleri, benzin istasyonları ve motosiklet servislerini keşfet."
+      },
+      "sharedWarnings": {
+        "title": "Paylaşılan Uyarılar",
+        "description": "Harita üzerinde gerçek zamanlı olarak diğer sürücüleri yol tehlikeleri, kazalar veya tehlikeli durumlar hakkında uyar."
+      },
+      "emergency": {
+        "title": "Acil Durum",
+        "description": "Yardıma ihtiyacın olduğunda sürüş grubuna ve acil durum kişilerine tek dokunuşla acil durum uyarıları gönder."
+      }
+    }
+  },
+  "notFound": {
+    "title": "404",
+    "heading": "Sayfa Bulunamadı",
+    "description": "Aradığınız sayfa mevcut değil.",
+    "button": "Ana Sayfaya Dön"
+  },
+  "features": {
+    "discoverRoads": {
+      "heading": "Yolları keşfet, sadece rotaları değil.",
+      "body": "Araba haritalarını unut. \"Virajlı Yollar\" algoritmamız istediğin virajları ve manzaralı yolları bulur. Mükemmel sürüşünü saniyeler içinde planla, kaydet ve paylaş.",
+      "visualAlt": "Virajlı yolları gösteren rota planlama arayüzü",
+      "thumbnails": {
+        "twistyRoads": {
+          "label": "Virajlı Yollar",
+          "alt": "Virajlı yollar algoritması arayüzü"
+        },
+        "waypoints": {
+          "label": "Ara Noktalar",
+          "alt": "Ara nokta planlama özelliği"
+        },
+        "offlineMaps": {
+          "label": "Çevrimdışı Haritalar",
+          "alt": "Çevrimdışı haritalar özelliği"
+        },
+        "shareRoutes": {
+          "label": "Rota Paylaş",
+          "alt": "Rota paylaşma özelliği"
+        }
+      }
+    },
+    "rideTogether": {
+      "heading": "Birlikte sür. Ayrı olsan bile.",
+      "body": "Sürüş grubunu oluştur. Ekibinin konumunu gerçek zamanlı gör. Rotaları paylaş, istatistiklerini takip et (yatış açısı ve yükseklik gibi) ve en iyi sürüşlerinin günlüğünü tut.",
+      "visualAlt": "Gerçek zamanlı konumlarla grup sürüşü takibi",
+      "thumbnails": {
+        "liveTracking": {
+          "label": "Canlı Takip",
+          "alt": "Gerçek zamanlı konum takibi"
+        },
+        "groupRides": {
+          "label": "Grup Sürüşleri",
+          "alt": "Grup sürüşü yönetimi"
+        },
+        "statistics": {
+          "label": "İstatistikler",
+          "alt": "Sürüş istatistikleri panosu"
+        },
+        "logbook": {
+          "label": "Sürüş Günlüğü",
+          "alt": "Sürüş günlüğü özelliği"
+        }
+      }
+    },
+    "focusOnRoad": {
+      "heading": "Yola odaklan.",
+      "body": "Sürüş için yapıldı. Yüksek kontrastlı, minimalist \"Sürüş Modu\"muz sadece ihtiyacın olanı verir. Eldiven dostu düğmeler ve sıfır dikkat dağıtıcı, gözlerinin önemli olan yerde kalması anlamına gelir.",
+      "visualAlt": "Sürüş Modu arayüz karşılaştırması",
+      "thumbnails": {
+        "rideMode": {
+          "label": "Sürüş Modu",
+          "alt": "Yüksek kontrastlı sürüş modu arayüzü"
+        },
+        "gloveFriendly": {
+          "label": "Eldiven Dostu",
+          "alt": "Eldiven dostu arayüz"
+        },
+        "voiceNav": {
+          "label": "Sesli Navigasyon",
+          "alt": "Sesli navigasyon özelliği"
+        },
+        "batterySaver": {
+          "label": "Pil Tasarrufu",
+          "alt": "Pil optimizasyonu"
+        }
+      }
+    },
+    "findWhatYouNeed": {
+      "heading": "İhtiyacın olanı, ihtiyacın olduğunda bul.",
+      "body": "Yakıtın mı bitiyor? Tamire mi ihtiyacın var? Akıllı işletme bulucumuz, tam ihtiyaçların için filtrelerle yakındaki motosiklet servislerini, benzin istasyonlarını ve dükkanları gösterir.",
+      "visualAlt": "Yakındaki işletmeler ve hizmet bulucu",
+      "thumbnails": {
+        "gasStations": {
+          "label": "Benzin İstasyonları",
+          "alt": "Yakındaki benzin istasyonları bulucu"
+        },
+        "repairShops": {
+          "label": "Tamir Atölyeleri",
+          "alt": "Motosiklet tamir atölyeleri"
+        },
+        "motoShops": {
+          "label": "Moto Dükkanları",
+          "alt": "Motosiklet dükkanları ve bayileri"
+        },
+        "smartSearch": {
+          "label": "Akıllı Arama",
+          "alt": "Akıllı filtre sistemi"
+        }
+      }
+    },
+    "staySafe": {
+      "heading": "Güvende kal, bağlantıda kal.",
+      "body": "Toplulukla tehlikeler, kazalar veya yol koşulları hakkında uyarıları paylaş. Tek dokunuşla acil durum uyarıları, en çok ihtiyacın olduğunda grubuna ve kişilerine bildirim gönderir.",
+      "visualAlt": "Güvenlik özellikleri ve acil durum uyarıları",
+      "thumbnails": {
+        "hazardAlerts": {
+          "label": "Tehlike Uyarıları",
+          "alt": "Tehlike uyarı sistemi"
+        },
+        "emergencySOS": {
+          "label": "Acil Durum SOS",
+          "alt": "Acil durum SOS özelliği"
+        },
+        "contactAlerts": {
+          "label": "Kişi Uyarıları",
+          "alt": "Acil durum kişi uyarıları"
+        },
+        "mapMarkers": {
+          "label": "Harita İşaretleri",
+          "alt": "Tehlike harita işaretleri"
+        }
+      }
+    },
+    "yourMemories": {
+      "heading": "Sürüşlerin, anıların.",
+      "body": "En iyi anlarını yakala ve paylaş. Topluluk gönderilerine göz at, yeni rotalar keşfet ve açık yol tutkunu paylaşan sürücülerle bağlantı kur.",
+      "visualAlt": "Sosyal akış ve topluluk gönderileri",
+      "thumbnails": {
+        "photoSharing": {
+          "label": "Fotoğraf Paylaşımı",
+          "alt": "Fotoğraf paylaşma özelliği"
+        },
+        "socialFeed": {
+          "label": "Sosyal Akış",
+          "alt": "Gönderileri beğen ve yorum yap"
+        },
+        "discover": {
+          "label": "Keşfet",
+          "alt": "Yeni rotalar keşfet"
+        },
+        "followRiders": {
+          "label": "Sürücüleri Takip Et",
+          "alt": "Diğer sürücüleri takip et"
+        }
+      }
+    }
   },
   "legal": {
     "cookies": {

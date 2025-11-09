@@ -3,8 +3,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import PhoneMockup from "./PhoneMockup";
+import { useTranslation } from "../app/i18n";
 
 const Hero: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="relative min-h-screen bg-neutral-white dark:bg-background-primary overflow-hidden flex items-center">
       {/* Impressive Background */}
@@ -113,17 +116,16 @@ const Hero: React.FC = () => {
           >
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-neutral-black dark:text-neutral-white leading-[1.1] tracking-tight">
-              Your ride.
+              {t("hero.headline.line1")}
               <br />
               <span className="text-neutral-darkGrey dark:text-neutral-offWhite">
-                Perfected.
+                {t("hero.headline.line2")}
               </span>
             </h1>
 
             {/* Sub-headline */}
             <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-neutral-darkGrey dark:text-neutral-grey leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Stop just navigating. Start riding. The all-in-one app for epic
-              routes, ride tracking, and community.
+              {t("hero.subheadline")}
             </p>
 
             {/* CTA Button */}
@@ -133,9 +135,9 @@ const Hero: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 className="px-8 sm:px-10 py-3 sm:py-4 bg-primary-main text-neutral-white font-semibold rounded-4xl text-base sm:text-lg transition-all duration-200 hover:bg-primary-light inline-flex items-center justify-center gap-2"
               >
-                <span>Join Beta</span>
+                <span>{t("hero.cta.button")}</span>
                 <span className="px-2 py-0.5 bg-neutral-white/20 rounded text-xs font-bold">
-                  BETA
+                  {t("hero.cta.badge")}
                 </span>
               </motion.button>
             </div>
