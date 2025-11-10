@@ -153,12 +153,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
       <View style={styles.tagsContainer}>
         {tags.map((tag, index) => (
           <React.Fragment key={tag}>
-            <Typography
-              variant="caption"
-              color={colors.neutral.darkGrey}
-              style={{
-                textDecorationLine: 'underline',
-              }}>
+            <Typography variant="caption" color={colors.neutral.darkGrey}>
               {tag}
             </Typography>
             {index < tags.length - 1 && (

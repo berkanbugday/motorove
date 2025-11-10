@@ -72,7 +72,7 @@ export const UserCard: React.FC<UserCardProps> = ({
                 color={colors.neutral.darkGrey}
                 style={styles.infoText}
                 numberOfLines={1}>
-                {user.city?.value}
+                {user.city?.value}, {t('common.country')}
               </Typography>
             </View>
           )}

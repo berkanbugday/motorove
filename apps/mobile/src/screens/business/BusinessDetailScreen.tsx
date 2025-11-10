@@ -868,10 +868,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   closedText: {
-    color: colors.neutral.grey,
+    color: colors.primary.main,
   },
   todayDay: {
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: colors.neutral.black,
   },
   markerInner: {

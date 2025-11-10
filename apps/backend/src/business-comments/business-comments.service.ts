@@ -12,6 +12,7 @@ import { BusinessComment } from './models/business-comment.model';
 import { BusinessCommentDto } from './dto/business-comment.dto';
 import { plainToClass } from 'class-transformer';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
+import { StorageService } from '../core/storage/storage.service';
 
 @Injectable()
 export class BusinessCommentsService {
@@ -19,12 +20,14 @@ export class BusinessCommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profanityFilterService: ProfanityFilterService,
+    private readonly storageService: StorageService,
   ) {}
 
   async findAll(
     businessId: string,
     limit?: number,
     skip?: number,
+    authToken?: string,
   ): Promise<BusinessCommentDto[]> {
     try {
       const where = {
@@ -43,7 +46,19 @@ export class BusinessCommentsService {
         take: limit || undefined,
       })) as BusinessComment[];
 
-      return businessComments.map((comment) => this.mapToDto(comment));
+      return Promise.all(
+        businessComments.map(async (comment) => {
+          if (comment.createdBy.avatar) {
+            comment.createdBy.avatar = await this.storageService.getSignedUrl(
+              comment.createdBy.avatar,
+              3600,
+              authToken,
+            );
+          }
+
+          return this.mapToDto(comment);
+        }),
+      );
     } catch (error) {
       this.logger.error(
         `Failed to get comments for business ${businessId}`,

@@ -6,6 +6,7 @@ import {
   ID,
   Int,
   Float,
+  Context,
 } from '@nestjs/graphql';
 import { BusinessCommentsService } from './business-comments.service';
 import { CreateBusinessCommentInput } from './dto/create-business-comment.input';
@@ -15,6 +16,14 @@ import { User } from '../users/models/user.model';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { BusinessCommentDto } from './dto/business-comment.dto';
+import { Request } from 'express';
+
+interface GqlContext {
+  req: Request & {
+    user: { id: string };
+    headers: { authorization?: string };
+  };
+}
 
 @Resolver(() => BusinessCommentDto)
 export class BusinessCommentsResolver {
@@ -25,11 +34,19 @@ export class BusinessCommentsResolver {
   @UseGuards(JwtGuard)
   @Query(() => [BusinessCommentDto], { name: 'businessComments' })
   async findAll(
+    @Context() context: GqlContext,
     @Args('businessId', { type: () => ID }) businessId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<BusinessCommentDto[]> {
-    return await this.businessCommentsService.findAll(businessId, limit, skip);
+    const authHeader = context.req.headers.authorization;
+    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
+    return await this.businessCommentsService.findAll(
+      businessId,
+      limit,
+      skip,
+      authToken,
+    );
   }
 
   @UseGuards(JwtGuard)
