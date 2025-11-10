@@ -1,9 +1,8 @@
 {
   "header": {
+    "home": "Home",
     "features": "Features",
-    "community": "Community",
-    "routes": "Routes",
-    "events": "Events"
+    "contact": "Contact"
   },
   "hero": {
     "headline": {
@@ -21,23 +20,12 @@
   },
   "footer": {
     "description": "The ultimate motorcycle app for connecting riders, discovering routes, and joining events.",
-    "quickLinks": "Quick Links",
-    "resources": "Resources",
-    "links": {
-      "features": "Features",
-      "community": "Community",
-      "routes": "Routes",
-      "events": "Events",
-      "blog": "Blog",
-      "help": "Help Center",
-      "safety": "Riding Safety",
-      "faq": "FAQs",
-      "contact": "Contact Us"
-    },
+  
     "legal": {
       "terms": "Terms of Service",
       "privacy": "Privacy Policy",
-      "cookies": "Cookie Policy"
+      "cookies": "Cookie Policy",
+      "contact": "Contact"
     },
     "copyright": "© {{year}} Motorove. All rights reserved."
   },

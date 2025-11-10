@@ -8,66 +8,30 @@ const Footer: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-neutral-black text-white pt-16 pb-8">
+    <footer id="contact" className="bg-neutral-black text-white pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Three Column Layout - Motorove full width on mobile, Quick Links and Resources in 2 columns on mobile */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
-          {/* Motorove Branding - Full width on mobile */}
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center mb-4">
-              <Image
-                src="/assets/images/logo.png"
-                alt="Motorove Logo"
-                width={50}
-                height={50}
-                className="mr-2"
-              />
-              {/* <span className="text-xl font-heading font-bold">Motorove</span> */}
-            </div>
-            <p className="text-neutral-lightGrey mb-4">
-              {t("footer.description")}
-            </p>
-            <div className="flex space-x-4">
-              <SocialIcon
-                icon="facebook"
-                href="https://facebook.com/motorove"
-              />
-              <SocialIcon
-                icon="instagram"
-                href="https://instagram.com/motorove"
-              />
-              <SocialIcon icon="twitter" href="https://twitter.com/motorove" />
-              <SocialIcon icon="youtube" href="https://youtube.com/motorove" />
-            </div>
+        {/* Motorove Branding */}
+        <div className="max-w-md mx-auto text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Image
+              src="/assets/images/logo.png"
+              alt="Motorove Logo"
+              width={50}
+              height={50}
+              className="mr-2"
+            />
           </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">{t("footer.quickLinks")}</h3>
-            <ul className="space-y-2">
-              <FooterLink href="#features">
-                {t("footer.links.features")}
-              </FooterLink>
-              <FooterLink href="#community">
-                {t("footer.links.community")}
-              </FooterLink>
-              <FooterLink href="#routes">{t("footer.links.routes")}</FooterLink>
-              <FooterLink href="#events">{t("footer.links.events")}</FooterLink>
-              <FooterLink href="/blog">{t("footer.links.blog")}</FooterLink>
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">{t("footer.resources")}</h3>
-            <ul className="space-y-2">
-              <FooterLink href="/help">{t("footer.links.help")}</FooterLink>
-              <FooterLink href="/safety">{t("footer.links.safety")}</FooterLink>
-              <FooterLink href="/faq">{t("footer.links.faq")}</FooterLink>
-              <FooterLink href="/contact">
-                {t("footer.links.contact")}
-              </FooterLink>
-            </ul>
+          <p className="text-neutral-lightGrey mb-6">
+            {t("footer.description")}
+          </p>
+          <div className="flex justify-center space-x-4">
+            <SocialIcon icon="facebook" href="https://facebook.com/motorove" />
+            <SocialIcon
+              icon="instagram"
+              href="https://instagram.com/motorove"
+            />
+            <SocialIcon icon="twitter" href="https://twitter.com/motorove" />
+            <SocialIcon icon="youtube" href="https://youtube.com/motorove" />
           </div>
         </div>
 
@@ -95,29 +59,17 @@ const Footer: React.FC = () => {
               >
                 {t("footer.legal.cookies")}
               </Link>
+              <Link
+                href="/contact"
+                className="text-neutral-lightGrey hover:text-white text-sm"
+              >
+                {t("footer.legal.contact")}
+              </Link>
             </div>
           </div>
         </div>
       </div>
     </footer>
-  );
-};
-
-interface FooterLinkProps {
-  href: string;
-  children: React.ReactNode;
-}
-
-const FooterLink: React.FC<FooterLinkProps> = ({ href, children }) => {
-  return (
-    <li>
-      <Link
-        href={href}
-        className="text-neutral-lightGrey hover:text-white transition-colors"
-      >
-        {children}
-      </Link>
-    </li>
   );
 };
 

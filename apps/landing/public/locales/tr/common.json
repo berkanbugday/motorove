@@ -1,9 +1,8 @@
 {
   "header": {
+    "home": "Ana Sayfa",
     "features": "Özellikler",
-    "community": "Topluluk",
-    "routes": "Rotalar",
-    "events": "Etkinlikler"
+    "contact": "İletişim"
   },
   "hero": {
     "headline": {
@@ -21,23 +20,12 @@
   },
   "footer": {
     "description": "Motorcuları birbirine bağlayan, rotaları keşfeden ve etkinliklere katılan nihai motosiklet uygulaması.",
-    "quickLinks": "Hızlı Bağlantılar",
-    "resources": "Kaynaklar",
-    "links": {
-      "features": "Özellikler",
-      "community": "Topluluk",
-      "routes": "Rotalar",
-      "events": "Etkinlikler",
-      "blog": "Blog",
-      "help": "Yardım Merkezi",
-      "safety": "Sürüş Güvenliği",
-      "faq": "SSS",
-      "contact": "İletişim"
-    },
+
     "legal": {
       "terms": "Hizmet Şartları",
       "privacy": "Gizlilik Politikası",
-      "cookies": "Çerez Politikası"
+      "cookies": "Çerez Politikası",
+      "contact": "İletişim"
     },
     "copyright": "© {{year}} Motorove. Tüm hakları saklıdır."
   },

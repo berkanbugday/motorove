@@ -28,7 +28,7 @@ const FeatureBlock: React.FC<FeatureBlockProps> = ({
 }) => {
   return (
     <div
-      className={`grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center ${
+      className={`grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 items-center ${
         reverse ? "lg:grid-flow-dense" : ""
       } relative`}
     >
@@ -43,7 +43,7 @@ const FeatureBlock: React.FC<FeatureBlockProps> = ({
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-black dark:text-neutral-white mb-4 lg:mb-6 leading-tight">
           {heading}
         </h2>
-        <p className="text-base sm:text-lg text-neutral-darkGrey dark:text-neutral-grey leading-relaxed mb-6 lg:mb-8">
+        <p className="text-base sm:text-lg text-neutral-darkGrey dark:text-neutral-grey leading-relaxed">
           {body}
         </p>
       </motion.div>
@@ -375,7 +375,7 @@ const Features: React.FC = () => {
   ];
 
   return (
-    <section className="bg-neutral-white dark:bg-background-primary py-16 sm:py-24 lg:py-32 relative overflow-hidden">
+    <section id="features" className="bg-neutral-white dark:bg-background-primary py-16 sm:py-24 lg:py-32 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="space-y-16 sm:space-y-24 lg:space-y-32 relative z-10">
           {features.map((feature, index) => (

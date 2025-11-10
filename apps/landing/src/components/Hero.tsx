@@ -10,7 +10,7 @@ const Hero: React.FC = () => {
   const currentLanguage = i18n.language || "tr";
 
   return (
-    <section className="relative min-h-screen bg-neutral-white dark:bg-background-primary overflow-hidden flex items-center">
+    <section id="home" className="relative min-h-screen bg-neutral-white dark:bg-background-primary overflow-hidden flex items-center">
       {/* Impressive Background */}
       <div className="absolute inset-0 z-0">
         {/* Animated road pattern background */}
@@ -131,7 +131,10 @@ const Hero: React.FC = () => {
 
             {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
-              <motion.button
+              <motion.a
+                href="https://tally.so/r/wazMeX"
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="px-8 sm:px-10 py-3 sm:py-4 bg-primary-main text-neutral-white font-semibold rounded-4xl text-base sm:text-lg transition-all duration-200 hover:bg-primary-light inline-flex items-center justify-center gap-2"
@@ -140,7 +143,7 @@ const Hero: React.FC = () => {
                 <span className="px-2 py-0.5 bg-neutral-white/20 rounded text-xs font-bold">
                   {t("hero.cta.badge")}
                 </span>
-              </motion.button>
+              </motion.a>
             </div>
           </motion.div>
         </div>

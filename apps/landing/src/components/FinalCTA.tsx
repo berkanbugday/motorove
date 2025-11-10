@@ -29,7 +29,10 @@ const FinalCTA: React.FC = () => {
 
           {/* CTA Button */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <motion.button
+            <motion.a
+              href="https://tally.so/r/wazMeX"
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="px-12 py-5 bg-primary-main text-neutral-white font-semibold rounded-4xl text-lg transition-all duration-200 hover:bg-primary-light inline-flex items-center justify-center gap-3"
@@ -38,11 +41,11 @@ const FinalCTA: React.FC = () => {
               <span className="px-2.5 py-1 bg-neutral-white/20 rounded text-sm font-bold">
                 {t("finalCTA.badge")}
               </span>
-            </motion.button>
+            </motion.a>
           </div>
 
           {/* Subtle feature highlights */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 pt-8 sm:pt-12 border-t border-neutral-grey/20 dark:border-neutral-darkGrey/30">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 pt-8 sm:pt-12 border-t border-neutral-grey/20 dark:border-neutral-darkGrey/100">
             <div className="space-y-2">
               <div className="text-2xl sm:text-3xl font-bold">
                 {t("finalCTA.features.free.title")}
@@ -59,12 +62,6 @@ const FinalCTA: React.FC = () => {
                 {t("finalCTA.features.platforms.description")}
               </div>
             </div>
-            {/* <div className="space-y-2">
-              <div className="text-2xl sm:text-3xl font-bold">{t("finalCTA.features.offlineMaps.title")}</div>
-              <div className="text-xs sm:text-sm text-neutral-darkGrey dark:text-neutral-grey">
-                {t("finalCTA.features.offlineMaps.description")}
-              </div>
-            </div> */}
           </div>
         </motion.div>
       </div>
