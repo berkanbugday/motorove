@@ -77,7 +77,7 @@ APP_VERSION_CODE=1
 APP_BUNDLE_ID=com.motorove.staging
 
 # API Settings
-API_URL=https://api.staging.motorove.com
+API_URL=https://api.staging.motorove.app
 API_TIMEOUT=15000
 
 # Debug Settings
@@ -114,7 +114,7 @@ APP_VERSION_CODE=1
 APP_BUNDLE_ID=com.motorove
 
 # API Settings
-API_URL=https://api.motorove.com
+API_URL=https://api.motorove.app
 API_TIMEOUT=15000
 
 # Debug Settings

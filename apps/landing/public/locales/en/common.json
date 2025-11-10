@@ -7,13 +7,16 @@
   },
   "hero": {
     "headline": {
-      "line1": "Your ride.",
-      "line2": "Perfected."
+      "line1": "Motorove is on the road",
+      "line2": "Where are you?"
     },
-    "subheadline": "Stop just navigating. Start riding. The all-in-one app for epic routes, ride tracking, and community.",
+    "subheadline": "We are very happy to see motorcycle passions like you on the roads and among us!",
     "cta": {
       "button": "Join Beta",
       "badge": "BETA"
+    },
+    "altText": {
+      "screen1": "Motorove app interface showing ride tracking and navigation"
     }
   },
   "footer": {
@@ -63,7 +66,7 @@
     }
   },
   "socialProof": {
-    "text": "Powering rides from the mountains to the coast"
+    "text": "Hit the road, Feel the wind, Share your memories"
   },
   "map": {
     "heading": "Find. Warn. Protect.",
@@ -90,49 +93,32 @@
     "button": "Go Home"
   },
   "features": {
-    "discoverRoads": {
-      "heading": "Discover roads, not just routes.",
-      "body": "Ditch the car maps. Our \"Twisty Roads\" algorithm finds the curves and scenic byways you crave. Plan, save, and share your perfect ride in seconds.",
-      "visualAlt": "Route planning interface showing twisty roads",
+    "business": {
+      "heading": "Easily Find the Service You Are Looking For!",
+      "body": "With over 5000 business information, we help you find motorcycle services in Turkey.",
+      "visualAlt": "Motorcycle service search interface",
       "thumbnails": {
-        "twistyRoads": {
-          "label": "Twisty Roads",
-          "alt": "Twisty roads algorithm interface"
+        "everyWhere": {
+          "label": "All Countries (Coming Soon)"
         },
-        "waypoints": {
-          "label": "Waypoints",
-          "alt": "Waypoint planning feature"
+        "autoCall": {
+         "label": "Auto Call (Coming Soon)"
+       },
+        "filter": {
+          "label": "Easy Filtering"
         },
-        "offlineMaps": {
-          "label": "Offline Maps",
-          "alt": "Offline maps feature"
-        },
-        "shareRoutes": {
-          "label": "Share Routes",
-          "alt": "Route sharing feature"
+        "comment": {
+          "label": "Comment & Rating"
         }
       }
     },
-    "rideTogether": {
-      "heading": "Ride together. Even when apart.",
-      "body": "Create your ride group. See your crew's location in real-time. Share routes, track your stats (like lean angle and elevation), and build a logbook of your best rides.",
-      "visualAlt": "Group ride tracking with real-time locations",
+    "warning": {
+      "heading": "Be united! Warn against dangers!",
+      "body": "We inform everyone around you about the dangers by taking the warnings of our motorcycle friends into account.",
+      "visualAlt": "Warning interface",
       "thumbnails": {
-        "liveTracking": {
-          "label": "Live Tracking",
-          "alt": "Real-time location tracking"
-        },
-        "groupRides": {
-          "label": "Group Rides",
-          "alt": "Group ride management"
-        },
-        "statistics": {
-          "label": "Statistics",
-          "alt": "Ride statistics dashboard"
-        },
-        "logbook": {
-          "label": "Logbook",
-          "alt": "Ride logbook feature"
+        "planning": {
+          "label": "Route Planning According to Warnings (Coming Soon)"
         }
       }
     },
@@ -317,7 +303,7 @@
         },
         "contact": {
           "title": "Contact Us",
-          "content": "If you have any questions about our use of cookies or other technologies, please email us at privacy@motorove.com."
+          "content": "If you have any questions about our use of cookies or other technologies, please email us at privacy@motorove.app."
         }
       }
     },
@@ -378,7 +364,7 @@
         },
         "contact": {
           "title": "Contact Us",
-          "content": "If you have any questions about these Terms, please contact us at terms@motorove.com."
+          "content": "If you have any questions about these Terms, please contact us at terms@motorove.app."
         }
       }
     },
@@ -459,7 +445,7 @@
         },
         "contact": {
           "title": "Contact Us",
-          "content": "If you have any questions about this Privacy Policy, please contact us at privacy@motorove.com."
+          "content": "If you have any questions about this Privacy Policy, please contact us at privacy@motorove.app."
         }
       }
     }

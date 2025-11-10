@@ -23,9 +23,8 @@ export async function generateMetadata({
   const { locale } = params;
 
   const titles = {
-    [Language.TR.toLowerCase()]: "Motorove - Motosiklet Tutkunlarıyla Bağlan",
-    [Language.EN.toLowerCase()]:
-      "Motorove - Connect with Motorcycle Enthusiasts",
+    [Language.TR.toLowerCase()]: "Motorove",
+    [Language.EN.toLowerCase()]: "Motorove",
   };
 
   const descriptions = {
@@ -64,7 +63,6 @@ export default function Home({ params }: HomePageProps) {
       <Hero />
       <SocialProof />
       <Features />
-      <Map />
       <FinalCTA />
       <Footer />
     </main>

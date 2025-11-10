@@ -7,13 +7,16 @@
   },
   "hero": {
     "headline": {
-      "line1": "Sürüşün.",
-      "line2": "Mükemmelleşti."
+      "line1": "Motorove yolda",
+      "line2": "Sen nerdesin?"
     },
-    "subheadline": "Sadece navigasyon yapmayı bırak. Sürmeye başla. Epik rotalar, sürüş takibi ve topluluk için hepsi bir arada uygulama.",
+    "subheadline": "Senin gibi motosiklet tutkunlarını yollarda ve aramızda görmekten çok mutluyuz!",
     "cta": {
       "button": "Beta'ya Katıl",
       "badge": "BETA"
+    },
+    "altText": {
+      "screen1": "Sürüş takibi ve navigasyon gösteren Motorove uygulama arayüzü"
     }
   },
   "footer": {
@@ -63,7 +66,7 @@
     }
   },
   "socialProof": {
-    "text": "Dağlardan sahile kadar sürüşlere güç veriyor"
+    "text": "Yola çık, Rüzgarı hisset, Anılarını paylaş"
   },
   "map": {
     "heading": "Bul. Uyar. Koru.",
@@ -90,95 +93,61 @@
     "button": "Ana Sayfaya Dön"
   },
   "features": {
-    "discoverRoads": {
-      "heading": "Yolları keşfet, sadece rotaları değil.",
-      "body": "Araba haritalarını unut. \"Virajlı Yollar\" algoritmamız istediğin virajları ve manzaralı yolları bulur. Mükemmel sürüşünü saniyeler içinde planla, kaydet ve paylaş.",
-      "visualAlt": "Virajlı yolları gösteren rota planlama arayüzü",
+    "business": {
+      "heading": "Aradığın Hizmeti Kolayca Bul!",
+      "body": "5000 den fazla işletme bilgisi ile Türkiye'nin her yerinde ihtiyacın olan hizmeti bul.",
+      "visualAlt": "Motosiklet servisi arama arayüzü",
       "thumbnails": {
-        "twistyRoads": {
-          "label": "Virajlı Yollar",
-          "alt": "Virajlı yollar algoritması arayüzü"
+        "everyWhere": {
+          "label": "Tüm Ülkeler (Yakında)"
         },
-        "waypoints": {
-          "label": "Ara Noktalar",
-          "alt": "Ara nokta planlama özelliği"
+        "autoCall": {
+         "label": "Otomatik Arama (Yakında)"
+       },
+        "filter": {
+          "label": "Kolay Filtreleme"
         },
-        "offlineMaps": {
-          "label": "Çevrimdışı Haritalar",
-          "alt": "Çevrimdışı haritalar özelliği"
-        },
-        "shareRoutes": {
-          "label": "Rota Paylaş",
-          "alt": "Rota paylaşma özelliği"
+        "comment": {
+          "label": "Yorum & Puanlama"
         }
       }
     },
-    "rideTogether": {
-      "heading": "Birlikte sür. Ayrı olsan bile.",
-      "body": "Sürüş grubunu oluştur. Ekibinin konumunu gerçek zamanlı gör. Rotaları paylaş, istatistiklerini takip et (yatış açısı ve yükseklik gibi) ve en iyi sürüşlerinin günlüğünü tut.",
-      "visualAlt": "Gerçek zamanlı konumlarla grup sürüşü takibi",
+    "warning": {
+      "heading": "Güvende Ol! Bağlantıda Kal!",
+      "body": "Yoldaki tehlikelere karşı topluluğu uyar. Tehlikeye yakın olan herkese bilgilendir",
+      "visualAlt": "Uyarı arayüzü",
       "thumbnails": {
-        "liveTracking": {
-          "label": "Canlı Takip",
-          "alt": "Gerçek zamanlı konum takibi"
-        },
-        "groupRides": {
-          "label": "Grup Sürüşleri",
-          "alt": "Grup sürüşü yönetimi"
-        },
-        "statistics": {
-          "label": "İstatistikler",
-          "alt": "Sürüş istatistikleri panosu"
-        },
-        "logbook": {
-          "label": "Sürüş Günlüğü",
-          "alt": "Sürüş günlüğü özelliği"
+        "planning": {
+          "label": "Uyarılara Göre Rota Planlama (Yakında)"
         }
       }
     },
-    "focusOnRoad": {
-      "heading": "Yola odaklan.",
-      "body": "Sürüş için yapıldı. Yüksek kontrastlı, minimalist \"Sürüş Modu\"muz sadece ihtiyacın olanı verir. Eldiven dostu düğmeler ve sıfır dikkat dağıtıcı, gözlerinin önemli olan yerde kalması anlamına gelir.",
-      "visualAlt": "Sürüş Modu arayüz karşılaştırması",
+    "emergency": {
+      "heading": "İhtiyacın Olanı, İhtiyacın Olduğunda Bul!",
+      "body": "Yakıtın mı bitti? Lastiğin mi patladı? İstersen katıldığın gruplardan ya da istersen yakınındaki diğer sürücülerden yardım talep et.",
+      "visualAlt": "Acil durum bildirimi arayüzü",
       "thumbnails": {
-        "rideMode": {
-          "label": "Sürüş Modu",
-          "alt": "Yüksek kontrastlı sürüş modu arayüzü"
+        "notification": {
+          "label": "Anlık Bildirim"
         },
-        "gloveFriendly": {
-          "label": "Eldiven Dostu",
-          "alt": "Eldiven dostu arayüz"
-        },
-        "voiceNav": {
-          "label": "Sesli Navigasyon",
-          "alt": "Sesli navigasyon özelliği"
-        },
-        "batterySaver": {
-          "label": "Pil Tasarrufu",
-          "alt": "Pil optimizasyonu"
+        "communication": {
+          "label": "Kolay İletişim"
         }
       }
     },
-    "findWhatYouNeed": {
-      "heading": "İhtiyacın olanı, ihtiyacın olduğunda bul.",
-      "body": "Yakıtın mı bitiyor? Tamire mi ihtiyacın var? Akıllı işletme bulucumuz, tam ihtiyaçların için filtrelerle yakındaki motosiklet servislerini, benzin istasyonlarını ve dükkanları gösterir.",
+    "event": {
+      "heading": "Yalnız Sürmek Zorunda Değilsin!",
+      "body": "\"Buluşma\", \"Sürüş\" veya \"Kamp\" için birkaç adımda etkinliğini oluştur. İstersen sadece arkadaşlarını veya grupları davet et. Sen de başka etkinlikleri keşfet ve katıl!",
       "visualAlt": "Yakındaki işletmeler ve hizmet bulucu",
       "thumbnails": {
-        "gasStations": {
-          "label": "Benzin İstasyonları",
-          "alt": "Yakındaki benzin istasyonları bulucu"
+        "reminder": {
+          "label": "Hatırlatıcı"
         },
-        "repairShops": {
-          "label": "Tamir Atölyeleri",
-          "alt": "Motosiklet tamir atölyeleri"
+        "invitation": {
+          "label": "Grup Daveti"
         },
-        "motoShops": {
-          "label": "Moto Dükkanları",
-          "alt": "Motosiklet dükkanları ve bayileri"
-        },
-        "smartSearch": {
-          "label": "Akıllı Arama",
-          "alt": "Akıllı filtre sistemi"
+        "notification": {
+          "label": "Anlık Bildirim"
         }
       }
     },
@@ -317,7 +286,7 @@
         },
         "contact": {
           "title": "Bize Ulaşın",
-          "content": "Çerezlerin veya diğer teknolojilerin kullanımımız hakkında sorularınız varsa, lütfen bize privacy@motorove.com adresinden e-posta gönderin."
+          "content": "Çerezlerin veya diğer teknolojilerin kullanımımız hakkında sorularınız varsa, lütfen bize privacy@motorove.app adresinden e-posta gönderin."
         }
       }
     },
@@ -378,7 +347,7 @@
         },
         "contact": {
           "title": "Bize Ulaşın",
-          "content": "Bu Şartlar hakkında sorularınız varsa, lütfen bize terms@motorove.com adresinden ulaşın."
+          "content": "Bu Şartlar hakkında sorularınız varsa, lütfen bize terms@motorove.app adresinden ulaşın."
         }
       }
     },
@@ -459,7 +428,7 @@
         },
         "contact": {
           "title": "Bize Ulaşın",
-          "content": "Bu Gizlilik Politikası hakkında sorularınız varsa, lütfen bize privacy@motorove.com adresinden ulaşın."
+          "content": "Bu Gizlilik Politikası hakkında sorularınız varsa, lütfen bize privacy@motorove.app adresinden ulaşın."
         }
       }
     }

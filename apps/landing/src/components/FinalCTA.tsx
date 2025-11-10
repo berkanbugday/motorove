@@ -8,7 +8,7 @@ const FinalCTA: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="bg-neutral-white dark:bg-background-primary py-16 sm:py-24 lg:py-32">
+    <section className="bg-neutral-offWhite dark:bg-background-secondary py-16 sm:py-24 lg:py-32 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -68,6 +68,9 @@ const FinalCTA: React.FC = () => {
           </div>
         </motion.div>
       </div>
+      {/* Accent line decoration */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-main/50 to-transparent" />
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-main/50 to-transparent" />
     </section>
   );
 };

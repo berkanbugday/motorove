@@ -6,7 +6,7 @@ import { ThemeProvider } from "@components/ThemeProvider";
 export const metadata: Metadata = {
   title: {
     default: "Motorove - Connect with Motorcycle Enthusiasts",
-    template: "%s | Motorove",
+    template: "%s",
   },
   description:
     "Join the Motorove community to connect with fellow riders, discover routes, attend events, and share your motorcycle journey.",
@@ -27,7 +27,25 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://motorove.com"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || "https://motorove.app"
+  ),
+  icons: {
+    icon: [
+      {
+        url: "/assets/images/favicon/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+      {
+        url: "/assets/images/favicon/favicon-32x32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      { url: "/assets/images/favicon/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/assets/images/favicon/favicon.ico",
+  },
   openGraph: {
     type: "website",
     locale: "tr_TR",

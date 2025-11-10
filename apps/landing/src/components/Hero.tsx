@@ -6,7 +6,8 @@ import PhoneMockup from "./PhoneMockup";
 import { useTranslation } from "../app/i18n";
 
 const Hero: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language || "tr";
 
   return (
     <section className="relative min-h-screen bg-neutral-white dark:bg-background-primary overflow-hidden flex items-center">
@@ -101,8 +102,8 @@ const Hero: React.FC = () => {
           >
             <div className="scale-[0.75] sm:scale-[0.85] md:scale-100">
               <PhoneMockup
-                screenshot="/assets/images/app-screen-1.png"
-                alt="Motorove app ride mode interface"
+                screenshot={`/assets/images/${currentLanguage}/app-screen-1.png`}
+                alt={t("hero.altText.screen1")}
               />
             </div>
           </motion.div>
@@ -118,7 +119,7 @@ const Hero: React.FC = () => {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-neutral-black dark:text-neutral-white leading-[1.1] tracking-tight">
               {t("hero.headline.line1")}
               <br />
-              <span className="text-neutral-darkGrey dark:text-neutral-offWhite">
+              <span className="text-neutral-darkGrey dark:text-neutral-white">
                 {t("hero.headline.line2")}
               </span>
             </h1>

@@ -49,9 +49,9 @@ const Header: React.FC = () => {
                 height={50}
                 className="mr-2"
               />
-              <span className="text-xl font-heading font-bold text-white">
+              {/* <span className="text-xl font-heading font-bold text-white">
                 Motorove
-              </span>
+              </span> */}
             </Link>
           </motion.div>
 
@@ -70,7 +70,7 @@ const Header: React.FC = () => {
             {/* CTA Button - Hidden until app is ready */}
             {/* <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
-                href="https://app.motorove.com"
+                href="https://app.motorove.app"
                 className="btn btn-primary bg-gradient-to-r from-primary-main to-primary-dark hover:from-primary-dark hover:to-primary-main transition-all duration-300"
               >
                 {t("header.download")}
@@ -173,7 +173,7 @@ const Header: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Link
-                    href="https://app.motorove.com"
+                    href="https://app.motorove.app"
                     className="block w-full text-center bg-gradient-to-r from-primary-main to-primary-dark text-white font-medium py-2 px-4 rounded-lg transition-all duration-300"
                     onClick={() => setIsMenuOpen(false)}
                   >

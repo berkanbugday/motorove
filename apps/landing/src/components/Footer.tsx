@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
                 height={50}
                 className="mr-2"
               />
-              <span className="text-xl font-heading font-bold">Motorove</span>
+              {/* <span className="text-xl font-heading font-bold">Motorove</span> */}
             </div>
             <p className="text-neutral-lightGrey mb-4">
               {t("footer.description")}
