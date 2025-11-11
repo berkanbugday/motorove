@@ -56,8 +56,8 @@ coverage
 # Mobile app (not needed for backend)
 apps/mobile
 
-# Landing page (not needed for backend)
-apps/landing
+# Landing page (not needed for backend - comment out if building landing)
+# apps/landing
 
 # CI/CD
 .github

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  landing:
+    build:
+      context: ../..
+      dockerfile: apps/landing/Dockerfile
+    container_name: motorove-landing
+    ports:
+      - "8080:8080"  # Map container port 8080 to host port 8080
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - motorove-network
+
+networks:
+  motorove-network:
+    driver: bridge
