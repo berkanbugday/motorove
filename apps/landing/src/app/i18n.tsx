@@ -21,7 +21,7 @@ i18next
     fallbackLng: Language.TR.toLowerCase(),
     ns: ["common"],
     defaultNS: "common",
-    supportedLngs: [Language.EN.toLowerCase(), Language.TR.toLowerCase()],
+    supportedLngs: [Language.TR.toLowerCase(), Language.EN.toLowerCase()],
     interpolation: {
       escapeValue: false,
     },

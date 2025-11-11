@@ -48,6 +48,13 @@ function PrivacyContent() {
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
+                  {t("legal.privacy.sections.scope.title")}
+                </h2>
+                <p>{t("legal.privacy.sections.scope.content")}</p>
+              </section>
+
+              <section className="mb-10">
+                <h2 className="text-2xl font-bold mb-4">
                   {t("legal.privacy.sections.dataCollection.title")}
                 </h2>
                 <p>{t("legal.privacy.sections.dataCollection.content")}</p>
@@ -82,6 +89,11 @@ function PrivacyContent() {
                       "legal.privacy.sections.dataCollection.personalData.items.item5"
                     )}
                   </li>
+                  <li>
+                    {t(
+                      "legal.privacy.sections.dataCollection.personalData.items.item6"
+                    )}
+                  </li>
                 </ul>
                 <h3 className="text-xl font-bold mt-6 mb-3">
                   {t("legal.privacy.sections.dataCollection.usageData.title")}
@@ -102,47 +114,7 @@ function PrivacyContent() {
                   <li>{t("legal.privacy.sections.dataUse.items.item3")}</li>
                   <li>{t("legal.privacy.sections.dataUse.items.item4")}</li>
                   <li>{t("legal.privacy.sections.dataUse.items.item5")}</li>
-                </ul>
-              </section>
-
-              <section className="mb-10">
-                <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.privacy.sections.dataSharing.title")}
-                </h2>
-                <p>{t("legal.privacy.sections.dataSharing.content")}</p>
-              </section>
-
-              <section className="mb-10">
-                <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.privacy.sections.location.title")}
-                </h2>
-                <p>{t("legal.privacy.sections.location.content")}</p>
-              </section>
-
-              <section className="mb-10">
-                <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.privacy.sections.dataRetention.title")}
-                </h2>
-                <p>{t("legal.privacy.sections.dataRetention.content")}</p>
-              </section>
-
-              <section className="mb-10">
-                <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.privacy.sections.dataSecurity.title")}
-                </h2>
-                <p>{t("legal.privacy.sections.dataSecurity.content")}</p>
-              </section>
-
-              <section className="mb-10">
-                <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.privacy.sections.yourRights.title")}
-                </h2>
-                <p>{t("legal.privacy.sections.yourRights.content")}</p>
-                <ul className="list-disc pl-6 mt-4 space-y-2">
-                  <li>{t("legal.privacy.sections.yourRights.items.item1")}</li>
-                  <li>{t("legal.privacy.sections.yourRights.items.item2")}</li>
-                  <li>{t("legal.privacy.sections.yourRights.items.item3")}</li>
-                  <li>{t("legal.privacy.sections.yourRights.items.item4")}</li>
+                  <li>{t("legal.privacy.sections.dataUse.items.item6")}</li>
                 </ul>
               </section>
 
@@ -155,9 +127,52 @@ function PrivacyContent() {
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
+                  {t("legal.privacy.sections.dataSharing.title")}
+                </h2>
+                <p>{t("legal.privacy.sections.dataSharing.content")}</p>
+              </section>
+
+              <section className="mb-10">
+                <h2 className="text-2xl font-bold mb-4">
+                  {t("legal.privacy.sections.userPrivacy.title")}
+                </h2>
+                <p>{t("legal.privacy.sections.userPrivacy.content")}</p>
+              </section>
+
+              <section className="mb-10">
+                <h2 className="text-2xl font-bold mb-4">
+                  {t("legal.privacy.sections.cookies.title")}
+                </h2>
+                <p>{t("legal.privacy.sections.cookies.content")}</p>
+              </section>
+
+              <section className="mb-10">
+                <h2 className="text-2xl font-bold mb-4">
                   {t("legal.privacy.sections.children.title")}
                 </h2>
                 <p>{t("legal.privacy.sections.children.content")}</p>
+              </section>
+
+              <section className="mb-10">
+                <h2 className="text-2xl font-bold mb-4">
+                  {t("legal.privacy.sections.dataRetention.title")}
+                </h2>
+                <p>{t("legal.privacy.sections.dataRetention.content")}</p>
+              </section>
+
+              <section className="mb-10">
+                <h2 className="text-2xl font-bold mb-4">
+                  {t("legal.privacy.sections.yourRights.title")}
+                </h2>
+                <p>{t("legal.privacy.sections.yourRights.content")}</p>
+                <ul className="list-disc pl-6 mt-4 space-y-2">
+                  <li>{t("legal.privacy.sections.yourRights.items.item1")}</li>
+                  <li>{t("legal.privacy.sections.yourRights.items.item2")}</li>
+                  <li>{t("legal.privacy.sections.yourRights.items.item3")}</li>
+                  <li>{t("legal.privacy.sections.yourRights.items.item4")}</li>
+                  <li>{t("legal.privacy.sections.yourRights.items.item5")}</li>
+                </ul>
+                <p className="mt-4">{t("legal.privacy.sections.yourRights.contact")}</p>
               </section>
 
               <section className="mb-10">

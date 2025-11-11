@@ -10,7 +10,10 @@ const Hero: React.FC = () => {
   const currentLanguage = i18n.language || "tr";
 
   return (
-    <section id="home" className="relative min-h-screen bg-neutral-white dark:bg-background-primary overflow-hidden flex items-center">
+    <section
+      id="home"
+      className="relative min-h-screen bg-neutral-white dark:bg-background-primary overflow-hidden flex items-center"
+    >
       {/* Impressive Background */}
       <div className="absolute inset-0 z-0">
         {/* Animated road pattern background */}
@@ -140,9 +143,6 @@ const Hero: React.FC = () => {
                 className="px-8 sm:px-10 py-3 sm:py-4 bg-primary-main text-neutral-white font-semibold rounded-4xl text-base sm:text-lg transition-all duration-200 hover:bg-primary-light inline-flex items-center justify-center gap-2"
               >
                 <span>{t("hero.cta.button")}</span>
-                <span className="px-2 py-0.5 bg-neutral-white/20 rounded text-xs font-bold">
-                  {t("hero.cta.badge")}
-                </span>
               </motion.a>
             </div>
           </motion.div>

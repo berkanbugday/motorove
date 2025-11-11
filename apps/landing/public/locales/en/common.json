@@ -6,25 +6,23 @@
   },
   "hero": {
     "headline": {
-      "line1": "Motorove is on the road",
+      "line1": "Motorove on the road",
       "line2": "Where are you?"
     },
-    "subheadline": "We are very happy to see motorcycle passions like you on the roads and among us!",
+    "subheadline": "We are happy to see you on the road and in our community!",
     "cta": {
-      "button": "Join Beta",
-      "badge": "BETA"
+      "button": "Join Beta"
     },
     "altText": {
-      "screen1": "Motorove app interface showing ride tracking and navigation"
+      "screen1": "Motorove app interface showing motorcycle tracking and navigation"
     }
   },
   "footer": {
-    "description": "The ultimate motorcycle app for connecting riders, discovering routes, and joining events.",
-  
+    "description": "A special motorcycle application for you, motorcycle passionates",
+
     "legal": {
       "terms": "Terms of Service",
       "privacy": "Privacy Policy",
-      "cookies": "Cookie Policy",
       "contact": "Contact"
     },
     "copyright": "© {{year}} Motorove. All rights reserved."
@@ -34,63 +32,40 @@
     "tr": "Turkish"
   },
   "finalCTA": {
-    "heading": "Your next great ride is waiting.",
-    "subheading": "Free to download. Built by riders, for riders.",
+    "heading": "We Are Happy to Have You Among Us!",
+    "subheading": "Made by bikers, for bikers.",
     "button": "Join Beta",
-    "badge": "BETA",
     "features": {
       "free": {
         "title": "Free",
-        "description": "No subscriptions, no hidden costs"
+        "description": "No subscription, no hidden fees"
       },
       "platforms": {
         "title": "iOS & Android",
         "description": "Available on both platforms"
-      },
-      "offlineMaps": {
-        "title": "Offline Maps",
-        "description": "Navigate without signal"
       }
     }
   },
   "socialProof": {
     "text": "Hit the road, Feel the wind, Share your memories"
   },
-  "map": {
-    "heading": "Find. Warn. Protect.",
-    "subheading": "More than just navigation. Find services when you need them, warn fellow riders about hazards, and get help in emergencies.",
-    "features": {
-      "findNearby": {
-        "title": "Find Nearby Businesses",
-        "description": "Discover repair shops, gas stations, and motorcycle services nearby with smart filters for your needs."
-      },
-      "sharedWarnings": {
-        "title": "Shared Warnings",
-        "description": "Alert other riders about road hazards, accidents, or dangerous conditions in real-time on the map."
-      },
-      "emergency": {
-        "title": "Emergency",
-        "description": "One-tap emergency alerts to your riding group and emergency contacts when you need help."
-      }
-    }
-  },
   "notFound": {
     "title": "404",
     "heading": "Page Not Found",
     "description": "The page you are looking for does not exist.",
-    "button": "Go Home"
+    "button": "Go to Homepage"
   },
   "features": {
     "business": {
-      "heading": "Easily Find the Service You Are Looking For!",
-      "body": "With over 5000 business information, we help you find motorcycle services in Turkey.",
+      "heading": "Find the Service You Need Easily!",
+      "body": "Find the service you need easily with 5000+ business information in Turkey.",
       "visualAlt": "Motorcycle service search interface",
       "thumbnails": {
         "everyWhere": {
           "label": "All Countries (Coming Soon)"
         },
         "autoCall": {
-         "label": "Auto Call (Coming Soon)"
+         "label": "Automatic Call (Coming Soon)"
        },
         "filter": {
           "label": "Easy Filtering"
@@ -101,339 +76,205 @@
       }
     },
     "warning": {
-      "heading": "Be united! Warn against dangers!",
-      "body": "We inform everyone around you about the dangers by taking the warnings of our motorcycle friends into account.",
+      "heading": "Stay Safe! Stay Connected!",
+      "body": "Warn the community about road dangers. Inform everyone near danger.",
       "visualAlt": "Warning interface",
       "thumbnails": {
         "planning": {
-          "label": "Route Planning According to Warnings (Coming Soon)"
+          "label": "Route Planning by Warnings (Coming Soon)"
         }
       }
     },
-    "focusOnRoad": {
-      "heading": "Focus on the road.",
-      "body": "Built for the ride. Our high-contrast, minimalist \"Ride Mode\" gives you only what you need. Glove-friendly buttons and zero distractions mean your eyes stay where they matter.",
-      "visualAlt": "Ride Mode interface comparison",
+    "emergency": {
+      "heading": "Help is Part of Motorcycle Culture!",
+      "body": "Is your fuel empty? Is your tire flat? Request help from your riding group or other riders near you.",
+      "visualAlt": "Emergency notification interface",
       "thumbnails": {
-        "rideMode": {
-          "label": "Ride Mode",
-          "alt": "High-contrast ride mode UI"
+        "notification": {
+          "label": "Instant Notification"
         },
-        "gloveFriendly": {
-          "label": "Glove-Friendly",
-          "alt": "Glove-friendly interface"
-        },
-        "voiceNav": {
-          "label": "Voice Nav",
-          "alt": "Voice navigation feature"
-        },
-        "batterySaver": {
-          "label": "Battery Saver",
-          "alt": "Battery optimization"
+        "communication": {
+          "label": "Easy Communication"
         }
       }
     },
-    "findWhatYouNeed": {
-      "heading": "Find what you need, when you need it.",
-      "body": "Running low on fuel? Need a repair? Our smart business finder shows nearby motorcycle services, gas stations, and shops with filters for your exact needs.",
-      "visualAlt": "Nearby businesses and services finder",
+    "event": {
+      "heading": "You Don't Have to Ride Alone!",
+      "body": "Create an event for \"MeetUp\", \"Riding\" or \"Camping\" in a few steps. You can invite your friends or groups. You can also discover other events and join them!",
+      "visualAlt": "Event interface",
       "thumbnails": {
-        "gasStations": {
-          "label": "Gas Stations",
-          "alt": "Nearby gas stations finder"
+        "reminder": {
+          "label": "Reminder"
         },
-        "repairShops": {
-          "label": "Repair Shops",
-          "alt": "Motorcycle repair shops"
+        "invitation": {
+          "label": "Group Invitation"
         },
-        "motoShops": {
-          "label": "Moto Shops",
-          "alt": "Motorcycle shops and dealers"
-        },
-        "smartSearch": {
-          "label": "Smart Search",
-          "alt": "Smart filter system"
+        "notification": {
+          "label": "Instant Notification"
         }
       }
     },
-    "staySafe": {
-      "heading": "Stay safe, stay connected.",
-      "body": "Share warnings about hazards, accidents, or road conditions with the community. One-tap emergency alerts notify your group and contacts when you need help most.",
-      "visualAlt": "Safety features and emergency alerts",
+    "group": {
+      "heading": "Find People with Similar Interests!",
+      "body": "Find people who share your interests. You can create a group. You can join existing groups. Ride together, attend meetups and camp together!",
+      "visualAlt": "Group interface",
       "thumbnails": {
-        "hazardAlerts": {
-          "label": "Hazard Alerts",
-          "alt": "Hazard warning system"
+        "share": {
+          "label": "Group Sharing"
         },
-        "emergencySOS": {
-          "label": "Emergency SOS",
-          "alt": "Emergency SOS feature"
+        "privacy": {
+          "label": "Privacy"
         },
-        "contactAlerts": {
-          "label": "Contact Alerts",
-          "alt": "Emergency contact alerts"
+        "event": {
+          "label": "Group Events"
         },
-        "mapMarkers": {
-          "label": "Map Markers",
-          "alt": "Hazard map markers"
-        }
-      }
-    },
-    "yourMemories": {
-      "heading": "Your rides, your memories.",
-      "body": "Capture and share your best moments. Browse community posts, discover new routes, and connect with riders who share your passion for the open road.",
-      "visualAlt": "Social feed and community posts",
-      "thumbnails": {
-        "photoSharing": {
-          "label": "Photo Sharing",
-          "alt": "Photo sharing feature"
-        },
-        "socialFeed": {
-          "label": "Social Feed",
-          "alt": "Like and comment on posts"
-        },
-        "discover": {
-          "label": "Discover",
-          "alt": "Discover new routes"
-        },
-        "followRiders": {
-          "label": "Follow Riders",
-          "alt": "Follow other riders"
+         "chat": {
+          "label": "Group Chat (Coming Soon)"
         }
       }
     }
   },
   "legal": {
-    "cookies": {
-      "title": "Cookie Policy",
-      "lastUpdated": "Last Updated: September 1, 2023",
-      "sections": {
-        "introduction": {
-          "title": "Introduction",
-          "content": "This Cookie Policy explains how Motorove uses cookies and similar technologies to recognize you when you visit our website. It explains what these technologies are and why we use them, as well as your rights to control our use of them."
-        },
-        "whatAreCookies": {
-          "title": "What Are Cookies?",
-          "content": "Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners in order to make their websites work, or to work more efficiently, as well as to provide reporting information."
-        },
-        "typesOfCookies": {
-          "title": "Types of Cookies We Use",
-          "essential": {
-            "title": "Essential Cookies",
-            "content": "These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms."
-          },
-          "preferences": {
-            "title": "Preference Cookies",
-            "content": "These cookies enable a website to remember information that changes the way the website behaves or looks, like your preferred language or the region that you are in."
-          },
-          "analytics": {
-            "title": "Analytics Cookies",
-            "content": "These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site."
-          },
-          "marketing": {
-            "title": "Marketing Cookies",
-            "content": "These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites."
-          }
-        },
-        "cookiesWeUse": {
-          "title": "Specific Cookies We Use",
-          "content": "Below is a detailed list of the cookies we use on our website:",
-          "table": {
-            "name": "Name",
-            "provider": "Provider",
-            "purpose": "Purpose",
-            "expiry": "Expiry",
-            "type": "Type"
-          },
-          "cookies": {
-            "session": {
-              "name": "SESSION_ID",
-              "provider": "Motorove",
-              "purpose": "To maintain user sessions and login status",
-              "expiry": "Session",
-              "type": "Essential"
-            },
-            "language": {
-              "name": "NEXT_LOCALE",
-              "provider": "Motorove",
-              "purpose": "To remember your language preference",
-              "expiry": "1 Year",
-              "type": "Preference"
-            },
-            "analytics": {
-              "name": "_ga, _gid",
-              "provider": "Google Analytics",
-              "purpose": "To track website usage and user behavior",
-              "expiry": "2 Years",
-              "type": "Analytics"
-            }
-          }
-        },
-        "cookieManagement": {
-          "title": "How to Manage Cookies",
-          "content": "Most browsers allow you to refuse to accept cookies and to delete cookies. The methods for doing so vary from browser to browser, and from version to version.",
-          "browser": {
-            "title": "Block cookies by adjusting your browser settings",
-            "content": "You can find information about how to manage cookies in your browser at the following links:",
-            "chrome": "Google Chrome",
-            "firefox": "Mozilla Firefox",
-            "safari": "Apple Safari",
-            "edge": "Microsoft Edge"
-          }
-        },
-        "doNotTrack": {
-          "title": "Do Not Track",
-          "content": "Some browsers have a 'Do Not Track' feature that lets you tell websites that you do not want to have your online activities tracked. We currently do not respond to browser 'Do Not Track' signals."
-        },
-        "updates": {
-          "title": "Updates to This Cookie Policy",
-          "content": "We may update this Cookie Policy from time to time in order to reflect, for example, changes to the cookies we use or for other operational, legal or regulatory reasons. Please therefore re-visit this Cookie Policy regularly to stay informed about our use of cookies and related technologies."
-        },
-        "contact": {
-          "title": "Contact Us",
-          "content": "If you have any questions about our use of cookies or other technologies, please email us at privacy@motorove.app."
-        }
-      }
-    },
     "terms": {
       "title": "Terms of Service",
-      "lastUpdated": "Last Updated: September 1, 2023",
+      "lastUpdated": "Last Updated: 11.10.2025",
       "sections": {
-        "introduction": {
-          "title": "Introduction",
-          "content": "Welcome to Motorove. By accessing our website and using our services, you agree to be bound by these Terms of Service. Please read them carefully before using our platform."
+        "generalOverview": {
+          "title": "General Overview",
+          "content": "Motorove is a digital platform and mobile application designed to enhance the motorcycle experience by enabling users to discover, plan, record, and share motorcycle routes, join group rides, find nearby services, and engage with the motorcycling community. Users contribute to the platform by uploading routes, events, and relevant content. Motorove respects and complies with applicable data protection laws. Users retain control over what personal data is shared publicly or with other users."
         },
-        "definitions": {
-          "title": "Definitions",
-          "content": "'Service' refers to the Motorove website and mobile application. 'User' refers to any individual who accesses or uses the Service. 'Content' refers to all information, text, graphics, photos, videos, or other materials uploaded, downloaded, or appearing on the Service."
+        "acceptance": {
+          "title": "Acceptance of Terms",
+          "content": "By registering for or using Motorove (the \"Platform\"), users confirm they have read, understood, and agree to these Terms of Service (\"Terms\"). Access to any features of the Platform is conditional on the acceptance of these Terms. The English version of these Terms is legally binding. These Terms govern use of the Platform across all channels, including mobile apps (iOS & Android) and any subdomains of motorove.app. Motorove may amend these Terms at any time. The latest version will always be available on the website and shown during registration and in-app."
         },
-        "accountRegistration": {
-          "title": "Account Registration",
-          "content": "To use certain features of the Service, you must register for an account. You must provide accurate and complete information and keep your account information updated. You are responsible for safeguarding your account and password. You are responsible for any activity that occurs under your account."
+        "scopeOfServices": {
+          "title": "Scope of Services",
+          "content": "Motorove provides users with: Route discovery and planning, GPS ride tracking and route recording, group ride creation and participation, social sharing of motorcycle-related activities, reviews, ratings, and media sharing, access to motorcycle-relevant services and locations, notifications and live updates, optional offline map downloads, and optional premium membership with added features. Users acknowledge that Motorove does not guarantee uninterrupted service or accuracy of third-party data (e.g., weather forecasts, traffic data, map coverage). Users are solely responsible for their actions on the Platform, including ride planning, route selection, and ride safety."
         },
-        "userContent": {
-          "title": "User Content",
-          "content": "You retain ownership rights to any content you submit to the Service. By submitting content, you grant Motorove a worldwide, non-exclusive, royalty-free license to use, copy, reproduce, process, adapt, modify, publish, transmit, display and distribute such content in any and all media or distribution methods."
+        "userRegistration": {
+          "title": "User Registration",
+          "content": "Users may register for free via the mobile app or web interface. A test mode may be available with limited functionality. Only natural persons are permitted to register. Business accounts require prior approval. Users must be at least 18 years old or have verified parental/legal guardian consent. A single user may only register one account. Duplicate or impersonating accounts will be removed. Upon registration, users are enrolled in a free Basic membership, which provides core functionality. Users may upgrade to a paid Motorove PRO membership to access extended features. Registration requires a valid email address and password or third-party authentication (e.g., Google or Apple ID). Users must provide accurate information and update it as necessary. Motorove is not responsible for verifying user identity. Motorove reserves the right to suspend or delete accounts at its sole discretion."
         },
-        "prohibitedActivities": {
-          "title": "Prohibited Activities",
-          "content": "You agree not to engage in any of the following prohibited activities:",
-          "items": {
-            "item1": "Violating any laws, rules, or regulations.",
-            "item2": "Posting content that is defamatory, obscene, or otherwise objectionable.",
-            "item3": "Impersonating any person or entity, or falsely stating or misrepresenting your affiliation with a person or entity.",
-            "item4": "Interfering with or disrupting the Service or servers or networks connected to the Service.",
-            "item5": "Attempting to gain unauthorized access to the Service or user accounts."
-          }
+        "paidMembership": {
+          "title": "Paid Membership (PRO)",
+          "content": "Upgrading to PRO requires prior registration. PRO may be purchased through app stores (Apple or Google) or on the Motorove website (via secure payment provider, e.g., Stripe). PRO subscriptions may be monthly or annual. Prices and terms are clearly shown before purchase. Subscriptions renew automatically unless cancelled before renewal. Cancellation stops future charges but does not refund the current billing cycle. A 14-day free trial may be offered once per user. Cancellation during the trial incurs no charge. Users are responsible for any fees arising from failed payments. PRO users are subject to the same general Terms as Basic users, unless stated otherwise."
         },
-        "intellectualProperty": {
-          "title": "Intellectual Property",
-          "content": "The Service and its original content, features, and functionality are owned by Motorove and are protected by international copyright, trademark, patent, trade secret, and other intellectual property or proprietary rights laws."
+        "platformConduct": {
+          "title": "Platform Conduct & Content",
+          "content": "Users agree not to post illegal, abusive, defamatory, discriminatory, or offensive content. Users must not infringe on third-party rights. All uploaded content must either belong to the user or be used with appropriate permissions. Users retain ownership of their content but grant Motorove a worldwide, non-exclusive license to use, display, and distribute such content within the app. Motorove reserves the right to moderate, remove, or block any content or user account in case of violations. Users must not access or attempt to access data of other users without authorization. The sharing of personal information is voluntary. Motorove is not liable for misuse of user-shared data. Users are solely responsible for saving a backup of their uploaded or recorded data."
         },
         "termination": {
           "title": "Termination",
-          "content": "We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms of Service."
-        },
-        "disclaimer": {
-          "title": "Disclaimer",
-          "content": "The Service is provided on an 'AS IS' and 'AS AVAILABLE' basis. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance."
+          "content": "Users may delete their account at any time via the app or website. Deletion is permanent. Motorove may terminate or suspend accounts that violate these Terms or legal regulations."
         },
         "limitation": {
           "title": "Limitation of Liability",
-          "content": "In no event shall Motorove be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service."
+          "content": "Motorove provides the Platform \"as is.\" No warranties are given for uninterrupted service, data accuracy, or feature availability. Users assume all risks related to riding, route usage, and interactions with others. Motorove is not liable for accidents, route errors, or data inaccuracies. Motorove disclaims liability for third-party services, embedded content, or user-shared information."
+        },
+        "privacy": {
+          "title": "Privacy & Data",
+          "content": "The collection, processing, and storage of user data is governed by the Motorove Privacy Policy. By using the Platform, users consent to the terms of the Privacy Policy."
+        },
+        "modifications": {
+          "title": "Modifications",
+          "content": "Motorove reserves the right to update these Terms and the Privacy Policy. Users will be notified in-app or via email. Continued use of the Platform after changes implies acceptance."
         },
         "governing": {
           "title": "Governing Law",
-          "content": "These Terms shall be governed and construed in accordance with the laws of Turkey, without regard to its conflict of law provisions."
-        },
-        "changes": {
-          "title": "Changes to Terms",
-          "content": "We reserve the right, at our sole discretion, to modify or replace these Terms at any time. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our Service after those revisions become effective, you agree to be bound by the revised terms."
+          "content": "These Terms are governed by the laws of the Republic of Türkiye. Any legal disputes shall be resolved in the courts of Istanbul. If any part of these Terms is found to be invalid, the rest remains enforceable."
         },
         "contact": {
-          "title": "Contact Us",
-          "content": "If you have any questions about these Terms, please contact us at terms@motorove.app."
+          "title": "Contact",
+          "content": "For questions about these Terms, contact us at: media@motorove.app"
         }
       }
     },
     "privacy": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last Updated: September 1, 2023",
+      "lastUpdated": "Last Updated: 11.10.2025",
       "sections": {
         "introduction": {
           "title": "Introduction",
-          "content": "At Motorove, we respect your privacy and are committed to protecting it through our compliance with this policy. This policy describes the types of information we may collect from you or that you may provide when you use our Service and our practices for collecting, using, maintaining, protecting, and disclosing that information."
+          "content": "Motorove (\"Motorove\", \"we\", \"our\", or \"us\") is committed to safeguarding your privacy and ensuring the security of your personal data. This Privacy Policy outlines how we collect, process, store, share, and protect the data you provide while using the Motorove mobile application, website, and related services (collectively, the \"Services\"). By accessing or using the Motorove app or services, you agree to the practices outlined in this Privacy Policy. If you do not agree with this policy, you should not use our Services."
+        },
+        "scope": {
+          "title": "Scope of Policy",
+          "content": "This policy applies to data we collect via: The Motorove mobile application, our official website, and all features, tools, and services provided through the app (e.g., route sharing, ride recording, group activities)."
         },
         "dataCollection": {
           "title": "Information We Collect",
-          "content": "We collect several types of information from and about users of our Service, including:",
+          "content": "We collect two types of data:",
           "personalData": {
-            "title": "Personal Data",
+            "title": "a) Personal Information (may identify you)",
             "items": {
-              "item1": "Name, email address, and contact information",
-              "item2": "Account credentials",
-              "item3": "Profile information and preferences",
-              "item4": "Location data",
-              "item5": "Device information and identifiers"
+              "item1": "Full name, username, email address, phone number",
+              "item2": "Profile photo, city/region, motorcycle type, gender, riding experience (optional)",
+              "item3": "Account login credentials (hashed)",
+              "item4": "Location data (with user consent)",
+              "item5": "Ride and route activity (e.g., shared routes, reviews, group ride participation)",
+              "item6": "Subscription and billing information (if using premium features)"
             }
           },
           "usageData": {
-            "title": "Usage Data",
-            "content": "We collect information about how you interact with our Service, the pages you visit, the features you use, the time spent on the Service, and other usage patterns."
+            "title": "b) Non-Personal Data",
+            "content": "App usage logs (e.g., time of access, feature usage), device identifiers (model, OS version, unique ID), aggregated analytics data, and IP address and browser type (if using web features)."
           }
         },
         "dataUse": {
-          "title": "How We Use Your Information",
-          "content": "We use the information we collect for various purposes, including:",
+          "title": "How We Use Your Data",
+          "content": "We use the data we collect to:",
           "items": {
-            "item1": "To provide and maintain our Service",
-            "item2": "To personalize your experience",
-            "item3": "To improve our Service",
-            "item4": "To communicate with you",
-            "item5": "To protect our Service and users"
-          }
-        },
-        "dataSharing": {
-          "title": "Sharing Your Information",
-          "content": "We may share information we have collected about you in certain situations. Your information may be disclosed to service providers, for business transfers, to protect our rights, or to comply with legal requirements."
-        },
-        "location": {
-          "title": "Location Information",
-          "content": "We may collect and use information about your location when you use our Service. This helps us provide features like finding nearby motorcycle routes or events, and connecting you with other riders in your area."
-        },
-        "dataRetention": {
-          "title": "Data Retention",
-          "content": "We will retain your information for as long as your account is active or as needed to provide you services. We will also retain and use your information as necessary to comply with our legal obligations, resolve disputes, and enforce our agreements."
-        },
-        "dataSecurity": {
-          "title": "Data Security",
-          "content": "We have implemented measures designed to secure your personal information from accidental loss and from unauthorized access, use, alteration, and disclosure. However, no method of transmission over the Internet is 100% secure."
-        },
-        "yourRights": {
-          "title": "Your Rights",
-          "content": "Depending on your location, you may have certain rights regarding your personal information, including:",
-          "items": {
-            "item1": "The right to access the personal information we hold about you",
-            "item2": "The right to request correction or deletion of your personal information",
-            "item3": "The right to restrict or object to our processing of your personal information",
-            "item4": "The right to data portability"
+            "item1": "Provide core functionality (route creation, ride logging, social features)",
+            "item2": "Enable personalized recommendations and discoverability",
+            "item3": "Process payments (via third-party services like Stripe or RevenueCat)",
+            "item4": "Improve the performance, reliability, and usability of the app",
+            "item5": "Communicate with you (e.g., notifications, service updates, support)",
+            "item6": "Ensure safety, prevent abuse or fraud"
           }
         },
         "thirdParty": {
-          "title": "Third-Party Links",
-          "content": "Our Service may contain links to other websites that are not operated by us. If you click on a third-party link, you will be directed to that third party's site. We strongly advise you to review the Privacy Policy of every site you visit."
+          "title": "Third-Party Services & Integrations",
+          "content": "Motorove uses third-party services for: Analytics (Google Firebase, Amplitude, Microsoft App Center), Payment Processing (Stripe, RevenueCat - we do not store card data), Maps & Navigation (Google Maps, OpenStreetMap, Mapbox), Crash/Error Tracking (Sentry, Crashlytics). These services may collect anonymized or pseudonymized data under their own privacy policies. We ensure all integrations comply with GDPR and other relevant legislation."
+        },
+        "dataSharing": {
+          "title": "Data Sharing",
+          "content": "We do not sell your personal data. We may share data with: Service providers (e.g., analytics, hosting, customer support), authorities when required by law or to prevent fraud or abuse, and other users (e.g., if you choose to publish a route, event, or post)."
+        },
+        "userPrivacy": {
+          "title": "User Privacy Settings",
+          "content": "You can control visibility of your: Profile and profile data, routes and rides (public, friends only, private), group membership and posts, and location tracking during rides (opt-in only). You may delete your account or request data deletion via the app or by emailing media@motorove.app."
+        },
+        "cookies": {
+          "title": "Cookies & Tracking",
+          "content": "Our website and app may use cookies and similar technologies for: Session management, user experience personalization, and usage analytics. You may disable cookies in your browser settings."
         },
         "children": {
           "title": "Children's Privacy",
-          "content": "Our Service is not intended for anyone under the age of 18. We do not knowingly collect personal information from children under 18. If we learn we have collected personal information from a child under 18, we will delete that information."
+          "content": "Motorove is not intended for users under the age of 16. We do not knowingly collect data from minors. If we become aware of such collection, we will delete the data immediately."
+        },
+        "dataRetention": {
+          "title": "Data Storage & Security",
+          "content": "Data is stored securely in encrypted databases (EU or compliant data centers). We follow industry-standard security practices. No method of storage or transmission is 100% secure."
+        },
+        "yourRights": {
+          "title": "Your Rights (Under GDPR and Similar Laws)",
+          "content": "You have the right to:",
+          "items": {
+            "item1": "Access your personal data",
+            "item2": "Correct or update your data",
+            "item3": "Delete your account and associated data",
+            "item4": "Withdraw consent at any time",
+            "item5": "File a complaint with your local Data Protection Authority"
+          },
+          "contact": "To exercise your rights, contact: media@motorove.app"
         },
         "changes": {
-          "title": "Changes to This Privacy Policy",
-          "content": "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the 'Last Updated' date."
+          "title": "Policy Updates",
+          "content": "We may update this policy to reflect changes to our practices or legal requirements. Updated versions will be posted in-app or on our website. Continued use of the app after such updates implies consent."
         },
         "contact": {
-          "title": "Contact Us",
-          "content": "If you have any questions about this Privacy Policy, please contact us at privacy@motorove.app."
+          "title": "Contact",
+          "content": "For any questions, concerns, or data-related requests: Motorove, Email: media@motorove.app. Only the English version of this policy is binding."
         }
       }
     }

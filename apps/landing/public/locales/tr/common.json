@@ -11,20 +11,18 @@
     },
     "subheadline": "Senin gibi motosiklet tutkunlarını yollarda ve aramızda görmekten çok mutluyuz!",
     "cta": {
-      "button": "Beta'ya Katıl",
-      "badge": "BETA"
+      "button": "Beta'ya Katıl"
     },
     "altText": {
       "screen1": "Sürüş takibi ve navigasyon gösteren Motorove uygulama arayüzü"
     }
   },
   "footer": {
-    "description": "Motorcuları birbirine bağlayan, rotaları keşfeden ve etkinliklere katılan nihai motosiklet uygulaması.",
+    "description": "Motosiklet tutkunlarına özel bir motosiklet uygulaması",
 
     "legal": {
       "terms": "Hizmet Şartları",
       "privacy": "Gizlilik Politikası",
-      "cookies": "Çerez Politikası",
       "contact": "İletişim"
     },
     "copyright": "© {{year}} Motorove. Tüm hakları saklıdır."
@@ -34,10 +32,9 @@
     "tr": "Türkçe"
   },
   "finalCTA": {
-    "heading": "Bir sonraki harika sürüşün seni bekliyor.",
-    "subheading": "İndirmesi ücretsiz. Motorcular tarafından, motorcular için yapıldı.",
+    "heading": "Aramızda Olmana Çok Sevindik!",
+    "subheading": "Motorcular tarafından, motorcular için yapıldı.",
     "button": "Beta'ya Katıl",
-    "badge": "BETA",
     "features": {
       "free": {
         "title": "Ücretsiz",
@@ -46,33 +43,11 @@
       "platforms": {
         "title": "iOS & Android",
         "description": "Her iki platformda da mevcut"
-      },
-      "offlineMaps": {
-        "title": "Çevrimdışı Haritalar",
-        "description": "Sinyal olmadan navigasyon"
       }
     }
   },
   "socialProof": {
     "text": "Yola çık, Rüzgarı hisset, Anılarını paylaş"
-  },
-  "map": {
-    "heading": "Bul. Uyar. Koru.",
-    "subheading": "Sadece navigasyondan daha fazlası. İhtiyacın olduğunda hizmetleri bul, diğer sürücüleri tehlikeler hakkında uyar ve acil durumlarda yardım al.",
-    "features": {
-      "findNearby": {
-        "title": "Yakındaki İşletmeleri Bul",
-        "description": "İhtiyaçlarına göre akıllı filtrelerle yakındaki tamir atölyeleri, benzin istasyonları ve motosiklet servislerini keşfet."
-      },
-      "sharedWarnings": {
-        "title": "Paylaşılan Uyarılar",
-        "description": "Harita üzerinde gerçek zamanlı olarak diğer sürücüleri yol tehlikeleri, kazalar veya tehlikeli durumlar hakkında uyar."
-      },
-      "emergency": {
-        "title": "Acil Durum",
-        "description": "Yardıma ihtiyacın olduğunda sürüş grubuna ve acil durum kişilerine tek dokunuşla acil durum uyarıları gönder."
-      }
-    }
   },
   "notFound": {
     "title": "404",
@@ -102,7 +77,7 @@
     },
     "warning": {
       "heading": "Güvende Ol! Bağlantıda Kal!",
-      "body": "Yoldaki tehlikelere karşı topluluğu uyar. Tehlikeye yakın olan herkese bilgilendir",
+      "body": "Yoldaki tehlikelere karşı topluluğu uyar. Tehlikeye yakın olan herkesi bilgilendir.",
       "visualAlt": "Uyarı arayüzü",
       "thumbnails": {
         "planning": {
@@ -111,8 +86,8 @@
       }
     },
     "emergency": {
-      "heading": "İhtiyacın Olanı, İhtiyacın Olduğunda Bul!",
-      "body": "Yakıtın mı bitti? Lastiğin mi patladı? İstersen katıldığın gruplardan ya da istersen yakınındaki diğer sürücülerden yardım talep et.",
+      "heading": "Yardımlaşmak Motosiklet Kültürünün Doğasında Var!",
+      "body": "Yakıtın mı bitti? Lastiğin mi patladı? İstersen katıldığın gruplardan ya da yakınındaki diğer sürücülerden yardım talep et.",
       "visualAlt": "Acil durum bildirimi arayüzü",
       "thumbnails": {
         "notification": {
@@ -125,8 +100,8 @@
     },
     "event": {
       "heading": "Yalnız Sürmek Zorunda Değilsin!",
-      "body": "\"Buluşma\", \"Sürüş\" veya \"Kamp\" için birkaç adımda etkinliğini oluştur. İstersen sadece arkadaşlarını veya grupları davet et. Sen de başka etkinlikleri keşfet ve katıl!",
-      "visualAlt": "Yakındaki işletmeler ve hizmet bulucu",
+      "body": "\"Buluşma\", \"Sürüş\" veya \"Kamp\" için birkaç adımda etkinliğini oluştur. İstersen sadece arkadaşlarını ya da grupları davet et. Sen de başka etkinlikleri keşfet ve katıl!",
+      "visualAlt": "Etkinlik arayüzü",
       "thumbnails": {
         "reminder": {
           "label": "Hatırlatıcı"
@@ -139,284 +114,167 @@
         }
       }
     },
-    "staySafe": {
-      "heading": "Güvende kal, bağlantıda kal.",
-      "body": "Toplulukla tehlikeler, kazalar veya yol koşulları hakkında uyarıları paylaş. Tek dokunuşla acil durum uyarıları, en çok ihtiyacın olduğunda grubuna ve kişilerine bildirim gönderir.",
-      "visualAlt": "Güvenlik özellikleri ve acil durum uyarıları",
+    "group": {
+      "heading": "Ortak Zevklerin Buluşma Noktası!",
+      "body": "Seninle benzer zevkleri paylaşan kişileri keşfet. İstersen grup oluştur. İstersen varolan gruplara katıl. Birlikte sürüş yap, buluşmalara katıl ve kamp yap!",
+      "visualAlt": "Grup arayüzü",
       "thumbnails": {
-        "hazardAlerts": {
-          "label": "Tehlike Uyarıları",
-          "alt": "Tehlike uyarı sistemi"
+        "share": {
+          "label": "Grup İçi Paylaşımlar"
         },
-        "emergencySOS": {
-          "label": "Acil Durum SOS",
-          "alt": "Acil durum SOS özelliği"
+        "privacy": {
+          "label": "Gizlilik"
         },
-        "contactAlerts": {
-          "label": "Kişi Uyarıları",
-          "alt": "Acil durum kişi uyarıları"
+        "event": {
+          "label": "Grup İçi Etkinlikler"
         },
-        "mapMarkers": {
-          "label": "Harita İşaretleri",
-          "alt": "Tehlike harita işaretleri"
-        }
-      }
-    },
-    "yourMemories": {
-      "heading": "Sürüşlerin, anıların.",
-      "body": "En iyi anlarını yakala ve paylaş. Topluluk gönderilerine göz at, yeni rotalar keşfet ve açık yol tutkunu paylaşan sürücülerle bağlantı kur.",
-      "visualAlt": "Sosyal akış ve topluluk gönderileri",
-      "thumbnails": {
-        "photoSharing": {
-          "label": "Fotoğraf Paylaşımı",
-          "alt": "Fotoğraf paylaşma özelliği"
-        },
-        "socialFeed": {
-          "label": "Sosyal Akış",
-          "alt": "Gönderileri beğen ve yorum yap"
-        },
-        "discover": {
-          "label": "Keşfet",
-          "alt": "Yeni rotalar keşfet"
-        },
-        "followRiders": {
-          "label": "Sürücüleri Takip Et",
-          "alt": "Diğer sürücüleri takip et"
+         "chat": {
+          "label": "Grup İçi Mesajlaşma (Yakında)"
         }
       }
     }
   },
   "legal": {
-    "cookies": {
-      "title": "Çerez Politikası",
-      "lastUpdated": "Son Güncelleme: 1 Eylül 2023",
-      "sections": {
-        "introduction": {
-          "title": "Giriş",
-          "content": "Bu Çerez Politikası, Motorove'un web sitemizi ziyaret ettiğinizde sizi tanımak için çerezleri ve benzer teknolojileri nasıl kullandığını açıklar. Bu teknolojilerin ne olduğunu ve neden kullandığımızı, ayrıca bunların kullanımını kontrol etme haklarınızı açıklar."
-        },
-        "whatAreCookies": {
-          "title": "Çerezler Nedir?",
-          "content": "Çerezler, bir web sitesini ziyaret ettiğinizde bilgisayarınıza veya mobil cihazınıza yerleştirilen küçük veri dosyalarıdır. Çerezler, web sitesi sahipleri tarafından web sitelerinin çalışmasını veya daha verimli çalışmasını sağlamak ve raporlama bilgileri sağlamak için yaygın olarak kullanılır."
-        },
-        "typesOfCookies": {
-          "title": "Kullandığımız Çerez Türleri",
-          "essential": {
-            "title": "Temel Çerezler",
-            "content": "Bu çerezler, web sitesinin çalışması için gereklidir ve sistemlerimizde kapatılamaz. Genellikle yalnızca gizlilik tercihlerinizi ayarlama, oturum açma veya formları doldurma gibi hizmet taleplerinde bulunma eylemlerinize yanıt olarak ayarlanırlar."
-          },
-          "preferences": {
-            "title": "Tercih Çerezleri",
-            "content": "Bu çerezler, bir web sitesinin tercih ettiğiniz dil veya bulunduğunuz bölge gibi web sitesinin davranış şeklini veya görünümünü değiştiren bilgileri hatırlamasını sağlar."
-          },
-          "analytics": {
-            "title": "Analiz Çerezleri",
-            "content": "Bu çerezler, ziyaretleri ve trafik kaynaklarını saymamıza olanak tanır, böylece sitemizin performansını ölçebilir ve iyileştirebiliriz. Hangi sayfaların en popüler ve en az popüler olduğunu bilmemize ve ziyaretçilerin sitede nasıl hareket ettiğini görmemize yardımcı olurlar."
-          },
-          "marketing": {
-            "title": "Pazarlama Çerezleri",
-            "content": "Bu çerezler, reklam ortaklarımız tarafından sitemiz aracılığıyla ayarlanabilir. Bu şirketler tarafından ilgi alanlarınızın bir profilini oluşturmak ve diğer sitelerde size ilgili reklamlar göstermek için kullanılabilirler."
-          }
-        },
-        "cookiesWeUse": {
-          "title": "Kullandığımız Özel Çerezler",
-          "content": "Aşağıda web sitemizde kullandığımız çerezlerin ayrıntılı bir listesi bulunmaktadır:",
-          "table": {
-            "name": "İsim",
-            "provider": "Sağlayıcı",
-            "purpose": "Amaç",
-            "expiry": "Süre",
-            "type": "Tür"
-          },
-          "cookies": {
-            "session": {
-              "name": "SESSION_ID",
-              "provider": "Motorove",
-              "purpose": "Kullanıcı oturumlarını ve giriş durumunu korumak için",
-              "expiry": "Oturum",
-              "type": "Temel"
-            },
-            "language": {
-              "name": "NEXT_LOCALE",
-              "provider": "Motorove",
-              "purpose": "Dil tercihinizi hatırlamak için",
-              "expiry": "1 Yıl",
-              "type": "Tercih"
-            },
-            "analytics": {
-              "name": "_ga, _gid",
-              "provider": "Google Analytics",
-              "purpose": "Web sitesi kullanımını ve kullanıcı davranışını izlemek için",
-              "expiry": "2 Yıl",
-              "type": "Analiz"
-            }
-          }
-        },
-        "cookieManagement": {
-          "title": "Çerezler Nasıl Yönetilir",
-          "content": "Çoğu tarayıcı, çerezleri kabul etmeyi reddetmenize ve çerezleri silmenize olanak tanır. Bunu yapma yöntemleri tarayıcıdan tarayıcıya ve sürümden sürüme değişir.",
-          "browser": {
-            "title": "Tarayıcı ayarlarınızı düzenleyerek çerezleri engelleyin",
-            "content": "Tarayıcınızda çerezleri nasıl yöneteceğiniz hakkında bilgiyi aşağıdaki bağlantılarda bulabilirsiniz:",
-            "chrome": "Google Chrome",
-            "firefox": "Mozilla Firefox",
-            "safari": "Apple Safari",
-            "edge": "Microsoft Edge"
-          }
-        },
-        "doNotTrack": {
-          "title": "İzleme Yapma",
-          "content": "Bazı tarayıcılarda, web sitelerine çevrimiçi etkinliklerinizin izlenmesini istemediğinizi söylemenizi sağlayan bir 'İzleme Yapma' özelliği vardır. Şu anda tarayıcı 'İzleme Yapma' sinyallerine yanıt vermiyoruz."
-        },
-        "updates": {
-          "title": "Bu Çerez Politikasındaki Güncellemeler",
-          "content": "Bu Çerez Politikasını zaman zaman, örneğin kullandığımız çerezlerdeki değişiklikleri yansıtmak veya diğer operasyonel, yasal veya düzenleyici nedenlerle güncelleyebiliriz. Bu nedenle, çerezlerin ve ilgili teknolojilerin kullanımımız hakkında bilgi sahibi olmak için bu Çerez Politikasını düzenli olarak yeniden ziyaret edin."
-        },
-        "contact": {
-          "title": "Bize Ulaşın",
-          "content": "Çerezlerin veya diğer teknolojilerin kullanımımız hakkında sorularınız varsa, lütfen bize privacy@motorove.app adresinden e-posta gönderin."
-        }
-      }
-    },
     "terms": {
-      "title": "Hizmet Şartları",
-      "lastUpdated": "Son Güncelleme: 1 Eylül 2023",
+      "title": "Hizmet Koşulları",
+      "lastUpdated": "Son Güncelleme: 11.10.2025",
       "sections": {
-        "introduction": {
-          "title": "Giriş",
-          "content": "Motorove'a hoş geldiniz. Web sitemize erişerek ve hizmetlerimizi kullanarak, bu Hizmet Şartlarına bağlı kalmayı kabul edersiniz. Lütfen platformumuzu kullanmadan önce bunları dikkatlice okuyun."
+        "generalOverview": {
+          "title": "Genel Bilgilendirme",
+          "content": "Motorove, motosiklet kullanıcılarının deneyimini geliştirmeyi amaçlayan dijital bir platform ve mobil uygulamadır. Kullanıcılar, rota keşfetme, planlama, kayıt alma, paylaşma, grup sürüşlerine katılma, yakın hizmet noktalarını bulma ve motosiklet topluluğu ile etkileşime geçme imkânına sahiptir. Platforma katkı sağlayan kullanıcılar; rota, etkinlik ve ilgili içerikleri yükleyerek katkıda bulunurlar. Motorove, yürürlükteki veri koruma mevzuatına riayet eder. Kullanıcılar, hangi kişisel verilerinin paylaşılacağını belirleme hakkını saklı tutar."
         },
-        "definitions": {
-          "title": "Tanımlar",
-          "content": "'Hizmet', Motorove web sitesi ve mobil uygulamasını ifade eder. 'Kullanıcı', Hizmete erişen veya kullanan herhangi bir kişiyi ifade eder. 'İçerik', Hizmete yüklenen, indirilen veya görünen tüm bilgileri, metinleri, grafikleri, fotoğrafları, videoları veya diğer materyalleri ifade eder."
+        "acceptance": {
+          "title": "Koşulların Kabulü",
+          "content": "Motorove platformuna (\"Platform\") kayıt olarak veya hizmetlerini kullanarak, bu Hizmet Koşulları'nı (\"Koşullar\") okuduğunuzu, anladığınızı ve kabul ettiğinizi beyan etmiş olursunuz. Platformun herhangi bir özelliğine erişim, bu Koşulları kabul etmenize bağlıdır. Koşullar; mobil uygulamalar (iOS ve Android) ile motorove.app'in alt alan adları dahil tüm Motorove kanallarındaki kullanımı kapsar. Motorove, bu Koşulları dilediği zaman değiştirme hakkını saklı tutar. Güncel versiyon, web sitesinde ve uygulama içi kayıt sürecinde yayınlanır."
         },
-        "accountRegistration": {
-          "title": "Hesap Kaydı",
-          "content": "Hizmetin belirli özelliklerini kullanmak için bir hesap için kayıt olmanız gerekir. Doğru ve eksiksiz bilgi sağlamalı ve hesap bilgilerinizi güncel tutmalısınız. Hesabınızı ve şifrenizi korumaktan siz sorumlusunuz. Hesabınız altında gerçekleşen herhangi bir etkinlikten siz sorumlusunuz."
+        "scopeOfServices": {
+          "title": "Hizmetlerin Kapsamı",
+          "content": "Motorove, kullanıcılarına şu hizmetleri sunar: Rota keşfi ve planlaması, GPS ile sürüş takibi ve rota kaydı, grup sürüşü oluşturma ve katılım, motosiklet temalı sosyal içerik paylaşımı, yorum, puanlama ve medya yükleme, motosiklet ile ilgili hizmet ve noktaların keşfi, bildirimler ve canlı güncellemeler, isteğe bağlı çevrimdışı harita indirme, ek özellikler sunan isteğe bağlı PRO üyelik. Kullanıcılar, Motorove'un hizmet sürekliliğini veya üçüncü taraflardan (örn. hava durumu, trafik, harita verileri) gelen bilgilerin doğruluğunu garanti etmediğini kabul ederler. Kullanıcılar, platform üzerindeki tüm eylemlerinden (sürüş planlaması, rota seçimi, sürüş güvenliği vb.) şahsen sorumludur."
         },
-        "userContent": {
-          "title": "Kullanıcı İçeriği",
-          "content": "Hizmete gönderdiğiniz herhangi bir içeriğin mülkiyet haklarını siz saklarsınız. İçerik göndererek, Motorove'a bu içeriği herhangi bir medya veya dağıtım yönteminde kullanmak, kopyalamak, çoğaltmak, işlemek, uyarlamak, değiştirmek, yayınlamak, iletmek, görüntülemek ve dağıtmak için dünya çapında, münhasır olmayan, telifsiz bir lisans verirsiniz."
+        "userRegistration": {
+          "title": "Kullanıcı Kaydı",
+          "content": "Kullanıcılar, mobil uygulama veya web üzerinden ücretsiz kayıt olabilir. Kısıtlı özelliklere sahip bir deneme modu bulunabilir. Yalnızca gerçek kişiler kayıt olabilir. Ticari hesaplar, önceden onay gerektirir. Kullanıcılar 18 yaşından büyük olmalı veya ebeveyn/vasi onayı almış olmalıdır. Her kullanıcı yalnızca bir hesap açabilir. Çift hesaplar ve sahte kimlikler kaldırılır. Kayıt olan kullanıcılar otomatik olarak ücretsiz \"Temel Üyelik\" planına dahil edilir. PRO Üyelik hakkında detaylar Bölüm 5'te açıklanmıştır. Kayıt; geçerli bir e-posta adresi ve şifre ile veya üçüncü taraf kimlik doğrulayıcılar (Google, Apple ID vb.) aracılığıyla yapılabilir. Kullanıcılar, doğru bilgi sağlamakla ve güncellemelerden sorumludur. Kimlik doğrulaması Motorove'un sorumluluğunda değildir. Motorove, dilediği zaman ve sebep göstermeksizin hesapları askıya alma veya silme hakkını saklı tutar."
         },
-        "prohibitedActivities": {
-          "title": "Yasaklı Faaliyetler",
-          "content": "Aşağıdaki yasaklı faaliyetlerden hiçbirine katılmamayı kabul edersiniz:",
-          "items": {
-            "item1": "Herhangi bir yasayı, kuralı veya düzenlemeyi ihlal etmek.",
-            "item2": "Karalayıcı, müstehcen veya başka türlü sakıncalı içerik yayınlamak.",
-            "item3": "Herhangi bir kişi veya kuruluşun kimliğine bürünmek veya bir kişi veya kuruluşla olan bağlantınızı yanlış beyan etmek.",
-            "item4": "Hizmete veya Hizmete bağlı sunuculara veya ağlara müdahale etmek veya bunları bozmak.",
-            "item5": "Hizmete veya kullanıcı hesaplarına yetkisiz erişim elde etmeye çalışmak."
-          }
+        "paidMembership": {
+          "title": "Ücretli Üyelik (PRO)",
+          "content": "PRO üyelik yalnızca kayıtlı kullanıcılar tarafından edinilebilir. Satın alma şu kanallarla yapılabilir: Uygulama mağazaları (Apple App Store / Google Play Store) veya Motorove web sitesi (güvenli ödeme altyapısı ile örn. Stripe). PRO abonelikleri aylık veya yıllık olabilir. Tüm ücretlendirme ve şartlar satın alma öncesinde açıkça sunulur. Abonelikler otomatik olarak yenilenir. Yenileme öncesi iptal edilmediği sürece ücret tahsilatı devam eder. Her kullanıcıya yalnızca bir kez 14 günlük ücretsiz deneme hakkı tanınabilir. Bu süre içinde iptal eden kullanıcılardan ücret alınmaz. Başarısız ödeme işlemlerinden kaynaklanan ücretler kullanıcı sorumluluğundadır. PRO kullanıcıları, aksi belirtilmedikçe Temel kullanıcılarla aynı genel koşullara tabidir."
         },
-        "intellectualProperty": {
-          "title": "Fikri Mülkiyet",
-          "content": "Hizmet ve orijinal içeriği, özellikleri ve işlevselliği Motorove'a aittir ve uluslararası telif hakkı, ticari marka, patent, ticari sır ve diğer fikri mülkiyet veya mülkiyet hakları yasaları tarafından korunmaktadır."
+        "platformConduct": {
+          "title": "Kullanıcı Davranışı ve İçerik",
+          "content": "Kullanıcılar, yasa dışı, taciz edici, iftira içeren, ayrımcı veya müstehcen içerikler paylaşamaz. Üçüncü kişilere ait hakların ihlali yasaktır. Tüm içerikler kullanıcıya ait olmalı veya gerekli izinlere sahip olunmalıdır. Kullanıcılar, yükledikleri içeriklerin mülkiyetini korur; ancak Motorove'a içeriklerini uygulama dahilinde kullanma, gösterme ve dağıtma hakkını (dünya genelinde, münhasır olmayan lisans) verir. Koşullara aykırı içerikler Motorove tarafından kaldırılabilir, kullanıcılar engellenebilir. Kullanıcılar başkalarının verilerine izinsiz erişemez. Kişisel verilerin paylaşımı tamamen gönüllüdür. Motorove, kullanıcıların gönüllü paylaşımlarının kötüye kullanımından sorumlu değildir. Kullanıcılar, yükledikleri verilerin yedeğini almakla yükümlüdür."
         },
         "termination": {
-          "title": "Fesih",
-          "content": "Hizmet Şartlarını ihlal etmeniz de dahil olmak üzere, herhangi bir nedenle, önceden haber vermeksizin veya sorumluluk olmaksızın hesabınızı derhal feshedebilir veya askıya alabiliriz."
-        },
-        "disclaimer": {
-          "title": "Sorumluluk Reddi",
-          "content": "Hizmet 'OLDUĞU GİBİ' ve 'MEVCUT OLDUĞU ŞEKLİYLE' sağlanır. Hizmet, satılabilirlik, belirli bir amaca uygunluk, ihlal etmeme veya performans süreci gibi zımni garantiler de dahil olmak üzere, açık veya zımni herhangi bir garanti olmaksızın sağlanır."
+          "title": "Hesabın Silinmesi",
+          "content": "Kullanıcılar, diledikleri zaman uygulama veya web sitesi üzerinden hesaplarını silebilirler. Silme işlemi kalıcıdır. Koşulları veya yasal hükümleri ihlal eden kullanıcıların hesapları Motorove tarafından askıya alınabilir veya silinebilir."
         },
         "limitation": {
-          "title": "Sorumluluk Sınırlaması",
-          "content": "Hiçbir durumda Motorove, Hizmete erişiminizden veya kullanımınızdan veya Hizmete erişememe veya kullanamama durumundan kaynaklanan kar, veri, kullanım, iyi niyet veya diğer maddi olmayan kayıplar da dahil olmak üzere herhangi bir dolaylı, arızi, özel, sonuç olarak ortaya çıkan veya cezai zararlardan sorumlu olmayacaktır."
+          "title": "Sorumluluğun Sınırlandırılması",
+          "content": "Platform \"olduğu gibi\" sunulmaktadır. Hizmet sürekliliği, veri doğruluğu veya özelliklerin mevcudiyeti garanti edilmez. Sürüş güvenliği, rota kullanımı ve diğer kullanıcılarla etkileşimden doğan tüm risk kullanıcıya aittir. Üçüncü taraf hizmetler, içerikler ve kullanıcı paylaşımlarından doğabilecek sorumluluk Motorove'a ait değildir."
+        },
+        "privacy": {
+          "title": "Gizlilik ve Veri Koruma",
+          "content": "Kullanıcı verilerinin toplanması, işlenmesi ve saklanması Motorove Gizlilik Politikası kapsamında düzenlenmiştir. Platformu kullanarak Gizlilik Politikası'nı kabul etmiş olursunuz."
+        },
+        "modifications": {
+          "title": "Değişiklikler",
+          "content": "Motorove, Hizmet Koşulları ve Gizlilik Politikasını dilediği zaman değiştirme hakkına sahiptir. Güncellemeler uygulama içinden veya e-posta ile duyurulur. Platformu kullanmaya devam etmeniz, değişiklikleri kabul ettiğiniz anlamına gelir."
         },
         "governing": {
-          "title": "Geçerli Hukuk",
-          "content": "Bu Şartlar, çatışan hukuk hükümleri dikkate alınmaksızın Türkiye yasalarına göre yönetilecek ve yorumlanacaktır."
-        },
-        "changes": {
-          "title": "Şartlardaki Değişiklikler",
-          "content": "Bu Şartları herhangi bir zamanda değiştirme veya değiştirme hakkını saklı tutarız. Önemli bir değişikliğin ne olduğu bizim takdirimize bağlı olarak belirlenecektir. Bu revizyonlar yürürlüğe girdikten sonra Hizmetimize erişmeye veya kullanmaya devam ederek, revize edilmiş şartlara bağlı kalmayı kabul edersiniz."
+          "title": "Yürürlükteki Hukuk ve Yetkili Mahkeme",
+          "content": "Bu Koşullar, Türkiye Cumhuriyeti yasalarına tabidir. Taraflar, İstanbul Mahkemeleri ve İcra Dairelerinin münhasır yetkisini kabul eder. Herhangi bir hükmün geçersiz sayılması, diğer hükümlerin geçerliliğini etkilemez."
         },
         "contact": {
-          "title": "Bize Ulaşın",
-          "content": "Bu Şartlar hakkında sorularınız varsa, lütfen bize terms@motorove.app adresinden ulaşın."
+          "title": "İletişim",
+          "content": "Bu Koşullar hakkında soru veya talepleriniz için: media@motorove.app"
         }
       }
     },
     "privacy": {
       "title": "Gizlilik Politikası",
-      "lastUpdated": "Son Güncelleme: 1 Eylül 2023",
+      "lastUpdated": "Son Güncelleme: 11.10.2025",
       "sections": {
         "introduction": {
           "title": "Giriş",
-          "content": "Motorove'da gizliliğinize saygı duyuyoruz ve bu politikaya uyarak onu korumaya kararlıyız. Bu politika, Hizmetimizi kullandığınızda sizden toplayabileceğimiz veya sağlayabileceğiniz bilgi türlerini ve bu bilgileri toplama, kullanma, koruma ve ifşa etme uygulamalarımızı açıklar."
+          "content": "Motorove (\"Motorove\", \"biz\", \"bizim\" veya \"tarafımız\") olarak, kişisel verilerinizin gizliliğini korumayı ve verilerinizin güvenliğini sağlamayı taahhüt ediyoruz. Bu Gizlilik Politikası, Motorove mobil uygulaması, web sitesi ve ilgili hizmetler (topluca \"Hizmetler\") aracılığıyla sağladığınız verilerin nasıl toplandığını, işlendiğini, saklandığını, paylaşıldığını ve korunduğunu açıklar. Motorove uygulamasına veya hizmetlerine erişerek ya da bunları kullanarak bu Gizlilik Politikası'nda belirtilen uygulamaları kabul etmiş olursunuz. Bu politikayı kabul etmiyorsanız Hizmetlerimizi kullanmamalısınız."
+        },
+        "scope": {
+          "title": "Politikanın Kapsamı",
+          "content": "Bu politika aşağıdaki yollarla topladığımız verilere uygulanır: Motorove mobil uygulaması, resmi web sitemiz ve uygulama aracılığıyla sunulan tüm özellikler, araçlar ve hizmetler (örn. rota paylaşımı, sürüş kaydı, grup etkinlikleri)."
         },
         "dataCollection": {
           "title": "Topladığımız Bilgiler",
-          "content": "Hizmetimizin kullanıcılarından ve hakkında çeşitli türde bilgiler topluyoruz, bunlar şunları içerir:",
+          "content": "İki tür veri toplarız:",
           "personalData": {
-            "title": "Kişisel Veriler",
+            "title": "a) Kişisel Bilgiler (kimliğinizi tanımlayabilir)",
             "items": {
-              "item1": "Ad, e-posta adresi ve iletişim bilgileri",
-              "item2": "Hesap kimlik bilgileri",
-              "item3": "Profil bilgileri ve tercihleri",
-              "item4": "Konum verileri",
-              "item5": "Cihaz bilgileri ve tanımlayıcıları"
+              "item1": "Ad soyad, kullanıcı adı, e-posta adresi, telefon numarası",
+              "item2": "Profil fotoğrafı, şehir/bölge, motosiklet tipi, cinsiyet, sürüş deneyimi (isteğe bağlı)",
+              "item3": "Hesap giriş bilgileri (şifrelenmiş şekilde)",
+              "item4": "Konum verisi (kullanıcının izniyle)",
+              "item5": "Sürüş ve rota etkinlikleri (örn. paylaşılan rotalar, yorumlar, grup sürüş katılımları)",
+              "item6": "Abonelik ve faturalandırma bilgileri (premium özellikler kullanılıyorsa)"
             }
           },
           "usageData": {
-            "title": "Kullanım Verileri",
-            "content": "Hizmetimizle nasıl etkileşimde bulunduğunuz, ziyaret ettiğiniz sayfalar, kullandığınız özellikler, Hizmette geçirilen süre ve diğer kullanım kalıpları hakkında bilgi topluyoruz."
+            "title": "b) Kişisel Olmayan Veriler",
+            "content": "Uygulama kullanım günlükleri (örn. erişim zamanı, kullanılan özellikler), cihaz tanımlayıcıları (model, işletim sistemi sürümü, benzersiz ID), toplu analiz verileri ve IP adresi ve tarayıcı türü (web özellikleri kullanılıyorsa)."
           }
         },
         "dataUse": {
-          "title": "Bilgilerinizi Nasıl Kullanıyoruz",
-          "content": "Topladığımız bilgileri aşağıdakiler de dahil olmak üzere çeşitli amaçlar için kullanıyoruz:",
+          "title": "Verilerinizi Nasıl Kullanırız",
+          "content": "Topladığımız verileri şu amaçlarla kullanırız:",
           "items": {
-            "item1": "Hizmetimizi sağlamak ve sürdürmek için",
-            "item2": "Deneyiminizi kişiselleştirmek için",
-            "item3": "Hizmetimizi geliştirmek için",
-            "item4": "Sizinle iletişim kurmak için",
-            "item5": "Hizmetimizi ve kullanıcılarımızı korumak için"
-          }
-        },
-        "dataSharing": {
-          "title": "Bilgilerinizi Paylaşma",
-          "content": "Belirli durumlarda hakkınızda topladığımız bilgileri paylaşabiliriz. Bilgileriniz hizmet sağlayıcılara, iş transferleri için, haklarımızı korumak için veya yasal gerekliliklere uymak için ifşa edilebilir."
-        },
-        "location": {
-          "title": "Konum Bilgisi",
-          "content": "Hizmetimizi kullandığınızda konumunuz hakkında bilgi toplayabilir ve kullanabiliriz. Bu, yakındaki motosiklet rotalarını veya etkinliklerini bulma ve bölgenizdeki diğer sürücülerle bağlantı kurma gibi özellikleri sağlamamıza yardımcı olur."
-        },
-        "dataRetention": {
-          "title": "Veri Saklama",
-          "content": "Hesabınız aktif olduğu sürece veya size hizmet sağlamak için gerektiği sürece bilgilerinizi saklayacağız. Ayrıca yasal yükümlülüklerimize uymak, anlaşmazlıkları çözmek ve anlaşmalarımızı uygulamak için gerektiği şekilde bilgilerinizi saklayacak ve kullanacağız."
-        },
-        "dataSecurity": {
-          "title": "Veri Güvenliği",
-          "content": "Kişisel bilgilerinizi kazara kayıptan ve yetkisiz erişimden, kullanımdan, değişiklikten ve ifşadan korumak için tasarlanmış önlemler uyguladık. Ancak, İnternet üzerinden iletim yönteminin %100 güvenli olduğu söylenemez."
-        },
-        "yourRights": {
-          "title": "Haklarınız",
-          "content": "Konumunuza bağlı olarak, kişisel bilgilerinizle ilgili belirli haklara sahip olabilirsiniz, bunlar şunları içerir:",
-          "items": {
-            "item1": "Hakkınızda tuttuğumuz kişisel bilgilere erişme hakkı",
-            "item2": "Kişisel bilgilerinizin düzeltilmesini veya silinmesini talep etme hakkı",
-            "item3": "Kişisel bilgilerinizin işlenmesini kısıtlama veya itiraz etme hakkı",
-            "item4": "Veri taşınabilirliği hakkı"
+            "item1": "Temel işlevselliği sağlamak (rota oluşturma, sürüş kaydı, sosyal özellikler)",
+            "item2": "Kişiselleştirilmiş öneriler ve keşif imkânı sunmak",
+            "item3": "Ödemeleri işlemek (Stripe veya RevenueCat gibi üçüncü taraflar aracılığıyla)",
+            "item4": "Uygulamanın performansını, güvenilirliğini ve kullanılabilirliğini iyileştirmek",
+            "item5": "Sizinle iletişime geçmek (örn. bildirimler, hizmet güncellemeleri, destek)",
+            "item6": "Güvenliği sağlamak, kötüye kullanımı veya dolandırıcılığı önlemek"
           }
         },
         "thirdParty": {
-          "title": "Üçüncü Taraf Bağlantıları",
-          "content": "Hizmetimiz, tarafımızca işletilmeyen diğer web sitelerine bağlantılar içerebilir. Bir üçüncü taraf bağlantısına tıklarsanız, o üçüncü tarafın sitesine yönlendirileceksiniz. Ziyaret ettiğiniz her sitenin Gizlilik Politikasını incelemenizi şiddetle tavsiye ederiz."
+          "title": "Üçüncü Taraf Hizmetler ve Entegrasyonlar",
+          "content": "Motorove şu üçüncü taraf hizmetleri kullanır: Analitik (Google Firebase, Amplitude, Microsoft App Center), Ödeme İşleme (Stripe, RevenueCat - kart bilgisi saklanmaz), Haritalar ve Navigasyon (Google Maps, OpenStreetMap, Mapbox), Hata/Çökme İzleme (Sentry, Crashlytics). Bu hizmetler kendi gizlilik politikaları kapsamında anonimleştirilmiş veya takma adla toplanmış veriler işleyebilir. Tüm entegrasyonların GDPR ve ilgili mevzuatlara uyumlu olmasını sağlıyoruz."
+        },
+        "dataSharing": {
+          "title": "Veri Paylaşımı",
+          "content": "Kişisel verilerinizi satmayız. Şu taraflarla veri paylaşımı olabilir: Hizmet sağlayıcılar (örn. analiz, barındırma, müşteri desteği), yasal zorunluluk veya dolandırıcılığı önlemek amacıyla yetkililer ve diğer kullanıcılar (örn. bir rota, etkinlik veya gönderi paylaşırsanız)."
+        },
+        "userPrivacy": {
+          "title": "Kullanıcı Gizlilik Ayarları",
+          "content": "Şu alanların görünürlüğünü kontrol edebilirsiniz: Profil ve profil verileri, rotalar ve sürüşler (herkese açık, sadece arkadaşlar, özel), grup üyeliği ve paylaşımlar, sürüş sırasında konum takibi (yalnızca izin verilirse). Hesabınızı uygulama içinden veya media@motorove.app adresine e-posta göndererek silebilir veya verilerinizin silinmesini talep edebilirsiniz."
+        },
+        "cookies": {
+          "title": "Çerezler ve Takip Teknolojileri",
+          "content": "Web sitemiz ve uygulamamız şu amaçlarla çerezler ve benzeri teknolojiler kullanabilir: Oturum yönetimi, kullanıcı deneyimini kişiselleştirme ve kullanım analizleri. Çerezleri tarayıcı ayarlarınızdan devre dışı bırakabilirsiniz."
         },
         "children": {
           "title": "Çocukların Gizliliği",
-          "content": "Hizmetimiz 18 yaşın altındaki hiç kimse için tasarlanmamıştır. 18 yaşın altındaki çocuklardan bilerek kişisel bilgi toplamıyoruz. 18 yaşın altındaki bir çocuktan kişisel bilgi topladığımızı öğrenirsek, bu bilgiyi sileriz."
+          "content": "Motorove, 16 yaş altı kullanıcılar için tasarlanmamıştır. Bu yaş grubuna ait verileri bilerek toplamıyoruz. Böyle bir durum tespit edilirse veriler derhal silinir."
+        },
+        "dataRetention": {
+          "title": "Veri Saklama ve Güvenlik",
+          "content": "Veriler, şifrelenmiş veritabanlarında güvenli bir şekilde saklanır (AB veya uygun veri merkezlerinde). Endüstri standartlarında güvenlik uygulamaları uygulanır. Hiçbir saklama veya iletim yöntemi %100 güvenli değildir."
+        },
+        "yourRights": {
+          "title": "Haklarınız (GDPR ve Benzeri Mevzuatlar Kapsamında)",
+          "content": "Aşağıdaki haklara sahipsiniz:",
+          "items": {
+            "item1": "Kişisel verinize erişim",
+            "item2": "Verilerinizin düzeltilmesi veya güncellenmesi",
+            "item3": "Hesabınızın ve ilgili verilerin silinmesi",
+            "item4": "Verdiğiniz onayın geri çekilmesi",
+            "item5": "Yerel Veri Koruma Kurumu'na şikâyette bulunma hakkı"
+          },
+          "contact": "Haklarınızı kullanmak için bizimle şu adresten iletişime geçebilirsiniz: media@motorove.app"
         },
         "changes": {
-          "title": "Bu Gizlilik Politikasındaki Değişiklikler",
-          "content": "Gizlilik Politikamızı zaman zaman güncelleyebiliriz. Yeni Gizlilik Politikasını bu sayfada yayınlayarak ve 'Son Güncelleme' tarihini güncelleyerek sizi herhangi bir değişiklikten haberdar edeceğiz."
+          "title": "Politika Güncellemeleri",
+          "content": "Uygulamalarımızda veya yasal gerekliliklerdeki değişiklikleri yansıtmak amacıyla bu politikayı güncelleyebiliriz. Güncellenmiş sürümler uygulama içinde veya web sitemizde yayınlanacaktır. Uygulamanın güncellemeden sonraki kullanımı, yeni politikayı kabul ettiğiniz anlamına gelir."
         },
         "contact": {
-          "title": "Bize Ulaşın",
-          "content": "Bu Gizlilik Politikası hakkında sorularınız varsa, lütfen bize privacy@motorove.app adresinden ulaşın."
+          "title": "İletişim",
+          "content": "Herhangi bir soru, endişe veya veriyle ilgili talebiniz için: Motorove, E-posta: media@motorove.app"
         }
       }
     }

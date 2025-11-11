@@ -315,67 +315,33 @@ const Features: React.FC = () => {
       ],
     },
     {
-      heading: t("features.staySafe.heading"),
-      body: t("features.staySafe.body"),
+      heading: t("features.group.heading"),
+      body: t("features.group.body"),
       visual: `/assets/images/${currentLanguage}/app-screen-6.png`,
-      visualAlt: t("features.staySafe.visualAlt"),
+      visualAlt: t("features.group.visualAlt"),
       reverse: false,
       thumbnails: [
         {
-          image: `/assets/images/${currentLanguage}/app-screen-1.png`,
-          label: t("features.staySafe.thumbnails.hazardAlerts.label"),
-          alt: t("features.staySafe.thumbnails.hazardAlerts.alt"),
+          label: t("features.group.thumbnails.share.label"),
         },
         {
-          image: `/assets/images/${currentLanguage}/app-screen-2.png`,
-          label: t("features.staySafe.thumbnails.emergencySOS.label"),
-          alt: t("features.staySafe.thumbnails.emergencySOS.alt"),
+          label: t("features.group.thumbnails.privacy.label"),
         },
         {
-          image: `/assets/images/${currentLanguage}/app-screen-1.png`,
-          label: t("features.staySafe.thumbnails.contactAlerts.label"),
-          alt: t("features.staySafe.thumbnails.contactAlerts.alt"),
+          label: t("features.group.thumbnails.event.label"),
         },
         {
-          image: `/assets/images/${currentLanguage}/app-screen-2.png`,
-          label: t("features.staySafe.thumbnails.mapMarkers.label"),
-          alt: t("features.staySafe.thumbnails.mapMarkers.alt"),
-        },
-      ],
-    },
-    {
-      heading: t("features.yourMemories.heading"),
-      body: t("features.yourMemories.body"),
-      visual: `/assets/images/${currentLanguage}/app-screen-7.png`,
-      visualAlt: t("features.yourMemories.visualAlt"),
-      reverse: true,
-      thumbnails: [
-        {
-          image: `/assets/images/${currentLanguage}/app-screen-1.png`,
-          label: t("features.yourMemories.thumbnails.photoSharing.label"),
-          alt: t("features.yourMemories.thumbnails.photoSharing.alt"),
-        },
-        {
-          image: `/assets/images/${currentLanguage}/app-screen-2.png`,
-          label: t("features.yourMemories.thumbnails.socialFeed.label"),
-          alt: t("features.yourMemories.thumbnails.socialFeed.alt"),
-        },
-        {
-          image: `/assets/images/${currentLanguage}/app-screen-1.png`,
-          label: t("features.yourMemories.thumbnails.discover.label"),
-          alt: t("features.yourMemories.thumbnails.discover.alt"),
-        },
-        {
-          image: `/assets/images/${currentLanguage}/app-screen-2.png`,
-          label: t("features.yourMemories.thumbnails.followRiders.label"),
-          alt: t("features.yourMemories.thumbnails.followRiders.alt"),
+          label: t("features.group.thumbnails.chat.label"),
         },
       ],
     },
   ];
 
   return (
-    <section id="features" className="bg-neutral-white dark:bg-background-primary py-16 sm:py-24 lg:py-32 relative overflow-hidden">
+    <section
+      id="features"
+      className="bg-neutral-white dark:bg-background-primary py-16 sm:py-24 lg:py-32 relative overflow-hidden"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="space-y-16 sm:space-y-24 lg:space-y-32 relative z-10">
           {features.map((feature, index) => (

@@ -41,61 +41,44 @@ function TermsContent() {
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.introduction.title")}
+                  {t("legal.terms.sections.generalOverview.title")}
                 </h2>
-                <p>{t("legal.terms.sections.introduction.content")}</p>
+                <p>{t("legal.terms.sections.generalOverview.content")}</p>
               </section>
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.definitions.title")}
+                  {t("legal.terms.sections.acceptance.title")}
                 </h2>
-                <p>{t("legal.terms.sections.definitions.content")}</p>
+                <p>{t("legal.terms.sections.acceptance.content")}</p>
               </section>
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.accountRegistration.title")}
+                  {t("legal.terms.sections.scopeOfServices.title")}
                 </h2>
-                <p>{t("legal.terms.sections.accountRegistration.content")}</p>
+                <p>{t("legal.terms.sections.scopeOfServices.content")}</p>
               </section>
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.userContent.title")}
+                  {t("legal.terms.sections.userRegistration.title")}
                 </h2>
-                <p>{t("legal.terms.sections.userContent.content")}</p>
+                <p>{t("legal.terms.sections.userRegistration.content")}</p>
               </section>
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.prohibitedActivities.title")}
+                  {t("legal.terms.sections.paidMembership.title")}
                 </h2>
-                <p>{t("legal.terms.sections.prohibitedActivities.content")}</p>
-                <ul className="list-disc pl-6 mt-4 space-y-2">
-                  <li>
-                    {t("legal.terms.sections.prohibitedActivities.items.item1")}
-                  </li>
-                  <li>
-                    {t("legal.terms.sections.prohibitedActivities.items.item2")}
-                  </li>
-                  <li>
-                    {t("legal.terms.sections.prohibitedActivities.items.item3")}
-                  </li>
-                  <li>
-                    {t("legal.terms.sections.prohibitedActivities.items.item4")}
-                  </li>
-                  <li>
-                    {t("legal.terms.sections.prohibitedActivities.items.item5")}
-                  </li>
-                </ul>
+                <p>{t("legal.terms.sections.paidMembership.content")}</p>
               </section>
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.intellectualProperty.title")}
+                  {t("legal.terms.sections.platformConduct.title")}
                 </h2>
-                <p>{t("legal.terms.sections.intellectualProperty.content")}</p>
+                <p>{t("legal.terms.sections.platformConduct.content")}</p>
               </section>
 
               <section className="mb-10">
@@ -107,13 +90,6 @@ function TermsContent() {
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.disclaimer.title")}
-                </h2>
-                <p>{t("legal.terms.sections.disclaimer.content")}</p>
-              </section>
-
-              <section className="mb-10">
-                <h2 className="text-2xl font-bold mb-4">
                   {t("legal.terms.sections.limitation.title")}
                 </h2>
                 <p>{t("legal.terms.sections.limitation.content")}</p>
@@ -121,16 +97,23 @@ function TermsContent() {
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.governing.title")}
+                  {t("legal.terms.sections.privacy.title")}
                 </h2>
-                <p>{t("legal.terms.sections.governing.content")}</p>
+                <p>{t("legal.terms.sections.privacy.content")}</p>
               </section>
 
               <section className="mb-10">
                 <h2 className="text-2xl font-bold mb-4">
-                  {t("legal.terms.sections.changes.title")}
+                  {t("legal.terms.sections.modifications.title")}
                 </h2>
-                <p>{t("legal.terms.sections.changes.content")}</p>
+                <p>{t("legal.terms.sections.modifications.content")}</p>
+              </section>
+
+              <section className="mb-10">
+                <h2 className="text-2xl font-bold mb-4">
+                  {t("legal.terms.sections.governing.title")}
+                </h2>
+                <p>{t("legal.terms.sections.governing.content")}</p>
               </section>
 
               <section className="mb-10">

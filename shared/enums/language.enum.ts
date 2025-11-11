@@ -3,6 +3,6 @@
  * Supported languages
  */
 export enum Language {
-  EN = "EN",
   TR = "TR",
+  EN = "EN",
 }

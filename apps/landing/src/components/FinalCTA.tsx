@@ -38,9 +38,6 @@ const FinalCTA: React.FC = () => {
               className="px-12 py-5 bg-primary-main text-neutral-white font-semibold rounded-4xl text-lg transition-all duration-200 hover:bg-primary-light inline-flex items-center justify-center gap-3"
             >
               <span>{t("finalCTA.button")}</span>
-              <span className="px-2.5 py-1 bg-neutral-white/20 rounded text-sm font-bold">
-                {t("finalCTA.badge")}
-              </span>
             </motion.a>
           </div>
 

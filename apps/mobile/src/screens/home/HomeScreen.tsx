@@ -576,7 +576,7 @@ export const HomeScreen = ({navigation}: Props) => {
     <View style={styles.container}>
       <TopHeaderBar
         title={t('screens.home.hello')}
-        subtitle={`${user?.firstName || ''} ${user?.lastName || ''}`}
+        subtitle={user?.firstName}
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
         rightIconName="plus"

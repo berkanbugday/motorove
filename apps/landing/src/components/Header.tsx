@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTranslation } from "../app/i18n";
+import { usePathname } from "next/navigation";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 interface NavLinkProps {
@@ -14,37 +15,53 @@ interface NavLinkProps {
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ href, children, onClick }) => {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      const headerOffset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+  const pathname = usePathname();
+  const isHomePage = pathname === "/" || pathname?.match(/^\/(en|tr)\/?$/);
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If we're on the homepage, use smooth scroll
+    if (isHomePage) {
+      e.preventDefault();
+      const element = document.querySelector(href);
+      if (element) {
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
+      }
+      onClick?.();
     }
-    onClick?.();
+    // Otherwise, let Next.js Link handle the navigation
   };
 
+  // Extract locale from pathname
+  const locale = pathname?.match(/^\/(en|tr)/)?.[1] || "tr";
+  const homeUrl = `/${locale}${href}`;
+
   return (
-    <a
-      href={href}
+    <Link
+      href={isHomePage ? href : homeUrl}
       onClick={handleClick}
       className="text-neutral-white hover:text-primary-main transition-colors duration-200 font-medium"
     >
       {children}
-    </a>
+    </Link>
   );
 };
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Extract locale from pathname
+  const locale = pathname?.match(/^\/(en|tr)/)?.[1] || "tr";
+  const homeUrl = `/${locale}`;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,7 +92,7 @@ const Header: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
           >
-            <Link href="/" className="flex items-center">
+            <Link href={homeUrl} className="flex items-center">
               <Image
                 src="/assets/images/logo.png"
                 alt="Motorove Logo"
