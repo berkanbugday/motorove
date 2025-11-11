@@ -247,9 +247,6 @@ importers:
       next:
         specifier: 14.0.4
         version: 14.0.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      next-i18next:
-        specifier: 15.4.2
-        version: 15.4.2(@types/react@19.0.0)(i18next@25.3.2(typescript@5.7.3))(next@14.0.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-i18next@15.6.0(i18next@25.3.2(typescript@5.7.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.3))(react@19.0.0)
       next-themes:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -262,9 +259,6 @@ importers:
       react-i18next:
         specifier: 15.6.0
         version: 15.6.0(i18next@25.3.2(typescript@5.7.3))(react-dom@19.0.0(react@19.0.0))(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0)(typescript@5.7.3)
-      react-intersection-observer:
-        specifier: 9.5.2
-        version: 9.5.2(react@19.0.0)
     devDependencies:
       '@tailwindcss/forms':
         specifier: 0.5.10
@@ -3608,11 +3602,6 @@ packages:
   '@types/hammerjs@2.0.46':
     resolution: {integrity: sha512-ynRvcq6wvqexJ9brDMS4BnBLzmr0e14d6ZJTEShTBWKymQiHwlAyGu0ZPEFI2Fh1U53F7tN9ufClWM5KvqkKOw==}
 
-  '@types/hoist-non-react-statics@3.3.7':
-    resolution: {integrity: sha512-PQTyIulDkIDro8P+IHbKCsw7U2xxBYflVzW/FgWdCAePD9xGSidgA76/GeJ6lBKoblyhf9pBY763gbrN+1dI8g==}
-    peerDependencies:
-      '@types/react': '*'
-
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
 
@@ -4871,9 +4860,6 @@ packages:
 
   core-js@3.29.1:
     resolution: {integrity: sha512-+jwgnhg6cQxKYIIjGtAHq2nwUOolo9eoFZ4sHfUH09BLXBgxnH4gA0zEd+t+BO2cNB8idaBtZFcFTRjQJRJmAw==}
-
-  core-js@3.46.0:
-    resolution: {integrity: sha512-vDMm9B0xnqqZ8uSBpZ8sNtRtOdmfShrvT6h2TuQGLs0Is+cR0DYbj/KWP6ALVNbWPpqA/qPLoOuppJN07humpA==}
 
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
@@ -7206,15 +7192,6 @@ packages:
       '@nestjs/common': ^5.0.0 || ^6.6.0 || ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
       winston: ^3.0.0
 
-  next-i18next@15.4.2:
-    resolution: {integrity: sha512-zgRxWf7kdXtM686ecGIBQL+Bq0+DqAhRlasRZ3vVF0TmrNTWkVhs52n//oU3Fj5O7r/xOKkECDUwfOuXVwTK/g==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      i18next: '>= 23.7.13'
-      next: '>= 12.0.0'
-      react: '>= 17.0.2'
-      react-i18next: '>= 13.5.0'
-
   next-themes@0.4.6:
     resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
     peerDependencies:
@@ -7787,11 +7764,6 @@ packages:
         optional: true
       typescript:
         optional: true
-
-  react-intersection-observer@9.5.2:
-    resolution: {integrity: sha512-EmoV66/yvksJcGa1rdW0nDNc4I1RifDWkT50gXSFnPLYQ4xUptuDD4V7k+Rj1OgVAlww628KLGcxPXFlOkkU/Q==}
-    peerDependencies:
-      react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -13040,11 +13012,6 @@ snapshots:
 
   '@types/hammerjs@2.0.46': {}
 
-  '@types/hoist-non-react-statics@3.3.7(@types/react@19.0.0)':
-    dependencies:
-      '@types/react': 19.0.0
-      hoist-non-react-statics: 3.3.2
-
   '@types/http-cache-semantics@4.0.4': {}
 
   '@types/http-errors@2.0.5': {}
@@ -14526,8 +14493,6 @@ snapshots:
   core-js@1.2.7: {}
 
   core-js@3.29.1: {}
-
-  core-js@3.46.0: {}
 
   core-util-is@1.0.3: {}
 
@@ -17542,20 +17507,6 @@ snapshots:
       fast-safe-stringify: 2.1.1
       winston: 3.17.0
 
-  next-i18next@15.4.2(@types/react@19.0.0)(i18next@25.3.2(typescript@5.7.3))(next@14.0.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-i18next@15.6.0(i18next@25.3.2(typescript@5.7.3))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.7.3))(react@19.0.0):
-    dependencies:
-      '@babel/runtime': 7.25.0
-      '@types/hoist-non-react-statics': 3.3.7(@types/react@19.0.0)
-      core-js: 3.46.0
-      hoist-non-react-statics: 3.3.2
-      i18next: 25.3.2(typescript@5.7.3)
-      i18next-fs-backend: 2.6.0
-      next: 14.0.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      react: 19.0.0
-      react-i18next: 15.6.0(i18next@25.3.2(typescript@5.7.3))(react-dom@19.0.0(react@19.0.0))(react-native@0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0))(react@19.0.0)(typescript@5.7.3)
-    transitivePeerDependencies:
-      - '@types/react'
-
   next-themes@0.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
       react: 19.0.0
@@ -18138,10 +18089,6 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       react-native: 0.79.1(@babel/core@7.25.2)(@react-native-community/cli@18.0.0(typescript@5.7.3))(@types/react@19.0.0)(react@19.0.0)
       typescript: 5.7.3
-
-  react-intersection-observer@9.5.2(react@19.0.0):
-    dependencies:
-      react: 19.0.0
 
   react-is@16.13.1: {}
 

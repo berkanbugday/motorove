@@ -100,9 +100,6 @@ const Header: React.FC = () => {
                 height={50}
                 className="mr-2"
               />
-              {/* <span className="text-xl font-heading font-bold text-white">
-                Motorove
-              </span> */}
             </Link>
           </motion.div>
 

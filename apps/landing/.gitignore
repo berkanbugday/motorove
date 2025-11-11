@@ -3,3 +3,9 @@ node_modules
 
 # Next.js
 .next
+
+# Build artifacts
+*.tsbuildinfo
+
+# macOS
+.DS_Store
