@@ -5,7 +5,7 @@ import { ThemeProvider } from "@components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Motorove - Connect with Motorcycle Enthusiasts",
+    default: "Motorove",
     template: "%s",
   },
   description:
@@ -51,13 +51,13 @@ export const metadata: Metadata = {
     locale: "tr_TR",
     alternateLocale: ["en_US"],
     siteName: "Motorove",
-    title: "Motorove - Connect with Motorcycle Enthusiasts",
+    title: "Motorove",
     description:
       "Join the Motorove community to connect with fellow riders, discover routes, attend events, and share your motorcycle journey.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Motorove - Connect with Motorcycle Enthusiasts",
+    title: "Motorove",
     description:
       "Join the Motorove community to connect with fellow riders, discover routes, attend events, and share your motorcycle journey.",
   },
