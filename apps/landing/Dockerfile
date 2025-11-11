@@ -1,7 +1,7 @@
 FROM node:20-alpine AS base
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.6.0 --activate
+# Install pnpm globally using npm (more reliable for multi-arch builds)
+RUN npm install -g pnpm@9.6.0
 
 # Set working directory
 WORKDIR /app
@@ -41,8 +41,11 @@ RUN pnpm build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.6.0 --activate
+# Install pnpm globally using npm (more reliable for multi-arch builds)
+RUN npm install -g pnpm@9.6.0
+
+# Install sharp for image optimization in standalone mode
+RUN pnpm add sharp
 
 # Copy built files
 COPY --from=builder /app/apps/landing/.next/standalone ./
@@ -57,5 +60,5 @@ ENV HOSTNAME="0.0.0.0"
 # Expose port
 EXPOSE 8080
 
-# Start the application
+# Start the application - server.js is in apps/landing subdirectory of standalone output
 CMD ["node", "apps/landing/server.js"]

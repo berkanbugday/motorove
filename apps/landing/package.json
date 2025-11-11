@@ -5,10 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && pnpm postbuild",
-    "postbuild": "mkdir -p .next/standalone/apps/landing/.next && cp -r .next/static .next/standalone/apps/landing/.next/ && if [ -d public ]; then cp -r public .next/standalone/apps/landing/; fi",
-    "start": "node .next/standalone/apps/landing/server.js",
-    "start:prod": "node .next/standalone/apps/landing/server.js",
+    "build": "next build",
+    "start": "node server.js",
+    "start:prod": "node server.js",
     "lint": "next lint"
   },
   "dependencies": {
