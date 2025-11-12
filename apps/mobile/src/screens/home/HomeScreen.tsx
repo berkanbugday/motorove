@@ -20,8 +20,12 @@ import {
   Body,
   SkeletonGroup,
   UserCard,
+  FullImageCard,
+  DropdownMenuItem,
+  closeBottomSheet,
+  useBottomSheet,
+  LoadingIndicator,
 } from '@components';
-import {FullImageCard} from '@components/FullImageCard';
 import WeatherWidget from '@components/WeatherWidget/WeatherWidget';
 import {colors, fontSizes, spacing} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -29,7 +33,6 @@ import type {IconName} from '@components/Icon';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {TabParamList} from '@navigation/types/navigationTypes';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
-import {DropdownMenuItem} from '@components/DropdownMenu';
 import {loggingService} from '@services/logging.service';
 import {useAuth} from '@contexts/AuthContext';
 import {useGetCount} from '@services/notification.service';
@@ -37,10 +40,6 @@ import {useGetWeather} from '@services/weather.service';
 import {useGetEvents} from '@services/event.service';
 import {useFocusEffect} from '@react-navigation/native';
 import {useLanguage} from '@contexts/LanguageContext';
-import {
-  closeBottomSheet,
-  useBottomSheet,
-} from '@components/BottomSheet/BottomSheetProvider';
 import {IPost, IUser, IImage, IEvent, EventStatus} from '@motorove/shared';
 import {
   useGetPosts,
@@ -85,7 +84,7 @@ export const HomeScreen = ({navigation}: Props) => {
   const {unsavePost} = useUnsavePost();
 
   // Add hook for post deletion
-  const {removePost} = useRemovePost(() => {
+  const {removePost, loading: removePostLoading} = useRemovePost(() => {
     refetchPosts();
   });
 
@@ -753,6 +752,7 @@ export const HomeScreen = ({navigation}: Props) => {
           </View>
         </ScrollView>
       </SafeAreaView>
+      <LoadingIndicator visible={removePostLoading} />
     </View>
   );
 };

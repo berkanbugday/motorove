@@ -47,7 +47,7 @@ export const useCreatePost = (onSuccess?: () => void) => {
       const result = await createPostMutation({
         variables: {input},
       });
-      return result.data?.create;
+      return result.data?.createPost;
     } catch (err) {
       loggingService.error('Error in createPost:', err);
       // Error is already handled in onError callback
