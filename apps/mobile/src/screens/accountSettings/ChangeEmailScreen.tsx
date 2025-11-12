@@ -5,7 +5,13 @@ import {useNavigation} from '@react-navigation/native';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors, commonStyles, spacing} from '@theme';
-import {Button, TopHeaderBar, AnimatedInput, BodySmall, LoadingIndicator} from '@components';
+import {
+  Button,
+  TopHeaderBar,
+  AnimatedInput,
+  BodySmall,
+  LoadingIndicator,
+} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {loggingService} from '@services/logging.service';
 import {
@@ -115,7 +121,7 @@ export const ChangeEmailScreen = () => {
         <Button
           variant="dark"
           shape="round"
-          title={loading ? t('common.updating') : t('common.save')}
+          title={t('common.update')}
           onPress={handleSubmit(onSubmit)}
           disabled={loading}
         />

@@ -76,30 +76,45 @@ export class ImageCensorFilterService implements OnModuleInit {
       const isValidImage = this.validateImageFormat(uint8Array);
 
       if (!isValidImage) {
-        this.logger.warn('Invalid image format detected');
+        this.logger.warn(
+          'Invalid image format detected (only BMP, JPEG, PNG, GIF supported)',
+        );
         return { isCensored: false, predictions: null };
       }
 
-      const image = tf.node.decodeImage(uint8Array, 3) as Tensor3D;
+      // Decode image with error handling
+      let image: Tensor3D | null = null;
+      try {
+        image = tf.node.decodeImage(uint8Array, 3) as Tensor3D;
+      } catch (decodeError) {
+        this.logger.warn(
+          `Failed to decode image: ${decodeError instanceof Error ? decodeError.message : String(decodeError)}`,
+        );
+        return { isCensored: false, predictions: null };
+      }
 
-      // Run the prediction
-      const predictions = await this.nsfwModel.classify(image);
+      try {
+        // Run the prediction
+        const predictions = await this.nsfwModel.classify(image);
 
-      // Dispose the tensor to free memory
-      image.dispose();
+        // Check if any image censor categories exceed threshold
+        // Categories: Porn, Sexy, Hentai, Drawing, Neutral
+        const imageCensorThreshold = 0.7; // 70% confidence threshold
+        const imageCensorCategories = ['Porn', 'Sexy', 'Hentai'];
 
-      // Check if any image censor categories exceed threshold
-      // Categories: Porn, Sexy, Hentai, Drawing, Neutral
-      const imageCensorThreshold = 0.7; // 70% confidence threshold
-      const imageCensorCategories = ['Porn', 'Sexy', 'Hentai'];
+        const isCensored = predictions.some(
+          (p: { className: string; probability: number }) =>
+            imageCensorCategories.includes(p.className) &&
+            p.probability > imageCensorThreshold,
+        );
 
-      const isCensored = predictions.some(
-        (p: { className: string; probability: number }) =>
-          imageCensorCategories.includes(p.className) &&
-          p.probability > imageCensorThreshold,
-      );
-
-      return { isCensored, predictions };
+        return { isCensored, predictions };
+      } finally {
+        // Always dispose the tensor to free memory
+        if (image) {
+          image.dispose();
+        }
+      }
     } catch (error) {
       this.logger.error(
         `Error checking image censor content for image ${imageUrl}`,
@@ -114,8 +129,9 @@ export class ImageCensorFilterService implements OnModuleInit {
 
   /**
    * Validate image format by checking magic bytes
+   * Only supports formats that TensorFlow.js can decode: BMP, JPEG, PNG, GIF
    * @param buffer Image buffer
-   * @returns True if valid image format detected
+   * @returns True if valid image format detected (supported by TensorFlow.js)
    */
   private validateImageFormat(buffer: Uint8Array): boolean {
     if (buffer.length < 4) {
@@ -150,21 +166,6 @@ export class ImageCensorFilterService implements OnModuleInit {
 
     // BMP: 42 4D (BM)
     if (buffer[0] === 0x42 && buffer[1] === 0x4d) {
-      return true;
-    }
-
-    // WebP: RIFF...WEBP (check for RIFF header)
-    if (
-      buffer.length >= 12 &&
-      buffer[0] === 0x52 &&
-      buffer[1] === 0x49 &&
-      buffer[2] === 0x46 &&
-      buffer[3] === 0x46 &&
-      buffer[8] === 0x57 &&
-      buffer[9] === 0x45 &&
-      buffer[10] === 0x42 &&
-      buffer[11] === 0x50
-    ) {
       return true;
     }
 

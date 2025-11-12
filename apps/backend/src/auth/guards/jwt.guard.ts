@@ -1,12 +1,8 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
+import { ExceptionHelper } from '../../core/exceptions/exception-helper.service';
 
 interface GqlContext {
   req: Request & { user?: any; accessToken?: string };
@@ -22,12 +18,14 @@ export class JwtGuard implements CanActivate {
 
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      throw new UnauthorizedException('Authorization header not found');
+      ExceptionHelper.unauthorized('errors.common.not_found', {
+        resource: 'authorization_header',
+      });
     }
 
     const parts = authHeader.split(' ');
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
-      throw new UnauthorizedException('Invalid authorization header');
+      ExceptionHelper.unauthorized('errors.auth.invalid_authorization_header');
     }
 
     const token = parts[1];
@@ -38,7 +36,7 @@ export class JwtGuard implements CanActivate {
       req.accessToken = token; // Store access token for Supabase operations
       return true;
     } catch {
-      throw new UnauthorizedException('Invalid token');
+      ExceptionHelper.unauthorized('errors.auth.invalid_token');
     }
   }
 }

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UpdatePasswordInput } from './dto/update-password.input';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 
 @Controller('auth')
 export class AuthController {
@@ -21,16 +22,19 @@ export class AuthController {
       const { token, password } = updatePasswordDto;
 
       if (!token || !password) {
-        throw new BadRequestException('Token and password are required');
+        ExceptionHelper.badRequest('errors.auth.token_and_password_required');
       }
 
       // Use the token (access token from password reset email) to update password
       const result = await this.authService.updatePassword(token, password);
 
       if (result) {
-        return { success: true, message: 'Password updated successfully' };
+        return {
+          success: true,
+          message: 'errors.auth.password_updated_successfully',
+        };
       } else {
-        throw new UnauthorizedException('Failed to update password');
+        ExceptionHelper.unauthorized('errors.auth.failed_to_update_password');
       }
     } catch (error) {
       if (
@@ -39,7 +43,7 @@ export class AuthController {
       ) {
         throw error;
       }
-      throw new UnauthorizedException('Invalid or expired token');
+      ExceptionHelper.unauthorized('errors.auth.invalid_or_expired_token');
     }
   }
 }

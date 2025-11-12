@@ -1,4 +1,5 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserDto } from './dto/user.dto';
 import { ProfileDto } from './dto/profile.dto';
@@ -146,7 +147,9 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'user',
+      });
     }
 
     return {
@@ -179,7 +182,9 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'user',
+      });
     }
 
     // Get signed URL for avatar if exists
@@ -255,7 +260,9 @@ export class UsersService {
       });
 
       if (!user) {
-        throw new NotFoundException('User not found');
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'user',
+        });
       }
 
       return user.hasCompletedSetup;
@@ -370,7 +377,9 @@ export class UsersService {
       });
 
       if (!userResult) {
-        throw new NotFoundException('User not found');
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'user',
+        });
       }
 
       // Get signed URL for avatar if exists

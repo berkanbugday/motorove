@@ -1,8 +1,5 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UserFollowing } from './models/user-following.model';
@@ -172,12 +169,14 @@ export class UserFollowingsService {
     ]);
 
     if (!followerUser || !followingUser) {
-      throw new NotFoundException('User not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'user',
+      });
     }
 
     // Prevent self-following
     if (followerUser === followingUser) {
-      throw new ConflictException('Cannot follow yourself');
+      ExceptionHelper.conflict('errors.common.cannot_follow_yourself');
     }
 
     // Check if already following
@@ -193,7 +192,7 @@ export class UserFollowingsService {
     });
 
     if (existingFollow) {
-      throw new ConflictException('Already following this user');
+      ExceptionHelper.conflict('errors.common.already_following');
     }
 
     // Create follow relationship
@@ -243,7 +242,7 @@ export class UserFollowingsService {
     });
 
     if (!userFollowing) {
-      throw new NotFoundException('Not following this user');
+      ExceptionHelper.notFound('errors.common.not_following');
     }
 
     // Delete the follow relationship
@@ -276,7 +275,10 @@ export class UserFollowingsService {
       });
 
       if (!userFollowing) {
-        throw new NotFoundException(`User following with ID ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'user_following',
+          id,
+        });
       }
 
       // Update the membership status

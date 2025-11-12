@@ -1,10 +1,5 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostInput } from './dto/create-post.input';
 import { UpdatePostInput } from './dto/update-post.input';
@@ -169,7 +164,10 @@ export class PostsService {
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${id} not found`);
+      ExceptionHelper.notFound('errors.common.not_found_with_id', {
+        resource: 'post',
+        id,
+      });
     }
 
     return this.mapToDto(post as Post, currentUserId, authToken);
@@ -220,9 +218,9 @@ export class PostsService {
       });
 
       if (!membership || membership.status !== ApprovalStatus.ACCEPTED) {
-        throw new ForbiddenException(
-          'You must be an approved member of the group to create a post',
-        );
+        ExceptionHelper.forbidden('errors.common.cannot_perform_action', {
+          resource: 'create_post',
+        });
       }
 
       postData.groupId = input.groupId;
@@ -291,20 +289,21 @@ export class PostsService {
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${input.id} not found`);
+      ExceptionHelper.notFound('errors.common.not_found_with_id', {
+        resource: 'post',
+        id: input.id,
+      });
     }
 
     // Check if user is the creator or an admin of the group
-    const isCreator = post.createdById === userId;
+    const isCreator = post.createdBy.id === userId;
     const isGroupAdmin =
       post.group?.memberships?.some(
         (membership) => membership.role === GroupMemberRole.ADMIN,
       ) || false;
 
     if (!isCreator && !isGroupAdmin) {
-      throw new ForbiddenException(
-        'You do not have permission to update this post',
-      );
+      ExceptionHelper.forbidden('errors.post.cannot_update');
     }
 
     // If trying to change the group, verify membership in the new group
@@ -317,9 +316,9 @@ export class PostsService {
       });
 
       if (!membership || membership.status !== ApprovalStatus.ACCEPTED) {
-        throw new ForbiddenException(
-          'You must be an approved member of the group to move a post to that group',
-        );
+        ExceptionHelper.forbidden('errors.common.cannot_perform_action', {
+          resource: 'update_post',
+        });
       }
     }
 
@@ -435,7 +434,10 @@ export class PostsService {
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${id} not found`);
+      ExceptionHelper.notFound('errors.common.not_found_with_id', {
+        resource: 'post',
+        id,
+      });
     }
 
     // Check if user is the creator or an admin of the group
@@ -446,9 +448,7 @@ export class PostsService {
       ) || false;
 
     if (!isCreator && !isGroupAdmin) {
-      throw new ForbiddenException(
-        'You do not have permission to delete this post',
-      );
+      ExceptionHelper.forbidden('errors.post.cannot_delete');
     }
 
     const deletedPost = await this.prisma.post.update({
@@ -471,7 +471,10 @@ export class PostsService {
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${postId} not found`);
+      ExceptionHelper.notFound('errors.common.not_found_with_id', {
+        resource: 'post',
+        id: postId,
+      });
     }
 
     // Check if user has already liked the post
@@ -512,7 +515,10 @@ export class PostsService {
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${postId} not found`);
+      ExceptionHelper.notFound('errors.common.not_found_with_id', {
+        resource: 'post',
+        id: postId,
+      });
     }
 
     // Check if user has liked the post
@@ -524,7 +530,9 @@ export class PostsService {
     });
 
     if (!existingLike) {
-      throw new NotFoundException(`Like not found`);
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'like',
+      });
     }
 
     // Delete the like
@@ -547,7 +555,10 @@ export class PostsService {
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${postId} not found`);
+      ExceptionHelper.notFound('errors.common.not_found_with_id', {
+        resource: 'post',
+        id: postId,
+      });
     }
 
     // Check if user has already saved the post
@@ -588,7 +599,10 @@ export class PostsService {
     });
 
     if (!post || !post.isActive) {
-      throw new NotFoundException(`Post with ID ${postId} not found`);
+      ExceptionHelper.notFound('errors.common.not_found_with_id', {
+        resource: 'post',
+        id: postId,
+      });
     }
 
     // Check if user has saved the post
@@ -600,7 +614,9 @@ export class PostsService {
     });
 
     if (!existingSave) {
-      throw new NotFoundException(`Save not found`);
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'save',
+      });
     }
 
     // Delete the save
@@ -650,7 +666,10 @@ export class PostsService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
+      ExceptionHelper.badRequest('errors.common.failed_to_upload_with_error', {
+        resource: 'image',
+        error: errorMessage,
+      });
     }
   }
 

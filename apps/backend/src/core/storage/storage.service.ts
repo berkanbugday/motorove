@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ExceptionHelper } from '../exceptions/exception-helper.service';
 import { SupabaseService } from '../../auth/supabase.service';
 import { ConfigService } from '../config/config.service';
 import { randomUUID } from 'crypto';
@@ -178,7 +179,10 @@ export class StorageService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
+      ExceptionHelper.badRequest('errors.common.failed_to_upload_with_error', {
+        resource: 'image',
+        error: errorMessage,
+      });
     }
   }
 

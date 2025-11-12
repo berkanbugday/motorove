@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGroupInput } from './dto/create-group.input';
 import { UpdateGroupInput } from './dto/update-group.input';
@@ -11,6 +11,7 @@ import { GroupDto } from './dto/group.dto';
 import { plainToClass } from 'class-transformer';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 import { GroupTag } from '../enums/models/group-tag.enum';
+import { ExceptionHelper } from 'src/core/exceptions/exception-helper.service';
 
 @Injectable()
 export class GroupsService {
@@ -223,7 +224,10 @@ export class GroupsService {
       });
 
       if (!group) {
-        throw new NotFoundException(`Group with ID ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'group',
+          id,
+        });
       }
 
       const groupDto = await this.mapToDto(group as Group, authToken);
@@ -359,9 +363,10 @@ export class GroupsService {
       });
 
       if (!existingGroup) {
-        throw new NotFoundException(
-          `Group with ID ${input.id} not found or you don't have permission to update it`,
-        );
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'group',
+          id: input.id,
+        });
       }
 
       // Extract update data from input

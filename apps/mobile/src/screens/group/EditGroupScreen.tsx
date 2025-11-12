@@ -427,7 +427,7 @@ export const EditGroupScreen = () => {
       </SafeAreaView>
       <View style={styles.buttonContainer}>
         <Button
-          title={updateGroupLoading ? t('common.updating') : t('common.update')}
+          title={t('common.update')}
           variant="dark"
           size="medium"
           shape="round"

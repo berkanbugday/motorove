@@ -1,9 +1,5 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../core/storage/storage.service';
 import { CreateEventInput } from './dto/create-event.input';
@@ -25,6 +21,7 @@ import { NotificationChannel } from '../enums/models/notification-channel.enum';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 import { ImageCensorFilterService } from '../core/image-censor-filter/image-censor-filter.service';
 import { ImageDto } from '../common/dto/image.dto';
+import { TranslatedException } from 'src/core/exceptions/translated-exception';
 
 @Injectable()
 export class EventsService {
@@ -253,9 +250,10 @@ export class EventsService {
       });
 
       if (!event || !event.isActive) {
-        throw new NotFoundException(
-          `Event with ID ${id} not found or access denied`,
-        );
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'event',
+          id,
+        });
       }
 
       this.logger.log(
@@ -333,7 +331,7 @@ export class EventsService {
       );
     } catch (error) {
       this.logger.error('Error finding invitations:', error);
-      throw new BadRequestException('Failed to fetch invitations');
+      ExceptionHelper.badRequest('errors.event.failed_to_fetch_invitations');
     }
   }
 
@@ -633,7 +631,10 @@ export class EventsService {
       });
 
       if (!currentEvent) {
-        throw new NotFoundException(`Event with id ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'event',
+          id,
+        });
       }
 
       // Use transaction to ensure atomicity with increased timeout
@@ -839,11 +840,14 @@ export class EventsService {
         });
 
         if (!draftEvent) {
-          throw new NotFoundException(`Event with id ${id} not found`);
+          ExceptionHelper.notFound('errors.common.not_found_with_id', {
+            resource: 'event',
+            id,
+          });
         }
 
         if (draftEvent?.createdById !== userId) {
-          throw new BadRequestException('You cannot remove this event');
+          ExceptionHelper.badRequest('errors.event.cannot_remove');
         }
 
         // Update event to inactive
@@ -912,14 +916,15 @@ export class EventsService {
       });
 
       if (!event) {
-        throw new NotFoundException(`Event with id ${eventId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'event',
+          id: eventId,
+        });
       }
 
       // Check if user is the event creator
-      if (event.createdById !== userId) {
-        throw new BadRequestException(
-          'Only the event creator can cancel the event',
-        );
+      if (event.createdById === userId) {
+        ExceptionHelper.badRequest('errors.event.cannot_leave');
       }
 
       // Use transaction to ensure all related data is updated atomically
@@ -1009,7 +1014,10 @@ export class EventsService {
       });
 
       if (!event) {
-        throw new NotFoundException(`Event with id ${eventId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'event',
+          id: eventId,
+        });
       }
 
       const invitation = await this.prisma.eventInvitation.findFirst({
@@ -1085,11 +1093,14 @@ export class EventsService {
       });
 
       if (!event) {
-        throw new NotFoundException(`Event with id ${eventId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'event',
+          id: eventId,
+        });
       }
 
       if (event.createdBy.id === userId && !event.organizedByGroupId) {
-        throw new BadRequestException('You cannot leave your own event');
+        ExceptionHelper.badRequest('errors.event.cannot_leave');
       }
       const participant = await this.prisma.eventParticipant.findFirst({
         where: {
@@ -1099,7 +1110,9 @@ export class EventsService {
       });
 
       if (!participant) {
-        throw new NotFoundException('Participant not found');
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'participant',
+        });
       }
 
       await this.prisma.eventParticipant.update({
@@ -1144,7 +1157,9 @@ export class EventsService {
       });
 
       if (!invitation) {
-        throw new NotFoundException('Invitation not found');
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'invitation',
+        });
       }
 
       // Use transaction to ensure both operations succeed or fail together
@@ -1178,8 +1193,8 @@ export class EventsService {
       return !!result;
     } catch (error) {
       this.logger.error('Error accepting invitation:', error);
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof TranslatedException) {
+        ExceptionHelper.badRequest('errors.event.failed_to_accept_invitation');
       }
       return false;
     }
@@ -1208,7 +1223,9 @@ export class EventsService {
       });
 
       if (!invitation) {
-        throw new NotFoundException('Invitation not found');
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'invitation',
+        });
       }
 
       // Update invitation status to REJECTED
@@ -1228,10 +1245,10 @@ export class EventsService {
       return !!updatedInvitation;
     } catch (error) {
       this.logger.error('Error rejecting invitation:', error);
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof TranslatedException) {
+        ExceptionHelper.badRequest('errors.event.failed_to_reject_invitation');
       }
-      throw new BadRequestException('Failed to reject invitation');
+      ExceptionHelper.badRequest('errors.event.failed_to_reject_invitation');
     }
   }
 
@@ -1432,7 +1449,10 @@ export class EventsService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      throw new BadRequestException(`Failed to upload image: ${errorMessage}`);
+      ExceptionHelper.badRequest('errors.common.failed_to_upload_with_error', {
+        resource: 'image',
+        error: errorMessage,
+      });
     }
   }
 

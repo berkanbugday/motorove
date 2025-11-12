@@ -526,7 +526,7 @@ export const EditProfileScreen = () => {
         <Button
           variant="dark"
           shape="round"
-          title={updateLoading ? t('common.updating') : t('common.save')}
+          title={t('common.update')}
           onPress={handleSubmit(onSubmit)}
           disabled={updateLoading}
         />

@@ -1,10 +1,5 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWarningInput } from './dto/create-warning.input';
 import { WarningDto } from './dto/warning.dto';
@@ -128,7 +123,9 @@ export class WarningsService {
     });
 
     if (!warning) {
-      throw new NotFoundException('Warning not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'warning',
+      });
     }
 
     // Filter profanity from warning descriptions
@@ -219,7 +216,9 @@ export class WarningsService {
       this.logger.error(
         `Error creating warning: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
-      throw new BadRequestException('Failed to create warning');
+      ExceptionHelper.badRequest('errors.common.failed_to_create', {
+        resource: 'warning',
+      });
     }
   }
 
@@ -230,11 +229,13 @@ export class WarningsService {
     });
 
     if (!warning) {
-      throw new NotFoundException('Warning not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'warning',
+      });
     }
 
     if (warning.createdById !== currentUserId) {
-      throw new ForbiddenException('You can only delete your own warnings');
+      ExceptionHelper.forbidden('errors.warning.cannot_delete');
     }
 
     await this.prisma.warning.update({

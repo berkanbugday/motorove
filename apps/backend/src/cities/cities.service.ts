@@ -1,4 +1,5 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { City } from './models/city.model';
 import { CityDto } from './dto/city.dto';
@@ -31,7 +32,9 @@ export class CitiesService {
       });
 
       if (!city) {
-        throw new NotFoundException('City not found');
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'city',
+        });
       }
 
       return this.mapToDto(city);

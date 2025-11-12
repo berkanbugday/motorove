@@ -1,10 +1,5 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEmergencyInput } from './dto/create-emergency.input';
 import { EmergencyDto } from './dto/emergency.dto';
@@ -150,7 +145,9 @@ export class EmergenciesService {
     });
 
     if (!emergency) {
-      throw new NotFoundException('Emergency not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'emergency',
+      });
     }
 
     // Filter profanity from emergency descriptions
@@ -313,7 +310,9 @@ export class EmergenciesService {
       this.logger.error(
         `Error creating emergency: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
-      throw new BadRequestException('Failed to create emergency');
+      ExceptionHelper.badRequest('errors.common.failed_to_create', {
+        resource: 'emergency',
+      });
     }
   }
 
@@ -324,11 +323,13 @@ export class EmergenciesService {
     });
 
     if (!emergency) {
-      throw new NotFoundException('Emergency not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'emergency',
+      });
     }
 
     if (emergency.createdById !== currentUserId) {
-      throw new ForbiddenException('You can only delete your own emergencies');
+      ExceptionHelper.forbidden('errors.emergency.cannot_delete');
     }
 
     await this.prisma.emergency.update({

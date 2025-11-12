@@ -1,13 +1,7 @@
-import {
-  Controller,
-  Post,
-  Body,
-  BadRequestException,
-  Headers,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Controller, Post, Body, Headers } from '@nestjs/common';
 import { StorageService } from './storage.service';
 import { SupabaseService } from '../../auth/supabase.service';
+import { ExceptionHelper } from '../exceptions';
 
 @Controller('storage')
 export class StorageController {
@@ -23,7 +17,7 @@ export class StorageController {
   ) {
     // Validate auth token
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Invalid authentication');
+      ExceptionHelper.unauthorized('errors.common.invalid_authentication');
     }
 
     // Extract token
@@ -31,12 +25,14 @@ export class StorageController {
     const { data, error } = await this.supabaseService.getUser(token);
 
     if (error || !data.user) {
-      throw new UnauthorizedException('Invalid token');
+      ExceptionHelper.unauthorized('errors.common.invalid_token');
     }
 
     // Validate file data
     if (!fileData.file) {
-      throw new BadRequestException('File data is required');
+      ExceptionHelper.badRequest('errors.common.failed_to_upload', {
+        resource: 'file',
+      });
     }
 
     try {
@@ -53,9 +49,10 @@ export class StorageController {
         url,
       };
     } catch (error) {
-      throw new BadRequestException(
-        `File upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      ExceptionHelper.badRequest('errors.common.failed_to_upload_with_error', {
+        resource: 'file',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
   }
 }

@@ -1,10 +1,5 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBusinessCommentInput } from './dto/create-business-comment.input';
 import { UpdateBusinessCommentInput } from './dto/update-business-comment.input';
@@ -79,7 +74,10 @@ export class BusinessCommentsService {
       })) as BusinessComment;
 
       if (!businessComment || !businessComment.isActive) {
-        throw new NotFoundException(`Business comment with ID ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'business_comment',
+          id,
+        });
       }
 
       return this.mapToDto(businessComment);
@@ -96,7 +94,7 @@ export class BusinessCommentsService {
     try {
       // Validate rating
       if (input.rating < 1 || input.rating > 5) {
-        throw new BadRequestException('Rating must be between 1 and 5');
+        ExceptionHelper.badRequest('errors.business_comment.rating_invalid');
       }
 
       // Check if the business exists and is active
@@ -105,9 +103,10 @@ export class BusinessCommentsService {
       });
 
       if (!business || !business.isActive) {
-        throw new NotFoundException(
-          `Business with ID ${input.businessId} not found`,
-        );
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'business',
+          id: input.businessId,
+        });
       }
 
       // Check if user already commented on this business
@@ -119,10 +118,10 @@ export class BusinessCommentsService {
         },
       });
 
-      if (existingComment) {
-        throw new BadRequestException(
-          'You have already commented on this business. Please update your existing comment.',
-        );
+      if (!existingComment) {
+        ExceptionHelper.badRequest('errors.common.already_exists', {
+          resource: 'business_comment',
+        });
       }
 
       const businessComment = (await this.prisma.businessComment.create({
@@ -153,7 +152,7 @@ export class BusinessCommentsService {
     try {
       // Validate rating if provided
       if (input.rating && (input.rating < 1 || input.rating > 5)) {
-        throw new BadRequestException('Rating must be between 1 and 5');
+        ExceptionHelper.badRequest('errors.business_comment.rating_invalid');
       }
 
       const businessComment = (await this.prisma.businessComment.findFirst({
@@ -164,16 +163,15 @@ export class BusinessCommentsService {
       })) as BusinessComment;
 
       if (!businessComment || !businessComment.isActive) {
-        throw new NotFoundException(
-          `Business comment with ID ${input.id} not found`,
-        );
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'business_comment',
+          id: input.id,
+        });
       }
 
       // Check if user is the creator
       if (businessComment.createdById !== userId) {
-        throw new ForbiddenException(
-          'You do not have permission to update this business comment',
-        );
+        ExceptionHelper.forbidden('errors.business_comment.cannot_update');
       }
 
       const updatedBusinessComment = (await this.prisma.businessComment.update({
@@ -205,14 +203,15 @@ export class BusinessCommentsService {
       })) as BusinessComment;
 
       if (!businessComment || !businessComment.isActive) {
-        throw new NotFoundException(`Business comment with ID ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'business_comment',
+          id,
+        });
       }
 
       // Check if user is the creator
       if (businessComment.createdById !== userId) {
-        throw new ForbiddenException(
-          'You do not have permission to delete this business comment',
-        );
+        ExceptionHelper.forbidden('errors.business_comment.cannot_delete');
       }
 
       const deletedBusinessComment = (await this.prisma.businessComment.update({

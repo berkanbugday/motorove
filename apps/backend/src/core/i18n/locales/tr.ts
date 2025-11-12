@@ -132,4 +132,120 @@ export const trTranslations = {
       other: 'Diğer',
     },
   },
+  errors: {
+    // Authentication errors
+    auth: {
+      invalid_authorization_header: 'Geçersiz yetkilendirme başlığı',
+      invalid_token: 'Geçersiz token',
+      token_expired: 'Token süresi doldu',
+      invalid_jwt_token: 'Geçersiz JWT token',
+      user_not_found_during_refresh:
+        'Token yenileme sırasında kullanıcı bulunamadı',
+      invalid_credentials: 'Geçersiz kimlik bilgileri',
+      email_already_in_use: 'E-posta zaten kullanımda',
+      user_not_created: 'Kullanıcı oluşturulamadı',
+      failed_to_send_password_reset_email:
+        'Şifre sıfırlama e-postası gönderilemedi',
+      failed_to_update_email: 'E-posta güncellenemedi',
+      failed_to_update_password: 'Şifre güncellenemedi',
+      failed_to_resend_email: 'E-posta yeniden gönderilemedi',
+      token_and_password_required: 'Token ve şifre gereklidir',
+      password_updated_successfully: 'Şifre başarıyla güncellendi',
+      invalid_or_expired_token: 'Geçersiz veya süresi dolmuş token',
+    },
+    // Common errors
+    common: {
+      not_found: '{{resource}} bulunamadı',
+      not_found_with_id: '{{resource}} ID {{id}} ile bulunamadı',
+      forbidden: 'Bu işlemi gerçekleştirmek için yetkiniz yok',
+      cannot_perform_action: '{{resource}} işlemini gerçekleştiremezsiniz',
+      failed_to_create: '{{resource}} oluşturulamadı',
+      failed_to_update: '{{resource}} güncellenemedi',
+      failed_to_delete: '{{resource}} silinemedi',
+      failed_to_upload: '{{resource}} yüklenemedi',
+      failed_to_upload_with_error: '{{resource}} yüklenemedi: {{error}}',
+      already_exists: '{{resource}} zaten mevcut',
+      cannot_follow_yourself: 'Kendinizi takip edemezsiniz',
+      already_following: 'Bu kullanıcıyı zaten takip ediyorsunuz',
+      not_following: 'Bu kullanıcıyı takip etmiyorsunuz',
+      internal_server_error: 'Sunucu hatası',
+      invalid_authentication: 'Geçersiz kimlik doğrulama',
+      invalid_token: 'Geçersiz token',
+    },
+    // Post errors
+    post: {
+      cannot_delete: 'Yalnızca kendi gönderilerinizi silebilirsiniz',
+      cannot_update: 'Yalnızca kendi gönderilerinizi güncelleyebilirsiniz',
+    },
+    // Post comment errors
+    post_comment: {
+      cannot_delete: 'Yalnızca kendi yorumlarınızı silebilirsiniz',
+      cannot_update: 'Yalnızca kendi yorumlarınızı güncelleyebilirsiniz',
+    },
+    // Group errors
+    group: {
+      already_member: 'Kullanıcı zaten bu grubun üyesi',
+      cannot_delete: 'Yalnızca sahip olduğunuz grupları silebilirsiniz',
+      cannot_update: 'Yalnızca sahip olduğunuz grupları güncelleyebilirsiniz',
+    },
+    // Group membership errors
+    group_membership: {
+      cannot_remove_yourself: 'Kendinizi gruptan çıkaramazsınız',
+      cannot_remove: 'Bu üyeyi kaldıramazsınız',
+      cannot_leave: 'Bu gruptan ayrılamazsınız',
+    },
+    // Event errors
+    event: {
+      cannot_remove: 'Bu etkinliği kaldıramazsınız',
+      cannot_leave: 'Kendi etkinliğinizden ayrılamazsınız',
+      failed_to_fetch_invitations: 'Davetiyeler alınamadı',
+      failed_to_reject_invitation: 'Davetiye reddedilemedi',
+      failed_to_accept_invitation: 'Davetiye kabul edilemedi',
+    },
+    // Warning errors
+    warning: {
+      cannot_delete: 'Yalnızca kendi uyarılarınızı silebilirsiniz',
+    },
+    // Emergency errors
+    emergency: {
+      cannot_delete: 'Yalnızca kendi acil durumlarınızı silebilirsiniz',
+    },
+    // Business comment errors
+    business_comment: {
+      rating_invalid: 'Değerlendirme 1 ile 5 arasında olmalıdır',
+      cannot_delete: 'Yalnızca kendi yorumlarınızı silebilirsiniz',
+      cannot_update: 'Yalnızca kendi yorumlarınızı güncelleyebilirsiniz',
+    },
+  },
+  // Resource names for translation
+  resources: {
+    email: 'E-posta',
+    supabase_credentials: 'Supabase Kimlik Bilgileri',
+    authorization_header: 'Yetkilendirme Başlığı',
+    user: 'Kullanıcı',
+    user_following: 'Kullanıcı Takibi',
+    user_setting: 'Kullanıcı Ayarı',
+    post: 'Gönderi',
+    create_post: 'Gönderi Oluşturma',
+    post_comment: 'Gönderi Yorumu',
+    create_post_comment: 'Gönderi Yorumu Oluşturma',
+    update_post: 'Gönderi Güncelleme',
+    group: 'Grup',
+    group_membership: 'Grup Üyeliği',
+    event: 'Etkinlik',
+    event_participant: 'Etkinlik Katılımcısı',
+    event_invitation: 'Etkinlik Davetiyesi',
+    warning: 'Uyarı',
+    emergency: 'Acil Durum',
+    business: 'İşletme',
+    business_comment: 'İşletme Yorumu',
+    city: 'Şehir',
+    file: 'Dosya',
+    image: 'Resim',
+    invitation: 'Davetiye',
+    participant: 'Katılımcı',
+    membership: 'Üyelik',
+    like: 'Beğeni',
+    save: 'Kayıt',
+  },
 };

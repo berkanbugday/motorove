@@ -1,10 +1,5 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  ConflictException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
@@ -88,7 +83,9 @@ export class GroupMembershipsService {
       });
 
       if (!group) {
-        throw new NotFoundException(`Group with ID ${groupId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'group',
+        });
       }
 
       // Check if the user is already a member
@@ -97,7 +94,7 @@ export class GroupMembershipsService {
       );
 
       if (existingMembership) {
-        throw new ConflictException('User is already a member of this group');
+        ExceptionHelper.conflict('errors.group.already_member');
       }
 
       // Add the user as a member
@@ -165,14 +162,16 @@ export class GroupMembershipsService {
       });
 
       if (!group) {
-        throw new NotFoundException(`Group with ID ${groupId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'group',
+        });
       }
 
       const isOwner = group.createdById === userId;
 
       if (isOwner) {
-        throw new ForbiddenException(
-          'You cannot remove yourself from the group',
+        ExceptionHelper.forbidden(
+          'errors.group_membership.cannot_remove_yourself',
         );
       }
 
@@ -181,9 +180,9 @@ export class GroupMembershipsService {
       );
 
       if (!membershipToDelete) {
-        throw new NotFoundException(
-          `Member with ID ${userId} not found in this group`,
-        );
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'group_membership',
+        });
       }
 
       // Delete the membership
@@ -226,7 +225,9 @@ export class GroupMembershipsService {
       });
 
       if (!group) {
-        throw new NotFoundException(`Group with ID ${groupId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'group',
+        });
       }
 
       // Check if the admin user has admin rights
@@ -238,9 +239,7 @@ export class GroupMembershipsService {
       );
 
       if (!adminMembership) {
-        throw new ForbiddenException(
-          'You are not authorized to change member roles in this group',
-        );
+        ExceptionHelper.forbidden('errors.common.forbidden');
       }
 
       // Check if the member exists
@@ -249,9 +248,9 @@ export class GroupMembershipsService {
       );
 
       if (!membershipToUpdate) {
-        throw new NotFoundException(
-          `Member with ID ${userId} not found in this group`,
-        );
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'group_membership',
+        });
       }
 
       // Update the member's role
@@ -313,7 +312,10 @@ export class GroupMembershipsService {
       });
 
       if (!membership) {
-        throw new NotFoundException(`Membership with ID ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'group_membership',
+          id,
+        });
       }
 
       // Update the membership status

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ConfigService } from '../core/config/config.service';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 
 @Injectable()
 export class SupabaseService {
@@ -11,9 +12,9 @@ export class SupabaseService {
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error(
-        'Supabase credentials not found in environment variables',
-      );
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'supabase_credentials',
+      });
     }
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {

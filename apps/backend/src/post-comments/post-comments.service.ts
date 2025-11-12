@@ -1,9 +1,5 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostCommentInput } from './dto/create-post-comment.input';
 import { UpdatePostCommentInput } from './dto/update-post-comment.input';
@@ -63,7 +59,10 @@ export class PostCommentsService {
       })) as PostComment;
 
       if (!postComment || !postComment.isActive) {
-        throw new NotFoundException(`Post comment with ID ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'post_comment',
+          id,
+        });
       }
 
       return this.mapToDto(postComment);
@@ -87,7 +86,9 @@ export class PostCommentsService {
       });
 
       if (!post || !post.isActive) {
-        throw new NotFoundException(`Post with ID ${input.postId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'post',
+        });
       }
 
       if (post.groupId) {
@@ -100,9 +101,9 @@ export class PostCommentsService {
         });
 
         if (!membership || membership.status !== ApprovalStatus.ACCEPTED) {
-          throw new ForbiddenException(
-            'You must be an approved member of the group to comment on a post',
-          );
+          ExceptionHelper.forbidden('errors.common.cannot_perform_action', {
+            resource: 'create_post_comment',
+          });
         }
       }
 
@@ -154,9 +155,10 @@ export class PostCommentsService {
       })) as PostComment;
 
       if (!postComment || !postComment.isActive) {
-        throw new NotFoundException(
-          `Post comment with ID ${input.id} not found`,
-        );
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'post_comment',
+          id: input.id,
+        });
       }
 
       // Check if user is the creator or an admin of the group (if post has a group)
@@ -168,9 +170,7 @@ export class PostCommentsService {
         ) || false;
 
       if (!isCreator && !isGroupAdmin) {
-        throw new ForbiddenException(
-          'You do not have permission to update this post comment',
-        );
+        ExceptionHelper.forbidden('errors.post_comment.cannot_update');
       }
 
       const updatedPostComment = (await this.prisma.postComment.update({
@@ -217,7 +217,10 @@ export class PostCommentsService {
       })) as PostComment;
 
       if (!postComment || !postComment.isActive) {
-        throw new NotFoundException(`Post comment with ID ${id} not found`);
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'post_comment',
+          id,
+        });
       }
 
       // Check if user is the creator or an admin of the group (if post has a group)
@@ -229,9 +232,7 @@ export class PostCommentsService {
         ) || false;
 
       if (!isCreator && !isGroupAdmin) {
-        throw new ForbiddenException(
-          'You do not have permission to delete this post comment',
-        );
+        ExceptionHelper.forbidden('errors.post_comment.cannot_delete');
       }
 
       const deletedPostComment = (await this.prisma.postComment.update({

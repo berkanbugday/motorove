@@ -1,4 +1,5 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserSettingDto } from './dto/user-setting.dto';
 import { UpdateUserSettingInput } from './dto/update-user-setting.input';
@@ -17,7 +18,9 @@ export class UserSettingsService {
       });
 
       if (!userSetting) {
-        throw new NotFoundException(`User setting with ID ${userId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'user_setting',
+        });
       }
 
       return plainToClass(UserSettingDto, userSetting);
@@ -36,7 +39,9 @@ export class UserSettingsService {
       });
 
       if (!existingSetting) {
-        throw new NotFoundException(`User setting with ID ${userId} not found`);
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'user_setting',
+        });
       }
 
       const userSetting = await this.prisma.userSetting.update({

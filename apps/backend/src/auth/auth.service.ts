@@ -13,6 +13,7 @@ import { NotificationPermission } from '../enums/models/notification-permission.
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { StorageService } from '../core/storage/storage.service';
 import { Language } from '../enums/models/language.enum';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 
 @Injectable()
 export class AuthService {
@@ -38,7 +39,9 @@ export class AuthService {
       });
 
       if (existingUser) {
-        throw new ConflictException('Email already exists');
+        ExceptionHelper.conflict('errors.common.already_exists', {
+          resource: 'email',
+        });
       }
 
       // Register user with Supabase
@@ -49,13 +52,15 @@ export class AuthService {
 
       if (error) {
         if (error.message.includes('already registered')) {
-          throw new ConflictException('Email already exists');
+          ExceptionHelper.conflict('errors.common.already_exists', {
+            resource: 'email',
+          });
         }
         throw new UnauthorizedException(error.message);
       }
 
       if (!data.user) {
-        throw new UnauthorizedException('User not created');
+        ExceptionHelper.unauthorized('errors.auth.user_not_created');
       }
 
       supabaseUser = data.user;
@@ -124,7 +129,9 @@ export class AuthService {
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        throw new ConflictException('Email already exists');
+        ExceptionHelper.conflict('errors.common.already_exists', {
+          resource: 'email',
+        });
       }
       throw error;
     }
@@ -138,7 +145,7 @@ export class AuthService {
     }
 
     if (!data.user) {
-      throw new UnauthorizedException('Invalid credentials');
+      ExceptionHelper.unauthorized('errors.auth.invalid_credentials');
     }
 
     // Get user from our database
@@ -150,7 +157,9 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      ExceptionHelper.unauthorized('errors.common.not_found', {
+        resource: 'user',
+      });
     }
 
     if (user.email !== data.user.email) {
@@ -198,19 +207,17 @@ export class AuthService {
         // Check for specific error types from Supabase
         if (error.message.includes('Token has expired or is invalid')) {
           console.error('Token expiration error:', error.message);
-          throw new UnauthorizedException('Token has expired');
+          ExceptionHelper.unauthorized('errors.auth.token_expired');
         }
 
         if (error.message.includes('Token already used')) {
           console.error('Refresh token reuse detected:', error.message);
-          throw new UnauthorizedException(
-            'Invalid Refresh Token: Already Used',
-          );
+          ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
         }
 
         if (error.message.includes('JWT')) {
           console.error('JWT validation error:', error.message);
-          throw new UnauthorizedException('Invalid JWT token');
+          ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
         }
 
         console.error('Token refresh error:', error.message);
@@ -220,7 +227,9 @@ export class AuthService {
       }
 
       if (!data.user) {
-        throw new UnauthorizedException('User not found during token refresh');
+        ExceptionHelper.unauthorized(
+          'errors.auth.user_not_found_during_refresh',
+        );
       }
 
       // Get user from our database
@@ -232,7 +241,9 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        ExceptionHelper.unauthorized('errors.common.not_found', {
+          resource: 'user',
+        });
       }
 
       const avatar = user.avatar
@@ -269,7 +280,7 @@ export class AuthService {
           errorMessage.includes('JWT claim') ||
           errorMessage.includes('JWT token')
         ) {
-          throw new UnauthorizedException('Invalid JWT token');
+          ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
         }
       }
 
@@ -286,7 +297,7 @@ export class AuthService {
     const { data, error } = await this.supabaseService.getUser(token);
 
     if (error || !data.user) {
-      throw new UnauthorizedException('Invalid token');
+      ExceptionHelper.unauthorized('errors.auth.invalid_token');
     }
 
     const user = await this.prismaService.user.findFirst({
@@ -297,7 +308,9 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      ExceptionHelper.unauthorized('errors.common.not_found', {
+        resource: 'user',
+      });
     }
 
     return {
@@ -334,7 +347,9 @@ export class AuthService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      throw new UnauthorizedException('Failed to send password reset email');
+      ExceptionHelper.unauthorized(
+        'errors.auth.failed_to_send_password_reset_email',
+      );
     }
   }
 
@@ -350,7 +365,9 @@ export class AuthService {
       });
 
       if (!existingUser) {
-        throw new UnauthorizedException('User not found');
+        ExceptionHelper.unauthorized('errors.common.not_found', {
+          resource: 'user',
+        });
       }
 
       // Check if new email is already in use
@@ -359,7 +376,7 @@ export class AuthService {
       });
 
       if (emailInUse) {
-        throw new ConflictException('Email already in use');
+        ExceptionHelper.conflict('errors.auth.email_already_in_use');
       }
 
       // Update email in Supabase with access token
@@ -380,7 +397,7 @@ export class AuthService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      throw new UnauthorizedException('Failed to update email');
+      ExceptionHelper.unauthorized('errors.auth.failed_to_update_email');
     }
   }
 
@@ -400,7 +417,7 @@ export class AuthService {
 
       return true;
     } catch {
-      throw new UnauthorizedException('Failed to update password');
+      ExceptionHelper.unauthorized('errors.auth.failed_to_update_password');
     }
   }
 
@@ -414,7 +431,7 @@ export class AuthService {
 
       return true;
     } catch {
-      throw new UnauthorizedException('Failed to resend email');
+      ExceptionHelper.unauthorized('errors.auth.failed_to_resend_email');
     }
   }
 }

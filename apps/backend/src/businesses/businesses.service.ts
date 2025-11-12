@@ -1,4 +1,5 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { BusinessDto } from './dto/business.dto';
 import { FilterBusinessInput } from './dto/filter-business.input';
@@ -210,7 +211,9 @@ export class BusinessesService {
       },
     });
     if (!business) {
-      throw new NotFoundException('Business not found');
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'business',
+      });
     }
     const averageRating =
       business.comments.length > 0
