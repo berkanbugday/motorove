@@ -500,6 +500,8 @@ model GroupMembership {
   @@unique([groupId, userId])
   @@index([userId])
   @@index([createdById])
+  @@index([groupId, userId, isActive, status])
+  @@index([userId, status, isActive])
 }
 
 model Notification {
@@ -525,6 +527,8 @@ model Notification {
 
   @@index([userId])
   @@index([createdById])
+  @@index([userId, read, isActive])
+  @@index([userId, isActive, createdAt])
 }
 
 model DeviceToken {
@@ -562,6 +566,8 @@ model Post {
 
   @@index([createdById])
   @@index([groupId])
+  @@index([isActive, createdAt])
+  @@index([groupId, isActive, createdAt])
 }
 
 model PostComment {
@@ -581,6 +587,7 @@ model PostComment {
 
   @@index([createdById])
   @@index([postId])
+  @@index([postId, isActive, createdAt])
 }
 
 // Business comment model for reviews and feedback
@@ -604,6 +611,7 @@ model BusinessComment {
 
   @@index([createdById])
   @@index([businessId])
+  @@index([businessId, isActive, createdAt])
 }
 
 // New model for post likes
@@ -755,6 +763,8 @@ model UserFollowing {
 
   @@unique([followerId, followingId])
   @@index([followingId])
+  @@index([followerId, isActive, status])
+  @@index([followingId, status, isActive])
 }
 
 // Event model
@@ -806,6 +816,8 @@ model Event {
 
   @@index([createdById])
   @@index([organizedByGroupId])
+  @@index([isActive, status, isPrivate, startDateTime])
+  @@index([status, isActive, startDateTime])
 }
 
 // Event participant model
@@ -826,6 +838,8 @@ model EventParticipant {
 
   @@unique([eventId, createdById])
   @@index([createdById])
+  @@index([eventId, status, isActive])
+  @@index([createdById, status, isActive])
 }
 
 // Event invitation model
@@ -849,6 +863,8 @@ model EventInvitation {
   @@unique([eventId, inviteeId])
   @@index([createdById])
   @@index([inviteeId])
+  @@index([inviteeId, status, isActive])
+  @@index([eventId, isActive, status])
 }
 
 // User settings model
@@ -914,6 +930,8 @@ model Warning {
 
   @@index([createdById])
   @@index([type])
+  @@index([isActive, status, createdAt])
+  @@index([type, isActive, status])
 }
 
 // Warning description model for multi-language support
@@ -973,6 +991,8 @@ model Emergency {
 
   @@index([createdById])
   @@index([type])
+  @@index([isActive, status, createdAt])
+  @@index([type, isActive, status])
 }
 
 // Emergency description model for multi-language support
