@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   Keyboard,
-  ActivityIndicator,
   Animated,
   LayoutChangeEvent,
   ScrollView,
@@ -16,6 +15,7 @@ import {MultiSelectItem, MultiSelectProps} from './types';
 import {colors} from '../../theme';
 import {Icon} from '../Icon';
 import {Chip} from '../Chip';
+import {LoadingIndicator} from '../LoadingIndicator';
 import {useTranslation} from '../../hooks/useTranslation';
 
 // Animation constants
@@ -318,9 +318,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
               onStartShouldSetResponder={() => true}
               onTouchEnd={e => e.stopPropagation()}>
               {loading ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator color={colors.neutral.black} />
-                </View>
+                <LoadingIndicator visible={true} />
               ) : data.length === 0 ? (
                 renderNoResults ? (
                   renderNoResults()

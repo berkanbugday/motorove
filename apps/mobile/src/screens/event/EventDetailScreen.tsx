@@ -2,7 +2,6 @@ import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {
   View,
   StyleSheet,
-  ActivityIndicator,
   Animated,
   Platform,
   TouchableOpacity,
@@ -538,11 +537,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
   // Show loading while fetching initial data
   if (loading) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   if (!event) {

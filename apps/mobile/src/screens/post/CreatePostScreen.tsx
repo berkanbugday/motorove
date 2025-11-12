@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   ImageStyle,
   TextStyle,
-  ActivityIndicator,
   FlatList,
   BackHandler,
   Platform,
@@ -28,6 +27,7 @@ import {
   SelectLocationMap,
   Icon,
   TopHeaderBar,
+  LoadingIndicator,
   GroupCard,
   openBottomSheet,
   closeBottomSheet,
@@ -127,7 +127,7 @@ export const CreatePostScreen = () => {
       content: (
         <>
           {loadingGroups ? (
-            <ActivityIndicator size="large" />
+            <LoadingIndicator visible={true} />
           ) : groupsError ? (
             <View style={styles.errorContainer}>
               <Icon name="error" size={24} color={colors.status.error} />
@@ -416,7 +416,6 @@ export const CreatePostScreen = () => {
           shape="round"
           onPress={handlePost}
           title={t('common.submit')}
-          loading={loading}
           disabled={
             loading ||
             !postText.trim() ||
@@ -424,6 +423,7 @@ export const CreatePostScreen = () => {
           }
         />
       </View>
+      <LoadingIndicator visible={loading} />
     </View>
   );
 };

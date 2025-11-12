@@ -12,6 +12,7 @@ import {
   Caption,
   Subtitle,
   BodySmall,
+  LoadingIndicator,
 } from '@components';
 import {colors, commonStyles, spacing} from '@theme';
 import {useNavigation} from '@react-navigation/native';
@@ -201,9 +202,10 @@ export const SupportScreen = () => {
           size="medium"
           shape="round"
           onPress={handleSubmit(onSubmit)}
-          loading={isLoading}
+          disabled={isLoading}
         />
       </View>
+      <LoadingIndicator visible={isLoading} />
     </View>
   );
 };

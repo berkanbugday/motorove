@@ -23,6 +23,7 @@ import {
   Chip,
   RNMap,
   openMapAppsBottomSheet,
+  LoadingIndicator,
 } from '@components';
 import {BusinessComments} from '@components/BusinessComments/BusinessComments';
 import {EnumUtils} from '@utils/enumUtils';
@@ -715,7 +716,7 @@ export const BusinessDetailScreen: React.FC = () => {
             variant="primary"
             shape="round"
             iconName="trash"
-            loading={removeLoading}
+            disabled={removeLoading}
             onPress={async () => {
               if (selectedCommentId) {
                 await handleDeleteComment(selectedCommentId);
@@ -727,6 +728,7 @@ export const BusinessDetailScreen: React.FC = () => {
           />
         </View>
       </BottomSheet>
+      <LoadingIndicator visible={createLoading || updateLoading || removeLoading} />
     </View>
   );
 };

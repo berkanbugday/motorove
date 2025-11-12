@@ -8,7 +8,6 @@
 import React, {useEffect, useState} from 'react';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {View, ActivityIndicator, StyleSheet} from 'react-native';
 import {RootNavigator} from '@navigation/RootNavigator';
 import {AuthProvider, LanguageProvider} from '@contexts';
 import {ApolloProvider} from '@apollo/client';
@@ -17,6 +16,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import * as Sentry from '@sentry/react-native';
 import {AppConfig} from '@configs/appConfig';
 import ErrorBoundary from '@components/ErrorBoundary';
+import {LoadingIndicator} from '@components';
 import {loggingService} from '@services/logging.service';
 import {networkService} from '@services/network.service';
 import {notificationService} from '@services/notification.service';
@@ -86,11 +86,7 @@ function App(): React.JSX.Element {
   }, []);
 
   if (!isStorageReady) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   return (
@@ -115,13 +111,5 @@ function App(): React.JSX.Element {
     </ErrorBoundary>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default App;

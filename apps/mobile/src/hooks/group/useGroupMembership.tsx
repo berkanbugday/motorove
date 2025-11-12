@@ -1,5 +1,5 @@
 import React, {useMemo, useCallback, useState} from 'react';
-import {View, FlatList, ActivityIndicator, StyleSheet} from 'react-native';
+import {View, FlatList, StyleSheet} from 'react-native';
 import {IGroup, GroupMemberRole, ApprovalStatus} from '@motorove/shared';
 import {AuthUser} from '@app-types/auth.types';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -7,6 +7,7 @@ import {
   openBottomSheet,
   closeBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
+import {LoadingIndicator} from '@components';
 import {
   Subtitle,
   Caption,
@@ -317,9 +318,7 @@ export const useGroupMembership = ({
         </View>
       ),
       content: groupLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
-        </View>
+        <LoadingIndicator visible={true} />
       ) : (
         <FlatList
           data={members}

@@ -1,5 +1,5 @@
 import React, {useCallback, useState, useEffect} from 'react';
-import {StyleSheet, View, ScrollView, ActivityIndicator} from 'react-native';
+import {StyleSheet, View, ScrollView} from 'react-native';
 import {
   Button,
   Checkbox,
@@ -9,6 +9,7 @@ import {
   DropdownItem,
   MultiSelect,
   MultiSelectItem,
+  LoadingIndicator,
 } from '@components';
 import {colors, spacing} from '@theme';
 import {useGetCities} from '@services/city.service';
@@ -108,9 +109,7 @@ export const GroupFilter: React.FC<GroupFilterProps> = ({
             {t('components.groupFilter.location')}
           </Subtitle>
           {isCitiesLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" />
-            </View>
+            <LoadingIndicator visible={true} />
           ) : (
             <Dropdown
               label={t('components.groupFilter.city')}

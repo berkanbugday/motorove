@@ -5,7 +5,6 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
 } from 'react-native';
 import {useAuth} from '@contexts';
 import {colors, commonStyles, getShadow, radius, spacing} from '@theme';
@@ -26,6 +25,7 @@ import {
   IconName,
   FeedCard,
   GroupCard,
+  LoadingIndicator,
 } from '@components';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useGetUserProfile, useGetUserStats} from '@services/user.service';
@@ -278,11 +278,7 @@ export const ProfileScreen = () => {
   const renderPostsTab = () => (
     <View style={styles.tabContent}>
       {postsLoading && posts.length === 0 ? (
-        <ActivityIndicator
-          size="small"
-          color={colors.neutral.black}
-          style={{marginTop: spacing.xl}}
-        />
+        <LoadingIndicator visible={true} />
       ) : posts.length === 0 ? (
         <Body
           color={colors.neutral.grey}
@@ -326,11 +322,7 @@ export const ProfileScreen = () => {
   const renderGroupsTab = () => (
     <View style={styles.tabContent}>
       {groupsLoading && groups.length === 0 ? (
-        <ActivityIndicator
-          size="small"
-          color={colors.neutral.black}
-          style={{marginTop: spacing.xl}}
-        />
+        <LoadingIndicator visible={true} />
       ) : groups.length === 0 ? (
         <Body
           color={colors.neutral.grey}

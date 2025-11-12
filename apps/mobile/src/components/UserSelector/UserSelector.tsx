@@ -6,12 +6,11 @@ import {
   TouchableOpacity,
   Image,
   ViewStyle,
-  ActivityIndicator,
   FlatList,
   Animated,
 } from 'react-native';
 import {colors, spacing, radius} from '@theme';
-import {Typography, Icon, Chip, Button} from '@components';
+import {Typography, Icon, Chip, Button, LoadingIndicator} from '@components';
 import {openBottomSheet} from '@components/BottomSheet';
 import {FollowService} from '@services/user-following.service';
 import type {IUser} from '@motorove/shared';
@@ -340,11 +339,7 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   ]);
 
   if (loading) {
-    return (
-      <View style={[styles.container, style]}>
-        <ActivityIndicator color={colors.neutral.black} />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   if (error || users.length === 0) {

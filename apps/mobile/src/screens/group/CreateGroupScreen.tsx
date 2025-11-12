@@ -21,6 +21,7 @@ import {
   showToast,
   Caption,
   BodySmall,
+  LoadingIndicator,
 } from '@components';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -335,9 +336,10 @@ export const CreateGroupScreen: React.FC = () => {
           size="medium"
           shape="round"
           onPress={handleSubmit(onSubmit)}
-          loading={createGroupLoading}
+          disabled={createGroupLoading}
         />
       </View>
+      <LoadingIndicator visible={createGroupLoading} />
     </View>
   );
 };

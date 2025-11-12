@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useCallback} from 'react';
-import {View, Image, ActivityIndicator} from 'react-native';
+import {View, Image} from 'react-native';
 import {
   NavigationContainer,
   LinkingOptions,
@@ -11,6 +11,7 @@ import {AuthNavigator} from './stacks/AuthNavigator';
 import {MainNavigator} from './stacks/MainNavigator';
 import {useFirstTimeCheck} from './utils/navigationUtils';
 import {useAuth} from '@contexts';
+import {LoadingIndicator} from '@components';
 import {RootStackParamList} from '@navigation/types/navigationTypes';
 import {AccountSetupScreen} from '@screens/auth/AccountSetupScreen';
 import {NotificationPermission} from '@motorove/shared';
@@ -61,26 +62,7 @@ export function RootNavigator() {
   }, [isAuthenticated]);
   // Show loading screen with logo when checking auth, session revival, or first time status
   if (isInitializing || firstTimeLoading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#121212',
-        }}>
-        <Image
-          source={require('@assets/images/motorove_logo_light.png')}
-          style={{
-            width: 150,
-            height: 150,
-            resizeMode: 'contain',
-            marginBottom: 30,
-          }}
-        />
-        <ActivityIndicator size="small" color="#fff" />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   return (

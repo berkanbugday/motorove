@@ -15,6 +15,7 @@ import {
   Icon,
   SkeletonGroup,
   Button,
+  LoadingIndicator,
 } from '@components';
 import {IPostComment, IImage, IPost, Language} from '@motorove/shared';
 import {PostComment} from '@components/PostComment/post-comment.interface';
@@ -464,6 +465,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
         editing={Boolean(editingComment)}
         onCancelEdit={handleCancelEditPostComment}
       />
+      <LoadingIndicator visible={createLoading || updateLoading || removeLoading} />
     </View>
   );
 };

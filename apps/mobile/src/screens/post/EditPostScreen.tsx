@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   ImageStyle,
   TextStyle,
-  ActivityIndicator,
   FlatList,
   BackHandler,
   Platform,
@@ -31,6 +30,7 @@ import {
   GroupCard,
   openBottomSheet,
   closeBottomSheet,
+  LoadingIndicator,
 } from '@components';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -196,7 +196,7 @@ export const EditPostScreen = () => {
       content: (
         <>
           {loadingGroups ? (
-            <ActivityIndicator size="large" />
+            <LoadingIndicator visible={true} />
           ) : groupsError ? (
             <View style={styles.errorContainer}>
               <Icon name="error" size={24} color={colors.status.error} />
@@ -368,11 +368,7 @@ export const EditPostScreen = () => {
   };
 
   if (loadingPost) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   return (
@@ -493,7 +489,6 @@ export const EditPostScreen = () => {
           shape="round"
           onPress={handleUpdate}
           title={t('common.submit')}
-          loading={isLoading}
           disabled={
             isLoading ||
             !postText.trim() ||
@@ -501,6 +496,7 @@ export const EditPostScreen = () => {
           }
         />
       </View>
+      <LoadingIndicator visible={isLoading} />
     </View>
   );
 };

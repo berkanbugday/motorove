@@ -11,6 +11,7 @@ import {
   EmergencyBottomSheet,
   WarningBottomSheet,
   showToast,
+  LoadingIndicator,
 } from '@components';
 import {colors} from '@theme/colors';
 import {getWarningIconAndColor} from '@utils/warningUtils';
@@ -85,10 +86,12 @@ export const MapScreen = () => {
   );
 
   // Fetch warnings from backend based on map viewport bounds
-  const {warnings} = useGetWarnings(memoizedMapBounds);
+  const {warnings, loading: warningsLoading} =
+    useGetWarnings(memoizedMapBounds);
 
   // Fetch emergencies from backend based on map viewport bounds
-  const {emergencies} = useGetEmergencies(memoizedMapBounds);
+  const {emergencies, loading: emergenciesLoading} =
+    useGetEmergencies(memoizedMapBounds);
 
   // Calculate distance between two coordinates (Haversine formula)
   const calculateDistance = useCallback(
@@ -495,6 +498,9 @@ export const MapScreen = () => {
         onTabChange={handleTabChange}
         showTabs={true}
         onProfilePress={handleProfilePress}
+      />
+      <LoadingIndicator
+        visible={loading || warningsLoading || emergenciesLoading}
       />
     </View>
   );

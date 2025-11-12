@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
   Dimensions,
   FlatList,
   Animated,
@@ -35,6 +34,7 @@ import {
   showToast,
   DropdownMenuItem,
   MemberItem,
+  LoadingIndicator,
 } from '@components';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {
@@ -369,11 +369,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
 
   // Show loading while fetching initial data
   if (groupLoading || postsLoading) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   // Animated values with smoother interpolation
@@ -548,9 +544,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
                 {t('screens.group.recent_posts')}
               </Subtitle>
               {postsLoading ? (
-                <View style={styles.postsLoadingContainer}>
-                  <ActivityIndicator size="large" />
-                </View>
+                <LoadingIndicator visible={true} />
               ) : posts.length > 0 ? (
                 <View style={styles.feedList}>
                   {posts.map(post => (
@@ -600,10 +594,11 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
             shape="round"
             onPress={confirmLeaveGroup}
             style={{flex: 1}}
-            loading={removeMemberLoading}
+            disabled={removeMemberLoading}
           />
         </View>
       </BottomSheet>
+      <LoadingIndicator visible={removeMemberLoading} />
     </View>
   );
 };

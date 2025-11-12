@@ -4,7 +4,6 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
-  ActivityIndicator,
   Image,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -18,6 +17,7 @@ import {
   Button,
   TopHeaderBar,
   AnimatedInput,
+  LoadingIndicator,
   MultiSelect,
   MultiSelectItem,
   Dropdown,
@@ -321,9 +321,7 @@ export const EditProfileScreen = () => {
           showShadow={false}
           onBackPress={() => navigation.goBack()}
         />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.neutral.black} />
-        </View>
+        <LoadingIndicator visible={true} />
       </View>
     );
   }
@@ -530,10 +528,10 @@ export const EditProfileScreen = () => {
           shape="round"
           title={updateLoading ? t('common.updating') : t('common.save')}
           onPress={handleSubmit(onSubmit)}
-          loading={updateLoading}
           disabled={updateLoading}
         />
       </View>
+      <LoadingIndicator visible={updateLoading} />
     </View>
   );
 };

@@ -5,7 +5,6 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
@@ -18,6 +17,7 @@ import {
   Dropdown,
   DropdownItem,
   showToast,
+  LoadingIndicator,
   MultiSelectItem,
   MultiSelect,
   BodySmall,
@@ -304,11 +304,7 @@ export const EditGroupScreen = () => {
   };
 
   if (groupLoading) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   return (
@@ -436,9 +432,10 @@ export const EditGroupScreen = () => {
           size="medium"
           shape="round"
           onPress={handleSubmit(onSubmit)}
-          loading={updateGroupLoading}
+          disabled={updateGroupLoading}
         />
       </View>
+      <LoadingIndicator visible={updateGroupLoading} />
     </View>
   );
 };

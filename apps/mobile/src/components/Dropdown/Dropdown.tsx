@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   Keyboard,
-  ActivityIndicator,
   Animated,
   LayoutChangeEvent,
   ScrollView,
@@ -20,7 +19,7 @@ import {
 } from './Dropdown.styles';
 import {DropdownItem, DropdownProps} from './types';
 import {colors} from '@theme';
-import {Icon} from '@components';
+import {Icon, LoadingIndicator} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -418,9 +417,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                 </TouchableOpacity>
               )}
               {loading ? (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator color={colors.neutral.black} />
-                </View>
+                <LoadingIndicator visible={true} />
               ) : filteredData.length === 0 ? (
                 renderNoResults ? (
                   renderNoResults()

@@ -12,7 +12,6 @@ import {
   SafeAreaView,
   BackHandler,
   Platform,
-  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
@@ -908,11 +907,7 @@ export const EditEventScreen = ({route}: EditEventScreenProps) => {
 
   // Show loading state while fetching event data
   if (eventLoading) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+    return <LoadingIndicator visible={true} />;
   }
 
   // Show error state if event couldn't be loaded
