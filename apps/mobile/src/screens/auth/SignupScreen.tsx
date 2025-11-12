@@ -1,5 +1,5 @@
-import React, {useState, useRef} from 'react';
-import {StyleSheet, View, SafeAreaView, Image, ScrollView} from 'react-native';
+import React, {useState} from 'react';
+import {StyleSheet, View, SafeAreaView, Image} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -15,13 +15,13 @@ import {
   Subtitle,
   TopHeaderBar,
   Caption,
+  useBottomSheet,
+  WebViewContent,
 } from '@components';
-import BottomSheet, {BottomSheetRef} from '@components/BottomSheet/BottomSheet';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {authSchemas, SignupFormValues} from '@utils/validation';
 import {colors, spacing, fontSizes, radius, commonStyles} from '@theme';
-import {termsOfService, privacyPolicy} from '@constants/legalContent';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {GraphQLFormattedError} from 'graphql';
 import {useTranslation} from '@hooks/useTranslation';
@@ -33,13 +33,12 @@ export const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const termsBottomSheetRef = useRef<BottomSheetRef>(null);
-  const privacyBottomSheetRef = useRef<BottomSheetRef>(null);
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
   const {language} = useLanguage();
   const {signUp, resend} = authService;
+  const {openBottomSheet} = useBottomSheet();
 
   // Create validation schema with translations
   const {signupSchema} = authSchemas(t);
@@ -110,11 +109,29 @@ export const SignupScreen = () => {
   };
 
   const handleTermsPress = () => {
-    termsBottomSheetRef.current?.open('full');
+    openBottomSheet({
+      content: (
+        <WebViewContent url={`https://motorove.app/${language}/terms-mobile`} />
+      ),
+      snapPoint: 'full',
+      title: t('screens.signUp.terms_of_service'),
+      showCloseButton: true,
+      closeButtonPosition: 'top-right',
+      disableContentGestures: false,
+    });
   };
 
   const handlePrivacyPress = () => {
-    privacyBottomSheetRef.current?.open('full');
+    openBottomSheet({
+      content: (
+        <WebViewContent url={`https://motorove.app/${language}/privacy-mobile`} />
+      ),
+      snapPoint: 'full',
+      title: t('screens.signUp.privacy_policy'),
+      showCloseButton: true,
+      closeButtonPosition: 'top-right',
+      disableContentGestures: false,
+    });
   };
 
   // View when signup is successful
@@ -270,44 +287,6 @@ export const SignupScreen = () => {
           </View>
         </KeyboardAwareScrollView>
       </SafeAreaView>
-
-      {/* Terms of Service Bottom Sheet */}
-      <BottomSheet
-        ref={termsBottomSheetRef}
-        closeOnBackdropPress
-        initialSnap="closed">
-        <View style={styles.bottomSheetContent}>
-          <Title align="center" style={styles.bottomSheetTitle}>
-            {t('screens.signUp.terms_of_service')}
-          </Title>
-          <ScrollView
-            style={styles.legalScrollView}
-            contentContainerStyle={styles.legalContentContainer}
-            bounces={false}
-            showsVerticalScrollIndicator={false}>
-            <BodySmall>{termsOfService}</BodySmall>
-          </ScrollView>
-        </View>
-      </BottomSheet>
-
-      {/* Privacy Policy Bottom Sheet */}
-      <BottomSheet
-        ref={privacyBottomSheetRef}
-        closeOnBackdropPress
-        initialSnap="closed">
-        <View style={styles.bottomSheetContent}>
-          <Title align="center" style={styles.bottomSheetTitle}>
-            {t('screens.signUp.privacy_policy')}
-          </Title>
-          <ScrollView
-            style={styles.legalScrollView}
-            contentContainerStyle={styles.legalContentContainer}
-            bounces={false}
-            showsVerticalScrollIndicator={false}>
-            <BodySmall>{privacyPolicy}</BodySmall>
-          </ScrollView>
-        </View>
-      </BottomSheet>
     </View>
   );
 };
@@ -381,16 +360,6 @@ const styles = StyleSheet.create({
     marginLeft: -20,
     marginRight: -20,
   },
-  bottomSheetContent: {
-    flex: 1,
-  },
-  legalScrollView: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-  },
-  legalContentContainer: {
-    paddingVertical: spacing.sm,
-  },
   successTitle: {
     marginBottom: spacing.md,
   },
@@ -400,9 +369,6 @@ const styles = StyleSheet.create({
   },
   successText: {
     marginBottom: spacing.md,
-  },
-  bottomSheetTitle: {
-    marginBottom: spacing.sm,
   },
   signupButton: {
     marginTop: spacing.md,

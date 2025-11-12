@@ -3,9 +3,15 @@ import {View, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
 import {Icon} from '@components/Icon';
-import {Body, Subtitle, useBottomSheet, LanguageSelector} from '@components';
+import {
+  Body,
+  Subtitle,
+  useBottomSheet,
+  LanguageSelector,
+  WebViewContent,
+} from '@components';
 import {colors, commonStyles, radius, spacing} from '@theme';
-import {useAuth} from '@contexts';
+import {useAuth, useLanguage} from '@contexts';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from '@hooks/useTranslation';
 import {useUpdateUserSetting} from '@services/user-setting.service';
@@ -31,6 +37,7 @@ export const MenuScreen = () => {
   const {t} = useTranslation();
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
   const {updateUserSetting} = useUpdateUserSetting();
+  const {language} = useLanguage();
 
   const handleLanguagePress = () => {
     openBottomSheet({
@@ -53,6 +60,34 @@ export const MenuScreen = () => {
       title: t('screens.menu.language_selection'),
       showCloseButton: true,
       closeButtonPosition: 'top-right',
+    });
+  };
+
+  const handleTermsPress = () => {
+    openBottomSheet({
+      content: (
+        <WebViewContent url={`https://motorove.app/${language}/terms-mobile`} />
+      ),
+      snapPoint: 'full',
+      title: t('screens.menu.terms_of_service'),
+      showCloseButton: true,
+      closeButtonPosition: 'top-right',
+      disableContentGestures: false,
+    });
+  };
+
+  const handlePrivacyPress = () => {
+    openBottomSheet({
+      content: (
+        <WebViewContent
+          url={`https://motorove.app/${language}/privacy-mobile`}
+        />
+      ),
+      snapPoint: 'full',
+      title: t('screens.menu.privacy_policy'),
+      showCloseButton: true,
+      closeButtonPosition: 'top-right',
+      disableContentGestures: false,
     });
   };
 
@@ -228,10 +263,7 @@ export const MenuScreen = () => {
             <Icon name="list-filled" size={18} color={colors.neutral.black} />
           ),
           title: t('screens.menu.terms_of_service'),
-          onPress: () => {
-            // Open terms of service
-            // navigation.navigate('TermsOfService');
-          },
+          onPress: handleTermsPress,
           showRightIcon: true,
         },
         {
@@ -239,10 +271,7 @@ export const MenuScreen = () => {
             <Icon name="file-filled" size={18} color={colors.neutral.black} />
           ),
           title: t('screens.menu.privacy_policy'),
-          onPress: () => {
-            // Open terms of service
-            // navigation.navigate('TermsOfService');
-          },
+          onPress: handlePrivacyPress,
           showRightIcon: true,
         },
       ],
