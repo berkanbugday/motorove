@@ -22,12 +22,12 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   const languageOptions: LanguageOption[] = [
     {
-      code: Language.EN.toLowerCase(),
-      name: t('common.english'),
-    },
-    {
       code: Language.TR.toLowerCase(),
       name: t('common.turkish'),
+    },
+    {
+      code: Language.EN.toLowerCase(),
+      name: t('common.english'),
     },
   ];
 
