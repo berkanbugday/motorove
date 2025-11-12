@@ -608,7 +608,6 @@ export default {
       support_request: 'Support Request',
       terms_of_service: 'Terms of Service',
       privacy_policy: 'Privacy Policy',
-      invite_friends: 'Invite Friends',
       sign_out: 'Sign Out',
     },
 

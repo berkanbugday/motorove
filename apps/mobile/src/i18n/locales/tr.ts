@@ -603,7 +603,6 @@ export default {
       support_request: 'Destek Talebi',
       terms_of_service: 'Hizmet Koşulları',
       privacy_policy: 'Gizlilik Politikası',
-      invite_friends: 'Arkadaşlarını Davet Et',
       sign_out: 'Çıkış Yap',
     },
 

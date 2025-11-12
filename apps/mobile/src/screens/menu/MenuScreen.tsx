@@ -249,17 +249,6 @@ export const MenuScreen = () => {
         },
         {
           icon: (
-            <Icon name="share-filled" size={18} color={colors.neutral.black} />
-          ),
-          title: t('screens.menu.invite_friends'),
-          onPress: () => {
-            // Open terms of service
-            // navigation.navigate('TermsOfService');
-          },
-          showRightIcon: true,
-        },
-        {
-          icon: (
             <Icon name="list-filled" size={18} color={colors.neutral.black} />
           ),
           title: t('screens.menu.terms_of_service'),
