@@ -190,7 +190,8 @@ export function TopHeaderBar({
       <View style={styles.contentContainer}>
         {/* Left section (back button or custom icon) */}
 
-        <View style={styles.leftSection}>
+        <View
+          style={[styles.leftSection, {width: title && subtitle ? 0 : '10%'}]}>
           {showBackButton ? (
             <TouchableOpacity
               onPress={onBackPress}
@@ -217,15 +218,16 @@ export function TopHeaderBar({
           {title && (
             <Subtitle color={textColor} style={titleStyle} numberOfLines={1}>
               {title}
+              {subtitle && (
+                <BodySmall
+                  color={textColor}
+                  style={subtitleStyle}
+                  numberOfLines={1}>
+                  {' '}
+                  {subtitle}
+                </BodySmall>
+              )}
             </Subtitle>
-          )}
-          {subtitle && (
-            <BodySmall
-              color={textColor}
-              style={subtitleStyle}
-              numberOfLines={1}>
-              {subtitle}
-            </BodySmall>
           )}
         </View>
 
@@ -340,7 +342,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screen.horizontal,
   },
   leftSection: {
-    width: '10%',
     alignItems: 'flex-start',
   },
   backButton: {
