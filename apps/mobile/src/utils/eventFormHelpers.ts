@@ -9,6 +9,7 @@ import {
   ExperienceLevel,
   Currency,
 } from '@motorove/shared';
+import {extractPathFromSignedUrl} from './imageUtils';
 
 export interface EventFormData {
   title: string;
@@ -69,7 +70,20 @@ export const buildEventInput = (
     ...cleanAddresses(selectedFinishLocation),
   ];
 
-  const images = selectedImages.map(img => img.base64 || img.uri);
+  // Extract images: send base64 for new images, extract paths from signed URLs for existing images
+  // Supabase signed URLs format: https://[project].supabase.co/storage/v1/object/sign/[bucket]/[path]?token=...
+  // We extract the path part to avoid re-uploading signed URLs (which would cause duplicates)
+  // If extraction fails, fallback to URI so backend can process it (similar to EditPostScreen)
+  const images = selectedImages
+    .map(img => {
+      // New image with base64 data
+      if (img.base64) {
+        return img.base64;
+      }
+      // Existing image - try to extract path from signed URL, fallback to URI if extraction fails
+      return extractPathFromSignedUrl(img.uri, true) || img.uri;
+    })
+    .filter((img): img is string => img !== null && img !== undefined);
 
   const maxParticipantsValue = formData.maxParticipants
     ? parseInt(formData.maxParticipants, 10)
@@ -173,8 +187,9 @@ export const buildUpdateEventInput = (
     id: eventId,
     ...baseInput,
     eventType: selectedEventTypeValue as EventType,
-    addresses: baseInput.addresses && baseInput.addresses.length > 0
-      ? baseInput.addresses
-      : undefined,
+    addresses:
+      baseInput.addresses && baseInput.addresses.length > 0
+        ? baseInput.addresses
+        : undefined,
   };
 };

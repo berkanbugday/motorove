@@ -9,3 +9,4 @@ export * from './locationUtils';
 export * from './warningUtils';
 export * from './emergencyUtils';
 export * from './socialMediaUtils';
+export * from './imageUtils';

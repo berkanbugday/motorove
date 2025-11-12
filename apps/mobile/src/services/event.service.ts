@@ -195,7 +195,7 @@ export const useRemoveEvent = (onSuccess?: () => void) => {
                   );
                   return false;
                 }
-                
+
                 // Check if this is the event we want to remove
                 const id = readField('id', eventRef);
                 return id !== removedEventId;
@@ -290,7 +290,7 @@ export const useCancelEvent = (onSuccess?: () => void) => {
                   );
                   return false;
                 }
-                
+
                 // Check if this is the event we want to remove
                 const id = readField('id', eventRef);
                 return id !== cancelledEventId;

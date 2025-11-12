@@ -1,4 +1,4 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState, useRef} from 'react';
 import {
   View,
   TextInput,
@@ -66,6 +66,9 @@ export const EditPostScreen = () => {
     name: string;
   } | null>(null);
 
+  // Track if we've initialized the form to prevent resetting on post updates
+  const isInitialized = useRef(false);
+
   // Fetch the post data
   const {post, loading: loadingPost} = useGetPost(postId);
 
@@ -104,9 +107,9 @@ export const EditPostScreen = () => {
     }
   }, [navigation]);
 
-  // Initialize form with post data when it loads
+  // Initialize form with post data when it loads (only once)
   useEffect(() => {
-    if (post) {
+    if (post && !isInitialized.current) {
       setPostText(post.content || '');
 
       // Set location if available
@@ -145,14 +148,17 @@ export const EditPostScreen = () => {
         }
       }
 
-      // Set images if available
+      // Set images if available (only on initial load)
       if (post.images && post.images.length > 0) {
-        const formattedImages = post.images.map((uri, index) => ({
+        const formattedImages = post.images.map((img, index) => ({
           id: Date.now() + index,
-          uri: uri.url,
+          uri: img.url,
         }));
         setSelectedImages(formattedImages);
       }
+
+      // Mark as initialized to prevent resetting on subsequent post updates
+      isInitialized.current = true;
     }
   }, [post]);
 

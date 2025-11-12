@@ -3,6 +3,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {showToast} from '@components';
 import {loggingService} from '@services/logging.service';
 import {useTranslation} from './useTranslation';
+import {extractPathFromSignedUrl} from '@utils/imageUtils';
 
 interface UseEventImagesProps {
   selectedImages: {id: number; uri: string; base64?: string}[];
@@ -20,6 +21,23 @@ export const useEventImages = ({
   maxImages = 3,
 }: UseEventImagesProps) => {
   const {t} = useTranslation();
+
+  // Helper function to build image data array for form validation
+  const buildImageDataForForm = useCallback(
+    (images: {id: number; uri: string; base64?: string}[]): string[] => {
+      return images
+        .map(img => {
+          // New image with base64 data - send base64
+          if (img.base64) {
+            return img.base64;
+          }
+          // Existing image - extract path from signed URL or use URI (fallback to URL for validation)
+          return extractPathFromSignedUrl(img.uri, true);
+        })
+        .filter((img): img is string => img !== null);
+    },
+    [],
+  );
 
   const handleSelectImage = useCallback(async () => {
     try {
@@ -62,7 +80,8 @@ export const useEventImages = ({
         const updatedImages = [...selectedImages, newImage];
         setSelectedImages(updatedImages);
 
-        const imageData = updatedImages.map(img => img.base64 || img.uri);
+        // Build image data array including both base64 (new) and paths (existing)
+        const imageData = buildImageDataForForm(updatedImages);
         setValue('images', imageData, {
           shouldValidate: true,
           shouldDirty: true,
@@ -76,17 +95,26 @@ export const useEventImages = ({
         text2: t('screens.event.image_selection_failed'),
       });
     }
-  }, [selectedImages, setValue, maxImages, t, setSelectedImages]);
+  }, [
+    selectedImages,
+    setValue,
+    maxImages,
+    t,
+    setSelectedImages,
+    buildImageDataForForm,
+  ]);
 
   const handleRemoveImage = useCallback(
     (id: number) => {
       const updatedImages = selectedImages.filter(image => image.id !== id);
       setSelectedImages(updatedImages);
 
-      const imageData = updatedImages.map(img => img.base64 || img.uri);
+      // Build image data array including both base64 (new) and paths (existing)
+      // This ensures validation works correctly when removing images
+      const imageData = buildImageDataForForm(updatedImages);
       setValue('images', imageData, {shouldValidate: true, shouldDirty: true});
     },
-    [selectedImages, setValue, setSelectedImages],
+    [selectedImages, setValue, setSelectedImages, buildImageDataForForm],
   );
 
   return {

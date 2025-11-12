@@ -35,10 +35,52 @@ export class ImageCensorFilterService implements OnModuleInit {
         return { isCensored: false, predictions: null };
       }
 
-      // Load the image
-      const response = await fetch(imageUrl);
+      // Validate URL
+      if (!imageUrl || typeof imageUrl !== 'string') {
+        this.logger.warn('Invalid image URL provided');
+        return { isCensored: false, predictions: null };
+      }
+
+      // Load the image with proper error handling
+      const response = await fetch(imageUrl, {
+        headers: {
+          Accept: 'image/*',
+        },
+        redirect: 'follow',
+      });
+
+      if (!response.ok) {
+        this.logger.warn(
+          `Failed to fetch image: ${response.status} ${response.statusText}`,
+        );
+        return { isCensored: false, predictions: null };
+      }
+
+      // Check Content-Type header
+      const contentType = response.headers.get('content-type');
+      if (contentType && !contentType.startsWith('image/')) {
+        this.logger.warn(`Invalid content type for image: ${contentType}`);
+        return { isCensored: false, predictions: null };
+      }
+
       const buffer = await response.arrayBuffer();
-      const image = tf.node.decodeImage(new Uint8Array(buffer), 3) as Tensor3D;
+
+      // Validate buffer size
+      if (!buffer || buffer.byteLength === 0) {
+        this.logger.warn('Empty image buffer received');
+        return { isCensored: false, predictions: null };
+      }
+
+      // Validate image format by checking magic bytes
+      const uint8Array = new Uint8Array(buffer);
+      const isValidImage = this.validateImageFormat(uint8Array);
+
+      if (!isValidImage) {
+        this.logger.warn('Invalid image format detected');
+        return { isCensored: false, predictions: null };
+      }
+
+      const image = tf.node.decodeImage(uint8Array, 3) as Tensor3D;
 
       // Run the prediction
       const predictions = await this.nsfwModel.classify(image);
@@ -61,9 +103,71 @@ export class ImageCensorFilterService implements OnModuleInit {
     } catch (error) {
       this.logger.error(
         `Error checking image censor content for image ${imageUrl}`,
-        error instanceof Error ? error.message : String(error),
+        {
+          trace: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
       );
       return { isCensored: false, predictions: null };
     }
+  }
+
+  /**
+   * Validate image format by checking magic bytes
+   * @param buffer Image buffer
+   * @returns True if valid image format detected
+   */
+  private validateImageFormat(buffer: Uint8Array): boolean {
+    if (buffer.length < 4) {
+      return false;
+    }
+
+    // Check for common image format magic bytes
+    // JPEG: FF D8 FF
+    if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+      return true;
+    }
+
+    // PNG: 89 50 4E 47
+    if (
+      buffer[0] === 0x89 &&
+      buffer[1] === 0x50 &&
+      buffer[2] === 0x4e &&
+      buffer[3] === 0x47
+    ) {
+      return true;
+    }
+
+    // GIF: 47 49 46 38 (GIF8)
+    if (
+      buffer[0] === 0x47 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x38
+    ) {
+      return true;
+    }
+
+    // BMP: 42 4D (BM)
+    if (buffer[0] === 0x42 && buffer[1] === 0x4d) {
+      return true;
+    }
+
+    // WebP: RIFF...WEBP (check for RIFF header)
+    if (
+      buffer.length >= 12 &&
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46 &&
+      buffer[8] === 0x57 &&
+      buffer[9] === 0x45 &&
+      buffer[10] === 0x42 &&
+      buffer[11] === 0x50
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }

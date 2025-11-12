@@ -16,6 +16,7 @@ import authService from '@services/auth.service';
 import {errorService, ErrorType, loggingService} from '@services/index';
 import {RetryLink} from '@apollo/client/link/retry';
 import {Platform} from 'react-native';
+import {getBasePathFromSignedUrl} from '@utils/imageUtils';
 
 // Create a retry link to automatically retry failed requests
 const retryLink = new RetryLink({
@@ -219,7 +220,7 @@ export const apolloClient = new ApolloClient({
 
               // Deduplicate by event ID using a Map
               const eventMap = new Map();
-              
+
               existingArray.forEach((event: any) => {
                 // Only include valid references that exist in the cache
                 if (event && isReference(event) && canRead(event)) {
@@ -264,47 +265,44 @@ export const apolloClient = new ApolloClient({
         },
       },
       EventDto: {
+        // Handle EventDto with id as key field (similar to Post)
+        keyFields: ['id'],
         fields: {
           images: {
-            // Custom merge function to properly handle image arrays
+            // Merge strategy for EventDto images - deduplicate by base path (without query params)
+            // to handle signed URLs with different tokens
+            // When backend returns images from mutation, it's the complete list, so we use incoming as source of truth
             merge(existing, incoming) {
-              // If no existing data, just return incoming
               if (!existing) {
                 return incoming;
               }
 
-              // If incoming is null/undefined, keep existing
               if (!incoming) {
                 return existing;
               }
 
-              // Both exist - merge them properly
-              // Apollo stores arrays as objects with numeric keys, so we need to handle that
-              const existingArray = Array.isArray(existing)
-                ? existing
-                : Object.values(existing || {});
               const incomingArray = Array.isArray(incoming)
                 ? incoming
                 : Object.values(incoming || {});
 
-              // Create a map to deduplicate images by URL
-              const imageMap = new Map();
+              const imageMap = new Map<string, any>();
 
-              // Add existing images
-              existingArray.forEach((img: any) => {
-                if (img && img.url) {
-                  imageMap.set(img.url, img);
-                }
-              });
-
-              // Add/update with incoming images
+              // Start with incoming images (complete list from backend mutation/query)
+              // This ensures deleted images are removed, existing images are kept with latest signed URLs,
+              // and new images are added. The backend returns the complete list after update.
               incomingArray.forEach((img: any) => {
                 if (img && img.url) {
-                  imageMap.set(img.url, img);
+                  const basePath = getBasePathFromSignedUrl(img.url);
+                  if (basePath) {
+                    imageMap.set(basePath, img);
+                  }
                 }
               });
 
-              // Return as array
+              // For any existing images that match by base path but have different signed URLs,
+              // we've already added the incoming (latest) version above.
+              // This handles the case where the same image comes back with a new signed URL token.
+
               return Array.from(imageMap.values());
             },
           },
@@ -359,9 +357,12 @@ export const apolloClient = new ApolloClient({
         },
       },
       PostDto: {
+        // Handle PostDto with id as key field (similar to Post and EventDto)
+        keyFields: ['id'],
         fields: {
           images: {
-            // Same merge strategy for PostDto images
+            // Merge strategy for PostDto images - deduplicate by base path (without query params)
+            // to handle signed URLs with different tokens
             merge(existing, incoming) {
               if (!existing) {
                 return incoming;
@@ -378,17 +379,25 @@ export const apolloClient = new ApolloClient({
                 ? incoming
                 : Object.values(incoming || {});
 
-              const imageMap = new Map();
+              const imageMap = new Map<string, any>();
 
+              // Add existing images, keyed by base path
               existingArray.forEach((img: any) => {
                 if (img && img.url) {
-                  imageMap.set(img.url, img);
+                  const basePath = getBasePathFromSignedUrl(img.url);
+                  if (basePath) {
+                    imageMap.set(basePath, img);
+                  }
                 }
               });
 
+              // Add/update with incoming images (prefer incoming for latest signed URLs)
               incomingArray.forEach((img: any) => {
                 if (img && img.url) {
-                  imageMap.set(img.url, img);
+                  const basePath = getBasePathFromSignedUrl(img.url);
+                  if (basePath) {
+                    imageMap.set(basePath, img);
+                  }
                 }
               });
 
