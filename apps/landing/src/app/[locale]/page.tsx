@@ -1,12 +1,12 @@
-import React from "react";
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import Header from "@components/Header";
 import Hero from "@components/Hero";
 import SocialProof from "@components/SocialProof";
 import Features from "@components/Features";
-import Map from "@components/Map";
 import FinalCTA from "@components/FinalCTA";
 import Footer from "@components/Footer";
+import EmailVerificationHandler from "@components/EmailVerificationHandler";
 import { Language } from "@motorove/shared";
 
 // Define the params type
@@ -59,6 +59,9 @@ export function generateStaticParams() {
 export default function Home({ params }: HomePageProps) {
   return (
     <main className="bg-neutral-white dark:bg-background-primary">
+      <Suspense fallback={null}>
+        <EmailVerificationHandler />
+      </Suspense>
       <Header />
       <Hero />
       <SocialProof />

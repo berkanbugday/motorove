@@ -98,7 +98,7 @@
             <h1>HOŞ GELDİNİZ!</h1>
             <p>Merhaba, motorcu topluluğumuza katıldığınız için teşekkürler! Artık Motorove topluluğunun bir parçasısınız.</p>
             <p>Hesabınızı aktifleştirmek ve tüm özelliklere erişmek için lütfen e-posta adresinizi doğrulayın.</p>
-            <a href="{{ .ConfirmationURL }}" class="button">E-Postamı Doğrula</a>
+            <a href="{{ .ConfirmationURL }}/?type=signup&token={{ .TokenHash }}" class="button">E-Postamı Doğrula</a>
         </div>
         
         <div class="divider"></div>

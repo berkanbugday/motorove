@@ -15,6 +15,7 @@ import { GroupMembershipsModule } from './group-memberships/group-memberships.mo
 import { EnumsModule } from './enums/enums.module';
 import { CitiesModule } from './cities/cities.module';
 import { GraphqlExceptionFilter } from './core/filters/graphql-exception.filter';
+import { HttpExceptionFilter } from './core/filters/http-exception.filter';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PostsModule } from './posts/posts.module';
 import { PostCommentsModule } from './post-comments/post-comments.module';
@@ -90,6 +91,10 @@ import { EmergenciesModule } from './emergencies/emergencies.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
     },
     {
       provide: APP_FILTER,

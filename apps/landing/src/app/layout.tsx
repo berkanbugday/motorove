@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import type { Metadata, Viewport } from "next";
 import { Language } from "@motorove/shared";
 import { ThemeProvider } from "@components/ThemeProvider";
+import ToastProvider from "@components/ToastProvider";
 
 export const metadata: Metadata = {
   title: {
@@ -100,6 +101,7 @@ export default function RootLayout({
           enableColorScheme={false}
           disableTransitionOnChange={false}
         >
+          <ToastProvider />
           {children}
         </ThemeProvider>
       </body>

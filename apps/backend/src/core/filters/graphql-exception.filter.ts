@@ -42,6 +42,11 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
   }
 
   catch(exception: unknown, host: ArgumentsHost): GraphQLError {
+    // Only handle GraphQL requests, let HTTP filter handle REST requests
+    if (host.getType<string>() !== 'graphql') {
+      throw exception;
+    }
+
     const gqlHost = GqlArgumentsHost.create(host);
     const context = gqlHost.getContext<GqlContext>();
     const request = context?.req;

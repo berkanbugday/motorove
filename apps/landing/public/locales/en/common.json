@@ -55,6 +55,14 @@
     "description": "The page you are looking for does not exist.",
     "button": "Go to Homepage"
   },
+  "confirm": {
+    "emailChange": {
+      "success": "Your email address has been successfully updated!"
+    },
+    "signup": {
+      "success": "Your account has been successfully verified!"
+    }
+  },
   "features": {
     "business": {
       "heading": "Find the Service You Need Easily!",

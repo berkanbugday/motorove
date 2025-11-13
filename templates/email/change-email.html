@@ -98,7 +98,7 @@
             <h1>E-POSTA ADRESİ DEĞİŞİKLİĞİ</h1>
             <p>Merhaba, hesabınızın e-posta adresini değiştirme talebinde bulundunuz.</p>
             <p>Yeni e-posta adresinizi doğrulamak ve değişikliği tamamlamak için lütfen e-posta adresinizi onaylayın.</p>
-            <a href="{{ .ConfirmationURL }}" class="button">Onayla</a>
+            <a href="{{ .ConfirmationURL }}/?type=email_change&token={{ .TokenHash }}" class="button">Onayla</a>
         </div>
         
         <div class="divider"></div>

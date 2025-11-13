@@ -30,6 +30,22 @@ export class LoggingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const now = Date.now();
+    const contextType = context.getType<string>();
+
+    // Check if this is a GraphQL request
+    if (contextType === 'graphql') {
+      return this.handleGraphQLRequest(context, next, now);
+    }
+
+    // Handle HTTP/REST requests
+    return this.handleHttpRequest(context, next, now);
+  }
+
+  private handleGraphQLRequest(
+    context: ExecutionContext,
+    next: CallHandler,
+    now: number,
+  ): Observable<unknown> {
     const gqlContext = GqlExecutionContext.create(context);
     const info = gqlContext.getInfo<GraphQLResolveInfo>() as GqlInfo;
     const ctx = gqlContext.getContext<GqlContextType>();
@@ -70,6 +86,55 @@ export class LoggingInterceptor implements NestInterceptor {
             message: `GraphQL ${operationType} ${operationName} failed in ${duration}ms`,
             operationType,
             operationName,
+            duration,
+            userAgent,
+            ip,
+            error: error.message,
+          });
+        },
+      }),
+    );
+  }
+
+  private handleHttpRequest(
+    context: ExecutionContext,
+    next: CallHandler,
+    now: number,
+  ): Observable<unknown> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const method = request.method;
+    const url = request.url;
+    const userAgent = request.headers?.['user-agent'] || 'unknown';
+    const ip = this.getClientIp(request);
+
+    // Log the incoming request
+    this.logger.log({
+      message: `HTTP ${method} ${url} started`,
+      method,
+      url,
+      userAgent,
+      ip,
+    });
+
+    return next.handle().pipe(
+      tap({
+        next: () => {
+          const duration = Date.now() - now;
+          this.logger.log({
+            message: `HTTP ${method} ${url} completed in ${duration}ms`,
+            method,
+            url,
+            duration,
+            userAgent,
+            ip,
+          });
+        },
+        error: (error: Error) => {
+          const duration = Date.now() - now;
+          this.logger.warn({
+            message: `HTTP ${method} ${url} failed in ${duration}ms`,
+            method,
+            url,
             duration,
             userAgent,
             ip,

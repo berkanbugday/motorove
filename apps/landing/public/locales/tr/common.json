@@ -55,6 +55,14 @@
     "description": "Aradığınız sayfa mevcut değil.",
     "button": "Ana Sayfaya Dön"
   },
+  "confirm": {
+    "emailChange": {
+      "success": "E-posta adresiniz başarıyla güncellendi!"
+    },
+    "signup": {
+      "success": "Hesabınız başarıyla doğrulandı!"
+    }
+  },
   "features": {
     "business": {
       "heading": "Aradığın Hizmeti Kolayca Bul!",
