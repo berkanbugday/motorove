@@ -63,6 +63,24 @@
       "success": "Your account has been successfully verified!"
     }
   },
+  "resetPassword": {
+    "title": "Reset Password",
+    "description": "Enter your new password below.",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordPlaceholder": "Enter your new password",
+    "confirmPlaceholder": "Confirm your new password",
+    "submitButton": "Reset Password",
+    "submitting": "Resetting...",
+    "success": "Password reset successfully!",
+    "successMessage": "Your password has been updated. You can now sign in with your new password.",
+    "error": "Reset failed",
+    "errorMessage": "Failed to reset password. The link might be invalid or expired.",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "invalidToken": "Invalid or expired reset link",
+    "goHome": "Go to Homepage"
+  },
   "features": {
     "business": {
       "heading": "Find the Service You Need Easily!",

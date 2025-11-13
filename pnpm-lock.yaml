@@ -226,6 +226,9 @@ importers:
 
   apps/landing:
     dependencies:
+      '@hookform/resolvers':
+        specifier: 5.0.1
+        version: 5.0.1(react-hook-form@7.56.0(react@19.0.0))
       '@motorove/shared':
         specifier: workspace:*
         version: link:../../shared
@@ -256,8 +259,11 @@ importers:
       react-dom:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
+      react-hook-form:
+        specifier: 7.56.0
+        version: 7.56.0(react@19.0.0)
       react-hot-toast:
-        specifier: ^2.6.0
+        specifier: 2.6.0
         version: 2.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-i18next:
         specifier: 15.6.0
@@ -265,6 +271,9 @@ importers:
       sharp:
         specifier: 0.33.0
         version: 0.33.0
+      zod:
+        specifier: 3.24.3
+        version: 3.24.3
     devDependencies:
       '@tailwindcss/forms':
         specifier: 0.5.10

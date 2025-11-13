@@ -11,6 +11,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hookform/resolvers": "5.0.1",
     "@motorove/shared": "workspace:*",
     "accept-language": "3.0.20",
     "framer-motion": "11.15.0",
@@ -21,9 +22,11 @@
     "next-themes": "0.4.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "7.56.0",
     "react-hot-toast": "2.6.0",
     "react-i18next": "15.6.0",
-    "sharp": "0.33.0"
+    "sharp": "0.33.0",
+    "zod": "3.24.3"
   },
   "devDependencies": {
     "@tailwindcss/forms": "0.5.10",

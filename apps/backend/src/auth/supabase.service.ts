@@ -73,11 +73,24 @@ export class SupabaseService {
   }
 
   async updatePassword(accessToken: string, newPassword: string) {
+    // For password reset, we need to verify the token first
+    // The access token from password reset email should be valid
+    const { data: userData, error: userError } =
+      await this.supabase.auth.getUser(accessToken);
+
+    if (userError || !userData.user) {
+      return { error: userError || new Error('Invalid or expired token') };
+    }
+
     // Set the session with the access token before updating
-    await this.supabase.auth.setSession({
+    const { error: sessionError } = await this.supabase.auth.setSession({
       access_token: accessToken,
-      refresh_token: '', // Not needed for update operations
+      refresh_token: '', // Empty for password reset flow
     });
+
+    if (sessionError) {
+      return { error: sessionError };
+    }
 
     return await this.supabase.auth.updateUser({
       password: newPassword,

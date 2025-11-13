@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -328,18 +327,22 @@ export class AuthService {
   async resetPassword(email: string): Promise<boolean> {
     try {
       // First verify if the user exists in our database
-      // const user = await this.prismaService.user.findFirst({
-      //   where: { email },
-      // });
+      const user = await this.prismaService.user.findFirst({
+        where: { email },
+      });
 
-      // if (!user) {
-      //   throw new UnauthorizedException('User not found');
-      // }
+      if (!user) {
+        ExceptionHelper.unauthorized('errors.common.not_found', {
+          resource: 'user',
+        });
+      }
 
       const { error } = await this.supabaseService.resetPassword(email);
 
       if (error) {
-        throw new UnauthorizedException(error.message);
+        ExceptionHelper.unauthorized(
+          'errors.auth.failed_to_send_password_reset_email',
+        );
       }
 
       return true;
@@ -386,7 +389,7 @@ export class AuthService {
       );
 
       if (error) {
-        throw new UnauthorizedException(error.message);
+        ExceptionHelper.unauthorized('errors.auth.failed_to_update_email');
       }
 
       return true;
@@ -412,11 +415,14 @@ export class AuthService {
       );
 
       if (error) {
-        throw new UnauthorizedException(error.message);
+        ExceptionHelper.unauthorized('errors.auth.failed_to_update_password');
       }
 
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       ExceptionHelper.unauthorized('errors.auth.failed_to_update_password');
     }
   }
@@ -426,7 +432,7 @@ export class AuthService {
       const { error } = await this.supabaseService.resend(email);
 
       if (error) {
-        throw new BadRequestException(error.message);
+        ExceptionHelper.unauthorized('errors.auth.failed_to_resend_email');
       }
 
       return true;

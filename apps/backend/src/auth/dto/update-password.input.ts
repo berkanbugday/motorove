@@ -6,11 +6,6 @@ export class UpdatePasswordInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  email: string;
-
-  @Field()
-  @IsString()
-  @IsNotEmpty()
   token: string;
 
   @Field()

@@ -63,6 +63,24 @@
       "success": "Hesabınız başarıyla doğrulandı!"
     }
   },
+  "resetPassword": {
+    "title": "Şifre Sıfırlama",
+    "description": "Aşağıya yeni şifrenizi girin.",
+    "newPassword": "Yeni Şifre",
+    "confirmPassword": "Şifre Tekrarı",
+    "passwordPlaceholder": "Yeni şifrenizi girin",
+    "confirmPlaceholder": "Şifrenizi tekrar girin",
+    "submitButton": "Şifreyi Sıfırla",
+    "submitting": "Sıfırlanıyor...",
+    "success": "Şifre başarıyla sıfırlandı!",
+    "successMessage": "Şifreniz güncellendi. Artık yeni şifrenizle giriş yapabilirsiniz.",
+    "error": "Sıfırlama başarısız",
+    "errorMessage": "Şifre sıfırlama başarısız oldu. Bağlantı geçersiz veya süresi dolmuş olabilir.",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "passwordTooShort": "Şifre en az 6 karakter olmalıdır",
+    "invalidToken": "Geçersiz veya süresi dolmuş sıfırlama bağlantısı",
+    "goHome": "Ana Sayfaya Dön"
+  },
   "features": {
     "business": {
       "heading": "Aradığın Hizmeti Kolayca Bul!",
