@@ -25,7 +25,7 @@ export class AuthController {
         ExceptionHelper.badRequest('errors.auth.token_and_password_required');
       }
 
-      // Use the token (access token from password reset email) to update password
+      // Token can be either JWT (mobile app) or hash (password reset email)
       const result = await this.authService.updatePassword(token, password);
 
       if (result) {

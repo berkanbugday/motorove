@@ -72,29 +72,47 @@ export class SupabaseService {
     });
   }
 
-  async updatePassword(accessToken: string, newPassword: string) {
-    // For password reset, we need to verify the token first
-    // The access token from password reset email should be valid
-    const { data: userData, error: userError } =
-      await this.supabase.auth.getUser(accessToken);
+  async updatePassword(token: string, newPassword: string) {
+    // This method handles two scenarios:
+    // 1. JWT token from mobile app (authenticated user changing password)
+    // 2. Token hash from password reset email (unauthenticated password reset)
 
-    if (userError || !userData.user) {
-      return { error: userError || new Error('Invalid or expired token') };
+    // Check if it's a JWT token (contains dots) or a hash token
+    const isJWT = token.includes('.');
+
+    if (isJWT) {
+      // Set the session with the access token before updating
+      await this.supabase.auth.setSession({
+        access_token: token,
+        refresh_token: '', // Not needed for update operations
+      });
+
+      return await this.supabase.auth.updateUser({
+        password: newPassword,
+      });
+    } else {
+      // Password reset flow: Verify token hash and exchange for session
+      const { data: verifyData, error: verifyError } =
+        await this.supabase.auth.verifyOtp({
+          token_hash: token,
+          type: 'recovery',
+        });
+
+      if (verifyError || !verifyData.session) {
+        ExceptionHelper.unauthorized('errors.auth.invalid_or_expired_token');
+      }
+
+      // Now we have a valid session, use it to update the password
+      const { error: updateError } = await this.supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        ExceptionHelper.unauthorized('errors.auth.invalid_or_expired_token');
+      }
+
+      return { data: verifyData, error: null };
     }
-
-    // Set the session with the access token before updating
-    const { error: sessionError } = await this.supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: '', // Empty for password reset flow
-    });
-
-    if (sessionError) {
-      return { error: sessionError };
-    }
-
-    return await this.supabase.auth.updateUser({
-      password: newPassword,
-    });
   }
 
   async deleteUser(userId: string) {

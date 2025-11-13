@@ -404,18 +404,18 @@ export class AuthService {
     }
   }
 
-  async updatePassword(
-    accessToken: string,
-    newPassword: string,
-  ): Promise<boolean> {
+  async updatePassword(token: string, newPassword: string): Promise<boolean> {
     try {
+      // Token can be either:
+      // - JWT access token from mobile app (authenticated user)
+      // - Token hash from password reset email (unauthenticated reset)
       const { error } = await this.supabaseService.updatePassword(
-        accessToken,
+        token,
         newPassword,
       );
 
       if (error) {
-        ExceptionHelper.unauthorized('errors.auth.failed_to_update_password');
+        ExceptionHelper.unauthorized('errors.auth.invalid_or_expired_token');
       }
 
       return true;
