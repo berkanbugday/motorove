@@ -23,13 +23,13 @@ export function errorToMessage(
   }
   // Handle GraphQL errors
   if (error.graphQLErrors && error.graphQLErrors.length > 0) {
-    return error.graphQLErrors[0].message;
+    return extractGraphQLErrorMessage(error.graphQLErrors[0]);
   }
 
   // Handle network errors
   if (error.networkError) {
     if (error.networkError.result && error.networkError.result.errors) {
-      return error.networkError.result.errors[0].message;
+      return extractGraphQLErrorMessage(error.networkError.result.errors[0]);
     }
     return i18n.t('errors.network.check_connection');
   }
@@ -39,14 +39,56 @@ export function errorToMessage(
     return extractHttpErrorMessage(error);
   }
 
+  // Handle errors with a message property
+  if (error.message) {
+    return humanizeErrorMessage(error.message);
+  }
+
   // Fall back to a generic message
   return fallbackMessage;
+}
+
+/**
+ * Extract a user-friendly message from a GraphQL error
+ */
+function extractGraphQLErrorMessage(graphQLError: any): string {
+  if (!graphQLError) {
+    return i18n.t('errors.general.default');
+  }
+
+  // Try to get the message from various possible locations
+  const message =
+    graphQLError.message ||
+    (graphQLError.extensions && graphQLError.extensions.message) ||
+    i18n.t('errors.general.default');
+
+  return humanizeErrorMessage(message);
 }
 
 /**
  * Extract a user-friendly message from an HTTP error
  */
 function extractHttpErrorMessage(error: any): string {
+  // Try to get a message from the response data
+  if (error.response.data) {
+    if (typeof error.response.data === 'string') {
+      return humanizeErrorMessage(error.response.data);
+    }
+
+    if (error.response.data.message) {
+      return humanizeErrorMessage(error.response.data.message);
+    }
+
+    if (error.response.data.error) {
+      return humanizeErrorMessage(
+        typeof error.response.data.error === 'string'
+          ? error.response.data.error
+          : error.response.data.error.message ||
+              i18n.t('errors.general.default'),
+      );
+    }
+  }
+
   // Use HTTP status code to generate a message
   switch (error.response.status) {
     case 400:
@@ -68,4 +110,56 @@ function extractHttpErrorMessage(error: any): string {
     default:
       return `${i18n.t('errors.general.error')}: ${error.response.status}`;
   }
+}
+
+/**
+ * Convert technical error messages to user-friendly ones
+ */
+function humanizeErrorMessage(message: string): string {
+  if (!message) {
+    return i18n.t('errors.general.default');
+  }
+
+  // Remove technical prefixes
+  message = message.replace(/^error:/i, '').trim();
+  message = message.replace(/^exception:/i, '').trim();
+
+  if (message.includes('Invalid login credentials')) {
+    return i18n.t('errors.auth.invalid_credentials');
+  }
+
+  if (
+    message.includes('Invalid Refresh Token: Already Used') ||
+    message.includes('Invalid token')
+  ) {
+    return i18n.t('errors.auth.session_expired');
+  }
+
+  if (message.includes('Email already exists')) {
+    return i18n.t('errors.auth.email_already_exists');
+  }
+
+  if (message.includes('Email not confirmed')) {
+    return i18n.t('errors.auth.email_not_confirmed');
+  }
+
+  if (message.includes('Network request failed')) {
+    return i18n.t('errors.network.check_connection');
+  }
+
+  if (message.includes('User is already a member of this group')) {
+    return i18n.t('errors.group.already_member');
+  }
+
+  // Make first letter uppercase if it's not
+  if (message.length > 0 && /[a-z]/.test(message[0])) {
+    message = message.charAt(0).toUpperCase() + message.slice(1);
+  }
+
+  // Add a period at the end if there isn't one already
+  if (message.length > 0 && !message.endsWith('.')) {
+    message += '.';
+  }
+
+  return message;
 }

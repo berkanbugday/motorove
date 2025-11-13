@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: white;
+            background-color: white !important;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -17,7 +17,7 @@
         .email-container {
             max-width: 600px;
             width: 100%;
-            background-color: white;
+            background-color: white !important;
         }
         
         .logo-container {
@@ -30,12 +30,12 @@
         }
         
         .divider {
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #ddd !important;
             margin: 20px 0;
         }
         
         .content-card {
-            background-color: #F5F5F7;
+            background-color: #F5F5F7 !important;
             padding: 30px;
             text-align: center;
             border-radius: 5px;
@@ -97,8 +97,8 @@
         <div class="content-card">
             <h1>E-POSTA ADRESİ DEĞİŞİKLİĞİ</h1>
             <p>Merhaba, hesabınızın e-posta adresini değiştirme talebinde bulundunuz.</p>
-            <p>Yeni e-posta adresinizi doğrulamak ve değişikliği tamamlamak için aşağıdaki butona tıklayın.</p>
-            <a href="{{ .ConfirmationURL }}" class="button">E-Posta Değişikliğini Onayla</a>
+            <p>Yeni e-posta adresinizi doğrulamak ve değişikliği tamamlamak için lütfen e-posta adresinizi onaylayın.</p>
+            <a href="{{ .ConfirmationURL }}" class="button">Onayla</a>
         </div>
         
         <div class="divider"></div>
