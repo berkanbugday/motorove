@@ -12,6 +12,9 @@ import { plainToClass } from 'class-transformer';
 import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 import { GroupTag } from '../enums/models/group-tag.enum';
 import { ExceptionHelper } from 'src/core/exceptions/exception-helper.service';
+import { QueueService } from '../core/queue/queue.service';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '@motorove/shared';
 
 @Injectable()
 export class GroupsService {
@@ -19,6 +22,7 @@ export class GroupsService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    private queueService: QueueService,
   ) {}
 
   async findAll(
@@ -432,6 +436,35 @@ export class GroupsService {
           },
         },
       });
+
+      // Send GROUP_CHANGED_INFO notification to all group members
+      try {
+        const memberUserIds = updatedGroup.memberships
+          .filter((m) => m.userId !== userId) // Don't notify the user who made the change
+          .map((m) => m.userId);
+
+        if (memberUserIds.length > 0) {
+          await this.queueService.addBulkNotificationJob(
+            {
+              userIds: memberUserIds,
+              title: 'group.info_changed.title',
+              body: 'group.info_changed.body',
+              type: NotificationType.GROUP_CHANGED_INFO,
+              channels: NotificationChannel.PUSH,
+              data: {
+                groupId: updatedGroup.id,
+                groupName: updatedGroup.name,
+              } as Record<string, any>,
+            },
+            userId,
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          'Failed to send group info changed notification',
+          error,
+        );
+      }
 
       return await this.mapToDto(updatedGroup as Group, authToken);
     } catch (error) {

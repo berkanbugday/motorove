@@ -17,6 +17,9 @@ import { ImageCensorFilterService } from '../core/image-censor-filter/image-cens
 import { ImageDto } from '../common/dto/image.dto';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 import { PostAddressDto } from './dto/post-address.dto';
+import { QueueService } from '../core/queue/queue.service';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
 
 @Injectable()
 export class PostsService {
@@ -27,6 +30,7 @@ export class PostsService {
     private storageService: StorageService,
     private imageCensorFilterService: ImageCensorFilterService,
     private profanityFilterService: ProfanityFilterService,
+    private queueService: QueueService,
   ) {}
 
   async findAll(
@@ -260,7 +264,17 @@ export class PostsService {
         },
       });
 
+      // Send SHARED_POST_IN_GROUP notification if post is in a group
+      if (postWithAddresses?.group) {
+        await this.notifyGroupMembersAboutNewPost(postWithAddresses as Post);
+      }
+
       return this.mapToDto(postWithAddresses as Post, userId, authToken);
+    }
+
+    // Send SHARED_POST_IN_GROUP notification if post is in a group (no addresses case)
+    if (createdPost.group) {
+      await this.notifyGroupMembersAboutNewPost(createdPost as Post);
     }
 
     return this.mapToDto(createdPost as Post, userId, authToken);
@@ -500,10 +514,37 @@ export class PostsService {
         userId,
       },
       include: {
-        post: true,
+        post: {
+          include: {
+            createdBy: true,
+          },
+        },
         user: true,
       },
     });
+
+    // Send notification to post owner (if not liking own post)
+    if (post.createdById !== userId) {
+      try {
+        await this.queueService.addNotificationJob(
+          {
+            userId: post.createdById,
+            title: 'post.like.title',
+            body: 'post.like.body',
+            type: NotificationType.POST_LIKE,
+            channel: NotificationChannel.PUSH,
+            data: {
+              postId: post.id,
+              userId: userId,
+              userFullName: `${newLike.user.firstName} ${newLike.user.lastName}`,
+            } as Record<string, any>,
+          },
+          userId,
+        );
+      } catch (error) {
+        this.logger.error('Failed to send POST_LIKE notification', error);
+      }
+    }
 
     return this.mapToInteractionDto(newLike as PostLike);
   }
@@ -584,10 +625,37 @@ export class PostsService {
         userId,
       },
       include: {
-        post: true,
+        post: {
+          include: {
+            createdBy: true,
+          },
+        },
         user: true,
       },
     });
+
+    // Send notification to post owner (if not saving own post)
+    if (post.createdById !== userId) {
+      try {
+        await this.queueService.addNotificationJob(
+          {
+            userId: post.createdById,
+            title: 'post.save.title',
+            body: 'post.save.body',
+            type: NotificationType.POST_SAVE,
+            channel: NotificationChannel.PUSH,
+            data: {
+              postId: post.id,
+              userId: userId,
+              userFullName: `${newSave.user.firstName} ${newSave.user.lastName}`,
+            } as Record<string, any>,
+          },
+          userId,
+        );
+      } catch (error) {
+        this.logger.error('Failed to send POST_SAVE notification', error);
+      }
+    }
 
     return this.mapToInteractionDto(newSave as PostSave);
   }
@@ -803,5 +871,72 @@ export class PostsService {
       userId: interaction.userId,
       createdAt: interaction.createdAt,
     };
+  }
+
+  /**
+   * Notifies group members about a new post shared in the group
+   * @param post - The created post with group and creator information
+   */
+  private async notifyGroupMembersAboutNewPost(post: Post): Promise<void> {
+    try {
+      const groupMembers = await this.prisma.groupMembership.findMany({
+        where: { groupId: post.group?.id },
+        include: {
+          user: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      if (!groupMembers) {
+        return;
+      }
+
+      const memberUserIds = groupMembers
+        .filter((membership) => membership.user.id !== post.createdBy.id)
+        .map((membership) => membership.user.id);
+
+      if (memberUserIds.length === 0) {
+        return;
+      }
+
+      await this.sendGroupPostNotification(memberUserIds, post);
+    } catch (error) {
+      this.logger.error(
+        'Failed to send shared post in group notification',
+        error,
+      );
+    }
+  }
+
+  /**
+   * Sends bulk notification to group members about a new post
+   * @param memberUserIds - Array of user IDs to notify
+   * @param post - The created post
+   */
+  private async sendGroupPostNotification(
+    memberUserIds: string[],
+    post: Post,
+  ): Promise<void> {
+    const userFullName = `${post.createdBy.firstName} ${post.createdBy.lastName}`;
+
+    await this.queueService.addBulkNotificationJob(
+      {
+        userIds: memberUserIds,
+        title: 'post.shared_in_group.title',
+        body: 'post.shared_in_group.body',
+        type: NotificationType.SHARED_POST_IN_GROUP,
+        channels: NotificationChannel.PUSH,
+        data: {
+          postId: post.id,
+          groupId: post.group?.id,
+          groupName: post.group?.name,
+          userFullName: userFullName,
+        } as Record<string, any>,
+      },
+      post.createdBy.id!,
+    );
   }
 }

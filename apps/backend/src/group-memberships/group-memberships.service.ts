@@ -78,7 +78,11 @@ export class GroupMembershipsService {
       const group = await this.prisma.group.findFirst({
         where: { id: groupId, isActive: true },
         include: {
-          memberships: true,
+          memberships: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
 
@@ -98,6 +102,11 @@ export class GroupMembershipsService {
       }
 
       // Add the user as a member
+      const isPrivateGroup = group.privacy === GroupPrivacy.PRIVATE;
+      const membershipStatus = isPrivateGroup
+        ? ApprovalStatus.PENDING
+        : ApprovalStatus.ACCEPTED;
+
       const membership = await this.prisma.groupMembership.upsert({
         where: {
           groupId_userId: {
@@ -108,10 +117,7 @@ export class GroupMembershipsService {
         update: {
           isActive: true,
           role: GroupMemberRole.MEMBER,
-          status:
-            group.privacy === GroupPrivacy.PRIVATE
-              ? ApprovalStatus.PENDING
-              : ApprovalStatus.ACCEPTED,
+          status: membershipStatus,
           updatedBy: {
             connect: { id: userId },
           },
@@ -125,10 +131,7 @@ export class GroupMembershipsService {
             connect: { id: userId },
           },
           role: GroupMemberRole.MEMBER,
-          status:
-            group.privacy === GroupPrivacy.PRIVATE
-              ? ApprovalStatus.PENDING
-              : ApprovalStatus.ACCEPTED,
+          status: membershipStatus,
           createdBy: {
             connect: { id: userId },
           },
@@ -139,6 +142,54 @@ export class GroupMembershipsService {
           user: true,
         },
       });
+
+      // Send notification based on group privacy
+      try {
+        const userFullName = `${membership.user.firstName} ${membership.user.lastName}`;
+
+        // Send GROUP_JOIN_REQUEST to group admins
+        const adminMembershipIds = group.memberships
+          .filter(
+            (m) =>
+              m.role === GroupMemberRole.ADMIN &&
+              m.isActive &&
+              m.status === ApprovalStatus.ACCEPTED,
+          )
+          .map((admin) => admin.user.id);
+
+        if (adminMembershipIds.length === 0) {
+          return membership ? true : false;
+        }
+
+        const title = isPrivateGroup
+          ? 'group.join_request.title'
+          : 'group.user_joined.title';
+        const body = isPrivateGroup
+          ? 'group.join_request.body'
+          : 'group.user_joined.body';
+        const notificationType = isPrivateGroup
+          ? NotificationType.GROUP_JOIN_REQUEST
+          : NotificationType.USER_JOINED_GROUP;
+
+        await this.queueService.addBulkNotificationJob(
+          {
+            userIds: adminMembershipIds,
+            title,
+            body,
+            type: notificationType,
+            channels: NotificationChannel.PUSH,
+            data: {
+              groupId: group.id,
+              groupName: group.name,
+              userId: userId,
+              userFullName: userFullName,
+            } as Record<string, any>,
+          },
+          userId,
+        );
+      } catch (error) {
+        this.logger.error('Failed to send group join notification', error);
+      }
 
       return membership ? true : false;
     } catch (error) {
@@ -157,7 +208,11 @@ export class GroupMembershipsService {
       const group = await this.prisma.group.findFirst({
         where: { id: groupId, isActive: true },
         include: {
-          memberships: true,
+          memberships: {
+            include: {
+              user: true,
+            },
+          },
         },
       });
 
@@ -201,6 +256,74 @@ export class GroupMembershipsService {
           updatedAt: new Date(),
         },
       });
+
+      // Send ADMIN_REMOVED_GROUP_MEMBER notification to the removed user
+      if (deletedMembership) {
+        try {
+          const userFullName = `${membershipToDelete.user.firstName} ${membershipToDelete.user.lastName}`;
+
+          // Send GROUP_JOIN_REQUEST to group admins
+
+          const adminMembership = group.memberships.find(
+            (m) =>
+              m.role === GroupMemberRole.ADMIN &&
+              m.isActive &&
+              m.status === ApprovalStatus.ACCEPTED &&
+              m.userId === adminId,
+          );
+
+          const adminFullName = adminMembership
+            ? `${adminMembership?.user.firstName} ${adminMembership?.user.lastName}`
+            : '';
+
+          const adminMembershipIds = group.memberships
+            .filter(
+              (m) =>
+                m.role === GroupMemberRole.ADMIN &&
+                m.isActive &&
+                m.status === ApprovalStatus.ACCEPTED &&
+                m.userId !== adminId,
+            )
+            .map((admin) => admin.user.id);
+          if (adminMembershipIds.length === 0) {
+            return deletedMembership ? true : false;
+          }
+
+          const isLeaveGroup = userId === adminId ? true : false;
+
+          const title = isLeaveGroup
+            ? 'group.user_left.title'
+            : 'group.member_removed.title';
+          const body = isLeaveGroup
+            ? 'group.user_left.body'
+            : 'group.member_removed.body';
+          const notificationType = isLeaveGroup
+            ? NotificationType.USER_LEAVE_GROUP
+            : NotificationType.ADMIN_REMOVED_GROUP_MEMBER;
+
+          await this.queueService.addBulkNotificationJob(
+            {
+              userIds: adminMembershipIds,
+              title,
+              body,
+              type: notificationType,
+              channels: NotificationChannel.PUSH,
+              data: {
+                groupId: group.id,
+                groupName: group.name,
+                userFullName: userFullName,
+                adminFullName: adminFullName,
+              } as Record<string, any>,
+            },
+            adminId,
+          );
+        } catch (error) {
+          this.logger.error(
+            'Failed to send member removed notification',
+            error,
+          );
+        }
+      }
 
       return deletedMembership ? true : false;
     } catch (error) {
@@ -275,22 +398,27 @@ export class GroupMembershipsService {
       });
 
       if (updatedMembership.role === newRole) {
-        // Send notification to the user
-        await this.queueService.addNotificationJob(
-          {
-            userId: updatedMembership.userId,
-            title: 'Membership status updated',
-            body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newRole}`,
-            type: NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE,
-            channel: NotificationChannel.PUSH,
-            data: {
-              groupId: updatedMembership.group.id,
-              groupName: updatedMembership.group.name,
-              role: newRole,
-            } as Record<string, any>,
-          },
-          adminId,
-        );
+        // Send ADMIN_CHANGED_GROUP_MEMBER_ROLE notification to the user
+        try {
+          await this.queueService.addNotificationJob(
+            {
+              userId: updatedMembership.userId,
+              title: 'group.role_changed.title',
+              body: 'group.role_changed.body',
+              type: NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE,
+              channel: NotificationChannel.PUSH,
+              data: {
+                groupId: updatedMembership.group.id,
+                groupName: updatedMembership.group.name,
+                userFullName: `${updatedMembership.user.firstName} ${updatedMembership.user.lastName}`,
+                role: newRole,
+              } as Record<string, any>,
+            },
+            adminId,
+          );
+        } catch (error) {
+          this.logger.error('Failed to send role changed notification', error);
+        }
       }
 
       return updatedMembership ? true : false;
@@ -331,24 +459,36 @@ export class GroupMembershipsService {
           },
           updatedAt: new Date(),
         },
+        include: {
+          group: true,
+          user: true,
+        },
       })) as GroupMembership;
 
-      // Send notification to the user
-      // await this.notificationsService.create(
-      //   {
-      //     userId,
-      //     title: 'Membership status updated',
-      //     body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newStatus}`,
-      //     type: NotificationType.GROUP_MEMBERSHIP_STATUS_UPDATED,
-      //     channel: NotificationChannel.PUSH,
-      //     data: JSON.stringify({
-      //       groupId: updatedMembership.group.id,
-      //       groupName: updatedMembership.group.name,
-      //       status: newStatus,
-      //     }),
-      //   },
-      //   userId,
-      // );
+      // Send GROUP_JOIN_REQUEST_ACCEPTED notification when request is accepted
+      if (newStatus === ApprovalStatus.ACCEPTED) {
+        try {
+          await this.queueService.addNotificationJob(
+            {
+              userId: updatedMembership.userId,
+              title: 'group.join_request_accepted.title',
+              body: 'group.join_request_accepted.body',
+              type: NotificationType.GROUP_JOIN_REQUEST_ACCEPTED,
+              channel: NotificationChannel.PUSH,
+              data: {
+                groupId: updatedMembership.groupId,
+                groupName: updatedMembership.group.name,
+              } as Record<string, any>,
+            },
+            adminId,
+          );
+        } catch (error) {
+          this.logger.error(
+            'Failed to send join request accepted notification',
+            error,
+          );
+        }
+      }
 
       return plainToClass(GroupMembershipDto, updatedMembership);
     } catch (error) {

@@ -1,4 +1,4 @@
-import {useMutation, useQuery} from '@apollo/client';
+import {useMutation, useQuery, type Reference} from '@apollo/client';
 import {
   CREATE_POST,
   GET_POST,
@@ -305,6 +305,12 @@ export const useLikePost = () => {
           const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
+            // Create a proper reference to the user with mergeIntoStore
+            const userRef = cache.identify({
+              __typename: 'UserDto',
+              id: user.id,
+            });
+
             // Update the cache directly with the optimistic values
             cache.modify({
               id: cacheId,
@@ -312,13 +318,13 @@ export const useLikePost = () => {
                 isLiked: () => true,
                 likesCount: (existingCount = 0) =>
                   (existingCount as number) + 1,
-                likedUsers: (existingUsers = []) => {
+                likedUsers: (existingUsers = [], {toReference}) => {
                   // Cast to array type since Apollo cache returns unknown
-                  const usersArray = existingUsers as Array<{__ref: string}>;
+                  const usersArray = existingUsers as Array<Reference>;
 
                   // Check if user is already in the likedUsers array
                   const userExists = usersArray.some(
-                    likedUser => likedUser.__ref === `UserDto:${user.id}`,
+                    likedUser => cache.identify(likedUser) === userRef,
                   );
 
                   // If user is already in the array, return the existing array
@@ -326,8 +332,17 @@ export const useLikePost = () => {
                     return usersArray;
                   }
 
+                  // Create a reference with mergeIntoStore to ensure it's added to cache
+                  const newUserRef = toReference(
+                    {
+                      __typename: 'UserDto',
+                      id: user.id,
+                    },
+                    true,
+                  );
+
                   // Add the current user to the likedUsers array
-                  return [...usersArray, {__ref: `UserDto:${user.id}`}];
+                  return newUserRef ? [...usersArray, newUserRef] : usersArray;
                 },
               },
             });
@@ -388,6 +403,12 @@ export const useUnlikePost = () => {
           const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
+            // Create a proper reference to the user
+            const userRef = cache.identify({
+              __typename: 'UserDto',
+              id: user.id,
+            });
+
             // Update the cache directly with the optimistic values
             cache.modify({
               id: cacheId,
@@ -399,11 +420,11 @@ export const useUnlikePost = () => {
                 },
                 likedUsers: (existingUsers = []) => {
                   // Cast to array type since Apollo cache returns unknown
-                  const usersArray = existingUsers as Array<{__ref: string}>;
+                  const usersArray = existingUsers as Array<Reference>;
 
                   // Remove the current user from the likedUsers array
                   return usersArray.filter(
-                    likedUser => likedUser.__ref !== `UserDto:${user.id}`,
+                    likedUser => cache.identify(likedUser) !== userRef,
                   );
                 },
               },

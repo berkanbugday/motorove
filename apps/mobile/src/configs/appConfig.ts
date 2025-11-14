@@ -13,7 +13,7 @@ export const AppConfig = {
     Config.APP_ENV === 'development'
       ? Platform.OS === 'ios'
         ? Config.API_URL
-        : 'http://10.0.2.2:3000'
+        : 'http://10.0.2.2:4000'
       : Config.API_URL,
 
   /**

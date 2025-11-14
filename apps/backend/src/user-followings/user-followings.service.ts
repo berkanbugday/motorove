@@ -7,6 +7,9 @@ import { UserFollowingDto } from './dto/user-following.dto';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { StorageService } from '../core/storage/storage.service';
 import { Logger } from '@nestjs/common';
+import { QueueService } from '../core/queue/queue.service';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '@motorove/shared';
 
 @Injectable()
 export class UserFollowingsService {
@@ -15,6 +18,7 @@ export class UserFollowingsService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    private queueService: QueueService,
   ) {}
 
   // Get users that follow the given userId with pagination
@@ -195,6 +199,12 @@ export class UserFollowingsService {
       ExceptionHelper.conflict('errors.common.already_following');
     }
 
+    // Determine if auto-accept is enabled
+    const autoAccept = followingUser.userSetting?.autoAcceptFollowers || false;
+    const followStatus = autoAccept
+      ? ApprovalStatus.ACCEPTED
+      : ApprovalStatus.PENDING;
+
     // Create follow relationship
     const follow = await this.prisma.userFollowing.upsert({
       where: {
@@ -206,14 +216,10 @@ export class UserFollowingsService {
       create: {
         followerId: followerId,
         followingId: followingId,
-        status: followingUser.userSetting?.autoAcceptFollowers
-          ? ApprovalStatus.ACCEPTED
-          : ApprovalStatus.PENDING,
+        status: followStatus,
       },
       update: {
-        status: followingUser.userSetting?.autoAcceptFollowers
-          ? ApprovalStatus.ACCEPTED
-          : ApprovalStatus.PENDING,
+        status: followStatus,
         isActive: true,
         updatedAt: new Date(),
       },
@@ -221,6 +227,47 @@ export class UserFollowingsService {
         status: true,
       },
     });
+
+    // Send notification based on auto-accept setting
+    try {
+      const followerName = `${followerUser.firstName} ${followerUser.lastName}`;
+
+      if (autoAccept) {
+        // Send NEW_FOLLOWER notification when auto-accepted
+        await this.queueService.addNotificationJob(
+          {
+            userId: followingId,
+            title: 'user.new_follower.title',
+            body: 'user.new_follower.body',
+            type: NotificationType.NEW_FOLLOWER,
+            channel: NotificationChannel.PUSH,
+            data: {
+              followerId: followerId,
+              userFullName: followerName,
+            } as Record<string, any>,
+          },
+          followerId,
+        );
+      } else {
+        // Send USER_FOLLOW_REQUEST notification when pending approval
+        await this.queueService.addNotificationJob(
+          {
+            userId: followingId,
+            title: 'user.follow_request.title',
+            body: 'user.follow_request.body',
+            type: NotificationType.USER_FOLLOW_REQUEST,
+            channel: NotificationChannel.PUSH,
+            data: {
+              followerId: followerId,
+              userFullName: followerName,
+            } as Record<string, any>,
+          },
+          followerId,
+        );
+      }
+    } catch (error) {
+      this.logger.error('Failed to send follow notification', error);
+    }
 
     return follow.status as ApprovalStatus;
   }
@@ -272,6 +319,10 @@ export class UserFollowingsService {
           isActive: true,
           status: ApprovalStatus.PENDING,
         },
+        include: {
+          follower: true,
+          following: true,
+        },
       });
 
       if (!userFollowing) {
@@ -292,22 +343,32 @@ export class UserFollowingsService {
         },
       });
 
-      // Send notification to the user
-      // await this.notificationsService.create(
-      //   {
-      //     userId,
-      //     title: 'Membership status updated',
-      //     body: `Your membership status in ${updatedMembership.group.name} has been updated to ${newStatus}`,
-      //     type: NotificationType.GROUP_MEMBERSHIP_STATUS_UPDATED,
-      //     channel: NotificationChannel.PUSH,
-      //     data: JSON.stringify({
-      //       groupId: updatedMembership.group.id,
-      //       groupName: updatedMembership.group.name,
-      //       status: newStatus,
-      //     }),
-      //   },
-      //   userId,
-      // );
+      // Send notification if the request was accepted
+      if (newStatus === ApprovalStatus.ACCEPTED) {
+        try {
+          const followingName = `${userFollowing.following.firstName} ${userFollowing.following.lastName}`;
+
+          await this.queueService.addNotificationJob(
+            {
+              userId: userFollowing.followerId,
+              title: 'user.follow_request_accepted.title',
+              body: 'user.follow_request_accepted.body',
+              type: NotificationType.USER_FOLLOW_REQUEST_ACCEPTED,
+              channel: NotificationChannel.PUSH,
+              data: {
+                followingId: userFollowing.followingId,
+                userFullName: followingName,
+              } as Record<string, any>,
+            },
+            userFollowing.followingId,
+          );
+        } catch (error) {
+          this.logger.error(
+            'Failed to send follow request accepted notification',
+            error,
+          );
+        }
+      }
 
       return this.mapToDto(updatedUserFollowing as UserFollowing);
     } catch (error) {

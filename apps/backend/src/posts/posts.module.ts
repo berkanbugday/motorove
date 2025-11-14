@@ -6,6 +6,7 @@ import { AuthModule } from '../auth/auth.module';
 import { StorageModule } from '../core/storage/storage.module';
 import { ImageCensorFilterModule } from '../core/image-censor-filter/image-censor-filter.module';
 import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter.module';
+import { QueueModule } from '../core/queue/queue.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter
     StorageModule,
     ImageCensorFilterModule,
     ProfanityFilterModule,
+    QueueModule,
   ],
   providers: [PostsResolver, PostsService],
   exports: [PostsService],

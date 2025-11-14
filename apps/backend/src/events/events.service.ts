@@ -818,6 +818,49 @@ export class EventsService {
         },
       );
 
+      // Send EVENT_UPDATED notification to all participants
+      try {
+        const participants = await this.prisma.eventParticipant.findMany({
+          where: {
+            eventId: id,
+            status: EventParticipantStatus.JOINED,
+            isActive: true,
+          },
+          select: {
+            createdById: true,
+          },
+        });
+
+        if (participants.length > 0) {
+          const participantIds = participants
+            .filter((participant) => participant.createdById !== userId)
+            .map((p) => p.createdById);
+
+          if (participantIds.length > 0) {
+            await this.queueService.addBulkNotificationJob(
+              {
+                userIds: participantIds,
+                title: 'event.updated.title',
+                body: 'event.updated.body',
+                type: NotificationType.EVENT_UPDATED,
+                channels: NotificationChannel.PUSH,
+                data: {
+                  eventId: event.id,
+                  eventName: event.title,
+                } as Record<string, any>,
+              },
+              userId,
+            );
+
+            this.logger.log(
+              `Sent update notifications to ${participantIds.length} participants for event ${id}`,
+            );
+          }
+        }
+      } catch (error) {
+        this.logger.error('Failed to send event updated notification', error);
+      }
+
       return this.mapToDto(event as Event, userId, authToken);
     } catch (error) {
       this.logger.error(`Failed to update event`, error);
@@ -985,7 +1028,6 @@ export class EventsService {
             data: {
               eventId: event.id,
               eventName: event.title,
-              eventDate: event.startDateTime,
             } as Record<string, any>,
           },
           userId,

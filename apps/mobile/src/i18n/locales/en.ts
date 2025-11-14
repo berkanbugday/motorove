@@ -1262,33 +1262,33 @@ export default {
     post: {
       shared_in_group: {
         title: 'New Post in {{groupName}}',
-        body: '{{userName}} shared a new post in {{groupName}}',
+        body: '{{userFullName}} shared a new post in {{groupName}}',
       },
       like: {
         title: 'Post Liked',
-        body: '{{userName}} liked your post',
+        body: '{{userFullName}} liked your post',
       },
       comment: {
         title: 'New Comment',
-        body: '{{userName}} commented on your post: "{{comment}}"',
+        body: '{{userFullName}} commented on your post: "{{comment}}"',
       },
       save: {
         title: 'Post Saved',
-        body: '{{userName}} saved your post',
+        body: '{{userFullName}} saved your post',
       },
     },
     user: {
       follow_request: {
         title: 'Follow Request',
-        body: '{{userName}} wants to follow you',
+        body: '{{userFullName}} wants to follow you',
       },
       follow_request_accepted: {
         title: 'Follow Request Accepted',
-        body: '{{userName}} accepted your follow request',
+        body: '{{userFullName}} accepted your follow request',
       },
       new_follower: {
         title: 'New Follower',
-        body: '{{userName}} started following you',
+        body: '{{userFullName}} started following you',
       },
     },
     group: {
@@ -1298,7 +1298,7 @@ export default {
       },
       join_request: {
         title: 'Group Join Request',
-        body: '{{userName}} wants to join {{groupName}}',
+        body: '{{userFullName}} wants to join {{groupName}}',
       },
       join_request_accepted: {
         title: 'Join Request Accepted',
@@ -1306,19 +1306,19 @@ export default {
       },
       user_joined: {
         title: 'New Member',
-        body: '{{userName}} joined {{groupName}}',
+        body: '{{userFullName}} joined {{groupName}}',
       },
       user_left: {
         title: 'Member Left',
-        body: '{{userName}} left {{groupName}}',
+        body: '{{userFullName}} left {{groupName}}',
       },
       member_removed: {
         title: 'Member Removed',
-        body: '{{userName}} was removed from {{groupName}}',
+        body: '{{userFullName}} was removed from {{groupName}} by {{adminFullName}}',
       },
       role_changed: {
         title: 'Role Changed',
-        body: "{{userName}}'s role in {{groupName}} has been changed to {{role}}",
+        body: 'Your role in {{groupName}} has been changed to {{role}}',
       },
     },
     event: {
@@ -1341,16 +1341,6 @@ export default {
       updated: {
         title: 'Event Updated',
         body: '{{eventName}} details have been updated',
-      },
-    },
-    route: {
-      shared: {
-        title: 'New Route Shared',
-        body: '{{userName}} shared a new route: {{routeName}}',
-      },
-      liked: {
-        title: 'Route Liked',
-        body: '{{userName}} liked your route: {{routeName}}',
       },
     },
     emergency: {

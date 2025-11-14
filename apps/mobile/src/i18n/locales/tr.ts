@@ -1259,33 +1259,33 @@ export default {
     post: {
       shared_in_group: {
         title: "{{groupName}}'da Yeni Gönderi",
-        body: "{{userName}}, {{groupName}}'da yeni bir gönderi paylaştı",
+        body: "{{userFullName}}, {{groupName}}'da yeni bir gönderi paylaştı",
       },
       like: {
         title: 'Gönderi Beğenildi',
-        body: '{{userName}} gönderinizi beğendi',
+        body: '{{userFullName}} gönderinizi beğendi',
       },
       comment: {
         title: 'Yeni Yorum',
-        body: '{{userName}} gönderinize yorum yaptı: "{{comment}}"',
+        body: '{{userFullName}} gönderinize yorum yaptı: "{{comment}}"',
       },
       save: {
         title: 'Gönderi Kaydedildi',
-        body: '{{userName}} gönderinizi kaydetti',
+        body: '{{userFullName}} gönderinizi kaydetti',
       },
     },
     user: {
       follow_request: {
         title: 'Takip İsteği',
-        body: '{{userName}} sizi takip etmek istiyor',
+        body: '{{userFullName}} sizi takip etmek istiyor',
       },
       follow_request_accepted: {
         title: 'Takip İsteği Kabul Edildi',
-        body: '{{userName}} takip isteğinizi kabul etti',
+        body: '{{userFullName}} takip isteğinizi kabul etti',
       },
       new_follower: {
         title: 'Yeni Takipçi',
-        body: '{{userName}} sizi takip etmeye başladı',
+        body: '{{userFullName}} sizi takip etmeye başladı',
       },
     },
     group: {
@@ -1295,7 +1295,7 @@ export default {
       },
       join_request: {
         title: 'Gruba Katılma İsteği',
-        body: "{{userName}}, {{groupName}}'a katılmak istiyor",
+        body: "{{userFullName}}, {{groupName}}'a katılmak istiyor",
       },
       join_request_accepted: {
         title: 'Katılma İsteği Kabul Edildi',
@@ -1303,19 +1303,19 @@ export default {
       },
       user_joined: {
         title: 'Yeni Üye',
-        body: "{{userName}}, {{groupName}}'a katıldı",
+        body: "{{userFullName}}, {{groupName}}'a katıldı",
       },
       user_left: {
         title: 'Üye Ayrıldı',
-        body: "{{userName}}, {{groupName}}'dan ayrıldı",
+        body: "{{userFullName}}, {{groupName}}'dan ayrıldı",
       },
       member_removed: {
         title: 'Üye Çıkarıldı',
-        body: "{{userName}}, {{groupName}}'dan çıkarıldı",
+        body: "{{userFullName}}, {{adminFullName}} tarafından {{groupName}}'dan çıkarıldı",
       },
       role_changed: {
         title: 'Rol Değişti',
-        body: "{{userName}}'in {{groupName}}'daki rolü {{role}} olarak değiştirildi",
+        body: "{{groupName}}'daki rolünüz {{role}} olarak değiştirildi",
       },
     },
     event: {
@@ -1338,16 +1338,6 @@ export default {
       updated: {
         title: 'Etkinlik Güncellendi',
         body: '{{eventName}} etkinliği detayları güncellendi',
-      },
-    },
-    route: {
-      shared: {
-        title: 'Yeni Rota Paylaşıldı',
-        body: '{{userName}} yeni bir rota paylaştı: {{routeName}}',
-      },
-      liked: {
-        title: 'Rota Beğenildi',
-        body: '{{userName}} rotanızı beğendi: {{routeName}}',
       },
     },
     emergency: {

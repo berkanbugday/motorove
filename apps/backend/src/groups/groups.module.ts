@@ -4,9 +4,10 @@ import { GroupsResolver } from './groups.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { StorageModule } from '../core/storage/storage.module';
+import { QueueModule } from '../core/queue/queue.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, StorageModule],
+  imports: [PrismaModule, AuthModule, StorageModule, QueueModule],
   providers: [GroupsResolver, GroupsService],
   exports: [GroupsService],
 })

@@ -4,9 +4,10 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { UserFollowingsService } from './user-followings.service';
 import { AuthModule } from '../auth/auth.module';
 import { StorageService } from '../core/storage/storage.service';
+import { QueueModule } from '../core/queue/queue.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, QueueModule],
   providers: [UserFollowingsResolver, UserFollowingsService, StorageService],
   exports: [UserFollowingsService],
 })

@@ -9,11 +9,17 @@ import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { GroupMembership } from '../group-memberships/models/group-membership.model';
 import { PostCommentDto } from './dto/post-comment.dto';
 import { plainToClass } from 'class-transformer';
+import { QueueService } from '../core/queue/queue.service';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { NotificationChannel } from '@motorove/shared';
 
 @Injectable()
 export class PostCommentsService {
   private readonly logger = new Logger(PostCommentsService.name);
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly queueService: QueueService,
+  ) {}
 
   async findAll(
     postId: string,
@@ -117,9 +123,38 @@ export class PostCommentsService {
         include: {
           createdBy: true,
           updatedBy: true,
-          post: true,
+          post: {
+            include: {
+              createdBy: true,
+            },
+          },
         },
       })) as PostComment;
+
+      // Send notification to post owner (if not commenting on own post)
+      if (post.createdById !== userId) {
+        try {
+          await this.queueService.addNotificationJob(
+            {
+              userId: post.createdById,
+              title: 'post.comment.title',
+              body: 'post.comment.body',
+              type: NotificationType.POST_COMMENT,
+              channel: NotificationChannel.PUSH,
+              data: {
+                postId: post.id,
+                commentId: postComment.id,
+                userId: userId,
+                userFullName: `${postComment.createdBy.firstName} ${postComment.createdBy.lastName}`,
+                comment: input.content.substring(0, 100), // Limit comment length in notification
+              } as Record<string, any>,
+            },
+            userId,
+          );
+        } catch (error) {
+          this.logger.error('Failed to send POST_COMMENT notification', error);
+        }
+      }
 
       return this.mapToDto(postComment);
     } catch (error) {
