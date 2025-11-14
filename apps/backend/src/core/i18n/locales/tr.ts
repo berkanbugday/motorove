@@ -90,7 +90,7 @@ export const trTranslations = {
     },
     emergency: {
       title: 'Acil Durum',
-      body: '{{fullName}} tarafından {{emergencyType}} acil durumu bildirildi.',
+      body: '{{userFullName}} tarafından {{emergencyType}} acil durumu bildirildi.',
     },
     common: {
       view_details: 'Detayları Görüntüle',

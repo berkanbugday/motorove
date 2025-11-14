@@ -288,7 +288,7 @@ export class EmergenciesService {
               channels: NotificationChannel.PUSH,
               data: {
                 emergencyType: type,
-                fullName: `${emergency.createdBy.firstName} ${emergency.createdBy.lastName}`,
+                userFullName: `${emergency.createdBy.firstName} ${emergency.createdBy.lastName}`,
                 addresses: emergency.addresses.map((addr) => ({
                   address: addr.address,
                   language: addr.language,

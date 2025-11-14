@@ -90,7 +90,7 @@ export const enTranslations = {
     },
     emergency: {
       title: 'Emergency',
-      body: '{{fullName}} reported an {{emergencyType}} emergency',
+      body: '{{userFullName}} reported an {{emergencyType}} emergency',
     },
     common: {
       view_details: 'View Details',

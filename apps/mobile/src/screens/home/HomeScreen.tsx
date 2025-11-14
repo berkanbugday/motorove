@@ -386,38 +386,37 @@ export const HomeScreen = ({navigation}: Props) => {
           // Show confirmation dialog before deleting
           openBottomSheet({
             title: t('screens.post.delete_post'),
-            closeButtonPosition: 'top-right',
+            snapPoint: 'minimal',
+            showCloseButton: false,
             enableGestureControl: false,
+            closeOnBackdropPress: true,
             content: (
-              <View>
-                <Body>{t('screens.post.delete_post_confirmation')}</Body>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    gap: spacing.md,
-                    paddingTop: spacing.lg,
-                    paddingBottom: spacing.lg,
-                  }}>
+              <View style={styles.bottomSheetContent}>
+                <Body style={styles.bottomSheetMessage}>
+                  {t('screens.post.delete_post_confirmation')}
+                </Body>
+
+                <View style={styles.bottomSheetButtons}>
                   <Button
                     title={t('common.cancel')}
                     variant="outline"
+                    shape="round"
                     onPress={() => closeBottomSheet()}
-                    style={{width: '50%'}}
+                    style={styles.bottomSheetButton}
                   />
                   <Button
                     title={t('common.delete')}
                     variant="primary"
+                    shape="round"
                     onPress={() => {
                       removePost(postId);
                       closeBottomSheet();
                     }}
-                    style={{width: '50%'}}
+                    style={styles.bottomSheetButton}
                   />
                 </View>
               </View>
             ),
-            snapPoint: 'minimal',
           });
           break;
         default:
@@ -860,5 +859,22 @@ const styles = StyleSheet.create({
   },
   skeletonListContainer: {
     paddingVertical: spacing.sm,
+  },
+  bottomSheetContent: {
+    padding: spacing.md,
+  },
+  bottomSheetMessage: {
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  bottomSheetButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+  },
+  bottomSheetButton: {
+    flex: 1,
+    width: '50%',
   },
 });

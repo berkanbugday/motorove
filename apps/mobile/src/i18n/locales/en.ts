@@ -1345,7 +1345,7 @@ export default {
     },
     emergency: {
       title: 'Emergency',
-      body: '{{fullName}} reported an {{emergencyType}} emergency. {{description}} {{address}} ',
+      body: '{{userFullName}} reported an {{emergencyType}} emergency. {{description}} {{address}} ',
     },
     common: {
       view_details: 'View Details',
