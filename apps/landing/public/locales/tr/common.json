@@ -23,6 +23,7 @@
     "legal": {
       "terms": "Hizmet Şartları",
       "privacy": "Gizlilik Politikası",
+      "deleteAccount": "Hesabımı Sil",
       "contact": "İletişim"
     },
     "copyright": "© {{year}} Motorove. Tüm hakları saklıdır."
@@ -163,7 +164,7 @@
   "legal": {
     "terms": {
       "title": "Hizmet Koşulları",
-      "lastUpdated": "Son Güncelleme: 11.10.2025",
+      "lastUpdated": "Son Güncelleme: 11.11.2025",
       "sections": {
         "generalOverview": {
           "title": "Genel Bilgilendirme",
@@ -217,7 +218,7 @@
     },
     "privacy": {
       "title": "Gizlilik Politikası",
-      "lastUpdated": "Son Güncelleme: 11.10.2025",
+      "lastUpdated": "Son Güncelleme: 11.11.2025",
       "sections": {
         "introduction": {
           "title": "Giriş",
@@ -233,7 +234,7 @@
           "personalData": {
             "title": "a) Kişisel Bilgiler (kimliğinizi tanımlayabilir)",
             "items": {
-              "item1": "Ad soyad, kullanıcı adı, e-posta adresi, telefon numarası",
+              "item1": "Ad soyad, e-posta adresi",
               "item2": "Profil fotoğrafı, şehir/bölge, motosiklet tipi, cinsiyet, sürüş deneyimi (isteğe bağlı)",
               "item3": "Hesap giriş bilgileri (şifrelenmiş şekilde)",
               "item4": "Konum verisi (kullanıcının izniyle)",
@@ -301,6 +302,70 @@
         "contact": {
           "title": "İletişim",
           "content": "Herhangi bir soru, endişe veya veriyle ilgili talebiniz için: Motorove, E-posta: media@motorove.app"
+        }
+      }
+    },
+    "deleteAccount": {
+      "title": "Hesap Silme Talebi",
+      "lastUpdated": "Son Güncelleme: 11.11.2025",
+      "sections": {
+        "introduction": {
+          "title": "Giriş",
+          "content": "Motorove olarak, kişisel verileriniz üzerindeki kontrolünüze saygı duyuyoruz. Motorove hesabınızı ve ilişkili tüm verileri kalıcı olarak silmek isterseniz, bunu istediğiniz zaman yapabilirsiniz. Bu sayfa, hesap silme talebinde bulunmayı, hangi verilerin silineceğini, hangi verilerin saklanabileceğini ve hesap silmenin sonuçlarını açıklamaktadır."
+        },
+        "howToDelete": {
+          "title": "Hesap Silme Talebi Nasıl Yapılır",
+          "content": "Hesap silme talebinde bulunmak için lütfen destek ekibimize aşağıdaki bilgileri içeren bir e-posta gönderin:",
+          "byEmail": {
+            "requirements": {
+              "item1": "Konu satırı: \"Hesap Silme Talebi\"",
+              "item2": "Motorove hesabınızla ilişkili kayıtlı e-posta adresiniz"
+            },
+            "emailLabel": "E-posta:"
+          }
+        },
+        "whatGetsDeleted": {
+          "title": "Hangi Veriler Silinecek",
+          "content": "Hesabınızı sildiğinizde, aşağıdaki veriler sistemlerimizden kalıcı olarak kaldırılacaktır:",
+          "items": {
+            "item1": "Profil bilgileriniz (ad, soyad, e-posta, doğum tarihi, cinsiyet, profil fotoğrafı)",
+            "item2": "Motosiklet bilgileriniz ve tercihleriniz",
+            "item3": "Kayıtlı rotalarınız, kaydedilmiş sürüşleriniz ve GPS takip verileriniz",
+            "item4": "Gönderileriniz, yorumlarınız ve değerlendirmeleriniz",
+            "item5": "Grup üyelikleriniz ve etkinlik katılımlarınız",
+            "item6": "Sosyal bağlantılarınız (takipçiler, takip edilenler)",
+            "item7": "Bildirim tercihleriniz ve ayarlarınız",
+            "item8": "Abonelik ve ödeme geçmişiniz (yasal saklama süresi sonrasında)"
+          }
+        },
+        "dataRetention": {
+          "title": "Saklanabilecek Veriler",
+          "content": "Yasal, güvenlik ve operasyonel nedenlerle, belirli veriler sınırlı bir süre saklanabilir:",
+          "items": {
+            "item1": "İşlem kayıtları ve ödeme bilgileri (vergi ve mali düzenlemelerin gerektirdiği şekilde 7 yıl saklanır)",
+            "item2": "Size geri bağlanamayan anonimleştirilmiş analitik veriler",
+            "item3": "Yasal uyumluluk, dolandırıcılık önleme veya anlaşmazlıkları çözmek için gerekli veriler"
+          },
+          "period": "Saklanan veriler, gerekli saklama süresi dolduktan sonra kalıcı olarak silinecektir (çoğu veri için genellikle 30 gün, mali kayıtlar için 7 yıla kadar)."
+        },
+        "consequences": {
+          "title": "Hesap Silmenin Sonuçları",
+          "content": "Lütfen hesap silmenin kalıcı ve geri alınamaz olduğunu unutmayın. Silindikten sonra:",
+          "items": {
+            "item1": "Tüm Motorove özelliklerine ve hizmetlerine erişiminizi kaybedeceksiniz",
+            "item2": "Aktif abonelikleriniz iptal edilecektir (kalan abonelik süresi için iade yapılmaz)",
+            "item3": "İçerikleriniz (rotalar, gönderiler, değerlendirmeler) platformdan kaldırılacaktır",
+            "item4": "Gelecekte Motorove'u tekrar kullanmak isterseniz yeni bir hesap oluşturmanız gerekecektir"
+          }
+        },
+        "reactivation": {
+          "title": "Hesap Yeniden Etkinleştirme",
+          "content": "Hesap silme işlemi kalıcıdır. Hesabınızı silerseniz, yeniden etkinleştiremezsiniz. Motorove'u tekrar kullanmak isterseniz yeni bir e-posta adresiyle yeni bir hesap oluşturmanız gerekecektir. Önceki verileriniz geri yüklenemez."
+        },
+        "contact": {
+          "title": "Sorular veya Destek",
+          "content": "Hesap silme, veri saklama hakkında sorularınız varsa veya silme işlemiyle ilgili yardıma ihtiyacınız varsa, lütfen destek ekibimizle iletişime geçin:",
+          "emailLabel": "E-posta:"
         }
       }
     }

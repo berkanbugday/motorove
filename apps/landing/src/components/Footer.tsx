@@ -50,6 +50,12 @@ const Footer: React.FC = () => {
               >
                 {t("footer.legal.privacy")}
               </Link>
+              <Link
+                href="/delete-account"
+                className="text-neutral-lightGrey hover:text-white text-sm"
+              >
+                {t("footer.legal.deleteAccount")}
+              </Link>
             </div>
           </div>
         </div>

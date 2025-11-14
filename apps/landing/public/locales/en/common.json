@@ -23,6 +23,7 @@
     "legal": {
       "terms": "Terms of Service",
       "privacy": "Privacy Policy",
+      "deleteAccount": "Delete Account",
       "contact": "Contact"
     },
     "copyright": "© {{year}} Motorove. All rights reserved."
@@ -163,7 +164,7 @@
   "legal": {
     "terms": {
       "title": "Terms of Service",
-      "lastUpdated": "Last Updated: 11.10.2025",
+      "lastUpdated": "Last Updated: 11.11.2025",
       "sections": {
         "generalOverview": {
           "title": "General Overview",
@@ -217,7 +218,7 @@
     },
     "privacy": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last Updated: 11.10.2025",
+      "lastUpdated": "Last Updated: 11.11.2025",
       "sections": {
         "introduction": {
           "title": "Introduction",
@@ -233,7 +234,7 @@
           "personalData": {
             "title": "a) Personal Information (may identify you)",
             "items": {
-              "item1": "Full name, username, email address, phone number",
+              "item1": "Full name, email address",
               "item2": "Profile photo, city/region, motorcycle type, gender, riding experience (optional)",
               "item3": "Account login credentials (hashed)",
               "item4": "Location data (with user consent)",
@@ -301,6 +302,70 @@
         "contact": {
           "title": "Contact",
           "content": "For any questions, concerns, or data-related requests: Motorove, Email: media@motorove.app. Only the English version of this policy is binding."
+        }
+      }
+    },
+    "deleteAccount": {
+      "title": "Account Deletion Request",
+      "lastUpdated": "Last Updated: 11.11.2025",
+      "sections": {
+        "introduction": {
+          "title": "Introduction",
+          "content": "At Motorove, we respect your right to control your personal data. If you wish to permanently delete your Motorove account and all associated data, you can do so at any time. This page explains how to request account deletion, what data will be deleted, what data may be retained, and the consequences of account deletion."
+        },
+        "howToDelete": {
+          "title": "How to Request Account Deletion",
+          "content": "To request account deletion, please send an email to our support team with the following information:",
+          "byEmail": {
+            "requirements": {
+              "item1": "Subject line: \"Account Deletion Request\"",
+              "item2": "Your registered email address associated with your Motorove account"
+            },
+            "emailLabel": "Email:"
+          }
+        },
+        "whatGetsDeleted": {
+          "title": "What Data Will Be Deleted",
+          "content": "When you delete your account, the following data will be permanently removed from our systems:",
+          "items": {
+            "item1": "Your profile information (first name, last name, email, date of birth, gender, profile photo)",
+            "item2": "Your motorcycle information and preferences",
+            "item3": "Your saved routes, recorded rides, and GPS tracking data",
+            "item4": "Your posts, comments, and reviews",
+            "item5": "Your group memberships and event participations",
+            "item6": "Your social connections (followers, following)",
+            "item7": "Your notification preferences and settings",
+            "item8": "Your subscription and payment history (after legal retention period)"
+          }
+        },
+        "dataRetention": {
+          "title": "Data That May Be Retained",
+          "content": "For legal, security, and operational reasons, certain data may be retained for a limited period:",
+          "items": {
+            "item1": "Transaction records and payment information (retained for 7 years as required by tax and financial regulations)",
+            "item2": "Anonymized analytics data that cannot be linked back to you",
+            "item3": "Data required for legal compliance, fraud prevention, or to resolve disputes"
+          },
+          "period": "Retained data will be permanently deleted after the required retention period expires (typically 30 days for most data, up to 7 years for financial records)."
+        },
+        "consequences": {
+          "title": "Consequences of Account Deletion",
+          "content": "Please note that account deletion is permanent and irreversible. Once deleted:",
+          "items": {
+            "item1": "You will lose access to all Motorove features and services",
+            "item2": "Any active subscriptions will be cancelled (no refunds for remaining subscription period)",
+            "item3": "Your content (routes, posts, reviews) will be removed from the platform",
+            "item4": "You will need to create a new account if you wish to use Motorove again in the future"
+          }
+        },
+        "reactivation": {
+          "title": "Account Reactivation",
+          "content": "Account deletion is permanent. If you delete your account, you cannot reactivate it. You will need to create a new account with a new email address if you wish to use Motorove again. Your previous data cannot be restored."
+        },
+        "contact": {
+          "title": "Questions or Support",
+          "content": "If you have any questions about account deletion, data retention, or need assistance with the deletion process, please contact our support team:",
+          "emailLabel": "Email:"
         }
       }
     }
