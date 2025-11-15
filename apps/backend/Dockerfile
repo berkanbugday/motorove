@@ -1,10 +1,7 @@
 FROM node:20-slim AS base
 
-# Install required system dependencies for TensorFlow and Prisma
+# Install required system dependencies for Prisma
 RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
     openssl \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -32,14 +29,6 @@ COPY apps/backend/package.json ./apps/backend/package.json
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Rebuild TensorFlow bindings for the target architecture
-RUN TFJS_PATH=$(find node_modules/.pnpm -type d -path "*/@tensorflow/tfjs-node" | head -1) && \
-    if [ -n "$TFJS_PATH" ]; then \
-        cd "$TFJS_PATH" && \
-        rm -rf lib/napi-v8/tfjs_binding.node && \
-        npm run build-addon-from-source || true; \
-    fi
-
 # Build shared package
 RUN pnpm --filter @motorove/shared build
 
@@ -55,11 +44,6 @@ RUN pnpm prisma generate
 
 # Build the application
 RUN pnpm build
-
-# Configure TensorFlow library path in the system
-RUN TFJS_LIB=$(find /app/node_modules/.pnpm -path "*/tfjs-node/deps/lib" | head -1) && \
-    echo "$TFJS_LIB" > /etc/ld.so.conf.d/tensorflow.conf && \
-    ldconfig
 
 # Expose port
 EXPOSE 3000
@@ -79,11 +63,6 @@ RUN pnpm prisma generate
 
 # Build the application
 RUN pnpm build
-
-# Configure TensorFlow library path in the system
-RUN TFJS_LIB=$(find /app/node_modules/.pnpm -path "*/tfjs-node/deps/lib" | head -1) && \
-    echo "$TFJS_LIB" > /etc/ld.so.conf.d/tensorflow.conf && \
-    ldconfig
 
 # Expose port
 EXPOSE 3000
@@ -126,11 +105,6 @@ RUN pnpm build
 
 # Remove source files, keep only dist
 RUN rm -rf src test
-
-# Configure TensorFlow library path in the system
-RUN TFJS_LIB=$(find /app/node_modules/.pnpm -path "*/tfjs-node/deps/lib" | head -1) && \
-    echo "$TFJS_LIB" > /etc/ld.so.conf.d/tensorflow.conf && \
-    ldconfig
 
 # Expose port
 EXPOSE 3000

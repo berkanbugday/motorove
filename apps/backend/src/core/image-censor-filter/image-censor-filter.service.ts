@@ -1,27 +1,27 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import * as tf from '@tensorflow/tfjs-node';
-import * as nsfw from 'nsfwjs';
-import { Tensor3D } from '@tensorflow/tfjs-node';
+import { Injectable, Logger } from '@nestjs/common';
+import { ImageAnnotatorClient } from '@google-cloud/vision';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
-export class ImageCensorFilterService implements OnModuleInit {
+export class ImageCensorFilterService {
   private readonly logger = new Logger(ImageCensorFilterService.name);
-  private nsfwModel: nsfw.NSFWJS;
+  private visionClient: ImageAnnotatorClient;
 
-  constructor() {}
+  constructor(private readonly configService: ConfigService) {
+    // Initialize Google Cloud Vision client with API key
+    const apiKey = this.configService.get<string>(
+      'GOOGLE_CLOUD_VISION_API_KEY',
+    );
 
-  async onModuleInit(): Promise<void> {
-    try {
-      // Load the image censor model
-      this.nsfwModel = await nsfw.load();
-      this.logger.log('Image censor model loaded successfully');
-    } catch (error) {
-      this.logger.error('Failed to load image censor model', error);
-    }
+    this.visionClient = new ImageAnnotatorClient({
+      apiKey,
+    });
+
+    this.logger.log('Google Cloud Vision API client initialized successfully');
   }
 
   /**
-   * Check if an image contains image censor content
+   * Check if an image contains inappropriate content using Google Cloud Vision API
    * @param imageUrl URL of the image to check
    * @returns Object containing isCensored flag and predictions
    */
@@ -30,94 +30,78 @@ export class ImageCensorFilterService implements OnModuleInit {
     predictions: Array<{ className: string; probability: number }> | null;
   }> {
     try {
-      if (!this.nsfwModel) {
-        this.logger.warn('Image censor model not loaded, skipping check');
-        return { isCensored: false, predictions: null };
-      }
-
       // Validate URL
       if (!imageUrl || typeof imageUrl !== 'string') {
         this.logger.warn('Invalid image URL provided');
         return { isCensored: false, predictions: null };
       }
 
-      // Load the image with proper error handling
-      const response = await fetch(imageUrl, {
-        headers: {
-          Accept: 'image/*',
-        },
-        redirect: 'follow',
-      });
+      // Perform safe search detection
+      const [result] = await this.visionClient.safeSearchDetection(imageUrl);
+      const safeSearch = result.safeSearchAnnotation;
 
-      if (!response.ok) {
-        this.logger.warn(
-          `Failed to fetch image: ${response.status} ${response.statusText}`,
-        );
+      if (!safeSearch) {
+        this.logger.warn('No safe search annotation returned from Vision API');
         return { isCensored: false, predictions: null };
       }
 
-      // Check Content-Type header
-      const contentType = response.headers.get('content-type');
-      if (contentType && !contentType.startsWith('image/')) {
-        this.logger.warn(`Invalid content type for image: ${contentType}`);
-        return { isCensored: false, predictions: null };
-      }
-
-      const buffer = await response.arrayBuffer();
-
-      // Validate buffer size
-      if (!buffer || buffer.byteLength === 0) {
-        this.logger.warn('Empty image buffer received');
-        return { isCensored: false, predictions: null };
-      }
-
-      // Validate image format by checking magic bytes
-      const uint8Array = new Uint8Array(buffer);
-      const isValidImage = this.validateImageFormat(uint8Array);
-
-      if (!isValidImage) {
-        this.logger.warn(
-          'Invalid image format detected (only BMP, JPEG, PNG, GIF supported)',
-        );
-        return { isCensored: false, predictions: null };
-      }
-
-      // Decode image with error handling
-      let image: Tensor3D | null = null;
-      try {
-        image = tf.node.decodeImage(uint8Array, 3) as Tensor3D;
-      } catch (decodeError) {
-        this.logger.warn(
-          `Failed to decode image: ${decodeError instanceof Error ? decodeError.message : String(decodeError)}`,
-        );
-        return { isCensored: false, predictions: null };
-      }
-
-      try {
-        // Run the prediction
-        const predictions = await this.nsfwModel.classify(image);
-
-        // Check if any image censor categories exceed threshold
-        // Categories: Porn, Sexy, Hentai, Drawing, Neutral
-        const imageCensorThreshold = 0.7; // 70% confidence threshold
-        const imageCensorCategories = ['Porn', 'Sexy', 'Hentai'];
-
-        const isCensored = predictions.some(
-          (p: { className: string; probability: number }) =>
-            imageCensorCategories.includes(p.className) &&
-            p.probability > imageCensorThreshold,
-        );
-
-        return { isCensored, predictions };
-      } finally {
-        // Always dispose the tensor to free memory
-        if (image) {
-          image.dispose();
+      // Map Google Cloud Vision likelihood to probability (0-1)
+      const likelihoodToProbability = (likelihood: any): number => {
+        const likelihoodStr = String(likelihood || '');
+        switch (likelihoodStr) {
+          case 'VERY_UNLIKELY':
+            return 0.1;
+          case 'UNLIKELY':
+            return 0.3;
+          case 'POSSIBLE':
+            return 0.5;
+          case 'LIKELY':
+            return 0.7;
+          case 'VERY_LIKELY':
+            return 0.9;
+          default:
+            return 0.0;
         }
+      };
+
+      // Create predictions array
+      const predictions = [
+        {
+          className: 'Adult',
+          probability: likelihoodToProbability(safeSearch.adult),
+        },
+        {
+          className: 'Racy',
+          probability: likelihoodToProbability(safeSearch.racy),
+        },
+        {
+          className: 'Violence',
+          probability: likelihoodToProbability(safeSearch.violence),
+        },
+      ];
+
+      // Check if content should be censored
+      // LIKELY or VERY_LIKELY for adult or racy content
+      const isCensored =
+        safeSearch.adult === 'LIKELY' ||
+        safeSearch.adult === 'VERY_LIKELY' ||
+        safeSearch.racy === 'VERY_LIKELY';
+
+      if (isCensored) {
+        this.logger.warn(
+          `Inappropriate content detected in image: ${imageUrl}`,
+          {
+            adult: safeSearch.adult,
+            racy: safeSearch.racy,
+            violence: safeSearch.violence,
+          },
+        );
       }
+
+      return { isCensored, predictions };
     } catch (error) {
       this.logger.error(
-        `Error checking image censor content for image ${imageUrl}`,
+        `Error checking image content with Google Cloud Vision API: ${imageUrl}`,
         {
           trace: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
@@ -125,50 +109,5 @@ export class ImageCensorFilterService implements OnModuleInit {
       );
       return { isCensored: false, predictions: null };
     }
-  }
-
-  /**
-   * Validate image format by checking magic bytes
-   * Only supports formats that TensorFlow.js can decode: BMP, JPEG, PNG, GIF
-   * @param buffer Image buffer
-   * @returns True if valid image format detected (supported by TensorFlow.js)
-   */
-  private validateImageFormat(buffer: Uint8Array): boolean {
-    if (buffer.length < 4) {
-      return false;
-    }
-
-    // Check for common image format magic bytes
-    // JPEG: FF D8 FF
-    if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
-      return true;
-    }
-
-    // PNG: 89 50 4E 47
-    if (
-      buffer[0] === 0x89 &&
-      buffer[1] === 0x50 &&
-      buffer[2] === 0x4e &&
-      buffer[3] === 0x47
-    ) {
-      return true;
-    }
-
-    // GIF: 47 49 46 38 (GIF8)
-    if (
-      buffer[0] === 0x47 &&
-      buffer[1] === 0x49 &&
-      buffer[2] === 0x46 &&
-      buffer[3] === 0x38
-    ) {
-      return true;
-    }
-
-    // BMP: 42 4D (BM)
-    if (buffer[0] === 0x42 && buffer[1] === 0x4d) {
-      return true;
-    }
-
-    return false;
   }
 }

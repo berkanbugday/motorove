@@ -35,6 +35,8 @@ import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
         ),
         WEATHER_API_KEY: Joi.string().required(),
         GEOCODING_API_KEY: Joi.string().required(),
+        // Google Cloud Vision API configuration
+        GOOGLE_CLOUD_VISION_API_KEY: Joi.string().required(),
       }),
       validationOptions: {
         allowUnknown: true,
