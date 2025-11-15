@@ -11,11 +11,7 @@ import { NotificationsModule } from '../../notifications/notifications.module';
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get('REDIS_HOST') || 'localhost',
-          port: parseInt(configService.get('REDIS_PORT') || '6379', 10),
-          password: configService.get('REDIS_PASSWORD'),
-        },
+        url: configService.get('REDIS_URL') || 'redis://localhost:6379',
         defaultJobOptions: {
           attempts: 3,
           backoff: {

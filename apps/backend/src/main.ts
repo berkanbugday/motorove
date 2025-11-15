@@ -19,8 +19,8 @@ async function bootstrap() {
   app.useLogger(logger);
 
   // Configure body parser with larger limit
-  app.use(json({ limit: '10mb' }));
-  app.use(urlencoded({ extended: true, limit: '10mb' }));
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   // Apply validation pipe globally
   app.useGlobalPipes(

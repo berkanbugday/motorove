@@ -41,6 +41,9 @@ import { EmergenciesModule } from './emergencies/emergencies.module';
         sortSchema: true,
         playground: configService.isDevelopment(),
         introspection: configService.isDevelopment(),
+        bodyParserConfig: {
+          limit: '50mb',
+        },
         formatError: (error) => {
           // Only return stacktrace in development mode
           const isDev = configService.isDevelopment();

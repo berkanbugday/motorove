@@ -22,6 +22,7 @@ import { NodeEnv, NodeEnvFileName } from './enums/node-env.enum';
         API_PREFIX: Joi.string().default('api'),
         CORS_ORIGIN: Joi.string().default('*'),
         // Redis configuration
+        REDIS_URL: Joi.string().default('redis://localhost:6379'),
         REDIS_HOST: Joi.string().default('localhost'),
         REDIS_PORT: Joi.number().default(6379),
         REDIS_PASSWORD: Joi.string().allow('').optional(),
