@@ -462,7 +462,7 @@ export default {
       basic_info: 'Temel Bilgiler',
       first_name: 'Ad',
       last_name: 'Soyad',
-      bio: 'Biografi',
+      bio: 'Biyografi',
       gender: 'Cinsiyet',
       date_of_birth: 'Doğum Tarihi',
       riding_styles: 'Sürüş Stilleri',

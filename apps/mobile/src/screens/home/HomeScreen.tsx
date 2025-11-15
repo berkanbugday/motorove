@@ -78,10 +78,10 @@ export const HomeScreen = ({navigation}: Props) => {
   } = useGetPosts();
 
   // Add hooks for post interactions
-  const {likePost} = useLikePost();
-  const {unlikePost} = useUnlikePost();
-  const {savePost} = useSavePost();
-  const {unsavePost} = useUnsavePost();
+  const {likePost, loading: likePostLoading} = useLikePost();
+  const {unlikePost, loading: unlikePostLoading} = useUnlikePost();
+  const {savePost, loading: savePostLoading} = useSavePost();
+  const {unsavePost, loading: unsavePostLoading} = useUnsavePost();
 
   // Add hook for post deletion
   const {removePost, loading: removePostLoading} = useRemovePost(() => {
@@ -132,10 +132,8 @@ export const HomeScreen = ({navigation}: Props) => {
   useFocusEffect(
     useCallback(() => {
       refetchCount();
-      refetchPosts();
       refetchWeather();
-      refetchEvents();
-    }, [refetchCount, refetchPosts, refetchWeather, refetchEvents]),
+    }, [refetchCount, refetchWeather]),
   );
 
   // Track the scroll direction for animation
@@ -509,9 +507,17 @@ export const HomeScreen = ({navigation}: Props) => {
           isCommented={feedCardProps.isCommented}
           dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
           onDropdownSelect={menuItem => handleDropdownSelect(menuItem, item.id)}
-          onLikePress={() => handleLikePress(item.id, item.isLiked)}
+          onLikePress={() => {
+            if (!likePostLoading && !unlikePostLoading) {
+              handleLikePress(item.id, item.isLiked);
+            }
+          }}
           onCommentPress={() => handleCommentPress(item.id)}
-          onSavePress={() => handleSavePress(item.id, item.isSaved)}
+          onSavePress={() => {
+            if (!savePostLoading && !unsavePostLoading) {
+              handleSavePress(item.id, item.isSaved);
+            }
+          }}
           onLikesPress={() => handleLikesPress(item.likedUsers)}
           onProfilePress={() => {
             if (item.createdBy.id !== user?.id) {
