@@ -17,14 +17,7 @@ export class SupabaseService {
       });
     }
 
-    this.supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: true,
-        detectSessionInUrl: false,
-        flowType: 'pkce',
-      },
-    });
+    this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
   getClient(): SupabaseClient {
@@ -46,9 +39,16 @@ export class SupabaseService {
   }
 
   async refreshToken(refreshToken: string) {
-    return await this.supabase.auth.refreshSession({
-      refresh_token: refreshToken,
-    });
+    const currentSession = await this.supabase.auth.getSession();
+    if (!currentSession.data.session || currentSession.error) {
+      return await this.supabase.auth.refreshSession();
+    }
+
+    const data = {
+      session: currentSession.data.session,
+      user: currentSession.data.session.user,
+    };
+    return { data, error: currentSession.error };
   }
 
   async signOut() {

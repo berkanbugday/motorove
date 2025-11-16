@@ -205,21 +205,17 @@ export class AuthService {
       if (error) {
         // Check for specific error types from Supabase
         if (error.message.includes('Token has expired or is invalid')) {
-          console.error('Token expiration error:', error.message);
           ExceptionHelper.unauthorized('errors.auth.token_expired');
         }
 
         if (error.message.includes('Token already used')) {
-          console.error('Refresh token reuse detected:', error.message);
           ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
         }
 
         if (error.message.includes('JWT')) {
-          console.error('JWT validation error:', error.message);
           ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
         }
 
-        console.error('Token refresh error:', error.message);
         throw new UnauthorizedException(
           error.message || 'Failed to refresh token',
         );
