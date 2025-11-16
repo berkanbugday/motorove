@@ -72,7 +72,7 @@ const MapAppsBottomSheetContent: React.FC<MapAppsBottomSheetContentProps> = ({
         activeOpacity={0.7}>
         <Image
           source={require('@assets/images/logos/google-maps.png')}
-          resizeMode="center"
+          resizeMode="contain"
           style={styles.mapLogo}
         />
         <Body weight="semiBold" style={styles.mapAppName}>
@@ -88,7 +88,7 @@ const MapAppsBottomSheetContent: React.FC<MapAppsBottomSheetContentProps> = ({
           activeOpacity={0.7}>
           <Image
             source={require('@assets/images/logos/apple-maps.png')}
-            resizeMode="center"
+            resizeMode="contain"
             style={styles.mapLogo}
           />
           <Body weight="semiBold" style={styles.mapAppName}>
@@ -107,7 +107,7 @@ const MapAppsBottomSheetContent: React.FC<MapAppsBottomSheetContentProps> = ({
         activeOpacity={0.7}>
         <Image
           source={require('@assets/images/logos/waze.png')}
-          resizeMode="center"
+          resizeMode="contain"
           style={styles.mapLogo}
         />
         <Body weight="semiBold" style={styles.mapAppName}>
@@ -125,7 +125,7 @@ const MapAppsBottomSheetContent: React.FC<MapAppsBottomSheetContentProps> = ({
         activeOpacity={0.7}>
         <Image
           source={require('@assets/images/logos/yandex-maps.png')}
-          resizeMode="center"
+          resizeMode="contain"
           style={styles.mapLogo}
         />
         <Body weight="semiBold" style={styles.mapAppName}>
@@ -143,7 +143,7 @@ const MapAppsBottomSheetContent: React.FC<MapAppsBottomSheetContentProps> = ({
         activeOpacity={0.7}>
         <Image
           source={require('@assets/images/logos/sygic.png')}
-          resizeMode="center"
+          resizeMode="contain"
           style={styles.mapLogo}
         />
         <Body weight="semiBold" style={styles.mapAppName}>
