@@ -537,11 +537,6 @@ export const useMarkNotificationAsRead = (onSuccess?: () => void) => {
     MARK_NOTIFICATION_AS_READ,
     {
       onCompleted: () => {
-        showToast({
-          type: 'success',
-          text1: i18n.t('common.success'),
-          text2: i18n.t('screens.notification.marked_as_read'),
-        });
         if (onSuccess) {
           onSuccess();
         }
@@ -590,11 +585,6 @@ export const useMarkAllNotificationsAsRead = (onSuccess?: () => void) => {
     MARK_ALL_NOTIFICATIONS_AS_READ,
     {
       onCompleted: () => {
-        showToast({
-          type: 'success',
-          text1: i18n.t('common.success'),
-          text2: i18n.t('screens.notification.all_marked_as_read'),
-        });
         if (onSuccess) {
           onSuccess();
         }

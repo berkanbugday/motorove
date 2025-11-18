@@ -97,25 +97,25 @@ export const HomeScreen = ({navigation}: Props) => {
       id: '1',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/81/500/300', // Coast/ocean image
+      image: 'https://picsum.photos/id/81/500/300',
     },
     {
       id: '2',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/29/500/300', // Mountain image
+      image: 'https://picsum.photos/id/29/500/300',
     },
     {
       id: '3',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/62/500/300', // Urban image
+      image: 'https://picsum.photos/id/62/500/300',
     },
     {
       id: '4',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/11/500/300', // Forest image
+      image: 'https://picsum.photos/id/11/500/300',
     },
   ];
 
@@ -463,6 +463,7 @@ export const HomeScreen = ({navigation}: Props) => {
           ? post.images.map((img: IImage) => ({
               url: img.url,
               isCensored: img.isCensored,
+              order: img.order,
             }))
           : undefined;
 

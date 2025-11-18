@@ -20,7 +20,6 @@ import {
 } from '@components';
 import {
   useGetNotifications,
-  useMarkNotificationAsRead,
   useMarkAllNotificationsAsRead,
   useDeleteNotification,
   useDeleteAllNotifications,
@@ -65,10 +64,6 @@ export const NotificationScreen = () => {
   const {notifications, loading, refetch, loadMore, isFetchingMore} =
     useGetNotifications();
 
-  const {markNotificationAsRead} = useMarkNotificationAsRead(() => {
-    refetch();
-  });
-
   const {deleteNotification} = useDeleteNotification(() => {
     refetch();
   });
@@ -82,13 +77,13 @@ export const NotificationScreen = () => {
   });
 
   const [refreshing, setRefreshing] = useState(false);
-  const [existingUnreadNotifications, setExistingUnreadNotifications] =
-    useState(false);
 
   useEffect(() => {
-    setExistingUnreadNotifications(
-      notifications.find(notification => !notification.read) !== undefined,
-    );
+    const unreadNotificationExist =
+      notifications.find(notification => !notification.read) !== undefined;
+    if (unreadNotificationExist) {
+      markAllNotificationsAsRead();
+    }
   }, [notifications]);
 
   // Handle refreshing notifications
@@ -98,14 +93,6 @@ export const NotificationScreen = () => {
       setRefreshing(false);
     });
   }, [refetch]);
-
-  // Mark notification as read
-  const handleMarkAsRead = useCallback(
-    (id: string) => {
-      markNotificationAsRead(id);
-    },
-    [markNotificationAsRead],
-  );
 
   // Delete notification
   const handleDeleteNotification = useCallback(
@@ -146,13 +133,6 @@ export const NotificationScreen = () => {
     },
     [deleteNotification, t],
   );
-
-  // Mark all notifications as read
-  const handleMarkAllAsRead = useCallback(() => {
-    if (existingUnreadNotifications) {
-      markAllNotificationsAsRead();
-    }
-  }, [markAllNotificationsAsRead, existingUnreadNotifications]);
 
   // Delete all notifications
   const handleDeleteAllNotifications = useCallback(() => {
@@ -218,19 +198,6 @@ export const NotificationScreen = () => {
       },
     ];
 
-    const leftActions: SwipeAction[] = [
-      {
-        text: t('screens.notification.mark_read'),
-        icon: <Icon name="check" size={24} color={colors.neutral.white} />,
-        backgroundColor: colors.status.success,
-        onPress: () => handleMarkAsRead(item.id),
-        testID: `mark-read-notification-${item.id}`,
-      },
-    ];
-
-    // Only show mark as read action if notification is unread
-    const actualLeftActions = item.read ? [] : leftActions;
-
     // Format notification data: translate enums, select language-specific fields, and format dates
     const formattedData: Record<string, any> | {} = (() => {
       try {
@@ -275,9 +242,7 @@ export const NotificationScreen = () => {
     })();
 
     return (
-      <SwipeableItem
-        leftActions={actualLeftActions}
-        rightActions={rightActions}>
+      <SwipeableItem rightActions={rightActions}>
         <View
           style={[
             styles.notificationItem,
@@ -346,22 +311,12 @@ export const NotificationScreen = () => {
         showShadow={false}
         showBackButton
         onBackPress={() => navigation.goBack()}
-        rightIconName={
-          notifications.length === 0
-            ? undefined
-            : existingUnreadNotifications
-            ? 'check'
-            : 'trash'
-        }
+        rightIconName={notifications.length === 0 ? undefined : 'trash'}
         onRightButtonPress={() => {
           if (notifications.length === 0) {
             return;
           }
-          if (existingUnreadNotifications) {
-            handleMarkAllAsRead();
-          } else {
-            handleDeleteAllNotifications();
-          }
+          handleDeleteAllNotifications();
         }}
         containerStyle={styles.topHeaderBar}
       />
