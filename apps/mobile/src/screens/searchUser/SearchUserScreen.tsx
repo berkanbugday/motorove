@@ -58,8 +58,9 @@ export const SearchUserScreen = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const {followUser, loading: followLoading} = useFollowUser();
-  const {unfollowUser, loading: unfollowLoading} = useUnfollowUser();
+  const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
+  const {followUser} = useFollowUser();
+  const {unfollowUser} = useUnfollowUser();
   // Fetch users based on search query
   const {
     users,
@@ -101,29 +102,60 @@ export const SearchUserScreen = () => {
     Keyboard.dismiss();
   }, [search]);
 
+  // Handle follow user with loading state
+  const handleFollowUser = useCallback(
+    async (userId: string) => {
+      setLoadingUserIds(prev => new Set(prev).add(userId));
+      try {
+        await followUser(userId);
+      } finally {
+        setLoadingUserIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
+      }
+    },
+    [followUser],
+  );
+
+  // Handle unfollow user with loading state
+  const handleUnfollowUser = useCallback(
+    async (userId: string) => {
+      setLoadingUserIds(prev => new Set(prev).add(userId));
+      try {
+        await unfollowUser(userId);
+      } finally {
+        setLoadingUserIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
+      }
+    },
+    [unfollowUser],
+  );
+
   // Render each user item
   const renderUserItem = useCallback(
     ({item}: {item: IUser}) => {
+      const isLoading = loadingUserIds.has(item.id);
+
       return (
         <UserCard
           user={item}
-          loading={followLoading || unfollowLoading}
+          loading={isLoading}
           onPress={() => {
             if (item.id !== user?.id) {
               navigation.navigate('Profile', {userId: item.id});
             }
           }}
-          handleFollowPress={async () => {
-            await followUser(item.id);
-            // The user list will be updated automatically via Apollo cache
-          }}
-          handleUnfollowPress={async () => {
-            await unfollowUser(item.id);
-          }}
+          handleFollowPress={() => handleFollowUser(item.id)}
+          handleUnfollowPress={() => handleUnfollowUser(item.id)}
         />
       );
     },
-    [followUser, unfollowUser, user],
+    [handleFollowUser, handleUnfollowUser, user, loadingUserIds, navigation],
   );
 
   // Render empty state when no users match search query
