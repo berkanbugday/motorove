@@ -20,10 +20,12 @@ import { PostAddressDto } from './dto/post-address.dto';
 import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PostsService {
   private readonly logger = new Logger(PostsService.name);
+  private readonly imagePublicUrl: string;
 
   constructor(
     private prisma: PrismaService,
@@ -31,7 +33,15 @@ export class PostsService {
     private imageCensorFilterService: ImageCensorFilterService,
     private profanityFilterService: ProfanityFilterService,
     private queueService: QueueService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    // Construct public URL from environment variables
+    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    const bucketName = this.configService.get<string>(
+      'SUPABASE_STORAGE_BUCKET',
+    );
+    this.imagePublicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/`;
+  }
 
   async findAll(
     groupId?: string,
@@ -188,7 +198,7 @@ export class PostsService {
       createdById: string;
       updatedById: string;
       groupId?: string;
-      images?: string[];
+      images?: any;
     } = {
       content: input.content,
       createdById: userId,
@@ -198,17 +208,32 @@ export class PostsService {
     // Process and upload images if they exist
     if (input.images && input.images.length > 0) {
       const processedImages = await Promise.all(
-        input.images.map((image, index) =>
-          this.processImageUpload(
+        input.images.map(async (image, index) => {
+          const imagePath = await this.processImageUpload(
             image,
             'posts/images',
             `post-${userId}-${index}`,
             authToken,
-          ),
-        ),
+          );
+
+          if (!imagePath) return null;
+
+          // Get public URL for censorship check
+          const publicUrl = `${this.imagePublicUrl}${imagePath}`;
+          const { isCensored } =
+            await this.imageCensorFilterService.checkImageCensorContent(
+              publicUrl,
+            );
+
+          return {
+            url: publicUrl, // Store path only, not full URL
+            isCensored,
+            order: index,
+          };
+        }),
       );
 
-      postData.images = processedImages.filter(Boolean) as string[];
+      postData.images = processedImages.filter(Boolean);
     }
 
     // Add optional fields if they exist
@@ -343,7 +368,7 @@ export class PostsService {
       updatedById: string;
       updatedAt: Date;
       groupId?: string;
-      images?: string[];
+      images?: any;
       addresses?: any;
     } = {
       ...input,
@@ -358,19 +383,36 @@ export class PostsService {
     if (input.images && input.images.length > 0) {
       const processedImages = await Promise.all(
         input.images.map(async (image, index) => {
-          const imageUrl = await this.processImageUpload(
+          const imagePath = await this.processImageUpload(
             image,
             'posts/images',
             `post-${userId}-${index}`,
             authToken,
           );
 
-          if (imageUrl && imageUrl.startsWith('posts/images')) {
-            return imageUrl;
+          if (!imagePath) return null;
+
+          // Normalize path
+          let normalizedPath = imagePath;
+          if (imagePath.startsWith('posts/images')) {
+            normalizedPath = imagePath;
+          } else {
+            const imageUrlWithoutQuery = imagePath.split('?')[0];
+            normalizedPath = `posts/images/${imageUrlWithoutQuery.split('/').pop()}`;
           }
 
-          const imageUrlWithoutQuery = imageUrl?.split('?')[0];
-          return `posts/images/${imageUrlWithoutQuery?.split('/').pop()}`;
+          // Get public URL for censorship check
+          const publicUrl = `${this.imagePublicUrl}${normalizedPath}`;
+          const { isCensored } =
+            await this.imageCensorFilterService.checkImageCensorContent(
+              publicUrl,
+            );
+
+          return {
+            url: publicUrl, // Store path only, not full URL
+            isCensored,
+            order: index,
+          };
         }),
       );
 
@@ -789,31 +831,38 @@ export class PostsService {
       isSaved = !!save;
     }
 
-    // Process images to get signed URLs if needed
+    // Process images from JSONB array
     const images: ImageDto[] = [];
 
-    if (Array.isArray(post.images) && post.images.length > 0 && authToken) {
+    if (post.images) {
       try {
-        await Promise.all(
-          post.images.map(async (imageUrl) => {
-            if (imageUrl && typeof imageUrl === 'string') {
-              const url = await this.storageService.getSignedUrl(
-                imageUrl,
-                3600,
-                authToken,
-              );
-              const { isCensored } =
-                await this.imageCensorFilterService.checkImageCensorContent(
-                  url,
-                );
-              images.push({ url: url, isCensored });
+        const imageArray = Array.isArray(post.images)
+          ? post.images
+          : (JSON.parse(JSON.stringify(post.images)) as any[]);
+
+        if (Array.isArray(imageArray) && imageArray.length > 0) {
+          imageArray.forEach((imageData: any) => {
+            if (
+              imageData &&
+              typeof imageData === 'object' &&
+              'url' in imageData
+            ) {
+              // Use public URL prefix instead of signed URLs
+              images.push({
+                url: String(imageData.url),
+                isCensored: Boolean(imageData.isCensored),
+                order: Number(imageData.order) || 0,
+              });
             }
-          }),
-        );
+          });
+
+          // Sort by order
+          images.sort((a, b) => a.order - b.order);
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown error';
-        console.error('Error getting signed URLs:', errorMessage);
+        this.logger.error('Error processing images:', errorMessage);
       }
     }
 

@@ -547,7 +547,7 @@ model DeviceToken {
 model Post {
   id        String        @id @default(uuid())
   content   String
-  images    String[]
+  images    Json?         @default("[]")
   group     Group?        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   groupId   String?
   comments  PostComment[]

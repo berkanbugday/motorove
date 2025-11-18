@@ -323,7 +323,7 @@ export class EventsService {
             );
             const { isCensored } =
               await this.imageCensorFilterService.checkImageCensorContent(url);
-            invitationDto.event.images = [{ url: url, isCensored }];
+            invitationDto.event.images = [{ url: url, isCensored, order: 1 }];
           }
 
           return invitationDto;
@@ -1315,7 +1315,7 @@ export class EventsService {
       if (Array.isArray(event.images) && event.images.length > 0 && authToken) {
         try {
           await Promise.all(
-            event.images.map(async (imageUrl) => {
+            event.images.map(async (imageUrl, index) => {
               if (imageUrl && typeof imageUrl === 'string') {
                 const url = await this.storageService.getSignedUrl(
                   imageUrl,
@@ -1326,7 +1326,7 @@ export class EventsService {
                   await this.imageCensorFilterService.checkImageCensorContent(
                     url,
                   );
-                images.push({ url: url, isCensored });
+                images.push({ url: url, isCensored, order: index });
               }
             }),
           );

@@ -39,6 +39,7 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
     <Marker
       coordinate={marker.coordinate}
       onPress={onPress}
+      tracksViewChanges={false}
       zIndex={marker.zIndex || (isSelected ? 1000 : 1)}>
       <Animated.View
         style={[

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useCallback} from 'react';
-import {View, Image} from 'react-native';
+import {View, StyleSheet, ActivityIndicator, Image} from 'react-native';
 import {
   NavigationContainer,
   LinkingOptions,
@@ -11,7 +11,7 @@ import {AuthNavigator} from './stacks/AuthNavigator';
 import {MainNavigator} from './stacks/MainNavigator';
 import {useFirstTimeCheck} from './utils/navigationUtils';
 import {useAuth} from '@contexts';
-import {LoadingIndicator} from '@components';
+import {colors} from '@theme';
 import {RootStackParamList} from '@navigation/types/navigationTypes';
 import {AccountSetupScreen} from '@screens/auth/AccountSetupScreen';
 import {NotificationPermission} from '@motorove/shared';
@@ -62,7 +62,20 @@ export function RootNavigator() {
   }, [isAuthenticated]);
   // Show loading screen with logo when checking auth, session revival, or first time status
   if (isInitializing || firstTimeLoading) {
-    return <LoadingIndicator visible={true} />;
+    return (
+      <View style={styles.loadingContainer}>
+        <Image
+          source={require('@assets/images/motorove_logo_light.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <ActivityIndicator
+          size="small"
+          color={colors.neutral.white}
+          style={styles.spinner}
+        />
+      </View>
+    );
   }
 
   return (
@@ -99,3 +112,20 @@ export function RootNavigator() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.neutral.black,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+  },
+  spinner: {
+    marginTop: 10,
+  },
+});

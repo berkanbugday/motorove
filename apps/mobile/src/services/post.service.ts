@@ -196,6 +196,10 @@ export const useGetPosts = (
       skip,
     },
     skip: skipQuery,
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-first',
+    returnPartialData: true,
+    notifyOnNetworkStatusChange: true,
     onError: errorObj => {
       loggingService.error('Error fetching posts:', errorObj);
     },
@@ -293,11 +297,8 @@ export const useLikePost = () => {
         variables: {postId},
         optimisticResponse: {
           likePost: {
-            __typename: 'PostDto',
-            id: postId,
+            __typename: 'PostLikeDto',
             postId: postId,
-            isLiked: true,
-            likesCount: +1,
           },
         },
         update: cache => {
@@ -305,26 +306,25 @@ export const useLikePost = () => {
           const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
-            // Create a proper reference to the user with mergeIntoStore
-            const userRef = cache.identify({
-              __typename: 'UserDto',
-              id: user.id,
-            });
-
             // Update the cache directly with the optimistic values
             cache.modify({
               id: cacheId,
               fields: {
                 isLiked: () => true,
-                likesCount: (existingCount = 0) =>
-                  (existingCount as number) + 1,
-                likedUsers: (existingUsers = [], {toReference}) => {
+                likesCount: (existingCount = 0) => {
+                  const current = existingCount as number;
+                  return current + 1;
+                },
+                likedUsers: (
+                  existingUsers = [],
+                  {toReference, readField, canRead},
+                ) => {
                   // Cast to array type since Apollo cache returns unknown
                   const usersArray = existingUsers as Array<Reference>;
 
                   // Check if user is already in the likedUsers array
                   const userExists = usersArray.some(
-                    likedUser => cache.identify(likedUser) === userRef,
+                    likedUser => readField('id', likedUser) === user.id,
                   );
 
                   // If user is already in the array, return the existing array
@@ -332,19 +332,36 @@ export const useLikePost = () => {
                     return usersArray;
                   }
 
-                  // Create a reference with mergeIntoStore to ensure it's added to cache
+                  // Try to get existing user reference from cache first
+                  const existingUserRef = toReference({
+                    __typename: 'UserDto',
+                    id: user.id,
+                  });
+
+                  // Check if we can read the user data from cache
+                  if (existingUserRef && canRead(existingUserRef)) {
+                    // User data already exists in cache, just add the reference
+                    return [...usersArray, existingUserRef];
+                  }
+
+                  // If user data doesn't exist in cache, write what we have from AuthUser
+                  // Apollo will merge this with any existing data
                   const newUserRef = toReference(
                     {
                       __typename: 'UserDto',
                       id: user.id,
+                      firstName: user.firstName || '',
+                      lastName: user.lastName || '',
+                      avatar: user.avatar || null,
                     },
-                    true,
+                    true, // mergeIntoStore - writes partial data to cache
                   );
 
                   // Add the current user to the likedUsers array
                   return newUserRef ? [...usersArray, newUserRef] : usersArray;
                 },
               },
+              broadcast: true,
             });
           }
         },
@@ -391,11 +408,8 @@ export const useUnlikePost = () => {
         variables: {postId},
         optimisticResponse: {
           unlikePost: {
-            __typename: 'PostDto',
-            id: postId,
+            __typename: 'PostLikeDto',
             postId: postId,
-            isLiked: false,
-            likesCount: -1,
           },
         },
         update: cache => {
@@ -403,12 +417,6 @@ export const useUnlikePost = () => {
           const cacheId = cache.identify({__typename: 'PostDto', id: postId});
 
           if (cacheId) {
-            // Create a proper reference to the user
-            const userRef = cache.identify({
-              __typename: 'UserDto',
-              id: user.id,
-            });
-
             // Update the cache directly with the optimistic values
             cache.modify({
               id: cacheId,
@@ -418,16 +426,17 @@ export const useUnlikePost = () => {
                   const currentCount = existingCount as number;
                   return Math.max(0, currentCount - 1); // Avoid negative counts
                 },
-                likedUsers: (existingUsers = []) => {
+                likedUsers: (existingUsers = [], {readField}) => {
                   // Cast to array type since Apollo cache returns unknown
                   const usersArray = existingUsers as Array<Reference>;
 
                   // Remove the current user from the likedUsers array
                   return usersArray.filter(
-                    likedUser => cache.identify(likedUser) !== userRef,
+                    likedUser => readField('id', likedUser) !== user.id,
                   );
                 },
               },
+              broadcast: true,
             });
           }
         },
@@ -467,10 +476,8 @@ export const useSavePost = () => {
         variables: {postId},
         optimisticResponse: {
           savePost: {
-            __typename: 'PostDto',
-            id: postId,
+            __typename: 'PostSaveDto',
             postId: postId,
-            isSaved: true,
           },
         },
         update: cache => {
@@ -484,6 +491,7 @@ export const useSavePost = () => {
               fields: {
                 isSaved: () => true,
               },
+              broadcast: true,
             });
           }
         },
@@ -523,10 +531,8 @@ export const useUnsavePost = () => {
         variables: {postId},
         optimisticResponse: {
           unsavePost: {
-            __typename: 'PostDto',
-            id: postId,
+            __typename: 'PostSaveDto',
             postId: postId,
-            isSaved: false,
           },
         },
         update: cache => {
@@ -540,6 +546,7 @@ export const useUnsavePost = () => {
               fields: {
                 isSaved: () => false,
               },
+              broadcast: true,
             });
           }
         },

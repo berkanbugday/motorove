@@ -102,6 +102,7 @@ export class AuthService {
           firstName: result.firstName,
           lastName: result.lastName,
           email: result.email,
+          avatar: result.avatar,
           hasCompletedSetup: result.hasCompletedSetup,
           notificationPermission: result.userSetting
             ?.notificationPermission as NotificationPermission,
@@ -169,21 +170,13 @@ export class AuthService {
       user.email = updateUser.email;
     }
 
-    const avatar = user.avatar
-      ? await this.storageService.getSignedUrl(
-          user.avatar,
-          3600,
-          data.session.access_token,
-        )
-      : null;
-
     return {
       user: {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        avatar: avatar,
+        avatar: user.avatar,
         hasCompletedSetup: user.hasCompletedSetup,
         notificationPermission: user.userSetting
           ?.notificationPermission as NotificationPermission,
@@ -241,21 +234,13 @@ export class AuthService {
         });
       }
 
-      const avatar = user.avatar
-        ? await this.storageService.getSignedUrl(
-            user.avatar,
-            3600,
-            data.session?.access_token,
-          )
-        : null;
-
       return {
         user: {
           id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-          avatar: avatar,
+          avatar: user.avatar,
           hasCompletedSetup: user.hasCompletedSetup,
           notificationPermission: user.userSetting
             ?.notificationPermission as NotificationPermission,
@@ -299,6 +284,7 @@ export class AuthService {
       where: { supabaseId: data.user.id },
       include: {
         userSetting: true,
+        city: true,
       },
     });
 
@@ -313,6 +299,7 @@ export class AuthService {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      avatar: user.avatar,
       hasCompletedSetup: user.hasCompletedSetup,
       notificationPermission: user.userSetting
         ?.notificationPermission as NotificationPermission,

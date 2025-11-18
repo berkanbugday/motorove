@@ -1,5 +1,5 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { IsBoolean, IsString } from 'class-validator';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { IImage } from '@motorove/shared';
 
 @ObjectType()
@@ -11,4 +11,8 @@ export class ImageDto implements IImage {
   @Field(() => Boolean)
   @IsBoolean()
   isCensored: boolean;
+
+  @Field(() => Int)
+  @IsNumber()
+  order: number;
 }

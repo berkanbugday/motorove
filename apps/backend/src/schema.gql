@@ -741,6 +741,7 @@ enum GroupTag {
 
 type ImageDto {
   isCensored: Boolean!
+  order: Int!
   url: String!
 }
 

@@ -6,6 +6,7 @@
  */
 
 import React, {useEffect, useState} from 'react';
+import {View, StyleSheet, ActivityIndicator, Image} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {RootNavigator} from '@navigation/RootNavigator';
@@ -16,7 +17,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import * as Sentry from '@sentry/react-native';
 import {AppConfig} from '@configs/appConfig';
 import ErrorBoundary from '@components/ErrorBoundary';
-import {LoadingIndicator} from '@components';
+import {colors} from '@theme';
 import {loggingService} from '@services/logging.service';
 import {networkService} from '@services/network.service';
 import {notificationService} from '@services/notification.service';
@@ -86,7 +87,20 @@ function App(): React.JSX.Element {
   }, []);
 
   if (!isStorageReady) {
-    return <LoadingIndicator visible={true} />;
+    return (
+      <View style={styles.loadingContainer}>
+        <Image
+          source={require('@assets/images/motorove_logo_light.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <ActivityIndicator
+          size="small"
+          color={colors.neutral.white}
+          style={styles.spinner}
+        />
+      </View>
+    );
   }
 
   return (
@@ -111,5 +125,22 @@ function App(): React.JSX.Element {
     </ErrorBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.neutral.black,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+  },
+  spinner: {
+    marginTop: 10,
+  },
+});
 
 export default App;
