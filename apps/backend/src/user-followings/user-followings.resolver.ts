@@ -1,12 +1,4 @@
-import {
-  Resolver,
-  Mutation,
-  Query,
-  Args,
-  Int,
-  ID,
-  Context,
-} from '@nestjs/graphql';
+import { Resolver, Mutation, Query, Args, Int, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/models/user.model';
@@ -16,13 +8,6 @@ import { UserFollowingDto } from './dto/user-following.dto';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { UpdateUserFollowingApprovalStatusInput } from './dto/update-user-following-approval-status.input';
 
-interface GqlContext {
-  req: Request & {
-    user: { id: string };
-    headers: { authorization?: string };
-  };
-}
-
 @Resolver(() => UserFollowingDto)
 export class UserFollowingsResolver {
   constructor(private userFollowingsService: UserFollowingsService) {}
@@ -30,54 +15,42 @@ export class UserFollowingsResolver {
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'followerUsers' })
   async findFollowerUsers(
-    @Context() context: GqlContext,
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.userFollowingsService.findFollowerUsers(
       userId,
       limit,
       skip,
-      authToken,
     );
   }
 
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'followingUsers' })
   async findFollowingUsers(
-    @Context() context: GqlContext,
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.userFollowingsService.findFollowingUsers(
       userId,
       limit,
       skip,
-      authToken,
     );
   }
 
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'followRequests' })
   async findFollowRequests(
-    @Context() context: GqlContext,
+    @CurrentUser() user: User,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserFollowingDto[]> {
-    const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.userFollowingsService.findFollowRequests(
-      userId,
+      user.id,
       limit,
       skip,
-      authToken,
     );
   }
 

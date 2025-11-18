@@ -28,6 +28,7 @@ export const EVENT_FRAGMENT = gql`
     images {
       url
       isCensored
+      order
     }
     addresses {
       ...EventAddressFragment
@@ -99,6 +100,7 @@ export const EVENT_INVITATION_FRAGMENT = gql`
       images {
         url
         isCensored
+        order
       }
       createdBy {
         id

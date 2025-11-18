@@ -40,13 +40,10 @@ export class EventsResolver {
     groupId?: string,
   ): Promise<EventDto[]> {
     const userId = context.req.user?.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.eventsService.findAll(
       limit,
       skip,
       userId,
-      authToken,
       status,
       groupId,
     );
@@ -58,10 +55,8 @@ export class EventsResolver {
     @Args('id') id: string,
     @Context() context: GqlContext,
   ): Promise<EventDto> {
-    const authHeader = context.req.headers.authorization;
     const userId = context.req.user?.id;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.eventsService.findOne(id, userId, authToken);
+    return await this.eventsService.findOne(id, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -71,14 +66,11 @@ export class EventsResolver {
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<EventInvitationDto[]> {
-    const authHeader = context.req.headers.authorization;
     const userId = context.req.user?.id;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     const invitations = await this.eventsService.findAllInvitations(
       limit,
       skip,
       userId,
-      authToken,
     );
     return invitations;
   }
@@ -136,9 +128,7 @@ export class EventsResolver {
     @Context() context: GqlContext,
   ): Promise<EventDto> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.eventsService.join(id, userId, authToken);
+    return await this.eventsService.join(id, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -148,9 +138,7 @@ export class EventsResolver {
     @Context() context: GqlContext,
   ): Promise<EventDto> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.eventsService.leave(id, userId, authToken);
+    return await this.eventsService.leave(id, userId);
   }
 
   @UseGuards(JwtGuard)

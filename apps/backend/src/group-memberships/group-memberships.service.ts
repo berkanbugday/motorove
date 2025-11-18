@@ -6,7 +6,6 @@ import { GroupPrivacy } from '../enums/models/group-privacy.enum';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { GroupMembershipDto } from './dto/group-membership.dto';
 import { plainToClass } from 'class-transformer';
-import { StorageService } from '../core/storage/storage.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '../enums/models/notification-channel.enum';
 import { QueueService } from '../core/queue/queue.service';
@@ -17,7 +16,6 @@ export class GroupMembershipsService {
   private readonly logger = new Logger(GroupMembershipsService.name);
   constructor(
     private prisma: PrismaService,
-    private storageService: StorageService,
     private queueService: QueueService,
   ) {}
 
@@ -25,7 +23,6 @@ export class GroupMembershipsService {
     limit?: number,
     skip?: number,
     userId?: string,
-    authToken?: string,
   ): Promise<GroupMembershipDto[]> {
     const groupJoinRequests = await this.prisma.groupMembership.findMany({
       where: {
@@ -51,23 +48,7 @@ export class GroupMembershipsService {
       },
     });
 
-    const groupJoinRequestsWithSignedUrls = await Promise.all(
-      groupJoinRequests.map(async (membership) => ({
-        ...membership,
-        user: membership.user.avatar
-          ? {
-              ...membership.user,
-              avatar: await this.storageService.getSignedUrl(
-                membership.user.avatar,
-                3600,
-                authToken,
-              ),
-            }
-          : membership.user,
-      })),
-    );
-
-    return groupJoinRequestsWithSignedUrls.map((membership) =>
+    return groupJoinRequests.map((membership) =>
       plainToClass(GroupMembershipDto, membership),
     );
   }

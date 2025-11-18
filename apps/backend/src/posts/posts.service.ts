@@ -35,12 +35,7 @@ export class PostsService {
     private queueService: QueueService,
     private configService: ConfigService,
   ) {
-    // Construct public URL from environment variables
-    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    const bucketName = this.configService.get<string>(
-      'SUPABASE_STORAGE_BUCKET',
-    );
-    this.imagePublicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/`;
+    this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
   }
 
   async findAll(
@@ -50,7 +45,6 @@ export class PostsService {
     limit?: number,
     skip?: number,
     currentUserId?: string,
-    authToken?: string,
   ): Promise<PostDto[]> {
     try {
       const posts = await this.prisma.post.findMany({
@@ -100,21 +94,6 @@ export class PostsService {
             post.likes.map(async (like) => {
               const user = like.user as UserDto;
 
-              // Get signed URL for avatar if exists
-              if (user.avatar && authToken) {
-                try {
-                  user.avatar = await this.storageService.getSignedUrl(
-                    user.avatar,
-                    3600,
-                    authToken,
-                  );
-                } catch (error) {
-                  this.logger.error(
-                    `Error getting signed URL for avatar: ${error.message}`,
-                  );
-                }
-              }
-
               // Check following status
               if (currentUserId) {
                 const following = await this.prisma.userFollowing.findFirst({
@@ -132,7 +111,7 @@ export class PostsService {
             }),
           );
 
-          return this.mapToDto(post as Post, currentUserId, authToken);
+          return this.mapToDto(post as Post, currentUserId);
         }),
       );
 
@@ -143,11 +122,7 @@ export class PostsService {
     }
   }
 
-  async findOne(
-    id: string,
-    currentUserId?: string,
-    authToken?: string,
-  ): Promise<PostDto> {
+  async findOne(id: string, currentUserId?: string): Promise<PostDto> {
     const post = await this.prisma.post.findFirst({
       where: { id },
       include: {
@@ -184,7 +159,7 @@ export class PostsService {
       });
     }
 
-    return this.mapToDto(post as Post, currentUserId, authToken);
+    return this.mapToDto(post as Post, currentUserId);
   }
 
   async create(
@@ -209,7 +184,7 @@ export class PostsService {
     if (input.images && input.images.length > 0) {
       const processedImages = await Promise.all(
         input.images.map(async (image, index) => {
-          const imagePath = await this.processImageUpload(
+          const imagePath = await this.storageService.processImageUpload(
             image,
             'posts/images',
             `post-${userId}-${index}`,
@@ -219,7 +194,7 @@ export class PostsService {
           if (!imagePath) return null;
 
           // Get public URL for censorship check
-          const publicUrl = `${this.imagePublicUrl}${imagePath}`;
+          const publicUrl = `${this.imagePublicUrl}/${imagePath}`;
           const { isCensored } =
             await this.imageCensorFilterService.checkImageCensorContent(
               publicUrl,
@@ -294,7 +269,7 @@ export class PostsService {
         await this.notifyGroupMembersAboutNewPost(postWithAddresses as Post);
       }
 
-      return this.mapToDto(postWithAddresses as Post, userId, authToken);
+      return this.mapToDto(postWithAddresses as Post, userId);
     }
 
     // Send SHARED_POST_IN_GROUP notification if post is in a group (no addresses case)
@@ -302,7 +277,7 @@ export class PostsService {
       await this.notifyGroupMembersAboutNewPost(createdPost as Post);
     }
 
-    return this.mapToDto(createdPost as Post, userId, authToken);
+    return this.mapToDto(createdPost as Post, userId);
   }
 
   async update(
@@ -383,7 +358,7 @@ export class PostsService {
     if (input.images && input.images.length > 0) {
       const processedImages = await Promise.all(
         input.images.map(async (image, index) => {
-          const imagePath = await this.processImageUpload(
+          const imagePath = await this.storageService.processImageUpload(
             image,
             'posts/images',
             `post-${userId}-${index}`,
@@ -402,7 +377,7 @@ export class PostsService {
           }
 
           // Get public URL for censorship check
-          const publicUrl = `${this.imagePublicUrl}${normalizedPath}`;
+          const publicUrl = `${this.imagePublicUrl}/${normalizedPath}`;
           const { isCensored } =
             await this.imageCensorFilterService.checkImageCensorContent(
               publicUrl,
@@ -461,17 +436,13 @@ export class PostsService {
         },
       });
 
-      return this.mapToDto(postWithAddresses as Post, userId, authToken);
+      return this.mapToDto(postWithAddresses as Post, userId);
     }
 
-    return this.mapToDto(updatedPost as Post, userId, authToken);
+    return this.mapToDto(updatedPost as Post, userId);
   }
 
-  async remove(
-    id: string,
-    userId: string,
-    authToken?: string,
-  ): Promise<PostDto> {
+  async remove(id: string, userId: string): Promise<PostDto> {
     const post = await this.prisma.post.findFirst({
       where: { id },
       include: {
@@ -517,7 +488,7 @@ export class PostsService {
       },
     });
 
-    return this.mapToDto(deletedPost as Post, userId, authToken);
+    return this.mapToDto(deletedPost as Post, userId);
   }
 
   async like(postId: string, userId: string): Promise<PostInteractionDto> {
@@ -742,65 +713,7 @@ export class PostsService {
     return this.mapToInteractionDto(deletedSave as PostSave);
   }
 
-  // Process base64 image and upload to Supabase storage
-  private async processImageUpload(
-    base64Image: string | null | undefined,
-    path: string,
-    filePrefix: string,
-    authToken?: string,
-  ): Promise<string | undefined> {
-    if (!base64Image) return undefined;
-
-    try {
-      // Check if it's a URL or base64 data
-      if (base64Image.startsWith('http')) {
-        return base64Image; // Already a URL, just return it
-      }
-
-      // Extract content type
-      const contentType = this.getContentTypeFromBase64(base64Image);
-      const filename = `${filePrefix}-${Date.now()}`;
-
-      // Upload to Supabase storage
-      const imageUrl = await this.storageService.uploadFile(
-        base64Image,
-        path,
-        {
-          contentType,
-          filename,
-        },
-        authToken,
-      );
-
-      return imageUrl;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      ExceptionHelper.badRequest('errors.common.failed_to_upload_with_error', {
-        resource: 'image',
-        error: errorMessage,
-      });
-    }
-  }
-
-  // Extract content type from base64 data
-  private getContentTypeFromBase64(base64Data: string): string {
-    if (base64Data.includes('data:')) {
-      const matches = base64Data.match(
-        /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/,
-      );
-      if (matches && matches.length > 1) {
-        return matches[1];
-      }
-    }
-    return 'image/jpeg'; // Default
-  }
-
-  private async mapToDto(
-    post: Post,
-    currentUserId?: string,
-    authToken?: string,
-  ): Promise<PostDto> {
+  private async mapToDto(post: Post, currentUserId?: string): Promise<PostDto> {
     const likesCount = await this.prisma.postLike.count({
       where: { postId: post.id },
     });
@@ -866,30 +779,12 @@ export class PostsService {
       }
     }
 
-    if (post.createdBy.avatar) {
-      post.createdBy.avatar = await this.storageService.getSignedUrl(
-        post.createdBy.avatar,
-        3600,
-        authToken,
-      );
-    }
-
     if (post.comments?.length) {
-      await Promise.all(
-        post.comments.map(async (comment) => {
-          if (comment.createdBy.avatar) {
-            comment.createdBy.avatar = await this.storageService.getSignedUrl(
-              comment.createdBy.avatar,
-              3600,
-              authToken,
-            );
-          }
-
-          comment.content = this.profanityFilterService.filterText(
-            comment.content,
-          );
-        }),
-      );
+      post.comments.map((comment) => {
+        comment.content = this.profanityFilterService.filterText(
+          comment.content,
+        );
+      });
     }
 
     return {

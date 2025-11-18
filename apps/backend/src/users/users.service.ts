@@ -17,22 +17,27 @@ import { EventParticipantStatus } from '../enums/models/event-participant-status
 import { EventStatus } from '../enums/models/event-status.enum';
 import { Gender } from '../enums/models/gender.enum';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
+  private readonly imagePublicUrl: string;
+
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
     private profanityFilterService: ProfanityFilterService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
+  }
 
   async findAll(
     query?: string,
     limit?: number,
     skip?: number,
     currentUserId?: string,
-    authToken?: string,
   ): Promise<UserDto[]> {
     const searchQuery = query?.trim();
 
@@ -122,20 +127,7 @@ export class UsersService {
       },
     });
 
-    const usersWithSignedUrls = await Promise.all(
-      users.map(async (user) => ({
-        ...user,
-        city: user.city as CityDto,
-        followingStatus: user.following.find(
-          (f) => f.followerId === currentUserId,
-        )?.status,
-        avatar: user.avatar
-          ? await this.storageService.getSignedUrl(user.avatar, 3600, authToken)
-          : user.avatar,
-      })),
-    );
-
-    return usersWithSignedUrls.map((user) => plainToClass(UserDto, user));
+    return users.map((user) => plainToClass(UserDto, user));
   }
 
   async findOne(id: string): Promise<UserDto> {
@@ -187,21 +179,6 @@ export class UsersService {
       });
     }
 
-    // Get signed URL for avatar if exists
-    if (user.avatar && authToken) {
-      try {
-        user.avatar = await this.storageService.getSignedUrl(
-          user.avatar,
-          3600,
-          authToken,
-        );
-      } catch (error) {
-        this.logger.error(
-          `Error getting signed URL for avatar: ${error.message}`,
-        );
-      }
-    }
-
     user.bio = this.profanityFilterService.filterText(user.bio!);
 
     // Get following status if currentUserId is provided
@@ -249,7 +226,7 @@ export class UsersService {
         gender: input.gender,
         ridingStyles: input.ridingStyles,
         interests: input.interests,
-        avatar: avatarUrl,
+        avatar: `${this.imagePublicUrl}/${avatarUrl}`,
         hasCompletedSetup: true,
         updatedAt: new Date(),
       };
@@ -351,7 +328,7 @@ export class UsersService {
           ...(input.firstName && { firstName: input.firstName }),
           ...(input.lastName && { lastName: input.lastName }),
           ...(input.bio !== undefined && { bio: input.bio }),
-          ...(avatarUrl && { avatar: avatarUrl }),
+          ...(avatarUrl && { avatar: `${this.imagePublicUrl}/${avatarUrl}` }),
           ...(input.dateOfBirth && { dateOfBirth: input.dateOfBirth }),
           ...(input.gender && { gender: input.gender }),
           ...(input.cityId && { city: { connect: { id: input.cityId } } }),
@@ -382,22 +359,6 @@ export class UsersService {
         });
       }
 
-      // Get signed URL for avatar if exists
-      let finalAvatar = userResult.avatar;
-      if (finalAvatar && authToken) {
-        try {
-          finalAvatar = await this.storageService.getSignedUrl(
-            finalAvatar,
-            3600,
-            authToken,
-          );
-        } catch (error) {
-          this.logger.error(
-            `Error getting signed URL for avatar: ${error.message}`,
-          );
-        }
-      }
-
       userResult.bio = this.profanityFilterService.filterText(userResult.bio!);
 
       return {
@@ -405,7 +366,7 @@ export class UsersService {
         firstName: userResult.firstName,
         lastName: userResult.lastName,
         email: userResult.email,
-        avatar: finalAvatar || undefined,
+        avatar: userResult.avatar || undefined,
         city: (userResult.city as CityDto) || undefined,
         bio: userResult.bio || undefined,
         ridingStyles: userResult.ridingStyles as RidingStyle[],

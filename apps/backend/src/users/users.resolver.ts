@@ -29,15 +29,7 @@ export class UsersResolver {
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<UserDto[]> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.usersService.findAll(
-      query,
-      limit,
-      skip,
-      userId,
-      authToken,
-    );
+    return await this.usersService.findAll(query, limit, skip, userId);
   }
 
   @UseGuards(JwtGuard)

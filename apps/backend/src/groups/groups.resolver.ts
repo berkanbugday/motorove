@@ -31,15 +31,12 @@ export class GroupsResolver {
     filters?: FilterGroupInput,
   ): Promise<GroupDto[]> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.groupsService.findAll(
       limit,
       skip,
       query,
       filters,
       userId,
-      authToken,
     );
   }
 
@@ -56,14 +53,11 @@ export class GroupsResolver {
   ): Promise<GroupDto[]> {
     const currentUserId = context.req.user.id;
     const userId = targetUserId ? targetUserId : currentUserId;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.groupsService.findJoinedGroups(
       limit,
       skip,
       filters,
       userId,
-      authToken,
     );
   }
 
@@ -74,9 +68,7 @@ export class GroupsResolver {
     @Context() context: GqlContext,
   ): Promise<GroupDto> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.groupsService.findOne(id, userId, authToken);
+    return await this.groupsService.findOne(id, userId);
   }
 
   @UseGuards(JwtGuard)

@@ -31,13 +31,10 @@ export class GroupMembershipsResolver {
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ): Promise<GroupMembershipDto[]> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.groupMembershipsService.groupJoinRequests(
       limit,
       skip,
       userId,
-      authToken,
     );
   }
 

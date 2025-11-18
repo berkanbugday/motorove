@@ -22,7 +22,6 @@ export class BusinessCommentsService {
     businessId: string,
     limit?: number,
     skip?: number,
-    authToken?: string,
   ): Promise<BusinessCommentDto[]> {
     try {
       const where = {
@@ -41,19 +40,7 @@ export class BusinessCommentsService {
         take: limit || undefined,
       })) as BusinessComment[];
 
-      return Promise.all(
-        businessComments.map(async (comment) => {
-          if (comment.createdBy.avatar) {
-            comment.createdBy.avatar = await this.storageService.getSignedUrl(
-              comment.createdBy.avatar,
-              3600,
-              authToken,
-            );
-          }
-
-          return this.mapToDto(comment);
-        }),
-      );
+      return businessComments.map((comment) => this.mapToDto(comment));
     } catch (error) {
       this.logger.error(
         `Failed to get comments for business ${businessId}`,

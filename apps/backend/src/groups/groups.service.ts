@@ -15,15 +15,22 @@ import { ExceptionHelper } from 'src/core/exceptions/exception-helper.service';
 import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '@motorove/shared';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class GroupsService {
   private readonly logger = new Logger(GroupsService.name);
+  private readonly imagePublicUrl: string;
+
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
     private queueService: QueueService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    // Construct public URL from environment variables
+    this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
+  }
 
   async findAll(
     limit?: number,
@@ -31,7 +38,6 @@ export class GroupsService {
     query?: string,
     filters?: FilterGroupInput,
     userId?: string,
-    authToken?: string,
   ): Promise<GroupDto[]> {
     try {
       const whereClause: any = {
@@ -104,11 +110,7 @@ export class GroupsService {
         });
       }
 
-      return await Promise.all(
-        filteredGroups.map(
-          async (group) => await this.mapToDto(group as Group, authToken),
-        ),
-      );
+      return filteredGroups.map((group) => this.mapToDto(group as Group));
     } catch (error) {
       this.logger.error(`Failed to get groups`, error);
       throw error;
@@ -120,7 +122,6 @@ export class GroupsService {
     skip?: number,
     filters?: FilterGroupInput,
     userId?: string,
-    authToken?: string,
   ): Promise<GroupDto[]> {
     try {
       const whereClause: any = {
@@ -187,22 +188,14 @@ export class GroupsService {
         });
       }
 
-      return await Promise.all(
-        filteredGroups.map(
-          async (group) => await this.mapToDto(group as Group, authToken),
-        ),
-      );
+      return filteredGroups.map((group) => this.mapToDto(group as Group));
     } catch (error) {
       this.logger.error(`Failed to get joined groups`, error);
       throw error;
     }
   }
 
-  async findOne(
-    id: string,
-    userId: string,
-    authToken?: string,
-  ): Promise<GroupDto> {
+  async findOne(id: string, userId: string): Promise<GroupDto> {
     try {
       const group = await this.prisma.group.findFirst({
         where: { id, isActive: true },
@@ -234,7 +227,7 @@ export class GroupsService {
         });
       }
 
-      const groupDto = await this.mapToDto(group as Group, authToken);
+      const groupDto = this.mapToDto(group as Group);
 
       // Check if the user is a member of the group
       const membership = group.memberships.find(
@@ -290,8 +283,8 @@ export class GroupsService {
       const prismaData: any = {
         name: input.name,
         description: input.description,
-        logo: logoUrl,
-        cover: coverUrl,
+        logo: logoUrl ? `${this.imagePublicUrl}/${logoUrl}` : null,
+        cover: coverUrl ? `${this.imagePublicUrl}/${coverUrl}` : null,
         city: {
           connect: { id: input.cityId },
         },
@@ -338,7 +331,7 @@ export class GroupsService {
         return group;
       });
 
-      return await this.mapToDto(group as Group, authToken);
+      return this.mapToDto(group as Group);
     } catch (error) {
       this.logger.error(`Failed to create group`, error);
       throw error;
@@ -381,23 +374,25 @@ export class GroupsService {
 
       // Process images if provided
       if (updateData.logo?.includes('base64')) {
-        updateData.logo = await this.storageService.processImageUpload(
+        const logoPath = await this.storageService.processImageUpload(
           updateData.logo,
           'groups/logos',
           `logo-${existingGroup.id}`,
           authToken,
         );
+        updateData.logo = `${this.imagePublicUrl}/${logoPath}`;
       } else {
         delete updateData.logo;
       }
 
       if (updateData.cover?.includes('base64')) {
-        updateData.cover = await this.storageService.processImageUpload(
+        const coverPath = await this.storageService.processImageUpload(
           updateData.cover,
           'groups/covers',
           `cover-${existingGroup.id}`,
           authToken,
         );
+        updateData.cover = `${this.imagePublicUrl}/${coverPath}`;
       } else {
         delete updateData.cover;
       }
@@ -466,60 +461,16 @@ export class GroupsService {
         );
       }
 
-      return await this.mapToDto(updatedGroup as Group, authToken);
+      return this.mapToDto(updatedGroup as Group);
     } catch (error) {
       this.logger.error(`Failed to update group`, error);
       throw error;
     }
   }
 
-  private async mapToDto(group: Group, authToken?: string): Promise<GroupDto> {
-    let logoUrl = group.logo;
-    let coverUrl = group.cover;
-
-    try {
-      if (group.logo) {
-        logoUrl = await this.storageService.getSignedUrl(
-          group.logo,
-          3600,
-          authToken,
-        );
-      }
-
-      if (group.cover) {
-        coverUrl = await this.storageService.getSignedUrl(
-          group.cover,
-          3600,
-          authToken,
-        );
-      }
-      if (group.memberships) {
-        group.memberships = await Promise.all(
-          group.memberships.map(async (membership) => ({
-            ...membership,
-            user: membership.user.avatar
-              ? {
-                  ...membership.user,
-                  avatar: await this.storageService.getSignedUrl(
-                    membership.user.avatar,
-                    3600,
-                    authToken,
-                  ),
-                }
-              : membership.user,
-          })),
-        );
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      console.error('Error getting signed URLs:', errorMessage);
-    }
-
+  private mapToDto(group: Group): GroupDto {
     return plainToClass(GroupDto, {
       ...group,
-      logo: logoUrl,
-      cover: coverUrl,
       memberships: group?.memberships?.filter(
         (membership) => membership.status === ApprovalStatus.ACCEPTED,
       ),

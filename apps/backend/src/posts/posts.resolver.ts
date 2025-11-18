@@ -40,8 +40,6 @@ export class PostsResolver {
     savedById?: string,
   ): Promise<PostDto[]> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
     return await this.postsService.findAll(
       groupId,
@@ -50,7 +48,6 @@ export class PostsResolver {
       limit,
       skip,
       userId,
-      authToken,
     );
   }
 
@@ -61,10 +58,8 @@ export class PostsResolver {
     @Context() context: GqlContext,
   ): Promise<PostDto> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.findOne(id, userId, authToken);
+    return await this.postsService.findOne(id, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -100,10 +95,8 @@ export class PostsResolver {
     @Context() context: GqlContext,
   ): Promise<PostDto> {
     const userId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
 
-    return await this.postsService.remove(id, userId, authToken);
+    return await this.postsService.remove(id, userId);
   }
 
   @UseGuards(JwtGuard)

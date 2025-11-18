@@ -26,7 +26,6 @@ export class UserFollowingsService {
     userId: string,
     limit?: number,
     skip?: number,
-    authToken?: string,
   ): Promise<UserFollowingDto[]> {
     const followers = await this.prisma.userFollowing.findMany({
       where: {
@@ -47,25 +46,7 @@ export class UserFollowingsService {
       skip: skip,
     });
 
-    const usersWithSignedUrls = await Promise.all(
-      followers.map(async (follower) => ({
-        ...follower,
-        follower: {
-          ...follower.follower,
-          avatar: follower.follower.avatar
-            ? await this.storageService.getSignedUrl(
-                follower.follower.avatar,
-                3600,
-                authToken,
-              )
-            : follower.follower.avatar,
-        },
-      })),
-    );
-
-    return await Promise.all(
-      usersWithSignedUrls.map((f) => this.mapToDto(f as UserFollowing)),
-    );
+    return followers.map((f) => this.mapToDto(f as UserFollowing));
   }
 
   // Get users that the given userId is following with pagination
@@ -73,7 +54,6 @@ export class UserFollowingsService {
     userId: string,
     limit?: number,
     skip?: number,
-    authToken?: string,
   ): Promise<UserFollowingDto[]> {
     const followings = await this.prisma.userFollowing.findMany({
       where: {
@@ -94,32 +74,13 @@ export class UserFollowingsService {
       skip: skip,
     });
 
-    const usersWithSignedUrls = await Promise.all(
-      followings.map(async (following) => ({
-        ...following,
-        following: {
-          ...following.following,
-          avatar: following.following.avatar
-            ? await this.storageService.getSignedUrl(
-                following.following.avatar,
-                3600,
-                authToken,
-              )
-            : following.following.avatar,
-        },
-      })),
-    );
-
-    return await Promise.all(
-      usersWithSignedUrls.map((f) => this.mapToDto(f as UserFollowing)),
-    );
+    return followings.map((f) => this.mapToDto(f as UserFollowing));
   }
 
   async findFollowRequests(
     userId: string,
     limit?: number,
     skip?: number,
-    authToken?: string,
   ): Promise<UserFollowingDto[]> {
     const followRequests = await this.prisma.userFollowing.findMany({
       where: {
@@ -138,25 +99,7 @@ export class UserFollowingsService {
       skip: skip,
     });
 
-    const usersWithSignedUrls = await Promise.all(
-      followRequests.map(async (followRequest) => ({
-        ...followRequest,
-        follower: {
-          ...followRequest.follower,
-          avatar: followRequest.follower.avatar
-            ? await this.storageService.getSignedUrl(
-                followRequest.follower.avatar,
-                3600,
-                authToken,
-              )
-            : followRequest.follower.avatar,
-        },
-      })),
-    );
-
-    return await Promise.all(
-      usersWithSignedUrls.map((f) => this.mapToDto(f as UserFollowing)),
-    );
+    return followRequests.map((f) => this.mapToDto(f as UserFollowing));
   }
 
   async follow(

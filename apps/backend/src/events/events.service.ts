@@ -14,7 +14,6 @@ import { plainToClass } from 'class-transformer';
 import { EventStatus } from '../enums/models/event-status.enum';
 import { EventInvitationDto } from './dto/event-invitation.dto';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
-import { EventParticipant } from '../events/models/event-participant.model';
 import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '../enums/models/notification-channel.enum';
@@ -22,23 +21,28 @@ import { ProfanityFilterService } from '../core/profanity-filter/profanity-filte
 import { ImageCensorFilterService } from '../core/image-censor-filter/image-censor-filter.service';
 import { ImageDto } from '../common/dto/image.dto';
 import { TranslatedException } from 'src/core/exceptions/translated-exception';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EventsService {
   private readonly logger = new Logger(EventsService.name);
+  private readonly imagePublicUrl: string;
+
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
     private queueService: QueueService,
     private profanityFilterService: ProfanityFilterService,
     private imageCensorFilterService: ImageCensorFilterService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
+  }
 
   async findAll(
     limit?: number,
     skip?: number,
     currentUserId?: string,
-    authToken?: string,
     status?: EventStatus,
     groupId?: string,
   ): Promise<EventDto[]> {
@@ -148,9 +152,7 @@ export class EventsService {
 
       // Map events to GraphQL format with additional fields
       return await Promise.all(
-        events.map((event) =>
-          this.mapToDto(event as Event, currentUserId, authToken),
-        ),
+        events.map((event) => this.mapToDto(event as Event, currentUserId)),
       );
     } catch (error) {
       this.logger.error(`Failed to get events`, error);
@@ -158,11 +160,7 @@ export class EventsService {
     }
   }
 
-  async findOne(
-    id: string,
-    currentUserId?: string,
-    authToken?: string,
-  ): Promise<EventDto> {
+  async findOne(id: string, currentUserId?: string): Promise<EventDto> {
     try {
       const baseWhere = { id, isActive: true };
 
@@ -261,7 +259,7 @@ export class EventsService {
       );
 
       // Map event to GraphQL format with additional fields
-      return this.mapToDto(event as Event, currentUserId, authToken);
+      return this.mapToDto(event as Event, currentUserId);
     } catch (error) {
       this.logger.error(`Failed to get event with ID ${id}`, error);
       throw error;
@@ -275,7 +273,6 @@ export class EventsService {
     limit?: number,
     skip?: number,
     currentUserId?: string,
-    authToken?: string,
   ): Promise<EventInvitationDto[]> {
     try {
       const invitations = await this.prisma.eventInvitation.findMany({
@@ -311,24 +308,45 @@ export class EventsService {
         `Found ${invitations.length} invitations for user ${currentUserId}`,
       );
 
-      return await Promise.all(
-        invitations.map(async (invitation) => {
-          const invitationDto = plainToClass(EventInvitationDto, invitation);
+      return invitations.map((invitation) => {
+        const invitationDto = plainToClass(EventInvitationDto, invitation);
 
-          if (invitation.event.images && authToken) {
-            const url = await this.storageService.getSignedUrl(
-              invitation.event.images[0],
-              3600,
-              authToken,
-            );
-            const { isCensored } =
-              await this.imageCensorFilterService.checkImageCensorContent(url);
-            invitationDto.event.images = [{ url: url, isCensored, order: 1 }];
+        // Process images from JSONB array
+        const images: ImageDto[] = [];
+        if (invitation.event.images) {
+          try {
+            const imageArray = Array.isArray(invitation.event.images)
+              ? invitation.event.images
+              : (JSON.parse(JSON.stringify(invitation.event.images)) as any[]);
+
+            if (Array.isArray(imageArray) && imageArray.length > 0) {
+              imageArray.forEach((imageData: any) => {
+                if (
+                  imageData &&
+                  typeof imageData === 'object' &&
+                  'url' in imageData
+                ) {
+                  images.push({
+                    url: String(imageData.url),
+                    isCensored: Boolean(imageData.isCensored),
+                    order: Number(imageData.order) || 0,
+                  });
+                }
+              });
+
+              // Sort by order
+              images.sort((a, b) => a.order - b.order);
+            }
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error('Error processing images:', errorMessage);
           }
+        }
+        invitationDto.event.images = images;
 
-          return invitationDto;
-        }),
-      );
+        return invitationDto;
+      });
     } catch (error) {
       this.logger.error('Error finding invitations:', error);
       ExceptionHelper.badRequest('errors.event.failed_to_fetch_invitations');
@@ -368,21 +386,36 @@ export class EventsService {
         currency,
       } = input;
 
-      // Process uploaded images if they exist
-      let processedImages: string[] | undefined;
+      // Process and upload images if they exist
+      let processedImages: any;
       if (images && images.length > 0) {
-        processedImages = (
-          await Promise.all(
-            images.map((image, index) =>
-              this.processImageUpload(
-                image,
-                'events/images',
-                `event-${userId}-${index}`,
-                authToken,
-              ),
-            ),
-          )
-        ).filter(Boolean) as string[];
+        const imageResults = await Promise.all(
+          images.map(async (image, index) => {
+            const imagePath = await this.storageService.processImageUpload(
+              image,
+              'events/images',
+              `event-${userId}-${index}`,
+              authToken,
+            );
+
+            if (!imagePath) return null;
+
+            // Get public URL for censorship check
+            const publicUrl = `${this.imagePublicUrl}/${imagePath}`;
+            const { isCensored } =
+              await this.imageCensorFilterService.checkImageCensorContent(
+                publicUrl,
+              );
+
+            return {
+              url: publicUrl,
+              isCensored,
+              order: index,
+            };
+          }),
+        );
+
+        processedImages = imageResults.filter(Boolean);
       }
 
       // Use transaction to ensure atomicity
@@ -560,7 +593,7 @@ export class EventsService {
         );
       }
 
-      return this.mapToDto(event, userId, authToken);
+      return this.mapToDto(event, userId);
     } catch (error) {
       this.logger.error(`Failed to create event`, error);
       throw error;
@@ -601,28 +634,45 @@ export class EventsService {
         currency,
       } = input;
 
-      // Process uploaded images if they exist
-      let processedImages: string[] | undefined;
+      // Process and upload images if they exist
+      let processedImages: any;
       if (images && images.length > 0) {
-        processedImages = (
-          await Promise.all(
-            images.map(async (image, index) => {
-              const imageUrl = await this.processImageUpload(
-                image,
-                'events/images',
-                `event-${userId}-${index}`,
-                authToken,
+        const imageResults = await Promise.all(
+          images.map(async (image, index) => {
+            const imagePath = await this.storageService.processImageUpload(
+              image,
+              'events/images',
+              `event-${userId}-${index}`,
+              authToken,
+            );
+
+            if (!imagePath) return null;
+
+            // Normalize path
+            let normalizedPath = imagePath;
+            if (imagePath.startsWith('events/images')) {
+              normalizedPath = imagePath;
+            } else {
+              const imageUrlWithoutQuery = imagePath.split('?')[0];
+              normalizedPath = `events/images/${imageUrlWithoutQuery.split('/').pop()}`;
+            }
+
+            // Get public URL for censorship check
+            const publicUrl = `${this.imagePublicUrl}/${normalizedPath}`;
+            const { isCensored } =
+              await this.imageCensorFilterService.checkImageCensorContent(
+                publicUrl,
               );
 
-              if (imageUrl && imageUrl.startsWith('events/images')) {
-                return imageUrl;
-              }
+            return {
+              url: publicUrl,
+              isCensored,
+              order: index,
+            };
+          }),
+        );
 
-              const imageUrlWithoutQuery = imageUrl?.split('?')[0];
-              return `events/images/${imageUrlWithoutQuery?.split('/').pop()}`;
-            }),
-          )
-        ).filter(Boolean);
+        processedImages = imageResults.filter(Boolean);
       }
 
       // First get the current event to handle relationships properly
@@ -861,7 +911,7 @@ export class EventsService {
         this.logger.error('Failed to send event updated notification', error);
       }
 
-      return this.mapToDto(event as Event, userId, authToken);
+      return this.mapToDto(event as Event, userId);
     } catch (error) {
       this.logger.error(`Failed to update event`, error);
       throw error;
@@ -1045,11 +1095,7 @@ export class EventsService {
     }
   }
 
-  async join(
-    eventId: string,
-    userId: string,
-    authToken?: string,
-  ): Promise<EventDto> {
+  async join(eventId: string, userId: string): Promise<EventDto> {
     try {
       const event = await this.prisma.event.findFirst({
         where: { id: eventId, isActive: true, status: EventStatus.UPCOMING },
@@ -1110,18 +1156,14 @@ export class EventsService {
         }
       });
 
-      return await this.findOne(eventId, userId, authToken);
+      return await this.findOne(eventId, userId);
     } catch (error) {
       this.logger.error(`Failed to join event`, error);
       throw error;
     }
   }
 
-  async leave(
-    eventId: string,
-    userId: string,
-    authToken?: string,
-  ): Promise<EventDto> {
+  async leave(eventId: string, userId: string): Promise<EventDto> {
     try {
       const event = await this.prisma.event.findFirst({
         where: {
@@ -1166,7 +1208,7 @@ export class EventsService {
         },
       });
 
-      return await this.findOne(eventId, userId, authToken);
+      return await this.findOne(eventId, userId);
     } catch (error) {
       this.logger.error(`Failed to leave event`, error);
       throw error;
@@ -1295,83 +1337,39 @@ export class EventsService {
   }
 
   // Helper method to map Prisma event to DTO with additional calculated fields
-  private async mapToDto(
-    event: {
-      id: string;
-      title: string;
-      description?: string;
-      images?: string[];
-      participants?: EventParticipant[];
-      createdById: string;
-      [key: string]: any;
-    },
-    currentUserId?: string,
-    authToken?: string,
-  ): Promise<EventDto> {
+  private mapToDto(event: any, currentUserId?: string): EventDto {
     try {
-      // Process images to get signed URLs and check for censored content
+      // Process images from JSONB array
       const images: ImageDto[] = [];
 
-      if (Array.isArray(event.images) && event.images.length > 0 && authToken) {
+      if (event.images) {
         try {
-          await Promise.all(
-            event.images.map(async (imageUrl, index) => {
-              if (imageUrl && typeof imageUrl === 'string') {
-                const url = await this.storageService.getSignedUrl(
-                  imageUrl,
-                  3600,
-                  authToken,
-                );
-                const { isCensored } =
-                  await this.imageCensorFilterService.checkImageCensorContent(
-                    url,
-                  );
-                images.push({ url: url, isCensored, order: index });
-              }
-            }),
-          );
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-          console.error('Error getting signed URLs:', errorMessage);
-        }
-      }
+          const imageArray = Array.isArray(event.images)
+            ? event.images
+            : (JSON.parse(JSON.stringify(event.images)) as any[]);
 
-      // Process participants to get signed URLs if needed
-      let processedParticipants = event.participants || [];
-
-      if (
-        Array.isArray(processedParticipants) &&
-        processedParticipants.length > 0 &&
-        authToken
-      ) {
-        try {
-          processedParticipants = await Promise.all(
-            processedParticipants.map(async (participant) => {
+          if (Array.isArray(imageArray) && imageArray.length > 0) {
+            imageArray.forEach((imageData: any) => {
               if (
-                participant.createdBy.avatar &&
-                typeof participant.createdBy.avatar === 'string'
+                imageData &&
+                typeof imageData === 'object' &&
+                'url' in imageData
               ) {
-                const signedUrl = await this.storageService.getSignedUrl(
-                  participant.createdBy.avatar,
-                  3600,
-                  authToken,
-                );
-                return {
-                  ...participant,
-                  createdBy: {
-                    ...participant.createdBy,
-                    avatar: signedUrl,
-                  },
-                };
+                images.push({
+                  url: String(imageData.url),
+                  isCensored: Boolean(imageData.isCensored),
+                  order: Number(imageData.order) || 0,
+                });
               }
-              return participant;
-            }),
-          );
+            });
+
+            // Sort by order
+            images.sort((a, b) => a.order - b.order);
+          }
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : 'Unknown error';
-          console.error('Error getting signed URLs:', errorMessage);
+          this.logger.error('Error processing images:', errorMessage);
         }
       }
 
@@ -1442,7 +1440,6 @@ export class EventsService {
         instructorInfo: filteredInstructorInfo,
         topicsCovered: filteredTopicsCovered,
         images: images,
-        participants: processedParticipants,
         invitedUsers: processedInvitedUsers,
         invitedGroups: processedInvitedGroups,
         isParticipating,
@@ -1455,59 +1452,5 @@ export class EventsService {
       this.logger.error(`Failed to map event to DTO`, error);
       throw error;
     }
-  }
-
-  // Process base64 image and upload to Supabase storage
-  private async processImageUpload(
-    base64Image: string | null | undefined,
-    path: string,
-    filePrefix: string,
-    authToken?: string,
-  ): Promise<string | undefined> {
-    if (!base64Image) return undefined;
-
-    try {
-      // Check if it's a URL or base64 data
-      if (base64Image.startsWith('http')) {
-        return base64Image; // Already a URL, just return it
-      }
-
-      // Extract content type
-      const contentType = this.getContentTypeFromBase64(base64Image);
-      const filename = `${filePrefix}-${Date.now()}`;
-
-      // Upload to Supabase storage
-      const imageUrl = await this.storageService.uploadFile(
-        base64Image,
-        path,
-        {
-          contentType,
-          filename,
-        },
-        authToken,
-      );
-
-      return imageUrl;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      ExceptionHelper.badRequest('errors.common.failed_to_upload_with_error', {
-        resource: 'image',
-        error: errorMessage,
-      });
-    }
-  }
-
-  // Extract content type from base64 data
-  private getContentTypeFromBase64(base64Data: string): string {
-    if (base64Data.includes('data:')) {
-      const matches = base64Data.match(
-        /data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/,
-      );
-      if (matches && matches.length > 1) {
-        return matches[1];
-      }
-    }
-    return 'image/jpeg'; // Default
   }
 }

@@ -90,13 +90,13 @@ function App(): React.JSX.Element {
     return (
       <View style={styles.loadingContainer}>
         <Image
-          source={require('@assets/images/motorove_logo_light.png')}
+          source={require('@assets/images/motorove_logo_dark.png')}
           style={styles.logo}
           resizeMode="contain"
         />
         <ActivityIndicator
           size="small"
-          color={colors.neutral.white}
+          color={colors.neutral.black}
           style={styles.spinner}
         />
       </View>
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.neutral.black,
+    backgroundColor: colors.neutral.white,
   },
   logo: {
     width: 120,

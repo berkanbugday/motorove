@@ -3,16 +3,11 @@ import { GroupMembershipsService } from './group-memberships.service';
 import { GroupMembershipsResolver } from './group-memberships.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
-import { StorageService } from '../core/storage/storage.service';
 import { QueueModule } from '../core/queue/queue.module';
 
 @Module({
   imports: [PrismaModule, AuthModule, QueueModule],
-  providers: [
-    GroupMembershipsResolver,
-    GroupMembershipsService,
-    StorageService,
-  ],
+  providers: [GroupMembershipsResolver, GroupMembershipsService],
   exports: [GroupMembershipsService],
 })
 export class GroupMembershipsModule {}

@@ -778,7 +778,7 @@ model Event {
   endDateTime     DateTime?
   maxParticipants Int?
   isPrivate       Boolean     @default(false)
-  images          String[]
+  images          Json?       @default("[]")
 
   // Organized by field - can be group
   organizedByGroupId String?
