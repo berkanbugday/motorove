@@ -97,25 +97,25 @@ export const HomeScreen = ({navigation}: Props) => {
       id: '1',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/81/500/300',
+      image: require('@assets/images/81.png'),
     },
     {
       id: '2',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/29/500/300',
+      image: require('@assets/images/29.png'),
     },
     {
       id: '3',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/62/500/300',
+      image: require('@assets/images/62.png'),
     },
     {
       id: '4',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: 'https://picsum.photos/id/11/500/300',
+      image: require('@assets/images/11.png'),
     },
   ];
 
@@ -660,7 +660,7 @@ export const HomeScreen = ({navigation}: Props) => {
               <FullImageCard
                 title={currentRoute.title}
                 subtitle={currentRoute.subtitle}
-                image={{uri: currentRoute.image}}
+                image={currentRoute.image}
                 variant="elevated"
                 size="small"
                 onPress={() => loggingService.info('Card pressed')}
