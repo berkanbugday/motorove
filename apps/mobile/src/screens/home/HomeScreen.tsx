@@ -97,25 +97,25 @@ export const HomeScreen = ({navigation}: Props) => {
       id: '1',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/81.png'),
+      image: require('@assets/images/81.jpg'),
     },
     {
       id: '2',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/29.png'),
+      image: require('@assets/images/29.jpg'),
     },
     {
       id: '3',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/62.png'),
+      image: require('@assets/images/62.jpg'),
     },
     {
       id: '4',
       title: t('screens.home.plan_route_with_ai'),
       subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/11.png'),
+      image: require('@assets/images/11.jpg'),
     },
   ];
 
