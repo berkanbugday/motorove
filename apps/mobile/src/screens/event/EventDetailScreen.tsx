@@ -651,14 +651,23 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
               size="small"
             />
 
-            {event?.isPrivate && (
+            {event.status === EventStatus.CANCELLED ? (
               <Chip
-                label={t('screens.event.private_event')}
-                variant="outlined"
+                label={t('screens.event.cancelled_event')}
+                variant="filled"
                 color="dark"
-                leadingIcon="lock-filled"
                 size="small"
               />
+            ) : (
+              event?.isPrivate && (
+                <Chip
+                  label={t('screens.event.private_event')}
+                  variant="outlined"
+                  color="dark"
+                  leadingIcon="lock-filled"
+                  size="small"
+                />
+              )
             )}
           </View>
 

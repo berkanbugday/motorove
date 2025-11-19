@@ -270,6 +270,7 @@ export default {
       max_participants: 'Maximum Participants',
       description: 'Description',
       private_event: 'Private Event',
+      cancelled_event: 'Cancelled',
       private_event_description:
         'Only invited groups or users can join this event',
       start_location: 'Start Location',
@@ -498,6 +499,7 @@ export default {
       delete_all_notifications_title: 'Delete All Notifications',
       delete_all_notifications_message:
         'Are you sure you want to delete all notifications? This action cannot be undone.',
+      navigation_failed: 'Failed to navigate to content',
     },
 
     // Map screen

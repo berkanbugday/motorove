@@ -199,6 +199,7 @@ export class EventReminderJobService {
           channel: NotificationChannel.PUSH,
           userId: participant.createdBy?.id,
           data: {
+            eventId: event.id,
             eventName: event.title,
             timeUntil: event.startDateTime,
           } as Record<string, any>,

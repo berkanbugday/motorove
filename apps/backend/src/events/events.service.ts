@@ -162,7 +162,7 @@ export class EventsService {
 
   async findOne(id: string, currentUserId?: string): Promise<EventDto> {
     try {
-      const baseWhere = { id, isActive: true };
+      const baseWhere = { id };
 
       const groupIds = await this.prisma.groupMembership.findMany({
         where: {
@@ -247,7 +247,7 @@ export class EventsService {
         },
       });
 
-      if (!event || !event.isActive) {
+      if (!event) {
         ExceptionHelper.notFound('errors.common.not_found_with_id', {
           resource: 'event',
           id,
@@ -1016,8 +1016,8 @@ export class EventsService {
       }
 
       // Check if user is the event creator
-      if (event.createdById === userId) {
-        ExceptionHelper.badRequest('errors.event.cannot_leave');
+      if (event.createdById !== userId) {
+        ExceptionHelper.badRequest('errors.event.cannot_cancel');
       }
 
       // Use transaction to ensure all related data is updated atomically
@@ -1066,7 +1066,9 @@ export class EventsService {
 
       // Send notifications to all participants
       if (event.participants && event.participants.length > 0) {
-        const participantIds = event.participants.map((p) => p.createdById);
+        const participantIds = event.participants
+          .filter((p) => p.createdById !== userId)
+          .map((p) => p.createdById);
 
         await this.queueService.addBulkNotificationJob(
           {

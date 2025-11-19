@@ -192,6 +192,7 @@ export const trTranslations = {
     event: {
       cannot_remove: 'Bu etkinliği kaldıramazsınız',
       cannot_leave: 'Kendi etkinliğinizden ayrılamazsınız',
+      cannot_cancel: 'Bu etkinliği iptal edemezsiniz',
       failed_to_fetch_invitations: 'Davetiyeler alınamadı',
       failed_to_reject_invitation: 'Davetiye reddedilemedi',
       failed_to_accept_invitation: 'Davetiye kabul edilemedi',

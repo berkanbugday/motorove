@@ -80,26 +80,89 @@ export const NotificationScreen = () => {
 
   const [refreshing, setRefreshing] = useState(false);
 
-  // Handle notification press - navigate to MapScreen with warning/emergency ID
+  // Handle notification press - navigate based on notification type
   const handleNotificationPress = useCallback(
     (notification: INotification) => {
       const {type, data} = notification;
 
-      if (type === NotificationType.WARNING && data?.warningId) {
-        // Navigate to MapTab with focused warning ID
-        navigation.navigate('Tabs', {
-          screen: 'MapTab',
-          params: {
-            warningId: data.warningId,
-          },
-        });
-      } else if (type === NotificationType.EMERGENCY && data?.emergencyId) {
-        // Navigate to MapTab with focused emergency ID
-        navigation.navigate('Tabs', {
-          screen: 'MapTab',
-          params: {
-            emergencyId: data.emergencyId,
-          },
+      try {
+        switch (type) {
+          // Map-related notifications
+          case NotificationType.WARNING:
+            if (data?.warningId) {
+              navigation.navigate('Tabs', {
+                screen: 'MapTab',
+                params: {warningId: data.warningId},
+              });
+            }
+            break;
+
+          case NotificationType.EMERGENCY:
+            if (data?.emergencyId) {
+              navigation.navigate('Tabs', {
+                screen: 'MapTab',
+                params: {emergencyId: data.emergencyId},
+              });
+            }
+            break;
+
+          // Post-related notifications
+          case NotificationType.POST_LIKE:
+          case NotificationType.POST_COMMENT:
+          case NotificationType.POST_SAVE:
+            if (data?.postId) {
+              navigation.navigate('PostComment', {postId: data.postId});
+            }
+            break;
+
+          // User follow notifications
+          case NotificationType.USER_FOLLOW_REQUEST:
+            navigation.navigate('FollowRequest');
+            break;
+
+          case NotificationType.USER_FOLLOW_REQUEST_ACCEPTED:
+          case NotificationType.NEW_FOLLOWER:
+            if (data?.followingId) {
+              navigation.navigate('Profile', {userId: data.followingId});
+            }
+            break;
+
+          // Group-related notifications
+          case NotificationType.SHARED_POST_IN_GROUP:
+          case NotificationType.GROUP_CHANGED_INFO:
+          case NotificationType.USER_JOINED_GROUP:
+          case NotificationType.USER_LEAVE_GROUP:
+          case NotificationType.ADMIN_REMOVED_GROUP_MEMBER:
+          case NotificationType.ADMIN_CHANGED_GROUP_MEMBER_ROLE:
+          case NotificationType.GROUP_JOIN_REQUEST_ACCEPTED:
+            if (data?.groupId) {
+              navigation.navigate('GroupDetail', {groupId: data.groupId});
+            }
+            break;
+
+          case NotificationType.GROUP_JOIN_REQUEST:
+            navigation.navigate('GroupJoinRequest');
+            break;
+
+          // Event-related notifications
+          case NotificationType.EVENT_INVITATION:
+          case NotificationType.EVENT_INVITATION_REMINDER:
+            navigation.navigate('EventInvitation');
+            break;
+
+          case NotificationType.EVENT_REMINDER:
+          case NotificationType.EVENT_CANCELLED:
+          case NotificationType.EVENT_UPDATED:
+            if (data?.eventId) {
+              navigation.navigate('EventDetail', {eventId: data.eventId});
+            }
+            break;
+        }
+      } catch (error) {
+        showToast({
+          type: 'error',
+          text1: t('common.error'),
+          text2: t('screens.notification.navigation_failed'),
         });
       }
     },

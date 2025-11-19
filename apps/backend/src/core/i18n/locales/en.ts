@@ -191,6 +191,7 @@ export const enTranslations = {
     event: {
       cannot_remove: 'You cannot remove this event',
       cannot_leave: 'You cannot leave your own event',
+      cannot_cancel: 'You cannot cancel this event',
       failed_to_fetch_invitations: 'Failed to fetch invitations',
       failed_to_reject_invitation: 'Failed to reject invitation',
       failed_to_accept_invitation: 'Failed to accept invitation',

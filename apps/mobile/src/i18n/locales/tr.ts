@@ -272,6 +272,7 @@ export default {
       max_participants: 'Maksimum Katılımcı',
       description: 'Açıklama',
       private_event: 'Özel Etkinlik',
+      cancelled_event: 'İptal Edildi',
       private_event_description:
         'Sadece davet edilen gruplar veya kullanıcılar bu etkinliğe katılabilir',
       start_location: 'Başlangıç Konumu',
@@ -493,6 +494,7 @@ export default {
       delete_all_notifications_title: 'Tüm Bildirimleri Sil',
       delete_all_notifications_message:
         'Tüm bildirimleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+      navigation_failed: 'İçeriğe yönlendirme başarısız',
     },
 
     // Map screen
