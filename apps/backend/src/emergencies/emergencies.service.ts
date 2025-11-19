@@ -7,12 +7,14 @@ import { FilterEmergencyInput } from './dto/filter-emergency.input';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { plainToClass } from 'class-transformer';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
-import {
-  Language,
-  NotificationChannel,
-  NotificationType,
-} from '@motorove/shared';
+import { NotificationType } from '../enums/models/notification-type.enum';
+import { Language } from '../enums/models/language.enum';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
 import { QueueService } from '../core/queue/queue.service';
+import { UserLocationsService } from '../user-locations/user-locations.service';
+import { UserDto } from 'src/users/dto/user.dto';
+import { EmergencyAddressDto } from './dto/emergency-address.dto';
+import { EmergencyDescriptionDto } from './dto/emergency-description.dto';
 
 @Injectable()
 export class EmergenciesService {
@@ -22,6 +24,7 @@ export class EmergenciesService {
     private prisma: PrismaService,
     private profanityFilterService: ProfanityFilterService,
     private queueService: QueueService,
+    private userLocationsService: UserLocationsService,
   ) {}
 
   /**
@@ -287,6 +290,7 @@ export class EmergenciesService {
               type: NotificationType.EMERGENCY,
               channels: NotificationChannel.PUSH,
               data: {
+                emergencyId: emergency.id,
                 emergencyType: type,
                 userFullName: `${emergency.createdBy.firstName} ${emergency.createdBy.lastName}`,
                 addresses: emergency.addresses.map((addr) => ({
@@ -305,7 +309,27 @@ export class EmergenciesService {
         }
       }
 
-      return plainToClass(EmergencyDto, emergency);
+      const emergencyDto = plainToClass(EmergencyDto, emergency);
+
+      // Find and notify nearby users (within 10km radius)
+      // This runs asynchronously so it doesn't block emergency creation
+      if (emergency.addresses.length > 0) {
+        this.notifyNearbyUsers(
+          currentUserId,
+          emergencyDto.id,
+          type,
+          emergencyDto.createdBy,
+          emergencyDto.addresses,
+          emergencyDto.descriptions,
+        ).catch((error) => {
+          this.logger.error(
+            `Failed to notify nearby users for emergency ${emergencyDto.id}:`,
+            error,
+          );
+        });
+      }
+
+      return emergencyDto;
     } catch (error) {
       this.logger.error(
         `Error creating emergency: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -313,6 +337,79 @@ export class EmergenciesService {
       ExceptionHelper.badRequest('errors.common.failed_to_create', {
         resource: 'emergency',
       });
+    }
+  }
+
+  /**
+   * Find nearby users and send emergency notifications
+   * Searches within 10km radius for users with recent locations (within last 10 minutes)
+   */
+  private async notifyNearbyUsers(
+    excludeUserId: string,
+    emergencyId: string,
+    emergencyType: string,
+    createdBy: Partial<UserDto>,
+    addresses: EmergencyAddressDto[],
+    descriptions?: EmergencyDescriptionDto[],
+  ): Promise<void> {
+    try {
+      this.logger.log(
+        `Finding nearby users for emergency ${emergencyId} at (${addresses[0].latitude}, ${addresses[0].longitude})`,
+      );
+
+      // Find users within 10km radius with locations updated in last 10 minutes
+      const nearbyUsers = await this.userLocationsService.findNearbyUsers(
+        addresses[0].latitude,
+        addresses[0].longitude,
+        20, // 20km radius
+        excludeUserId,
+      );
+
+      if (nearbyUsers.length === 0) {
+        this.logger.log(`No nearby users found for emergency ${emergencyId}`);
+        return;
+      }
+
+      this.logger.log(
+        `Found ${nearbyUsers.length} nearby users for emergency ${emergencyId}`,
+      );
+
+      // Prepare notification data
+
+      await this.queueService.addBulkNotificationJob(
+        {
+          userIds: nearbyUsers,
+          title: 'emergency.title',
+          body: 'emergency.body',
+          type: NotificationType.EMERGENCY,
+          channels: NotificationChannel.PUSH,
+          data: {
+            emergencyId,
+            emergencyType,
+            userFullName: `${createdBy.firstName} ${createdBy.lastName}`,
+            addresses: addresses.map((addr) => ({
+              address: addr.address,
+              language: addr.language,
+            })),
+            descriptions:
+              descriptions?.map((desc) => ({
+                description: desc.description,
+                language: desc.language,
+              })) || [],
+          } as Record<string, any>,
+        },
+        excludeUserId,
+      );
+
+      this.logger.log(
+        `Sent emergency notifications to ${nearbyUsers.length} nearby users`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify nearby users for emergency ${emergencyId}:`,
+        error,
+      );
+      // Don't throw - we don't want to fail emergency creation if notification fails
     }
   }
 

@@ -12,6 +12,8 @@ import {NotificationPermission} from '@motorove/shared';
 import {useRemoveDeviceToken} from '@services/notification.service';
 import {useUpdateUserSetting} from '@services/user-setting.service';
 import {useLanguage} from './LanguageContext';
+import {useLocationPermission} from '@hooks/useLocationPermission';
+import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay/LocationPermissionOverlay';
 
 // Import refactored helpers
 import {useAppStateRefresh} from './auth/useAppStateRefresh';
@@ -80,6 +82,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {updateUserSetting} = useUpdateUserSetting();
   const {setLanguage} = useLanguage();
+
+  // Location permission hook - only active when user is authenticated
+  const isAuthenticated = isValidAuthState(authState);
+  const {
+    showPermissionOverlay,
+    onAllowPermission,
+    onDismissOverlay,
+    onOpenSettings,
+  } = useLocationPermission(isAuthenticated);
 
   // Load authentication state on mount
   useEffect(() => {
@@ -172,7 +183,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       try {
         await removeDeviceToken();
       } catch (tokenError) {
-        loggingService.warning('Failed to remove device token during sign out', {error: tokenError});
+        loggingService.warning(
+          'Failed to remove device token during sign out',
+          {error: tokenError},
+        );
       }
 
       // Perform sign out cleanup
@@ -222,7 +236,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>
+      {children}
+      {/* Show location permission overlay only when user is authenticated */}
+      {isAuthenticated && (
+        <LocationPermissionOverlay
+          visible={showPermissionOverlay}
+          onAllowPress={onAllowPermission}
+          onDismiss={onDismissOverlay}
+          onOpenSettings={onOpenSettings}
+        />
+      )}
+    </AuthContext.Provider>
   );
 };
 

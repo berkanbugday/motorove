@@ -2,10 +2,9 @@
  * Location and route utility functions
  */
 
-import {intervalToDuration, formatDuration} from 'date-fns';
-import {tr, enUS} from 'date-fns/locale';
-import {Language} from '@motorove/shared';
-import {AppConfig} from '@configs/appConfig';
+import { intervalToDuration, formatDuration } from "date-fns";
+import { tr, enUS } from "date-fns/locale";
+import { Language } from "../enums";
 
 export interface Coordinates {
   latitude: number;
@@ -26,7 +25,7 @@ export interface RouteResult {
  */
 export const calculateDistance = (
   from: Coordinates,
-  to: Coordinates,
+  to: Coordinates
 ): number => {
   const R = 6371; // Earth's radius in km
   const dLat = ((to.latitude - from.latitude) * Math.PI) / 180;
@@ -50,7 +49,7 @@ export const calculateDistance = (
  */
 export const formatDistance = (
   distanceKm: number,
-  unit: string = 'km',
+  unit: string = "km"
 ): string => {
   return `${distanceKm.toFixed(1)} ${unit}`;
 };
@@ -66,14 +65,15 @@ export const formatDistance = (
  * @throws Error if route calculation fails
  */
 export const calculateRoute = async (
+  apiKey: string,
   startLat: number,
   startLng: number,
   endLat: number,
   endLng: number,
-  language: Language = Language.TR,
+  language: Language = Language.TR
 ): Promise<RouteResult> => {
   // Use Google Maps Routes API (v2) to calculate route distance and duration
-  const url = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+  const url = "https://routes.googleapis.com/directions/v2:computeRoutes";
 
   const requestBody = {
     origin: {
@@ -92,20 +92,20 @@ export const calculateRoute = async (
         },
       },
     },
-    travelMode: 'DRIVE',
-    routingPreference: 'TRAFFIC_AWARE',
+    travelMode: "DRIVE",
+    routingPreference: "TRAFFIC_AWARE",
     computeAlternativeRoutes: false,
     languageCode: language.toLowerCase(),
-    units: 'METRIC',
+    units: "METRIC",
   };
 
   const response = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Goog-Api-Key': AppConfig.ROUTES_API_KEY,
-      'X-Goog-FieldMask':
-        'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": apiKey,
+      "X-Goog-FieldMask":
+        "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
     },
     body: JSON.stringify(requestBody),
   });
@@ -114,18 +114,18 @@ export const calculateRoute = async (
 
   if (!data.routes || data.routes.length === 0) {
     throw new Error(
-      `Route calculation failed: ${data.error?.message || 'No routes found'}`,
+      `Route calculation failed: ${data.error?.message || "No routes found"}`
     );
   }
 
   const route = data.routes[0];
   const distanceKm = Math.round(route.distanceMeters / 1000); // Convert meters to km
-  const durationSeconds = parseInt(route.duration.replace('s', ''), 10); // Parse duration string (e.g., "1234s")
+  const durationSeconds = parseInt(route.duration.replace("s", ""), 10); // Parse duration string (e.g., "1234s")
   const durationHours = durationSeconds / 3600; // Convert seconds to hours
 
   // Format duration using date-fns
   const durationMs = durationSeconds * 1000; // Convert seconds to milliseconds
-  const duration = intervalToDuration({start: 0, end: durationMs});
+  const duration = intervalToDuration({ start: 0, end: durationMs });
 
   // Get the correct locale based on language setting
   const locale =
@@ -135,28 +135,28 @@ export const calculateRoute = async (
   if (durationHours < 1) {
     // For durations less than 1 hour, display minutes only
     durationText = formatDuration(
-      {minutes: duration.minutes || 0},
+      { minutes: duration.minutes || 0 },
       {
-        format: ['minutes'],
+        format: ["minutes"],
         locale: locale,
-      },
+      }
     );
     if (!durationText && duration.seconds) {
       // If less than a minute, use localized version of '1 minute'
       durationText = formatDuration(
-        {minutes: 1},
-        {format: ['minutes'], locale: locale},
+        { minutes: 1 },
+        { format: ["minutes"], locale: locale }
       );
     }
   } else {
     // For longer durations, display hours and minutes
     durationText = formatDuration(
-      {hours: duration.hours || 0, minutes: duration.minutes || 0},
+      { hours: duration.hours || 0, minutes: duration.minutes || 0 },
       {
-        format: ['hours', 'minutes'],
-        delimiter: ' ',
+        format: ["hours", "minutes"],
+        delimiter: " ",
         locale: locale,
-      },
+      }
     );
   }
 
@@ -175,7 +175,7 @@ export const calculateRoute = async (
  */
 export const formatRouteInfo = (
   distanceKm: number,
-  durationText: string,
+  durationText: string
 ): string => {
   return `${distanceKm} km • ${durationText}`;
 };

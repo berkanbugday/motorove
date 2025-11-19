@@ -9,7 +9,6 @@ import {
   Animated,
   ScrollView,
 } from 'react-native';
-import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay';
 import {
   TopHeaderBar,
   Subtitle,
@@ -59,7 +58,6 @@ type Props = NativeStackScreenProps<TabParamList, 'HomeTab'>;
 
 export const HomeScreen = ({navigation}: Props) => {
   const {t} = useTranslation();
-  const [showLocationPermission, setShowLocationPermission] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
@@ -170,15 +168,6 @@ export const HomeScreen = ({navigation}: Props) => {
     setCurrentRouteIndex(nextIndex);
     setCurrentRoute(recommendedRoutes[nextIndex]);
   }, [currentRouteIndex]);
-
-  const handleAllowLocationAccess = () => {
-    // Request location permission logic would go here
-    setShowLocationPermission(false);
-  };
-
-  const handleDismissLocationPermission = () => {
-    setShowLocationPermission(false);
-  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -595,12 +584,6 @@ export const HomeScreen = ({navigation}: Props) => {
       />
       <SafeAreaView
         style={[styles.container, {marginBottom: 60 + insets.bottom}]}>
-        <LocationPermissionOverlay
-          visible={showLocationPermission}
-          onAllowPress={handleAllowLocationAccess}
-          onDismiss={handleDismissLocationPermission}
-        />
-
         {/* Weather Widget with ghost effect when scrolling up */}
 
         {weatherData && (

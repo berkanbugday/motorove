@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {IEmergency, Language} from '@motorove/shared';
+import {IEmergency, Language, calculateRoute} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
@@ -18,7 +18,7 @@ import {getEmergencyIcon} from '@utils/emergencyUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
-import {calculateRoute} from '@utils/locationUtils';
+import {AppConfig} from '@configs/appConfig';
 
 /**
  * Emergency marker card props
@@ -67,6 +67,7 @@ export const RNMapEmergencyMarkerCard: React.FC<
     const fetchRouteDistance = async () => {
       try {
         const route = await calculateRoute(
+          AppConfig.ROUTES_API_KEY,
           userLocation.latitude,
           userLocation.longitude,
           emergency.addresses[0].latitude,

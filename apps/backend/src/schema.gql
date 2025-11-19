@@ -851,6 +851,7 @@ type Mutation {
   updatePost(input: UpdatePostInput!): PostDto!
   updatePostComment(input: UpdatePostCommentInput!): PostCommentDto!
   updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
+  updateUserLocation(input: UpdateUserLocationInput!): UserLocationDto!
   updateUserProfile(input: UpdateUserProfileInput!): ProfileDto!
   updateUserSetting(input: UpdateUserSettingInput!): UserSettingDto!
 }
@@ -1250,6 +1251,11 @@ input UpdateUserFollowingApprovalStatusInput {
   status: ApprovalStatus!
 }
 
+input UpdateUserLocationInput {
+  latitude: Float!
+  longitude: Float!
+}
+
 input UpdateUserProfileInput {
   avatar: String
   bio: String
@@ -1335,6 +1341,16 @@ type UserFollowingDto {
   id: ID!
   status: String!
   updatedAt: DateTime!
+}
+
+type UserLocationDto {
+  id: String!
+  latitude: Float!
+  longitude: Float!
+  routeDistanceKm: Float
+  routeDurationSeconds: Int
+  updatedAt: DateTime!
+  userId: String!
 }
 
 type UserSetting {

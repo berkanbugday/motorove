@@ -188,11 +188,25 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
         animationType="slide"
         onRequestClose={handleCloseLocationModal}
         presentationStyle="pageSheet">
-        <SelectLocationMap
-          initialAddress={location[0]}
-          onLocationSelect={handleLocationSelect}
-          onClose={handleCloseLocationModal}
-        />
+        <>
+          <View style={styles.modalHeader}>
+            <Button
+              title={t('common.close')}
+              onPress={handleCloseLocationModal}
+              variant="text"
+              size="small"
+            />
+            <Subtitle style={styles.modalTitle}>
+              {t('components.warningBottomSheet.warning_location')}
+            </Subtitle>
+            <View style={styles.modalHeaderSpacer} />
+          </View>
+          <SelectLocationMap
+            initialAddress={location[0]}
+            onLocationSelect={handleLocationSelect}
+            onClose={handleCloseLocationModal}
+          />
+        </>
       </Modal>
     </View>
   );
@@ -245,5 +259,22 @@ const styles = StyleSheet.create({
     borderTopColor: colors.secondary.main,
     paddingTop: spacing.md,
     paddingBottom: spacing.lg,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary.main,
+  },
+  modalTitle: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  modalHeaderSpacer: {
+    width: 60,
   },
 });

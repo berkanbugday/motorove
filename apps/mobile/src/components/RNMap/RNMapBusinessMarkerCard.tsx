@@ -6,7 +6,7 @@ import {
   Linking,
   Platform,
 } from 'react-native';
-import {IBusiness, Language} from '@motorove/shared';
+import {IBusiness, Language, calculateRoute} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
@@ -22,7 +22,7 @@ import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
 import {BusinessStatus, DayOfWeek} from '@motorove/shared';
 import {useLanguage} from '@contexts/LanguageContext';
-import {calculateRoute} from '@utils/locationUtils';
+import {AppConfig} from '@configs/appConfig';
 
 /**
  * Business marker card props
@@ -114,6 +114,7 @@ export const RNMapBusinessMarkerCard: React.FC<
     const fetchRouteDistance = async () => {
       try {
         const route = await calculateRoute(
+          AppConfig.ROUTES_API_KEY,
           userLocation.latitude,
           userLocation.longitude,
           business.addresses[0].latitude,

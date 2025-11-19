@@ -56,12 +56,15 @@ import {
   Currency,
   CURRENCY_FORMATTING,
   IImage,
+  calculateRoute,
+  formatRouteInfo,
 } from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
 import {EnumUtils} from '@utils/enumUtils';
 import {formatCurrency} from '@utils/currencyUtils';
-import {calculateRoute, formatRouteInfo} from '@utils/locationUtils';
+import {AppConfig} from '@configs/appConfig';
+
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
 import {useAuth} from '@contexts/AuthContext';
 type Props = {
@@ -473,6 +476,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         setIsLoadingRoute(true);
 
         const result = await calculateRoute(
+          AppConfig.ROUTES_API_KEY,
           startLat,
           startLng,
           endLat,

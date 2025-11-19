@@ -28,6 +28,7 @@ import {
 } from '@services/emergency.service';
 import {getEmergencyIconAndColor} from '@utils/emergencyUtils';
 import {useAuth} from '@contexts';
+import {loggingService} from '@services/logging.service';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -202,8 +203,8 @@ export const MapScreen = () => {
           mapRef.current.animateToRegion(newRegion, 1000);
         }
       },
-      err => {
-        console.error('Error getting user location:', err);
+      () => {
+        loggingService;
         showToast({
           text1: t('common.error'),
           text2: t('screens.map.error_getting_location'),

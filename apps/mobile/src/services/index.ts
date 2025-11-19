@@ -13,3 +13,4 @@ export * from './user-following.service';
 export * from './support.service';
 export * from './emergency.service';
 export * from './warning.service';
+export * from './user-location.service';

@@ -358,6 +358,9 @@ model User {
   createdEmergencies Emergency[] @relation("EmergencyCreatedBy")
   updatedEmergencies Emergency[] @relation("EmergencyUpdatedBy")
 
+  // Location tracking
+  locations UserLocation[]
+
   // Event relations
   createdEvents       Event[]            @relation("EventCreatedBy")
   updatedEvents       Event[]            @relation("EventUpdatedBy")
@@ -1028,4 +1031,20 @@ model EmergencyAddress {
   @@unique([emergencyId, language]) // Ensure unique address per emergency/language
   @@index([emergencyId])
   @@index([latitude, longitude]) // For location-based queries
+}
+
+// User location model for background location tracking
+// Used to find nearby users for emergency notifications
+// One location per user - updated in place
+model UserLocation {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([latitude, longitude]) // For spatial queries to find nearby users
+  @@index([updatedAt]) // To filter out stale locations (older than X minutes)
 }

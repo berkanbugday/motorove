@@ -1,12 +1,11 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, ActivityIndicator} from 'react-native';
 import {RNMap} from '@components/RNMap';
 import {Region, LatLng} from 'react-native-maps';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
 import {Button} from '@components/Button';
 import {Icon} from '@components/Icon';
-import {LoadingIndicator} from '@components/LoadingIndicator';
 import Geolocation from '@react-native-community/geolocation';
 import {RNMapMarkerItem} from '@components/RNMap/types';
 import {Body, BodySmall} from '@components/Typography';
@@ -287,7 +286,11 @@ export const SelectLocationMap: React.FC<SelectLocationMapProps> = ({
     <View style={styles.container}>
       <View style={styles.mapContainer}>
         {isLoading ? (
-          <LoadingIndicator visible={true} />
+          <ActivityIndicator
+            size="small"
+            color={colors.neutral.black}
+            style={styles.loader}
+          />
         ) : (
           <RNMap
             initialRegion={region}

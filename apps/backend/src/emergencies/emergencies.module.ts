@@ -5,9 +5,16 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter.module';
 import { QueueModule } from '../core/queue/queue.module';
+import { UserLocationsModule } from '../user-locations/user-locations.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, ProfanityFilterModule, QueueModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    ProfanityFilterModule,
+    QueueModule,
+    UserLocationsModule,
+  ],
   providers: [EmergenciesResolver, EmergenciesService],
   exports: [EmergenciesService],
 })

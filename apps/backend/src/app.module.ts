@@ -28,6 +28,7 @@ import { BusinessCommentsModule } from './business-comments/business-comments.mo
 import { SupportsModule } from './supports/supports.module';
 import { WarningsModule } from './warnings/warnings.module';
 import { EmergenciesModule } from './emergencies/emergencies.module';
+import { UserLocationsModule } from './user-locations/user-locations.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { EmergenciesModule } from './emergencies/emergencies.module';
     SupportsModule,
     WarningsModule,
     EmergenciesModule,
+    UserLocationsModule,
   ],
   controllers: [AppController],
   providers: [

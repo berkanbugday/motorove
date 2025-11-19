@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {IWarning, Language} from '@motorove/shared';
+import {IWarning, Language, calculateRoute} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
@@ -18,7 +18,7 @@ import {getWarningIcon} from '@utils/warningUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
-import {calculateRoute} from '@utils/locationUtils';
+import {AppConfig} from '@configs/appConfig';
 
 /**
  * Warning marker card props
@@ -68,6 +68,7 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
     const fetchRouteDistance = async () => {
       try {
         const route = await calculateRoute(
+          AppConfig.ROUTES_API_KEY,
           userLocation.latitude,
           userLocation.longitude,
           warning.addresses[0].latitude,

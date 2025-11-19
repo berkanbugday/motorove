@@ -9,7 +9,13 @@ import {
   Platform,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {IBusiness, DayOfWeek, BusinessStatus, Language} from '@motorove/shared';
+import {
+  IBusiness,
+  DayOfWeek,
+  BusinessStatus,
+  Language,
+  calculateRoute,
+} from '@motorove/shared';
 import {colors, radius, spacing} from '@theme';
 import {
   Body,
@@ -27,7 +33,6 @@ import {
 } from '@components';
 import {BusinessComments} from '@components/BusinessComments/BusinessComments';
 import {EnumUtils} from '@utils/enumUtils';
-import {calculateRoute} from '@utils/locationUtils';
 import type {BottomSheetRef, RNMapMarkerItem} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
@@ -46,6 +51,7 @@ import {
   MainScreenNavigationProp,
 } from '@navigation/types/navigationTypes';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
+import {AppConfig} from '@configs/appConfig';
 
 type BusinessDetailScreenRouteProp = RouteProp<
   MainStackParamList,
@@ -288,6 +294,7 @@ export const BusinessDetailScreen: React.FC = () => {
     const fetchRouteDistance = async () => {
       try {
         const routeResult = await calculateRoute(
+          AppConfig.ROUTES_API_KEY,
           userLocation.latitude,
           userLocation.longitude,
           currentBusiness.addresses[0].latitude,
@@ -728,7 +735,9 @@ export const BusinessDetailScreen: React.FC = () => {
           />
         </View>
       </BottomSheet>
-      <LoadingIndicator visible={createLoading || updateLoading || removeLoading} />
+      <LoadingIndicator
+        visible={createLoading || updateLoading || removeLoading}
+      />
     </View>
   );
 };

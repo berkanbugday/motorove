@@ -9,3 +9,4 @@ export * from './user.graphql';
 export * from './user-following.graphql';
 export * from './user-setting.graphql';
 export * from './support.graphql';
+export * from './user-location.graphql';
