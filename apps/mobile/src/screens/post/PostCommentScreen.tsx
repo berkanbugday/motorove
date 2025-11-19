@@ -234,6 +234,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
           ? postData.images.map((img: IImage) => ({
               url: img.url,
               isCensored: img.isCensored,
+              order: img.order,
             }))
           : undefined;
 
@@ -426,6 +427,13 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
         <Typography variant="subtitle">
           {t('screens.postComment.post_not_found')}
         </Typography>
+        <Button
+          shape="round"
+          variant="primary"
+          title={t('common.back')}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        />
       </View>
     );
   }
@@ -465,7 +473,9 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
         editing={Boolean(editingComment)}
         onCancelEdit={handleCancelEditPostComment}
       />
-      <LoadingIndicator visible={createLoading || updateLoading || removeLoading} />
+      <LoadingIndicator
+        visible={createLoading || updateLoading || removeLoading}
+      />
     </View>
   );
 };
@@ -519,5 +529,8 @@ const styles = StyleSheet.create({
   bottomSheetButton: {
     flex: 1,
     width: '50%',
+  },
+  backButton: {
+    marginTop: spacing.md,
   },
 });

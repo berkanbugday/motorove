@@ -78,6 +78,7 @@ export const useGroupPosts = ({groupId}: UseGroupPostsProps) => {
           ? post.images.map((img: IImage) => ({
               url: img.url,
               isCensored: img.isCensored,
+              order: img.order,
             }))
           : undefined;
 

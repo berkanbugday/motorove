@@ -309,6 +309,7 @@ export const PostScreen = ({navigation}: Props) => {
           ? post.images.map((img: IImage) => ({
               url: img.url,
               isCensored: img.isCensored,
+              order: img.order,
             }))
           : undefined;
 

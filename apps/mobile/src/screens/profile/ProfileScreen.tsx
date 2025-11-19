@@ -624,7 +624,9 @@ export const ProfileScreen = () => {
       <ImagePreviewModal
         visible={imagePreviewVisible}
         images={
-          profile?.avatar ? [{url: profile.avatar, isCensored: false}] : []
+          profile?.avatar
+            ? [{url: profile.avatar, isCensored: false, order: 0}]
+            : []
         }
         initialIndex={0}
         onClose={handleCloseImagePreview}
