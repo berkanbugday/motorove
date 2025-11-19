@@ -22,10 +22,14 @@ services:
 
   # API - Development environment
   api-dev:
+    image: motorove/images:backend-dev
     build:
       context: ../..
       dockerfile: apps/backend/Dockerfile
       target: development
+      tags:
+        - motorove/images:backend-dev
+        - motorove/images:backend-latest
     container_name: motorove-api-dev
     ports:
       - '${DEV_PORT:-3000}:3000'
@@ -47,10 +51,13 @@ services:
 
   # API - Staging environment
   api-staging:
+    image: motorove/images:backend-staging
     build:
       context: ../..
       dockerfile: apps/backend/Dockerfile
       target: staging
+      tags:
+        - motorove/images:backend-staging
     container_name: motorove-api-staging
     ports:
       - '${STAGING_PORT:-3000}:3000'
@@ -72,10 +79,14 @@ services:
 
   # API - Production environment
   api-prod:
+    image: motorove/images:backend-prod
     build:
       context: ../..
       dockerfile: apps/backend/Dockerfile
       target: production
+      tags:
+        - motorove/images:backend-prod
+        - motorove/images:backend
     container_name: motorove-api-prod
     ports:
       - '${PROD_PORT:-3000}:3000'

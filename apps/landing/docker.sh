@@ -94,14 +94,14 @@ push() {
     
     print_header "Multi-Architecture Docker Build & Push"
     
-    # Default Docker Hub username (can be overridden with DOCKER_HUB_USERNAME env var)
+    # Default Docker Hub configuration for shared motorove/images repository
     local docker_username="${DOCKER_HUB_USERNAME:-motorove}"
-    local image_name="${DOCKER_HUB_IMAGE_NAME:-landing}"
+    local image_name="${DOCKER_HUB_IMAGE_NAME:-images}"
     local tags=()
     local platforms="linux/amd64,linux/arm64"
     local use_buildx=true
     local no_cache=false
-    local default_tag="latest"
+    local default_tag="landing"
     
     # Parse additional tags from arguments
     while [[ $# -gt 0 ]]; do
@@ -182,8 +182,8 @@ push() {
         # Add git commit SHA tag if in a git repo
         if git rev-parse --git-dir > /dev/null 2>&1; then
             local git_sha=$(git rev-parse --short HEAD)
-            tag_args+=("-t" "${docker_username}/${image_name}:sha-${git_sha}")
-            print_info "Adding git commit tag: sha-${git_sha}"
+            tag_args+=("-t" "${docker_username}/${image_name}:landing-sha-${git_sha}")
+            print_info "Adding git commit tag: landing-sha-${git_sha}"
         fi
         
         # Build and push multi-architecture image
@@ -212,7 +212,7 @@ push() {
             done
             if git rev-parse --git-dir > /dev/null 2>&1; then
                 local git_sha=$(git rev-parse --short HEAD)
-                echo "  • ${docker_username}/${image_name}:sha-${git_sha}"
+                echo "  • ${docker_username}/${image_name}:landing-sha-${git_sha}"
             fi
             echo ""
             print_info "Supported platforms: $platforms"
@@ -262,10 +262,10 @@ push() {
         # Add git commit SHA tag if in a git repo
         if git rev-parse --git-dir > /dev/null 2>&1; then
             local git_sha=$(git rev-parse --short HEAD)
-            local sha_tag="${docker_username}/${image_name}:sha-${git_sha}"
+            local sha_tag="${docker_username}/${image_name}:landing-sha-${git_sha}"
             print_info "  → $sha_tag (git commit)"
             docker tag "temp-motorove-landing:build" "$sha_tag"
-            tags+=("sha-${git_sha}")
+            tags+=("landing-sha-${git_sha}")
         fi
         
         # Push all tags
@@ -294,8 +294,8 @@ push() {
 # Pull from Docker Hub
 pull() {
     local docker_username="${DOCKER_HUB_USERNAME:-motorove}"
-    local image_name="${DOCKER_HUB_IMAGE_NAME:-landing}"
-    local tag="${1:-latest}"
+    local image_name="${DOCKER_HUB_IMAGE_NAME:-images}"
+    local tag="${1:-landing}"
     
     print_header "Pulling from Docker Hub"
     
@@ -364,14 +364,14 @@ ${GREEN}Commands:${NC}
 ${GREEN}Push Options:${NC}
     --tag, -t <tag>         Additional tag for the image (can be used multiple times)
     --username, -u <user>   Docker Hub username (default: \$DOCKER_HUB_USERNAME)
-    --image, -i <name>      Image name (default: landing)
+    --image, -i <name>      Image name (default: images)
     --platform, -p <plat>   Target platforms (default: linux/amd64,linux/arm64)
     --no-buildx             Use standard build instead of buildx (single architecture)
     --no-cache              Build without using cache (clean rebuild)
 
 ${GREEN}Environment Variables:${NC}
-    DOCKER_HUB_USERNAME     Your Docker Hub username
-    DOCKER_HUB_IMAGE_NAME   Custom image name (default: landing)
+    DOCKER_HUB_USERNAME     Your Docker Hub username (default: motorove)
+    DOCKER_HUB_IMAGE_NAME   Custom image name (default: images)
 
 ${GREEN}Examples:${NC}
     ./docker.sh start                       # Start landing page
@@ -380,17 +380,16 @@ ${GREEN}Examples:${NC}
     ./docker.sh shell                       # Open shell in container
     
     # Push to Docker Hub (multi-architecture by default)
-    ./docker.sh push                                # Push with default tags (amd64 + arm64)
-    ./docker.sh push --tag v1.0.0                   # Push with version tag
-    ./docker.sh push --tag v1.0.0 --tag stable      # Push with multiple tags
-    ./docker.sh push -u myusername                  # Push with custom username
+    ./docker.sh push                                # Push as motorove/images:landing
+    ./docker.sh push --tag landing-v1.0.0           # Push with version tag
+    ./docker.sh push --tag landing-v1.0.0 --tag landing-stable # Push with multiple tags
     ./docker.sh push --platform linux/amd64         # Push only for amd64
     ./docker.sh push --no-buildx                    # Use single-arch build (legacy)
-    ./docker.sh push --tag v1.0.0 --no-cache        # Clean rebuild without cache
+    ./docker.sh push --tag landing-v1.0.0 --no-cache # Clean rebuild without cache
     
     # Pull from Docker Hub
-    ./docker.sh pull                                # Pull latest image
-    ./docker.sh pull v1.0.0                         # Pull specific version
+    ./docker.sh pull                                # Pull motorove/images:landing
+    ./docker.sh pull landing-v1.0.0                 # Pull specific version
 
 ${GREEN}Quick Start:${NC}
     1. ./docker.sh build            # Build image
@@ -398,17 +397,19 @@ ${GREEN}Quick Start:${NC}
     3. ./docker.sh logs             # View logs
 
 ${GREEN}Docker Hub Workflow (Multi-Architecture):${NC}
-    1. export DOCKER_HUB_USERNAME=yourusername
-    2. docker login                 # Login to Docker Hub
-    3. ./docker.sh push --tag v1.0.0
-    4. ./docker.sh pull v1.0.0      # Pull on another machine
+    1. docker login                 # Login to Docker Hub (uses motorove account)
+    2. ./docker.sh push --tag landing-v1.0.0
+    3. ./docker.sh pull landing-v1.0.0 # Pull on another machine
+    
+    Images are pushed to the shared motorove/images repository with landing- prefix tags.
     
     The push command builds for both linux/amd64 (Railway, AWS) and 
     linux/arm64 (Mac M1/M2) by default using Docker Buildx.
 
 ${YELLOW}Note:${NC}
-    Set DOCKER_HUB_USERNAME environment variable for push/pull commands.
+    Images are pushed to motorove/images repository with landing- prefix tags.
     The landing page runs on port 8080 by default.
+    See README-DOCKER-HUB.md for detailed Docker Hub documentation.
 
 EOF
 }
@@ -437,7 +438,7 @@ case ${1:-help} in
         push "$@"
         ;;
     pull)
-        pull "${2:-latest}"
+        pull "${2:-landing}"
         ;;
     clean)
         clean

@@ -1,5 +1,12 @@
 FROM node:20-slim AS base
 
+# Docker Hub metadata for motorove/images:backend
+LABEL org.opencontainers.image.title="Motorove Backend API"
+LABEL org.opencontainers.image.description="NestJS GraphQL API for Motorove motorcycle community platform"
+LABEL org.opencontainers.image.vendor="Motorove"
+LABEL org.opencontainers.image.source="https://github.com/berkanbugday/motorove"
+LABEL org.opencontainers.image.documentation="https://github.com/berkanbugday/motorove/blob/main/apps/backend/README.md"
+
 # Install required system dependencies for Prisma
 RUN apt-get update && apt-get install -y \
     openssl \

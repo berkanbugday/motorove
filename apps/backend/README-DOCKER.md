@@ -479,31 +479,31 @@ jobs:
       - name: Run migrations
         run: docker-compose run --rm api-prod pnpm prisma migrate deploy
 
-      - name: Push to registry
+      - name: Push to Docker Hub
         run: |
-          docker tag motorove-api-prod registry.example.com/motorove-api:latest
-          docker push registry.example.com/motorove-api:latest
+          docker tag motorove-api-prod motorove/images:backend
+          docker push motorove/images:backend
 ```
 
 ## Pushing to Docker Hub
 
 To share your Docker images or deploy to production via Docker Hub, see:
 
-- **Quick Start**: [DOCKER-HUB-QUICKSTART.md](./DOCKER-HUB-QUICKSTART.md) - Get started in 5 minutes
 - **Full Guide**: [README-DOCKER-HUB.md](./README-DOCKER-HUB.md) - Complete documentation
 
 Quick example:
 
 ```bash
-# Set your Docker Hub username
-export DOCKER_HUB_USERNAME=yourusername
-
 # Login to Docker Hub
 docker login
 
-# Build and push production image
-./docker.sh push prod --tag v1.0.0 --tag latest
+# Build and push to shared motorove/images repository
+docker-compose build api-prod
+docker-compose push api-prod
 
+# Or manually tag and push
+docker tag motorove-api-prod:latest motorove/images:backend
+docker push motorove/images:backend
 ```
 
 ## Additional Resources

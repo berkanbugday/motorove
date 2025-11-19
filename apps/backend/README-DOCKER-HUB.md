@@ -1,6 +1,6 @@
 # Docker Hub Push Guide
 
-This guide explains how to build and push your Motorove backend Docker images to Docker Hub.
+This guide explains how to build and push your Motorove backend Docker images to the shared `motorove/images` Docker Hub repository with backend-specific tags.
 
 ## Prerequisites
 
@@ -57,47 +57,48 @@ The easiest way is to use the enhanced `docker.sh` script:
 If you prefer to do it manually:
 
 ```bash
-# Set your Docker Hub username
-DOCKER_USERNAME="yourusername"
-IMAGE_NAME="backend"
-
-# Build the production image
+# Build the production image for motorove/images repository
 docker build -f Dockerfile \
   --target production \
   --build-context monorepo=../.. \
-  -t ${DOCKER_USERNAME}/${IMAGE_NAME}:latest \
-  -t ${DOCKER_USERNAME}/${IMAGE_NAME}:v1.0.0 \
+  -t motorove/images:backend \
+  -t motorove/images:backend-prod \
+  -t motorove/images:backend-v1.0.0 \
   ../..
 
 # Push to Docker Hub
-docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:latest
-docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:v1.0.0
+docker push motorove/images:backend
+docker push motorove/images:backend-prod
+docker push motorove/images:backend-v1.0.0
 ```
 
 ## Image Tagging Strategy
 
 ### Recommended Tagging Convention
 
-1. **Environment tags**: `dev`, `staging`, `prod`
-2. **Version tags**: `v1.0.0`, `v1.0.1`, etc. (semantic versioning)
-3. **Git commit tags**: `sha-abc1234` (for traceability)
-4. **Latest tag**: `latest` (for production only)
-5. **Date tags**: `2025-09-30` (optional, for releases)
+All images are pushed to `motorove/images` repository with backend-specific tags:
+
+1. **Environment tags**: `backend-dev`, `backend-staging`, `backend-prod`
+2. **Version tags**: `backend-v1.0.0`, `backend-v1.0.1`, etc.
+3. **Git commit tags**: `backend-sha-abc1234` (for traceability)
+4. **Latest tags**: `backend` (production), `backend-latest` (development)
+5. **Date tags**: `backend-2025-09-30` (optional, for releases)
 
 ### Examples
 
 ```bash
 # Production image with multiple tags
-docker tag backend:prod yourusername/backend:latest
-docker tag backend:prod yourusername/backend:v1.0.0
-docker tag backend:prod yourusername/backend:prod
+docker tag backend:prod motorove/images:backend
+docker tag backend:prod motorove/images:backend-prod
+docker tag backend:prod motorove/images:backend-v1.0.0
 
 # Staging image
-docker tag backend:staging yourusername/backend:staging
-docker tag backend:staging yourusername/backend:v1.0.0-rc.1
+docker tag backend:staging motorove/images:backend-staging
+docker tag backend:staging motorove/images:backend-v1.0.0-rc.1
 
 # Development image
-docker tag backend:dev yourusername/backend:dev
+docker tag backend:dev motorove/images:backend-dev
+docker tag backend:dev motorove/images:backend-latest
 ```
 
 ## Docker Compose with Docker Hub Images
@@ -107,7 +108,7 @@ Update your `docker-compose.yml` to pull from Docker Hub:
 ```yaml
 services:
   api-prod:
-    image: yourusername/backend:latest
+    image: motorove/images:backend
     # ... rest of configuration
 ```
 
@@ -118,7 +119,7 @@ version: '3.8'
 
 services:
   api-prod:
-    image: yourusername/backend:latest
+    image: motorove/images:backend
     container_name: motorove-api-prod
     env_file:
       - .env
@@ -158,8 +159,8 @@ on:
       - 'v*'
 
 env:
-  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-  IMAGE_NAME: backend
+  DOCKER_HUB_USERNAME: motorove
+  IMAGE_NAME: images
 
 jobs:
   build-and-push:
@@ -186,13 +187,14 @@ jobs:
         with:
           images: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch,prefix=backend-
+            type=ref,event=pr,prefix=backend-
+            type=semver,pattern=backend-v{{version}}
+            type=semver,pattern=backend-v{{major}}.{{minor}}
+            type=semver,pattern=backend-v{{major}}
+            type=sha,prefix=backend-sha-
+            type=raw,value=backend,enable={{is_default_branch}}
+            type=raw,value=backend-latest,enable={{is_default_branch}}
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -214,8 +216,8 @@ Create `.gitlab-ci.yml`:
 
 ```yaml
 variables:
-  DOCKER_HUB_USERNAME: $DOCKER_HUB_USERNAME
-  IMAGE_NAME: backend
+  DOCKER_HUB_USERNAME: motorove
+  IMAGE_NAME: images
   DOCKER_DRIVER: overlay2
 
 stages:
@@ -231,10 +233,10 @@ build:
     - echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
   script:
     - cd apps/backend
-    - docker build -f Dockerfile --target production -t $DOCKER_HUB_USERNAME/$IMAGE_NAME:$CI_COMMIT_SHA ../..
-    - docker tag $DOCKER_HUB_USERNAME/$IMAGE_NAME:$CI_COMMIT_SHA $DOCKER_HUB_USERNAME/$IMAGE_NAME:latest
-    - docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:$CI_COMMIT_SHA
-    - docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:latest
+    - docker build -f Dockerfile --target production -t $DOCKER_HUB_USERNAME/$IMAGE_NAME:backend-sha-$CI_COMMIT_SHA ../..
+    - docker tag $DOCKER_HUB_USERNAME/$IMAGE_NAME:backend-sha-$CI_COMMIT_SHA $DOCKER_HUB_USERNAME/$IMAGE_NAME:backend
+    - docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:backend-sha-$CI_COMMIT_SHA
+    - docker push $DOCKER_HUB_USERNAME/$IMAGE_NAME:backend
   only:
     - main
 ```
@@ -247,18 +249,18 @@ Never use your password in scripts or CI/CD. Always use access tokens:
 
 ```bash
 # Create token at: https://hub.docker.com/settings/security
-echo "YOUR_TOKEN" | docker login -u YOUR_USERNAME --password-stdin
+echo "YOUR_TOKEN" | docker login -u motorove --password-stdin
 ```
 
 ### 2. Scan Images for Vulnerabilities
 
 ```bash
 # Scan image before pushing
-docker scan yourusername/backend:latest
+docker scan motorove/images:backend
 
 # Or use Trivy
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-  aquasec/trivy image yourusername/backend:latest
+  aquasec/trivy image motorove/images:backend
 ```
 
 ### 3. Sign Images (Docker Content Trust)
@@ -267,7 +269,7 @@ Enable Docker Content Trust:
 
 ```bash
 export DOCKER_CONTENT_TRUST=1
-docker push yourusername/backend:latest
+docker push motorove/images:backend
 ```
 
 ### 4. Use Multi-Architecture Builds
@@ -279,7 +281,7 @@ docker buildx create --name multiarch --use
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --target production \
-  -t yourusername/backend:latest \
+  -t motorove/images:backend \
   --push \
   -f apps/backend/Dockerfile \
   .
@@ -291,9 +293,9 @@ docker buildx build \
 
 1. Go to [Docker Hub](https://hub.docker.com)
 2. Click "Create Repository"
-3. Name: `backend`
+3. Name: `images` (shared repository for all Motorove services)
 4. Visibility: Private or Public
-5. Description: Add a meaningful description
+5. Description: "Motorove platform Docker images - Backend API and Landing Page"
 6. Create repository
 
 ### 2. Configure Repository
@@ -321,33 +323,33 @@ docker-compose build --no-cache api-prod
 
 ```bash
 # Tag local image for Docker Hub
-docker tag motorove-api-prod:latest yourusername/backend:latest
+docker tag motorove-api-prod:latest motorove/images:backend
 
 # Tag with version
-docker tag motorove-api-prod:latest yourusername/backend:v1.0.0
+docker tag motorove-api-prod:latest motorove/images:backend-v1.0.0
 
 # Tag with git commit
-docker tag motorove-api-prod:latest yourusername/backend:sha-$(git rev-parse --short HEAD)
+docker tag motorove-api-prod:latest motorove/images:backend-sha-$(git rev-parse --short HEAD)
 ```
 
 ### Push Commands
 
 ```bash
 # Push specific tag
-docker push yourusername/backend:latest
+docker push motorove/images:backend
 
-# Push all tags
-docker push yourusername/backend --all-tags
+# Push all backend tags
+docker push motorove/images --all-tags
 ```
 
 ### Pull Commands
 
 ```bash
 # Pull from Docker Hub
-docker pull yourusername/backend:latest
+docker pull motorove/images:backend
 
 # Pull specific version
-docker pull yourusername/backend:v1.0.0
+docker pull motorove/images:backend-v1.0.0
 ```
 
 ## Troubleshooting

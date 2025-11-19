@@ -20,7 +20,7 @@ The Docker configuration has been updated to work properly with the pnpm workspa
 - Properly installs workspace dependencies
 - Separate stages for development, staging, and production
 
-### 2. **docker-compose.yml** - Build Context & Supabase Integration
+### 2. **docker-compose.yml** - Build Context & Docker Hub Integration
 
 **Before:**
 
@@ -28,12 +28,19 @@ The Docker configuration has been updated to work properly with the pnpm workspa
 - Referenced wrong environment files (`.env.development` vs `.env.dev`)
 - Database URLs hard-coded
 - Required local PostgreSQL container
+- No Docker Hub configuration
 
 **After:**
 
 - Build context set to `../..` (monorepo root)
 - Dockerfile path: `apps/backend/Dockerfile`
-- Correct environment file references:
+- **Docker Hub Integration**
+- ✅ Shared `motorove/images` repository for all services
+- ✅ Backend tags: `backend-dev`, `backend-staging`, `backend-prod`, `backend`
+- ✅ Landing tags: `landing`, `landing-latest`
+- ✅ Automatic image metadata and labels
+- ✅ Multi-architecture builds (amd64/arm64)
+- ✅ Consistent tagging strategy across projects:
   - Development: `.env.dev`
   - Staging: `.env.staging`
   - Production: `.env`
@@ -67,14 +74,13 @@ The Docker configuration has been updated to work properly with the pnpm workspa
 
 ### 5. **Documentation & Tooling**
 
-**New files:**
+**Updated files:**
 
-- `README-DOCKER.md` - Comprehensive Docker usage guide
-- `README-SUPABASE.md` - Complete Supabase integration guide
-- `SUPABASE-CHANGES.md` - Summary of Supabase-specific changes
-- `docker.sh` - Helper script for common Docker operations
+- `README-DOCKER.md` - Updated with Docker Hub integration
+- `README-DOCKER-HUB.md` - Updated for shared `motorove/images` repository
 - `DOCKER-SETUP-SUMMARY.md` - This file
-- `README.md` - Updated main project documentation
+- `docker-compose.yml` - Added Docker Hub image tags and metadata
+- `Dockerfile` - Added Docker Hub labels and metadata
 
 ## Quick Start
 
@@ -152,44 +158,57 @@ docker-compose logs -f api-dev
 │                    Monorepo Root                            │
 │                                                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐       │
-│  │   shared    │  │   backend   │  │   mobile     │       │
-│  │             │  │             │  │  (excluded)  │       │
+│  │   shared    │  │   backend   │  │   landing    │       │
+│  │             │  │             │  │              │       │
 │  └─────────────┘  └─────────────┘  └──────────────┘       │
-│         │                │                                  │
-│         └────────────────┘                                  │
-│                  │                                          │
-│                  ▼                                          │
-│         ┌─────────────────┐                                │
-│         │  Docker Build   │                                │
-│         │    Context      │                                │
-│         └─────────────────┘                                │
+│         │                │                │                 │
+│         └────────────────┼────────────────┘                 │
+│                          │                                  │
+│                          ▼                                  │
+│                 ┌─────────────────┐                        │
+│                 │  Docker Build   │                        │
+│                 │    Context      │                        │
+│                 └─────────────────┘                        │
 └─────────────────────────────────────────────────────────────┘
-                       │
-                       ▼
+                          │
+                          ▼
         ┌──────────────────────────────────┐
         │   Multi-Stage Docker Build       │
         │                                  │
         │  1. Base (Node + pnpm)          │
         │  2. Dependencies (install)       │
         │  3. Build shared package        │
-        │  4. Build backend               │
+        │  4. Build backend/landing       │
         │  5. Runtime (dev/staging/prod)  │
         └──────────────────────────────────┘
-                       │
-                       ▼
+                          │
+                          ▼
+        ┌──────────────────────────────────┐
+        │      Docker Hub Repository       │
+        │      motorove/images            │
+        │                                  │
+        │  • backend:backend-dev          │
+        │  • backend:backend-staging      │
+        │  • backend:backend-prod         │
+        │  • backend:backend              │
+        │  • landing:landing              │
+        │  • landing:landing-latest       │
+        └──────────────────────────────────┘
+                          │
+                          ▼
         ┌──────────────────────────────────┐
         │      Docker Containers           │
         │                                  │
-        │         ┌────────────┐           │
-        │         │  API       │           │
-        │         │  :3000     │           │
-        │         └────────────┘           │
+        │  ┌────────────┐ ┌─────────────┐  │
+        │  │  Backend   │ │   Landing   │  │
+        │  │  :3000     │ │   :8080     │  │
+        │  └────────────┘ └─────────────┘  │
         │              │                   │
         │              ▼                   │
         │      motorove-network            │
         └──────────────────────────────────┘
-                       │
-                       ▼
+                          │
+                          ▼
         ┌──────────────────────────────────┐
         │   Supabase (External)            │
         │                                  │
@@ -226,6 +245,8 @@ docker-compose logs -f api-dev
 ### 4. **Production Ready**
 
 - ✅ Separate builds for dev/staging/prod
+- ✅ Docker Hub integration with proper tagging
+- ✅ Multi-architecture support (amd64/arm64)
 - ✅ Health checks
 - ✅ Restart policies
 - ✅ Resource limits support

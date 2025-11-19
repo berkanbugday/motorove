@@ -1,6 +1,6 @@
 # Motorove Landing Page - Docker Hub Deployment Guide
 
-This guide explains how to build and push the Motorove landing page Docker images to Docker Hub with multi-architecture support.
+This guide explains how to build and push the Motorove landing page Docker images to the shared `motorove/images` Docker Hub repository with landing-specific tags and multi-architecture support.
 
 ## Prerequisites
 
@@ -16,10 +16,11 @@ This guide explains how to build and push the Motorove landing page Docker image
 docker login
 ```
 
-### 2. Set Your Docker Hub Username
+### 2. Set Repository Configuration
 
 ```bash
-export DOCKER_HUB_USERNAME=yourusername
+export DOCKER_HUB_USERNAME=motorove
+export DOCKER_HUB_IMAGE_NAME=images
 ```
 
 ### 3. Build and Push Multi-Architecture Image
@@ -29,15 +30,16 @@ export DOCKER_HUB_USERNAME=yourusername
 ./docker.sh push
 
 # Push with custom version tag
-./docker.sh push --tag v1.0.0
+./docker.sh push --tag landing-v1.0.0
 
 # Push with multiple tags
-./docker.sh push --tag v1.0.0 --tag stable
+./docker.sh push --tag landing-v1.0.0 --tag landing-stable
 ```
 
 ## Multi-Architecture Support
 
 By default, the push command builds for both:
+
 - **linux/amd64** - For Railway, AWS, Google Cloud, most servers
 - **linux/arm64** - For Mac M1/M2, ARM servers
 
@@ -51,14 +53,14 @@ This ensures your image works on all platforms without separate builds.
 
 ### Available Options
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--tag, -t` | Additional tag for the image | `--tag v1.0.0` |
-| `--username, -u` | Docker Hub username | `--username myuser` |
-| `--image, -i` | Image name | `--image landing-page` |
-| `--platform, -p` | Target platforms | `--platform linux/amd64` |
-| `--no-buildx` | Use standard build (single arch) | `--no-buildx` |
-| `--no-cache` | Build without cache | `--no-cache` |
+| Option           | Description                      | Example                  |
+| ---------------- | -------------------------------- | ------------------------ |
+| `--tag, -t`      | Additional tag for the image     | `--tag landing-v1.0.0`   |
+| `--username, -u` | Docker Hub username              | `--username motorove`    |
+| `--image, -i`    | Image name                       | `--image images`         |
+| `--platform, -p` | Target platforms                 | `--platform linux/amd64` |
+| `--no-buildx`    | Use standard build (single arch) | `--no-buildx`            |
+| `--no-cache`     | Build without cache              | `--no-cache`             |
 
 ## Common Use Cases
 
@@ -66,31 +68,31 @@ This ensures your image works on all platforms without separate builds.
 
 ```bash
 # Push with version tag and latest
-./docker.sh push --tag v1.0.0 --tag latest
+./docker.sh push --tag landing-v1.0.0 --tag landing
 ```
 
 ### Push to Custom Repository
 
 ```bash
-# Use custom username and image name
-./docker.sh push --username mycompany --image motorove-landing --tag v1.0.0
+# Use shared repository with landing tag
+./docker.sh push --username motorove --image images --tag landing-v1.0.0
 ```
 
 ### Build for Specific Platform
 
 ```bash
 # Build only for amd64 (Railway, AWS)
-./docker.sh push --platform linux/amd64 --tag v1.0.0
+./docker.sh push --platform linux/amd64 --tag landing-v1.0.0
 
 # Build only for arm64 (Mac M1/M2)
-./docker.sh push --platform linux/arm64 --tag v1.0.0
+./docker.sh push --platform linux/arm64 --tag landing-v1.0.0
 ```
 
 ### Clean Rebuild
 
 ```bash
 # Force rebuild without using cache
-./docker.sh push --tag v1.0.0 --no-cache
+./docker.sh push --tag landing-v1.0.0 --no-cache
 ```
 
 ## Automatic Git SHA Tagging
@@ -98,13 +100,14 @@ This ensures your image works on all platforms without separate builds.
 The script automatically adds a git commit SHA tag to your images:
 
 ```bash
-./docker.sh push --tag v1.0.0
+./docker.sh push --tag landing-v1.0.0
 ```
 
 This creates three tags:
-- `motorove/landing:v1.0.0`
-- `motorove/landing:latest`
-- `motorove/landing:sha-abc1234` (git commit)
+
+- `motorove/images:landing-v1.0.0`
+- `motorove/images:landing`
+- `motorove/images:landing-sha-abc1234` (git commit)
 
 ## Pulling Images
 
@@ -117,14 +120,14 @@ This creates three tags:
 ### Pull Specific Version
 
 ```bash
-./docker.sh pull v1.0.0
+./docker.sh pull landing-v1.0.0
 ```
 
 ### Pull with Custom Settings
 
 ```bash
-export DOCKER_HUB_USERNAME=myusername
-./docker.sh pull v1.0.0
+export DOCKER_HUB_USERNAME=motorove
+./docker.sh pull landing-v1.0.0
 ```
 
 ## Deployment Examples
@@ -132,23 +135,25 @@ export DOCKER_HUB_USERNAME=myusername
 ### Deploy on Railway
 
 1. Push your image:
+
 ```bash
-./docker.sh push --tag v1.0.0
+./docker.sh push --tag landing-v1.0.0
 ```
 
 2. In Railway, set the Docker image:
+
 ```
-motorove/landing:v1.0.0
+motorove/images:landing-v1.0.0
 ```
 
 ### Deploy with Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   landing:
-    image: motorove/landing:latest
+    image: motorove/images:landing
     ports:
       - "8080:8080"
     environment:
@@ -165,7 +170,7 @@ docker run -d \
   -p 8080:8080 \
   -e NODE_ENV=production \
   -e PORT=8080 \
-  motorove/landing:latest
+  motorove/images:landing
 ```
 
 ## Environment Variables
@@ -174,10 +179,10 @@ Set these in your shell or `.bashrc`/`.zshrc`:
 
 ```bash
 # Required for push/pull commands
-export DOCKER_HUB_USERNAME=yourusername
+export DOCKER_HUB_USERNAME=motorove
 
-# Optional: Custom image name
-export DOCKER_HUB_IMAGE_NAME=landing
+# Optional: Custom image name (shared repository)
+export DOCKER_HUB_IMAGE_NAME=images
 ```
 
 ## Troubleshooting
@@ -185,6 +190,7 @@ export DOCKER_HUB_IMAGE_NAME=landing
 ### Not Logged In
 
 If you see "Not logged in to Docker Hub":
+
 ```bash
 docker login
 ```
@@ -192,21 +198,24 @@ docker login
 ### Buildx Not Available
 
 If buildx is not available:
+
 ```bash
 # Use legacy build method
-./docker.sh push --no-buildx --tag v1.0.0
+./docker.sh push --no-buildx --tag landing-v1.0.0
 ```
 
 ### Build Fails
 
 Try a clean rebuild:
+
 ```bash
-./docker.sh push --no-cache --tag v1.0.0
+./docker.sh push --no-cache --tag landing-v1.0.0
 ```
 
 ### Permission Denied
 
 Make sure the script is executable:
+
 ```bash
 chmod +x docker.sh
 ```
@@ -214,41 +223,49 @@ chmod +x docker.sh
 ## Docker Hub Repository
 
 Your images will be available at:
+
 ```
-https://hub.docker.com/r/yourusername/landing
+https://hub.docker.com/r/motorove/images
 ```
+
+Landing page images will have `landing` prefix tags.
 
 ## Image Tags
 
 The script creates the following tags:
-- `latest` - Latest production build
-- `v1.0.0` - Specific version (if specified)
-- `sha-abc1234` - Git commit SHA (automatic)
+
+- `landing` - Latest production build
+- `landing-v1.0.0` - Specific version (if specified)
+- `landing-sha-abc1234` - Git commit SHA (automatic)
 
 ## Best Practices
 
 1. **Use Version Tags**: Always tag releases with version numbers
+
    ```bash
-   ./docker.sh push --tag v1.0.0
+   ./docker.sh push --tag landing-v1.0.0
    ```
 
 2. **Keep Latest Updated**: Update latest tag with stable releases
+
    ```bash
-   ./docker.sh push --tag v1.0.0 --tag latest
+   ./docker.sh push --tag landing-v1.0.0 --tag landing
    ```
 
 3. **Multi-Architecture**: Use default buildx for maximum compatibility
+
    ```bash
-   ./docker.sh push --tag v1.0.0
+   ./docker.sh push --tag landing-v1.0.0
    ```
 
 4. **Git SHA Tags**: Use automatic git SHA tags for traceability
+
    - Automatically added by the script
    - Helps track which commit was deployed
 
 5. **Clean Rebuilds**: Use `--no-cache` for production releases
    ```bash
-   ./docker.sh push --tag v1.0.0 --no-cache
+   ./docker.sh push --tag landing-v1.0.0 --no-cache
    ```
 
 ## CI/CD Integration
@@ -261,30 +278,31 @@ name: Build and Push Docker Image
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      
+
       - name: Build and Push
         run: |
           cd apps/landing
-          export DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
-          ./docker.sh push --tag ${GITHUB_REF#refs/tags/}
+          export DOCKER_HUB_USERNAME=motorove
+          ./docker.sh push --tag landing-${GITHUB_REF#refs/tags/}
 ```
 
 ## Support
 
 For issues or questions:
+
 - Check the main README.md
 - Review Docker logs: `./docker.sh logs`
 - Check container status: `./docker.sh status`

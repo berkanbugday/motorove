@@ -257,29 +257,29 @@ push() {
     
     print_header "Multi-Architecture Docker Build & Push - $env"
     
-    # Default Docker Hub username (can be overridden with DOCKER_HUB_USERNAME env var)
+    # Default Docker Hub configuration for shared motorove/images repository
     local docker_username="${DOCKER_HUB_USERNAME:-motorove}"
-    local image_name="${DOCKER_HUB_IMAGE_NAME:-backend}"
+    local image_name="${DOCKER_HUB_IMAGE_NAME:-images}"
     local tags=()
     local platforms="linux/amd64,linux/arm64"
     local use_buildx=true
     local no_cache=false
     
-    # Determine target and default tags
+    # Determine target and default tags with backend prefix
     local target=""
     local default_tag=""
     case $env in
         dev|development)
             target="development"
-            default_tag="dev"
+            default_tag="backend-dev"
             ;;
         staging)
             target="staging"
-            default_tag="staging"
+            default_tag="backend-staging"
             ;;
         prod|production)
             target="production"
-            default_tag="latest"
+            default_tag="backend"
             ;;
     esac
     
@@ -364,8 +364,8 @@ push() {
         # Add git commit SHA tag if in a git repo
         if git rev-parse --git-dir > /dev/null 2>&1; then
             local git_sha=$(git rev-parse --short HEAD)
-            tag_args+=("-t" "${docker_username}/${image_name}:sha-${git_sha}")
-            print_info "Adding git commit tag: sha-${git_sha}"
+            tag_args+=("-t" "${docker_username}/${image_name}:backend-sha-${git_sha}")
+            print_info "Adding git commit tag: backend-sha-${git_sha}"
         fi
         
         # Build and push multi-architecture image
@@ -395,7 +395,7 @@ push() {
             done
             if git rev-parse --git-dir > /dev/null 2>&1; then
                 local git_sha=$(git rev-parse --short HEAD)
-                echo "  • ${docker_username}/${image_name}:sha-${git_sha}"
+                echo "  • ${docker_username}/${image_name}:backend-sha-${git_sha}"
             fi
             echo ""
             print_info "Supported platforms: $platforms"
@@ -447,10 +447,10 @@ push() {
         # Add git commit SHA tag if in a git repo
         if git rev-parse --git-dir > /dev/null 2>&1; then
             local git_sha=$(git rev-parse --short HEAD)
-            local sha_tag="${docker_username}/${image_name}:sha-${git_sha}"
+            local sha_tag="${docker_username}/${image_name}:backend-sha-${git_sha}"
             print_info "  → $sha_tag (git commit)"
             docker tag "temp-motorove-$env:build" "$sha_tag"
-            tags+=("sha-${git_sha}")
+            tags+=("backend-sha-${git_sha}")
         fi
         
         # Push all tags
@@ -480,20 +480,20 @@ push() {
 pull() {
     local env=${1:-prod}
     local docker_username="${DOCKER_HUB_USERNAME:-motorove}"
-    local image_name="${DOCKER_HUB_IMAGE_NAME:-backend}"
+    local image_name="${DOCKER_HUB_IMAGE_NAME:-images}"
     
     print_header "Pulling from Docker Hub - $env"
     
     local tag=""
     case $env in
         dev|development)
-            tag="dev"
+            tag="backend-dev"
             ;;
         staging)
-            tag="staging"
+            tag="backend-staging"
             ;;
         prod|production)
-            tag="latest"
+            tag="backend"
             ;;
     esac
     
@@ -584,14 +584,14 @@ ${GREEN}Environments:${NC}
 ${GREEN}Push Options:${NC}
     --tag, -t <tag>         Additional tag for the image (can be used multiple times)
     --username, -u <user>   Docker Hub username (default: \$DOCKER_HUB_USERNAME)
-    --image, -i <name>      Image name (default: backend)
+    --image, -i <name>      Image name (default: images)
     --platform, -p <plat>   Target platforms (default: linux/amd64,linux/arm64)
     --no-buildx             Use standard build instead of buildx (single architecture)
     --no-cache              Build without using cache (clean rebuild)
 
 ${GREEN}Environment Variables:${NC}
-    DOCKER_HUB_USERNAME     Your Docker Hub username
-    DOCKER_HUB_IMAGE_NAME   Custom image name (default: backend)
+    DOCKER_HUB_USERNAME     Your Docker Hub username (default: motorove)
+    DOCKER_HUB_IMAGE_NAME   Custom image name (default: images)
 
 ${GREEN}Examples:${NC}
     ./docker.sh start dev           # Start development environment
@@ -601,13 +601,13 @@ ${GREEN}Examples:${NC}
     ./docker.sh shell dev           # Open shell in development container
     
     # Push to Docker Hub (multi-architecture by default)
-    ./docker.sh push prod                           # Push with default tags (amd64 + arm64)
-    ./docker.sh push prod --tag v1.0.0              # Push with version tag
-    ./docker.sh push prod --tag v1.0.0 --tag stable # Push with multiple tags
-    ./docker.sh push staging -u myusername          # Push with custom username
+    ./docker.sh push prod                           # Push as motorove/images:backend
+    ./docker.sh push prod --tag backend-v1.0.0      # Push with version tag
+    ./docker.sh push prod --tag backend-v1.0.0 --tag backend-stable # Push with multiple tags
+    ./docker.sh push staging                        # Push as motorove/images:backend-staging
     ./docker.sh push prod --platform linux/amd64    # Push only for amd64
     ./docker.sh push prod --no-buildx               # Use single-arch build (legacy)
-    ./docker.sh push staging --tag v1.0.0 --no-cache # Clean rebuild without cache
+    ./docker.sh push staging --tag backend-v1.0.0 --no-cache # Clean rebuild without cache
     
     # Pull from Docker Hub
     ./docker.sh pull prod                           # Pull latest production image
@@ -619,17 +619,18 @@ ${GREEN}Quick Start:${NC}
     4. ./docker.sh logs dev         # View logs
 
 ${GREEN}Docker Hub Workflow (Multi-Architecture):${NC}
-    1. export DOCKER_HUB_USERNAME=yourusername
-    2. docker login                 # Login to Docker Hub
-    3. ./docker.sh push prod --tag v1.0.0
-    4. ./docker.sh pull prod        # Pull on another machine
+    1. docker login                 # Login to Docker Hub (uses motorove account)
+    2. ./docker.sh push prod --tag backend-v1.0.0
+    3. ./docker.sh pull prod        # Pull motorove/images:backend
+    
+    Images are pushed to the shared motorove/images repository with backend- prefix tags.
     
     The push command builds for both linux/amd64 (Railway, AWS) and 
     linux/arm64 (Mac M1/M2) by default using Docker Buildx.
 
 ${YELLOW}Note:${NC}
     Make sure to configure your .env files before starting containers.
-    Set DOCKER_HUB_USERNAME environment variable for push/pull commands.
+    Images are pushed to motorove/images repository with backend- prefix tags.
     See README-DOCKER-HUB.md for detailed Docker Hub documentation.
 
 EOF

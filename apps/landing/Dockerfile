@@ -1,5 +1,12 @@
 FROM node:20-alpine AS base
 
+# Docker Hub metadata for motorove/images:landing
+LABEL org.opencontainers.image.title="Motorove Landing Page"
+LABEL org.opencontainers.image.description="Next.js landing page for Motorove motorcycle community platform"
+LABEL org.opencontainers.image.vendor="Motorove"
+LABEL org.opencontainers.image.source="https://github.com/berkanbugday/motorove"
+LABEL org.opencontainers.image.documentation="https://github.com/berkanbugday/motorove/blob/main/apps/landing/README.md"
+
 # Install pnpm globally using npm (more reliable for multi-arch builds)
 RUN npm install -g pnpm@9.6.0
 
