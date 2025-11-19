@@ -1345,6 +1345,10 @@ export default {
       title: 'Emergency',
       body: '{{userFullName}} reported an {{emergencyType}} emergency. {{description}} {{address}} ',
     },
+    warning: {
+      title: 'Warning',
+      body: '{{userFullName}} reported a {{warningType}} warning nearby. {{description}} {{address}}',
+    },
     common: {
       view_details: 'View Details',
       dismiss: 'Dismiss',

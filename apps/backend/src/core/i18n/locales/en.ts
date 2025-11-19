@@ -92,6 +92,10 @@ export const enTranslations = {
       title: 'Emergency',
       body: '{{userFullName}} reported an {{emergencyType}} emergency',
     },
+    warning: {
+      title: 'Warning',
+      body: '{{userFullName}} reported a {{warningType}} warning nearby',
+    },
     common: {
       view_details: 'View Details',
       dismiss: 'Dismiss',

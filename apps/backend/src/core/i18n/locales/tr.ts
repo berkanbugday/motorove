@@ -92,6 +92,10 @@ export const trTranslations = {
       title: 'Acil Durum',
       body: '{{userFullName}} tarafından {{emergencyType}} acil durumu bildirildi.',
     },
+    warning: {
+      title: 'Uyarı',
+      body: '{{userFullName}} yakınlarda {{warningType}} uyarısı bildirdi',
+    },
     common: {
       view_details: 'Detayları Görüntüle',
       dismiss: 'Kapat',

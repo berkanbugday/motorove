@@ -7,7 +7,14 @@ import { FilterWarningInput } from './dto/filter-warning.input';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
 import { plainToClass } from 'class-transformer';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
+import { NotificationType } from '../enums/models/notification-type.enum';
 import { Language } from '@motorove/shared';
+import { NotificationChannel } from '../enums/models/notification-channel.enum';
+import { QueueService } from '../core/queue/queue.service';
+import { UserLocationsService } from '../user-locations/user-locations.service';
+import { UserDto } from 'src/users/dto/user.dto';
+import { WarningAddressDto } from './dto/warning-address.dto';
+import { WarningDescriptionDto } from './dto/warning-description.dto';
 
 @Injectable()
 export class WarningsService {
@@ -16,6 +23,8 @@ export class WarningsService {
   constructor(
     private prisma: PrismaService,
     private profanityFilterService: ProfanityFilterService,
+    private queueService: QueueService,
+    private userLocationsService: UserLocationsService,
   ) {}
 
   /**
@@ -53,7 +62,7 @@ export class WarningsService {
       `Fetching warnings for bounds: NE(${northEastLat}, ${northEastLng}), SW(${southWestLat}, ${southWestLng}), limit: ${limit}`,
     );
 
-    const whereClause: any = {
+    const whereClause = {
       isActive: true,
       status: ApprovalStatus.ACCEPTED,
       addresses: {
@@ -68,11 +77,8 @@ export class WarningsService {
           },
         },
       },
+      ...(type && { type }),
     };
-
-    if (type) {
-      whereClause.type = type;
-    }
 
     // Query warnings within the bounding box (viewport polygon)
     const warnings = await this.prisma.warning.findMany({
@@ -84,6 +90,13 @@ export class WarningsService {
           },
         },
         addresses: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: limit,
@@ -119,6 +132,13 @@ export class WarningsService {
           },
         },
         addresses: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
 
@@ -154,6 +174,13 @@ export class WarningsService {
           },
         },
         addresses: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -208,10 +235,37 @@ export class WarningsService {
             },
           },
           addresses: true,
+          createdBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       });
 
-      return plainToClass(WarningDto, warning);
+      const warningDto = plainToClass(WarningDto, warning);
+
+      // Find and notify nearby users (within 10km radius)
+      // This runs asynchronously so it doesn't block warning creation
+      if (warning.addresses.length > 0) {
+        this.notifyNearbyUsers(
+          currentUserId,
+          warningDto.id,
+          type,
+          warningDto.createdBy,
+          warningDto.addresses,
+          warningDto.descriptions,
+        ).catch((error) => {
+          this.logger.error(
+            `Failed to notify nearby users for warning ${warningDto.id}:`,
+            error,
+          );
+        });
+      }
+
+      return warningDto;
     } catch (error) {
       this.logger.error(
         `Error creating warning: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -219,6 +273,78 @@ export class WarningsService {
       ExceptionHelper.badRequest('errors.common.failed_to_create', {
         resource: 'warning',
       });
+    }
+  }
+
+  /**
+   * Find nearby users and send warning notifications
+   * Searches within 10km radius for users with recent locations (within last 10 minutes)
+   */
+  private async notifyNearbyUsers(
+    excludeUserId: string,
+    warningId: string,
+    warningType: string,
+    createdBy: Partial<UserDto>,
+    addresses: WarningAddressDto[],
+    descriptions?: WarningDescriptionDto[],
+  ): Promise<void> {
+    try {
+      this.logger.log(
+        `Finding nearby users for warning ${warningId} at (${addresses[0].latitude}, ${addresses[0].longitude})`,
+      );
+
+      // Find users within 10km radius with locations updated in last 10 minutes
+      const nearbyUsers = await this.userLocationsService.findNearbyUsers(
+        addresses[0].latitude,
+        addresses[0].longitude,
+        10, // 10km radius for warnings (smaller than emergency 20km)
+        excludeUserId,
+      );
+
+      if (nearbyUsers.length === 0) {
+        this.logger.log(`No nearby users found for warning ${warningId}`);
+        return;
+      }
+
+      this.logger.log(
+        `Found ${nearbyUsers.length} nearby users for warning ${warningId}`,
+      );
+
+      // Send warning notifications to nearby users
+      await this.queueService.addBulkNotificationJob(
+        {
+          userIds: nearbyUsers,
+          title: 'warning.title',
+          body: 'warning.body',
+          type: NotificationType.WARNING,
+          channels: NotificationChannel.PUSH,
+          data: {
+            warningId,
+            warningType,
+            userFullName: `${createdBy.firstName} ${createdBy.lastName}`,
+            addresses: addresses.map((addr) => ({
+              address: addr.address,
+              language: addr.language,
+            })),
+            descriptions:
+              descriptions?.map((desc) => ({
+                description: desc.description,
+                language: desc.language,
+              })) || [],
+          } as Record<string, any>,
+        },
+        excludeUserId,
+      );
+
+      this.logger.log(
+        `Sent warning notifications to ${nearbyUsers.length} nearby users`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify nearby users for warning ${warningId}:`,
+        error,
+      );
+      // Don't throw - we don't want to fail warning creation if notification fails
     }
   }
 

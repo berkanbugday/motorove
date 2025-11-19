@@ -1342,6 +1342,10 @@ export default {
       title: 'Acil Durum',
       body: '{{userFullName}} tarafından {{emergencyType}} acil durumu bildirildi. {{description}} {{address}} ',
     },
+    warning: {
+      title: 'Uyarı',
+      body: '{{userFullName}} yakınlarda {{warningType}} uyarısı bildirdi. {{description}} {{address}}',
+    },
     common: {
       view_details: 'Detayları Görüntüle',
       dismiss: 'Kapat',
