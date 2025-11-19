@@ -32,10 +32,12 @@ import {
   selectLanguageSpecificFields,
   INotification,
   Language,
+  NotificationType,
 } from '@motorove/shared';
 import {useTranslation} from '@hooks/useTranslation';
 import {useLanguage} from '@contexts/LanguageContext';
 import {FlashList} from '@shopify/flash-list';
+import {TouchableOpacity} from 'react-native';
 
 /**
  * NotificationSkeleton - Skeleton component for notification items
@@ -77,6 +79,32 @@ export const NotificationScreen = () => {
   });
 
   const [refreshing, setRefreshing] = useState(false);
+
+  // Handle notification press - navigate to MapScreen with warning/emergency ID
+  const handleNotificationPress = useCallback(
+    (notification: INotification) => {
+      const {type, data} = notification;
+
+      if (type === NotificationType.WARNING && data?.warningId) {
+        // Navigate to MapTab with focused warning ID
+        navigation.navigate('Tabs', {
+          screen: 'MapTab',
+          params: {
+            warningId: data.warningId,
+          },
+        });
+      } else if (type === NotificationType.EMERGENCY && data?.emergencyId) {
+        // Navigate to MapTab with focused emergency ID
+        navigation.navigate('Tabs', {
+          screen: 'MapTab',
+          params: {
+            emergencyId: data.emergencyId,
+          },
+        });
+      }
+    },
+    [navigation, t],
+  );
 
   useEffect(() => {
     const unreadNotificationExist =
@@ -243,52 +271,60 @@ export const NotificationScreen = () => {
 
     return (
       <SwipeableItem rightActions={rightActions}>
-        <View
-          style={[
-            styles.notificationItem,
-            !item.read && styles.unreadNotification,
-          ]}>
+        <TouchableOpacity
+          onPress={() => handleNotificationPress(item)}
+          activeOpacity={0.7}>
           <View
             style={[
-              styles.notificationIcon,
-              item.read && {backgroundColor: colors.status.success},
+              styles.notificationItem,
+              !item.read && styles.unreadNotification,
             ]}>
-            {item.read ? (
-              <Icon
-                name="check-filled"
-                size={15}
-                color={colors.neutral.white}
-              />
-            ) : (
-              <Icon name="bell-filled" size={15} color={colors.neutral.white} />
-            )}
-          </View>
-          <View style={styles.notificationContent}>
-            <Subtitle
-              weight={item.read ? 'medium' : 'bold'}
-              style={styles.notificationTitle}>
-              {t(`notifications.${item.title}`, formattedData).toString()}
-            </Subtitle>
-            <BodySmall style={styles.notificationBody}>
-              {t(`notifications.${item.body}`, formattedData).toString()}
-            </BodySmall>
-            <View style={styles.bottomRow}>
-              <View style={styles.timeContainer}>
-                <Icon name="clock" size={12} color={colors.neutral.grey} />
-                <Caption color={colors.neutral.grey} style={styles.infoText}>
-                  {formatDistanceToNow(new Date(item.createdAt), {
-                    addSuffix: true,
-                    locale:
-                      language.toLowerCase() === Language.TR.toLowerCase()
-                        ? tr
-                        : enUS,
-                  })}
-                </Caption>
+            <View
+              style={[
+                styles.notificationIcon,
+                item.read && {backgroundColor: colors.status.success},
+              ]}>
+              {item.read ? (
+                <Icon
+                  name="check-filled"
+                  size={15}
+                  color={colors.neutral.white}
+                />
+              ) : (
+                <Icon
+                  name="bell-filled"
+                  size={15}
+                  color={colors.neutral.white}
+                />
+              )}
+            </View>
+            <View style={styles.notificationContent}>
+              <Subtitle
+                weight={item.read ? 'medium' : 'bold'}
+                style={styles.notificationTitle}>
+                {t(`notifications.${item.title}`, formattedData).toString()}
+              </Subtitle>
+              <BodySmall style={styles.notificationBody}>
+                {t(`notifications.${item.body}`, formattedData).toString()}
+              </BodySmall>
+              <View style={styles.bottomRow}>
+                <View style={styles.timeContainer}>
+                  <Icon name="clock" size={12} color={colors.neutral.grey} />
+                  <Caption color={colors.neutral.grey} style={styles.infoText}>
+                    {formatDistanceToNow(new Date(item.createdAt), {
+                      addSuffix: true,
+                      locale:
+                        language.toLowerCase() === Language.TR.toLowerCase()
+                          ? tr
+                          : enUS,
+                    })}
+                  </Caption>
+                </View>
               </View>
             </View>
+            {!item.read && <View style={styles.unreadIndicator} />}
           </View>
-          {!item.read && <View style={styles.unreadIndicator} />}
-        </View>
+        </TouchableOpacity>
       </SwipeableItem>
     );
   };

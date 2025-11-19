@@ -26,7 +26,12 @@ export type AuthScreenRouteProp<T extends keyof AuthStackParamList> = RouteProp<
 export type TabParamList = {
   HomeTab: undefined;
   SearchTab: undefined;
-  MapTab: undefined;
+  MapTab:
+    | {
+        warningId?: string;
+        emergencyId?: string;
+      }
+    | undefined;
   GroupsTab: undefined;
   MenuTab: undefined;
 };
@@ -41,7 +46,12 @@ export type TabScreenRouteProp<T extends keyof TabParamList> = RouteProp<
 
 // MAIN STACK
 export type MainStackParamList = {
-  Tabs: undefined;
+  Tabs:
+    | {
+        screen?: keyof TabParamList;
+        params?: TabParamList[keyof TabParamList];
+      }
+    | undefined;
   PostComment: {postId: string};
   CreatePost: undefined;
   EditPost: {postId: string};

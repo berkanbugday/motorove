@@ -127,7 +127,7 @@ export const useGetWarnings = (
 };
 
 // Hook for getting a specific warning
-export const useGetWarning = (id: string) => {
+export const useGetWarning = (id?: string) => {
   const {data, loading, error, refetch} = useQuery(GET_WARNING, {
     variables: {id},
     skip: !id,

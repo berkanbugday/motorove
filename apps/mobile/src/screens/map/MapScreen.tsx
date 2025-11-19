@@ -3,7 +3,11 @@ import {StyleSheet, View, Platform} from 'react-native';
 import {RNMap, RNMapMarkerItem, MapTabType} from '@components/RNMap';
 import {useGetBusinesses} from '@services/business.service';
 import {IBusiness, ICreateWarning, ICreateEmergency} from '@motorove/shared';
-import {useGetWarnings, useCreateWarning} from '@services/warning.service';
+import {
+  useGetWarnings,
+  useGetWarning,
+  useCreateWarning,
+} from '@services/warning.service';
 import {
   IconName,
   Button,
@@ -19,11 +23,15 @@ import Geolocation from '@react-native-community/geolocation';
 import {Region} from 'react-native-maps';
 import {useTranslation} from '@hooks/useTranslation';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
-import {useNavigation} from '@react-navigation/native';
-import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  MainScreenNavigationProp,
+  TabScreenRouteProp,
+} from '@navigation/types/navigationTypes';
 import {MapFilter, MapFilterValues} from '@components/MapFilter';
 import {
   useGetEmergencies,
+  useGetEmergency,
   useCreateEmergency,
 } from '@services/emergency.service';
 import {getEmergencyIconAndColor} from '@utils/emergencyUtils';
@@ -46,6 +54,7 @@ export const MapScreen = () => {
   const {user} = useAuth();
   const navigation =
     useNavigation<MainScreenNavigationProp<'BusinessDetail'>>();
+  const route = useRoute<TabScreenRouteProp<'MapTab'>>();
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [selectedBusinessId, setSelectedBusinessId] = useState<
     string | undefined
@@ -76,6 +85,17 @@ export const MapScreen = () => {
   const {createEmergency} = useCreateEmergency();
   const {createWarning} = useCreateWarning();
   const [selectedTab, setSelectedTab] = useState<MapTabType>();
+
+  // Get focused warning/emergency IDs from route params
+  const warningId = route.params?.warningId;
+  const emergencyId = route.params?.emergencyId;
+  // Fetch specific warning if warning ID is provided
+  const {warning: focusedWarning, loading: focusedWarningLoading} =
+    useGetWarning(warningId);
+
+  // Fetch specific emergency if emergency ID is provided
+  const {emergency: focusedEmergency, loading: focusedEmergencyLoading} =
+    useGetEmergency(emergencyId || '');
 
   // Memoize mapBounds to prevent unnecessary re-renders
   const memoizedMapBounds = useMemo(() => mapBounds || undefined, [mapBounds]);
@@ -221,8 +241,83 @@ export const MapScreen = () => {
 
   // Get user location on mount
   useEffect(() => {
-    getUserLocation();
-  }, [getUserLocation]);
+    if (!warningId && !emergencyId) {
+      getUserLocation();
+    }
+  }, [getUserLocation, warningId, emergencyId]);
+
+  // Handle focused warning/emergency from route params
+  useEffect(() => {
+    if (warningId && focusedWarning) {
+      // Set warnings tab
+      setSelectedTab(MapTabType.WARNINGS);
+
+      // Clear business selection
+      setSelectedBusinessId(undefined);
+      setSelectedBusiness(undefined);
+
+      // Get warning location from addresses
+      const warningAddress = focusedWarning.addresses?.[0];
+      if (warningAddress?.latitude && warningAddress?.longitude) {
+        const warningRegion: Region = {
+          latitude: warningAddress.latitude,
+          longitude: warningAddress.longitude,
+          latitudeDelta: 0.01, // Close zoom like getUserLocation
+          longitudeDelta: 0.01,
+        };
+
+        setRegion(warningRegion);
+        setCurrentRegion(warningRegion);
+
+        // Animate to warning location
+        if (mapRef.current) {
+          mapRef.current.animateToRegion(warningRegion, 1000);
+        }
+
+        // Set map bounds to trigger data fetch for the area
+        const bounds = calculateBounds(warningRegion);
+        setMapBounds(bounds);
+      }
+    } else if (emergencyId && focusedEmergency) {
+      // Set emergencies tab
+      setSelectedTab(MapTabType.EMERGENCIES);
+
+      // Clear business selection
+      setSelectedBusinessId(undefined);
+      setSelectedBusiness(undefined);
+
+      // Get emergency location from addresses
+      const emergencyAddress = focusedEmergency.addresses?.[0];
+      if (emergencyAddress?.latitude && emergencyAddress?.longitude) {
+        const emergencyRegion: Region = {
+          latitude: emergencyAddress.latitude,
+          longitude: emergencyAddress.longitude,
+          latitudeDelta: 0.01, // Close zoom like getUserLocation
+          longitudeDelta: 0.01,
+        };
+
+        setRegion(emergencyRegion);
+        setCurrentRegion(emergencyRegion);
+
+        // Animate to emergency location
+        if (mapRef.current) {
+          mapRef.current.animateToRegion(emergencyRegion, 1000);
+        }
+
+        // Set map bounds to trigger data fetch for the area
+        const bounds = calculateBounds(emergencyRegion);
+        setMapBounds(bounds);
+      }
+    } else {
+      getUserLocation();
+    }
+  }, [
+    warningId,
+    focusedWarning,
+    emergencyId,
+    focusedEmergency,
+    calculateBounds,
+  ]);
 
   // Handle "Search This Area" button press
   const handleSearchThisArea = useCallback(() => {
@@ -501,7 +596,13 @@ export const MapScreen = () => {
         onProfilePress={handleProfilePress}
       />
       <LoadingIndicator
-        visible={loading || warningsLoading || emergenciesLoading}
+        visible={
+          loading ||
+          warningsLoading ||
+          emergenciesLoading ||
+          focusedWarningLoading ||
+          focusedEmergencyLoading
+        }
       />
     </View>
   );

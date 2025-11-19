@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -22,7 +22,9 @@ export class WarningsResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => WarningDto, { name: 'warning' })
-  async findOne(@Args('id') id: string): Promise<WarningDto> {
+  async findOne(
+    @Args('id', { type: () => ID, nullable: true }) id: string,
+  ): Promise<WarningDto> {
     return await this.warningsService.findOne(id);
   }
 

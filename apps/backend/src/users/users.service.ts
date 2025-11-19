@@ -211,13 +211,16 @@ export class UsersService {
     authToken?: string,
   ): Promise<boolean> {
     try {
-      // Process avatar if present and is base64
-      const avatarUrl = await this.storageService.processImageUpload(
-        input.avatar,
-        'users/avatars',
-        `avatar-${userId}`,
-        authToken,
-      );
+      let avatarUrl: string | undefined;
+      if (input.avatar?.includes('base64')) {
+        // Process avatar if present and is base64
+        avatarUrl = await this.storageService.processImageUpload(
+          input.avatar,
+          'users/avatars',
+          `avatar-${userId}`,
+          authToken,
+        );
+      }
 
       // Prepare update data
       const accountSetupData: any = {
@@ -226,7 +229,7 @@ export class UsersService {
         gender: input.gender,
         ridingStyles: input.ridingStyles,
         interests: input.interests,
-        avatar: `${this.imagePublicUrl}/${avatarUrl}`,
+        ...(avatarUrl && { avatar: `${this.imagePublicUrl}/${avatarUrl}` }),
         hasCompletedSetup: true,
         updatedAt: new Date(),
       };

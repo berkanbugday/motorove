@@ -1070,7 +1070,7 @@ type Query {
   city(id: ID!): CityDto!
   count: Float!
   emergencies(filter: FilterEmergencyInput!): [EmergencyDto!]!
-  emergency(id: String!): EmergencyDto!
+  emergency(id: ID!): EmergencyDto!
   event(id: String!): EventDto!
   eventInvitations(limit: Int, skip: Int): [EventInvitationDto!]!
   events(groupId: String, limit: Int, skip: Int, status: EventStatus): [EventDto!]!
@@ -1102,7 +1102,7 @@ type Query {
   userSetting: UserSettingDto!
   userStats(userId: String!): UserStatsDto!
   users(limit: Int, query: String, skip: Int): [UserDto!]!
-  warning(id: String!): WarningDto!
+  warning(id: ID): WarningDto!
   warnings(filter: FilterWarningInput!): [WarningDto!]!
   weather: Weather
 }

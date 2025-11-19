@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -22,7 +22,9 @@ export class EmergenciesResolver {
 
   @UseGuards(JwtGuard)
   @Query(() => EmergencyDto, { name: 'emergency' })
-  async findOne(@Args('id') id: string): Promise<EmergencyDto> {
+  async findOne(
+    @Args('id', { type: () => ID }) id: string,
+  ): Promise<EmergencyDto> {
     return await this.emergenciesService.findOne(id);
   }
 
