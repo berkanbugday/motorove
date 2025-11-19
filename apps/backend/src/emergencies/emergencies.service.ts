@@ -361,7 +361,7 @@ export class EmergenciesService {
       const nearbyUsers = await this.userLocationsService.findNearbyUsers(
         addresses[0].latitude,
         addresses[0].longitude,
-        20, // 20km radius
+        10, // 10km radius
         excludeUserId,
       );
 

@@ -60,7 +60,7 @@ export class UserLocationsService {
   async findNearbyUsers(
     latitude: number,
     longitude: number,
-    radiusKm: number = 20,
+    radiusKm: number = 10,
     excludeUserId?: string,
   ): Promise<string[]> {
     try {
