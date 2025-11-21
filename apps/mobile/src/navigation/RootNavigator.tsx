@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useCallback} from 'react';
+import React, {useEffect, useRef, useCallback, useState} from 'react';
 import {View, StyleSheet, ActivityIndicator, Image} from 'react-native';
 import {
   NavigationContainer,
@@ -44,6 +44,7 @@ export function RootNavigator() {
     isFirstTime,
     isLoading: firstTimeLoading,
   } = useFirstTimeCheck();
+  const [showLoading, setShowLoading] = useState(true);
 
   useEffect(() => {
     async function init() {
@@ -51,6 +52,15 @@ export function RootNavigator() {
     }
     init();
   }, [checkFirstTimeUser]);
+
+  // Add minimum loading time to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoading(false);
+    }, 300); // Minimum 300ms loading time
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const isAuthenticated = Boolean(user) && Boolean(accessToken);
 
@@ -61,7 +71,7 @@ export function RootNavigator() {
     }
   }, [isAuthenticated]);
   // Show loading screen with logo when checking auth, session revival, or first time status
-  if (isInitializing || firstTimeLoading) {
+  if (isInitializing || firstTimeLoading || showLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Image

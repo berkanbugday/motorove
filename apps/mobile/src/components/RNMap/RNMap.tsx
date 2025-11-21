@@ -18,13 +18,10 @@ import {RNMapBusinessMarkerCard} from './RNMapBusinessMarkerCard';
 import {RNMapWarningMarkerCard} from './RNMapWarningMarkerCard';
 import {RNMapEmergencyMarkerCard} from './RNMapEmergencyMarkerCard';
 import {useAnimatedRegion} from '@hooks/useAnimatedRegion';
-import {Button} from '@components/Button/Button';
 import {useTranslation} from '@hooks/useTranslation';
-import {getShadow} from '@theme/shadows';
-import {colors} from '@theme/colors';
+import {getShadow, spacing, colors} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {spacing} from '@theme/spacing';
-import {Chip} from '@components/Chip';
+import {Chip, LoadingIndicator, Button} from '@components';
 
 const screen = Dimensions.get('window');
 const ITEM_SPACING = 10;
@@ -66,6 +63,10 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   const [isMapReady, setIsMapReady] = useState(false);
   const [isWarningExpanded, setIsWarningExpanded] = useState(false);
   const [isEmergencyExpanded, setIsEmergencyExpanded] = useState(false);
+  const [reorderedMarkers, setReorderedMarkers] = useState<RNMapMarkerItem[]>(
+    [],
+  );
+  const [isLoadingCards, setIsLoadingCards] = useState(false);
   const internalMapRef = useRef<MapView>(null);
   const activeMapRef = mapRef || internalMapRef;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -175,13 +176,33 @@ const RNMapComponent: React.FC<RNMapProps> = ({
 
   /**
    * Handle marker press - update selection and scroll to card
-   * Note: Scroll position will be calculated based on filtered markers in useEffect
+   * Reorders cards to put selected marker first
    */
   const handleMarkerPress = useCallback(
     (marker: RNMapMarkerItem, index: number) => {
+      // Show loading indicator
+      setIsLoadingCards(true);
+
+      // Determine marker type and filter markers inline
+      const selectedMarker = markers[index];
+      let baseMarkers: RNMapMarkerItem[] = [];
+
+      if (selectedMarker.business) {
+        baseMarkers = markers.filter(m => m.business);
+      } else if (selectedMarker.warning) {
+        baseMarkers = markers.filter(m => m.warning);
+      } else if (selectedMarker.emergency) {
+        baseMarkers = markers.filter(m => m.emergency);
+      }
+
+      // Reorder: selected marker first, then others
+      const otherMarkers = baseMarkers.filter(m => m.id !== selectedMarker.id);
+      const reordered = [selectedMarker, ...otherMarkers];
+      setReorderedMarkers(reordered);
+
       updateSelectedMarker(index);
     },
-    [updateSelectedMarker],
+    [updateSelectedMarker, markers],
   );
 
   // Debounced region change handler for performance
@@ -323,22 +344,6 @@ const RNMapComponent: React.FC<RNMapProps> = ({
     [markers, handleMarkerPress, selectedBusinessId, selectedIndex],
   );
 
-  // Split markers by type for organized rendering
-  const businessMarkers = useMemo(
-    () => markers.filter(marker => marker.business),
-    [markers],
-  );
-
-  const warningMarkers = useMemo(
-    () => markers.filter(marker => marker.warning),
-    [markers],
-  );
-
-  const emergencyMarkers = useMemo(
-    () => markers.filter(marker => marker.emergency),
-    [markers],
-  );
-
   // Determine which marker type is currently selected
   const selectedMarkerType = useMemo(() => {
     if (selectedIndex === null) {
@@ -361,27 +366,21 @@ const RNMapComponent: React.FC<RNMapProps> = ({
     return null;
   }, [selectedIndex, markers]);
 
-  // Filter cards to show only the same type as selected marker
+  // Use reordered markers (set when marker is tapped)
+  // This array stays stable during card scrolling - NO reordering on scroll
   const filteredMarkers = useMemo(() => {
-    if (!selectedMarkerType) {
+    if (!selectedMarkerType || selectedIndex === null) {
       return [];
     }
 
-    switch (selectedMarkerType) {
-      case 'business':
-        return businessMarkers;
-      case 'warning':
-        return warningMarkers;
-      case 'emergency':
-        return emergencyMarkers;
-      default:
-        return [];
-    }
-  }, [selectedMarkerType, businessMarkers, warningMarkers, emergencyMarkers]);
+    // Return the reordered markers that were set when marker was tapped
+    // This ensures the order stays stable during scrolling
+    return reorderedMarkers;
+  }, [selectedMarkerType, selectedIndex, reorderedMarkers]);
 
   /**
    * Handle card scroll end - update selected marker and center map
-   * Only scrolls within the same marker type (business, warning, or emergency)
+   * Does NOT reorder cards - maintains the current reordered array
    */
   const handleScrollEnd = useCallback(
     (event: any) => {
@@ -389,31 +388,49 @@ const RNMapComponent: React.FC<RNMapProps> = ({
         event.nativeEvent.contentOffset.x / (ITEM_WIDTH + ITEM_SPACING),
       );
 
-      // Get the marker from filtered list
-      if (scrollIndex >= 0 && scrollIndex < filteredMarkers.length) {
-        const scrolledMarker = filteredMarkers[scrollIndex];
+      // Get the marker from the CURRENT reordered list (no reordering)
+      if (scrollIndex >= 0 && scrollIndex < reorderedMarkers.length) {
+        const scrolledMarker = reorderedMarkers[scrollIndex];
         // Find its original index in the full markers array
         const originalIndex = markers.findIndex(
           m => m.id === scrolledMarker.id,
         );
 
         if (originalIndex !== -1 && originalIndex !== selectedIndex) {
+          // Update selection but DO NOT reorder - keep reorderedMarkers unchanged
           updateSelectedMarker(originalIndex);
         }
       }
     },
-    [filteredMarkers, markers, selectedIndex, updateSelectedMarker],
+    [reorderedMarkers, markers, selectedIndex, updateSelectedMarker],
   );
 
   /**
-   * Scroll to selected marker within filtered list when selection changes
+   * Hide loading indicator when cards are ready
    */
   useEffect(() => {
-    if (selectedIndex !== null && scrollViewRef.current) {
+    if (reorderedMarkers.length > 0 && isLoadingCards) {
+      // Cards are ready, hide loading after a short delay
+      const timer = setTimeout(() => {
+        setIsLoadingCards(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [reorderedMarkers, isLoadingCards]);
+
+  /**
+   * Scroll to selected marker within the reordered list when selection changes
+   */
+  useEffect(() => {
+    if (
+      selectedIndex !== null &&
+      scrollViewRef.current &&
+      reorderedMarkers.length > 0
+    ) {
       const selectedMarker = markers[selectedIndex];
       if (selectedMarker) {
-        // Find the index in filtered markers
-        const filteredIndex = filteredMarkers.findIndex(
+        // Find the marker's position in the current reordered list
+        const filteredIndex = reorderedMarkers.findIndex(
           m => m.id === selectedMarker.id,
         );
 
@@ -427,7 +444,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
         }
       }
     }
-  }, [selectedIndex, markers, filteredMarkers]);
+  }, [selectedIndex, markers, reorderedMarkers]);
 
   // Memoize card rendering for performance - only show cards of selected type
   const renderedCards = useMemo(
@@ -639,8 +656,11 @@ const RNMapComponent: React.FC<RNMapProps> = ({
         </View>
       )}
 
+      {/* Loading indicator for marker cards */}
+      <LoadingIndicator visible={showScrollView && isLoadingCards} />
+
       {/* Scrollable marker cards - only shown after marker selection */}
-      {showScrollView && (
+      {showScrollView && !isLoadingCards && (
         <ScrollView
           ref={scrollViewRef}
           horizontal

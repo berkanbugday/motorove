@@ -45,6 +45,7 @@ if (
 
 function App(): React.JSX.Element {
   const [isStorageReady, setIsStorageReady] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
 
   // Initialize services
   useEffect(() => {
@@ -86,7 +87,16 @@ function App(): React.JSX.Element {
     initializeStorage();
   }, []);
 
-  if (!isStorageReady) {
+  // Add minimum loading time to prevent flickering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoading(false);
+    }, 300); // Minimum 300ms loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!isStorageReady || showLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Image

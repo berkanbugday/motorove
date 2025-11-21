@@ -452,10 +452,16 @@ export const MapScreen = () => {
   }, [navigation, selectedBusiness]);
 
   const handleMarkerPress = useCallback((marker: RNMapMarkerItem) => {
+    // Clear all selections first
+    setSelectedBusinessId(undefined);
+    setSelectedBusiness(undefined);
+
+    // Set the appropriate selection based on marker type
     if (marker.business) {
       setSelectedBusinessId(marker.business.id);
       setSelectedBusiness(marker.business);
     }
+    // Note: Warning and emergency selections are now handled internally by RNMap component
   }, []);
 
   // Handle my location button press

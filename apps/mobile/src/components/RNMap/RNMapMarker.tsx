@@ -1,11 +1,10 @@
 import React, {useEffect, useRef} from 'react';
-import {View, StyleSheet, Animated} from 'react-native';
-import {Marker} from 'react-native-maps';
+import {View, StyleSheet} from 'react-native';
+import {Marker, Callout} from 'react-native-maps';
 import {RNMapMarkerItem} from './types';
-import {colors} from '@theme/colors';
-import {Icon} from '@components/Icon';
-import {getShadow} from '@theme/shadows';
-import {radius} from '@theme/radius';
+import {colors, getShadow, radius, spacing} from '@theme';
+import {Icon, Body} from '@components';
+import {useTranslation} from '@hooks/useTranslation';
 
 interface RNMapMarkerProps {
   marker: RNMapMarkerItem;
@@ -22,53 +21,68 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
   onPress,
   isSelected = false,
 }) => {
+  const {t} = useTranslation();
   const markerColor = marker.pinColor || colors.neutral.black;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const markerRef = useRef<any>(null);
 
-  // Animate scale when selection changes
+  //  show/hide callout when selection changes
   useEffect(() => {
-    Animated.spring(scaleAnim, {
-      toValue: isSelected ? 1 : 0.8,
-      useNativeDriver: true,
-      friction: 8,
-      tension: 40,
-    }).start();
-  }, [isSelected, scaleAnim]);
+    // Show/hide callout based on selection
+    if (markerRef.current) {
+      if (isSelected) {
+        markerRef.current.showCallout();
+      } else {
+        markerRef.current.hideCallout();
+      }
+    }
+  }, [isSelected]);
+
+  // Get callout title based on marker type
+  const getCalloutTitle = () => {
+    if (marker.business) {
+      return marker.business.name;
+    }
+    if (marker.warning) {
+      return t(`enums.warningType.${marker.warning.type.toLowerCase()}`);
+    }
+    if (marker.emergency) {
+      return t(`enums.emergencyType.${marker.emergency.type.toLowerCase()}`);
+    }
+    return marker.title || '';
+  };
 
   return (
     <Marker
+      ref={markerRef}
       coordinate={marker.coordinate}
       onPress={onPress}
-      tracksViewChanges={false}
-      zIndex={marker.zIndex || (isSelected ? 1000 : 1)}>
-      <Animated.View
-        style={[
-          styles.markerContainer,
-          {
-            transform: [{scale: scaleAnim}],
-          },
-        ]}>
-        <View
-          style={[
-            styles.markerInner,
-            {backgroundColor: markerColor},
-            isSelected && styles.markerInnerSelected,
-          ]}>
-          {marker.iconName ? (
-            <Icon
-              name={marker.iconName}
-              size={20}
-              color={marker.iconColor || colors.neutral.white}
-            />
-          ) : (
-            <Icon
-              name="map-pin-filled"
-              size={20}
-              color={marker.iconColor || colors.neutral.white}
-            />
-          )}
+      tracksViewChanges={false}>
+      <View style={[styles.markerInner, {backgroundColor: markerColor}]}>
+        {marker.iconName ? (
+          <Icon
+            name={marker.iconName}
+            size={20}
+            color={marker.iconColor || colors.neutral.white}
+          />
+        ) : (
+          <Icon
+            name="map-pin-filled"
+            size={20}
+            color={marker.iconColor || colors.neutral.white}
+          />
+        )}
+      </View>
+      <Callout tooltip>
+        <View style={styles.calloutContainer}>
+          <Body
+            align="center"
+            weight="semiBold"
+            color={colors.neutral.black}
+            numberOfLines={2}>
+            {getCalloutTitle()}
+          </Body>
         </View>
-      </Animated.View>
+      </Callout>
     </Marker>
   );
 };
@@ -103,5 +117,12 @@ const styles = StyleSheet.create({
   },
   markerText: {
     fontSize: 11,
+  },
+  calloutContainer: {
+    backgroundColor: colors.neutral.white,
+    padding: spacing.sm,
+    borderRadius: radius.md,
+    minWidth: 100,
+    ...getShadow('medium'),
   },
 });
