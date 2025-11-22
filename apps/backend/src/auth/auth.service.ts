@@ -7,10 +7,8 @@ import { SupabaseService } from './supabase.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { AuthResponse } from './models/auth-response.model';
-import { AuthUser } from './models/auth-user.model';
 import { NotificationPermission } from '../enums/models/notification-permission.enum';
 import { NotificationType } from '../enums/models/notification-type.enum';
-import { StorageService } from '../core/storage/storage.service';
 import { Language } from '../enums/models/language.enum';
 import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 
@@ -19,7 +17,6 @@ export class AuthService {
   constructor(
     private supabaseService: SupabaseService,
     private prismaService: PrismaService,
-    private storageService: StorageService,
   ) {}
 
   async signUp(
@@ -273,7 +270,7 @@ export class AuthService {
     }
   }
 
-  async validateUser(token: string): Promise<AuthUser> {
+  async validateUser(token: string): Promise<string> {
     const { data, error } = await this.supabaseService.getUser(token);
 
     if (error || !data.user) {
@@ -282,9 +279,8 @@ export class AuthService {
 
     const user = await this.prismaService.user.findFirst({
       where: { supabaseId: data.user.id },
-      include: {
-        userSetting: true,
-        city: true,
+      select: {
+        id: true,
       },
     });
 
@@ -294,17 +290,7 @@ export class AuthService {
       });
     }
 
-    return {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      avatar: user.avatar,
-      hasCompletedSetup: user.hasCompletedSetup,
-      notificationPermission: user.userSetting
-        ?.notificationPermission as NotificationPermission,
-      preferredLanguage: user.userSetting?.preferredLanguage as Language,
-    };
+    return user.id;
   }
 
   async resetPassword(email: string): Promise<boolean> {

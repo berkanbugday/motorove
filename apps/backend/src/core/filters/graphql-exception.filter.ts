@@ -146,7 +146,6 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
       if (context.req?.user) {
         safeContext.user = {
           id: context.req.user.id,
-          email: context.req.user.email,
         };
       }
 

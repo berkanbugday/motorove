@@ -19,8 +19,8 @@ export class SupabaseService {
 
     this.supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
-        autoRefreshToken: false,
         flowType: 'pkce',
+        detectSessionInUrl: false,
       },
     });
   }
