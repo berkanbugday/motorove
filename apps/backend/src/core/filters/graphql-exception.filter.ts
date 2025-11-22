@@ -173,8 +173,8 @@ export class GraphqlExceptionFilter implements GqlExceptionFilter {
     statusCode: number;
     stack?: string;
   } {
-    // Get user's preferred language or default to TR
-    const preferredLanguage = user?.preferredLanguage || Language.TR;
+    // Get user's preferred language or default to EN
+    const preferredLanguage = user?.preferredLanguage || Language.EN;
 
     if (exception instanceof TranslatedException) {
       // Translate the exception message

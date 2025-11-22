@@ -10,6 +10,7 @@ import {
   useRemoveDeviceToken,
 } from '@services/notification.service';
 import {useAuth} from '@contexts/AuthContext';
+import {useTranslation} from './useTranslation';
 
 type NotificationPermissionStatus =
   | 'granted'
@@ -36,6 +37,7 @@ export const useNotificationPermission = () => {
   const {updateNotificationPermission} = useAuth();
   const {saveDeviceToken} = useSaveDeviceToken();
   const {removeDeviceToken} = useRemoveDeviceToken();
+  const {t} = useTranslation();
 
   /**
    * Open app settings if permission is blocked
@@ -184,6 +186,13 @@ export const useNotificationPermission = () => {
           // For Android 13+, request POST_NOTIFICATIONS permission
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+            {
+              title: t('permissions.notification.title'),
+              message: t('permissions.notification.message'),
+              buttonNeutral: t('common.ask_me_later'),
+              buttonNegative: t('common.cancel'),
+              buttonPositive: t('common.ok'),
+            },
           );
 
           const permissionGranted =

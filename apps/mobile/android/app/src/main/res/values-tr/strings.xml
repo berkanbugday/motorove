@@ -1,0 +1,19 @@
+<resources>
+    <!-- app_name is dynamically set in build.gradle based on build flavor -->
+    
+    <!-- İzin Açıklamaları - Türkçe -->
+    <string name="location_permission_title">Konum İzni</string>
+    <string name="location_permission_message">Motorove, haritada konumunuzu göstermek ve yakındaki sürücülerin acil durumlara yanıt vermesine yardımcı olmak için konumunuza ihtiyaç duyar.</string>
+    
+    <string name="background_location_permission_title">Arka Plan Konum İzni</string>
+    <string name="background_location_permission_message">Motorove, uygulama arka planda olsa bile acil durum oluşturduğunuzda yakındaki sürücüleri bilgilendirmek için sürekli konum erişimine ihtiyaç duyar. Bu, sürücülerin acil durumlara hızlı yanıt vermesine yardımcı olur.</string>
+    
+    <string name="notification_permission_title">Bildirim İzni</string>
+    <string name="notification_permission_message">Motorove, etkinlikler, acil durumlar ve topluluk aktiviteleri hakkında önemli güncellemeleri size göndermek için bildirim iznine ihtiyaç duyar.</string>
+    
+    <string name="camera_permission_title">Kamera İzni</string>
+    <string name="camera_permission_message">Fotoğraf çekmenize izin vermek için kameranıza erişmemiz gerekiyor.</string>
+    
+    <string name="photo_library_permission_title">Fotoğraf Galerisi İzni</string>
+    <string name="photo_library_permission_message">Görsel paylaşmanıza izin vermek için fotoğraf galerinize erişmemiz gerekiyor.</string>
+</resources>

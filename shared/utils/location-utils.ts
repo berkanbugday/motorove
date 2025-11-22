@@ -70,7 +70,7 @@ export const calculateRoute = async (
   startLng: number,
   endLat: number,
   endLng: number,
-  language: Language = Language.TR
+  language: Language = Language.EN
 ): Promise<RouteResult> => {
   // Use Google Maps Routes API (v2) to calculate route distance and duration
   const url = "https://routes.googleapis.com/directions/v2:computeRoutes";

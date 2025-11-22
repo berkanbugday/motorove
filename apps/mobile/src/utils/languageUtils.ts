@@ -1,7 +1,7 @@
 import * as RNLocalize from 'react-native-localize';
 import {Language} from '@motorove/shared';
 
-const DEFAULT_LANGUAGE = Language.TR.toLowerCase();
+const DEFAULT_LANGUAGE = Language.EN.toLowerCase();
 /**
  * Gets the device language and checks if it's supported
  * @param defaultLanguage The default language to return if device language is not supported

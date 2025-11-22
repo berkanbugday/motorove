@@ -60,6 +60,7 @@ export default {
     pending_approval: 'Pending Approval',
     following: 'Following',
     not_now: 'Not Now',
+    ask_me_later: 'Ask Me Later',
     view_all: 'View All',
     select_all: 'Select All',
     clear_all: 'Clear All',
@@ -1032,6 +1033,7 @@ export default {
     api: {
       default: 'An error occurred while processing your request.',
       not_found: 'The requested information could not be found.',
+      failed_to_load_post: 'Failed to load post. Please try again.',
     },
     // GraphQL specific errors
     graphql: {
@@ -1356,6 +1358,33 @@ export default {
       dismiss: 'Dismiss',
       accept: 'Accept',
       reject: 'Reject',
+    },
+  },
+
+  // Permissions
+  permissions: {
+    location: {
+      title: 'Location Permission',
+      message:
+        'Motorove needs your location to show your position on the map and help nearby riders respond to emergencies.',
+    },
+    backgroundLocation: {
+      title: 'Background Location Permission',
+      message:
+        'Motorove needs continuous location access to notify nearby riders when you create an emergency, even when the app is in the background. This helps riders respond quickly to emergencies.',
+    },
+    notification: {
+      title: 'Notification Permission',
+      message:
+        'Motorove needs notification permission to send you important updates about events, emergencies, and community activities.',
+    },
+    camera: {
+      title: 'Camera Permission',
+      message: 'We need access to your camera to let you take photos.',
+    },
+    photoLibrary: {
+      title: 'Photo Library Permission',
+      message: 'We need access to your photo library to let you share images.',
     },
   },
 };

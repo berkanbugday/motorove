@@ -27,8 +27,6 @@ export class AuthUser {
   })
   notificationPermission: NotificationPermission;
 
-  @Field(() => Language, {
-    defaultValue: Language.TR,
-  })
+  @Field(() => Language, { defaultValue: Language.EN })
   preferredLanguage: Language;
 }

@@ -49,8 +49,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "tr_TR",
-    alternateLocale: ["en_US"],
+    locale: "en_US",
+    alternateLocale: ["tr_TR"],
     siteName: "Motorove",
     title: "Motorove",
     description:
@@ -92,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang={Language.TR.toLowerCase()} suppressHydrationWarning>
+    <html lang={Language.EN.toLowerCase()} suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"

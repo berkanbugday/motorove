@@ -4,7 +4,7 @@ import resources from './locales';
 import {getDeviceLanguage} from '../utils/languageUtils';
 import {Language} from '@motorove/shared';
 
-const DEFAULT_LANGUAGE = Language.TR.toLowerCase();
+const DEFAULT_LANGUAGE = Language.EN.toLowerCase();
 // Initialize i18n
 i18n.use(initReactI18next).init({
   resources,

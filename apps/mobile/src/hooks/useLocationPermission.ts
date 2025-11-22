@@ -5,6 +5,7 @@ import Geolocation, {
 } from '@react-native-community/geolocation';
 import {loggingService} from '@services/logging.service';
 import {useUpdateUserLocation} from '@services/user-location.service';
+import {useTranslation} from './useTranslation';
 
 type LocationPermissionStatus =
   | 'granted'
@@ -36,6 +37,7 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
   const lastBackgroundUpdateRef = useRef<number>(0); // Track last background update timestamp
   const isUpdatingLocationRef = useRef(false); // Prevent concurrent location updates
   const {updateUserLocation: updateLocationMutation} = useUpdateUserLocation();
+  const {t} = useTranslation();
 
   /**
    * Update user location by getting current position and sending to backend
@@ -374,11 +376,11 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
-            title: 'Location Permission',
-            message: 'Motorove needs access to your location',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
+            title: t('permissions.location.title'),
+            message: t('permissions.location.message'),
+            buttonNeutral: t('common.ask_me_later'),
+            buttonNegative: t('common.cancel'),
+            buttonPositive: t('common.ok'),
           },
         );
 

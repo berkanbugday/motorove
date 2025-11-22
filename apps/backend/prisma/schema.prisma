@@ -880,7 +880,7 @@ model UserSetting {
   autoAcceptFollowers Boolean @default(false)
 
   // Language preference for notifications and app content
-  preferredLanguage Language @default(TR)
+  preferredLanguage Language @default(EN)
 
   // Notification permission fields
   notificationPermission NotificationPermission @default(UNKNOWN)

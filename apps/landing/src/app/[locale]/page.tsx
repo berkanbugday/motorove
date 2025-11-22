@@ -35,9 +35,9 @@ export async function generateMetadata({
   };
 
   return {
-    title: titles[locale] || titles[Language.TR.toLowerCase()],
+    title: titles[locale] || titles[Language.EN.toLowerCase()],
     description:
-      descriptions[locale] || descriptions[Language.TR.toLowerCase()],
+      descriptions[locale] || descriptions[Language.EN.toLowerCase()],
     alternates: {
       canonical: `/${locale}`,
       languages: {

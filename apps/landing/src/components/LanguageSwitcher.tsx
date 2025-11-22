@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "../app/i18n";
@@ -9,12 +9,11 @@ import { Language } from "@motorove/shared";
 
 const LanguageSwitcher: React.FC = () => {
   const { t } = useTranslation();
-  const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   // Get current locale from URL path
-  const currentLocale = pathname?.split("/")[1] || Language.TR.toLowerCase();
+  const currentLocale = pathname?.split("/")[1] || Language.EN.toLowerCase();
 
   // Available locales (lowercase)
   const locales = Object.values(Language).map((lang) => lang.toLowerCase());

@@ -33,8 +33,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     >();
     const status = exception.getStatus();
 
-    // Get user's preferred language or default to TR
-    const preferredLanguage = request.user?.preferredLanguage || Language.TR;
+    // Get user's preferred language or default to EN
+    const preferredLanguage = request.user?.preferredLanguage || Language.EN;
 
     // Get the exception response
     const exceptionResponse = exception.getResponse();

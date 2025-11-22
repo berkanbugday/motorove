@@ -90,11 +90,11 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
     if (postError) {
       showToast({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to load post. Please try again.',
+        text1: t('common.error'),
+        text2: t('errors.api.failed_to_load_post'),
       });
     }
-  }, [postError]);
+  }, [postError, t]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

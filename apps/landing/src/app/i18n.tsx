@@ -18,7 +18,7 @@ i18next
     )
   )
   .init({
-    fallbackLng: Language.TR.toLowerCase(),
+    fallbackLng: Language.EN.toLowerCase(),
     ns: ["common"],
     defaultNS: "common",
     supportedLngs: [Language.TR.toLowerCase(), Language.EN.toLowerCase()],
@@ -39,7 +39,7 @@ export interface I18nProviderProps {
 
 export function I18nProvider({
   children,
-  locale = Language.TR.toLowerCase(),
+  locale = Language.EN.toLowerCase(),
 }: I18nProviderProps) {
   const [mounted, setMounted] = useState(false);
 

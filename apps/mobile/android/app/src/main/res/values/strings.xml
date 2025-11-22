@@ -1,3 +1,19 @@
 <resources>
-    <string name="app_name">Motorove</string>
+    <!-- app_name is dynamically set in build.gradle based on build flavor -->
+    
+    <!-- Permission Descriptions - English -->
+    <string name="location_permission_title">Location Permission</string>
+    <string name="location_permission_message">Motorove needs your location to show your position on the map and help nearby riders respond to emergencies.</string>
+    
+    <string name="background_location_permission_title">Background Location Permission</string>
+    <string name="background_location_permission_message">Motorove needs continuous location access to notify nearby riders when you create an emergency, even when the app is in the background. This helps riders respond quickly to emergencies.</string>
+    
+    <string name="notification_permission_title">Notification Permission</string>
+    <string name="notification_permission_message">Motorove needs notification permission to send you important updates about events, emergencies, and community activities.</string>
+    
+    <string name="camera_permission_title">Camera Permission</string>
+    <string name="camera_permission_message">We need access to your camera to let you take photos.</string>
+    
+    <string name="photo_library_permission_title">Photo Library Permission</string>
+    <string name="photo_library_permission_message">We need access to your photo library to let you share images.</string>
 </resources>

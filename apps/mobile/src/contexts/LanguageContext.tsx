@@ -11,7 +11,7 @@ import {Language} from '@motorove/shared';
 import {getDeviceLanguage} from '../utils/languageUtils';
 
 const LANGUAGE_KEY = 'user_language_preference';
-const DEFAULT_LANGUAGE = Language.TR.toLowerCase();
+const DEFAULT_LANGUAGE = Language.EN.toLowerCase();
 
 type LanguageContextType = {
   language: string;

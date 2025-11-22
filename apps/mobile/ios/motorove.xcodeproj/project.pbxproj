@@ -10,6 +10,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		AA1234567890ABCD1234EFGH /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA1234567890ABCD1234EFGI /* InfoPlist.strings */; };
 		E8676BCA0E7C7F59A2F54732 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		FDD1E0590F21E5DF638F64B8 /* libPods-motorove.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA0BC9FF3CB6E91E4CF93299 /* libPods-motorove.a */; };
 /* End PBXBuildFile section */
@@ -23,6 +24,8 @@
 		7C207AA0E9F54AB5E4A6204B /* Pods-motorove.staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-motorove.staging.xcconfig"; path = "Target Support Files/Pods-motorove/Pods-motorove.staging.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = motorove/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9314CC2F62B094E80C62C99C /* Pods-motorove.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-motorove.debug.xcconfig"; path = "Target Support Files/Pods-motorove/Pods-motorove.debug.xcconfig"; sourceTree = "<group>"; };
+		AA1234567890ABCD1234EFGJ /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = motorove/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		AA1234567890ABCD1234EFGK /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = motorove/tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BA0BC9FF3CB6E91E4CF93299 /* libPods-motorove.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-motorove.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF3A9E950745948149FA8511 /* Pods-motorove.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-motorove.release.xcconfig"; path = "Target Support Files/Pods-motorove/Pods-motorove.release.xcconfig"; sourceTree = "<group>"; };
 		DA33F3B02DD6B29D007E2AF0 /* motorove.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = motorove.entitlements; path = motorove/motorove.entitlements; sourceTree = "<group>"; };
@@ -48,6 +51,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
+				AA1234567890ABCD1234EFGI /* InfoPlist.strings */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 			);
@@ -146,6 +150,7 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				tr,
 				en,
 				Base,
 			);
@@ -166,6 +171,7 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				AA1234567890ABCD1234EFGH /* InfoPlist.strings in Resources */,
 				E8676BCA0E7C7F59A2F54732 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -288,6 +294,18 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		AA1234567890ABCD1234EFGI /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA1234567890ABCD1234EFGJ /* en */,
+				AA1234567890ABCD1234EFGK /* tr */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {

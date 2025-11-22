@@ -510,7 +510,7 @@ export class NotificationsService {
       // Use default language if preferredLanguage is not provided
       const withLanguageSpecificFields = selectLanguageSpecificFields(
         formattedData,
-        preferredLanguage || Language.TR,
+        preferredLanguage || Language.EN,
       );
 
       // Convert enum values to translation keys

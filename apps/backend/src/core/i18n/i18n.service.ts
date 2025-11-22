@@ -27,8 +27,8 @@ export class I18nService {
       }
 
       await this.i18next.init({
-        lng: Language.TR.toLowerCase(), // Default language
-        fallbackLng: Language.TR.toLowerCase(),
+        lng: Language.EN.toLowerCase(), // Default language
+        fallbackLng: Language.EN.toLowerCase(),
         debug: this.configService.isDevelopment(),
         resources: this.buildI18nResources(),
         interpolation: {
@@ -82,7 +82,7 @@ export class I18nService {
    */
   translate(
     key: string,
-    language: Language = Language.TR,
+    language: Language = Language.EN,
     options?: Record<string, any>,
   ): string {
     try {
@@ -97,7 +97,7 @@ export class I18nService {
   /**
    * Check if a translation key exists
    */
-  exists(key: string, language: Language = Language.TR): boolean {
+  exists(key: string, language: Language = Language.EN): boolean {
     try {
       if (!this.isInitialized || !this.i18next) {
         return false;

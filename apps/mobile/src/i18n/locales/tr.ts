@@ -60,6 +60,7 @@ export default {
     pending_approval: 'Onay Bekliyor',
     following: 'Takip Ediliyor',
     not_now: 'Şimdi Değil',
+    ask_me_later: 'Daha Sonra Sor',
     view_all: 'Tümünü Gör',
     select_all: 'Tümünü Seç',
     clear_all: 'Tümünü Temizle',
@@ -1029,6 +1030,7 @@ export default {
     api: {
       default: 'İsteğiniz işlenirken bir hata oluştu.',
       not_found: 'İstenen bilgi bulunamadı.',
+      failed_to_load_post: 'Gönderi yüklenemedi. Lütfen tekrar deneyin.',
     },
     // GraphQL specific errors
     graphql: {
@@ -1353,6 +1355,35 @@ export default {
       dismiss: 'Kapat',
       accept: 'Kabul Et',
       reject: 'Reddet',
+    },
+  },
+
+  // İzinler
+  permissions: {
+    location: {
+      title: 'Konum İzni',
+      message:
+        'Motorove, haritada konumunuzu göstermek ve yakındaki sürücülerin acil durumlara yanıt vermesine yardımcı olmak için konumunuza ihtiyaç duyar.',
+    },
+    backgroundLocation: {
+      title: 'Arka Plan Konum İzni',
+      message:
+        'Motorove, uygulama arka planda olsa bile acil durum oluşturduğunuzda yakındaki sürücüleri bilgilendirmek için sürekli konum erişimine ihtiyaç duyar. Bu, sürücülerin acil durumlara hızlı yanıt vermesine yardımcı olur.',
+    },
+    notification: {
+      title: 'Bildirim İzni',
+      message:
+        'Motorove, etkinlikler, acil durumlar ve topluluk aktiviteleri hakkında önemli güncellemeleri size göndermek için bildirim iznine ihtiyaç duyar.',
+    },
+    camera: {
+      title: 'Kamera İzni',
+      message:
+        'Fotoğraf çekmenize izin vermek için kameranıza erişmemiz gerekiyor.',
+    },
+    photoLibrary: {
+      title: 'Fotoğraf Galerisi İzni',
+      message:
+        'Görsel paylaşmanıza izin vermek için fotoğraf galerinize erişmemiz gerekiyor.',
     },
   },
 };

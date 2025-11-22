@@ -1,0 +1,16 @@
+/* Turkish Localization for Permission Descriptions */
+
+/* Camera Permission */
+"NSCameraUsageDescription" = "Fotoğraf çekmenize izin vermek için kameranıza erişmemiz gerekiyor.";
+
+/* Location Permissions */
+"NSLocationWhenInUseUsageDescription" = "Motorove, haritada konumunuzu göstermek ve yakındaki sürücülerin acil durumlara yanıt vermesine yardımcı olmak için konumunuza ihtiyaç duyar.";
+
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Motorove, acil durum bildirimlerini etkinleştirdiğinizde yakındaki sürücülerin acil durumlara yanıt vermesine yardımcı olmak için konumunuza ihtiyaç duyar. Konumunuz yalnızca acil durum bildirimlerini etkinleştirdiğinizde kullanılacak ve ihtiyaç sahibi sürücülere yardımcı olmak için güvenli bir şekilde paylaşılacaktır.";
+
+"NSLocationAlwaysUsageDescription" = "Motorove, uygulama arka planda olsa bile acil durum oluşturduğunuzda yakındaki sürücüleri bilgilendirmek için sürekli konum erişimine ihtiyaç duyar. Bu, sürücülerin acil durumlara hızlı yanıt vermesine yardımcı olur.";
+
+/* Photo Library Permissions */
+"NSPhotoLibraryUsageDescription" = "Görsel paylaşmanıza izin vermek için fotoğraf kütüphanenize erişmemiz gerekiyor.";
+
+"NSPhotoLibraryAddUsageDescription" = "Fotoğrafları kütüphanenize kaydetmek için erişmemiz gerekiyor.";

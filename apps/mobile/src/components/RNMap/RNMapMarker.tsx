@@ -61,13 +61,13 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
         {marker.iconName ? (
           <Icon
             name={marker.iconName}
-            size={20}
+            size={16}
             color={marker.iconColor || colors.neutral.white}
           />
         ) : (
           <Icon
             name="map-pin-filled"
-            size={20}
+            size={16}
             color={marker.iconColor || colors.neutral.white}
           />
         )}
