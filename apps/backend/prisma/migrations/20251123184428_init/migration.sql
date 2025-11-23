@@ -8,7 +8,7 @@ CREATE TYPE "GroupMemberRole" AS ENUM ('ADMIN', 'MEMBER');
 CREATE TYPE "ApprovalStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('SYSTEM', 'SHARED_POST_IN_GROUP', 'POST_LIKE', 'POST_COMMENT', 'POST_SAVE', 'USER_FOLLOW_REQUEST', 'USER_FOLLOW_REQUEST_ACCEPTED', 'NEW_FOLLOWER', 'GROUP_CHANGED_INFO', 'GROUP_JOIN_REQUEST', 'GROUP_JOIN_REQUEST_ACCEPTED', 'USER_JOINED_GROUP', 'USER_LEAVE_GROUP', 'ADMIN_REMOVED_GROUP_MEMBER', 'ADMIN_CHANGED_GROUP_MEMBER_ROLE', 'EVENT_INVITATION', 'EVENT_INVITATION_REMINDER', 'EVENT_REMINDER', 'EVENT_CANCELLED', 'EVENT_UPDATED');
+CREATE TYPE "NotificationType" AS ENUM ('SYSTEM', 'SHARED_POST_IN_GROUP', 'POST_LIKE', 'POST_COMMENT', 'POST_SAVE', 'USER_FOLLOW_REQUEST', 'USER_FOLLOW_REQUEST_ACCEPTED', 'NEW_FOLLOWER', 'GROUP_CHANGED_INFO', 'GROUP_JOIN_REQUEST', 'GROUP_JOIN_REQUEST_ACCEPTED', 'USER_JOINED_GROUP', 'USER_LEAVE_GROUP', 'ADMIN_REMOVED_GROUP_MEMBER', 'ADMIN_CHANGED_GROUP_MEMBER_ROLE', 'EVENT_INVITATION', 'EVENT_INVITATION_REMINDER', 'EVENT_REMINDER', 'EVENT_CANCELLED', 'EVENT_UPDATED', 'EMERGENCY', 'WARNING');
 
 -- CreateEnum
 CREATE TYPE "NotificationStatus" AS ENUM ('PENDING', 'SENT', 'NOT_SENT', 'DELIVERED', 'FAILED');
@@ -35,7 +35,7 @@ CREATE TYPE "ExperienceLevel" AS ENUM ('BEGINNER', 'INTERMEDIATE', 'ADVANCED', '
 CREATE TYPE "EventParticipantStatus" AS ENUM ('JOINED', 'LEFT');
 
 -- CreateEnum
-CREATE TYPE "EventStatus" AS ENUM ('DRAFT', 'UPCOMING', 'PAST');
+CREATE TYPE "EventStatus" AS ENUM ('DRAFT', 'UPCOMING', 'CANCELLED', 'PAST');
 
 -- CreateEnum
 CREATE TYPE "DayOfWeek" AS ENUM ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY');
@@ -59,7 +59,7 @@ CREATE TYPE "RidingStyle" AS ENUM ('TOURING', 'COMMUTING', 'OFF_ROAD', 'ADVENTUR
 CREATE TYPE "EquipmentType" AS ENUM ('FULL_FACE_HELMET', 'MODULAR_HELMET', 'OPEN_FACE_HELMET', 'OFF_ROAD_HELMET', 'HALF_HELMET', 'RIDING_JACKET', 'ARMOR', 'BACK_PROTECTOR', 'AIRBAG_VEST', 'RIDING_PANTS', 'KNEE_GUARDS', 'GLOVES', 'BOOTS', 'GOGGLES', 'RAIN_SUIT', 'INTERCOM', 'CAMERA', 'GPS_DEVICE', 'FIRST_AID_KIT');
 
 -- CreateEnum
-CREATE TYPE "SocialMediaPlatform" AS ENUM ('INSTAGRAM', 'FACEBOOK', 'TWITTER', 'YOUTUBE', 'TIKTOK', 'LINKEDIN');
+CREATE TYPE "SocialMediaPlatform" AS ENUM ('INSTAGRAM', 'FACEBOOK', 'YOUTUBE', 'TIKTOK', 'LINKEDIN', 'X');
 
 -- CreateEnum
 CREATE TYPE "Interest" AS ENUM ('MOTORCYCLE_CUSTOMIZATION', 'DIY_MAINTENANCE', 'VINTAGE_MOTORCYCLES', 'ELECTRIC_MOTORCYCLES', 'RIDING_SKILLS', 'MOTO_PHOTOGRAPHY', 'CONTENT_CREATION', 'MEETING_RIDERS', 'COMMUNITY_EVENTS', 'MOTO_FESTIVALS', 'EXPLORING_NATURE', 'MOUNTAIN_ROADS', 'COASTAL_RIDES', 'CROSS_BORDER_TRIPS');
@@ -75,6 +75,9 @@ CREATE TYPE "SupportCategory" AS ENUM ('ACCOUNT', 'TECHNICAL', 'FEEDBACK', 'FEAT
 
 -- CreateEnum
 CREATE TYPE "WarningType" AS ENUM ('RADAR', 'POLICE_CHECKPOINT', 'ACCIDENT', 'ROAD_CONSTRUCTION', 'ROAD_CLOSURE', 'DANGEROUS_CURVE', 'SLIPPERY_ROAD', 'PARKING_PROHIBITED', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "EmergencyType" AS ENUM ('ACCIDENT', 'BREAKDOWN', 'MEDICAL', 'FUEL_SHORTAGE', 'TIRE_PROBLEM', 'BATTERY_DEAD', 'LOST', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -135,18 +138,14 @@ CREATE TABLE "Equipment" (
 );
 
 -- CreateTable
-CREATE TABLE "SocialMedia" (
+CREATE TABLE "UserSocialMediaProfile" (
     "id" TEXT NOT NULL,
     "platform" "SocialMediaPlatform" NOT NULL,
     "username" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
     "createdById" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedById" TEXT,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
 
-    CONSTRAINT "SocialMedia_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserSocialMediaProfile_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -230,7 +229,7 @@ CREATE TABLE "DeviceToken" (
 CREATE TABLE "Post" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "images" TEXT[],
+    "images" JSONB DEFAULT '[]',
     "groupId" TEXT,
     "createdById" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -246,7 +245,6 @@ CREATE TABLE "PostComment" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "postId" TEXT NOT NULL,
-    "parentId" TEXT,
     "createdById" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedById" TEXT,
@@ -395,7 +393,7 @@ CREATE TABLE "Event" (
     "endDateTime" TIMESTAMP(3),
     "maxParticipants" INTEGER,
     "isPrivate" BOOLEAN NOT NULL DEFAULT false,
-    "images" TEXT[],
+    "images" JSONB DEFAULT '[]',
     "organizedByGroupId" TEXT,
     "roadType" "RoadType",
     "difficultyLevel" "DifficultyLevel",
@@ -451,7 +449,7 @@ CREATE TABLE "UserSetting" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "autoAcceptFollowers" BOOLEAN NOT NULL DEFAULT false,
-    "preferredLanguage" "Language" NOT NULL DEFAULT 'TR',
+    "preferredLanguage" "Language" NOT NULL DEFAULT 'EN',
     "notificationPermission" "NotificationPermission" NOT NULL DEFAULT 'UNKNOWN',
     "notificationPreferences" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -515,11 +513,69 @@ CREATE TABLE "WarningAddress" (
 );
 
 -- CreateTable
+CREATE TABLE "Emergency" (
+    "id" TEXT NOT NULL,
+    "type" "EmergencyType" NOT NULL,
+    "status" "ApprovalStatus" NOT NULL DEFAULT 'ACCEPTED',
+    "createdById" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedById" TEXT,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "Emergency_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EmergencyDescription" (
+    "id" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "language" "Language" NOT NULL DEFAULT 'TR',
+    "emergencyId" TEXT NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "EmergencyDescription_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EmergencyAddress" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "countryCode" TEXT,
+    "language" "Language" NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "emergencyId" TEXT NOT NULL,
+
+    CONSTRAINT "EmergencyAddress_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserLocation" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserLocation_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_EventToGroup" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
 
     CONSTRAINT "_EventToGroup_AB_pkey" PRIMARY KEY ("A","B")
+);
+
+-- CreateTable
+CREATE TABLE "_EmergencySelectedGroups" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_EmergencySelectedGroups_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateIndex
@@ -541,10 +597,10 @@ CREATE INDEX "Motorcycle_createdById_idx" ON "Motorcycle"("createdById");
 CREATE INDEX "Equipment_createdById_idx" ON "Equipment"("createdById");
 
 -- CreateIndex
-CREATE INDEX "SocialMedia_createdById_idx" ON "SocialMedia"("createdById");
+CREATE INDEX "UserSocialMediaProfile_createdById_idx" ON "UserSocialMediaProfile"("createdById");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SocialMedia_createdById_platform_key" ON "SocialMedia"("createdById", "platform");
+CREATE UNIQUE INDEX "UserSocialMediaProfile_createdById_platform_key" ON "UserSocialMediaProfile"("createdById", "platform");
 
 -- CreateIndex
 CREATE INDEX "Group_cityId_idx" ON "Group"("cityId");
@@ -559,6 +615,12 @@ CREATE INDEX "GroupMembership_userId_idx" ON "GroupMembership"("userId");
 CREATE INDEX "GroupMembership_createdById_idx" ON "GroupMembership"("createdById");
 
 -- CreateIndex
+CREATE INDEX "GroupMembership_groupId_userId_isActive_status_idx" ON "GroupMembership"("groupId", "userId", "isActive", "status");
+
+-- CreateIndex
+CREATE INDEX "GroupMembership_userId_status_isActive_idx" ON "GroupMembership"("userId", "status", "isActive");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "GroupMembership_groupId_userId_key" ON "GroupMembership"("groupId", "userId");
 
 -- CreateIndex
@@ -566,6 +628,12 @@ CREATE INDEX "Notification_userId_idx" ON "Notification"("userId");
 
 -- CreateIndex
 CREATE INDEX "Notification_createdById_idx" ON "Notification"("createdById");
+
+-- CreateIndex
+CREATE INDEX "Notification_userId_read_isActive_idx" ON "Notification"("userId", "read", "isActive");
+
+-- CreateIndex
+CREATE INDEX "Notification_userId_isActive_createdAt_idx" ON "Notification"("userId", "isActive", "createdAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "DeviceToken_userId_key" ON "DeviceToken"("userId");
@@ -577,19 +645,28 @@ CREATE INDEX "Post_createdById_idx" ON "Post"("createdById");
 CREATE INDEX "Post_groupId_idx" ON "Post"("groupId");
 
 -- CreateIndex
+CREATE INDEX "Post_isActive_createdAt_idx" ON "Post"("isActive", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "Post_groupId_isActive_createdAt_idx" ON "Post"("groupId", "isActive", "createdAt");
+
+-- CreateIndex
 CREATE INDEX "PostComment_createdById_idx" ON "PostComment"("createdById");
 
 -- CreateIndex
 CREATE INDEX "PostComment_postId_idx" ON "PostComment"("postId");
 
 -- CreateIndex
-CREATE INDEX "PostComment_parentId_idx" ON "PostComment"("parentId");
+CREATE INDEX "PostComment_postId_isActive_createdAt_idx" ON "PostComment"("postId", "isActive", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "BusinessComment_createdById_idx" ON "BusinessComment"("createdById");
 
 -- CreateIndex
 CREATE INDEX "BusinessComment_businessId_idx" ON "BusinessComment"("businessId");
+
+-- CreateIndex
+CREATE INDEX "BusinessComment_businessId_isActive_createdAt_idx" ON "BusinessComment"("businessId", "isActive", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "PostLike_userId_idx" ON "PostLike"("userId");
@@ -634,6 +711,12 @@ CREATE UNIQUE INDEX "WorkingHour_businessId_dayOfWeek_key" ON "WorkingHour"("bus
 CREATE INDEX "UserFollowing_followingId_idx" ON "UserFollowing"("followingId");
 
 -- CreateIndex
+CREATE INDEX "UserFollowing_followerId_isActive_status_idx" ON "UserFollowing"("followerId", "isActive", "status");
+
+-- CreateIndex
+CREATE INDEX "UserFollowing_followingId_status_isActive_idx" ON "UserFollowing"("followingId", "status", "isActive");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "UserFollowing_followerId_followingId_key" ON "UserFollowing"("followerId", "followingId");
 
 -- CreateIndex
@@ -643,7 +726,19 @@ CREATE INDEX "Event_createdById_idx" ON "Event"("createdById");
 CREATE INDEX "Event_organizedByGroupId_idx" ON "Event"("organizedByGroupId");
 
 -- CreateIndex
+CREATE INDEX "Event_isActive_status_isPrivate_startDateTime_idx" ON "Event"("isActive", "status", "isPrivate", "startDateTime");
+
+-- CreateIndex
+CREATE INDEX "Event_status_isActive_startDateTime_idx" ON "Event"("status", "isActive", "startDateTime");
+
+-- CreateIndex
 CREATE INDEX "EventParticipant_createdById_idx" ON "EventParticipant"("createdById");
+
+-- CreateIndex
+CREATE INDEX "EventParticipant_eventId_status_isActive_idx" ON "EventParticipant"("eventId", "status", "isActive");
+
+-- CreateIndex
+CREATE INDEX "EventParticipant_createdById_status_isActive_idx" ON "EventParticipant"("createdById", "status", "isActive");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "EventParticipant_eventId_createdById_key" ON "EventParticipant"("eventId", "createdById");
@@ -653,6 +748,12 @@ CREATE INDEX "EventInvitation_createdById_idx" ON "EventInvitation"("createdById
 
 -- CreateIndex
 CREATE INDEX "EventInvitation_inviteeId_idx" ON "EventInvitation"("inviteeId");
+
+-- CreateIndex
+CREATE INDEX "EventInvitation_inviteeId_status_isActive_idx" ON "EventInvitation"("inviteeId", "status", "isActive");
+
+-- CreateIndex
+CREATE INDEX "EventInvitation_eventId_isActive_status_idx" ON "EventInvitation"("eventId", "isActive", "status");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "EventInvitation_eventId_inviteeId_key" ON "EventInvitation"("eventId", "inviteeId");
@@ -670,6 +771,12 @@ CREATE INDEX "Warning_createdById_idx" ON "Warning"("createdById");
 CREATE INDEX "Warning_type_idx" ON "Warning"("type");
 
 -- CreateIndex
+CREATE INDEX "Warning_isActive_status_createdAt_idx" ON "Warning"("isActive", "status", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "Warning_type_isActive_status_idx" ON "Warning"("type", "isActive", "status");
+
+-- CreateIndex
 CREATE INDEX "WarningDescription_warningId_idx" ON "WarningDescription"("warningId");
 
 -- CreateIndex
@@ -685,7 +792,46 @@ CREATE INDEX "WarningAddress_latitude_longitude_idx" ON "WarningAddress"("latitu
 CREATE UNIQUE INDEX "WarningAddress_warningId_language_key" ON "WarningAddress"("warningId", "language");
 
 -- CreateIndex
+CREATE INDEX "Emergency_createdById_idx" ON "Emergency"("createdById");
+
+-- CreateIndex
+CREATE INDEX "Emergency_type_idx" ON "Emergency"("type");
+
+-- CreateIndex
+CREATE INDEX "Emergency_isActive_status_createdAt_idx" ON "Emergency"("isActive", "status", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "Emergency_type_isActive_status_idx" ON "Emergency"("type", "isActive", "status");
+
+-- CreateIndex
+CREATE INDEX "EmergencyDescription_emergencyId_idx" ON "EmergencyDescription"("emergencyId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EmergencyDescription_emergencyId_language_key" ON "EmergencyDescription"("emergencyId", "language");
+
+-- CreateIndex
+CREATE INDEX "EmergencyAddress_emergencyId_idx" ON "EmergencyAddress"("emergencyId");
+
+-- CreateIndex
+CREATE INDEX "EmergencyAddress_latitude_longitude_idx" ON "EmergencyAddress"("latitude", "longitude");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EmergencyAddress_emergencyId_language_key" ON "EmergencyAddress"("emergencyId", "language");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserLocation_userId_key" ON "UserLocation"("userId");
+
+-- CreateIndex
+CREATE INDEX "UserLocation_latitude_longitude_idx" ON "UserLocation"("latitude", "longitude");
+
+-- CreateIndex
+CREATE INDEX "UserLocation_updatedAt_idx" ON "UserLocation"("updatedAt");
+
+-- CreateIndex
 CREATE INDEX "_EventToGroup_B_index" ON "_EventToGroup"("B");
+
+-- CreateIndex
+CREATE INDEX "_EmergencySelectedGroups_B_index" ON "_EmergencySelectedGroups"("B");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_cityId_fkey" FOREIGN KEY ("cityId") REFERENCES "City"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -703,10 +849,7 @@ ALTER TABLE "Equipment" ADD CONSTRAINT "Equipment_createdById_fkey" FOREIGN KEY 
 ALTER TABLE "Equipment" ADD CONSTRAINT "Equipment_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SocialMedia" ADD CONSTRAINT "SocialMedia_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "SocialMedia" ADD CONSTRAINT "SocialMedia_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserSocialMediaProfile" ADD CONSTRAINT "UserSocialMediaProfile_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Group" ADD CONSTRAINT "Group_cityId_fkey" FOREIGN KEY ("cityId") REFERENCES "City"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -752,9 +895,6 @@ ALTER TABLE "Post" ADD CONSTRAINT "Post_updatedById_fkey" FOREIGN KEY ("updatedB
 
 -- AddForeignKey
 ALTER TABLE "PostComment" ADD CONSTRAINT "PostComment_postId_fkey" FOREIGN KEY ("postId") REFERENCES "Post"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "PostComment" ADD CONSTRAINT "PostComment_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "PostComment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PostComment" ADD CONSTRAINT "PostComment_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -856,7 +996,28 @@ ALTER TABLE "WarningDescription" ADD CONSTRAINT "WarningDescription_warningId_fk
 ALTER TABLE "WarningAddress" ADD CONSTRAINT "WarningAddress_warningId_fkey" FOREIGN KEY ("warningId") REFERENCES "Warning"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Emergency" ADD CONSTRAINT "Emergency_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Emergency" ADD CONSTRAINT "Emergency_updatedById_fkey" FOREIGN KEY ("updatedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EmergencyDescription" ADD CONSTRAINT "EmergencyDescription_emergencyId_fkey" FOREIGN KEY ("emergencyId") REFERENCES "Emergency"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EmergencyAddress" ADD CONSTRAINT "EmergencyAddress_emergencyId_fkey" FOREIGN KEY ("emergencyId") REFERENCES "Emergency"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserLocation" ADD CONSTRAINT "UserLocation_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "_EventToGroup" ADD CONSTRAINT "_EventToGroup_A_fkey" FOREIGN KEY ("A") REFERENCES "Event"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_EventToGroup" ADD CONSTRAINT "_EventToGroup_B_fkey" FOREIGN KEY ("B") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EmergencySelectedGroups" ADD CONSTRAINT "_EmergencySelectedGroups_A_fkey" FOREIGN KEY ("A") REFERENCES "Emergency"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_EmergencySelectedGroups" ADD CONSTRAINT "_EmergencySelectedGroups_B_fkey" FOREIGN KEY ("B") REFERENCES "Group"("id") ON DELETE CASCADE ON UPDATE CASCADE;
