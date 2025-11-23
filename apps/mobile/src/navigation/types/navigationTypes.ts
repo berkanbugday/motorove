@@ -75,7 +75,6 @@ export type MainStackParamList = {
   Posts: undefined;
   Events: undefined;
   EditEvent: {eventId: string};
-  Garage: undefined;
   BusinessDetail: {
     business: IBusiness;
     userLocation?: {latitude: number; longitude: number};

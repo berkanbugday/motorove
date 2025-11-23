@@ -31,7 +31,6 @@ import {
   SupportScreen,
 } from '@screens/menu';
 import {ProfileScreen, EditProfileScreen} from '@screens/profile';
-import {GarageScreen} from '@screens/garage';
 import {BusinessDetailScreen} from '@screens/business';
 import {
   AccountSettingScreen,
@@ -211,11 +210,6 @@ export function MainNavigator() {
       <Stack.Screen
         name="EditEvent"
         component={EditEventScreen}
-        options={{headerShown: false}}
-      />
-      <Stack.Screen
-        name="Garage"
-        component={GarageScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen
