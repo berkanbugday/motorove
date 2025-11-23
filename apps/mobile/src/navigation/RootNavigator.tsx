@@ -36,7 +36,8 @@ const linking: LinkingOptions<RootStackParamList> = {
  * Uses a NativeStackNavigator but hides all screen headers
  */
 export function RootNavigator() {
-  const {user, accessToken, isInitializing} = useAuth();
+  const {id, hasCompletedSetup, notificationPermission, isInitializing} =
+    useAuth();
   const navigationRef =
     useRef<NavigationContainerRef<RootStackParamList>>(null);
   const {
@@ -62,14 +63,12 @@ export function RootNavigator() {
     return () => clearTimeout(timer);
   }, []);
 
-  const isAuthenticated = Boolean(user) && Boolean(accessToken);
-
   // Set navigation ref for notification service when navigation is ready
   const handleNavigationReady = useCallback(() => {
-    if (navigationRef.current && isAuthenticated) {
+    if (navigationRef.current && id) {
       notificationService.service.setNavigationRef(navigationRef.current);
     }
-  }, [isAuthenticated]);
+  }, [id]);
   // Show loading screen with logo when checking auth, session revival, or first time status
   if (isInitializing || firstTimeLoading || showLoading) {
     return (
@@ -94,16 +93,15 @@ export function RootNavigator() {
       linking={linking}
       onReady={handleNavigationReady}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        {isAuthenticated && !isFirstTime ? (
+        {id && !isFirstTime ? (
           // User is authenticated, decide whether to show main app or account setup
-          !user?.hasCompletedSetup ? (
+          !hasCompletedSetup ? (
             <Stack.Screen
               name="Auth"
               component={AccountSetupScreen}
               key="accountSetup"
             />
-          ) : user?.notificationPermission ===
-            NotificationPermission.UNKNOWN ? (
+          ) : notificationPermission === NotificationPermission.UNKNOWN ? (
             <Stack.Screen
               key="notificationPermission"
               name="Auth"

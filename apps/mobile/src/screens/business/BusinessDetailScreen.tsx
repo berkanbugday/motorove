@@ -79,7 +79,7 @@ export const BusinessDetailScreen: React.FC = () => {
 
   const {t} = useTranslation();
   const {language} = useLanguage();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
 
   // Business comments hooks
   const {
@@ -398,7 +398,7 @@ export const BusinessDetailScreen: React.FC = () => {
 
   const handleProfilePress = useCallback(
     (userId: string | null) => {
-      if (userId && userId !== user?.id) {
+      if (userId && userId !== currentUserId) {
         navigateToScreen(navigation, 'Profile', {userId});
       }
     },
@@ -655,7 +655,7 @@ export const BusinessDetailScreen: React.FC = () => {
             commentsLoading={commentsLoading}
             createLoading={createLoading}
             updateLoading={updateLoading}
-            currentUserId={user?.id}
+            currentUserId={currentUserId}
             language={language}
             onCreateComment={handleCreateComment}
             onUpdateComment={handleUpdateComment}

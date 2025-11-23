@@ -61,7 +61,7 @@ export const HomeScreen = ({navigation}: Props) => {
   const [refreshing, setRefreshing] = useState(false);
   const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const {user} = useAuth();
+  const {id: currentUserId, firstName: currentUserFirstName} = useAuth();
   const {count: notificationsCount, refetch: refetchCount} = useGetCount();
   const {language} = useLanguage();
   // Create a stable animated value for scroll position
@@ -316,7 +316,7 @@ export const HomeScreen = ({navigation}: Props) => {
       <UserCard
         user={item}
         onPress={() => {
-          if (item.id !== user?.id) {
+          if (item.id !== currentUserId) {
             closeBottomSheet();
             navigateToScreen(navigation, 'Profile', {userId: item.id});
           }
@@ -333,10 +333,10 @@ export const HomeScreen = ({navigation}: Props) => {
       if (likedUsers) {
         // Sort the array to put current user first
         const sortedUsers = [...likedUsers].sort((a, b) => {
-          if (a.id === user?.id) {
+          if (a.id === currentUserId) {
             return -1;
           }
-          if (b.id === user?.id) {
+          if (b.id === currentUserId) {
             return 1;
           }
           return 0;
@@ -359,7 +359,7 @@ export const HomeScreen = ({navigation}: Props) => {
         });
       }
     },
-    [user?.id],
+    [currentUserId],
   );
 
   // Handle dropdown menu item selection
@@ -478,7 +478,7 @@ export const HomeScreen = ({navigation}: Props) => {
   const renderFeedPost = useCallback(
     ({item}: {item: IPost}) => {
       // Determine if this is the user's own post
-      const isOwnPost = item.createdBy.id === user?.id;
+      const isOwnPost = item.createdBy.id === currentUserId;
       // Transform Post model to FeedCard props
       const feedCardProps = transformPostToFeedCard(item);
 
@@ -510,7 +510,7 @@ export const HomeScreen = ({navigation}: Props) => {
           }}
           onLikesPress={() => handleLikesPress(item.likedUsers)}
           onProfilePress={() => {
-            if (item.createdBy.id !== user?.id) {
+            if (item.createdBy.id !== currentUserId) {
               navigateToScreen(navigation, 'Profile', {
                 userId: item.createdBy.id,
               });
@@ -521,7 +521,7 @@ export const HomeScreen = ({navigation}: Props) => {
       );
     },
     [
-      user,
+      currentUserId,
       handleLikePress,
       handleSavePress,
       createPostDropdownItems,
@@ -570,7 +570,7 @@ export const HomeScreen = ({navigation}: Props) => {
     <View style={styles.container}>
       <TopHeaderBar
         title={t('screens.home.hello')}
-        subtitle={user?.firstName}
+        subtitle={currentUserFirstName}
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
         rightIconName="plus"

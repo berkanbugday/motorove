@@ -17,8 +17,24 @@ export function errorToMessage(
     return fallbackMessage;
   }
 
+  // Handle errors with translationKey (from Supabase auth errors)
+  if (error.translationKey) {
+    // Check if translation exists
+    const translated = i18n.t(error.translationKey);
+    if (translated !== error.translationKey) {
+      return translated;
+    }
+  }
+
   // Handle different types of errors
   if (typeof error === 'string') {
+    // Check if string is a translation key
+    if (error.startsWith('errors.')) {
+      const translated = i18n.t(error);
+      if (translated !== error) {
+        return translated;
+      }
+    }
     return error;
   }
   // Handle GraphQL errors
@@ -41,6 +57,13 @@ export function errorToMessage(
 
   // Handle errors with a message property
   if (error.message) {
+    // Check if message is a translation key
+    if (error.message.startsWith('errors.')) {
+      const translated = i18n.t(error.message);
+      if (translated !== error.message) {
+        return translated;
+      }
+    }
     return humanizeErrorMessage(error.message);
   }
 

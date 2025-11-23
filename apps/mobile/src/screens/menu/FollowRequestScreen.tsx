@@ -25,7 +25,7 @@ export const FollowRequestScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<MainScreenNavigationProp<'FollowRequest'>>();
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
 
   // Fetch follow requests with comprehensive error handling
   const {
@@ -56,11 +56,11 @@ export const FollowRequestScreen = () => {
    */
   const handleUserPress = useCallback(
     (userId: string) => {
-      if (userId !== user?.id) {
+      if (userId !== currentUserId) {
         navigation.navigate('Profile', {userId});
       }
     },
-    [navigation, user],
+    [navigation, currentUserId],
   );
 
   /**

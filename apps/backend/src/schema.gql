@@ -30,22 +30,6 @@ enum ApprovalStatus {
   REJECTED
 }
 
-type AuthResponse {
-  session: Session
-  user: AuthUser!
-}
-
-type AuthUser {
-  avatar: String
-  email: String!
-  firstName: String!
-  hasCompletedSetup: Boolean!
-  id: ID!
-  lastName: String!
-  notificationPermission: NotificationPermission!
-  preferredLanguage: Language!
-}
-
 type BusinessAddressDto {
   address: String!
   countryCode: String!
@@ -822,7 +806,6 @@ type Mutation {
   likePost(postId: ID!): PostInteractionDto!
   markAllNotificationsAsRead: [NotificationDto!]!
   markNotificationAsRead(id: ID!): NotificationDto!
-  refreshToken(token: String!): AuthResponse!
   rejectEventInvitation(id: ID!): Boolean!
   removeBusinessComment(id: ID!): Boolean!
   removeDeviceToken: Boolean!
@@ -832,22 +815,15 @@ type Mutation {
   removePost(id: ID!): PostDto!
   removePostComment(id: ID!): PostCommentDto!
   removeWarning(id: String!): Boolean!
-  resend(email: String!): Boolean!
-  resetPassword(input: ResetPasswordInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
-  signIn(input: SignInInput!): AuthResponse!
-  signOut: Boolean!
-  signUp(input: SignUpInput!): AuthResponse!
   unfollowUser(userId: ID!): ApprovalStatus!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
   updateBusinessComment(input: UpdateBusinessCommentInput!): BusinessCommentDto!
-  updateEmail(input: UpdateEmailInput!): Boolean!
   updateEvent(input: UpdateEventInput!): EventDto!
   updateGroup(input: UpdateGroupInput!): GroupDto!
   updateGroupMembershipApprovalStatus(input: UpdateGroupMembershipApprovalStatusInput!): GroupMembershipDto!
-  updatePassword(newPassword: String!): Boolean!
   updatePost(input: UpdatePostInput!): PostDto!
   updatePostComment(input: UpdatePostCommentInput!): PostCommentDto!
   updateUserFollowingApprovalStatus(input: UpdateUserFollowingApprovalStatusInput!): UserFollowingDto!
@@ -1090,6 +1066,7 @@ type Query {
   groupJoinRequests(limit: Int, skip: Int): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int, userId: String): [GroupDto!]!
+  me: UserDto!
   myEmergencies: [EmergencyDto!]!
   myWarnings: [WarningDto!]!
   notifications(limit: Int, skip: Int): [NotificationDto!]!
@@ -1112,10 +1089,6 @@ input RemoveMemberInput {
   userId: ID!
 }
 
-input ResetPasswordInput {
-  email: String!
-}
-
 """Different styles of motorcycle riding"""
 enum RidingStyle {
   ADVENTURE
@@ -1135,26 +1108,6 @@ enum RoadType {
   ASPHALT
   MIXED
   OFF_ROAD
-}
-
-type Session {
-  access_token: String!
-  expires_at: Float
-  expires_in: Float!
-  refresh_token: String!
-}
-
-input SignInInput {
-  email: String!
-  password: String!
-}
-
-input SignUpInput {
-  email: String!
-  firstName: String!
-  lastName: String!
-  password: String!
-  preferredLanguage: Language
 }
 
 """Social media platform types"""
@@ -1181,11 +1134,6 @@ input UpdateBusinessCommentInput {
   content: String
   id: ID!
   rating: Int
-}
-
-input UpdateEmailInput {
-  email: String!
-  newEmail: String!
 }
 
 input UpdateEventInput {
@@ -1317,9 +1265,11 @@ type UserDto {
   email: String!
   firstName: String!
   followingStatus: ApprovalStatus
+  hasCompletedSetup: Boolean
   id: ID!
   lastName: String!
   supabaseId: String!
+  userSetting: UserSettingDto
 }
 
 type UserFollowing {

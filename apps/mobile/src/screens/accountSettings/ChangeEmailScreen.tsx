@@ -18,8 +18,9 @@ import {
   authSchemas,
   ChangeEmailFormValues,
 } from '@utils/validation/authValidation';
-import {useUpdateEmail} from '@services';
+import authService from '@services/auth.service';
 import {useAuth} from '@contexts/AuthContext';
+import {showToast} from '@components';
 
 /**
  * Change Email Screen - Allows users to change their email address
@@ -27,7 +28,8 @@ import {useAuth} from '@contexts/AuthContext';
 export const ChangeEmailScreen = () => {
   const navigation = useNavigation();
   const {t} = useTranslation();
-  const {user, signOut} = useAuth();
+  const {email: currentUserEmail, signOut} = useAuth();
+  const [loading, setLoading] = React.useState(false);
 
   const {changeEmailSchema} = authSchemas(t);
 
@@ -38,24 +40,37 @@ export const ChangeEmailScreen = () => {
   } = useForm<ChangeEmailFormValues>({
     resolver: zodResolver(changeEmailSchema),
     defaultValues: {
-      email: user?.email,
+      email: currentUserEmail,
       newEmail: '',
       confirmEmail: '',
     },
     mode: 'onChange',
   });
 
-  const {updateEmail, loading} = useUpdateEmail(() =>
-    setTimeout(() => {
-      signOut();
-    }, 3000),
-  );
-
   const onSubmit = async (data: ChangeEmailFormValues) => {
     try {
-      await updateEmail(user?.email!, data.newEmail);
+      setLoading(true);
+      await authService.updateEmail(data.newEmail);
+
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.changeEmail.success_updated'),
+      });
+
+      // Sign out after 3 seconds to allow user to verify new email
+      setTimeout(() => {
+        signOut();
+      }, 3000);
     } catch (error) {
       loggingService.error('Error in onSubmit:', error);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('screens.changeEmail.update_failed'),
+      });
+    } finally {
+      setLoading(false);
     }
   };
 

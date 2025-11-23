@@ -39,15 +39,20 @@ export class UsersResolver {
   }
 
   @UseGuards(JwtGuard)
+  @Query(() => UserDto, { name: 'me' })
+  async me(@Context() context: GqlContext): Promise<UserDto> {
+    const userId = context.req.user.id;
+    return await this.usersService.findMe(userId);
+  }
+
+  @UseGuards(JwtGuard)
   @Query(() => ProfileDto)
   async userProfile(
     @Context() context: GqlContext,
     @Args('id', { type: () => String }) id: string,
   ): Promise<ProfileDto> {
     const currentUserId = context.req.user.id;
-    const authHeader = context.req.headers.authorization;
-    const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
-    return await this.usersService.userProfile(id, authToken, currentUserId);
+    return await this.usersService.userProfile(id, currentUserId);
   }
 
   @UseGuards(JwtGuard)

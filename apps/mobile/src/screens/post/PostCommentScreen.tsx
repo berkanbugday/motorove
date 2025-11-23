@@ -51,7 +51,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
   const commentToDelete = useRef<{id: string; postId: string} | null>(null);
 
   // Get current user
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
 
   // Get post data
   const {
@@ -280,7 +280,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
         />
       );
     },
-    [user, transformPostToFeedCard],
+    [currentUserId, transformPostToFeedCard],
   );
 
   const mapCommentForUI = (comment: IPostComment): PostComment => {
@@ -306,7 +306,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
   };
 
   const isCommentOwner = (comment: PostComment): boolean => {
-    return user?.id === comment.userId;
+    return currentUserId === comment.userId;
   };
 
   const renderCommentWithSwipeable = useCallback(
@@ -321,7 +321,7 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
             style={style}
             actionBarActive={false}
             onPressAvatar={() => {
-              if (commentItem.userId !== user?.id) {
+              if (commentItem.userId !== currentUserId) {
                 navigation.navigate('Profile', {userId: commentItem.userId});
               }
             }}

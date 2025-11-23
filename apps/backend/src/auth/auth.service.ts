@@ -1,13 +1,8 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { AuthResponse } from './models/auth-response.model';
-import { NotificationPermission } from '../enums/models/notification-permission.enum';
+import { AuthUser } from './models/auth-user.model';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { Language } from '../enums/models/language.enum';
 import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
@@ -25,7 +20,7 @@ export class AuthService {
     email: string,
     password: string,
     preferredLanguage?: Language,
-  ): Promise<AuthResponse> {
+  ): Promise<boolean> {
     let supabaseUser: any = null;
 
     try {
@@ -93,20 +88,7 @@ export class AuthService {
         return user;
       });
 
-      return {
-        user: {
-          id: result.id,
-          firstName: result.firstName,
-          lastName: result.lastName,
-          email: result.email,
-          avatar: result.avatar,
-          hasCompletedSetup: result.hasCompletedSetup,
-          notificationPermission: result.userSetting
-            ?.notificationPermission as NotificationPermission,
-          preferredLanguage: result.userSetting?.preferredLanguage as Language,
-        },
-        session: data.session,
-      };
+      return result.id ? true : false;
     } catch (error) {
       // If we created a Supabase user but database operations failed,
       // we should attempt to delete the Supabase user to maintain consistency
@@ -134,143 +116,7 @@ export class AuthService {
     }
   }
 
-  async signIn(email: string, password: string): Promise<AuthResponse> {
-    const { data, error } = await this.supabaseService.signIn(email, password);
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
-
-    if (!data.user) {
-      ExceptionHelper.unauthorized('errors.auth.invalid_credentials');
-    }
-
-    // Get user from our database
-    const user = await this.prismaService.user.findFirst({
-      where: { supabaseId: data.user.id },
-      include: {
-        userSetting: true,
-      },
-    });
-
-    if (!user) {
-      ExceptionHelper.unauthorized('errors.common.not_found', {
-        resource: 'user',
-      });
-    }
-
-    if (user.email !== data.user.email) {
-      const updateUser = await this.prismaService.user.update({
-        where: { id: user.id },
-        data: { email: data.user.email },
-      });
-      user.email = updateUser.email;
-    }
-
-    return {
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        avatar: user.avatar,
-        hasCompletedSetup: user.hasCompletedSetup,
-        notificationPermission: user.userSetting
-          ?.notificationPermission as NotificationPermission,
-        preferredLanguage: user.userSetting?.preferredLanguage as Language,
-      },
-      session: data.session,
-    };
-  }
-
-  async signOut(): Promise<void> {
-    await this.supabaseService.signOut();
-  }
-
-  async refreshToken(token: string): Promise<AuthResponse> {
-    try {
-      // Use Supabase's refresh token functionality
-      const { data, error } = await this.supabaseService.refreshToken(token);
-
-      if (error) {
-        // Check for specific error types from Supabase
-        if (error.message.includes('Token has expired or is invalid')) {
-          ExceptionHelper.unauthorized('errors.auth.token_expired');
-        }
-
-        if (error.message.includes('Token already used')) {
-          ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
-        }
-
-        if (error.message.includes('JWT')) {
-          ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
-        }
-
-        throw new UnauthorizedException(
-          error.message || 'Failed to refresh token',
-        );
-      }
-
-      if (!data.user) {
-        ExceptionHelper.unauthorized(
-          'errors.auth.user_not_found_during_refresh',
-        );
-      }
-
-      // Get user from our database
-      const user = await this.prismaService.user.findFirst({
-        where: { supabaseId: data.user.id },
-        include: {
-          userSetting: true,
-        },
-      });
-
-      if (!user) {
-        ExceptionHelper.unauthorized('errors.common.not_found', {
-          resource: 'user',
-        });
-      }
-
-      return {
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          avatar: user.avatar,
-          hasCompletedSetup: user.hasCompletedSetup,
-          notificationPermission: user.userSetting
-            ?.notificationPermission as NotificationPermission,
-          preferredLanguage: user.userSetting?.preferredLanguage as Language,
-        },
-        session: data.session,
-      };
-    } catch (error: unknown) {
-      let errorMessage = 'Token refresh failed';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-
-        // Check for JWT validation errors in the error message
-        if (
-          errorMessage.includes('InvalidJWTToken') ||
-          errorMessage.includes('JWT claim') ||
-          errorMessage.includes('JWT token')
-        ) {
-          ExceptionHelper.unauthorized('errors.auth.invalid_jwt_token');
-        }
-      }
-
-      // Rethrow the error with appropriate message
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
-      throw new UnauthorizedException(errorMessage);
-    }
-  }
-
-  async validateUser(token: string): Promise<string> {
+  async validateUser(token: string): Promise<AuthUser> {
     const { data, error } = await this.supabaseService.getUser(token);
 
     if (error || !data.user) {
@@ -281,6 +127,12 @@ export class AuthService {
       where: { supabaseId: data.user.id },
       select: {
         id: true,
+        email: true,
+        userSetting: {
+          select: {
+            preferredLanguage: true,
+          },
+        },
       },
     });
 
@@ -290,87 +142,11 @@ export class AuthService {
       });
     }
 
-    return user.id;
-  }
-
-  async resetPassword(email: string): Promise<boolean> {
-    try {
-      // First verify if the user exists in our database
-      const user = await this.prismaService.user.findFirst({
-        where: { email },
-      });
-
-      if (!user) {
-        ExceptionHelper.unauthorized('errors.common.not_found', {
-          resource: 'user',
-        });
-      }
-
-      const { error } = await this.supabaseService.resetPassword(email);
-
-      if (error) {
-        ExceptionHelper.unauthorized(
-          'errors.auth.failed_to_send_password_reset_email',
-        );
-      }
-
-      return true;
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      ExceptionHelper.unauthorized(
-        'errors.auth.failed_to_send_password_reset_email',
-      );
-    }
-  }
-
-  async updateEmail(
-    accessToken: string,
-    email: string,
-    newEmail: string,
-  ): Promise<boolean> {
-    try {
-      // First, verify the user exists with the old email
-      const existingUser = await this.prismaService.user.findFirst({
-        where: { email },
-      });
-
-      if (!existingUser) {
-        ExceptionHelper.unauthorized('errors.common.not_found', {
-          resource: 'user',
-        });
-      }
-
-      // Check if new email is already in use
-      const emailInUse = await this.prismaService.user.findFirst({
-        where: { email: newEmail },
-      });
-
-      if (emailInUse) {
-        ExceptionHelper.conflict('errors.auth.email_already_in_use');
-      }
-
-      // Update email in Supabase with access token
-      const { error } = await this.supabaseService.updateEmail(
-        accessToken,
-        newEmail,
-      );
-
-      if (error) {
-        ExceptionHelper.unauthorized('errors.auth.failed_to_update_email');
-      }
-
-      return true;
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        throw error;
-      }
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      ExceptionHelper.unauthorized('errors.auth.failed_to_update_email');
-    }
+    return {
+      id: user.id,
+      email: user.email,
+      preferredLanguage: user.userSetting?.preferredLanguage as Language,
+    };
   }
 
   async updatePassword(token: string, newPassword: string): Promise<boolean> {
@@ -393,20 +169,6 @@ export class AuthService {
         throw error;
       }
       ExceptionHelper.unauthorized('errors.auth.failed_to_update_password');
-    }
-  }
-
-  async resend(email: string): Promise<boolean> {
-    try {
-      const { error } = await this.supabaseService.resend(email);
-
-      if (error) {
-        ExceptionHelper.unauthorized('errors.auth.failed_to_resend_email');
-      }
-
-      return true;
-    } catch {
-      ExceptionHelper.unauthorized('errors.auth.failed_to_resend_email');
     }
   }
 }

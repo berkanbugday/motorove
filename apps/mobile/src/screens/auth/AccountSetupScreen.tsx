@@ -51,7 +51,8 @@ import {useAccountSetup} from '@services/user.service';
 
 export const AccountSetupScreen = () => {
   const {height} = useWindowDimensions();
-  const {user, accountSetup: accountSetupAuth} = useAuth();
+  const {firstName: currentUserFirstName, accountSetup: accountSetupAuth} =
+    useAuth();
   const insets = useSafeAreaInsets();
   const wizardRef = useRef<WizardHandle>(null);
   const {t, language} = useTranslation();
@@ -399,8 +400,8 @@ export const AccountSetupScreen = () => {
           style={styles.container}>
           <View style={[styles.content, {minHeight: height * 0.8}]}>
             <Title>
-              {user?.firstName
-                ? `${t('screens.accountSetup.hi')} ${user?.firstName}!`
+              {currentUserFirstName
+                ? `${t('screens.accountSetup.hi')} ${currentUserFirstName}!`
                 : ''}
             </Title>
             <BodySmall style={styles.welcomeText}>

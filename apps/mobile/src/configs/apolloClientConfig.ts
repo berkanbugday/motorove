@@ -3,20 +3,17 @@ import {
   InMemoryCache,
   createHttpLink,
   from,
-  Observable,
 } from '@apollo/client';
 import {setContext} from '@apollo/client/link/context';
 import {onError} from '@apollo/client/link/error';
-import EncryptedStorage from 'react-native-encrypted-storage';
 import {AppConfig} from './appConfig';
-import {AUTH_STORAGE_KEYS} from '../types/auth.types';
 import {captureException} from '@sentry/react-native';
 import NetInfo from '@react-native-community/netinfo';
-import authService from '@services/auth.service';
 import {errorService, ErrorType, loggingService} from '@services/index';
 import {RetryLink} from '@apollo/client/link/retry';
 import {Platform} from 'react-native';
 import {getBasePathFromSignedUrl} from '@utils/imageUtils';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 // Create a retry link to automatically retry failed requests
 const retryLink = new RetryLink({
@@ -44,127 +41,80 @@ const httpLink = createHttpLink({
 });
 
 // Error handling link
-const errorLink = onError(
-  ({graphQLErrors, networkError, operation, forward}) => {
-    // Handle GraphQL errors
-    if (graphQLErrors) {
-      for (let err of graphQLErrors) {
-        const {message, locations, path, extensions} = err;
+const errorLink = onError(({graphQLErrors, networkError, operation}) => {
+  // Handle GraphQL errors
+  if (graphQLErrors) {
+    for (let err of graphQLErrors) {
+      const {message, locations, path, extensions} = err;
 
-        // Log all GraphQL errors for debugging
-        loggingService.error(`[GraphQL error]: ${message}`, {
-          locations,
-          path,
-          extensions,
-          operationName: operation.operationName,
+      // Log all GraphQL errors for debugging
+      loggingService.error(`[GraphQL error]: ${message}`, {
+        locations,
+        path,
+        extensions,
+        operationName: operation.operationName,
+      });
+
+      // Track critical errors
+      if (extensions?.code === 'INTERNAL_SERVER_ERROR') {
+        captureException(err, {
+          tags: {
+            graphql: true,
+            operationName: operation.operationName,
+            platform: Platform.OS,
+          },
+          extra: {
+            operationName: operation.operationName,
+            variables: operation.variables,
+            path,
+            extensions,
+          },
         });
-
-        // Track critical errors
-        if (extensions?.code === 'INTERNAL_SERVER_ERROR') {
-          captureException(err, {
-            tags: {
-              graphql: true,
-              operationName: operation.operationName,
-              platform: Platform.OS,
-            },
-            extra: {
-              operationName: operation.operationName,
-              variables: operation.variables,
-              path,
-              extensions,
-            },
-          });
-        }
-
-        // Handle authentication errors with automatic token refresh
-        if (extensions?.code === 'UNAUTHORIZED') {
-          // Return a new observable for the refresh token flow
-
-          if (operation.operationName === 'SignIn') {
-            errorService.handleError(err, ErrorType.AUTHORIZATION, {
-              showToast: true,
-            });
-            return new Observable(observer => {
-              authService.signOut();
-              observer.error(err);
-              observer.complete();
-            });
-          }
-
-          return new Observable(observer => {
-            // Attempt to refresh the token
-            authService
-              .refreshToken()
-              .then(() => {
-                // If successful, retry the original operation and chain the results to our observer
-                const subscriber = {
-                  next: observer.next.bind(observer),
-                  error: observer.error.bind(observer),
-                  complete: observer.complete.bind(observer),
-                };
-
-                // Retry the operation with the new token
-                forward(operation).subscribe(subscriber);
-              })
-              .catch(refreshError => {
-                loggingService.error('Token refresh failed:', refreshError);
-
-                // Clear auth if refresh token is invalid
-                authService.signOut();
-
-                // Forward the original error
-                observer.error(err);
-                observer.complete();
-              });
-          });
-        }
       }
     }
+  }
 
-    // Handle network errors
-    if (networkError) {
-      loggingService.error(`[Network error]: ${networkError}`);
+  // Handle network errors
+  if (networkError) {
+    loggingService.error(`[Network error]: ${networkError}`);
 
-      // Check connectivity
-      NetInfo.fetch().then(state => {
-        // Only log to Sentry if connected but still getting network error
-        if (state.isConnected) {
-          captureException(networkError, {
-            tags: {
-              network: true,
-              operationName: operation.operationName,
-              platform: Platform.OS,
-            },
-            extra: {
-              operationName: operation.operationName,
-              variables: operation.variables,
-              networkError,
-            },
-          });
-          errorService.handleError(networkError, ErrorType.NETWORK, {
-            showToast: true,
-          });
-        } else {
-          loggingService.warning('Device is offline. Network error expected.');
-        }
-      });
-    }
-  },
-);
+    // Check connectivity
+    NetInfo.fetch().then(state => {
+      // Only log to Sentry if connected but still getting network error
+      if (state.isConnected) {
+        captureException(networkError, {
+          tags: {
+            network: true,
+            operationName: operation.operationName,
+            platform: Platform.OS,
+          },
+          extra: {
+            operationName: operation.operationName,
+            variables: operation.variables,
+            networkError,
+          },
+        });
+        errorService.handleError(networkError, ErrorType.NETWORK, {
+          showToast: true,
+        });
+      } else {
+        loggingService.warning('Device is offline. Network error expected.');
+      }
+    });
+  }
+});
 
-// Get access token directly from storage to avoid circular dependency
+// Get access token from Supabase session
+// Supabase automatically refreshes the token if expired
 async function getAccessToken(): Promise<string | null> {
   try {
-    // Try encrypted storage first
-    const encryptedAuthData = await EncryptedStorage.getItem(
-      AUTH_STORAGE_KEYS.AUTH_DATA,
-    );
-
-    if (encryptedAuthData) {
-      const parsedData = JSON.parse(encryptedAuthData);
-      return parsedData.accessToken;
+    const authString = await EncryptedStorage.getItem('supabase.auth.token');
+    if (!authString) {
+      return null;
     }
-    return null;
+
+    const auth = JSON.parse(authString);
+    return auth?.access_token || null;
   } catch (error) {
     loggingService.error('Error getting access token:', error);
     return null;

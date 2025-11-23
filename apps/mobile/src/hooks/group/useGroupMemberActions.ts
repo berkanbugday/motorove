@@ -130,7 +130,7 @@ export const useGroupMemberActions = ({
   );
 
   const handleJoinGroup = useCallback(
-    async (user: {id: string} | null, verifiedIsPendingMember: boolean) => {
+    async (userId: string | null, verifiedIsPendingMember: boolean) => {
       if (verifiedIsPendingMember) {
         loggingService.info(`Group: ${groupId} is pending. Cannot join.`);
         showToast({
@@ -156,10 +156,10 @@ export const useGroupMemberActions = ({
       }
 
       try {
-        if (user && user.id) {
+        if (userId) {
           await addMember({
             groupId,
-            userId: user.id,
+            userId,
           });
         }
       } catch (error) {
@@ -182,7 +182,7 @@ export const useGroupMemberActions = ({
   );
 
   const handleLeaveGroup = useCallback(
-    async (user: {id: string} | null) => {
+    async (userId: string | null) => {
       if (group?.isOwner) {
         showToast({
           text1: t('common.warning'),
@@ -192,9 +192,9 @@ export const useGroupMemberActions = ({
         return;
       }
 
-      if (user && user.id) {
+      if (userId) {
         try {
-          const result = await removeMember({groupId, userId: user.id});
+          const result = await removeMember({groupId, userId});
           if (result) {
             showToast({
               type: 'success',

@@ -18,6 +18,23 @@ export const USER_FRAGMENT = gql`
   ${CITY_FRAGMENT}
 `;
 
+// Me fragment (includes userSetting)
+export const ME_FRAGMENT = gql`
+  fragment MeFragment on UserDto {
+    id
+    firstName
+    lastName
+    email
+    avatar
+    hasCompletedSetup
+    supabaseId
+    userSetting {
+      notificationPermission
+      preferredLanguage
+    }
+  }
+`;
+
 // Profile fragment
 export const PROFILE_FRAGMENT = gql`
   fragment ProfileFragment on ProfileDto {
@@ -52,6 +69,15 @@ export const SEARCH_USERS = gql`
     }
   }
   ${USER_FRAGMENT}
+`;
+
+export const GET_ME = gql`
+  query GetMe {
+    me {
+      ...MeFragment
+    }
+  }
+  ${ME_FRAGMENT}
 `;
 
 export const ACCOUNT_SETUP = gql`

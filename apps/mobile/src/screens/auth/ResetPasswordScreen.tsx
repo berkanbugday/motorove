@@ -24,8 +24,9 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {colors} from '@theme/colors';
 import {spacing} from '@theme/spacing';
-import {useResetPassword} from '@services/auth.service';
+import authService from '@services/auth.service';
 import {loggingService} from '@services/logging.service';
+import {showToast} from '@components';
 import {useTranslation} from '@hooks/useTranslation';
 import {commonStyles} from '@theme/commonStyles';
 
@@ -33,14 +34,7 @@ export const ResetPasswordScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {height} = useWindowDimensions();
   const {t} = useTranslation();
-  const {resetPassword, loading} = useResetPassword(() => {
-    // Reset form after successful submission
-    reset();
-    // Navigate to signin screen
-    setTimeout(() => {
-      navigation.navigate('Signin');
-    }, 1500);
-  });
+  const [loading, setLoading] = React.useState(false);
 
   // Create validation schema with translations
   const {resetPasswordSchema} = authSchemas(t);
@@ -65,10 +59,31 @@ export const ResetPasswordScreen = () => {
     formValues: ResetPasswordFormValues,
   ): Promise<void> => {
     try {
-      await resetPassword(formValues.email);
+      setLoading(true);
+      await authService.resetPassword(formValues.email);
+
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.resetPassword.email_sent'),
+      });
+
+      // Reset form after successful submission
+      reset();
+
+      // Navigate to signin screen
+      setTimeout(() => {
+        navigation.navigate('Signin');
+      }, 1500);
     } catch (error) {
       loggingService.error('Error in onSubmit:', error);
-      // Error handling is now done in the hook
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('screens.resetPassword.email_send_failed'),
+      });
+    } finally {
+      setLoading(false);
     }
   };
 

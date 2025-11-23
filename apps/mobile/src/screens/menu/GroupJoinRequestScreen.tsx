@@ -26,7 +26,7 @@ export const GroupJoinRequestScreen = () => {
   const navigation =
     useNavigation<MainScreenNavigationProp<'GroupJoinRequest'>>();
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
 
   // Fetch group join requests with comprehensive error handling
   const {
@@ -56,11 +56,11 @@ export const GroupJoinRequestScreen = () => {
    */
   const handleUserPress = useCallback(
     (userId: string) => {
-      if (userId !== user?.id) {
+      if (userId !== currentUserId) {
         navigation.navigate('Profile', {userId});
       }
     },
-    [navigation, user],
+    [navigation, currentUserId],
   );
 
   /**

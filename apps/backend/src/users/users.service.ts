@@ -135,6 +135,7 @@ export class UsersService {
       where: { id },
       include: {
         city: true,
+        userSetting: true,
       },
     });
 
@@ -144,16 +145,40 @@ export class UsersService {
       });
     }
 
-    return {
-      ...user,
-      avatar: user.avatar || undefined,
-      city: user.city as CityDto,
-    };
+    return plainToClass(UserDto, user);
+  }
+
+  async findMe(id: string): Promise<UserDto> {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        avatar: true,
+        hasCompletedSetup: true,
+        supabaseId: true,
+        userSetting: {
+          select: {
+            notificationPermission: true,
+            preferredLanguage: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'user',
+      });
+    }
+
+    return plainToClass(UserDto, user);
   }
 
   async userProfile(
     userId: string,
-    authToken?: string,
     currentUserId?: string,
   ): Promise<ProfileDto> {
     const user = await this.prisma.user.findFirst({

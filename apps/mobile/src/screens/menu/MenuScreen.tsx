@@ -32,7 +32,7 @@ type MenuItem = {
 
 export const MenuScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'Tabs'>>();
-  const {user, signOut} = useAuth();
+  const {id: currentUserId, signOut} = useAuth();
   const insets = useSafeAreaInsets();
   const {t} = useTranslation();
   const {openBottomSheet, closeBottomSheet} = useBottomSheet();
@@ -106,7 +106,7 @@ export const MenuScreen = () => {
           title: t('screens.menu.my_profile'),
           onPress: () => {
             navigation.navigate('Profile', {
-              userId: user?.id,
+              userId: currentUserId,
             });
           },
           showRightIcon: true,

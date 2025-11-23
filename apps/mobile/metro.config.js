@@ -17,7 +17,12 @@ const defaultConfig = getDefaultConfig(__dirname);
 
 // Path aliases configuration for Metro
 const srcPath = path.resolve(__dirname, 'src');
+
+// Node.js core module polyfills for React Native
+const nodeLibs = require('node-libs-react-native');
+
 const extraNodeModules = {
+  // Path aliases
   '@components': path.resolve(srcPath, 'components'),
   '@screens': path.resolve(srcPath, 'screens'),
   '@navigation': path.resolve(srcPath, 'navigation'),
@@ -31,6 +36,17 @@ const extraNodeModules = {
   '@contexts': path.resolve(srcPath, 'contexts'),
   '@services': path.resolve(srcPath, 'services'),
   '@': srcPath,
+  // Node.js core module polyfills - spread first to get all modules
+  ...nodeLibs,
+  // Override specific modules for better compatibility
+  stream: require.resolve('readable-stream'),
+  events: require.resolve('events'),
+  crypto: require.resolve('crypto-browserify'),
+  // Custom shims for modules not available in React Native
+  net: path.resolve(srcPath, 'shims/net.js'),
+  tls: path.resolve(srcPath, 'shims/tls.js'),
+  http: path.resolve(srcPath, 'shims/http.js'),
+  https: path.resolve(srcPath, 'shims/https.js'),
 };
 
 // Define a custom cache directory

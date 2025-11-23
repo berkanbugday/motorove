@@ -16,7 +16,7 @@ import {
 import {loggingService} from './logging.service';
 import {showToast} from '@components';
 import {useState, useCallback} from 'react';
-import {useTranslation} from '@/i18n';
+import useTranslation from '@hooks/useTranslation';
 
 // Hook for creating a business comment
 export const useCreateBusinessComment = (onSuccess?: () => void) => {

@@ -47,7 +47,7 @@ export const PostScreen = ({navigation}: Props) => {
   const {t} = useTranslation();
   const [activeTab, setActiveTab] = useState('shared_posts');
   const [refreshing, setRefreshing] = useState(false);
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
   const {language} = useLanguage();
   const {openBottomSheet} = useBottomSheet();
   const insets = useSafeAreaInsets();
@@ -58,7 +58,7 @@ export const PostScreen = ({navigation}: Props) => {
     loading: myPostsLoading,
     refetch: refetchMyPosts,
     loadMore: loadMoreMyPosts,
-  } = useGetPosts(undefined, user?.id);
+  } = useGetPosts(undefined, currentUserId);
 
   // Hook for saved posts (Saved Posts tab)
   const {
@@ -66,7 +66,7 @@ export const PostScreen = ({navigation}: Props) => {
     loading: savedPostsLoading,
     refetch: refetchSavedPosts,
     loadMore: loadMoreSavedPosts,
-  } = useGetPosts(undefined, undefined, user?.id);
+  } = useGetPosts(undefined, undefined, currentUserId);
 
   // Add hooks for post interactions
   const {likePost} = useLikePost();
@@ -170,7 +170,7 @@ export const PostScreen = ({navigation}: Props) => {
         <UserCard
           user={item}
           onPress={() => {
-            if (item.id !== user?.id) {
+            if (item.id !== currentUserId) {
               closeBottomSheet();
               navigateToScreen(navigation, 'Profile', {userId: item.id});
             }
@@ -180,7 +180,7 @@ export const PostScreen = ({navigation}: Props) => {
         />
       );
     },
-    [navigation, user?.id],
+    [navigation, currentUserId],
   );
 
   // Show liked users in bottom sheet with current user first
@@ -189,10 +189,10 @@ export const PostScreen = ({navigation}: Props) => {
       if (likedUsers) {
         // Sort the array to put current user first
         const sortedUsers = [...likedUsers].sort((a, b) => {
-          if (a.id === user?.id) {
+          if (a.id === currentUserId) {
             return -1;
           }
-          if (b.id === user?.id) {
+          if (b.id === currentUserId) {
             return 1;
           }
           return 0;
@@ -215,7 +215,7 @@ export const PostScreen = ({navigation}: Props) => {
         });
       }
     },
-    [user?.id, openBottomSheet, renderUserItem, t],
+    [currentUserId, openBottomSheet, renderUserItem, t],
   );
 
   // Handle dropdown menu item selection
@@ -335,7 +335,7 @@ export const PostScreen = ({navigation}: Props) => {
   const renderFeedPost = useCallback(
     ({item}: {item: IPost}) => {
       // Determine if this is the user's own post
-      const isOwnPost = item.createdBy.id === user?.id;
+      const isOwnPost = item.createdBy.id === currentUserId;
       // Transform Post model to FeedCard props
       const feedCardProps = transformPostToFeedCard(item);
 
@@ -363,7 +363,7 @@ export const PostScreen = ({navigation}: Props) => {
       );
     },
     [
-      user,
+      currentUserId,
       handleLikePress,
       handleSavePress,
       createPostDropdownItems,

@@ -80,7 +80,11 @@ export const EditPostScreen = () => {
     refetch: refetchJoinedGroups,
   } = useGetJoinedGroups();
 
-  const {user} = useAuth();
+  const {
+    firstName: currentUserFirstName,
+    lastName: currentUserLastName,
+    avatar: currentUserAvatar,
+  } = useAuth();
   const insets = useSafeAreaInsets();
   const {language} = useLanguage();
 
@@ -386,15 +390,15 @@ export const EditPostScreen = () => {
           <View style={styles.profileSection}>
             <Image
               source={
-                user?.avatar
-                  ? {uri: user?.avatar}
+                currentUserAvatar
+                  ? {uri: currentUserAvatar}
                   : require('@assets/images/default_avatar.png')
               }
               style={styles.avatar as ImageStyle}
             />
             <View style={styles.profileInfo}>
               <Subtitle style={styles.profileName}>
-                {user?.firstName} {user?.lastName}
+                {currentUserFirstName} {currentUserLastName}
               </Subtitle>
               <Dropdown
                 data={privacyOptions}

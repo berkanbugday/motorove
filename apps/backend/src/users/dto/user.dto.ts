@@ -6,11 +6,13 @@ import {
   IsString,
   IsUUID,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { IUser } from '@motorove/shared';
 import { CityDto } from 'src/cities/dto/city.dto';
 import { Type } from 'class-transformer';
 import { ApprovalStatus } from '../../enums/models/approval-status.enum';
+import { UserSettingDto } from '../../user-settings/dto/user-setting.dto';
 
 @ObjectType()
 export class UserDto implements IUser {
@@ -35,6 +37,11 @@ export class UserDto implements IUser {
   @IsString()
   avatar?: string;
 
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  hasCompletedSetup?: boolean;
+
   @Field(() => String)
   @IsString()
   supabaseId: string;
@@ -47,4 +54,10 @@ export class UserDto implements IUser {
   @ValidateNested()
   @Type(() => CityDto)
   city?: CityDto;
+
+  @Field(() => UserSettingDto, { nullable: true })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UserSettingDto)
+  userSetting?: UserSettingDto;
 }

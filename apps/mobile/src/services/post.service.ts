@@ -273,7 +273,12 @@ export const useGetPosts = (
 // Hook for liking a post
 export const useLikePost = () => {
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {
+    id: currentUserId,
+    firstName: currentUserFirstName,
+    lastName: currentUserLastName,
+    avatar: currentUserAvatar,
+  } = useAuth();
   const [likePostMutation, {loading, error}] = useMutation(LIKE_POST, {
     onError: errorObj => {
       loggingService.error('Error liking post:', errorObj);
@@ -288,7 +293,7 @@ export const useLikePost = () => {
   const likePost = async (postId: string) => {
     try {
       // Make sure we have the current user
-      if (!user) {
+      if (!currentUserId) {
         loggingService.error('Cannot like post: User not authenticated');
         return null;
       }
@@ -324,7 +329,7 @@ export const useLikePost = () => {
 
                   // Check if user is already in the likedUsers array
                   const userExists = usersArray.some(
-                    likedUser => readField('id', likedUser) === user.id,
+                    likedUser => readField('id', likedUser) === currentUserId,
                   );
 
                   // If user is already in the array, return the existing array
@@ -335,7 +340,7 @@ export const useLikePost = () => {
                   // Try to get existing user reference from cache first
                   const existingUserRef = toReference({
                     __typename: 'UserDto',
-                    id: user.id,
+                    id: currentUserId,
                   });
 
                   // Check if we can read the user data from cache
@@ -349,10 +354,10 @@ export const useLikePost = () => {
                   const newUserRef = toReference(
                     {
                       __typename: 'UserDto',
-                      id: user.id,
-                      firstName: user.firstName || '',
-                      lastName: user.lastName || '',
-                      avatar: user.avatar || null,
+                      id: currentUserId,
+                      firstName: currentUserFirstName || '',
+                      lastName: currentUserLastName || '',
+                      avatar: currentUserAvatar || null,
                     },
                     true, // mergeIntoStore - writes partial data to cache
                   );
@@ -384,7 +389,7 @@ export const useLikePost = () => {
 // Hook for unliking a post
 export const useUnlikePost = () => {
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
   const [unlikePostMutation, {loading, error}] = useMutation(UNLIKE_POST, {
     onError: errorObj => {
       loggingService.error('Error unliking post:', errorObj);
@@ -399,7 +404,7 @@ export const useUnlikePost = () => {
   const unlikePost = async (postId: string) => {
     try {
       // Make sure we have the current user
-      if (!user) {
+      if (!currentUserId) {
         loggingService.error('Cannot unlike post: User not authenticated');
         return null;
       }
@@ -432,7 +437,7 @@ export const useUnlikePost = () => {
 
                   // Remove the current user from the likedUsers array
                   return usersArray.filter(
-                    likedUser => readField('id', likedUser) !== user.id,
+                    likedUser => readField('id', likedUser) !== currentUserId,
                   );
                 },
               },

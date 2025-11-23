@@ -34,7 +34,7 @@ type UseGroupPostsProps = {
  */
 export const useGroupPosts = ({groupId}: UseGroupPostsProps) => {
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
   const {language} = useLanguage();
   const navigation = useNavigation<MainScreenNavigationProp<'GroupDetail'>>();
 
@@ -143,10 +143,10 @@ export const useGroupPosts = ({groupId}: UseGroupPostsProps) => {
     (likedUsers?: IUser[]) => {
       if (likedUsers) {
         const sortedUsers = [...likedUsers].sort((a, b) => {
-          if (a.id === user?.id) {
+          if (a.id === currentUserId) {
             return -1;
           }
-          if (b.id === user?.id) {
+          if (b.id === currentUserId) {
             return 1;
           }
           return 0;
@@ -169,7 +169,7 @@ export const useGroupPosts = ({groupId}: UseGroupPostsProps) => {
         });
       }
     },
-    [user?.id, renderUserItem, t],
+    [currentUserId, renderUserItem, t],
   );
 
   const createPostDropdownItems = useCallback(

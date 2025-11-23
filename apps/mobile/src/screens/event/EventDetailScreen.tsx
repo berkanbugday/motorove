@@ -83,7 +83,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
   const {language} = useLanguage();
   const deleteEventBottomSheetRef = useRef<BottomSheetRef>(null);
   const cancelEventBottomSheetRef = useRef<BottomSheetRef>(null);
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
   // Image carousel states
   const [activeSlide, setActiveSlide] = useState(0);
   const [headerWidth, setHeaderWidth] = useState(0);
@@ -173,7 +173,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           isHighlighted: true,
         });
       } else if (status === EventStatus.UPCOMING) {
-        if (event?.createdBy.id === user?.id) {
+        if (event?.createdBy.id === currentUserId) {
           items.push({
             id: 'edit_event',
             label: t('common.edit'),
@@ -187,7 +187,10 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           });
         }
         if (event?.isParticipating) {
-          if (event?.createdBy.id !== user?.id || !event?.organizedByGroupId) {
+          if (
+            event?.createdBy.id !== currentUserId ||
+            !event?.organizedByGroupId
+          ) {
             items.push({
               id: 'leave_event',
               label: t('screens.event.leave'),
@@ -206,7 +209,7 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
 
       return items;
     },
-    [t, event?.isParticipating, event?.createdBy.id, user?.id],
+    [t, event?.isParticipating, event?.createdBy.id, currentUserId],
   );
 
   const handleDropdownMenuItemSelect = useCallback(

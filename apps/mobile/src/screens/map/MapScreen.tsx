@@ -51,7 +51,7 @@ const ZOOM_THRESHOLD_FAR = 0.5; // Very zoomed out
 
 export const MapScreen = () => {
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
   const navigation =
     useNavigation<MainScreenNavigationProp<'BusinessDetail'>>();
   const route = useRoute<TabScreenRouteProp<'MapTab'>>();
@@ -541,11 +541,11 @@ export const MapScreen = () => {
   // Handle profile press - navigate to profile screen
   const handleProfilePress = useCallback(
     (userId: string) => {
-      if (userId !== user?.id) {
+      if (userId !== currentUserId) {
         navigateToScreen(navigation, 'Profile', {userId});
       }
     },
-    [navigation, user],
+    [navigation, currentUserId],
   );
 
   // Check if filters are active

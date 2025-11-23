@@ -54,7 +54,7 @@ const CancelButton = ({onPress}: {onPress: () => void}) => {
 export const SearchUserScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'SearchUser'>>();
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -146,7 +146,7 @@ export const SearchUserScreen = () => {
           user={item}
           loading={isLoading}
           onPress={() => {
-            if (item.id !== user?.id) {
+            if (item.id !== currentUserId) {
               navigation.navigate('Profile', {userId: item.id});
             }
           }}
@@ -155,7 +155,13 @@ export const SearchUserScreen = () => {
         />
       );
     },
-    [handleFollowUser, handleUnfollowUser, user, loadingUserIds, navigation],
+    [
+      handleFollowUser,
+      handleUnfollowUser,
+      currentUserId,
+      loadingUserIds,
+      navigation,
+    ],
   );
 
   // Render empty state when no users match search query

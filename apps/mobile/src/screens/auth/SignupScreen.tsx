@@ -81,7 +81,7 @@ export const SignupScreen = () => {
         language.toUpperCase() as Language,
       );
 
-      if (response.user) {
+      if (response) {
         setUserEmail(data.email);
         setSignupSuccess(true);
         reset();
@@ -124,7 +124,9 @@ export const SignupScreen = () => {
   const handlePrivacyPress = () => {
     openBottomSheet({
       content: (
-        <WebViewContent url={`https://motorove.app/${language}/privacy-mobile`} />
+        <WebViewContent
+          url={`https://motorove.app/${language}/privacy-mobile`}
+        />
       ),
       snapPoint: 'full',
       title: t('screens.signUp.privacy_policy'),

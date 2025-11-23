@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import authService from '../services/auth.service';
-import {AuthState, AuthResponse} from '../types/auth.types';
+import {AuthUser} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
 import {NotificationPermission} from '@motorove/shared';
 import {useRemoveDeviceToken} from '@services/notification.service';
@@ -15,26 +15,25 @@ import {useLanguage} from './LanguageContext';
 import {useLocationPermission} from '@hooks/useLocationPermission';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay/LocationPermissionOverlay';
 
-// Import refactored helpers
-import {useAppStateRefresh} from './auth/useAppStateRefresh';
-import {
-  createEmptyAuthState,
-  convertAuthResponseToState,
-  updateAuthStateWithSetup,
-  updateAuthStateWithNotificationPermission,
-  isValidAuthState,
-} from './auth/authStateHelpers';
+// Import helpers
+import {createEmptyAuthUser, isValidAuthUser} from './auth/authUserHelpers';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 /**
  * Authentication Context Type
  */
-export interface AuthContextType extends AuthState {
-  signIn: (email: string, password: string) => Promise<AuthResponse>;
+export interface AuthContextType extends AuthUser {
+  signIn: (email: string, password: string) => Promise<AuthUser>;
   accountSetup: (hasCompletedSetup: boolean) => Promise<void>;
   signOut: () => Promise<void>;
-  loadAuthState: () => Promise<void>;
+  loadAuthUser: () => Promise<void>;
   updateNotificationPermission: (
     permission: NotificationPermission,
+  ) => Promise<void>;
+  updateCurrentUser: (
+    firstName: string,
+    lastName: string,
+    avatar: string | null,
   ) => Promise<void>;
   isInitializing: boolean;
 }
@@ -43,7 +42,7 @@ export interface AuthContextType extends AuthState {
  * Default context value with error-throwing implementations
  */
 const createDefaultContextValue = (): AuthContextType => ({
-  ...createEmptyAuthState(),
+  ...createEmptyAuthUser(),
   signIn: async () => {
     throw new Error('AuthContext not initialized');
   },
@@ -53,10 +52,13 @@ const createDefaultContextValue = (): AuthContextType => ({
   signOut: async () => {
     throw new Error('AuthContext not initialized');
   },
-  loadAuthState: async () => {
+  loadAuthUser: async () => {
     throw new Error('AuthContext not initialized');
   },
   updateNotificationPermission: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  updateCurrentUser: async () => {
     throw new Error('AuthContext not initialized');
   },
   isInitializing: false,
@@ -74,17 +76,22 @@ interface AuthProviderProps {
 
 /**
  * Authentication Provider Component
- * Manages global authentication state and provides auth operations
+ *
+ * Senior Developer Implementation:
+ * - Simple state management (no complex refresh logic here)
+ * - Auth service handles all token refresh automatically
+ * - Clean separation: Context manages state, Service handles auth logic
+ * - Automatic token refresh on app foreground (handled by auth service)
  */
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
-  const [authState, setAuthState] = useState<AuthState>(createEmptyAuthState());
+  const [authUser, setAuthUser] = useState<AuthUser>(createEmptyAuthUser());
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {updateUserSetting} = useUpdateUserSetting();
   const {setLanguage} = useLanguage();
 
   // Location permission hook - only active when user is authenticated
-  const isAuthenticated = isValidAuthState(authState);
+  const isAuthenticated = isValidAuthUser(authUser);
   const {
     showPermissionOverlay,
     onAllowPermission,
@@ -94,31 +101,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
   // Load authentication state on mount
   useEffect(() => {
-    loadAuthState();
+    loadAuthUser();
   }, []);
-
-  // Handle app foreground token refresh
-  useAppStateRefresh(authState, setAuthState);
 
   /**
    * Load authentication state from storage
    */
-  const loadAuthState = useCallback(async (): Promise<void> => {
+  const loadAuthUser = useCallback(async (): Promise<void> => {
     try {
       setIsInitializing(true);
       loggingService.info('Loading authentication state');
 
-      const state = await authService.getAuthState();
-      setAuthState(state);
+      const state = await authService.getAuthUser();
+      setAuthUser(state);
 
-      if (isValidAuthState(state)) {
+      if (isValidAuthUser(state)) {
         loggingService.info('Auth context loaded with valid auth state');
       } else {
         loggingService.info('Auth context loaded with no valid session');
       }
     } catch (error) {
       loggingService.error('Error loading auth state:', error);
-      setAuthState(createEmptyAuthState());
+      setAuthUser(createEmptyAuthUser());
     } finally {
       setIsInitializing(false);
     }
@@ -128,24 +132,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
    * Sign in user
    */
   const signIn = useCallback(
-    async (email: string, password: string): Promise<AuthResponse> => {
+    async (email: string, password: string): Promise<AuthUser> => {
       const response = await authService.signIn(email, password);
 
-      if (response.session) {
-        const newState = convertAuthResponseToState(response);
-
+      if (response.id) {
         loggingService.info('Setting auth state after signin', {
-          hasUser: !!newState.user,
-          hasToken: !!newState.accessToken,
+          hasUser: !!response.id,
         });
 
-        setAuthState(newState);
+        setAuthUser(response);
 
-        if (newState.user?.preferredLanguage) {
+        if (response.preferredLanguage) {
           try {
-            setLanguage(newState.user.preferredLanguage.toLowerCase());
+            setLanguage(response.preferredLanguage.toLowerCase());
             loggingService.info('Language set from stored user preference:', {
-              preferredLanguage: newState.user.preferredLanguage,
+              preferredLanguage: response.preferredLanguage,
             });
           } catch (error) {
             loggingService.error(
@@ -166,11 +167,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
    */
   const accountSetup = useCallback(
     async (hasCompletedSetup: boolean): Promise<void> => {
-      const newState = updateAuthStateWithSetup(authState, hasCompletedSetup);
-      setAuthState(newState);
-      await authService.saveAuthDataToEncryptedStorage(newState);
+      const newUser = {
+        ...authUser,
+        hasCompletedSetup,
+      };
+      setAuthUser(newUser);
+      await EncryptedStorage.setItem('auth_user', JSON.stringify(newUser));
     },
-    [authState],
+    [authUser],
   );
 
   /**
@@ -193,11 +197,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       await authService.signOut();
 
       // Clear auth state last to stop any active queries
-      setAuthState(createEmptyAuthState());
+      setAuthUser(createEmptyAuthUser());
     } catch (error) {
       loggingService.error('Error signing out:', error);
       // Ensure state is cleared even on error
-      setAuthState(createEmptyAuthState());
+      setAuthUser(createEmptyAuthUser());
       throw error;
     }
   }, [removeDeviceToken]);
@@ -215,23 +219,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         throw new Error('Failed to update notification permission');
       }
 
-      const newState = updateAuthStateWithNotificationPermission(
-        authState,
-        permission,
-      );
-      setAuthState(newState);
-      await authService.saveAuthDataToEncryptedStorage(newState);
+      const newUser = {
+        ...authUser,
+        notificationPermission: permission,
+      };
+      setAuthUser(newUser);
+      await EncryptedStorage.setItem('auth_user', JSON.stringify(newUser));
     },
-    [authState, updateUserSetting],
+    [authUser, updateUserSetting],
+  );
+
+  /**
+   * Update user profile
+   */
+  const updateCurrentUser = useCallback(
+    async (
+      firstName: string,
+      lastName: string,
+      avatar: string | null,
+    ): Promise<void> => {
+      const newUser = {
+        ...authUser,
+        firstName,
+        lastName,
+        avatar,
+      };
+      setAuthUser(newUser);
+      await EncryptedStorage.setItem('auth_user', JSON.stringify(newUser));
+    },
+    [authUser],
   );
 
   const contextValue: AuthContextType = {
-    ...authState,
+    ...authUser,
     signIn,
     accountSetup,
     signOut,
-    loadAuthState,
+    loadAuthUser,
     updateNotificationPermission,
+    updateCurrentUser,
     isInitializing,
   };
 

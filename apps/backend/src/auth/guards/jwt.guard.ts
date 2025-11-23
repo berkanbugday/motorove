@@ -31,10 +31,8 @@ export class JwtGuard implements CanActivate {
     const token = parts[1];
 
     try {
-      const userId = await this.authService.validateUser(token);
-      req.user = {
-        id: userId,
-      };
+      const user = await this.authService.validateUser(token);
+      req.user = user;
       req.accessToken = token; // Store access token for Supabase operations
       return true;
     } catch {

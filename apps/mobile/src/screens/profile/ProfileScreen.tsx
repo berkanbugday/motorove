@@ -48,14 +48,14 @@ type ProfileTab = 'posts' | 'groups';
  * Profile Screen - Shows user profile and account management
  */
 export const ProfileScreen = () => {
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
   const {t} = useTranslation();
   const navigation = useNavigation<MainScreenNavigationProp<'Profile'>>();
   const route = useRoute<MainScreenRouteProp<'Profile'>>();
 
   // Get userId from route params, fallback to current user
   const profileUserId = route.params?.userId || '';
-  const isOwnProfile = profileUserId === user?.id;
+  const isOwnProfile = profileUserId === currentUserId;
   const [activeTab, setActiveTab] = useState<ProfileTab>('posts');
   const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
   const [showCompletionWidgetState, setShowCompletionWidgetState] =

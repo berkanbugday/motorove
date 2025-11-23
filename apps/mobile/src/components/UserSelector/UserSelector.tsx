@@ -275,11 +275,11 @@ export const UserSelector: React.FC<UserSelectorProps> = ({
   maxUsers = 10,
 }) => {
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {id: currentUserId} = useAuth();
 
   // Get following users - ensure we always have a valid user ID
-  const {followingUsers, loading, error, loadMore, refetch} = user?.id
-    ? FollowService.useFollowingUsers(user.id, 50)
+  const {followingUsers, loading, error, loadMore, refetch} = currentUserId
+    ? FollowService.useFollowingUsers(currentUserId, 50)
     : {
         followingUsers: [],
         loading: false,

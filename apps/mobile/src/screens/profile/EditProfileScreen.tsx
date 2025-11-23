@@ -51,7 +51,7 @@ import {
  * Edit Profile Screen - Allows users to edit their profile information
  */
 export const EditProfileScreen = () => {
-  const {user} = useAuth();
+  const {id: currentUserId, updateCurrentUser} = useAuth();
   const navigation = useNavigation();
   const {t} = useTranslation();
   const {language} = useLanguage();
@@ -73,7 +73,7 @@ export const EditProfileScreen = () => {
   );
 
   // Fetch user profile
-  const {profile, loading: profileLoading} = useGetUserProfile(user?.id!);
+  const {profile, loading: profileLoading} = useGetUserProfile(currentUserId);
 
   // Mutations
   const {updateUserProfile, loading: updateLoading} = useUpdateUserProfile(
@@ -306,7 +306,14 @@ export const EditProfileScreen = () => {
         socialMediaProfiles: cleanedSocialMediaProfiles,
       };
 
-      await updateUserProfile(input);
+      const userId = await updateUserProfile(input);
+      if (userId) {
+        await updateCurrentUser(
+          data.firstName,
+          data.lastName,
+          data.avatar || null,
+        );
+      }
     } catch (error) {
       loggingService.error('Error in onSubmit:', error);
     }

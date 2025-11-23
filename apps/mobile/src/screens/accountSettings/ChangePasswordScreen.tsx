@@ -17,7 +17,8 @@ import {
   authSchemas,
   ChangePasswordFormValues,
 } from '@utils/validation/authValidation';
-import {useUpdatePassword} from '@services';
+import authService from '@services/auth.service';
+import {showToast} from '@components';
 
 /**
  * Change Password Screen - Allows users to change their password
@@ -28,6 +29,7 @@ export const ChangePasswordScreen = () => {
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {changePasswordSchema} = authSchemas(t);
 
@@ -44,12 +46,6 @@ export const ChangePasswordScreen = () => {
     mode: 'onChange',
   });
 
-  const {updatePassword, loading} = useUpdatePassword(() =>
-    setTimeout(() => {
-      navigation.goBack();
-    }, 1000),
-  );
-
   const toggleNewPasswordVisibility = () => {
     setShowNewPassword(!showNewPassword);
   };
@@ -60,9 +56,28 @@ export const ChangePasswordScreen = () => {
 
   const onSubmit = async (data: ChangePasswordFormValues) => {
     try {
-      await updatePassword(data.newPassword);
+      setLoading(true);
+      await authService.updatePassword(data.newPassword);
+
+      showToast({
+        type: 'success',
+        text1: t('common.success'),
+        text2: t('screens.changePassword.success_updated'),
+      });
+
+      // Navigate back after 1 second
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
     } catch (error) {
       loggingService.error('Error in onSubmit:', error);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2: t('screens.changePassword.update_failed'),
+      });
+    } finally {
+      setLoading(false);
     }
   };
 

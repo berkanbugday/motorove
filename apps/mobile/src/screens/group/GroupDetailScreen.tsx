@@ -67,7 +67,13 @@ type Props = {
 export const GroupDetailScreen = ({route, navigation}: Props) => {
   const {groupId} = route.params;
   const {t} = useTranslation();
-  const {user} = useAuth();
+  const {
+    id: currentUserId,
+    email: currentUserEmail,
+    firstName: currentUserFirstName,
+    lastName: currentUserLastName,
+    avatar: currentUserAvatar,
+  } = useAuth();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const leaveGroupBottomSheetRef = useRef<BottomSheetRef>(null);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
@@ -139,7 +145,13 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
     openMembersBottomSheet,
   } = useGroupMembership({
     group,
-    user,
+    user: {
+      id: currentUserId,
+      email: currentUserEmail,
+      firstName: currentUserFirstName,
+      lastName: currentUserLastName,
+      avatar: currentUserAvatar,
+    },
     groupLoading,
     navigation,
     MemberItemComponent: MemberItem,
@@ -195,7 +207,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
   // Render feed post with FeedCard component
   const renderFeedPost = useCallback(
     ({item}: {item: IPost}) => {
-      const isOwnPost = item.createdBy.id === user?.id;
+      const isOwnPost = item.createdBy.id === currentUserId;
       const feedCardProps = transformPostToFeedCard(item);
       return (
         <FeedCard
@@ -223,7 +235,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       );
     },
     [
-      user,
+      currentUserId,
       transformPostToFeedCard,
       createPostDropdownItems,
       handlePostDropdownSelect,
@@ -288,8 +300,8 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
   );
 
   const confirmLeaveGroup = useCallback(async () => {
-    await handleLeaveGroup(user);
-  }, [handleLeaveGroup, user]);
+    await handleLeaveGroup(currentUserId);
+  }, [handleLeaveGroup, currentUserId]);
 
   // Handle dropdown item select
   const handleDropdownMenuItemSelect = useCallback(
@@ -305,7 +317,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           handleLeaveGroupPress(_group);
           break;
         case 'join_group':
-          handleJoinGroup(user, verifiedIsPendingMember);
+          handleJoinGroup(currentUserId, verifiedIsPendingMember);
           break;
         default:
           break;
@@ -316,7 +328,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
       navigation,
       handleLeaveGroupPress,
       handleJoinGroup,
-      user,
+      currentUserId,
       verifiedIsPendingMember,
     ],
   );
