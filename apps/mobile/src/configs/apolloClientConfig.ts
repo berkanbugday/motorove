@@ -9,6 +9,7 @@ import {onError} from '@apollo/client/link/error';
 import {AppConfig} from './appConfig';
 import {captureException} from '@sentry/react-native';
 import NetInfo from '@react-native-community/netinfo';
+import authService from '@services/auth.service';
 import {errorService, ErrorType, loggingService} from '@services/index';
 import {RetryLink} from '@apollo/client/link/retry';
 import {Platform} from 'react-native';
@@ -70,6 +71,19 @@ const errorLink = onError(({graphQLErrors, networkError, operation}) => {
             extensions,
           },
         });
+      }
+
+      // Handle authentication errors
+      if (extensions?.code === 'UNAUTHORIZED') {
+        loggingService.error('Unauthorized request - signing out');
+
+        errorService.handleError(err, ErrorType.AUTHORIZATION, {
+          showToast: false,
+        });
+
+        // Sign out on unauthorized - Supabase handles token refresh automatically,
+        // so if we get UNAUTHORIZED, the session is truly invalid
+        authService.signOut();
       }
     }
   }

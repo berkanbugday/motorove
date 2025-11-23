@@ -817,6 +817,7 @@ type Mutation {
   removeWarning(id: String!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
+  signUp(input: SignUpInput!): Boolean!
   unfollowUser(userId: ID!): ApprovalStatus!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
@@ -1108,6 +1109,14 @@ enum RoadType {
   ASPHALT
   MIXED
   OFF_ROAD
+}
+
+input SignUpInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  preferredLanguage: Language
 }
 
 """Social media platform types"""

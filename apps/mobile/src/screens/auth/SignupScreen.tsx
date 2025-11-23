@@ -117,7 +117,6 @@ export const SignupScreen = () => {
       title: t('screens.signUp.terms_of_service'),
       showCloseButton: true,
       closeButtonPosition: 'top-right',
-      disableContentGestures: false,
     });
   };
 
@@ -132,7 +131,6 @@ export const SignupScreen = () => {
       title: t('screens.signUp.privacy_policy'),
       showCloseButton: true,
       closeButtonPosition: 'top-right',
-      disableContentGestures: false,
     });
   };
 
@@ -275,17 +273,16 @@ export const SignupScreen = () => {
                   </View>
                 }
               />
-
-              <Button
-                title={t('screens.signUp.sign_up')}
-                shape="round"
-                onPress={handleSubmit(onSubmit)}
-                loading={isSubmitting}
-                disabled={isSubmitting}
-                style={styles.signupButton}
-                testID="signup-button"
-              />
             </View>
+            <Button
+              title={t('screens.signUp.sign_up')}
+              shape="round"
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+              style={styles.signupButton}
+              testID="signup-button"
+            />
           </View>
         </KeyboardAwareScrollView>
       </SafeAreaView>
