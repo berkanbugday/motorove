@@ -19,18 +19,21 @@ export default function EmailVerificationHandler() {
     // Parse hash fragment for Supabase parameters
     const hash = window.location.hash.substring(1);
     const hashParams = new URLSearchParams(hash);
-    
+
     // Get type from hash fragment (Supabase format)
     const typeFromHash = hashParams.get("type");
     const accessToken = hashParams.get("access_token");
-    
+    const code = hashParams.get("code");
+
     // Get type from query string (custom format)
     const typeFromQuery = searchParams.get("type");
     const tokenFromQuery = searchParams.get("token");
+    const codeFromQuery = searchParams.get("code");
 
     // Determine which format we're using
     const type = typeFromHash || typeFromQuery;
-    const hasValidToken = accessToken || tokenFromQuery;
+    const hasValidToken =
+      accessToken || code || tokenFromQuery || codeFromQuery;
 
     // Only show toast if both type and token exist
     if (!type || !hasValidToken) {
