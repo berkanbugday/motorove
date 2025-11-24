@@ -128,6 +128,8 @@ class AuthService {
       apolloClient.stop();
       await apolloClient.resetStore();
 
+      await EncryptedStorage.clear();
+
       // Sign out from Supabase - it clears session from storage automatically
       const {error} = await supabase.auth.signOut();
       if (error) {
