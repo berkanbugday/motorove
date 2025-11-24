@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, Modal} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {
@@ -7,6 +7,7 @@ import {
   Subtitle,
   BodySmall,
   SelectLocationMap,
+  LoadingIndicator,
 } from '@components';
 import {GroupSelectorBottomSheetContent} from '@components/GroupSelector/GroupSelector';
 import {colors, commonStyles, spacing} from '@theme';
@@ -44,6 +45,7 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
   const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [showGroupModal, setShowGroupModal] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Fetch groups for the selector
   const {
@@ -75,7 +77,24 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
     setShowGroupModal(false);
   }, []);
 
+  // Reset submitting state when component closes
+  useEffect(() => {
+    return () => {
+      setIsSubmitting(false);
+    };
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsSubmitting(false);
+    onClose();
+  }, [onClose]);
+
   const handleSendEmergency = useCallback(async () => {
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      return;
+    }
+
     if (!selectedType) {
       showToast({
         text1: t('common.error'),
@@ -94,15 +113,30 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
       return;
     }
 
-    const createEmergencyInput: ICreateEmergency = {
-      type: selectedType,
-      addresses: location,
-      descriptions: description ? [description] : [],
-      selectedGroupIds: selectedGroups.length > 0 ? selectedGroups : undefined,
-    };
+    setIsSubmitting(true);
 
-    onSubmit(createEmergencyInput);
-  }, [selectedType, description, location, selectedGroups, onSubmit, t]);
+    try {
+      const createEmergencyInput: ICreateEmergency = {
+        type: selectedType,
+        addresses: location,
+        descriptions: description ? [description] : [],
+        selectedGroupIds:
+          selectedGroups.length > 0 ? selectedGroups : undefined,
+      };
+
+      onSubmit(createEmergencyInput);
+    } catch (error) {
+      setIsSubmitting(false);
+    }
+  }, [
+    selectedType,
+    description,
+    location,
+    selectedGroups,
+    onSubmit,
+    t,
+    isSubmitting,
+  ]);
 
   return (
     <View style={styles.container}>
@@ -214,10 +248,11 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
       <View style={styles.footer}>
         <Button
           title={t('common.cancel')}
-          onPress={onClose}
+          onPress={handleClose}
           variant="outline"
           shape="round"
           style={{flex: 1}}
+          disabled={isSubmitting}
         />
 
         <Button
@@ -226,7 +261,7 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
           variant="dark"
           shape="round"
           style={{flex: 1}}
-          disabled={!selectedType || !location.length}
+          disabled={!selectedType || !location.length || isSubmitting}
         />
       </View>
 
@@ -290,6 +325,7 @@ export const EmergencyBottomSheet: React.FC<EmergencyBottomSheetProps> = ({
           />
         </View>
       </Modal>
+      <LoadingIndicator visible={isSubmitting} />
     </View>
   );
 };

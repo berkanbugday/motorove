@@ -18,7 +18,10 @@ export const useFirstTimeCheck = () => {
       setIsLoading(false);
       if (value === null) {
         setIsFirstTime(true); // If value is null, this is the first time
-        await authService.signOut();
+        // Only sign out if not already signing out (prevents infinite loop)
+        if (!authService.getIsSigningOut()) {
+          await authService.signOut();
+        }
       } else {
         setIsFirstTime(false);
       }
@@ -26,7 +29,10 @@ export const useFirstTimeCheck = () => {
       loggingService.error('Error checking first time status:', error);
       setIsFirstTime(true);
       setIsLoading(false);
-      await authService.signOut();
+      // Only sign out if not already signing out (prevents infinite loop)
+      if (!authService.getIsSigningOut()) {
+        await authService.signOut();
+      }
     }
   };
 

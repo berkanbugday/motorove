@@ -69,6 +69,10 @@ export function RootNavigator() {
       notificationService.service.setNavigationRef(navigationRef.current);
     }
   }, [id]);
+
+  // Check if user is authenticated - if id exists, user is authenticated
+  const isAuthenticated = !!id;
+
   // Show loading screen with logo when checking auth, session revival, or first time status
   if (isInitializing || firstTimeLoading || showLoading) {
     return (
@@ -93,28 +97,26 @@ export function RootNavigator() {
       linking={linking}
       onReady={handleNavigationReady}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        {id && !isFirstTime ? (
-          // User is authenticated, decide whether to show main app or account setup
-          !hasCompletedSetup ? (
-            <Stack.Screen
-              name="Auth"
-              component={AccountSetupScreen}
-              key="accountSetup"
-            />
-          ) : notificationPermission === NotificationPermission.UNKNOWN ? (
-            <Stack.Screen
-              key="notificationPermission"
-              name="Auth"
-              component={NotificationPermissionScreen}
-            />
-          ) : (
-            <Stack.Screen key="main" name="Main" component={MainNavigator} />
-          )
-        ) : (
-          // User is not authenticated, show auth flow
+        {!isAuthenticated || isFirstTime ? (
+          // User is not authenticated, show login screen
           <Stack.Screen name="Auth">
             {props => <AuthNavigator {...props} isFirstTime={isFirstTime} />}
           </Stack.Screen>
+        ) : // User is authenticated, decide whether to show main app or account setup
+        !hasCompletedSetup ? (
+          <Stack.Screen
+            name="Auth"
+            component={AccountSetupScreen}
+            key="accountSetup"
+          />
+        ) : notificationPermission === NotificationPermission.UNKNOWN ? (
+          <Stack.Screen
+            key="notificationPermission"
+            name="Auth"
+            component={NotificationPermissionScreen}
+          />
+        ) : (
+          <Stack.Screen key="main" name="Main" component={MainNavigator} />
         )}
       </Stack.Navigator>
     </NavigationContainer>

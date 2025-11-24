@@ -25,10 +25,14 @@ declare module 'react-native-config' {
     FIREBASE_API_KEY: string;
     FIREBASE_AUTH_DOMAIN: string;
     FIREBASE_PROJECT_ID: string;
-    FIREBASE_STORAGE_BUCKET: string;
     FIREBASE_MESSAGING_SENDER_ID: string;
     FIREBASE_APP_ID: string;
-    FIREBASE_DATABASE_URL: string;
+    FIREBASE_APP_ID_IOS: string;
+    FIREBASE_APP_ID_ANDROID: string;
+
+    // Supabase
+    SUPABASE_URL: string;
+    SUPABASE_KEY: string;
 
     // Google Maps
     GOOGLE_MAPS_API_KEY: string;

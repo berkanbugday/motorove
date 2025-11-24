@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, Modal} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {
@@ -7,6 +7,7 @@ import {
   Subtitle,
   BodySmall,
   SelectLocationMap,
+  LoadingIndicator,
 } from '@components';
 import {colors, commonStyles, spacing} from '@theme';
 import {useTranslation} from '@hooks/useTranslation';
@@ -40,6 +41,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
   );
   const [location, setLocation] = useState<ICreateWarningAddress[]>([]);
   const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const handleLocationSelect = useCallback(
     (selectedAddresses: IBaseCreateAddress[]) => {
@@ -54,7 +56,24 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
     setShowLocationModal(false);
   }, []);
 
+  // Reset submitting state when component closes
+  useEffect(() => {
+    return () => {
+      setIsSubmitting(false);
+    };
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsSubmitting(false);
+    onClose();
+  }, [onClose]);
+
   const handleSendWarning = useCallback(async () => {
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      return;
+    }
+
     if (!selectedType) {
       showToast({
         text1: t('common.error'),
@@ -73,14 +92,20 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
       return;
     }
 
-    const createWarningInput: ICreateWarning = {
-      type: selectedType,
-      addresses: location,
-      descriptions: description ? [description] : [],
-    };
+    setIsSubmitting(true);
 
-    onSubmit(createWarningInput);
-  }, [selectedType, description, location, onSubmit, t]);
+    try {
+      const createWarningInput: ICreateWarning = {
+        type: selectedType,
+        addresses: location,
+        descriptions: description ? [description] : [],
+      };
+
+      onSubmit(createWarningInput);
+    } catch (error) {
+      setIsSubmitting(false);
+    }
+  }, [selectedType, description, location, onSubmit, t, isSubmitting]);
 
   return (
     <View style={styles.container}>
@@ -166,10 +191,11 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
       <View style={styles.footer}>
         <Button
           title={t('common.cancel')}
-          onPress={onClose}
+          onPress={handleClose}
           variant="outline"
           shape="round"
           style={{flex: 1}}
+          disabled={isSubmitting}
         />
 
         <Button
@@ -178,7 +204,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
           variant="dark"
           shape="round"
           style={{flex: 1}}
-          disabled={!selectedType || !location.length}
+          disabled={!selectedType || !location.length || isSubmitting}
         />
       </View>
 
@@ -208,6 +234,7 @@ export const WarningBottomSheet: React.FC<WarningBottomSheetProps> = ({
           />
         </>
       </Modal>
+      <LoadingIndicator visible={isSubmitting} />
     </View>
   );
 };

@@ -53,14 +53,16 @@ CRASH_REPORTING_ENABLED=true
 SENTRY_DSN=
 
 # Firebase Configuration - Development
-FIREBASE_API_KEY_DEV=your_dev_api_key
-FIREBASE_AUTH_DOMAIN_DEV=your_dev_project.firebaseapp.com
-FIREBASE_PROJECT_ID_DEV=your_dev_project
-FIREBASE_STORAGE_BUCKET_DEV=your_dev_project.firebasestorage.app
-FIREBASE_MESSAGING_SENDER_ID_DEV=your_dev_sender_id
-FIREBASE_APP_ID_IOS_DEV=your_dev_ios_app_id
-FIREBASE_APP_ID_ANDROID_DEV=your_dev_android_app_id
-FIREBASE_DATABASE_URL_DEV=your_dev_database_url
+FIREBASE_API_KEY=your_dev_api_key
+FIREBASE_AUTH_DOMAIN=your_dev_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_dev_project
+FIREBASE_MESSAGING_SENDER_ID=your_dev_sender_id
+FIREBASE_APP_ID_IOS=your_dev_ios_app_id
+FIREBASE_APP_ID_ANDROID=your_dev_android_app_id
+
+# Supabase Configuration - Development
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_supabase_anon_key
 ```
 
 ### Staging (.env.staging)
@@ -90,14 +92,16 @@ CRASH_REPORTING_ENABLED=true
 SENTRY_DSN=
 
 # Firebase Configuration - Staging
-FIREBASE_API_KEY_STAGING=your_staging_api_key
-FIREBASE_AUTH_DOMAIN_STAGING=your-staging-project.firebaseapp.com
-FIREBASE_PROJECT_ID_STAGING=your-staging-project
-FIREBASE_STORAGE_BUCKET_STAGING=your-staging-project.firebasestorage.app
-FIREBASE_MESSAGING_SENDER_ID_STAGING=your_staging_sender_id
-FIREBASE_APP_ID_IOS_STAGING=your_staging_ios_app_id
-FIREBASE_APP_ID_ANDROID_STAGING=your_staging_android_app_id
-FIREBASE_DATABASE_URL_STAGING=
+FIREBASE_API_KEY=your_staging_api_key
+FIREBASE_AUTH_DOMAIN=your-staging-project.firebaseapp.com
+FIREBASE_PROJECT_ID=your-staging-project
+FIREBASE_MESSAGING_SENDER_ID=your_staging_sender_id
+FIREBASE_APP_ID_IOS=your_staging_ios_app_id
+FIREBASE_APP_ID_ANDROID=your_staging_android_app_id
+
+# Supabase Configuration - Staging
+SUPABASE_URL=https://your-staging-project.supabase.co
+SUPABASE_KEY=your_staging_supabase_anon_key
 ```
 
 ### Production (.env)
@@ -127,14 +131,16 @@ CRASH_REPORTING_ENABLED=true
 SENTRY_DSN=your_production_sentry_dsn
 
 # Firebase Configuration - Production
-FIREBASE_API_KEY_PROD=your_production_api_key
-FIREBASE_AUTH_DOMAIN_PROD=your-production-project.firebaseapp.com
-FIREBASE_PROJECT_ID_PROD=your-production-project
-FIREBASE_STORAGE_BUCKET_PROD=your-production-project.firebasestorage.app
-FIREBASE_MESSAGING_SENDER_ID_PROD=your_production_sender_id
-FIREBASE_APP_ID_IOS_PROD=your_production_ios_app_id
-FIREBASE_APP_ID_ANDROID_PROD=your_production_android_app_id
-FIREBASE_DATABASE_URL_PROD=
+FIREBASE_API_KEY=your_production_api_key
+FIREBASE_AUTH_DOMAIN=your-production-project.firebaseapp.com
+FIREBASE_PROJECT_ID=your-production-project
+FIREBASE_MESSAGING_SENDER_ID=your_production_sender_id
+FIREBASE_APP_ID_IOS=your_production_ios_app_id
+FIREBASE_APP_ID_ANDROID=your_production_android_app_id
+
+# Supabase Configuration - Production
+SUPABASE_URL=https://your-production-project.supabase.co
+SUPABASE_KEY=your_production_supabase_anon_key
 ```
 
 ## Using Environment Variables
@@ -156,6 +162,36 @@ import {getFirebaseConfig} from '@configs/firebaseConfig';
 const firebaseConfig = getFirebaseConfig();
 console.log('Firebase project ID:', firebaseConfig.projectId);
 ```
+
+For Supabase, the client is automatically initialized from environment variables:
+
+```typescript
+import {supabase} from '@configs/supabase';
+
+// Supabase client is ready to use
+const {data, error} = await supabase.auth.signInWithPassword({
+  email: 'user@example.com',
+  password: 'password',
+});
+```
+
+## Important Notes
+
+### Firebase iOS Setup
+
+For iOS, Firebase requires native initialization in `AppDelegate.swift`. The app automatically calls `FirebaseApp.configure()` on startup. Make sure you have:
+
+1. Added `GoogleService-Info.plist` to your iOS project (download from Firebase Console)
+2. The plist file is added to the Xcode project target
+3. Firebase SDK is properly installed via CocoaPods
+
+### Supabase Credentials
+
+Supabase credentials (`SUPABASE_URL` and `SUPABASE_KEY`) are required for authentication. If these are missing:
+
+- The app will log a warning but continue to start
+- Authentication features will not work until credentials are configured
+- Make sure to use the **anon/public** key, not the service role key
 
 ## Running the App with Different Environments
 

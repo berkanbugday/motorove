@@ -34,6 +34,13 @@ class GraphQLErrorService {
       switch (errorCode) {
         case 'UNAUTHORIZED':
           // Handle authentication errors
+          // Don't sign out if we're already signing out (prevents infinite loop)
+          if (authService.getIsSigningOut()) {
+            loggingService.info('UNAUTHORIZED error during sign out, ignoring');
+            handled = true;
+            break;
+          }
+
           errorType = ErrorType.AUTHORIZATION;
 
           loggingService.error(errorMessage);
@@ -45,6 +52,15 @@ class GraphQLErrorService {
           handled = true;
           break;
         case 'INVALID_REFRESH_TOKEN':
+          // Don't sign out if we're already signing out (prevents infinite loop)
+          if (authService.getIsSigningOut()) {
+            loggingService.info(
+              'INVALID_REFRESH_TOKEN error during sign out, ignoring',
+            );
+            handled = true;
+            break;
+          }
+
           loggingService.error('Refresh token error, signing out user');
           await authService.signOut();
           handled = true;

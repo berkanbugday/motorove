@@ -4,7 +4,9 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from 'react';
+import {AppState, AppStateStatus} from 'react-native';
 import authService from '../services/auth.service';
 import {AuthUser} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
@@ -14,6 +16,7 @@ import {useUpdateUserSetting} from '@services/user-setting.service';
 import {useLanguage} from './LanguageContext';
 import {useLocationPermission} from '@hooks/useLocationPermission';
 import {LocationPermissionOverlay} from '@components/LocationPermissionOverlay/LocationPermissionOverlay';
+import {supabase} from '@configs/supabase';
 
 // Import helpers
 import {createEmptyAuthUser, isValidAuthUser} from './auth/authUserHelpers';
@@ -89,6 +92,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const {removeDeviceToken} = useRemoveDeviceToken();
   const {updateUserSetting} = useUpdateUserSetting();
   const {setLanguage} = useLanguage();
+  const appState = useRef<AppStateStatus>(AppState.currentState);
+  const sessionRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Location permission hook - only active when user is authenticated
   const isAuthenticated = isValidAuthUser(authUser);
@@ -99,10 +104,160 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     onOpenSettings,
   } = useLocationPermission(isAuthenticated);
 
-  // Load authentication state on mount
-  useEffect(() => {
-    loadAuthUser();
+  /**
+   * Setup periodic session refresh to keep user active
+   * Refreshes session every 30 minutes to ensure 1 month active period
+   */
+  const setupPeriodicRefresh = useCallback((user: AuthUser) => {
+    // Clear any existing interval
+    if (sessionRefreshIntervalRef.current) {
+      clearInterval(sessionRefreshIntervalRef.current);
+      sessionRefreshIntervalRef.current = null;
+    }
+
+    // Only set up periodic refresh if user is authenticated
+    if (isValidAuthUser(user)) {
+      // Refresh session every 30 minutes to keep user active
+      // This ensures the session doesn't expire due to inactivity
+      sessionRefreshIntervalRef.current = setInterval(async () => {
+        loggingService.info('Periodic session refresh check');
+        try {
+          await authService.validateAndRefreshSession();
+        } catch (error) {
+          loggingService.error('Error in periodic session refresh:', error);
+        }
+      }, 30 * 60 * 1000); // 30 minutes
+    }
   }, []);
+
+  /**
+   * Setup Supabase session state change listeners
+   * This ensures we stay in sync with Supabase auth state
+   * and handle token refresh automatically
+   */
+  const setupSessionListeners = useCallback(() => {
+    // Listen to auth state changes (sign in, sign out, token refresh)
+    const {
+      data: {subscription},
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      loggingService.info('Supabase auth state changed', {event});
+
+      try {
+        switch (event) {
+          case 'SIGNED_IN':
+          case 'TOKEN_REFRESHED':
+            // Session was refreshed or user signed in
+            // Reload user data to ensure we have the latest state
+            if (session) {
+              loggingService.info('Session active, reloading user data');
+              const user = await authService.getAuthUser();
+              setAuthUser(user);
+              if (isValidAuthUser(user)) {
+                setupPeriodicRefresh(user);
+              }
+            }
+            break;
+
+          case 'SIGNED_OUT':
+            // User signed out, clear auth state
+            // Only handle if we're not already in the process of signing out
+            // (prevents infinite loop when signOut triggers this event)
+            if (authService.getIsSigningOut()) {
+              loggingService.info(
+                'SIGNED_OUT event received during sign out process, ignoring',
+              );
+              break;
+            }
+            loggingService.info('User signed out, clearing auth state');
+            setAuthUser(createEmptyAuthUser());
+            if (sessionRefreshIntervalRef.current) {
+              clearInterval(sessionRefreshIntervalRef.current);
+              sessionRefreshIntervalRef.current = null;
+            }
+            break;
+
+          case 'USER_UPDATED':
+            // User data was updated, reload asynchronously without blocking
+            // This event is triggered after email/password updates, so we refresh
+            // user data in the background without affecting UI loading states
+            loggingService.info('User updated, reloading user data');
+            authService
+              .getAuthUser()
+              .then(updatedUser => {
+                setAuthUser(updatedUser);
+              })
+              .catch(error => {
+                loggingService.error(
+                  'Error reloading user data after USER_UPDATED:',
+                  error,
+                );
+                // Don't throw - this is a background refresh, shouldn't break the flow
+              });
+            break;
+
+          default:
+            loggingService.info(`Unhandled auth event: ${event}`);
+        }
+      } catch (error) {
+        loggingService.error('Error handling auth state change:', error);
+      }
+    });
+
+    // Store subscription for cleanup
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [setupPeriodicRefresh]);
+
+  /**
+   * Setup app state listener to refresh session when app comes to foreground
+   * This ensures users stay active even after app was in background
+   */
+  const setupAppStateListener = useCallback(() => {
+    const subscription = AppState.addEventListener(
+      'change',
+      async (nextAppState: AppStateStatus) => {
+        if (
+          appState.current.match(/inactive|background/) &&
+          nextAppState === 'active'
+        ) {
+          // App has come to the foreground
+          loggingService.info('App came to foreground, validating session');
+
+          try {
+            // Validate and refresh session if needed
+            const isValid = await authService.validateAndRefreshSession();
+            if (isValid) {
+              // Reload user data to ensure we have latest state
+              const user = await authService.getAuthUser();
+              setAuthUser(user);
+              if (isValidAuthUser(user)) {
+                setupPeriodicRefresh(user);
+              }
+            } else {
+              // Session invalid, clear auth state
+              setAuthUser(createEmptyAuthUser());
+              if (sessionRefreshIntervalRef.current) {
+                clearInterval(sessionRefreshIntervalRef.current);
+                sessionRefreshIntervalRef.current = null;
+              }
+            }
+          } catch (error) {
+            loggingService.error(
+              'Error refreshing session on foreground:',
+              error,
+            );
+          }
+        }
+
+        appState.current = nextAppState;
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [setupPeriodicRefresh]);
 
   /**
    * Load authentication state from storage
@@ -117,8 +272,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       if (isValidAuthUser(state)) {
         loggingService.info('Auth context loaded with valid auth state');
+        // Setup periodic refresh when user is authenticated
+        setupPeriodicRefresh(state);
       } else {
         loggingService.info('Auth context loaded with no valid session');
+        // Clear interval if user is not authenticated
+        if (sessionRefreshIntervalRef.current) {
+          clearInterval(sessionRefreshIntervalRef.current);
+          sessionRefreshIntervalRef.current = null;
+        }
       }
     } catch (error) {
       loggingService.error('Error loading auth state:', error);
@@ -126,7 +288,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     } finally {
       setIsInitializing(false);
     }
-  }, []);
+  }, [setupPeriodicRefresh]);
+
+  // Load authentication state on mount and setup listeners
+  useEffect(() => {
+    let sessionCleanup: (() => void) | undefined;
+    let appStateCleanup: (() => void) | undefined;
+    let isMounted = true;
+
+    const initialize = async () => {
+      try {
+        await loadAuthUser();
+        if (isMounted) {
+          sessionCleanup = setupSessionListeners();
+          appStateCleanup = setupAppStateListener();
+        }
+      } catch (error) {
+        loggingService.error('Error initializing auth:', error);
+      }
+    };
+
+    initialize();
+
+    return () => {
+      isMounted = false;
+      // Cleanup session listeners
+      if (sessionCleanup) {
+        sessionCleanup();
+      }
+      // Cleanup app state listener
+      if (appStateCleanup) {
+        appStateCleanup();
+      }
+      // Clear periodic refresh interval
+      if (sessionRefreshIntervalRef.current) {
+        clearInterval(sessionRefreshIntervalRef.current);
+        sessionRefreshIntervalRef.current = null;
+      }
+    };
+  }, [loadAuthUser, setupSessionListeners, setupAppStateListener]);
 
   /**
    * Sign in user
@@ -141,6 +341,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         });
 
         setAuthUser(response);
+        // Setup periodic refresh after successful sign in
+        setupPeriodicRefresh(response);
 
         if (response.preferredLanguage) {
           try {
@@ -159,7 +361,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       return response;
     },
-    [],
+    [setupPeriodicRefresh, setLanguage],
   );
 
   /**
@@ -182,6 +384,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
    */
   const signOut = useCallback(async (): Promise<void> => {
     try {
+      // Clear periodic refresh interval
+      if (sessionRefreshIntervalRef.current) {
+        clearInterval(sessionRefreshIntervalRef.current);
+        sessionRefreshIntervalRef.current = null;
+      }
+
       // Remove device token first (requires authentication)
       // Don't block sign out if this fails
       try {

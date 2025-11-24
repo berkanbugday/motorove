@@ -74,6 +74,12 @@ const errorLink = onError(({graphQLErrors, networkError, operation}) => {
 
       // Handle authentication errors
       if (extensions?.code === 'UNAUTHORIZED') {
+        // Don't sign out if we're already signing out (prevents infinite loop)
+        if (authService.getIsSigningOut()) {
+          loggingService.info('UNAUTHORIZED error during sign out, ignoring');
+          return;
+        }
+
         loggingService.error('Unauthorized request - signing out');
 
         errorService.handleError(err, ErrorType.AUTHORIZATION, {
