@@ -14,8 +14,7 @@ import {errorService, ErrorType, loggingService} from '@services/index';
 import {RetryLink} from '@apollo/client/link/retry';
 import {Platform} from 'react-native';
 import {getBasePathFromSignedUrl} from '@utils/imageUtils';
-import EncryptedStorage from 'react-native-encrypted-storage';
-
+import {supabase} from '@configs/supabase';
 // Create a retry link to automatically retry failed requests
 const retryLink = new RetryLink({
   delay: {
@@ -119,16 +118,23 @@ const errorLink = onError(({graphQLErrors, networkError, operation}) => {
 });
 
 // Get access token from Supabase session
-// Supabase automatically refreshes the token if expired
+// Checks if token exists and is expired, then refreshes if needed
 async function getAccessToken(): Promise<string | null> {
   try {
-    const authString = await EncryptedStorage.getItem('supabase.auth.token');
-    if (!authString) {
+    // Use Supabase's getSession to automatically refresh the token
+    const {data, error} = await supabase.auth.getSession();
+
+    if (error) {
+      loggingService.error('Failed to get session:', error);
       return null;
     }
 
-    const auth = JSON.parse(authString);
-    return auth?.access_token || null;
+    if (data?.session?.access_token) {
+      loggingService.info('Session retrieved successfully');
+      return data.session.access_token;
+    }
+
+    return null;
   } catch (error) {
     loggingService.error('Error getting access token:', error);
     return null;

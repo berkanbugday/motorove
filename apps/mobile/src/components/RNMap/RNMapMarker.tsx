@@ -72,17 +72,19 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
           />
         )}
       </View>
-      <Callout tooltip>
-        <View style={styles.calloutContainer}>
-          <Body
-            align="center"
-            weight="semiBold"
-            color={colors.neutral.black}
-            numberOfLines={2}>
-            {getCalloutTitle()}
-          </Body>
-        </View>
-      </Callout>
+      {marker.iconName && (
+        <Callout tooltip>
+          <View style={styles.calloutContainer}>
+            <Body
+              align="center"
+              weight="semiBold"
+              color={colors.neutral.black}
+              numberOfLines={2}>
+              {getCalloutTitle()}
+            </Body>
+          </View>
+        </Callout>
+      )}
     </Marker>
   );
 };

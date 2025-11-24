@@ -56,14 +56,11 @@ import {
   Currency,
   CURRENCY_FORMATTING,
   IImage,
-  calculateRoute,
-  formatRouteInfo,
 } from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
 import {EnumUtils} from '@utils/enumUtils';
 import {formatCurrency} from '@utils/currencyUtils';
-import {AppConfig} from '@configs/appConfig';
 
 type EventDetailScreenRouteProp = RouteProp<MainStackParamList, 'EventDetail'>;
 import {useAuth} from '@contexts/AuthContext';
@@ -272,9 +269,31 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     [cancelEvent],
   );
 
-  // State for route data
-  const [routeInfo, setRouteInfo] = useState<string>('');
-  const [isLoadingRoute, setIsLoadingRoute] = useState<boolean>(false);
+  // Get route info from backend-calculated fields
+  const getRouteInfo = useCallback(() => {
+    if (event?.distanceKm && event?.durationSeconds) {
+      const hours = Math.floor(event.durationSeconds / 3600);
+      const minutes = Math.floor((event.durationSeconds % 3600) / 60);
+
+      let durationText = '';
+      if (hours > 0) {
+        durationText = `${hours} ${
+          hours > 1 ? t('common.hours') : t('common.hour')
+        }`;
+      }
+      if (minutes > 0) {
+        if (durationText) {
+          durationText += ' ';
+        }
+        durationText += `${minutes} ${
+          minutes > 1 ? t('common.minutes') : t('common.minute')
+        }`;
+      }
+
+      return `${event.distanceKm} km • ${durationText}`;
+    }
+    return null;
+  }, [event?.distanceKm, event?.durationSeconds, t]);
 
   // Add scroll optimization
   const scrollViewRef = useRef<any>(null);
@@ -467,72 +486,6 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
     );
   };
 
-  // Calculate route using Google Maps Routes API (v2)
-  const handleCalculateRoute = useCallback(
-    async (
-      startLat: number,
-      startLng: number,
-      endLat: number,
-      endLng: number,
-    ) => {
-      try {
-        setIsLoadingRoute(true);
-
-        const result = await calculateRoute(
-          AppConfig.ROUTES_API_KEY,
-          startLat,
-          startLng,
-          endLat,
-          endLng,
-          language as Language,
-        );
-
-        setRouteInfo(formatRouteInfo(result.distanceKm, result.durationText));
-      } catch (error) {
-        loggingService.error('Error calculating route:', error);
-        setRouteInfo('');
-      } finally {
-        setIsLoadingRoute(false);
-      }
-    },
-    [language],
-  );
-
-  // Load route data when event data is available
-  useEffect(() => {
-    if (event?.addresses) {
-      const startAddress = event.addresses.find(
-        address =>
-          address.language.toLowerCase() === language.toLowerCase() &&
-          address.type === AddressType.EVENT_START_LOCATION,
-      );
-
-      const finishAddress = event.addresses.find(
-        address =>
-          address.language.toLowerCase() === language.toLowerCase() &&
-          address.type === AddressType.EVENT_FINISH_LOCATION,
-      );
-
-      if (
-        startAddress &&
-        finishAddress &&
-        startAddress.latitude &&
-        startAddress.longitude &&
-        finishAddress.latitude &&
-        finishAddress.longitude
-      ) {
-        handleCalculateRoute(
-          startAddress.latitude,
-          startAddress.longitude,
-          finishAddress.latitude,
-          finishAddress.longitude,
-        );
-      } else {
-        setRouteInfo('');
-      }
-    }
-  }, [event?.addresses, language, handleCalculateRoute]);
-
   useEffect(() => {
     if (joinEventLoading || leaveEventLoading) {
       showToast({
@@ -719,12 +672,10 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           )}
 
           {/* Distance/Duration/Difficulty Row */}
-          {!isLoadingRoute && routeInfo && (
+          {getRouteInfo() && (
             <View style={styles.infoRow}>
               <Icon name="route-filled" size={16} color={colors.neutral.grey} />
-              <Typography style={styles.infoText}>
-                {routeInfo.replace('NaN', '0')}
-              </Typography>
+              <Typography style={styles.infoText}>{getRouteInfo()}</Typography>
             </View>
           )}
 

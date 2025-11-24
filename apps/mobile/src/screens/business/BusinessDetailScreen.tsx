@@ -9,13 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {
-  IBusiness,
-  DayOfWeek,
-  BusinessStatus,
-  Language,
-  calculateRoute,
-} from '@motorove/shared';
+import {IBusiness, DayOfWeek, BusinessStatus, Language} from '@motorove/shared';
 import {colors, radius, spacing} from '@theme';
 import {
   Body,
@@ -51,7 +45,6 @@ import {
   MainScreenNavigationProp,
 } from '@navigation/types/navigationTypes';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
-import {AppConfig} from '@configs/appConfig';
 
 type BusinessDetailScreenRouteProp = RouteProp<
   MainStackParamList,
@@ -62,13 +55,12 @@ export const BusinessDetailScreen: React.FC = () => {
   const route = useRoute<BusinessDetailScreenRouteProp>();
   const navigation =
     useNavigation<MainScreenNavigationProp<'BusinessDetail'>>();
-  const {business: businessParam, userLocation} = route.params;
+  const {business: businessParam} = route.params;
 
   const [currentBusiness, setCurrentBusiness] = useState<IBusiness | null>(
     businessParam,
   );
   const [showAllWorkingHours, setShowAllWorkingHours] = useState(false);
-  const [distance, setDistance] = useState<string | null>(null);
 
   // Bottom sheet refs
   const commentActionsBottomSheetRef = useRef<BottomSheetRef>(null);
@@ -284,33 +276,6 @@ export const BusinessDetailScreen: React.FC = () => {
     };
   }, [currentBusiness?.workingHours, t]);
 
-  // Calculate route distance
-  useEffect(() => {
-    if (!userLocation || !currentBusiness) {
-      setDistance(null);
-      return;
-    }
-
-    const fetchRouteDistance = async () => {
-      try {
-        const routeResult = await calculateRoute(
-          AppConfig.ROUTES_API_KEY,
-          userLocation.latitude,
-          userLocation.longitude,
-          currentBusiness.addresses[0].latitude,
-          currentBusiness.addresses[0].longitude,
-          language as Language,
-        );
-        setDistance(routeResult.distanceKm.toString().replace('NaN', '0'));
-      } catch (error) {
-        console.error('Error calculating route distance:', error);
-        setDistance(null);
-      }
-    };
-
-    fetchRouteDistance();
-  }, [userLocation, currentBusiness, language]);
-
   // Handle phone number call
   const handlePhoneNumberCall = useCallback(async () => {
     if (!currentBusiness?.phoneNumber) {
@@ -521,11 +486,6 @@ export const BusinessDetailScreen: React.FC = () => {
                     )?.address
                   }
                 </Body>
-                {distance && (
-                  <Caption color={colors.neutral.grey}>
-                    {distance} {t('screens.map.km_away')}
-                  </Caption>
-                )}
               </View>
             </View>
 

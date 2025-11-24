@@ -377,6 +377,8 @@ type Event {
   currency: Currency
   description: String!
   difficultyLevel: DifficultyLevel
+  distanceKm: Int
+  durationSeconds: Int
   endDateTime: DateTime
   equipmentChecklist: String
   eventType: EventType!
@@ -440,6 +442,8 @@ type EventDto {
   currency: Currency
   description: String!
   difficultyLevel: DifficultyLevel
+  distanceKm: Int
+  durationSeconds: Int
   endDateTime: DateTime
   equipmentChecklist: String
   eventType: EventType!

@@ -22,6 +22,9 @@ import { ImageCensorFilterService } from '../core/image-censor-filter/image-cens
 import { ImageDto } from '../common/dto/image.dto';
 import { TranslatedException } from 'src/core/exceptions/translated-exception';
 import { ConfigService } from '@nestjs/config';
+import { calculateRoute } from '@motorove/shared';
+import { AddressType } from '@motorove/shared';
+import { CreateEventAddressInput } from './dto/create-event-address.input';
 
 @Injectable()
 export class EventsService {
@@ -418,6 +421,13 @@ export class EventsService {
         processedImages = imageResults.filter(Boolean);
       }
 
+      // Calculate distance and duration if start and finish locations exist
+      let routeInfo: { distanceKm: number; durationSeconds: number } | null =
+        null;
+      if (addresses && addresses.length > 0) {
+        routeInfo = await this.calculateRouteInfo(addresses);
+      }
+
       // Use transaction to ensure atomicity
       const event = await this.prisma.$transaction(async (tx) => {
         // Create the event first
@@ -446,6 +456,8 @@ export class EventsService {
             experienceLevel: experienceLevel as ExperienceLevel,
             price: price ? parseFloat(price) : null,
             currency,
+            distanceKm: routeInfo?.distanceKm || null,
+            durationSeconds: routeInfo?.durationSeconds || null,
             createdById: userId,
             updatedById: userId,
             // Handle addresses
@@ -675,6 +687,13 @@ export class EventsService {
         processedImages = imageResults.filter(Boolean);
       }
 
+      // Calculate distance and duration if start and finish locations exist
+      let routeInfo: { distanceKm: number; durationSeconds: number } | null =
+        null;
+      if (addresses && addresses.length > 0) {
+        routeInfo = await this.calculateRouteInfo(addresses);
+      }
+
       // First get the current event to handle relationships properly
       const currentEvent = await this.prisma.event.findFirst({
         where: { id, isActive: true },
@@ -718,6 +737,8 @@ export class EventsService {
               experienceLevel: experienceLevel as ExperienceLevel,
               price: price ? parseFloat(price) : null,
               currency,
+              distanceKm: routeInfo?.distanceKm || null,
+              durationSeconds: routeInfo?.durationSeconds || null,
               // Handle organized by fields
               ...(currentEvent.status === EventStatus.DRAFT
                 ? { organizedByGroupId: organizedByGroupId || null }
@@ -1453,6 +1474,58 @@ export class EventsService {
     } catch (error) {
       this.logger.error(`Failed to map event to DTO`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Calculate distance and duration between start and finish locations
+   * @param addresses - Array of event addresses
+   * @returns Object with distanceKm and durationSeconds, or null if calculation fails
+   */
+  private async calculateRouteInfo(
+    addresses: CreateEventAddressInput[],
+  ): Promise<{ distanceKm: number; durationSeconds: number } | null> {
+    try {
+      // Find start and finish locations
+      const startLocation = addresses.find(
+        (addr) => addr.type === AddressType.EVENT_START_LOCATION,
+      );
+      const finishLocation = addresses.find(
+        (addr) => addr.type === AddressType.EVENT_FINISH_LOCATION,
+      );
+
+      // Both start and finish locations must exist
+      if (!startLocation || !finishLocation) {
+        return null;
+      }
+
+      // Get Google Maps API key
+      const apiKey = this.configService.get<string>('ROUTES_API_KEY');
+      if (!apiKey) {
+        this.logger.warn('Google Maps Routes API key not configured');
+        return null;
+      }
+
+      // Calculate route using Google Maps Routes API
+      const routeResult = await calculateRoute(
+        apiKey,
+        startLocation.latitude,
+        startLocation.longitude,
+        finishLocation.latitude,
+        finishLocation.longitude,
+      );
+
+      this.logger.log(
+        `Calculated route: ${routeResult.distanceKm}km, ${routeResult.durationText}`,
+      );
+
+      return {
+        distanceKm: routeResult.distanceKm,
+        durationSeconds: routeResult.durationSeconds,
+      };
+    } catch (error) {
+      this.logger.error('Failed to calculate route info:', error);
+      return null;
     }
   }
 }

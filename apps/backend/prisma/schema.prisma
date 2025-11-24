@@ -802,6 +802,10 @@ model Event {
   price           Float?
   currency        Currency?        @default(TL)
 
+  // Route information (calculated from start/finish locations)
+  distanceKm      Int?    // Distance in kilometers
+  durationSeconds Int?    // Duration in seconds
+
   // Base model fields
   createdById String
   createdBy   User     @relation("EventCreatedBy", fields: [createdById], references: [id])

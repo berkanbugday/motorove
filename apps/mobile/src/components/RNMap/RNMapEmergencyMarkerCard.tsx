@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {IEmergency, Language, calculateRoute} from '@motorove/shared';
+import {IEmergency, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
@@ -18,7 +18,6 @@ import {getEmergencyIcon} from '@utils/emergencyUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
-import {AppConfig} from '@configs/appConfig';
 
 /**
  * Emergency marker card props
@@ -41,7 +40,7 @@ export interface RNMapEmergencyMarkerCardProps {
  */
 export const RNMapEmergencyMarkerCard: React.FC<
   RNMapEmergencyMarkerCardProps
-> = ({emergency, onClose, style, userLocation, onProfilePress}) => {
+> = ({emergency, onClose, style, onProfilePress}) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   // Title expansion state
@@ -50,39 +49,6 @@ export const RNMapEmergencyMarkerCard: React.FC<
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   // Address expansion state
   const [isAddressExpanded, setIsAddressExpanded] = useState(false);
-  // Distance state
-  const [distance, setDistance] = useState<string | null>(null);
-
-  // Calculate route distance
-  useEffect(() => {
-    if (
-      !userLocation ||
-      !emergency.addresses ||
-      emergency.addresses.length === 0
-    ) {
-      setDistance(null);
-      return;
-    }
-
-    const fetchRouteDistance = async () => {
-      try {
-        const route = await calculateRoute(
-          AppConfig.ROUTES_API_KEY,
-          userLocation.latitude,
-          userLocation.longitude,
-          emergency.addresses[0].latitude,
-          emergency.addresses[0].longitude,
-          language as Language,
-        );
-        setDistance(route.distanceKm.toString().replace('NaN', '0'));
-      } catch (error) {
-        console.error('Error calculating route distance:', error);
-        setDistance(null);
-      }
-    };
-
-    fetchRouteDistance();
-  }, [userLocation, emergency.addresses, language]);
 
   const handleGetDirections = () => {
     if (!emergency.addresses || emergency.addresses.length === 0) {
@@ -130,7 +96,7 @@ export const RNMapEmergencyMarkerCard: React.FC<
         </TouchableOpacity>
       </View>
 
-      {/* Address with Distance */}
+      {/* Address */}
       {emergency.addresses && emergency.addresses.length > 0 && (
         <TouchableOpacity
           style={styles.infoRow}
@@ -147,11 +113,6 @@ export const RNMapEmergencyMarkerCard: React.FC<
                 )?.address
               }
             </BodySmall>
-            {distance && (
-              <Caption color={colors.neutral.grey}>
-                {distance} {t('screens.map.km_away')}
-              </Caption>
-            )}
           </View>
         </TouchableOpacity>
       )}

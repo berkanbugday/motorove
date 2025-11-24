@@ -42,6 +42,8 @@ export interface IEvent {
   experienceLevel?: ExperienceLevel | null;
   price?: number | null;
   currency?: Currency | null;
+  distanceKm?: number | null;
+  durationSeconds?: number | null;
   participantsCount?: number | null;
   isParticipating?: boolean | null;
   participationStatus?: EventParticipantStatus | null;

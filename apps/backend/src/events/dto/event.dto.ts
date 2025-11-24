@@ -128,6 +128,16 @@ export class EventDto implements IEvent {
   @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsInt()
+  distanceKm?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  durationSeconds?: number;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
   participantsCount?: number;
 
   @Field(() => Boolean, { nullable: true })

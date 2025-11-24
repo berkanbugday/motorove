@@ -44,6 +44,8 @@ export const EVENT_FRAGMENT = gql`
     experienceLevel
     price
     currency
+    distanceKm
+    durationSeconds
     participantsCount
     isParticipating
     participationStatus

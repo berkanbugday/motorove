@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useCallback, useEffect} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {
   View,
   StyleSheet,
@@ -6,7 +6,7 @@ import {
   Linking,
   Platform,
 } from 'react-native';
-import {IBusiness, Language, calculateRoute} from '@motorove/shared';
+import {IBusiness, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
@@ -22,7 +22,6 @@ import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
 import {BusinessStatus, DayOfWeek} from '@motorove/shared';
 import {useLanguage} from '@contexts/LanguageContext';
-import {AppConfig} from '@configs/appConfig';
 
 /**
  * Business marker card props
@@ -48,7 +47,7 @@ export interface RNMapBusinessMarkerCardProps {
  */
 export const RNMapBusinessMarkerCard: React.FC<
   RNMapBusinessMarkerCardProps
-> = ({business, onClose, style, userLocation, onDetailScreenOpen}) => {
+> = ({business, onClose, style, onDetailScreenOpen}) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   // Address expansion state
@@ -57,8 +56,6 @@ export const RNMapBusinessMarkerCard: React.FC<
   const [isAboutExpanded, setIsAboutExpanded] = useState(false);
   // Title expansion state
   const [isTitleExpanded, setIsTitleExpanded] = useState(false);
-  // Distance state
-  const [distance, setDistance] = useState<string | null>(null);
 
   // Handle phone number call
   const handlePhoneNumberCall = useCallback(async () => {
@@ -103,33 +100,6 @@ export const RNMapBusinessMarkerCard: React.FC<
       });
     }
   }, [business.countryCode, business.phoneNumber, t]);
-
-  // Calculate route distance
-  useEffect(() => {
-    if (!userLocation) {
-      setDistance(null);
-      return;
-    }
-
-    const fetchRouteDistance = async () => {
-      try {
-        const route = await calculateRoute(
-          AppConfig.ROUTES_API_KEY,
-          userLocation.latitude,
-          userLocation.longitude,
-          business.addresses[0].latitude,
-          business.addresses[0].longitude,
-          language as Language,
-        );
-        setDistance(route.distanceKm.toString().replace('NaN', '0'));
-      } catch (error) {
-        console.error('Error calculating route distance:', error);
-        setDistance(null);
-      }
-    };
-
-    fetchRouteDistance();
-  }, [userLocation, business.addresses, language]);
 
   // Calculate business status based on current time and working hours
   const businessStatus = useMemo(() => {
@@ -273,7 +243,7 @@ export const RNMapBusinessMarkerCard: React.FC<
         </BodySmall>
       </View>
 
-      {/* Address with Distance */}
+      {/* Address */}
       {business.addresses && (
         <TouchableOpacity
           style={styles.infoRow}
@@ -289,11 +259,6 @@ export const RNMapBusinessMarkerCard: React.FC<
                 )?.address
               }
             </BodySmall>
-            {distance && (
-              <Caption color={colors.neutral.grey}>
-                {distance} {t('screens.map.km_away')}
-              </Caption>
-            )}
           </View>
         </TouchableOpacity>
       )}

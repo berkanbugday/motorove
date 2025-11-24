@@ -92,6 +92,12 @@ export class Event extends BaseModel {
   @Field(() => Currency, { nullable: true })
   currency?: Currency;
 
+  @Field(() => Int, { nullable: true })
+  distanceKm?: number;
+
+  @Field(() => Int, { nullable: true })
+  durationSeconds?: number;
+
   @Field(() => [EventParticipant], { nullable: true })
   participants?: EventParticipant[];
 

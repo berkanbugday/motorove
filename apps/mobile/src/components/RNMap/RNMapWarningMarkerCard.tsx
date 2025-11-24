@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {IWarning, Language, calculateRoute} from '@motorove/shared';
+import {IWarning, Language} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
@@ -18,7 +18,6 @@ import {getWarningIcon} from '@utils/warningUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
-import {AppConfig} from '@configs/appConfig';
 
 /**
  * Warning marker card props
@@ -44,7 +43,6 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
   warning,
   onClose,
   style,
-  userLocation,
   showGetDirectionsButton = false,
 }) => {
   const {t} = useTranslation();
@@ -55,35 +53,6 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   // Address expansion state
   const [isAddressExpanded, setIsAddressExpanded] = useState(false);
-  // Distance state
-  const [distance, setDistance] = useState<string | null>(null);
-
-  // Calculate route distance
-  useEffect(() => {
-    if (!userLocation || !warning.addresses || warning.addresses.length === 0) {
-      setDistance(null);
-      return;
-    }
-
-    const fetchRouteDistance = async () => {
-      try {
-        const route = await calculateRoute(
-          AppConfig.ROUTES_API_KEY,
-          userLocation.latitude,
-          userLocation.longitude,
-          warning.addresses[0].latitude,
-          warning.addresses[0].longitude,
-          language as Language,
-        );
-        setDistance(route.distanceKm.toString().replace('NaN', '0'));
-      } catch (error) {
-        console.error('Error calculating route distance:', error);
-        setDistance(null);
-      }
-    };
-
-    fetchRouteDistance();
-  }, [userLocation, warning.addresses, language]);
 
   const handleGetDirections = () => {
     if (!warning.addresses || warning.addresses.length === 0) {
@@ -131,7 +100,7 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Address with Distance */}
+      {/* Address */}
       {warning.addresses && warning.addresses.length > 0 && (
         <TouchableOpacity
           style={styles.infoRow}
@@ -148,11 +117,6 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
                 )?.address
               }
             </BodySmall>
-            {distance && (
-              <Caption color={colors.neutral.grey}>
-                {distance} {t('screens.map.km_away')}
-              </Caption>
-            )}
           </View>
         </TouchableOpacity>
       )}
