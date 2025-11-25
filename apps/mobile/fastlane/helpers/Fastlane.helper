@@ -129,6 +129,46 @@ module Fastlane
       
       UI.success("Version validation passed")
     end
+    
+    # Gets the current Android version code from local sources (env file or build.gradle)
+    # Returns nil if not found
+    def self.get_local_android_version_code
+      # Try environment variable first
+      env_version_code = ENV["ANDROID_VERSION_CODE"] || ENV["APP_VERSION_CODE"]
+      if env_version_code && !env_version_code.empty?
+        return env_version_code.to_i
+      end
+      
+      # Try reading from build.gradle default value
+      begin
+        build_gradle_path = File.expand_path("../../android/app/build.gradle", __dir__)
+        if File.exist?(build_gradle_path)
+          build_gradle = File.read(build_gradle_path)
+          
+          # Try to find versionCode in defaultConfig
+          version_code_match = build_gradle.match(/versionCode\s+(\d+)/)
+          if version_code_match
+            return version_code_match[1].to_i
+          end
+        end
+      rescue => e
+        UI.important("Could not read version code from build.gradle: #{e.message}")
+      end
+      
+      nil
+    end
+    
+    # Increments Android version code based on current version code
+    def self.increment_android_version_code(current_version_code:)
+      if current_version_code.nil? || current_version_code < 1
+        UI.important("Invalid version code, starting from 1")
+        return 1
+      end
+      
+      new_version_code = current_version_code + 1
+      UI.success("Incrementing version code from #{current_version_code} to #{new_version_code}")
+      new_version_code
+    end
   end
 end
 
@@ -148,4 +188,14 @@ end
 
 def get_match_type(env:)
   Fastlane::Helper.get_match_type(env: env)
-end 
+end
+
+def get_local_android_version_code
+  Fastlane::Helper.get_local_android_version_code
+end
+
+def increment_android_version_code(options)
+  Fastlane::Helper.increment_android_version_code(
+    current_version_code: options[:current_version_code]
+  )
+end

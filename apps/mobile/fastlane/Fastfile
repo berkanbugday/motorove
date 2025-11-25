@@ -186,6 +186,7 @@ platform :android do
       UI.message("AAB copied to: #{target_path}")
       
       # Store the target path for use in upload actions
+      lane_context[:CUSTOM_AAB_PATH] = target_path
     else
       UI.user_error!("AAB file not found at expected location: #{aab_path}")
     end
@@ -208,13 +209,59 @@ platform :android do
   desc "Deploy a beta build to Google Play Beta track"
   lane :deploy_play_beta do |options|
     env = options[:env] || "staging"
+    
+    # Auto-increment version code before building
+    track = ENV["ANDROID_TRACK"] || "internal"
+    json_key_path = ENV["GOOGLE_PLAY_JSON_KEY_PATH"]
+    
+    UI.message("Determining current Android version code...")
+    current_version_code = nil
+    
+    # Try to get version code from Google Play first (most reliable)
+    if json_key_path && File.exist?(json_key_path)
+      begin
+        version_codes = google_play_track_version_codes(
+          track: track,
+          json_key: json_key_path,
+          package_name: ENV["ANDROID_PACKAGE_NAME"]
+        )
+        
+        if version_codes && !version_codes.empty?
+          current_version_code = version_codes.max # Get the highest version code
+          UI.success("Found version code #{current_version_code} on Google Play #{track} track")
+        end
+      rescue => e
+        UI.important("Could not fetch version code from Google Play: #{e.message}")
+        UI.important("Falling back to local version code")
+      end
+    end
+    
+    # Fallback to local version code
+    if current_version_code.nil?
+      current_version_code = get_local_android_version_code
+      if current_version_code
+        UI.message("Using local version code: #{current_version_code}")
+      else
+        UI.important("Could not determine current version code, starting from 0")
+        current_version_code = 0
+      end
+    end
+    
+    # Increment version code
+    new_version_code = increment_android_version_code(
+      current_version_code: current_version_code
+    )
+    
+    # Set the incremented version code for the build
+    ENV["ANDROID_VERSION_CODE"] = new_version_code.to_s
+    
     build(env: env)
     
     upload_to_play_store(
-      track: ENV["ANDROID_TRACK"] || "internal",
+      track: track,
       release_status: ENV["ANDROID_RELEASE_STATUS"] || "draft",
       aab: lane_context[:CUSTOM_AAB_PATH],
-      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
+      json_key: json_key_path,
       package_name: ENV["ANDROID_PACKAGE_NAME"]
     )
   end
