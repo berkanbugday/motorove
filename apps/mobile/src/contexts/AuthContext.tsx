@@ -10,6 +10,7 @@ import {AppState, AppStateStatus} from 'react-native';
 import authService from '../services/auth.service';
 import {AuthUser} from '../types/auth.types';
 import {loggingService} from '@services/logging.service';
+import {firebaseService} from '@services/firebase.service';
 import {NotificationPermission} from '@motorove/shared';
 import {useRemoveDeviceToken} from '@services/notification.service';
 import {useUpdateUserSetting} from '@services/user-setting.service';
@@ -274,6 +275,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         loggingService.info('Auth context loaded with valid auth state');
         // Setup periodic refresh when user is authenticated
         setupPeriodicRefresh(state);
+        // Set user ID for Firebase Analytics
+        await firebaseService.setUserId(state.id);
+        // Set user properties for Analytics
+        await firebaseService.setUserProperty('user_id', state.id);
+        await firebaseService.setUserProperty('email', state.email || '');
+        await firebaseService.logEvent('user_login', {
+          method: 'auto', // Auto login from stored session
+        });
       } else {
         loggingService.info('Auth context loaded with no valid session');
         // Clear interval if user is not authenticated
@@ -344,6 +353,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         // Setup periodic refresh after successful sign in
         setupPeriodicRefresh(response);
 
+        // Set user ID and properties for Firebase Analytics
+        await firebaseService.setUserId(response.id);
+        await firebaseService.setUserProperty('user_id', response.id);
+        await firebaseService.setUserProperty('email', response.email || '');
+        if (response.preferredLanguage) {
+          await firebaseService.setUserProperty(
+            'preferred_language',
+            response.preferredLanguage,
+          );
+        }
+        // Log login event
+        await firebaseService.logEvent('user_login', {
+          method: 'email',
+        });
+
         if (response.preferredLanguage) {
           try {
             setLanguage(response.preferredLanguage.toLowerCase());
@@ -384,6 +408,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
    */
   const signOut = useCallback(async (): Promise<void> => {
     try {
+      // Log logout event before clearing user data
+      await firebaseService.logEvent('user_logout');
+
       // Clear periodic refresh interval
       if (sessionRefreshIntervalRef.current) {
         clearInterval(sessionRefreshIntervalRef.current);
@@ -403,6 +430,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       // Perform sign out cleanup
       await authService.signOut();
+
+      // Reset Firebase Analytics user data
+      await firebaseService.resetUserId();
 
       // Clear auth state last to stop any active queries
       setAuthUser(createEmptyAuthUser());

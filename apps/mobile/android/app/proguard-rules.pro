@@ -73,6 +73,20 @@
 # Firebase In-App Messaging
 -keep class com.google.firebase.inappmessaging.** { *; }
 
+# Firebase Analytics
+-keep class com.google.firebase.analytics.** { *; }
+-keep class com.google.android.gms.measurement.** { *; }
+-dontwarn com.google.firebase.analytics.**
+-dontwarn com.google.android.gms.measurement.**
+
+# Firebase Crashlytics
+-keep class com.google.firebase.crashlytics.** { *; }
+-dontwarn com.google.firebase.crashlytics.**
+
+# Firebase Performance
+-keep class com.google.firebase.perf.** { *; }
+-dontwarn com.google.firebase.perf.**
+
 # =============================================================================
 # Sentry
 # =============================================================================

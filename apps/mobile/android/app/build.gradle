@@ -216,3 +216,10 @@ dependencies {
 
     implementation "androidx.core:core-splashscreen:1.0.1"
 }
+
+// Apply Google Services plugin at the end (after android block)
+// This ensures all Android configuration is processed before Firebase configuration
+apply plugin: "com.google.gms.google-services"
+// Apply Crashlytics plugin after Google Services plugin
+// This generates the build ID that Crashlytics needs
+apply plugin: "com.google.firebase.crashlytics"

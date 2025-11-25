@@ -5,6 +5,13 @@
  * @format
  */
 
+// Silence deprecation warnings for React Native Firebase v22+ modular API migration
+// Analytics, Crashlytics, and Performance still use the namespaced API pattern
+// This flag prevents console warnings during the transition period
+if (typeof globalThis !== 'undefined') {
+  (globalThis as any).RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+}
+
 import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, ActivityIndicator, Image} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -21,6 +28,7 @@ import {colors} from '@theme';
 import {loggingService} from '@services/logging.service';
 import {networkService} from '@services/network.service';
 import {notificationService} from '@services/notification.service';
+import {firebaseService} from '@services/firebase.service';
 import ToastMessage from '@components/ToastMessage';
 import NetworkStatusBar from '@components/NetworkAware';
 import BottomSheetProvider from '@components/BottomSheet/BottomSheetProvider';
@@ -49,18 +57,45 @@ function App(): React.JSX.Element {
 
   // Initialize services
   useEffect(() => {
-    if (AppConfig.DEBUG_MODE) {
-      // Initialize logging service
-      loggingService.initialize({
-        environment: AppConfig.APP_ENV,
-      });
-    }
+    const initializeServices = async () => {
+      try {
+        if (AppConfig.DEBUG_MODE) {
+          // Initialize logging service
+          loggingService.initialize({
+            environment: AppConfig.APP_ENV,
+          });
+        }
 
-    // Initialize network monitoring
-    networkService.initialize();
+        // Initialize network monitoring first (doesn't depend on native modules)
+        networkService.initialize();
 
-    // Initialize notification service
-    notificationService.service.initialize();
+        // Initialize notification service
+        notificationService.service.initialize();
+
+        // Delay Firebase initialization to ensure React Native native modules are ready
+        // This prevents crashes if Firebase tries to access native modules before they're loaded
+        setTimeout(() => {
+          firebaseService.initialize().catch((error) => {
+            // Firebase initialization errors are already logged in the service
+            // Just ensure app continues to load
+            if (AppConfig.DEBUG_MODE) {
+              loggingService.warning(
+                'Firebase initialization completed with errors',
+                {
+                  error:
+                    error instanceof Error ? error.message : String(error),
+                },
+              );
+            }
+          });
+        }, 500); // 500ms delay to ensure native modules are loaded
+      } catch (error) {
+        // Log but don't block app startup
+        loggingService.error('Error initializing services:', error);
+      }
+    };
+
+    initializeServices();
 
     // Cleanup when component unmounts
     return () => {

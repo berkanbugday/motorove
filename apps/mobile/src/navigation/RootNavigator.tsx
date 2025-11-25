@@ -17,6 +17,7 @@ import {AccountSetupScreen} from '@screens/auth/AccountSetupScreen';
 import {NotificationPermission} from '@motorove/shared';
 import {NotificationPermissionScreen} from '@screens/notification/NotificationPermissionScreen';
 import {notificationService} from '@services/notification.service';
+import {firebaseService} from '@services/firebase.service';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -70,6 +71,25 @@ export function RootNavigator() {
     }
   }, [id]);
 
+  // Track screen changes for Firebase Analytics
+  const handleNavigationStateChange = useCallback(() => {
+    const currentRoute = navigationRef.current?.getCurrentRoute();
+    if (currentRoute) {
+      // Get the full route name including nested routes
+      const routeName = currentRoute.name;
+      const params = currentRoute.params as any;
+
+      // Handle nested routes (e.g., Main -> Tabs -> HomeTab)
+      let screenName: string = routeName;
+      if (params?.screen) {
+        screenName = `${routeName}_${params.screen}`;
+      }
+
+      // Track screen view
+      firebaseService.setCurrentScreen(screenName, routeName);
+    }
+  }, []);
+
   // Check if user is authenticated - if id exists, user is authenticated
   const isAuthenticated = !!id;
 
@@ -95,7 +115,8 @@ export function RootNavigator() {
     <NavigationContainer
       ref={navigationRef}
       linking={linking}
-      onReady={handleNavigationReady}>
+      onReady={handleNavigationReady}
+      onStateChange={handleNavigationStateChange}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {!isAuthenticated || isFirstTime ? (
           // User is not authenticated, show login screen
