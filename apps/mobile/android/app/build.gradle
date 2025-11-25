@@ -177,7 +177,36 @@ android {
     }
     
     // Configure product flavor variant names
-    android.applicationVariants.all { variant ->
+    applicationVariants.all { variant ->
+        // Copy the correct google-services.json file based on flavor before build
+        def flavorName = variant.flavorName
+        def googleServicesFile = file("src/${flavorName}/google-services.json")
+        def outputFile = file("google-services.json")
+        
+        // Create a task to copy the correct google-services.json
+        // Note: We don't declare outputs to avoid Gradle validation conflicts
+        // since all variants write to the same file location
+        def copyGoogleServicesTask = tasks.create("copy${variant.name.capitalize()}GoogleServices") {
+            doLast {
+                if (googleServicesFile.exists()) {
+                    copy {
+                        from googleServicesFile
+                        into outputFile.parent
+                        rename { "google-services.json" }
+                    }
+                }
+            }
+        }
+        
+        // Make sure this runs before the Google Services plugin processes the file
+        variant.preBuild.dependsOn copyGoogleServicesTask
+        
+        if (googleServicesFile.exists()) {
+            println "Configured to copy google-services.json from src/${flavorName}/ for ${variant.name}"
+        } else {
+            println "WARNING: google-services.json not found for flavor: ${flavorName} at ${googleServicesFile.absolutePath}"
+        }
+        
         // Configure proper env file for build tasks
         if (variant.hasProperty("mergedFlavor")) {
             variant.mergedFlavor.manifestPlaceholders = [
@@ -223,3 +252,19 @@ apply plugin: "com.google.gms.google-services"
 // Apply Crashlytics plugin after Google Services plugin
 // This generates the build ID that Crashlytics needs
 apply plugin: "com.google.firebase.crashlytics"
+
+// Configure Google Services task dependencies after plugin is applied
+afterEvaluate {
+    android.applicationVariants.all { variant ->
+        def copyTaskName = "copy${variant.name.capitalize()}GoogleServices"
+        def copyTask = tasks.findByName(copyTaskName)
+        def processTaskName = "process${variant.name.capitalize()}GoogleServices"
+        def processTask = tasks.findByName(processTaskName)
+        
+        if (copyTask != null && processTask != null) {
+            // Make the process task explicitly depend on the copy task
+            // This ensures the google-services.json file is copied before processing
+            processTask.dependsOn copyTask
+        }
+    }
+}
