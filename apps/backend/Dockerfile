@@ -77,28 +77,8 @@ EXPOSE 3000
 # Start the app in staging mode
 CMD ["pnpm", "start:staging"]
 
-# ---- Production dependencies ----
-FROM base AS production-deps
-
-# Copy workspace configuration files
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
-
-# Copy shared package
-COPY shared/package.json ./shared/package.json
-COPY shared/tsconfig.json ./shared/tsconfig.json
-COPY shared ./shared
-
-# Copy backend package.json
-COPY apps/backend/package.json ./apps/backend/package.json
-
-# Install only production dependencies
-RUN pnpm install --frozen-lockfile --prod
-
-# Build shared package (needed even in production)
-RUN pnpm --filter @motorove/shared build
-
 # ---- Production build ----
-FROM production-deps AS production
+FROM dependencies AS production
 
 # Copy backend source files
 COPY apps/backend ./apps/backend
@@ -109,9 +89,6 @@ RUN pnpm prisma generate
 
 # Build the application
 RUN pnpm build
-
-# Remove source files, keep only dist
-RUN rm -rf src test
 
 # Expose port
 EXPOSE 3000

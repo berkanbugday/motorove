@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "YOUR_PROD_PROJECT_NUMBER",
-    "project_id": "motorove-prod",
-    "storage_bucket": "motorove-prod.firebasestorage.app"
+    "project_number": "927069951564",
+    "project_id": "motorove-prod-df0ca",
+    "storage_bucket": "motorove-prod-df0ca.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "YOUR_PROD_MOBILESDK_APP_ID",
+        "mobilesdk_app_id": "1:927069951564:android:9b3645bf41886a5e7986e9",
         "android_client_info": {
           "package_name": "com.motorove"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "YOUR_PROD_API_KEY"
+          "current_key": "AIzaSyB8x5G0K7QPC7TAIuAKan1tRqiHY_Lx4zY"
         }
       ],
       "services": {
@@ -27,4 +27,3 @@
   ],
   "configuration_version": "1"
 }
-
