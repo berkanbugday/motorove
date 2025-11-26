@@ -1178,9 +1178,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  bottomSheetContent: {
-    padding: spacing.sm,
-  },
   bottomSheetButtons: {
     flexDirection: 'row',
     gap: spacing.md,

@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.secondary.main,
   },
   bottomSheetContent: {
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
   },
   bottomSheetMessage: {
     marginBottom: spacing.sm,
@@ -523,8 +523,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
   },
   bottomSheetButton: {
     flex: 1,

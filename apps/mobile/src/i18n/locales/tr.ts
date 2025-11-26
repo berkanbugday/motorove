@@ -226,7 +226,7 @@ export default {
       delete_confirmation: 'Bu gönderiyi silmek istediğinize emin misiniz?',
       delete_post: 'Gönderi Sil',
       delete_post_confirmation:
-        'Bu gönderiyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+        'Bu gönderiyi silmek istediğinize emin misiniz?',
       select_location: 'Konum Seç',
       select_group: 'Grup Seç',
       no_groups_joined: 'Henüz hiçbir gruba katılmadınız',
@@ -246,7 +246,7 @@ export default {
       no_comments_yet: 'Henüz yorum yok',
       delete_comment: 'Yorumu Sil',
       delete_comment_confirmation:
-        'Bu yorumu silmek istediğinize emin misiniz? \nBu işlem geri alınamaz.',
+        'Bu yorumu silmek istediğinize emin misiniz?',
       comment_created: 'Yorum başarıyla oluşturuldu!',
       comment_updated: 'Yorum başarıyla güncellendi!',
       comment_deleted: 'Yorum başarıyla silindi!',
@@ -491,10 +491,10 @@ export default {
       no_notifications_yet: 'Henüz hiç bildiriminiz yok',
       delete_notification_title: 'Bildirim Sil',
       delete_notification_message:
-        'Bu bildirimi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+        'Bu bildirimi silmek istediğinize emin misiniz?',
       delete_all_notifications_title: 'Tüm Bildirimleri Sil',
       delete_all_notifications_message:
-        'Tüm bildirimleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+        'Tüm bildirimleri silmek istediğinize emin misiniz?',
       navigation_failed: 'İçeriğe yönlendirme başarısız',
     },
 

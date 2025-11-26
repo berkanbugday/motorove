@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
     marginVertical: spacing.md,
   },
   bottomSheetContent: {
-    padding: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   bottomSheetMessage: {
     textAlign: 'center',

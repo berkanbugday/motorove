@@ -223,8 +223,7 @@ export default {
       post_deleted_failed: 'Post deletion failed. Please try again.',
       delete_confirmation: 'Are you sure you want to delete this post?',
       delete_post: 'Delete Post',
-      delete_post_confirmation:
-        'Are you sure you want to delete this post? This action cannot be undone.',
+      delete_post_confirmation: 'Are you sure you want to delete this post?',
       select_location: 'Select Location',
       select_group: 'Select Group',
       no_groups_joined: "You haven't joined any groups yet",
@@ -244,7 +243,7 @@ export default {
       no_comments_yet: 'No comments yet',
       delete_comment: 'Delete Comment',
       delete_comment_confirmation:
-        'Are you sure you want to delete this comment? \nThis action cannot be undone.',
+        'Are you sure you want to delete this comment?',
       comment_created: 'Comment created successfully!',
       comment_updated: 'Comment updated successfully!',
       comment_deleted: 'Comment deleted successfully!',
@@ -496,10 +495,10 @@ export default {
       no_notifications_yet: "You don't have any notifications yet",
       delete_notification_title: 'Delete Notification',
       delete_notification_message:
-        'Are you sure you want to delete this notification? This action cannot be undone.',
+        'Are you sure you want to delete this notification?',
       delete_all_notifications_title: 'Delete All Notifications',
       delete_all_notifications_message:
-        'Are you sure you want to delete all notifications? This action cannot be undone.',
+        'Are you sure you want to delete all notifications?',
       navigation_failed: 'Failed to navigate to content',
     },
 
