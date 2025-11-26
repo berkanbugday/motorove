@@ -173,7 +173,7 @@ platform :android do
     
     # Move and rename AAB to consistent location
     # Use absolute path to ensure it's accessible from mobile app root
-    build_dir = File.expand_path("../build/android/#{env}", __dir__)
+    build_dir = File.expand_path("build/android/#{env}", __dir__)
     sh("mkdir -p '#{build_dir}'")
     
     # Use the actual AAB path from gradle output
