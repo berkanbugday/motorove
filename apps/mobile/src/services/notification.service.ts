@@ -1,13 +1,12 @@
 import {PermissionsAndroid, Platform} from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getApps, initializeApp, getApp} from '@react-native-firebase/app';
+import {getApps, getApp} from '@react-native-firebase/app';
 import messaging, {getMessaging} from '@react-native-firebase/messaging';
 import inAppMessaging from '@react-native-firebase/in-app-messaging';
 import {useMutation, useQuery} from '@apollo/client';
 import {showToast} from '@components';
 import {loggingService} from './logging.service';
-import {getFirebaseConfig} from '@configs';
 import {
   SAVE_DEVICE_TOKEN,
   REMOVE_DEVICE_TOKEN,
@@ -55,22 +54,33 @@ class NotificationService {
     return NotificationService.instance;
   }
 
+  /**
+   * Initialize notification service
+   * Note: Firebase must be initialized before calling this method
+   * Firebase initialization is handled by FirebaseService
+   */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
       return;
     }
 
     try {
-      // Check if Firebase is already initialized
+      // Verify Firebase is initialized
       if (!getApps().length) {
-        // Use environment-based Firebase configuration
-        await initializeApp(getFirebaseConfig());
+        loggingService.warning(
+          'Firebase not initialized. NotificationService requires Firebase to be initialized first.',
+        );
+        return;
       }
 
       // Set up message handlers
       this.setupMessageHandlers();
 
       this.isInitialized = true;
+
+      if (__DEV__) {
+        loggingService.debug('NotificationService initialized successfully');
+      }
     } catch (error) {
       loggingService.error('Failed to initialize notification service:', error);
     }

@@ -69,25 +69,30 @@ function App(): React.JSX.Element {
         // Initialize network monitoring first (doesn't depend on native modules)
         networkService.initialize();
 
-        // Initialize notification service
-        notificationService.service.initialize();
+        // Initialize Firebase and Notification services sequentially
+        // Firebase must be initialized first, then NotificationService can set up message handlers
+        setTimeout(async () => {
+          try {
+            // Step 1: Initialize Firebase (Analytics, Crashlytics, Performance)
+            await firebaseService.initialize();
 
-        // Delay Firebase initialization to ensure React Native native modules are ready
-        // This prevents crashes if Firebase tries to access native modules before they're loaded
-        setTimeout(() => {
-          firebaseService.initialize().catch((error) => {
-            // Firebase initialization errors are already logged in the service
-            // Just ensure app continues to load
+            // Step 2: Initialize NotificationService (requires Firebase to be ready)
+            await notificationService.service.initialize();
+
+            if (AppConfig.DEBUG_MODE) {
+              loggingService.info('All services initialized successfully');
+            }
+          } catch (error) {
+            // Services handle their own errors, just log completion status
             if (AppConfig.DEBUG_MODE) {
               loggingService.warning(
-                'Firebase initialization completed with errors',
+                'Service initialization completed with errors',
                 {
-                  error:
-                    error instanceof Error ? error.message : String(error),
+                  error: error instanceof Error ? error.message : String(error),
                 },
               );
             }
-          });
+          }
         }, 500); // 500ms delay to ensure native modules are loaded
       } catch (error) {
         // Log but don't block app startup
