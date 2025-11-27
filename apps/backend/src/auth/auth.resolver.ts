@@ -8,13 +8,21 @@ export class AuthResolver {
 
   @Mutation(() => Boolean)
   async signUp(@Args('input') input: SignUpInput): Promise<boolean> {
-    const { firstName, lastName, email, password, preferredLanguage } = input;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      preferredLanguage,
+      eulaAccepted,
+    } = input;
     return await this.authService.signUp(
       firstName,
       lastName,
       email,
       password,
       preferredLanguage,
+      eulaAccepted,
     );
   }
 }

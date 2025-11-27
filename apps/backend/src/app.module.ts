@@ -29,6 +29,8 @@ import { SupportsModule } from './supports/supports.module';
 import { WarningsModule } from './warnings/warnings.module';
 import { EmergenciesModule } from './emergencies/emergencies.module';
 import { UserLocationsModule } from './user-locations/user-locations.module';
+import { ContentReportsModule } from './content-reports/content-reports.module';
+import { UserBlocksModule } from './user-blocks/user-blocks.module';
 
 @Module({
   imports: [
@@ -89,6 +91,8 @@ import { UserLocationsModule } from './user-locations/user-locations.module';
     WarningsModule,
     EmergenciesModule,
     UserLocationsModule,
+    ContentReportsModule,
+    UserBlocksModule,
   ],
   controllers: [AppController],
   providers: [

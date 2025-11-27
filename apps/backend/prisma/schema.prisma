@@ -11,7 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_DATABASE_URL")
 }
@@ -296,6 +296,41 @@ enum EmergencyType {
   OTHER
 }
 
+// Enums for content moderation
+enum ContentType {
+  POST
+  POST_COMMENT
+  BUSINESS_COMMENT
+  GROUP
+  EVENT
+  USER_PROFILE
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  HATE_SPEECH
+  INAPPROPRIATE_CONTENT
+  COPYRIGHT_VIOLATION
+  FALSE_INFORMATION
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+enum ModerationAction {
+  REMOVE_CONTENT
+  WARN_USER
+  SUSPEND_USER
+  BAN_USER
+  NO_ACTION
+}
+
 // Models
 model User {
   id                String   @id @default(uuid())
@@ -378,6 +413,15 @@ model User {
   // Business comment relations
   businessComments        BusinessComment[]
   updatedBusinessComments BusinessComment[] @relation("BusinessCommentUpdatedBy")
+
+  // Content moderation relations
+  createdContentReports ContentReport[] @relation("ContentReportCreatedBy")
+  blockedUsers          UserBlock[]     @relation("UserBlockBlocker")
+  blockedByUsers        UserBlock[]     @relation("UserBlockBlocked")
+
+  // EULA acceptance
+  eulaAcceptedAt DateTime?
+  eulaAccepted   Boolean   @default(true)
 
   @@index([supabaseId])
   @@index([cityId])
@@ -804,8 +848,8 @@ model Event {
   currency        Currency?        @default(TL)
 
   // Route information (calculated from start/finish locations)
-  distanceKm      Int?    // Distance in kilometers
-  durationSeconds Int?    // Duration in seconds
+  distanceKm      Int? // Distance in kilometers
+  durationSeconds Int? // Duration in seconds
 
   // Base model fields
   createdById String
@@ -1052,4 +1096,47 @@ model UserLocation {
 
   @@index([latitude, longitude]) // For spatial queries to find nearby users
   @@index([updatedAt]) // To filter out stale locations (older than X minutes)
+}
+
+// Content report model for flagging objectionable content
+model ContentReport {
+  id          String       @id @default(uuid())
+  contentType ContentType
+  contentId   String // ID of the reported content (post, comment, etc.)
+  reason      ReportReason
+  description String?      @db.Text // Optional additional details from reporter
+
+  // Moderation status
+  status ReportStatus @default(PENDING)
+
+  // Moderation actions
+  moderationActions ModerationAction[]
+
+  // Base model fields
+  createdById String
+  createdBy   User     @relation("ContentReportCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true)
+
+  @@unique([createdById, contentType, contentId]) // Prevent duplicate reports
+  @@index([createdById])
+  @@index([contentType, contentId])
+  @@index([status, createdAt])
+  @@index([status, isActive, createdAt])
+}
+
+// User block model for blocking abusive users
+model UserBlock {
+  id        String   @id @default(uuid())
+  blockerId String
+  blocker   User     @relation("UserBlockBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("UserBlockBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId, isActive])
+  @@index([blockedId, isActive])
 }

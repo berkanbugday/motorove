@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { Language } from '../../enums/models/language.enum';
 
@@ -34,4 +35,9 @@ export class SignUpInput {
   @IsOptional()
   @IsEnum(Language)
   preferredLanguage?: Language;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  eulaAccepted?: boolean;
 }

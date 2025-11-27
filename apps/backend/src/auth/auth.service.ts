@@ -20,6 +20,7 @@ export class AuthService {
     email: string,
     password: string,
     preferredLanguage?: Language,
+    eulaAccepted?: boolean,
   ): Promise<boolean> {
     let supabaseUser: any = null;
 
@@ -58,13 +59,15 @@ export class AuthService {
 
       // Use a transaction for database operations
       const result = await this.prismaService.$transaction(async (tx) => {
-        // Create user in our database
+        // Create user in our database with EULA acceptance
         const user = await tx.user.create({
           data: {
             firstName,
             lastName,
             email,
             supabaseId: supabaseUser.id,
+            eulaAcceptedAt: eulaAccepted ? new Date() : null,
+            eulaAccepted: eulaAccepted,
           },
           include: {
             userSetting: true,
