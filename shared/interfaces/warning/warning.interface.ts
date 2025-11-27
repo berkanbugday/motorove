@@ -9,4 +9,5 @@ export interface IWarning {
   addresses: IWarningAddress[];
   descriptions?: IWarningDescription[] | null;
   createdAt: Date | string;
+  createdById: string;
 }

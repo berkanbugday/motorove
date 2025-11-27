@@ -106,10 +106,30 @@ type CityDto {
   value: String!
 }
 
+"""Type of content that can be reported"""
+enum ContentType {
+  BUSINESS
+  BUSINESS_COMMENT
+  EMERGENCY
+  EVENT
+  GROUP
+  POST
+  POST_COMMENT
+  USER_PROFILE
+  WARNING
+}
+
 input CreateBusinessCommentInput {
   businessId: String!
   content: String!
   rating: Int!
+}
+
+input CreateContentReportInput {
+  contentId: String!
+  contentType: ContentType!
+  description: String
+  reason: ReportReason!
 }
 
 input CreateDeviceTokenInput {
@@ -226,6 +246,10 @@ input CreateSupportRequestInput {
   deviceInfo: JSON
   message: String!
   subject: String!
+}
+
+input CreateUserBlockInput {
+  blockedUserId: ID!
 }
 
 input CreateWarningAddressInput {
@@ -790,6 +814,7 @@ type Mutation {
   acceptEventInvitation(id: ID!): Boolean!
   accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddMemberInput!): Boolean!
+  blockUser(input: CreateUserBlockInput!): UserBlockDto!
   cancelEvent(id: ID!): String!
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
@@ -819,9 +844,11 @@ type Mutation {
   removePost(id: ID!): PostDto!
   removePostComment(id: ID!): PostCommentDto!
   removeWarning(id: String!): Boolean!
+  reportContent(input: CreateContentReportInput!): Boolean!
   saveDeviceToken(input: CreateDeviceTokenInput!): Boolean!
   savePost(postId: ID!): PostInteractionDto!
   signUp(input: SignUpInput!): Boolean!
+  unblockUser(blockedUserId: ID!): Boolean!
   unfollowUser(userId: ID!): ApprovalStatus!
   unlikePost(postId: ID!): PostInteractionDto!
   unsavePost(postId: ID!): PostInteractionDto!
@@ -1041,6 +1068,7 @@ type ProfileDto {
 }
 
 type Query {
+  blockedUsers: [UserBlockDto!]!
   business(id: String!): BusinessDto!
   businessAverageRating(businessId: ID!): Float!
   businessComment(id: ID!): BusinessCommentDto!
@@ -1094,6 +1122,17 @@ input RemoveMemberInput {
   userId: ID!
 }
 
+"""Reason for reporting content"""
+enum ReportReason {
+  COPYRIGHT_VIOLATION
+  FALSE_INFORMATION
+  HARASSMENT
+  HATE_SPEECH
+  INAPPROPRIATE_CONTENT
+  OTHER
+  SPAM
+}
+
 """Different styles of motorcycle riding"""
 enum RidingStyle {
   ADVENTURE
@@ -1117,6 +1156,7 @@ enum RoadType {
 
 input SignUpInput {
   email: String!
+  eulaAccepted: Boolean
   firstName: String!
   lastName: String!
   password: String!
@@ -1247,6 +1287,8 @@ type User {
   createdGroups: [Group!]
   dateOfBirth: DateTime
   email: String!
+  eulaAccepted: Boolean!
+  eulaAcceptedAt: DateTime
   eventParticipations: [EventParticipant!]
   firstName: String!
   followers: [UserFollowing!]
@@ -1270,6 +1312,13 @@ type User {
   supabaseId: String!
   updatedAt: DateTime!
   userSetting: UserSetting
+}
+
+type UserBlockDto {
+  blocked: User!
+  blocker: User!
+  createdAt: DateTime!
+  id: ID!
 }
 
 type UserDto {
