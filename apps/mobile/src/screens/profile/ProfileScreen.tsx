@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback, useMemo} from 'react';
 import {
   View,
   StyleSheet,
@@ -26,13 +26,19 @@ import {
   FeedCard,
   GroupCard,
   LoadingIndicator,
+  DropdownMenuItem,
 } from '@components';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useGetUserProfile, useGetUserStats} from '@services/user.service';
 import {useGetPosts} from '@services/post.service';
 import {useGetJoinedGroups} from '@services/group.service';
 import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
-import {IGroup, SocialMediaPlatform, ApprovalStatus} from '@motorove/shared';
+import {
+  IGroup,
+  SocialMediaPlatform,
+  ApprovalStatus,
+  ContentType,
+} from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {
   MainScreenNavigationProp,
@@ -109,6 +115,36 @@ export const ProfileScreen = () => {
 
   const loading = profileLoading || statsLoading;
   const followActionLoading = followLoading || unfollowLoading;
+
+  // Create dropdown menu items for other users' profiles
+  const profileDropdownMenuItems = useMemo((): DropdownMenuItem[] => {
+    if (isOwnProfile || !profileUserId) {
+      return [];
+    }
+    return [
+      {
+        id: 'report',
+        label: t('common.report'),
+        icon: 'error-filled',
+        isHighlighted: true,
+      },
+    ];
+  }, [isOwnProfile, profileUserId, t]);
+
+  // Handle dropdown menu item selection
+  const handleDropdownItemSelect = useCallback(
+    (item: DropdownMenuItem) => {
+      switch (item.id) {
+        case 'report':
+          navigateToScreen(navigation, 'ReportContent', {
+            contentType: ContentType.USER_PROFILE,
+            contentId: profileUserId,
+          });
+          break;
+      }
+    },
+    [navigation, profileUserId],
+  );
 
   // Calculate profile completion
   const calculateProfileCompletion = () => {
@@ -402,6 +438,10 @@ export const ProfileScreen = () => {
           isOwnProfile
             ? () => navigateToScreen(navigation, 'EditProfile')
             : undefined
+        }
+        dropdownMenuItems={!isOwnProfile ? profileDropdownMenuItems : undefined}
+        onDropdownItemSelect={
+          !isOwnProfile ? handleDropdownItemSelect : undefined
         }
       />
       <ScrollView

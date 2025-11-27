@@ -1,7 +1,7 @@
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RouteProp} from '@react-navigation/native';
 import {BottomTabNavigationProp} from '@react-navigation/bottom-tabs';
-import {IBusiness} from '@motorove/shared';
+import {IBusiness, ContentType} from '@motorove/shared';
 
 // AUTH STACK
 export type AuthStackParamList = {
@@ -81,6 +81,10 @@ export type MainStackParamList = {
   };
   ChangeEmail: undefined;
   ChangePassword: undefined;
+  ReportContent: {
+    contentType: ContentType;
+    contentId: string;
+  };
 };
 
 export type MainScreenNavigationProp<T extends keyof MainStackParamList> =

@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {IWarning, Language} from '@motorove/shared';
+import {IWarning, Language, ContentType} from '@motorove/shared';
 import {StyleProp, ViewStyle} from 'react-native';
 import {colors, spacing, radius, getShadow, commonStyles} from '@theme';
 import {
@@ -12,12 +12,17 @@ import {
   IconName,
   openMapAppsBottomSheet,
 } from '@components';
+import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {useTranslation} from '@hooks/useTranslation';
 import {EnumUtils} from '@utils/enumUtils';
 import {getWarningIcon} from '@utils/warningUtils';
 import {useLanguage} from '@contexts/LanguageContext';
 import {formatDistanceToNow} from 'date-fns';
 import {tr, enUS} from 'date-fns/locale';
+import {useNavigation} from '@react-navigation/native';
+import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {navigateToScreen} from '@navigation/utils/navigationHelpers';
+import {useAuth} from '@contexts/AuthContext';
 
 /**
  * Warning marker card props
@@ -47,6 +52,8 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
 }) => {
   const {t} = useTranslation();
   const {language} = useLanguage();
+  const {id: currentUserId} = useAuth();
+  const navigation = useNavigation<MainScreenNavigationProp<'ReportContent'>>();
   // Title expansion state
   const [isTitleExpanded, setIsTitleExpanded] = useState(false);
   // Description expansion state
@@ -63,6 +70,28 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
       warning.addresses[0].longitude,
       t,
     );
+  };
+
+  // Create dropdown menu items (only show report if user didn't create it)
+  const dropdownMenuItems: DropdownMenuItem[] = [];
+  if (warning.createdById !== currentUserId) {
+    dropdownMenuItems.push({
+      id: 'report',
+      label: t('common.report'),
+      icon: 'error-filled',
+      isHighlighted: true,
+    });
+  }
+
+  const handleDropdownSelect = (item: DropdownMenuItem) => {
+    switch (item.id) {
+      case 'report':
+        navigateToScreen(navigation, 'ReportContent', {
+          contentType: ContentType.WARNING,
+          contentId: warning.id,
+        });
+        break;
+    }
   };
 
   return (
@@ -86,6 +115,21 @@ export const RNMapWarningMarkerCard: React.FC<RNMapWarningMarkerCardProps> = ({
           onPress={onClose}
           style={styles.closeButton}
         />
+      )}
+
+      {/* More Menu Button - Only show if there are menu items */}
+      {dropdownMenuItems.length > 0 && (
+        <View style={styles.moreMenuContainer}>
+          <DropdownMenu
+            items={dropdownMenuItems}
+            onSelect={handleDropdownSelect}
+            position="bottom"
+            triggerIcon="more-vertical"
+            triggerIconSize={24}
+            triggerIconColor={colors.neutral.grey}
+            testID="warning-card-dropdown-menu"
+          />
+        </View>
       )}
 
       {/* Warning Icon and Title */}
@@ -207,11 +251,18 @@ const styles = StyleSheet.create({
     ...getShadow('small'),
     zIndex: 10,
   },
+  moreMenuContainer: {
+    position: 'absolute',
+    right: spacing.xxl, // Position to the left of close button
+    top: spacing.sm,
+    zIndex: 10,
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     marginBottom: spacing.sm,
+    marginRight: spacing.xxxl,
   },
   infoRow: {
     flexDirection: 'row',

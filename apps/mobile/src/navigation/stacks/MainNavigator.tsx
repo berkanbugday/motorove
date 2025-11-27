@@ -37,6 +37,7 @@ import {
   ChangeEmailScreen,
   ChangePasswordScreen,
 } from '@screens/accountSettings';
+import {ReportContentScreen} from '@screens/report';
 import {useRemoveDeviceToken} from '@services/notification.service';
 import {useAuth} from '@contexts/AuthContext';
 import {NotificationPermission} from '@motorove/shared';
@@ -225,6 +226,11 @@ export function MainNavigator() {
       <Stack.Screen
         name="ChangePassword"
         component={ChangePasswordScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="ReportContent"
+        component={ReportContentScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

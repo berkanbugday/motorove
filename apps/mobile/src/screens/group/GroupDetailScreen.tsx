@@ -43,6 +43,7 @@ import {
   EventStatus,
   IEvent,
   IPost,
+  ContentType,
 } from '@motorove/shared';
 import {useAuth} from '@contexts';
 import {useTranslation} from '@hooks/useTranslation';
@@ -248,7 +249,11 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
 
   // Create dropdown menu items for the group detail screen
   const groupDropdownMenuItems = useCallback(
-    (isAdmin?: boolean, isMember?: boolean): DropdownMenuItem[] => {
+    (
+      isAdmin?: boolean,
+      isMember?: boolean,
+      isOwner?: boolean,
+    ): DropdownMenuItem[] => {
       const items: DropdownMenuItem[] = [];
 
       if (isAdmin) {
@@ -265,17 +270,30 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           label: t('screens.group.members'),
           icon: 'users-filled',
         });
+      } else {
+        items.push({
+          id: 'join_group',
+          label: t('screens.group.join'),
+          icon: 'user-plus-filled',
+        });
+      }
+
+      if (!isOwner && isMember) {
         items.push({
           id: 'leave_group',
           label: t('screens.group.leave'),
           icon: 'users-slash-filled',
           isHighlighted: true,
         });
-      } else {
+      }
+
+      // Add report option if user is not owner/admin
+      if (!isOwner && !isAdmin) {
         items.push({
-          id: 'join_group',
-          label: t('screens.group.join'),
-          icon: 'user-plus-filled',
+          id: 'report',
+          label: t('common.report'),
+          icon: 'error-filled',
+          isHighlighted: true,
         });
       }
 
@@ -318,6 +336,12 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           break;
         case 'join_group':
           handleJoinGroup(currentUserId, verifiedIsPendingMember);
+          break;
+        case 'report':
+          navigateToScreen(navigation, 'ReportContent', {
+            contentType: ContentType.GROUP,
+            contentId: groupId,
+          });
           break;
         default:
           break;
@@ -415,6 +439,7 @@ export const GroupDetailScreen = ({route, navigation}: Props) => {
           dropdownMenuItems={groupDropdownMenuItems(
             verifiedIsAdmin,
             verifiedIsMember,
+            group?.isOwner,
           )}
           onDropdownItemSelect={item =>
             handleDropdownMenuItemSelect(item, group as IGroup)

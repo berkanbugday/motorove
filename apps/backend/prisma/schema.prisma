@@ -300,10 +300,13 @@ enum EmergencyType {
 enum ContentType {
   POST
   POST_COMMENT
+  BUSINESS
   BUSINESS_COMMENT
   GROUP
   EVENT
   USER_PROFILE
+  WARNING
+  EMERGENCY
 }
 
 enum ReportReason {

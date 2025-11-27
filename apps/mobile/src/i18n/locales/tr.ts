@@ -1370,10 +1370,13 @@ export default {
     contentType: {
       post: 'Gönderi',
       post_comment: 'Gönderi Yorumu',
+      business: 'İşletme',
       business_comment: 'İşletme Yorumu',
       group: 'Grup',
       event: 'Etkinlik',
       user_profile: 'Kullanıcı Profili',
+      warning: 'Uyarı',
+      emergency: 'Acil Durum',
     },
     reportReason: {
       spam: 'Spam',

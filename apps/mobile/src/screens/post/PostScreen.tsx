@@ -29,7 +29,7 @@ import {
   closeBottomSheet,
   useBottomSheet,
 } from '@components/BottomSheet/BottomSheetProvider';
-import {IPost, IUser, IImage} from '@motorove/shared';
+import {IPost, IUser, IImage, ContentType} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -156,6 +156,14 @@ export const PostScreen = ({navigation}: Props) => {
             isHighlighted: true,
           },
         );
+      } else {
+        // Add report option for other users' posts
+        items.push({
+          id: 'report',
+          label: t('common.report'),
+          icon: 'error-filled',
+          isHighlighted: true,
+        });
       }
 
       return items;
@@ -261,6 +269,12 @@ export const PostScreen = ({navigation}: Props) => {
               </View>
             ),
             snapPoint: 'minimal',
+          });
+          break;
+        case 'report':
+          navigateToScreen(navigation, 'ReportContent', {
+            contentType: ContentType.POST,
+            contentId: postId,
           });
           break;
         default:

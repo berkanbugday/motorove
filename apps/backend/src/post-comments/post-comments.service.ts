@@ -12,6 +12,7 @@ import { plainToClass } from 'class-transformer';
 import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '@motorove/shared';
+import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 
 @Injectable()
 export class PostCommentsService {
@@ -19,6 +20,7 @@ export class PostCommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly queueService: QueueService,
+    private readonly profanityFilterService: ProfanityFilterService,
   ) {}
 
   async findAll(
@@ -288,6 +290,8 @@ export class PostCommentsService {
   }
 
   private mapToDto(postComment: PostComment): PostCommentDto {
-    return plainToClass(PostCommentDto, postComment);
+    const dto = plainToClass(PostCommentDto, postComment);
+    dto.content = this.profanityFilterService.filterText(dto.content);
+    return dto;
   }
 }

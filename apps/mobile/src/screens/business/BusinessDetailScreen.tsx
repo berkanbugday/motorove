@@ -31,6 +31,7 @@ import {
   openMapAppsBottomSheet,
   LoadingIndicator,
 } from '@components';
+import DropdownMenu, {DropdownMenuItem} from '@components/DropdownMenu';
 import {BusinessComments} from '@components/BusinessComments/BusinessComments';
 import {EnumUtils} from '@utils/enumUtils';
 import type {BottomSheetRef, RNMapMarkerItem} from '@components';
@@ -387,6 +388,32 @@ export const BusinessDetailScreen: React.FC = () => {
     );
   }, [currentBusiness, t]);
 
+  // Create dropdown menu items for business detail screen (only show report if user didn't create it)
+  const businessDropdownMenuItems: DropdownMenuItem[] = [];
+
+  businessDropdownMenuItems.push({
+    id: 'report',
+    label: t('common.report'),
+    icon: 'error-filled',
+    isHighlighted: true,
+  });
+
+  const handleBusinessDropdownSelect = useCallback(
+    (item: DropdownMenuItem) => {
+      switch (item.id) {
+        case 'report':
+          if (currentBusiness?.id) {
+            navigateToScreen(navigation, 'ReportContent', {
+              contentType: ContentType.BUSINESS,
+              contentId: currentBusiness.id,
+            });
+          }
+          break;
+      }
+    },
+    [navigation, currentBusiness?.id],
+  );
+
   // Update business if params change
   useEffect(() => {
     if (businessParam) {
@@ -480,6 +507,19 @@ export const BusinessDetailScreen: React.FC = () => {
 
           {/* Business Information Section */}
           <View style={styles.infoSection}>
+            {/* More Menu Button - Only show if there are menu items */}
+            {businessDropdownMenuItems.length > 0 && (
+              <DropdownMenu
+                items={businessDropdownMenuItems}
+                onSelect={handleBusinessDropdownSelect}
+                position="bottom"
+                triggerIcon="more-vertical"
+                triggerIconSize={24}
+                triggerIconColor={colors.neutral.grey}
+                triggerContainerStyle={{alignSelf: 'flex-end'}}
+                testID="business-detail-dropdown-menu"
+              />
+            )}
             {/* Address */}
             <View style={styles.infoRow}>
               <Icon name="map-pin-filled" size={20} />

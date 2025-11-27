@@ -1369,10 +1369,13 @@ export default {
     contentType: {
       post: 'Post',
       post_comment: 'Post Comment',
+      business: 'Business',
       business_comment: 'Business Comment',
       group: 'Group',
       event: 'Event',
       user_profile: 'User Profile',
+      warning: 'Warning',
+      emergency: 'Emergency',
     },
     reportReason: {
       spam: 'Spam',

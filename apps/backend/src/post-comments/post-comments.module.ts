@@ -4,9 +4,10 @@ import { PostCommentsResolver } from './post-comments.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { QueueModule } from '../core/queue/queue.module';
+import { ProfanityFilterModule } from '../core/profanity-filter/profanity-filter.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, QueueModule],
+  imports: [PrismaModule, AuthModule, QueueModule, ProfanityFilterModule],
   providers: [PostCommentsResolver, PostCommentsService],
   exports: [PostCommentsService],
 })
