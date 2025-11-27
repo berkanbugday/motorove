@@ -21,6 +21,7 @@ import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '../enums/models/notification-channel.enum';
 import { ConfigService } from '@nestjs/config';
+import { UserBlocksService } from '../user-blocks/user-blocks.service';
 
 @Injectable()
 export class PostsService {
@@ -34,6 +35,7 @@ export class PostsService {
     private profanityFilterService: ProfanityFilterService,
     private queueService: QueueService,
     private configService: ConfigService,
+    private userBlocksService: UserBlocksService,
   ) {
     this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
   }
@@ -47,12 +49,21 @@ export class PostsService {
     currentUserId?: string,
   ): Promise<PostDto[]> {
     try {
+      // Get blocked user IDs if currentUserId is provided
+      const blockedUserIds = currentUserId
+        ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+        : [];
+
       const posts = await this.prisma.post.findMany({
         where: {
           ...(groupId && { groupId }),
           ...(createdById && { createdById }),
           ...(savedById && { saves: { some: { userId: savedById } } }),
           isActive: true,
+          // Filter out posts from blocked users
+          ...(blockedUserIds.length > 0 && {
+            createdById: { notIn: blockedUserIds },
+          }),
         },
         include: {
           group: true,
@@ -123,6 +134,11 @@ export class PostsService {
   }
 
   async findOne(id: string, currentUserId?: string): Promise<PostDto> {
+    // Get blocked user IDs if currentUserId is provided
+    const blockedUserIds = currentUserId
+      ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+      : [];
+
     const post = await this.prisma.post.findFirst({
       where: { id },
       include: {
@@ -141,6 +157,10 @@ export class PostsService {
         comments: {
           where: {
             isActive: true,
+            // Filter out comments from blocked users
+            ...(blockedUserIds.length > 0 && {
+              createdById: { notIn: blockedUserIds },
+            }),
           },
           include: {
             createdBy: true,
@@ -157,6 +177,20 @@ export class PostsService {
         resource: 'post',
         id,
       });
+    }
+
+    // Check if the post creator is blocked
+    if (currentUserId) {
+      const isBlocked = await this.userBlocksService.isUserBlocked(
+        currentUserId,
+        post.createdById,
+      );
+      if (isBlocked) {
+        ExceptionHelper.notFound('errors.common.not_found_with_id', {
+          resource: 'post',
+          id,
+        });
+      }
     }
 
     return this.mapToDto(post as Post, currentUserId);

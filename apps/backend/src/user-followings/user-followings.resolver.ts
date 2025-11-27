@@ -15,6 +15,7 @@ export class UserFollowingsResolver {
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'followerUsers' })
   async findFollowerUsers(
+    @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
@@ -23,12 +24,14 @@ export class UserFollowingsResolver {
       userId,
       limit,
       skip,
+      user.id,
     );
   }
 
   @UseGuards(JwtGuard)
   @Query(() => [UserFollowingDto], { name: 'followingUsers' })
   async findFollowingUsers(
+    @CurrentUser() user: User,
     @Args('userId', { type: () => ID }) userId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
@@ -37,6 +40,7 @@ export class UserFollowingsResolver {
       userId,
       limit,
       skip,
+      user.id,
     );
   }
 

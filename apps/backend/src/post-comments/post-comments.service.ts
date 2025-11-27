@@ -13,6 +13,7 @@ import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '@motorove/shared';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
+import { UserBlocksService } from '../user-blocks/user-blocks.service';
 
 @Injectable()
 export class PostCommentsService {
@@ -21,17 +22,28 @@ export class PostCommentsService {
     private readonly prisma: PrismaService,
     private readonly queueService: QueueService,
     private readonly profanityFilterService: ProfanityFilterService,
+    private readonly userBlocksService: UserBlocksService,
   ) {}
 
   async findAll(
     postId: string,
     limit?: number,
     skip?: number,
+    currentUserId?: string,
   ): Promise<PostCommentDto[]> {
     try {
+      // Get blocked user IDs if currentUserId is provided
+      const blockedUserIds = currentUserId
+        ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+        : [];
+
       const where = {
         postId,
         isActive: true,
+        // Filter out comments from blocked users
+        ...(blockedUserIds.length > 0 && {
+          createdById: { notIn: blockedUserIds },
+        }),
       };
 
       const postComments = (await this.prisma.postComment.findMany({

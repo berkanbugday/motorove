@@ -15,11 +15,12 @@ export class PostCommentsResolver {
   @UseGuards(JwtGuard)
   @Query(() => [PostCommentDto], { name: 'postComments' })
   async findAll(
+    @CurrentUser() user: User,
     @Args('postId', { type: () => ID }) postId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('skip', { type: () => Int, nullable: true }) skip?: number,
   ) {
-    return await this.postCommentsService.findAll(postId, limit, skip);
+    return await this.postCommentsService.findAll(postId, limit, skip, user.id);
   }
 
   @UseGuards(JwtGuard)

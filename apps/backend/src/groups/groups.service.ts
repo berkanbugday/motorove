@@ -16,6 +16,7 @@ import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '@motorove/shared';
 import { ConfigService } from '@nestjs/config';
+import { UserBlocksService } from '../user-blocks/user-blocks.service';
 
 @Injectable()
 export class GroupsService {
@@ -27,6 +28,7 @@ export class GroupsService {
     private storageService: StorageService,
     private queueService: QueueService,
     private configService: ConfigService,
+    private userBlocksService: UserBlocksService,
   ) {
     // Construct public URL from environment variables
     this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
@@ -197,6 +199,10 @@ export class GroupsService {
 
   async findOne(id: string, userId: string): Promise<GroupDto> {
     try {
+      const blockedUserIds = userId
+        ? await this.userBlocksService.getBlockedUserIds(userId)
+        : [];
+
       const group = await this.prisma.group.findFirst({
         where: { id, isActive: true },
         include: {
@@ -204,6 +210,9 @@ export class GroupsService {
           city: true,
           memberships: {
             where: {
+              ...(blockedUserIds.length > 0 && {
+                userId: { notIn: blockedUserIds },
+              }),
               status: {
                 in: [ApprovalStatus.ACCEPTED, ApprovalStatus.PENDING],
               },

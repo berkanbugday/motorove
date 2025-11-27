@@ -25,6 +25,7 @@ import { ConfigService } from '@nestjs/config';
 import { calculateRoute } from '@motorove/shared';
 import { AddressType } from '@motorove/shared';
 import { CreateEventAddressInput } from './dto/create-event-address.input';
+import { UserBlocksService } from '../user-blocks/user-blocks.service';
 
 @Injectable()
 export class EventsService {
@@ -38,6 +39,7 @@ export class EventsService {
     private profanityFilterService: ProfanityFilterService,
     private imageCensorFilterService: ImageCensorFilterService,
     private configService: ConfigService,
+    private userBlocksService: UserBlocksService,
   ) {
     this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
   }
@@ -50,11 +52,20 @@ export class EventsService {
     groupId?: string,
   ): Promise<EventDto[]> {
     try {
+      // Get blocked user IDs if currentUserId is provided
+      const blockedUserIds = currentUserId
+        ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+        : [];
+
       const baseWhere = {
         isActive: true,
         ...(status && { status }),
         ...(status === EventStatus.DRAFT &&
           currentUserId && { createdById: currentUserId }),
+        // Filter out events from blocked users
+        ...(blockedUserIds.length > 0 && {
+          createdById: { notIn: blockedUserIds },
+        }),
       };
 
       // Apply privacy filtering based on user access and groupId
@@ -165,6 +176,10 @@ export class EventsService {
 
   async findOne(id: string, currentUserId?: string): Promise<EventDto> {
     try {
+      const blockedUserIds = currentUserId
+        ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+        : [];
+
       const baseWhere = { id };
 
       const groupIds = await this.prisma.groupMembership.findMany({
@@ -223,7 +238,12 @@ export class EventsService {
             },
           },
           participants: {
-            where: { status: EventParticipantStatus.JOINED, isActive: true },
+            where: {
+              status: EventParticipantStatus.JOINED,
+              ...(blockedUserIds.length > 0 && {
+                createdById: { notIn: blockedUserIds },
+              }),
+            },
             include: { createdBy: true },
           },
           addresses: true,
@@ -257,6 +277,20 @@ export class EventsService {
         });
       }
 
+      // Check if the event creator is blocked
+      if (currentUserId) {
+        const isBlocked = await this.userBlocksService.isUserBlocked(
+          currentUserId,
+          event.createdById,
+        );
+        if (isBlocked) {
+          ExceptionHelper.notFound('errors.common.not_found_with_id', {
+            resource: 'event',
+            id,
+          });
+        }
+      }
+
       this.logger.log(
         `User ${currentUserId || 'anonymous'} accessed event ${id} (private: ${event.isPrivate})`,
       );
@@ -278,11 +312,20 @@ export class EventsService {
     currentUserId?: string,
   ): Promise<EventInvitationDto[]> {
     try {
+      // Get blocked user IDs if currentUserId is provided
+      const blockedUserIds = currentUserId
+        ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+        : [];
+
       const invitations = await this.prisma.eventInvitation.findMany({
         where: {
           status: ApprovalStatus.PENDING,
           inviteeId: currentUserId,
           isActive: true,
+          // Filter out invitations from blocked users
+          ...(blockedUserIds.length > 0 && {
+            createdById: { notIn: blockedUserIds },
+          }),
           event: {
             status: EventStatus.UPCOMING,
             isActive: true,

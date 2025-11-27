@@ -122,9 +122,9 @@ export const ProfileScreen = () => {
   const {blockUser, loading: blockLoading} = useBlockUser(async () => {
     await refetchIsUserBlocked();
   });
-  const {unblockUser, loading: unblockLoading} = useUnblockUser(async () => {
-    await refetchIsUserBlocked();
-  });
+  const {unblockUser, loading: unblockLoading} = useUnblockUser(
+    async () => await refetchIsUserBlocked(),
+  );
 
   // Check if current profile user is blocked using backend isUserBlocked method
   const {isUserBlocked, refetch: refetchIsUserBlocked} = useIsUserBlocked(
@@ -258,7 +258,9 @@ export const ProfileScreen = () => {
     platform: SocialMediaPlatform,
     username: string,
   ) => {
-    await openSocialMediaUrl(platform, username);
+    if (!isUserBlocked) {
+      await openSocialMediaUrl(platform, username);
+    }
   };
 
   // Get all social media platforms with their status
@@ -694,12 +696,14 @@ export const ProfileScreen = () => {
           )}
         </View>
 
-        <Tabs
-          items={tabItems}
-          selectedKey={activeTab}
-          onTabChange={tab => setActiveTab(tab as ProfileTab)}
-          equalWidth
-        />
+        {!isUserBlocked && (
+          <Tabs
+            items={tabItems}
+            selectedKey={activeTab}
+            onTabChange={tab => setActiveTab(tab as ProfileTab)}
+            equalWidth
+          />
+        )}
       </ScrollView>
       <ImagePreviewModal
         visible={imagePreviewVisible}

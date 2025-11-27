@@ -16,6 +16,7 @@ import {
   translateEnumsInData,
   selectLanguageSpecificFields,
 } from '@motorove/shared';
+import { UserBlocksService } from '../user-blocks/user-blocks.service';
 
 interface UserSettingValidationResult {
   userSetting?: UserSetting | null;
@@ -30,6 +31,7 @@ export class NotificationsService {
     private readonly prisma: PrismaService,
     private readonly firebaseService: FirebaseService,
     private readonly i18nService: I18nService,
+    private readonly userBlocksService: UserBlocksService,
   ) {}
 
   async findAll(
@@ -38,8 +40,20 @@ export class NotificationsService {
     userId?: string,
   ): Promise<NotificationDto[]> {
     try {
+      // Get blocked user IDs if userId is provided
+      const blockedUserIds = userId
+        ? await this.userBlocksService.getBlockedUserIds(userId)
+        : [];
+
       const notifications = (await this.prisma.notification.findMany({
-        where: { userId, isActive: true },
+        where: {
+          userId,
+          isActive: true,
+          // Filter out notifications from blocked users
+          ...(blockedUserIds.length > 0 && {
+            createdById: { notIn: blockedUserIds },
+          }),
+        },
         orderBy: [{ read: 'asc' }, { createdAt: 'desc' }],
         take: limit || undefined,
         skip: skip || undefined,
@@ -76,8 +90,32 @@ export class NotificationsService {
     senderUserId: string,
   ): Promise<NotificationDto[]> {
     try {
+      // Filter out blocked users using optimized bulk method
+      const allUserIds = [senderUserId, ...input.userIds];
+      const blockedUserIdsMap =
+        await this.userBlocksService.getBlockedUserIdsForMultipleUsers(
+          allUserIds,
+        );
+
+      // Get blocked user IDs for sender (bidirectional)
+      const senderBlockedIds = blockedUserIdsMap[senderUserId] || [];
+
+      // Filter out users that have a block relationship with sender
+      const validUserIds = input.userIds.filter((userId) => {
+        // Check if sender has blocked this user or user has blocked sender
+        const userBlockedIds = blockedUserIdsMap[userId] || [];
+        const isBlocked =
+          senderBlockedIds.includes(userId) ||
+          userBlockedIds.includes(senderUserId);
+        return !isBlocked;
+      });
+
+      if (validUserIds.length === 0) {
+        return [];
+      }
+
       // Prepare notification data
-      const notificationData = input.userIds.map((userId) => ({
+      const notificationData = validUserIds.map((userId) => ({
         title: input.title,
         body: input.body,
         type: input.type,
@@ -95,7 +133,7 @@ export class NotificationsService {
       });
 
       // Process each user
-      for (const targetUserId of input.userIds) {
+      for (const targetUserId of validUserIds) {
         const { userSetting, shouldSendPush: hasUserSetting } =
           await this.getUserSettingsWithValidation(targetUserId);
 
@@ -161,7 +199,7 @@ export class NotificationsService {
       // Fetch created notifications to return
       const createdNotifications = (await this.prisma.notification.findMany({
         where: {
-          userId: { in: input.userIds },
+          userId: { in: validUserIds },
           title: input.title,
           body: input.body,
           type: input.type,
@@ -184,6 +222,37 @@ export class NotificationsService {
     senderUserId: string,
   ): Promise<NotificationDto> {
     try {
+      // Check if the recipient has blocked the sender or vice versa
+      const isBlocked = await this.userBlocksService.isUserBlocked(
+        senderUserId,
+        input.userId,
+      );
+
+      if (isBlocked) {
+        // Return a notification with NOT_SENT status if blocked
+        const blockedNotification = (await this.prisma.notification.create({
+          data: {
+            title: input.title,
+            body: input.body,
+            type: input.type,
+            channel: input.channel,
+            data: input.data,
+            user: {
+              connect: { id: input.userId },
+            },
+            status: NotificationStatus.NOT_SENT,
+            createdBy: {
+              connect: { id: senderUserId },
+            },
+            updatedBy: {
+              connect: { id: senderUserId },
+            },
+          },
+        })) as unknown as Notification;
+
+        return this.mapToDto(blockedNotification);
+      }
+
       const createdNotification = (await this.prisma.notification.create({
         data: {
           title: input.title,

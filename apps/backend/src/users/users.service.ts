@@ -18,6 +18,7 @@ import { EventStatus } from '../enums/models/event-status.enum';
 import { Gender } from '../enums/models/gender.enum';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 import { ConfigService } from '@nestjs/config';
+import { UserBlocksService } from '../user-blocks/user-blocks.service';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +30,7 @@ export class UsersService {
     private storageService: StorageService,
     private profanityFilterService: ProfanityFilterService,
     private configService: ConfigService,
+    private userBlocksService: UserBlocksService,
   ) {
     this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
   }
@@ -69,13 +71,24 @@ export class UsersService {
             .then((followings) => followings.map((f) => f.followingId))
         : [];
 
+    // Get blocked user IDs if currentUserId is provided
+    const blockedUserIds = currentUserId
+      ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+      : [];
+
+    // Combine excluded user IDs (current user, following users, and blocked users)
+    const excludedUserIds = [
+      ...(currentUserId ? [currentUserId] : []),
+      ...followingUserIds,
+      ...blockedUserIds,
+    ];
+
     // Build base filters that always apply
     const baseFilters: any = {
-      // Don't include the current user in results
-      id:
-        followingUserIds.length > 0
-          ? { not: { in: [currentUserId, ...followingUserIds] } }
-          : { not: currentUserId },
+      // Don't include the current user, following users, or blocked users in results
+      ...(excludedUserIds.length > 0 && {
+        id: { notIn: excludedUserIds },
+      }),
       // Only include active users
       isActive: true,
       // Filter by same city if current user has a city

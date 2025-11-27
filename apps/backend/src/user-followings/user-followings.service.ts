@@ -5,11 +5,11 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { UserFollowing } from './models/user-following.model';
 import { UserFollowingDto } from './dto/user-following.dto';
 import { ApprovalStatus } from '../enums/models/approval-status.enum';
-import { StorageService } from '../core/storage/storage.service';
 import { Logger } from '@nestjs/common';
 import { QueueService } from '../core/queue/queue.service';
 import { NotificationType } from '../enums/models/notification-type.enum';
 import { NotificationChannel } from '@motorove/shared';
+import { UserBlocksService } from '../user-blocks/user-blocks.service';
 
 @Injectable()
 export class UserFollowingsService {
@@ -17,8 +17,8 @@ export class UserFollowingsService {
 
   constructor(
     private prisma: PrismaService,
-    private storageService: StorageService,
     private queueService: QueueService,
+    private userBlocksService: UserBlocksService,
   ) {}
 
   // Get users that follow the given userId with pagination
@@ -26,7 +26,13 @@ export class UserFollowingsService {
     userId: string,
     limit?: number,
     skip?: number,
+    currentUserId?: string,
   ): Promise<UserFollowingDto[]> {
+    // Get blocked user IDs if currentUserId is provided
+    const blockedUserIds = currentUserId
+      ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+      : [];
+
     const followers = await this.prisma.userFollowing.findMany({
       where: {
         followingId: userId,
@@ -34,6 +40,10 @@ export class UserFollowingsService {
         status: {
           in: [ApprovalStatus.ACCEPTED],
         },
+        // Filter out blocked users
+        ...(blockedUserIds.length > 0 && {
+          followerId: { notIn: blockedUserIds },
+        }),
       },
       include: {
         follower: {
@@ -54,7 +64,13 @@ export class UserFollowingsService {
     userId: string,
     limit?: number,
     skip?: number,
+    currentUserId?: string,
   ): Promise<UserFollowingDto[]> {
+    // Get blocked user IDs if currentUserId is provided
+    const blockedUserIds = currentUserId
+      ? await this.userBlocksService.getBlockedUserIds(currentUserId)
+      : [];
+
     const followings = await this.prisma.userFollowing.findMany({
       where: {
         followerId: userId,
@@ -62,6 +78,10 @@ export class UserFollowingsService {
         status: {
           in: [ApprovalStatus.ACCEPTED],
         },
+        // Filter out blocked users
+        ...(blockedUserIds.length > 0 && {
+          followingId: { notIn: blockedUserIds },
+        }),
       },
       include: {
         following: {
@@ -82,11 +102,20 @@ export class UserFollowingsService {
     limit?: number,
     skip?: number,
   ): Promise<UserFollowingDto[]> {
+    // Get blocked user IDs if userId is provided
+    const blockedUserIds = userId
+      ? await this.userBlocksService.getBlockedUserIds(userId)
+      : [];
+
     const followRequests = await this.prisma.userFollowing.findMany({
       where: {
         followingId: userId,
         isActive: true,
         status: ApprovalStatus.PENDING,
+        // Filter out blocked users
+        ...(blockedUserIds.length > 0 && {
+          followerId: { notIn: blockedUserIds },
+        }),
       },
       include: {
         follower: {
