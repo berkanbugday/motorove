@@ -36,6 +36,7 @@ class AuthService {
     email: string,
     password: string,
     preferredLanguage: Language,
+    eulaAccepted: boolean,
   ): Promise<boolean> {
     try {
       loggingService.info('Signing up...');
@@ -43,7 +44,14 @@ class AuthService {
       const {data, errors} = await apolloClient.mutate({
         mutation: SIGN_UP,
         variables: {
-          input: {firstName, lastName, email, password, preferredLanguage},
+          input: {
+            firstName,
+            lastName,
+            email,
+            password,
+            preferredLanguage,
+            eulaAccepted,
+          },
         },
       });
 

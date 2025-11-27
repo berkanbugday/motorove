@@ -55,7 +55,7 @@ export const SignupScreen = () => {
       lastName: '',
       email: '',
       password: '',
-      agreeToTerms: true,
+      agreeToTerms: false,
     },
   });
 
@@ -79,6 +79,7 @@ export const SignupScreen = () => {
         data.email,
         data.password,
         language.toUpperCase() as Language,
+        data.agreeToTerms,
       );
 
       if (response) {

@@ -1,0 +1,7 @@
+export enum ModerationAction {
+  REMOVE_CONTENT = "REMOVE_CONTENT",
+  WARN_USER = "WARN_USER",
+  SUSPEND_USER = "SUSPEND_USER",
+  BAN_USER = "BAN_USER",
+  NO_ACTION = "NO_ACTION",
+}

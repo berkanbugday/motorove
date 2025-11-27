@@ -1,0 +1,6 @@
+export enum ReportStatus {
+  PENDING = "PENDING",
+  REVIEWING = "REVIEWING",
+  RESOLVED = "RESOLVED",
+  DISMISSED = "DISMISSED",
+}

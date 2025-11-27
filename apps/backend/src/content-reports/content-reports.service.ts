@@ -30,7 +30,7 @@ export class ContentReportsService {
       });
 
       if (existingReport) {
-        ExceptionHelper.conflict('errors.content_reports.already_reported');
+        ExceptionHelper.conflict('errors.content_report.already_reported');
       }
 
       // Create the report
