@@ -15,3 +15,4 @@ export * from './support.service';
 export * from './emergency.service';
 export * from './warning.service';
 export * from './user-location.service';
+export * from './user-block.service';

@@ -26,6 +26,7 @@ import {NotificationScreen} from '@screens/notification';
 import {
   NotificationSettingScreen,
   FollowRequestScreen,
+  BlockedUserScreen,
   GroupJoinRequestScreen,
   EventInvitationScreen,
   SupportScreen,
@@ -184,6 +185,12 @@ export function MainNavigator() {
       <Stack.Screen
         name="FollowRequest"
         component={FollowRequestScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="BlockedUser"
+        component={BlockedUserScreen}
         options={{headerShown: false}}
       />
 

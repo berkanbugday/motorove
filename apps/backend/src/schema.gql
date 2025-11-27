@@ -248,10 +248,6 @@ input CreateSupportRequestInput {
   subject: String!
 }
 
-input CreateUserBlockInput {
-  blockedUserId: ID!
-}
-
 input CreateWarningAddressInput {
   address: String!
   countryCode: String
@@ -814,7 +810,7 @@ type Mutation {
   acceptEventInvitation(id: ID!): Boolean!
   accountSetup(input: AccountSetupInput!): Boolean!
   addMember(input: AddMemberInput!): Boolean!
-  blockUser(input: CreateUserBlockInput!): UserBlockDto!
+  blockUser(blockedUserId: ID!): Boolean!
   cancelEvent(id: ID!): String!
   changeMemberRole(input: ChangeMemberRoleInput!): Boolean!
   createBulkNotifications(input: CreateNotificationsInput!): Boolean!
@@ -1098,6 +1094,7 @@ type Query {
   group(id: String!): GroupDto!
   groupJoinRequests(limit: Int, skip: Int): [GroupMembershipDto!]!
   groups(filters: FilterGroupInput, limit: Int, query: String, skip: Int): [GroupDto!]!
+  isUserBlocked(userId: ID!): Boolean!
   joinedGroups(filters: FilterGroupInput, limit: Int, skip: Int, userId: String): [GroupDto!]!
   me: UserDto!
   myEmergencies: [EmergencyDto!]!
@@ -1315,8 +1312,7 @@ type User {
 }
 
 type UserBlockDto {
-  blocked: User!
-  blocker: User!
+  blocked: UserDto!
   createdAt: DateTime!
   id: ID!
 }

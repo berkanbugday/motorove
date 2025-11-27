@@ -57,6 +57,8 @@ export default {
     minutes_ago: '{{count}} {{minute}} önce',
     follow: 'Takip Et',
     unfollow: 'Takibi Bırak',
+    block: 'Engelle',
+    unblock: 'Engeli Kaldır',
     pending_approval: 'Onay Bekliyor',
     following: 'Takip Ediliyor',
     not_now: 'Şimdi Değil',
@@ -447,6 +449,18 @@ export default {
       wants_to_follow: 'takip etmek istiyor.',
     },
 
+    // Blocked User screens
+    blockedUser: {
+      blocked_users: 'Engellenen Kullanıcılar',
+      no_blocked_users: 'Engellenen Kullanıcı Yok',
+      no_blocked_users_yet: 'Henüz hiçbir kullanıcıyı engellemediniz.',
+      could_not_load_users:
+        'Engellenen kullanıcılar yüklenemedi. Lütfen tekrar deneyin.',
+      unblocked_successfully: 'Kullanıcı engeli kaldırıldı',
+      unblocked_failed:
+        'Kullanıcı engeli kaldırılamadı. Lütfen tekrar deneyin.',
+    },
+
     // Profile screens
     profile: {
       groups: 'Gruplar',
@@ -457,6 +471,8 @@ export default {
       followers: 'Takipçi',
       groups_empty_message: 'Henüz Grup Yok',
       no_posts: 'Henüz gönderi yok',
+      blocked_successfully: 'Kullanıcı başarıyla engellendi',
+      blocked_failed: 'Kullanıcı engellenemedi. Lütfen tekrar deneyin.',
     },
 
     // Edit Profile screen

@@ -8,7 +8,7 @@ import {tr, enUS} from 'date-fns/locale';
 import {useLanguage} from '@contexts/LanguageContext';
 import {Language} from '@motorove/shared';
 
-export interface FollowRequestCardProps {
+export interface BlockedUserCardProps {
   /**
    * User avatar image source
    */
@@ -20,14 +20,14 @@ export interface FollowRequestCardProps {
   name: string;
 
   /**
-   * City of the requester
+   * City of the blocked user
    */
   city?: string;
 
   /**
-   * Time when the request was created
+   * Time when the user was blocked
    */
-  timeAgo: Date;
+  blockedAt: Date;
 
   /**
    * Handler for when user avatar/name is pressed
@@ -35,14 +35,9 @@ export interface FollowRequestCardProps {
   onUserPress: () => void;
 
   /**
-   * Handler for accepting the request
+   * Handler for unblocking the user
    */
-  onAccept: () => void;
-
-  /**
-   * Handler for rejecting the request
-   */
-  onReject: () => void;
+  onUnblock: () => void;
 
   /**
    * Additional styles for the card container
@@ -51,16 +46,15 @@ export interface FollowRequestCardProps {
 }
 
 /**
- * A card component for displaying follow requests
+ * A card component for displaying blocked users
  */
-export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
+export const BlockedUserCard: React.FC<BlockedUserCardProps> = ({
   avatarSource,
   name,
   city,
-  timeAgo,
+  blockedAt,
   onUserPress,
-  onAccept,
-  onReject,
+  onUnblock,
   style,
 }) => {
   const {t} = useTranslation();
@@ -91,7 +85,7 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
               {name}
             </Typography>
             <Typography variant="caption" color={colors.neutral.darkGrey}>
-              {formatDistanceToNow(new Date(timeAgo), {
+              {formatDistanceToNow(new Date(blockedAt), {
                 addSuffix: true,
                 locale:
                   language.toLowerCase() === Language.TR.toLowerCase()
@@ -116,32 +110,17 @@ export const FollowRequestCard: React.FC<FollowRequestCardProps> = ({
               {city}, {t('common.country')}
             </Typography>
           </View>
-
-          <Typography
-            variant="caption"
-            color={colors.neutral.darkGrey}
-            numberOfLines={2}>
-            {t('screens.followRequest.wants_to_follow')}
-          </Typography>
         </View>
       </TouchableOpacity>
 
       <View style={styles.actionsContainer}>
         <Button
-          title={t('common.reject')}
-          variant="outline"
-          size="small"
-          shape="round"
-          onPress={onReject}
-          style={styles.rejectButton}
-        />
-        <Button
-          title={t('common.accept')}
+          title={t('common.unblock')}
           variant="primary"
           size="small"
           shape="round"
-          onPress={onAccept}
-          style={styles.acceptButton}
+          onPress={onUnblock}
+          style={styles.unblockButton}
         />
       </View>
     </View>
@@ -194,10 +173,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginTop: spacing.sm,
   },
-  acceptButton: {
-    marginLeft: spacing.sm,
-  },
-  rejectButton: {
-    marginRight: spacing.sm,
+  unblockButton: {
+    minWidth: 100,
   },
 });

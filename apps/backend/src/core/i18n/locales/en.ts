@@ -210,6 +210,16 @@ export const enTranslations = {
       cannot_delete: 'You can only delete your own comments',
       cannot_update: 'You can only update your own comments',
     },
+    // Content reports errors
+    content_report: {
+      already_reported: 'You have already reported this content',
+    },
+    // User blocks errors
+    user_block: {
+      cannot_block_yourself: 'You cannot block yourself',
+      already_blocked: 'User is already blocked',
+      block_not_found: 'Block not found',
+    },
   },
   // Resource names for translation
   resources: {

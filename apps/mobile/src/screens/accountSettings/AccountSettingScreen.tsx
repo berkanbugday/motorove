@@ -87,6 +87,26 @@ export const AccountSettingScreen = () => {
               style={styles.menuItem}
               onPress={() => {
                 // Navigate to change email screen or handle action
+                navigateToScreen(navigation, 'BlockedUser');
+              }}>
+              <View style={styles.menuItemContent}>
+                <Icon
+                  name="user-slash-filled"
+                  size={18}
+                  color={colors.neutral.black}
+                />
+                <Body style={styles.menuItemText}>
+                  {t('screens.blockedUser.blocked_users')}
+                </Body>
+              </View>
+              <View style={styles.menuItemRight}>
+                <Icon name="chevron-right" size={18} />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                // Navigate to change email screen or handle action
                 navigateToScreen(navigation, 'ChangeEmail');
               }}>
               <View style={styles.menuItemContent}>

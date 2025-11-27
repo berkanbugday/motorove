@@ -211,6 +211,16 @@ export const trTranslations = {
       cannot_delete: 'Yalnızca kendi yorumlarınızı silebilirsiniz',
       cannot_update: 'Yalnızca kendi yorumlarınızı güncelleyebilirsiniz',
     },
+    // Content reports errors
+    content_report: {
+      already_reported: 'Bu içeriği zaten bildirdiniz',
+    },
+    // User blocks errors
+    user_block: {
+      cannot_block_yourself: 'Kendinizi engelleyemezsiniz',
+      already_blocked: 'Kullanıcı zaten engellenmiş',
+      block_not_found: 'Engel bulunamadı',
+    },
   },
   // Resource names for translation
   resources: {

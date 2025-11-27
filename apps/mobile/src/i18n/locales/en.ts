@@ -57,6 +57,8 @@ export default {
     minutes_ago: '{{count}} {{minute}} ago',
     follow: 'Follow',
     unfollow: 'Unfollow',
+    block: 'Block',
+    unblock: 'Unblock',
     pending_approval: 'Pending Approval',
     following: 'Following',
     not_now: 'Not Now',
@@ -451,6 +453,16 @@ export default {
       wants_to_follow: 'wants to follow.',
     },
 
+    // Blocked User screens
+    blockedUser: {
+      blocked_users: 'Blocked Users',
+      no_blocked_users: 'No Blocked Users',
+      no_blocked_users_yet: 'You have not blocked any users yet.',
+      could_not_load_users: "We couldn't load blocked users. Please try again.",
+      unblocked_successfully: 'User unblocked successfully',
+      unblocked_failed: 'Failed to unblock user. Please try again.',
+    },
+
     // Profile screens
     profile: {
       groups: 'Groups',
@@ -461,6 +473,8 @@ export default {
       followers: 'Followers',
       groups_empty_message: 'No groups yet',
       no_posts: 'No posts yet',
+      blocked_successfully: 'User blocked successfully',
+      blocked_failed: 'Failed to block user. Please try again.',
     },
 
     // Edit Profile screen

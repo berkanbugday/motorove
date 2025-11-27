@@ -34,6 +34,11 @@ import {useGetPosts} from '@services/post.service';
 import {useGetJoinedGroups} from '@services/group.service';
 import {useFollowUser, useUnfollowUser} from '@services/user-following.service';
 import {
+  useBlockUser,
+  useUnblockUser,
+  useIsUserBlocked,
+} from '@services/user-block.service';
+import {
   IGroup,
   SocialMediaPlatform,
   ApprovalStatus,
@@ -113,15 +118,30 @@ export const ProfileScreen = () => {
     refetchProfile(),
   );
 
+  // Block/unblock hooks
+  const {blockUser, loading: blockLoading} = useBlockUser(async () => {
+    await refetchIsUserBlocked();
+  });
+  const {unblockUser, loading: unblockLoading} = useUnblockUser(async () => {
+    await refetchIsUserBlocked();
+  });
+
+  // Check if current profile user is blocked using backend isUserBlocked method
+  const {isUserBlocked, refetch: refetchIsUserBlocked} = useIsUserBlocked(
+    profileUserId,
+    isOwnProfile || !profileUserId,
+  );
+
   const loading = profileLoading || statsLoading;
   const followActionLoading = followLoading || unfollowLoading;
+  const blockActionLoading = blockLoading || unblockLoading;
 
   // Create dropdown menu items for other users' profiles
   const profileDropdownMenuItems = useMemo((): DropdownMenuItem[] => {
     if (isOwnProfile || !profileUserId) {
       return [];
     }
-    return [
+    const items: DropdownMenuItem[] = [
       {
         id: 'report',
         label: t('common.report'),
@@ -129,11 +149,21 @@ export const ProfileScreen = () => {
         isHighlighted: true,
       },
     ];
-  }, [isOwnProfile, profileUserId, t]);
+
+    // Add block/unblock option
+    items.push({
+      id: isUserBlocked ? 'unblock' : 'block',
+      label: isUserBlocked ? t('common.unblock') : t('common.block'),
+      icon: isUserBlocked ? 'user-check-filled' : 'user-slash-filled',
+      isHighlighted: false,
+    });
+
+    return items;
+  }, [isOwnProfile, profileUserId, t, isUserBlocked]);
 
   // Handle dropdown menu item selection
   const handleDropdownItemSelect = useCallback(
-    (item: DropdownMenuItem) => {
+    async (item: DropdownMenuItem) => {
       switch (item.id) {
         case 'report':
           navigateToScreen(navigation, 'ReportContent', {
@@ -141,9 +171,19 @@ export const ProfileScreen = () => {
             contentId: profileUserId,
           });
           break;
+        case 'block':
+          if (!blockActionLoading && profileUserId) {
+            await blockUser(profileUserId);
+          }
+          break;
+        case 'unblock':
+          if (!blockActionLoading && profileUserId) {
+            await unblockUser(profileUserId);
+          }
+          break;
       }
     },
-    [navigation, profileUserId],
+    [navigation, profileUserId, blockUser, unblockUser, blockActionLoading],
   );
 
   // Calculate profile completion
@@ -518,7 +558,7 @@ export const ProfileScreen = () => {
             </View>
           </View>
 
-          {!isOwnProfile && (
+          {!isOwnProfile && !isUserBlocked && (
             <Button
               title={getFollowButtonText()}
               onPress={handleFollowToggle}

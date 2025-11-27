@@ -69,6 +69,12 @@ export class User implements IUser {
   isActive: boolean;
 
   @Field(() => Boolean, { defaultValue: false })
+  eulaAccepted: boolean;
+
+  @Field(() => Date, { nullable: true })
+  eulaAcceptedAt?: Date;
+
+  @Field(() => Boolean, { defaultValue: false })
   hasCompletedSetup: boolean;
 
   @Field(() => [Group], { nullable: true })

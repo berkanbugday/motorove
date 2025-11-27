@@ -71,6 +71,7 @@ export type MainStackParamList = {
   AccountSetting: undefined;
   NotificationSetting: undefined;
   FollowRequest: undefined;
+  BlockedUser: undefined;
   Support: undefined;
   Posts: undefined;
   Events: undefined;
