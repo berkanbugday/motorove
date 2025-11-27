@@ -16,7 +16,7 @@ export const useReportContent = (onSuccess?: () => void) => {
         showToast({
           type: 'success',
           text1: t('common.success'),
-          text2: t('components.content-report.report_submitted'),
+          text2: t('screens.reportContent.report_submitted'),
         });
 
         if (onSuccess) {
@@ -28,8 +28,7 @@ export const useReportContent = (onSuccess?: () => void) => {
         showToast({
           type: 'error',
           text1: t('common.error'),
-          text2:
-            errorObj.message || t('components.content-report.report_failed'),
+          text2: errorObj.message || t('screens.reportContent.report_failed'),
         });
       },
     },

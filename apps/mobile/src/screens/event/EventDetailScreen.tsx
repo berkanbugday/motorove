@@ -56,6 +56,7 @@ import {
   Currency,
   CURRENCY_FORMATTING,
   IImage,
+  ContentType,
 } from '@motorove/shared';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {loggingService} from '@services/logging.service';
@@ -204,6 +205,16 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
         }
       }
 
+      // Add report option if user is not the creator
+      if (event?.createdBy.id !== currentUserId) {
+        items.push({
+          id: 'report',
+          label: t('common.report'),
+          icon: 'error-filled',
+          isHighlighted: true,
+        });
+      }
+
       return items;
     },
     [t, event?.isParticipating, event?.createdBy.id, currentUserId],
@@ -230,6 +241,12 @@ export const EventDetailScreen = ({route, navigation}: Props) => {
           if (!leaveEventLoading) {
             leaveEvent(eventId);
           }
+          break;
+        case 'report':
+          navigateToScreen(navigation, 'ReportContent', {
+            contentType: ContentType.EVENT,
+            contentId: eventId,
+          });
           break;
         default:
           loggingService.info(

@@ -17,7 +17,13 @@ import {
   Button,
   LoadingIndicator,
 } from '@components';
-import {IPostComment, IImage, IPost, Language} from '@motorove/shared';
+import {
+  IPostComment,
+  IImage,
+  IPost,
+  Language,
+  ContentType,
+} from '@motorove/shared';
 import {PostComment} from '@components/PostComment/post-comment.interface';
 import {
   useCreatePostComment,
@@ -313,19 +319,41 @@ export const PostCommentScreen = ({navigation, route: {params}}: Props) => {
     (commentItem: PostComment, style: any = {}) => {
       const isOwner = isCommentOwner(commentItem);
 
-      // If user is not the owner, render regular comment without swipeable
+      // If user is not the owner, render with report action
       if (!isOwner) {
         return (
-          <PostCommentItem
-            comment={commentItem}
-            style={style}
-            actionBarActive={false}
-            onPressAvatar={() => {
-              if (commentItem.userId !== currentUserId) {
-                navigation.navigate('Profile', {userId: commentItem.userId});
-              }
-            }}
-          />
+          <SwipeableItem
+            rightActions={[
+              {
+                text: t('common.report'),
+                icon: (
+                  <Icon
+                    name="error-filled"
+                    color={colors.neutral.white}
+                    size={20}
+                  />
+                ),
+                backgroundColor: colors.status.error,
+                onPress: () => {
+                  navigation.navigate('ReportContent', {
+                    contentType: ContentType.POST_COMMENT,
+                    contentId: commentItem.id,
+                  });
+                },
+              },
+            ]}
+            contentContainerStyle={styles.swipeableContainer}>
+            <PostCommentItem
+              comment={commentItem}
+              style={style}
+              actionBarActive={false}
+              onPressAvatar={() => {
+                if (commentItem.userId !== currentUserId) {
+                  navigation.navigate('Profile', {userId: commentItem.userId});
+                }
+              }}
+            />
+          </SwipeableItem>
         );
       }
 

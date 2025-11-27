@@ -204,7 +204,6 @@ export const BusinessComments: React.FC<BusinessCommentsProps> = ({
             <CommentItem
               key={comment.id}
               comment={comment}
-              isUserComment={currentUserId === comment.createdBy?.id}
               isEditing={editingCommentId === comment.id}
               editingRating={editingRating}
               editingComment={editingComment}
@@ -236,7 +235,6 @@ export const BusinessComments: React.FC<BusinessCommentsProps> = ({
 // Comment Item Component
 interface CommentItemProps {
   comment: IBusinessComment;
-  isUserComment: boolean;
   isEditing: boolean;
   editingRating: number;
   editingComment: string;
@@ -252,7 +250,6 @@ interface CommentItemProps {
 
 const CommentItem: React.FC<CommentItemProps> = ({
   comment,
-  isUserComment,
   isEditing,
   editingRating,
   editingComment,
@@ -387,17 +384,16 @@ const CommentItem: React.FC<CommentItemProps> = ({
               />
             ))}
           </View>
-          {isUserComment && (
-            <Button
-              variant="text"
-              shape="circle"
-              size="small"
-              iconName="more-vertical"
-              iconSize={20}
-              iconColor={colors.neutral.grey}
-              onPress={onOpenActionSheet}
-            />
-          )}
+
+          <Button
+            variant="text"
+            shape="circle"
+            size="small"
+            iconName="more-vertical"
+            iconSize={20}
+            iconColor={colors.neutral.grey}
+            onPress={onOpenActionSheet}
+          />
         </View>
       </View>
       <Body style={styles.commentText}>{comment.content}</Body>

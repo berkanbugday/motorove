@@ -68,6 +68,7 @@ export default {
     read_more: 'Devamını Oku...',
     show_less: 'Daha Az Göster...',
     country: 'Türkiye',
+    report: 'Bildir',
   },
 
   // Bottom tabs navigation items
@@ -665,6 +666,18 @@ export default {
       follow_error: 'Takip edilemedi',
       unfollow_error: 'Takipten çıkarılamadı',
     },
+
+    reportContent: {
+      title: 'İçeriği Bildir',
+      heading: 'Bu içeriği neden bildiriyorsunuz?',
+      description:
+        'Sorunu anlamamıza yardımcı olun. Bildiriminiz moderasyon ekibimiz tarafından incelenecektir.',
+      content_type: 'İçerik Türü',
+      reason: 'Neden',
+      description_label: 'Ek Detaylar',
+      report_submitted: 'Bildirim başarıyla gönderildi',
+      report_failed: 'Bildirim gönderilemedi',
+    },
   },
 
   // Components organized by component name
@@ -908,6 +921,20 @@ export default {
       message: {
         required: 'Mesaj gereklidir',
         min_length: 'Mesaj en az 10 karakter olmalıdır',
+      },
+    },
+    content_report: {
+      content_type: {
+        required: 'İçerik türü gereklidir',
+        select: 'Lütfen bir içerik türü seçin',
+      },
+      reason: {
+        required: 'Neden gereklidir',
+        select: 'Lütfen bir neden seçin',
+      },
+      description: {
+        min_length: 'Açıklama en az 10 karakter olmalıdır',
+        max_length: 'Açıklama 500 karakteri geçemez',
       },
     },
     email: {
@@ -1338,6 +1365,23 @@ export default {
       tire_problem: 'Lastik Sorunu',
       battery_dead: 'Akü Bitti',
       lost: 'Kayboldum/Mahsur Kaldım',
+      other: 'Diğer',
+    },
+    contentType: {
+      post: 'Gönderi',
+      post_comment: 'Gönderi Yorumu',
+      business_comment: 'İşletme Yorumu',
+      group: 'Grup',
+      event: 'Etkinlik',
+      user_profile: 'Kullanıcı Profili',
+    },
+    reportReason: {
+      spam: 'Spam',
+      harassment: 'Taciz',
+      hate_speech: 'Nefret Söylemi',
+      inappropriate_content: 'Uygunsuz İçerik',
+      copyright_violation: 'Telif Hakkı İhlali',
+      false_information: 'Yanlış Bilgi',
       other: 'Diğer',
     },
   },

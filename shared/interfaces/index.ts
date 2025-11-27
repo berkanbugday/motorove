@@ -16,3 +16,4 @@ export * from "./user-setting";
 export * from "./support";
 export * from "./emergency";
 export * from "./warning";
+export * from "./content-report";

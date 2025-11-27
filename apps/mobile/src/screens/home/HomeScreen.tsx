@@ -19,7 +19,7 @@ import {
   Body,
   SkeletonGroup,
   UserCard,
-  FullImageCard,
+  // FullImageCard,
   DropdownMenuItem,
   closeBottomSheet,
   useBottomSheet,
@@ -39,7 +39,14 @@ import {useGetWeather} from '@services/weather.service';
 import {useGetEvents} from '@services/event.service';
 import {useFocusEffect} from '@react-navigation/native';
 import {useLanguage} from '@contexts/LanguageContext';
-import {IPost, IUser, IImage, IEvent, EventStatus} from '@motorove/shared';
+import {
+  IPost,
+  IUser,
+  IImage,
+  IEvent,
+  EventStatus,
+  ContentType,
+} from '@motorove/shared';
 import {
   useGetPosts,
   useLikePost,
@@ -59,7 +66,7 @@ type Props = NativeStackScreenProps<TabParamList, 'HomeTab'>;
 export const HomeScreen = ({navigation}: Props) => {
   const {t} = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
-  const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
+  // const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const {id: currentUserId, firstName: currentUserFirstName} = useAuth();
   const {count: notificationsCount, refetch: refetchCount} = useGetCount();
@@ -90,34 +97,34 @@ export const HomeScreen = ({navigation}: Props) => {
   const {weatherData, refetch: refetchWeather} = useGetWeather();
 
   // Route data
-  const recommendedRoutes = [
-    {
-      id: '1',
-      title: t('screens.home.plan_route_with_ai'),
-      subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/81.jpg'),
-    },
-    {
-      id: '2',
-      title: t('screens.home.plan_route_with_ai'),
-      subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/29.jpg'),
-    },
-    {
-      id: '3',
-      title: t('screens.home.plan_route_with_ai'),
-      subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/62.jpg'),
-    },
-    {
-      id: '4',
-      title: t('screens.home.plan_route_with_ai'),
-      subtitle: t('screens.home.coming_soon'),
-      image: require('@assets/images/11.jpg'),
-    },
-  ];
+  // const recommendedRoutes = [
+  //   {
+  //     id: '1',
+  //     title: t('screens.home.plan_route_with_ai'),
+  //     subtitle: t('screens.home.coming_soon'),
+  //     image: require('@assets/images/81.jpg'),
+  //   },
+  //   {
+  //     id: '2',
+  //     title: t('screens.home.plan_route_with_ai'),
+  //     subtitle: t('screens.home.coming_soon'),
+  //     image: require('@assets/images/29.jpg'),
+  //   },
+  //   {
+  //     id: '3',
+  //     title: t('screens.home.plan_route_with_ai'),
+  //     subtitle: t('screens.home.coming_soon'),
+  //     image: require('@assets/images/62.jpg'),
+  //   },
+  //   {
+  //     id: '4',
+  //     title: t('screens.home.plan_route_with_ai'),
+  //     subtitle: t('screens.home.coming_soon'),
+  //     image: require('@assets/images/11.jpg'),
+  //   },
+  // ];
 
-  const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
+  // const [currentRoute, setCurrentRoute] = useState(recommendedRoutes[0]);
 
   // Get events data with limit of 3
   const {
@@ -163,17 +170,17 @@ export const HomeScreen = ({navigation}: Props) => {
   // Reference to the FlatList for programmatic scrolling
   const eventsListRef = useRef<FlatList>(null);
   const insets = useSafeAreaInsets();
-  const rotateRecommendedRoute = useCallback(() => {
-    const nextIndex = (currentRouteIndex + 1) % recommendedRoutes.length;
-    setCurrentRouteIndex(nextIndex);
-    setCurrentRoute(recommendedRoutes[nextIndex]);
-  }, [currentRouteIndex]);
+  // const rotateRecommendedRoute = useCallback(() => {
+  //   const nextIndex = (currentRouteIndex + 1) % recommendedRoutes.length;
+  //   setCurrentRouteIndex(nextIndex);
+  //   setCurrentRoute(recommendedRoutes[nextIndex]);
+  // }, [currentRouteIndex]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       // Change route on refresh
-      rotateRecommendedRoute();
+      // rotateRecommendedRoute();
       await refetchCount();
       await refetchPosts();
       await refetchWeather();
@@ -182,7 +189,7 @@ export const HomeScreen = ({navigation}: Props) => {
       setRefreshing(false);
     }
   }, [
-    rotateRecommendedRoute,
+    // rotateRecommendedRoute,
     refetchCount,
     refetchPosts,
     refetchWeather,
@@ -190,9 +197,9 @@ export const HomeScreen = ({navigation}: Props) => {
   ]);
 
   // Set initial route
-  useEffect(() => {
-    setCurrentRoute(recommendedRoutes[currentRouteIndex]);
-  }, [currentRouteIndex]);
+  // useEffect(() => {
+  //   setCurrentRoute(recommendedRoutes[currentRouteIndex]);
+  // }, [currentRouteIndex]);
 
   // Handle FlatList scroll event to update the current page
   const handleEventScroll = useCallback((event: any) => {
@@ -303,11 +310,19 @@ export const HomeScreen = ({navigation}: Props) => {
             isHighlighted: true,
           },
         );
+      } else {
+        // Add report option for other users' posts
+        items.push({
+          id: 'report',
+          label: t('common.report'),
+          icon: 'error-filled',
+          isHighlighted: true,
+        });
       }
 
       return items;
     },
-    [],
+    [t],
   );
 
   // Render each user item
@@ -406,13 +421,19 @@ export const HomeScreen = ({navigation}: Props) => {
             ),
           });
           break;
+        case 'report':
+          navigateToScreen(navigation, 'ReportContent', {
+            contentType: ContentType.POST,
+            contentId: postId,
+          });
+          break;
         default:
           loggingService.info(
             `Unhandled action: ${item.id} for post: ${postId}`,
           );
       }
     },
-    [navigation, removePost, refetchPosts],
+    [navigation, removePost, refetchPosts, openBottomSheet, t],
   );
 
   // Helper function to format avatar URL from API data
@@ -636,7 +657,7 @@ export const HomeScreen = ({navigation}: Props) => {
           nestedScrollEnabled={true}>
           <View style={styles.contentContainer}>
             {/* Recommended Routes Section */}
-            <View style={styles.sectionContainer}>
+            {/* <View style={styles.sectionContainer}>
               <Subtitle weight="bold" style={styles.sectionTitle}>
                 {t('screens.home.recommended_routes')}
               </Subtitle>
@@ -648,7 +669,7 @@ export const HomeScreen = ({navigation}: Props) => {
                 size="small"
                 onPress={() => loggingService.info('Card pressed')}
               />
-            </View>
+            </View> */}
 
             {/* Upcoming Group Events Section */}
             {(events.length > 0 || eventsLoading) && (

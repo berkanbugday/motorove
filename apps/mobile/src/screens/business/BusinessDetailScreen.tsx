@@ -9,7 +9,13 @@ import {
   Platform,
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {IBusiness, DayOfWeek, BusinessStatus, Language} from '@motorove/shared';
+import {
+  IBusiness,
+  DayOfWeek,
+  BusinessStatus,
+  Language,
+  ContentType,
+} from '@motorove/shared';
 import {colors, radius, spacing} from '@theme';
 import {
   Body,
@@ -661,38 +667,63 @@ export const BusinessDetailScreen: React.FC = () => {
         title={t('screens.map.comment_actions')}
         titlePosition="center">
         <View style={styles.commentActionsContent}>
-          <Button
-            title={t('common.edit')}
-            variant="outline"
-            shape="round"
-            iconName="pen-filled"
-            disabled={removeLoading}
-            onPress={() => {
-              if (selectedCommentId) {
-                // Close the bottom sheet first
-                commentActionsBottomSheetRef.current?.close();
-                // Then trigger edit mode in BusinessComments
-                setTriggerEdit(selectedCommentId);
-                setSelectedCommentId(null);
-              }
-            }}
-            style={styles.commentActionButton}
-          />
-          <Button
-            title={t('common.delete')}
-            variant="primary"
-            shape="round"
-            iconName="trash"
-            disabled={removeLoading}
-            onPress={async () => {
-              if (selectedCommentId) {
-                await handleDeleteComment(selectedCommentId);
-                commentActionsBottomSheetRef.current?.close();
-                setSelectedCommentId(null);
-              }
-            }}
-            style={styles.commentActionButton}
-          />
+          {selectedCommentId &&
+          businessComments?.find(c => c.id === selectedCommentId)?.createdBy
+            ?.id === currentUserId ? (
+            <>
+              <Button
+                title={t('common.edit')}
+                variant="outline"
+                shape="round"
+                iconName="pen-filled"
+                disabled={removeLoading}
+                onPress={() => {
+                  if (selectedCommentId) {
+                    // Close the bottom sheet first
+                    commentActionsBottomSheetRef.current?.close();
+                    // Then trigger edit mode in BusinessComments
+                    setTriggerEdit(selectedCommentId);
+                    setSelectedCommentId(null);
+                  }
+                }}
+                style={styles.commentActionButton}
+              />
+              <Button
+                title={t('common.delete')}
+                variant="primary"
+                shape="round"
+                iconName="trash"
+                disabled={removeLoading}
+                onPress={async () => {
+                  if (selectedCommentId) {
+                    await handleDeleteComment(selectedCommentId);
+                    commentActionsBottomSheetRef.current?.close();
+                    setSelectedCommentId(null);
+                  }
+                }}
+                style={styles.commentActionButton}
+              />
+            </>
+          ) : (
+            <Button
+              title={t('common.report')}
+              variant="primary"
+              shape="round"
+              iconName="error-filled"
+              disabled={removeLoading}
+              onPress={() => {
+                if (selectedCommentId) {
+                  commentActionsBottomSheetRef.current?.close();
+                  navigateToScreen(navigation, 'ReportContent', {
+                    contentType: ContentType.BUSINESS_COMMENT,
+                    contentId: selectedCommentId,
+                  });
+                  setSelectedCommentId(null);
+                }
+              }}
+              style={styles.commentActionButton}
+            />
+          )}
         </View>
       </BottomSheet>
       <LoadingIndicator

@@ -68,6 +68,7 @@ export default {
     read_more: 'Read More...',
     show_less: 'Show Less...',
     country: 'Turkey',
+    report: 'Report',
   },
 
   // Bottom tabs navigation items
@@ -668,6 +669,18 @@ export default {
       follow_error: 'Follow failed',
       unfollow_error: 'Unfollow failed',
     },
+
+    reportContent: {
+      title: 'Report Content',
+      heading: 'Why are you reporting this content?',
+      description:
+        'Help us understand the issue. Your report will be reviewed by our moderation team.',
+      content_type: 'Content Type',
+      reason: 'Reason',
+      description_label: 'Additional Details',
+      report_submitted: 'Report submitted successfully',
+      report_failed: 'Failed to submit report',
+    },
   },
 
   // Components organized by component name
@@ -912,6 +925,20 @@ export default {
       message: {
         required: 'Message is required',
         min_length: 'Message must be at least 10 characters',
+      },
+    },
+    content_report: {
+      content_type: {
+        required: 'Content type is required',
+        select: 'Please select a content type',
+      },
+      reason: {
+        required: 'Reason is required',
+        select: 'Please select a reason',
+      },
+      description: {
+        min_length: 'Description must be at least 10 characters',
+        max_length: 'Description cannot exceed 500 characters',
       },
     },
     email: {
@@ -1337,6 +1364,23 @@ export default {
       tire_problem: 'Tire Problem',
       battery_dead: 'Battery Dead',
       lost: 'Lost/Stranded',
+      other: 'Other',
+    },
+    contentType: {
+      post: 'Post',
+      post_comment: 'Post Comment',
+      business_comment: 'Business Comment',
+      group: 'Group',
+      event: 'Event',
+      user_profile: 'User Profile',
+    },
+    reportReason: {
+      spam: 'Spam',
+      harassment: 'Harassment',
+      hate_speech: 'Hate Speech',
+      inappropriate_content: 'Inappropriate Content',
+      copyright_violation: 'Copyright Violation',
+      false_information: 'False Information',
       other: 'Other',
     },
   },

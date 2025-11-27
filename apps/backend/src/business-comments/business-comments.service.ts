@@ -105,7 +105,7 @@ export class BusinessCommentsService {
         },
       });
 
-      if (!existingComment) {
+      if (existingComment) {
         ExceptionHelper.badRequest('errors.common.already_exists', {
           resource: 'business_comment',
         });

@@ -21,6 +21,8 @@ import {
   BusinessCategory,
   WarningType,
   EmergencyType,
+  ContentType,
+  ReportReason,
 } from '@motorove/shared';
 import {DropdownItem} from '@components/Dropdown/types';
 import {i18n} from '@/i18n';
@@ -244,5 +246,27 @@ export class EnumUtils {
       t => t.value.toLowerCase() === emergencyType.toLowerCase(),
     );
     return emergencyTypeItem?.label || emergencyType;
+  }
+
+  static getContentTypeDropdownOptions(): DropdownItem[] {
+    return this.getDropdownOptions(ContentType, 'enums.contentType');
+  }
+
+  static convertContentType(contentType: ContentType): string {
+    const contentTypeItem = this.getContentTypeDropdownOptions().find(
+      t => t.value.toLowerCase() === contentType.toLowerCase(),
+    );
+    return contentTypeItem?.label || contentType;
+  }
+
+  static getReportReasonDropdownOptions(): DropdownItem[] {
+    return this.getDropdownOptions(ReportReason, 'enums.reportReason');
+  }
+
+  static convertReportReason(reportReason: ReportReason): string {
+    const reportReasonItem = this.getReportReasonDropdownOptions().find(
+      t => t.value.toLowerCase() === reportReason.toLowerCase(),
+    );
+    return reportReasonItem?.label || reportReason;
   }
 }
