@@ -6,10 +6,6 @@
 /* Location Permissions */
 "NSLocationWhenInUseUsageDescription" = "Motorove needs your location to show your position on the map and help nearby riders respond to emergencies.";
 
-"NSLocationAlwaysAndWhenInUseUsageDescription" = "Motorove needs your location to help nearby riders respond to emergencies. Your location will only be used when you enable emergency notifications and will be shared securely to help riders in need.";
-
-"NSLocationAlwaysUsageDescription" = "Motorove needs continuous location access to notify nearby riders when you create an emergency, even when the app is in the background. This helps riders respond quickly to emergencies.";
-
 /* Photo Library Permissions */
 "NSPhotoLibraryUsageDescription" = "We need access to your photo library to let you share images.";
 

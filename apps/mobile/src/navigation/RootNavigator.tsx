@@ -4,6 +4,7 @@ import {
   NavigationContainer,
   LinkingOptions,
   NavigationContainerRef,
+  CommonActions,
 } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
@@ -92,6 +93,38 @@ export function RootNavigator() {
 
   // Check if user is authenticated - if id exists, user is authenticated
   const isAuthenticated = !!id;
+  const prevAuthenticatedRef = useRef<boolean>(isAuthenticated);
+
+  // Reset navigation to Signin screen when user signs out
+  useEffect(() => {
+    // Check if user just signed out (was authenticated, now not authenticated)
+    if (prevAuthenticatedRef.current && !isAuthenticated && navigationRef.current) {
+      // Reset navigation to Auth -> Signin screen
+      // This ensures user is taken to Signin screen regardless of current screen
+      // Use a small timeout to ensure navigation container is ready
+      const timeoutId = setTimeout(() => {
+        if (navigationRef.current) {
+          navigationRef.current.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Auth',
+                  params: {
+                    screen: 'Signin',
+                  },
+                },
+              ],
+            }),
+          );
+        }
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+    // Update the ref for next comparison
+    prevAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   // Show loading screen with logo when checking auth, session revival, or first time status
   if (isInitializing || firstTimeLoading || showLoading) {
@@ -120,8 +153,18 @@ export function RootNavigator() {
       <Stack.Navigator screenOptions={{headerShown: false}}>
         {!isAuthenticated || isFirstTime ? (
           // User is not authenticated, show login screen
-          <Stack.Screen name="Auth">
-            {props => <AuthNavigator {...props} isFirstTime={isFirstTime} />}
+          // Use key to force remount when auth state changes to ensure clean navigation state
+          // When user signs out (not first time), force navigation to Signin screen
+          <Stack.Screen 
+            name="Auth" 
+            key={`auth-${isAuthenticated}-${isFirstTime}`}>
+            {props => (
+              <AuthNavigator 
+                {...props} 
+                isFirstTime={isFirstTime} 
+                initialRoute={!isFirstTime ? 'Signin' : undefined} 
+              />
+            )}
           </Stack.Screen>
         ) : // User is authenticated, decide whether to show main app or account setup
         !hasCompletedSetup ? (

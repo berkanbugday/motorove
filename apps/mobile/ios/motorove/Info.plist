@@ -48,12 +48,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We need access to your camera to let you take photos</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Motorove needs your location to help nearby riders respond to emergencies. Your location will only be used when you enable emergency notifications and will be shared securely to help riders in need.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Motorove needs your location to show your position on the map and help nearby riders respond to emergencies.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Motorove needs continuous location access to notify nearby riders when you create an emergency, even when the app is in the background. This helps riders respond quickly to emergencies.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to save photos to your library</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -61,7 +57,6 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
-		<string>location</string>
 		<string>fetch</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
