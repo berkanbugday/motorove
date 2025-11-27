@@ -58,3 +58,7 @@ pnpm-debug.log*
 **/android/app/build
 *.keystore
 !debug.keystore
+
+# Firebase
+**/ios/Firebase/**/GoogleService-Info.plist
+**/android/app/src/**/google-services.json
