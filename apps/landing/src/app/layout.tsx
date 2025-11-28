@@ -31,6 +31,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL || "https://motorove.app"
   ),
+  manifest: "/manifest.json",
   icons: {
     icon: [
       {
@@ -46,6 +47,13 @@ export const metadata: Metadata = {
       { url: "/assets/images/favicon/favicon.ico", sizes: "any" },
     ],
     shortcut: "/assets/images/favicon/favicon.ico",
+    apple: [
+      {
+        url: "/assets/images/favicon/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
   openGraph: {
     type: "website",
@@ -55,12 +63,21 @@ export const metadata: Metadata = {
     title: "Motorove",
     description:
       "Join the Motorove community to connect with fellow riders, discover routes, attend events, and share your motorcycle journey.",
+    images: [
+      {
+        url: "/assets/images/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Motorove Logo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Motorove",
     description:
       "Join the Motorove community to connect with fellow riders, discover routes, attend events, and share your motorcycle journey.",
+    images: ["/assets/images/logo.png"],
   },
   robots: {
     index: true,
