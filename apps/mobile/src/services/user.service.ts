@@ -13,6 +13,7 @@ import {
   GET_USER_PROFILE,
   GET_USER_STATS,
   UPDATE_USER_PROFILE,
+  DELETE_ACCOUNT,
 } from './graphql/user.graphql';
 import {useCallback, useEffect, useState, useRef} from 'react';
 import {apolloClient} from '../configs/apolloClientConfig';
@@ -329,6 +330,48 @@ export const useUpdateUserProfile = (onSuccess?: () => void) => {
     error,
   };
 };
+
+/**
+ * Hook for deleting user account
+ * @param onSuccess Optional callback to execute on successful deletion
+ * @returns Delete function, loading state, and error state
+ */
+export const useDeleteAccount = (onSuccess?: () => void) => {
+  const {t} = useTranslation();
+  const [deleteAccountMutation, {loading, error}] = useMutation(DELETE_ACCOUNT, {
+    onCompleted: _data => {
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: errorObj => {
+      loggingService.error('Error deleting account:', errorObj);
+      showToast({
+        type: 'error',
+        text1: t('common.error'),
+        text2:
+          errorObj.message || t('screens.accountSetting.delete_account_failed'),
+      });
+    },
+  });
+
+  const deleteAccount = async () => {
+    try {
+      const result = await deleteAccountMutation();
+      return result.data?.deleteAccount;
+    } catch (err) {
+      loggingService.error('Error in deleteAccount:', err);
+      return false;
+    }
+  };
+
+  return {
+    deleteAccount,
+    loading,
+    error,
+  };
+};
+
 /**
  * User service for handling user-related operations
  */
@@ -370,6 +413,7 @@ export const UserService = {
   useGetUserStats,
   useAccountSetup,
   useUpdateUserProfile,
+  useDeleteAccount,
 };
 
 export default UserService;

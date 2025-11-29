@@ -662,6 +662,12 @@ export default {
       auto_accept_followers_label: 'Auto Accept Followers',
       auto_accept_followers_description:
         'Automatically accept new followers follow requests',
+      delete_account: 'Delete Account',
+      delete_account_confirmation_title: 'Delete Account',
+      delete_account_confirmation_message:
+        'Are you sure you want to delete your account? \nThis action cannot be undone. \nAll your data, including posts, comments and other content will be permanently deleted.',
+      delete_account_failed: 'Failed to delete account. Please try again.',
+      delete_account_success: 'Your account has been deleted successfully.',
     },
 
     notificationSetting: {

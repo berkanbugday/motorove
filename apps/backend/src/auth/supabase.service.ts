@@ -1,15 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ConfigService } from '../core/config/config.service';
 import { ExceptionHelper } from '../core/exceptions/exception-helper.service';
 
 @Injectable()
 export class SupabaseService {
+  private readonly logger = new Logger(SupabaseService.name);
   private supabase: SupabaseClient;
+  private supabaseAdmin: SupabaseClient | null = null;
 
   constructor(private configService: ConfigService) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
+    const supabaseServiceRoleKey = this.configService.get<string>(
+      'SUPABASE_SERVICE_ROLE_KEY',
+    );
 
     if (!supabaseUrl || !supabaseKey) {
       ExceptionHelper.notFound('errors.common.not_found', {
@@ -17,16 +22,42 @@ export class SupabaseService {
       });
     }
 
+    // Regular client for non-admin operations (uses anon key)
     this.supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
         flowType: 'pkce',
         detectSessionInUrl: false,
       },
     });
+
+    // Admin client for admin operations (uses service role key)
+    if (supabaseServiceRoleKey) {
+      this.supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+        auth: {
+          flowType: 'pkce',
+          detectSessionInUrl: false,
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      });
+    } else {
+      this.logger.warn(
+        'SUPABASE_SERVICE_ROLE_KEY not configured. Admin operations (e.g., deleteUser) will fail.',
+      );
+    }
   }
 
   getClient(): SupabaseClient {
     return this.supabase;
+  }
+
+  getAdminClient(): SupabaseClient {
+    if (!this.supabaseAdmin) {
+      ExceptionHelper.notFound('errors.common.not_found', {
+        resource: 'supabase_admin_credentials',
+      });
+    }
+    return this.supabaseAdmin;
   }
 
   async getUser(jwt: string) {
@@ -65,7 +96,15 @@ export class SupabaseService {
   }
 
   async deleteUser(userId: string) {
-    const { error } = await this.supabase.auth.admin.deleteUser(userId);
+    if (!this.supabaseAdmin) {
+      const error = new Error(
+        'SUPABASE_SERVICE_ROLE_KEY not configured. Cannot delete user.',
+      );
+      this.logger.error(`Failed to delete Supabase user ${userId}:`, error);
+      return { error };
+    }
+
+    const { error } = await this.supabaseAdmin.auth.admin.deleteUser(userId);
     return { error };
   }
 }

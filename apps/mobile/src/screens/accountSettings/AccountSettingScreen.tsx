@@ -2,16 +2,26 @@ import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
 import {useTranslation} from '@hooks/useTranslation';
 import {colors, spacing, radius} from '@theme';
-import {Switch, TopHeaderBar, Body, Icon} from '@components';
+import {
+  Switch,
+  TopHeaderBar,
+  Body,
+  Icon,
+  openBottomSheet,
+  closeBottomSheet,
+  Button,
+  LoadingIndicator,
+} from '@components';
 import {
   useGetUserSetting,
   useUpdateUserSetting,
 } from '@services/user-setting.service';
-// import {useAuth} from '@contexts/AuthContext';
+import {useAuth} from '@contexts/AuthContext';
 import {loggingService} from '@services/logging.service';
 import {useNavigation} from '@react-navigation/native';
 import {navigateToScreen} from '@navigation/utils/navigationHelpers';
 import {MainScreenNavigationProp} from '@navigation/types/navigationTypes';
+import {useDeleteAccount} from '@services/user.service';
 
 export const AccountSettingScreen = () => {
   const navigation =
@@ -19,6 +29,13 @@ export const AccountSettingScreen = () => {
   const {t} = useTranslation();
   const {userSetting, refetch} = useGetUserSetting();
   const {updateUserSetting} = useUpdateUserSetting(() => refetch());
+  const {signOut} = useAuth();
+  const {deleteAccount, loading: deleteAccountLoading} = useDeleteAccount(
+    async () => {
+      // Sign out after successful account deletion
+      await signOut();
+    },
+  );
 
   // Local state for the auto accept followers setting
   const [autoAcceptFollowers, setAutoAcceptFollowers] = useState<boolean>();
@@ -145,8 +162,71 @@ export const AccountSettingScreen = () => {
               </View>
             </TouchableOpacity>
           </View>
+
+          {/* Danger Zone */}
+          <View style={styles.dangerZoneContainer}>
+            <TouchableOpacity
+              style={styles.dangerMenuItem}
+              onPress={() => {
+                openBottomSheet({
+                  title: t(
+                    'screens.accountSetting.delete_account_confirmation_title',
+                  ),
+                  snapPoint: 'minimal',
+                  showCloseButton: false,
+                  closeOnBackdropPress: true,
+                  content: (
+                    <View>
+                      <Body align="center">
+                        {t(
+                          'screens.accountSetting.delete_account_confirmation_message',
+                        )}
+                      </Body>
+
+                      <View style={styles.bottomSheetButtons}>
+                        <Button
+                          title={t('common.cancel')}
+                          variant="outline"
+                          shape="round"
+                          onPress={() => closeBottomSheet()}
+                          style={styles.bottomSheetButton}
+                          disabled={deleteAccountLoading}
+                        />
+                        <Button
+                          title={t('common.delete')}
+                          variant="primary"
+                          shape="round"
+                          onPress={async () => {
+                            try {
+                              closeBottomSheet();
+                              await deleteAccount();
+                            } catch (error) {
+                              loggingService.error(
+                                'Error deleting account:',
+                                error,
+                              );
+                            }
+                          }}
+                          style={styles.bottomSheetButton}
+                          disabled={deleteAccountLoading}
+                        />
+                      </View>
+                    </View>
+                  ),
+                });
+              }}>
+              <View style={styles.menuItemContent}>
+                <Icon name="trash" size={18} color={colors.status.error} />
+                <Body
+                  style={[styles.menuItemText, {color: colors.status.error}]}>
+                  {t('screens.accountSetting.delete_account')}
+                </Body>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
+      <LoadingIndicator visible={deleteAccountLoading} />
     </View>
   );
 };
@@ -201,5 +281,28 @@ const styles = StyleSheet.create({
   menuItemRight: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  dangerZoneContainer: {
+    marginTop: spacing.md,
+    backgroundColor: colors.neutral.white,
+    borderRadius: radius.sm,
+    overflow: 'hidden',
+  },
+  dangerMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+  },
+  bottomSheetButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
+  },
+  bottomSheetButton: {
+    flex: 1,
+    width: '50%',
   },
 });

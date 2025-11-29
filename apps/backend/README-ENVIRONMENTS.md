@@ -61,6 +61,7 @@ DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-eu-central-1.p
 # Supabase API
 SUPABASE_URL=https://[PROJECT-REF].supabase.co
 SUPABASE_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 SUPABASE_STORAGE_BUCKET=images
 
 # Firebase
@@ -75,7 +76,10 @@ GEOCODING_API_KEY=your_google_maps_geocoding_api_key
 
 1. Go to [Supabase Dashboard](https://app.supabase.com)
 2. **DATABASE_URL**: Settings → Database → Connection string (Session pooler)
-3. **SUPABASE_URL & KEY**: Settings → API
+3. **SUPABASE_URL & SUPABASE_KEY**: Settings → API → Project URL and anon/public key
+4. **SUPABASE_SERVICE_ROLE_KEY**: Settings → API → service_role key (secret, for admin operations)
+
+**Important**: The service role key has admin privileges and should be kept secret. It's required for operations like deleting users.
 
 See [README-SUPABASE.md](./README-SUPABASE.md) for detailed setup instructions.
 

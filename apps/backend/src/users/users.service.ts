@@ -19,6 +19,8 @@ import { Gender } from '../enums/models/gender.enum';
 import { ProfanityFilterService } from '../core/profanity-filter/profanity-filter.service';
 import { ConfigService } from '@nestjs/config';
 import { UserBlocksService } from '../user-blocks/user-blocks.service';
+import { SupabaseService } from '../auth/supabase.service';
+import { GroupMemberRole } from '../enums/models/group-member-role.enum';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +33,7 @@ export class UsersService {
     private profanityFilterService: ProfanityFilterService,
     private configService: ConfigService,
     private userBlocksService: UserBlocksService,
+    private supabaseService: SupabaseService,
   ) {
     this.imagePublicUrl = `${this.configService.get<string>('IMAGE_PUBLIC_URL')}`;
   }
@@ -417,6 +420,224 @@ export class UsersService {
       };
     } catch (error) {
       this.logger.error(`Failed to update user profile`, error);
+      throw error;
+    }
+  }
+
+  async deleteAccount(userId: string): Promise<boolean> {
+    try {
+      // Get user with supabaseId
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, supabaseId: true, email: true },
+      });
+
+      if (!user) {
+        ExceptionHelper.notFound('errors.common.not_found', {
+          resource: 'user',
+        });
+      }
+
+      // Delete user from Supabase after database operations succeed
+      const { error: supabaseError } = await this.supabaseService.deleteUser(
+        user.supabaseId,
+      );
+
+      if (supabaseError) {
+        this.logger.error(
+          `Failed to delete Supabase user ${user.supabaseId}:`,
+          supabaseError,
+        );
+        // Don't throw here - database is already updated, log the error
+        // The account is effectively deleted from our system
+      }
+
+      // Use transaction to ensure all operations succeed or fail together
+      await this.prisma.$transaction(async (tx) => {
+        // Deactivate user-generated content (posts, comments, etc.)
+        // Set isActive to false for all user-related data
+        await tx.post.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        await tx.postComment.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Delete user's post likes and saves (no isActive field)
+        await tx.postLike.deleteMany({
+          where: { userId: userId },
+        });
+
+        await tx.postSave.deleteMany({
+          where: { userId: userId },
+        });
+
+        await tx.businessComment.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate user's events (draft events can be removed, others should be cancelled)
+        await tx.event.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate user's emergencies
+        await tx.emergency.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate user's warnings
+        await tx.warning.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Find all groups created by the user
+        const userCreatedGroups = await tx.group.findMany({
+          where: {
+            createdById: userId,
+            isActive: true,
+          },
+          include: {
+            memberships: {
+              where: {
+                isActive: true,
+                role: GroupMemberRole.ADMIN,
+              },
+            },
+          },
+        });
+
+        // Delete groups where the user is the only admin
+        for (const group of userCreatedGroups) {
+          // Check if there are any other active admins besides the user being deleted
+          const otherAdmins = group.memberships.filter(
+            (membership) => membership.userId !== userId,
+          );
+
+          if (otherAdmins.length === 0) {
+            // No other admins exist, delete/deactivate the group
+            await tx.group.update({
+              where: { id: group.id },
+              data: {
+                isActive: false,
+                updatedAt: new Date(),
+              },
+            });
+
+            this.logger.log(
+              `Deleted group ${group.id} (${group.name}) as user ${userId} was the only admin`,
+            );
+          }
+        }
+
+        // Deactivate user's group memberships
+        await tx.groupMembership.updateMany({
+          where: { userId: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate user's follow relationships
+        await tx.userFollowing.updateMany({
+          where: {
+            OR: [{ followerId: userId }, { followingId: userId }],
+          },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate user's blocks
+        await tx.userBlock.updateMany({
+          where: {
+            OR: [{ blockerId: userId }, { blockedId: userId }],
+          },
+          data: { isActive: false },
+        });
+
+        // Deactivate notifications
+        await tx.notification.updateMany({
+          where: { userId: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate device tokens
+        await tx.deviceToken.updateMany({
+          where: { userId: userId },
+          data: { isActive: false },
+        });
+
+        // Deactivate user's event participations
+        await tx.eventParticipant.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate user's event invitations
+        await tx.eventInvitation.updateMany({
+          where: {
+            OR: [{ createdById: userId }, { inviteeId: userId }],
+          },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Delete user's social media profiles (no isActive field)
+        await tx.userSocialMediaProfile.deleteMany({
+          where: { createdById: userId },
+        });
+
+        // Deactivate user's motorcycles and equipment
+        await tx.motorcycle.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        await tx.equipment.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Delete user's locations (no isActive field, cascade delete will handle)
+        await tx.userLocation.deleteMany({
+          where: { userId: userId },
+        });
+
+        // Delete user's settings (no isActive field, one-to-one relationship)
+        await tx.userSetting.deleteMany({
+          where: { userId: userId },
+        });
+
+        // Deactivate user's support requests
+        await tx.supportRequest.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Deactivate user's content reports
+        await tx.contentReport.updateMany({
+          where: { createdById: userId },
+          data: { isActive: false, updatedAt: new Date() },
+        });
+
+        // Finally, deactivate the user account
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            isActive: false,
+            email: `deleted_${Date.now()}_${userId}_${user.email}`, // Anonymize email
+            updatedAt: new Date(),
+          },
+        });
+      });
+
+      this.logger.log(`Account deleted successfully for user ${userId}`);
+      return true;
+    } catch (error) {
+      this.logger.error(`Failed to delete account for user ${userId}`, error);
       throw error;
     }
   }

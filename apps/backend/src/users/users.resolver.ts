@@ -84,4 +84,11 @@ export class UsersResolver {
     const authToken = authHeader ? authHeader.split(' ')[1] : undefined;
     return await this.usersService.updateUserProfile(input, userId, authToken);
   }
+
+  @UseGuards(JwtGuard)
+  @Mutation(() => Boolean)
+  async deleteAccount(@Context() context: GqlContext): Promise<boolean> {
+    const userId = context.req.user.id;
+    return await this.usersService.deleteAccount(userId);
+  }
 }

@@ -823,6 +823,7 @@ type Mutation {
   createPostComment(input: CreatePostCommentInput!): PostCommentDto!
   createSupportRequest(input: CreateSupportRequestInput!): Boolean!
   createWarning(input: CreateWarningInput!): WarningDto!
+  deleteAccount: Boolean!
   deleteAllNotifications: [NotificationDto!]!
   deleteNotification(id: ID!): NotificationDto!
   followUser(userId: ID!): ApprovalStatus!

@@ -155,6 +155,7 @@ NODE_ENV=development
 DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
 SUPABASE_URL=https://[PROJECT-REF].supabase.co
 SUPABASE_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 FIREBASE_SERVICE_ACCOUNT={...}
 WEATHER_API_KEY=your-google-cloud-weather-api-key
 GEOCODING_API_KEY=your-google-maps-geocoding-api-key

@@ -117,3 +117,10 @@ export const UPDATE_USER_PROFILE = gql`
   }
   ${PROFILE_FRAGMENT}
 `;
+
+// Delete account
+export const DELETE_ACCOUNT = gql`
+  mutation DeleteAccount {
+    deleteAccount
+  }
+`;

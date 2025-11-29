@@ -661,6 +661,12 @@ export default {
       auto_accept_followers_label: 'Otomatik Takip',
       auto_accept_followers_description:
         'Yeni takipçilerin takip isteklerini otomatik olarak kabul et',
+      delete_account: 'Hesabı Sil',
+      delete_account_confirmation_title: 'Hesabı Sil',
+      delete_account_confirmation_message:
+        'Hesabınızı silmek istediğinizden emin misiniz? \nBu işlem geri alınamaz. \nTüm verileriniz, gönderileriniz, yorumlarınız ve diğer içerikleriniz kalıcı olarak silinecektir.',
+      delete_account_failed: 'Hesap silinemedi. Lütfen tekrar deneyin.',
+      delete_account_success: 'Hesabınız başarıyla silindi.',
     },
 
     notificationSetting: {
