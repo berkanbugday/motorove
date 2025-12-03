@@ -31,7 +31,7 @@ const FinalCTA: React.FC = () => {
           {/* App Store Badges */}
           <div className="flex flex-row gap-4 justify-center pt-4">
             <motion.a
-              href="https://apps.apple.com/app/motorove/id6738828848"
+              href="https://apps.apple.com/tr/app/motorove/id6755730937"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
