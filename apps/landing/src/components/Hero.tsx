@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import PhoneMockup from "./PhoneMockup";
 import { useTranslation } from "../app/i18n";
 
@@ -132,18 +133,40 @@ const Hero: React.FC = () => {
               {t("hero.subheadline")}
             </p>
 
-            {/* CTA Button */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
+            {/* App Store Badges */}
+            <div className="flex flex-row gap-4 pt-4 justify-center lg:justify-start">
               <motion.a
-                href="https://tally.so/r/wazMeX"
+                href="https://apps.apple.com/tr/app/motorove/id6755730937"
                 target="_blank"
                 rel="noopener noreferrer"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-8 sm:px-10 py-3 sm:py-4 bg-primary-main text-neutral-white font-semibold rounded-4xl text-base sm:text-lg transition-all duration-200 hover:bg-primary-light inline-flex items-center justify-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-block"
               >
-                <span>{t("hero.cta.button")}</span>
+                <Image
+                  src="/assets/images/app-store-badge.png"
+                  alt="Download on the App Store"
+                  width={160}
+                  height={53}
+                  className="h-[48px] sm:h-[53px] w-auto"
+                />
               </motion.a>
+              {/* <motion.a
+                href=""
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-block"
+              >
+                <Image
+                  src="/assets/images/google-play-badge.png"
+                  alt="Get it on Google Play"
+                  width={180}
+                  height={53}
+                  className="h-[48px] sm:h-[53px] w-auto"
+                />
+              </motion.a> */}
             </div>
           </motion.div>
         </div>
