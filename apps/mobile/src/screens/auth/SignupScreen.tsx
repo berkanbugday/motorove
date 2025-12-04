@@ -55,7 +55,7 @@ export const SignupScreen = () => {
       lastName: '',
       email: '',
       password: '',
-      agreeToTerms: false,
+      agreeToTerms: true,
     },
   });
 
