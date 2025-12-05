@@ -65,6 +65,8 @@ export type MainStackParamList = {
   Notification: undefined;
   Profile: {userId?: string};
   EditProfile: undefined;
+  Following: {userId?: string};
+  Followers: {userId?: string};
   JoinRequest: undefined;
   GroupJoinRequest: undefined;
   EventInvitation: undefined;

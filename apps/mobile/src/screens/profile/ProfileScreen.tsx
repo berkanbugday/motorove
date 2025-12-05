@@ -625,7 +625,13 @@ export const ProfileScreen = () => {
                   {t('screens.profile.events')}
                 </BodySmall>
               </View>
-              <View style={styles.statItem}>
+              <TouchableOpacity
+                style={styles.statItem}
+                onPress={() =>
+                  navigateToScreen(navigation, 'Following', {
+                    userId: profileUserId,
+                  })
+                }>
                 <Title weight="bold" style={{marginBottom: spacing.xs}}>
                   {stats?.followingCount > 999
                     ? '999+'
@@ -634,8 +640,14 @@ export const ProfileScreen = () => {
                 <BodySmall color={colors.neutral.grey}>
                   {t('screens.profile.following')}
                 </BodySmall>
-              </View>
-              <View style={styles.statItem}>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.statItem}
+                onPress={() =>
+                  navigateToScreen(navigation, 'Followers', {
+                    userId: profileUserId,
+                  })
+                }>
                 <Title weight="bold" style={{marginBottom: spacing.xs}}>
                   {stats?.followersCount > 999
                     ? '999+'
@@ -644,7 +656,7 @@ export const ProfileScreen = () => {
                 <BodySmall color={colors.neutral.grey}>
                   {t('screens.profile.followers')}
                 </BodySmall>
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
 

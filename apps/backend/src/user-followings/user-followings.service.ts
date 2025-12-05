@@ -56,7 +56,40 @@ export class UserFollowingsService {
       skip: skip,
     });
 
-    return followers.map((f) => this.mapToDto(f as UserFollowing));
+    // Get following statuses for all follower users if currentUserId is provided
+    const followingStatusMap: Map<string, ApprovalStatus> = new Map();
+    if (currentUserId && followers.length > 0) {
+      const followerIds = followers.map((f) => f.followerId);
+      const currentUserFollowings = await this.prisma.userFollowing.findMany({
+        where: {
+          followerId: currentUserId,
+          followingId: { in: followerIds },
+          isActive: true,
+          status: {
+            in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
+          },
+        },
+        select: {
+          followingId: true,
+          status: true,
+        },
+      });
+
+      currentUserFollowings.forEach((f) => {
+        followingStatusMap.set(f.followingId, f.status as ApprovalStatus);
+      });
+    }
+
+    return followers.map((f) => {
+      const dto = this.mapToDto(f as UserFollowing);
+      // Populate followingStatus for the follower user if currentUserId is provided
+      if (currentUserId && dto.follower) {
+        (dto.follower as any).followingStatus = followingStatusMap.get(
+          dto.follower.id!,
+        );
+      }
+      return dto;
+    });
   }
 
   // Get users that the given userId is following with pagination
@@ -94,7 +127,40 @@ export class UserFollowingsService {
       skip: skip,
     });
 
-    return followings.map((f) => this.mapToDto(f as UserFollowing));
+    // Get following statuses for all following users if currentUserId is provided
+    const followingStatusMap: Map<string, ApprovalStatus> = new Map();
+    if (currentUserId && followings.length > 0) {
+      const followingIds = followings.map((f) => f.followingId);
+      const currentUserFollowings = await this.prisma.userFollowing.findMany({
+        where: {
+          followerId: currentUserId,
+          followingId: { in: followingIds },
+          isActive: true,
+          status: {
+            in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
+          },
+        },
+        select: {
+          followingId: true,
+          status: true,
+        },
+      });
+
+      currentUserFollowings.forEach((f) => {
+        followingStatusMap.set(f.followingId, f.status as ApprovalStatus);
+      });
+    }
+
+    return followings.map((f) => {
+      const dto = this.mapToDto(f as UserFollowing);
+      // Populate followingStatus for the following user if currentUserId is provided
+      if (currentUserId && dto.following) {
+        (dto.following as any).followingStatus = followingStatusMap.get(
+          dto.following.id!,
+        );
+      }
+      return dto;
+    });
   }
 
   async findFollowRequests(

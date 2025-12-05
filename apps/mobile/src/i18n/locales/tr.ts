@@ -475,6 +475,18 @@ export default {
       blocked_failed: 'Kullanıcı engellenemedi. Lütfen tekrar deneyin.',
     },
 
+    // Following screen
+    following: {
+      following: 'Takip Edilen',
+      no_following: 'Henüz takip edilen yok',
+    },
+
+    // Followers screen
+    followers: {
+      followers: 'Takipçi',
+      no_followers: 'Henüz takipçi yok',
+    },
+
     // Edit Profile screen
     editProfile: {
       title: 'Profil Düzenle',

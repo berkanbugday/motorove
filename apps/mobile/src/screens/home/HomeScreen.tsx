@@ -359,7 +359,7 @@ export const HomeScreen = ({navigation}: Props) => {
 
         openBottomSheet({
           content: (
-            <FlatList
+            <FlashList
               data={sortedUsers}
               renderItem={renderUserItem}
               keyExtractor={item => item.id}

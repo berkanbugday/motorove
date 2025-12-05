@@ -143,7 +143,40 @@ export class UsersService {
       },
     });
 
-    return users.map((user) => plainToClass(UserDto, user));
+    // Get following statuses for all users if currentUserId is provided
+    const followingStatusMap: Map<string, ApprovalStatus> = new Map();
+    if (currentUserId && users.length > 0) {
+      const userIds = users.map((u) => u.id);
+      const followings = await this.prisma.userFollowing.findMany({
+        where: {
+          followerId: currentUserId,
+          followingId: { in: userIds },
+          isActive: true,
+          status: {
+            in: [ApprovalStatus.PENDING, ApprovalStatus.ACCEPTED],
+          },
+        },
+        select: {
+          followingId: true,
+          status: true,
+        },
+      });
+
+      followings.forEach((f) => {
+        followingStatusMap.set(f.followingId, f.status as ApprovalStatus);
+      });
+    }
+
+    return users.map((user) => {
+      const userDto = plainToClass(UserDto, user);
+
+      // Populate followingStatus if currentUserId is provided
+      if (currentUserId) {
+        userDto.followingStatus = followingStatusMap.get(user.id);
+      }
+
+      return userDto;
+    });
   }
 
   async findOne(id: string): Promise<UserDto> {

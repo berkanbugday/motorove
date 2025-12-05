@@ -31,7 +31,12 @@ import {
   EventInvitationScreen,
   SupportScreen,
 } from '@screens/menu';
-import {ProfileScreen, EditProfileScreen} from '@screens/profile';
+import {
+  ProfileScreen,
+  EditProfileScreen,
+  FollowingScreen,
+  FollowersScreen,
+} from '@screens/profile';
 import {BusinessDetailScreen} from '@screens/business';
 import {
   AccountSettingScreen,
@@ -155,6 +160,18 @@ export function MainNavigator() {
       <Stack.Screen
         name="EditProfile"
         component={EditProfileScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Following"
+        component={FollowingScreen}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="Followers"
+        component={FollowersScreen}
         options={{headerShown: false}}
       />
 

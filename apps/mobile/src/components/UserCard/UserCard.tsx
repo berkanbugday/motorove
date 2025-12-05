@@ -7,6 +7,7 @@ import {Icon} from '@components/Icon';
 import {styles} from './UserCard.styles';
 import {ApprovalStatus, IUser} from '@motorove/shared';
 import {useTranslation} from '@hooks/useTranslation';
+import {useAuth} from '@contexts';
 
 interface UserCardProps {
   user: IUser;
@@ -33,12 +34,16 @@ export const UserCard: React.FC<UserCardProps> = ({
   showUnfollowButton = true,
 }) => {
   const {t} = useTranslation();
+  const {id: currentUserId} = useAuth();
   const [followingStatus, setFollowingStatus] = useState<ApprovalStatus>();
 
   // Update local state when user prop changes
   useEffect(() => {
     setFollowingStatus(user.followingStatus);
   }, [user.followingStatus]);
+
+  // Check if this is the current user
+  const isCurrentUser = user.id === currentUserId;
 
   return (
     <TouchableOpacity
@@ -77,35 +82,37 @@ export const UserCard: React.FC<UserCardProps> = ({
             </View>
           )}
         </View>
-        <View style={styles.buttonContainer}>
-          {followingStatus === ApprovalStatus.ACCEPTED ? (
-            showUnfollowButton ? (
-              <Button
-                title={t('common.unfollow')}
-                variant="secondary"
-                size="small"
-                onPress={handleUnfollowPress}
-                disabled={loading}
-                loading={loading}
-              />
+        {!isCurrentUser && (
+          <View style={styles.buttonContainer}>
+            {followingStatus === ApprovalStatus.ACCEPTED ? (
+              showUnfollowButton ? (
+                <Button
+                  title={t('common.unfollow')}
+                  variant="secondary"
+                  size="small"
+                  onPress={handleUnfollowPress}
+                  disabled={loading}
+                  loading={loading}
+                />
+              ) : (
+                <Caption>{t('common.following')}</Caption>
+              )
+            ) : followingStatus === ApprovalStatus.PENDING ? (
+              <Caption>{t('common.pending_approval')}</Caption>
             ) : (
-              <Caption>{t('common.following')}</Caption>
-            )
-          ) : followingStatus === ApprovalStatus.PENDING ? (
-            <Caption>{t('common.pending_approval')}</Caption>
-          ) : (
-            showFollowButton && (
-              <Button
-                title={t('common.follow')}
-                variant="dark"
-                size="small"
-                onPress={handleFollowPress}
-                disabled={loading}
-                loading={loading}
-              />
-            )
-          )}
-        </View>
+              showFollowButton && (
+                <Button
+                  title={t('common.follow')}
+                  variant="dark"
+                  size="small"
+                  onPress={handleFollowPress}
+                  disabled={loading}
+                  loading={loading}
+                />
+              )
+            )}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );

@@ -477,6 +477,18 @@ export default {
       blocked_failed: 'Failed to block user. Please try again.',
     },
 
+    // Following screen
+    following: {
+      following: 'Following',
+      no_following: 'No following yet',
+    },
+
+    // Followers screen
+    followers: {
+      followers: 'Followers',
+      no_followers: 'No followers yet',
+    },
+
     // Edit Profile screen
     editProfile: {
       title: 'Edit Profile',
