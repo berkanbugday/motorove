@@ -159,8 +159,8 @@ function App(): React.JSX.Element {
         <ApolloProvider client={apolloClient}>
           <LanguageProvider>
             <NetworkStatusBar />
-            <NotificationPermissionHandler />
             <ToastMessage.Provider>
+              <NotificationPermissionHandler />
               <SafeAreaProvider>
                 <BottomSheetProvider.Provider>
                   <AuthProvider>

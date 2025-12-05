@@ -214,7 +214,11 @@ export const useFollowUser = (onSuccess?: () => void) => {
             // Update all cached user queries
             cache.modify({
               fields: {
-                users(existingUsers = [], {readField, canRead}) {
+                users(existingUsers, {readField, canRead}) {
+                  // Return undefined to skip modification if field doesn't exist
+                  if (!existingUsers) {
+                    return existingUsers;
+                  }
                   return existingUsers
                     .filter((userRef: any) => canRead(userRef))
                     .map((userRef: any) => {
@@ -291,7 +295,11 @@ export const useUnfollowUser = (onSuccess?: () => void) => {
           // Update all cached user queries
           cache.modify({
             fields: {
-              users(existingUsers = [], {readField, canRead}) {
+              users(existingUsers, {readField, canRead}) {
+                // Return undefined to skip modification if field doesn't exist
+                if (!existingUsers) {
+                  return existingUsers;
+                }
                 return existingUsers
                   .filter((userRef: any) => canRead(userRef))
                   .map((userRef: any) => {

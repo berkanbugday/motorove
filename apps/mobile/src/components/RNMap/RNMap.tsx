@@ -17,7 +17,6 @@ import {RNMapMarker} from './RNMapMarker';
 import {RNMapBusinessMarkerCard} from './RNMapBusinessMarkerCard';
 import {RNMapWarningMarkerCard} from './RNMapWarningMarkerCard';
 import {RNMapEmergencyMarkerCard} from './RNMapEmergencyMarkerCard';
-import {useAnimatedRegion} from '@hooks/useAnimatedRegion';
 import {useTranslation} from '@hooks/useTranslation';
 import {getShadow, spacing, colors} from '@theme';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -79,8 +78,6 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   const emergencyCollapseTimeout = useRef<NodeJS.Timeout | null>(null);
   const {t} = useTranslation();
   const inset = useSafeAreaInsets();
-  // Animated region hook
-  const {getRegionForIndex} = useAnimatedRegion(initialRegion, markers);
 
   /**
    * Generic expandable button methods
@@ -143,10 +140,33 @@ const RNMapComponent: React.FC<RNMapProps> = ({
   );
 
   /**
+   * Center map on a specific marker coordinate
+   */
+  const centerMapOnMarker = useCallback(
+    (marker: RNMapMarkerItem) => {
+      if (activeMapRef.current) {
+        isProgrammaticChange.current = true;
+        const region: Region = {
+          latitude: marker.coordinate.latitude,
+          longitude: marker.coordinate.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01 * (screen.width / screen.height),
+        };
+        activeMapRef.current.animateToRegion(region, 350);
+        // Reset flag after animation completes
+        setTimeout(() => {
+          isProgrammaticChange.current = false;
+        }, 400);
+      }
+    },
+    [activeMapRef],
+  );
+
+  /**
    * Update selected marker and sync map + card scroll
    */
   const updateSelectedMarker = useCallback(
-    (index: number) => {
+    (index: number, shouldCenterMap: boolean = true) => {
       if (index < 0 || index >= markers.length) {
         return;
       }
@@ -160,18 +180,12 @@ const RNMapComponent: React.FC<RNMapProps> = ({
         onBusinessSelect?.(marker.business);
       }
 
-      // Animate map to center on marker
-      if (activeMapRef.current) {
-        isProgrammaticChange.current = true;
-        const region = getRegionForIndex(index);
-        activeMapRef.current.animateToRegion(region, 100);
-        // Reset flag after animation completes
-        setTimeout(() => {
-          isProgrammaticChange.current = false;
-        }, 100);
+      // Animate map to center marker on screen
+      if (shouldCenterMap) {
+        centerMapOnMarker(marker);
       }
     },
-    [markers, onMarkerPress, onBusinessSelect, activeMapRef, getRegionForIndex],
+    [markers, onMarkerPress, onBusinessSelect, centerMapOnMarker],
   );
 
   /**
@@ -396,13 +410,27 @@ const RNMapComponent: React.FC<RNMapProps> = ({
           m => m.id === scrolledMarker.id,
         );
 
-        if (originalIndex !== -1 && originalIndex !== selectedIndex) {
-          // Update selection but DO NOT reorder - keep reorderedMarkers unchanged
-          updateSelectedMarker(originalIndex);
+        if (originalIndex !== -1) {
+          // Update selection state without centering (we'll center separately)
+          setSelectedIndex(originalIndex);
+          onMarkerPress?.(scrolledMarker);
+
+          if (scrolledMarker.business) {
+            onBusinessSelect?.(scrolledMarker.business);
+          }
+
+          // Always center map on the scrolled marker
+          centerMapOnMarker(scrolledMarker);
         }
       }
     },
-    [reorderedMarkers, markers, selectedIndex, updateSelectedMarker],
+    [
+      reorderedMarkers,
+      markers,
+      onMarkerPress,
+      onBusinessSelect,
+      centerMapOnMarker,
+    ],
   );
 
   /**

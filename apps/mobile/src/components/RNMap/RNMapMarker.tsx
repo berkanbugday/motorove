@@ -25,17 +25,22 @@ export const RNMapMarker: React.FC<RNMapMarkerProps> = ({
   const markerColor = marker.pinColor || colors.neutral.black;
   const markerRef = useRef<any>(null);
 
-  //  show/hide callout when selection changes
+  // Show/hide callout when selection changes
   useEffect(() => {
-    // Show/hide callout based on selection
-    if (markerRef.current) {
-      if (isSelected) {
-        markerRef.current.showCallout();
-      } else {
-        markerRef.current.hideCallout();
-      }
+    if (!markerRef.current) {
+      return;
     }
-  }, [isSelected]);
+
+    if (isSelected) {
+      // Show callout after map animation completes
+      const timer = setTimeout(() => {
+        markerRef.current?.showCallout();
+      }, 400);
+      return () => clearTimeout(timer);
+    } else {
+      markerRef.current.hideCallout();
+    }
+  }, [isSelected, marker.id]);
 
   // Get callout title based on marker type
   const getCalloutTitle = () => {
