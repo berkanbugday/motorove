@@ -147,7 +147,7 @@ const RNMapComponent: React.FC<RNMapProps> = ({
       if (activeMapRef.current) {
         isProgrammaticChange.current = true;
         const region: Region = {
-          latitude: marker.coordinate.latitude,
+          latitude: marker.coordinate.latitude - 0.002,
           longitude: marker.coordinate.longitude,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01 * (screen.width / screen.height),
