@@ -33,8 +33,11 @@ cd apps/backend
 # Install dependencies
 pnpm install
 
+# Generate Prisma client
+pnpm prisma:generate:dev
+
 # Run migrations
-pnpm prisma migrate deploy
+pnpm prisma:migrate:dev
 
 # Start development server
 pnpm dev
@@ -68,6 +71,7 @@ This project uses **Supabase** as the database provider:
 - ✅ Automatic backups
 - ✅ Storage for file uploads
 - ✅ Real-time subscriptions
+- ✅ 30-day authentication sessions
 
 See [README-SUPABASE.md](./README-SUPABASE.md) for detailed setup instructions.
 
@@ -93,10 +97,11 @@ pnpm start:prod       # Start in production mode
 ### Database
 
 ```bash
-pnpm prisma:generate  # Generate Prisma client
-pnpm prisma:migrate   # Run migrations
-pnpm prisma:studio    # Open Prisma Studio
-pnpm prisma:seed      # Seed database
+pnpm prisma:generate:dev      # Generate Prisma client (dev)
+pnpm prisma:migrate:dev       # Run migrations (dev)
+pnpm prisma:studio:dev        # Open Prisma Studio (dev)
+pnpm prisma:seed:dev          # Seed database (dev)
+pnpm prisma:migrate:reset:dev # Reset database (dev)
 ```
 
 ### Testing
@@ -129,15 +134,40 @@ apps/backend/
 │   ├── migrations/            # Migration files
 │   └── seed.ts                # Seed data
 ├── src/
-│   ├── auth/                  # Authentication module
+│   ├── auth/                  # Authentication (Supabase + Firebase)
 │   ├── users/                 # User management
-│   ├── posts/                 # Posts module
-│   ├── groups/                # Groups module
-│   ├── events/                # Events module
-│   ├── core/                  # Core utilities & config
+│   ├── posts/                 # Posts & media sharing
+│   ├── post-comments/         # Post comments
+│   ├── groups/                # Riding groups
+│   ├── group-memberships/     # Group membership management
+│   ├── events/                # Events & group rides
+│   ├── businesses/            # Motorcycle businesses
+│   ├── business-comments/     # Business reviews
+│   ├── warnings/              # Road hazard warnings
+│   ├── emergencies/           # Emergency reports
+│   ├── notifications/         # Push notifications
+│   ├── user-followings/       # Social following system
+│   ├── user-blocks/           # User blocking
+│   ├── user-settings/         # User preferences
+│   ├── user-locations/        # Location tracking
+│   ├── cities/                # City data
+│   ├── content-reports/       # Content moderation
+│   ├── supports/              # Support tickets
+│   ├── core/                  # Core utilities
+│   │   ├── cache/             # Redis caching
 │   │   ├── config/            # Configuration service
+│   │   ├── exceptions/        # Custom exceptions
 │   │   ├── filters/           # Exception filters
-│   │   └── interceptors/      # Interceptors
+│   │   ├── i18n/              # Internationalization (EN/TR)
+│   │   ├── image-censor-filter/ # NSFW detection
+│   │   ├── interceptors/      # Request interceptors
+│   │   ├── profanity-filter/  # Content filtering
+│   │   ├── queue/             # BullMQ job processing
+│   │   ├── schedule-job/      # Scheduled tasks
+│   │   ├── sentry/            # Error tracking
+│   │   ├── storage/           # Supabase storage
+│   │   └── weather/           # Google Cloud Weather API
+│   ├── enums/                 # GraphQL enums
 │   └── main.ts                # Application entry point
 ├── docker-compose.yml         # Docker services
 ├── Dockerfile                 # Multi-stage Docker build
@@ -303,15 +333,68 @@ See [README-DOCKER.md](./README-DOCKER.md) for detailed deployment instructions.
 
 ## 🔧 Tech Stack
 
-- **Framework**: NestJS 11
-- **Database**: PostgreSQL (via Supabase)
-- **ORM**: Prisma 6
-- **API**: GraphQL (Apollo Server)
-- **Auth**: JWT, Firebase Admin
-- **Storage**: Supabase Storage
-- **Queue**: BullMQ + Redis
-- **Validation**: class-validator
-- **Documentation**: GraphQL Playground
+| Category       | Technology                         |
+| -------------- | ---------------------------------- |
+| **Framework**  | NestJS 11                          |
+| **Database**   | PostgreSQL (Supabase)              |
+| **ORM**        | Prisma 6                           |
+| **API**        | GraphQL (Apollo Server)            |
+| **Auth**       | Supabase Auth, Firebase Admin      |
+| **Storage**    | Supabase Storage                   |
+| **Queue**      | BullMQ + Redis                     |
+| **Cache**      | Redis                              |
+| **Weather**    | Google Cloud Weather API           |
+| **Monitoring** | Sentry                             |
+| **Validation** | class-validator, class-transformer |
+| **i18n**       | i18next (EN, TR)                   |
+
+## 📡 API Modules
+
+### Core Features
+
+| Module                | Description                                                        |
+| --------------------- | ------------------------------------------------------------------ |
+| **Auth**              | Supabase authentication with 30-day sessions, Firebase push tokens |
+| **Users**             | User profiles, preferences, motorcycle info                        |
+| **Posts**             | Social posts with media, likes, NSFW detection                     |
+| **Post Comments**     | Nested comments on posts                                           |
+| **Groups**            | Riding groups with privacy settings                                |
+| **Group Memberships** | Join requests, member roles, invitations                           |
+| **Events**            | Group rides, meetups, event invitations                            |
+
+### Location & Safety
+
+| Module                | Description                                     |
+| --------------------- | ----------------------------------------------- |
+| **Businesses**        | Motorcycle shops, repair services, dealerships  |
+| **Business Comments** | Reviews and ratings                             |
+| **Warnings**          | Road hazard reports with nearby notifications   |
+| **Emergencies**       | Emergency alerts with 20km radius notifications |
+| **User Locations**    | Real-time location tracking                     |
+| **Cities**            | City data for location filtering                |
+| **Weather**           | Google Cloud Weather API integration            |
+
+### Social & Moderation
+
+| Module              | Description                          |
+| ------------------- | ------------------------------------ |
+| **User Followings** | Follow system with approval workflow |
+| **User Blocks**     | User blocking functionality          |
+| **Notifications**   | Push notifications via Firebase      |
+| **Content Reports** | Report inappropriate content         |
+| **Supports**        | Support ticket system                |
+
+### Core Services
+
+| Service              | Description                               |
+| -------------------- | ----------------------------------------- |
+| **Cache**            | Redis-based caching with TTL              |
+| **Queue**            | BullMQ job processing for notifications   |
+| **I18n**             | Multi-language support (English, Turkish) |
+| **Profanity Filter** | Content filtering with Turkish support    |
+| **Image Censor**     | NSFW detection using Google Cloud Vision  |
+| **Storage**          | Supabase storage for media files          |
+| **Sentry**           | Error tracking and monitoring             |
 
 ## 📦 Monorepo Structure
 
