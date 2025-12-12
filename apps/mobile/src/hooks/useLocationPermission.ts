@@ -5,7 +5,6 @@ import Geolocation, {
 } from '@react-native-community/geolocation';
 import {loggingService} from '@services/logging.service';
 import {useUpdateUserLocation} from '@services/user-location.service';
-import {useTranslation} from './useTranslation';
 
 type LocationPermissionStatus =
   | 'granted'
@@ -36,8 +35,8 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
   const locationUpdateCountRef = useRef(0); // Track location updates per app session
   const lastBackgroundUpdateRef = useRef<number>(0); // Track last background update timestamp
   const isUpdatingLocationRef = useRef(false); // Prevent concurrent location updates
+  const disclosureDismissedRef = useRef(false); // Track if user dismissed disclosure (tapped "Not Now")
   const {updateUserLocation: updateLocationMutation} = useUpdateUserLocation();
-  const {t} = useTranslation();
 
   /**
    * Update user location by getting current position and sending to backend
@@ -118,10 +117,15 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
   );
 
   /**
-   * Handle dismiss overlay
+   * Handle dismiss overlay (user tapped "Not Now")
+   * This must NOT request permission - user explicitly declined
    */
   const handleDismissOverlay = useCallback(() => {
+    disclosureDismissedRef.current = true;
     setShowPermissionOverlay(false);
+    loggingService.info(
+      'User dismissed location permission disclosure - will not request permission',
+    );
   }, []);
 
   /**
@@ -252,9 +256,17 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
                   } else {
                     setStatus('denied');
                   }
-                  // Show overlay for denied/blocked permissions if user is authenticated
-                  if (isAuthenticated) {
+                  // Show Prominent Disclosure overlay BEFORE requesting permission
+                  // Only show if user is authenticated and hasn't dismissed the disclosure
+                  if (
+                    isAuthenticated &&
+                    !disclosureDismissedRef.current &&
+                    permissionRequestCount === 0
+                  ) {
                     setShowPermissionOverlay(true);
+                    loggingService.info(
+                      'Showing Prominent Disclosure before requesting permission (iOS)',
+                    );
                   }
                 } else {
                   setStatus('unavailable');
@@ -299,9 +311,17 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
               } else {
                 setStatus('denied');
               }
-              // Show overlay for denied/blocked permissions if user is authenticated
-              if (isAuthenticated) {
+              // Show Prominent Disclosure overlay BEFORE requesting permission
+              // Only show if user is authenticated and hasn't dismissed the disclosure
+              if (
+                isAuthenticated &&
+                !disclosureDismissedRef.current &&
+                permissionRequestCount === 0
+              ) {
                 setShowPermissionOverlay(true);
+                loggingService.info(
+                  'Showing Prominent Disclosure before requesting permission',
+                );
               }
             }
           }
@@ -349,9 +369,7 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
                   // If this is not the first request, likely permission is blocked in settings
                   if (permissionRequestCount > 1) {
                     setStatus('blocked');
-                    setTimeout(() => {
-                      openSettings();
-                    }, 500);
+                    // Don't auto-open settings - let user decide
                   } else {
                     setStatus('denied');
                   }
@@ -372,31 +390,33 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
           return status === 'granted';
         }
       } else {
-        // Android
-        const granted = await PermissionsAndroid.request(
+        // Android - Request both FINE and COARSE location permissions
+        // After user taps "Allow & Continue" in Prominent Disclosure
+        const permissions = [
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: t('permissions.location.title'),
-            message: t('permissions.location.message'),
-            buttonNeutral: t('common.ask_me_later'),
-            buttonNegative: t('common.cancel'),
-            buttonPositive: t('common.ok'),
-          },
-        );
+          PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        ];
 
-        const permissionGranted =
-          granted === PermissionsAndroid.RESULTS.GRANTED;
+        const results = await PermissionsAndroid.requestMultiple(permissions);
+
+        const fineLocationGranted =
+          results[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
+          PermissionsAndroid.RESULTS.GRANTED;
+        const coarseLocationGranted =
+          results[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION] ===
+          PermissionsAndroid.RESULTS.GRANTED;
+
+        const permissionGranted = fineLocationGranted || coarseLocationGranted;
 
         if (permissionGranted) {
           setStatus('granted');
+          setShowPermissionOverlay(false);
           checkHighAccuracy();
         } else {
           // If not the first request, consider it blocked
           if (permissionRequestCount > 1) {
             setStatus('blocked');
-            setTimeout(() => {
-              openSettings();
-            }, 500);
+            // Don't auto-open settings - let user decide
           } else {
             setStatus('denied');
           }
@@ -412,18 +432,28 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
   }, [checkHighAccuracy, permissionRequestCount, status, openSettings]);
 
   /**
-   * Handle allow permission button press
+   * Handle allow permission button press (user tapped "Allow & Continue")
+   * This is called AFTER Prominent Disclosure is shown
+   * Now we show the system permission dialog
    */
   const handleAllowPermission = useCallback(async () => {
     try {
+      loggingService.info(
+        'User accepted Prominent Disclosure - now requesting system permission',
+      );
       const granted = await requestPermission();
       if (granted) {
         setShowPermissionOverlay(false);
         // Update location now that permission is granted
         await updateUserLocation();
+      } else {
+        // Permission denied - hide overlay but don't show it again
+        // User can still access settings later if needed
+        setShowPermissionOverlay(false);
       }
     } catch (error) {
       loggingService.error('Error requesting location permission:', error);
+      setShowPermissionOverlay(false);
     }
   }, [requestPermission, updateUserLocation]);
 
@@ -477,24 +507,24 @@ export const useLocationPermission = (isAuthenticated: boolean = false) => {
     }
   }, [isAuthenticated, checkPermission]);
 
-  // Show overlay when user becomes authenticated and permission is not granted
+  // Show Prominent Disclosure overlay when user becomes authenticated and permission is not granted
+  // Only show if disclosure hasn't been dismissed and permission hasn't been requested yet
   useEffect(() => {
-    if (isAuthenticated && (status === 'denied' || status === 'blocked')) {
-      setShowPermissionOverlay(true);
-      loggingService.info(
-        `Showing location permission overlay - status: ${status}, authenticated: ${isAuthenticated}`,
-      );
-    } else if (isAuthenticated && status === 'granted') {
+    if (isAuthenticated && status === 'granted') {
       setShowPermissionOverlay(false);
+      disclosureDismissedRef.current = false; // Reset if permission granted
       loggingService.info(
         'Hiding location permission overlay - permission granted',
       );
     } else if (!isAuthenticated) {
       setShowPermissionOverlay(false);
+      disclosureDismissedRef.current = false; // Reset when user logs out
       loggingService.info(
         'Hiding location permission overlay - user not authenticated',
       );
     }
+    // Note: Overlay visibility is now controlled in checkPermission() to ensure
+    // it shows BEFORE requesting permission, not after denial
   }, [isAuthenticated, status]);
 
   return {

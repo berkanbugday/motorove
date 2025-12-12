@@ -16,6 +16,7 @@ import {
   WarningBottomSheet,
   showToast,
   LoadingIndicator,
+  LocationPermissionOverlay,
 } from '@components';
 import {colors} from '@theme/colors';
 import {getWarningIconAndColor} from '@utils/warningUtils';
@@ -36,6 +37,7 @@ import {
 } from '@services/emergency.service';
 import {getEmergencyIconAndColor} from '@utils/emergencyUtils';
 import {useAuth} from '@contexts';
+import {useLocationPermission} from '@hooks/useLocationPermission';
 
 // Default region (Turkey - Ankara)
 const DEFAULT_REGION: Region = {
@@ -51,9 +53,21 @@ const ZOOM_THRESHOLD_FAR = 0.5; // Very zoomed out
 export const MapScreen = () => {
   const {t} = useTranslation();
   const {id: currentUserId} = useAuth();
+  const isAuthenticated = !!currentUserId;
   const navigation =
     useNavigation<MainScreenNavigationProp<'BusinessDetail'>>();
   const route = useRoute<TabScreenRouteProp<'MapTab'>>();
+
+  // Location permission hook
+  const {
+    isGranted: isLocationGranted,
+    isBlocked: isLocationBlocked,
+    isDenied: isLocationDenied,
+    showPermissionOverlay,
+    onAllowPermission,
+    onDismissOverlay,
+    onOpenSettings,
+  } = useLocationPermission(isAuthenticated);
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [selectedBusinessId, setSelectedBusinessId] = useState<
     string | undefined
@@ -84,6 +98,7 @@ export const MapScreen = () => {
   const {createEmergency} = useCreateEmergency();
   const {createWarning} = useCreateWarning();
   const [selectedTab, setSelectedTab] = useState<MapTabType>();
+  const [overlayDismissed, setOverlayDismissed] = useState(false);
 
   // Get focused warning/emergency IDs from route params
   const warningId = route.params?.warningId;
@@ -235,7 +250,7 @@ export const MapScreen = () => {
         maximumAge: 10000,
       },
     );
-  }, [t]);
+  }, [t, isLocationGranted]);
 
   // Get user location on mount
   useEffect(() => {
@@ -464,6 +479,7 @@ export const MapScreen = () => {
 
   // Handle my location button press
   const handleMyLocationPress = useCallback(() => {
+    // Try to get location - will fail gracefully if permission not granted
     getUserLocation();
   }, [getUserLocation]);
 
@@ -569,12 +585,42 @@ export const MapScreen = () => {
     );
   }
 
+  // Handle overlay dismiss (Not Now button)
+  const handleDismissOverlay = useCallback(() => {
+    setOverlayDismissed(true);
+    onDismissOverlay();
+  }, [onDismissOverlay]);
+
+  // Handle allow permission (Allow & Continue button)
+  const handleAllowPermission = useCallback(async () => {
+    setOverlayDismissed(true);
+    await onAllowPermission();
+  }, [onAllowPermission]);
+
+  // Determine if we should show the permission overlay in MapScreen
+  // Show overlay if permission is not granted (denied/blocked) OR if the hook's overlay is showing
+  // Overlay is informational only - map works without permission
+  // Don't show if user has dismissed it
+  const shouldShowOverlay =
+    !overlayDismissed &&
+    (showPermissionOverlay ||
+      (!isLocationGranted &&
+        (isLocationDenied || isLocationBlocked) &&
+        isAuthenticated));
+
+  // Reset dismissed state when permission is granted
+  useEffect(() => {
+    if (isLocationGranted) {
+      setOverlayDismissed(false);
+    }
+  }, [isLocationGranted]);
+
   return (
     <View style={styles.container}>
       <RNMap
         initialRegion={region}
         markers={markers}
-        showUserLocation={true}
+        showUserLocation={isLocationGranted}
         onMarkerPress={handleMarkerPress}
         onBusinessSelect={handleBusinessSelect}
         onDetailScreenOpen={handleDetailScreenOpen}
@@ -608,6 +654,15 @@ export const MapScreen = () => {
           focusedEmergencyLoading
         }
       />
+      {/* Show location permission overlay when permission is not granted or rejected */}
+      {shouldShowOverlay && (
+        <LocationPermissionOverlay
+          visible={shouldShowOverlay}
+          onAllowPress={handleAllowPermission}
+          onDismiss={handleDismissOverlay}
+          onOpenSettings={isLocationBlocked ? onOpenSettings : undefined}
+        />
+      )}
     </View>
   );
 };

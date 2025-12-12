@@ -829,13 +829,13 @@ export default {
     },
     locationPermissionOverlay: {
       open_settings: 'Ayarları Aç',
-      title: 'Sürüş Deneyiminizi Geliştirin',
+      title: 'Motorove Konumunuza İhtiyaç Duyuyor',
       description:
-        'Motorove, konumunuzu kullanarak yakınınızdaki uyarıları, etkinlikleri ve motosiklet servislerini gösterir.',
+        'Motorove, yakındaki motosiklet servislerini göstermek, rota planlamak ve harita doğruluğunu artırmak için konum verilerinizi toplar ve kullanır. Konum verileri, uygulama kullanımdayken kullanılır. Konumunuz, izniniz olmadan asla üçüncü taraflarla paylaşılmaz.',
       show_nearby_warnings: 'Yakınındaki uyarılardan haberdar ol',
       connect_with_nearby_riders: 'Yakınındaki sürücülerle bağlantı kur',
       find_motorcycle_services: 'Motosiklet servislerini bul',
-      allow_location_access: 'Lokasyon Erişim İzni Ver',
+      allow_location_access: 'İzin Ver ve Devam Et',
       footer_text:
         'Lokasyon erişim izni ayarlarını daha sonra uygulama tercihlerinden değiştirebilirsiniz',
     },

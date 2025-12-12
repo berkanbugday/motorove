@@ -831,13 +831,13 @@ export default {
     },
     locationPermissionOverlay: {
       open_settings: 'Open Settings',
-      title: 'Enhance Your Riding Experience',
+      title: 'Motorove Needs Your Location',
       description:
-        'Motorove uses your location to show nearby warnings, events, and motorcycle services. Explore the events and connect with riders in your area.',
+        'Motorove collects and uses your location data to show nearby motorcycle services, plan routes, and improve map accuracy. Location data is used while the app is in use. Your location is never shared with third parties without your consent.',
       show_nearby_warnings: 'Show nearby warnings',
       connect_with_nearby_riders: 'Connect with nearby riders',
       find_motorcycle_services: 'Find motorcycle services',
-      allow_location_access: 'Allow Location Access',
+      allow_location_access: 'Allow & Continue',
       footer_text:
         'You can always change location settings later in the app preferences',
     },

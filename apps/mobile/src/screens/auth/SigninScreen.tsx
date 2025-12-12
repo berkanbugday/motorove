@@ -11,12 +11,22 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Icon, AnimatedInput, Button, Body, TopHeaderBar} from '@components';
+import {
+  Icon,
+  AnimatedInput,
+  Button,
+  Body,
+  Caption,
+  TopHeaderBar,
+  useBottomSheet,
+  WebViewContent,
+} from '@components';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {authSchemas, SigninFormValues} from '@utils/validation';
 import {colors, spacing, radius, commonStyles} from '@theme';
 import {useAuth} from '@contexts';
+import {useLanguage} from '@contexts/LanguageContext';
 import {useGraphQLErrorHandler} from '@hooks/useGraphQLErrorHandler';
 import {useTranslation} from '@hooks/useTranslation';
 import {GraphQLFormattedError} from 'graphql';
@@ -28,6 +38,8 @@ export const SigninScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const {handleGraphQLError} = useGraphQLErrorHandler();
   const {t} = useTranslation();
+  const {language} = useLanguage();
+  const {openBottomSheet} = useBottomSheet();
 
   const {signinSchema} = authSchemas(t);
 
@@ -61,6 +73,32 @@ export const SigninScreen = () => {
 
   const handleForgotPassword = () => {
     navigation.navigate('ResetPassword');
+  };
+
+  const handleTermsPress = () => {
+    openBottomSheet({
+      content: (
+        <WebViewContent url={`https://motorove.app/${language}/terms-mobile`} />
+      ),
+      snapPoint: 'full',
+      title: t('screens.signUp.terms_of_service'),
+      showCloseButton: true,
+      closeButtonPosition: 'top-right',
+    });
+  };
+
+  const handlePrivacyPress = () => {
+    openBottomSheet({
+      content: (
+        <WebViewContent
+          url={`https://motorove.app/${language}/privacy-mobile`}
+        />
+      ),
+      snapPoint: 'full',
+      title: t('screens.signUp.privacy_policy'),
+      showCloseButton: true,
+      closeButtonPosition: 'top-right',
+    });
   };
 
   return (
@@ -136,6 +174,27 @@ export const SigninScreen = () => {
                     testID="signup-button"
                   />
                 </View>
+
+                {/* Terms and Privacy Links */}
+                <View style={styles.termsContainer}>
+                  <View style={styles.termsLinksContainer}>
+                    <Button
+                      title={t('screens.signUp.terms_of_service')}
+                      variant="text"
+                      onPress={handleTermsPress}
+                      textStyle={styles.termsLink}
+                    />
+                    <Caption color={colors.neutral.grey}>
+                      {t('common.and')}
+                    </Caption>
+                    <Button
+                      title={t('screens.signUp.privacy_policy')}
+                      variant="text"
+                      onPress={handlePrivacyPress}
+                      textStyle={styles.termsLink}
+                    />
+                  </View>
+                </View>
               </View>
             </View>
           </ScrollView>
@@ -209,5 +268,19 @@ const styles = StyleSheet.create({
     marginLeft: -20,
     fontWeight: 'bold',
     textDecorationLine: 'underline',
+  },
+  termsContainer: {
+    alignItems: 'center',
+  },
+  termsLinksContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  termsLink: {
+    fontSize: 12,
+    textDecorationLine: 'underline',
+    marginHorizontal: -16,
   },
 });
