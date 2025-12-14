@@ -151,8 +151,8 @@ const Hero: React.FC = () => {
                   className="h-[48px] sm:h-[53px] w-auto"
                 />
               </motion.a>
-              {/* <motion.a
-                href=""
+              <motion.a
+                href="https://play.google.com/store/apps/details?id=com.motorove"
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
@@ -166,7 +166,7 @@ const Hero: React.FC = () => {
                   height={53}
                   className="h-[48px] sm:h-[53px] w-auto"
                 />
-              </motion.a> */}
+              </motion.a>
             </div>
           </motion.div>
         </div>
