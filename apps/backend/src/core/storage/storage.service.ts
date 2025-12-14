@@ -1,15 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ExceptionHelper } from '../exceptions/exception-helper.service';
 import { SupabaseService } from '../../auth/supabase.service';
 import { ConfigService } from '../config/config.service';
 import { randomUUID } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
+import * as sharp from 'sharp';
 
 @Injectable()
 export class StorageService {
+  private readonly logger = new Logger(StorageService.name);
   private readonly bucketName: string;
   private readonly supabaseUrl: string;
   private readonly supabaseKey: string;
+
+  // Image compression settings
+  private readonly MAX_IMAGE_WIDTH = 1280;
+  private readonly MAX_IMAGE_HEIGHT = 1280;
+  private readonly JPEG_QUALITY = 70;
+  private readonly MAX_FILE_SIZE_KB = 500; // Target max file size in KB
 
   constructor(
     private readonly supabaseService: SupabaseService,
@@ -21,6 +29,73 @@ export class StorageService {
       'SUPABASE_STORAGE_BUCKET',
       'images',
     );
+  }
+
+  /**
+   * Compress an image buffer using sharp with progressive quality reduction
+   * @param buffer The image buffer to compress
+   * @param contentType The content type of the image
+   * @returns Compressed image buffer and potentially updated content type
+   */
+  private async compressImage(
+    buffer: Buffer,
+    contentType: string,
+  ): Promise<{ buffer: Buffer; contentType: string }> {
+    try {
+      // Always resize first to max dimensions
+      const processedBuffer = await sharp(buffer)
+        .resize(this.MAX_IMAGE_WIDTH, this.MAX_IMAGE_HEIGHT, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .toBuffer();
+
+      // Convert to JPEG for best compression (except for PNG with transparency)
+      const outputContentType = 'image/jpeg';
+
+      // Progressive quality reduction to meet target file size
+      let quality = this.JPEG_QUALITY;
+      let compressedBuffer = await sharp(processedBuffer)
+        .jpeg({ quality, mozjpeg: true })
+        .toBuffer();
+
+      // If still too large, progressively reduce quality
+      while (
+        compressedBuffer.length > this.MAX_FILE_SIZE_KB * 1024 &&
+        quality > 30
+      ) {
+        quality -= 10;
+        compressedBuffer = await sharp(processedBuffer)
+          .jpeg({ quality, mozjpeg: true })
+          .toBuffer();
+      }
+
+      // If still too large after quality reduction, resize further
+      if (compressedBuffer.length > this.MAX_FILE_SIZE_KB * 1024) {
+        const metadata = await sharp(processedBuffer).metadata();
+        const scaleFactor = Math.sqrt(
+          (this.MAX_FILE_SIZE_KB * 1024) / compressedBuffer.length,
+        );
+        const newWidth = Math.floor((metadata.width || 1280) * scaleFactor);
+        const newHeight = Math.floor((metadata.height || 1280) * scaleFactor);
+
+        compressedBuffer = await sharp(processedBuffer)
+          .resize(newWidth, newHeight, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .jpeg({ quality: 60, mozjpeg: true })
+          .toBuffer();
+      }
+
+      return { buffer: compressedBuffer, contentType: outputContentType };
+    } catch (error) {
+      this.logger.warn(
+        `Image compression failed, using original: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      // Return original buffer if compression fails
+      return { buffer, contentType };
+    }
   }
 
   /**
@@ -61,11 +136,25 @@ export class StorageService {
     const filename = fileOptions?.filename || `${randomUUID()}`;
     const fullPath = path ? `${path}/${filename}` : filename;
 
+    // Convert base64 to buffer
+    let fileBuffer: Uint8Array = Buffer.from(base64Data, 'base64');
+    let contentType = fileOptions?.contentType || 'image/jpeg';
+
+    // Compress image if it's an image type
+    if (contentType.startsWith('image/')) {
+      const compressed = await this.compressImage(
+        Buffer.from(fileBuffer),
+        contentType,
+      );
+      fileBuffer = new Uint8Array(compressed.buffer);
+      contentType = compressed.contentType;
+    }
+
     // Upload the file
     const { error } = await supabase.storage
       .from(this.bucketName)
-      .upload(fullPath, Buffer.from(base64Data, 'base64'), {
-        contentType: fileOptions?.contentType || 'image/jpeg',
+      .upload(fullPath, fileBuffer, {
+        contentType,
         upsert: true,
         cacheControl: '3600',
       });

@@ -132,6 +132,9 @@ importers:
       rxjs:
         specifier: 7.8.1
         version: 7.8.1
+      sharp:
+        specifier: 0.33.0
+        version: 0.33.0
       winston:
         specifier: 3.17.0
         version: 3.17.0
@@ -169,6 +172,9 @@ importers:
       '@types/node':
         specifier: 22.10.7
         version: 22.10.7
+      '@types/sharp':
+        specifier: ^0.32.0
+        version: 0.32.0
       '@types/supertest':
         specifier: 6.0.2
         version: 6.0.2
@@ -3820,6 +3826,10 @@ packages:
 
   '@types/serve-static@1.15.10':
     resolution: {integrity: sha512-tRs1dB+g8Itk72rlSI2ZrW6vZg0YrLI81iQSTkMmOqnqCaNr/8Ek4VwWcN5vZgCYWbg/JJSGBlUaYGAOP73qBw==}
+
+  '@types/sharp@0.32.0':
+    resolution: {integrity: sha512-OOi3kL+FZDnPhVzsfD37J88FNeZh6gQsGcLc95NbeURRGvmSjeXiDcyWzF2o3yh/gQAUn2uhh/e+CPCa5nwAxw==}
+    deprecated: This is a stub types definition. sharp provides its own type definitions, so you do not need this installed.
 
   '@types/shimmer@1.2.0':
     resolution: {integrity: sha512-UE7oxhQLLd9gub6JKIAhDq06T0F6FnztwMNRvYgjeQSBeMc1ZG/tA47EwfduvkuQS8apbkM/lpLpWsaCeYsXVg==}
@@ -13407,6 +13417,10 @@ snapshots:
       '@types/http-errors': 2.0.5
       '@types/node': 22.10.7
       '@types/send': 0.17.6
+
+  '@types/sharp@0.32.0':
+    dependencies:
+      sharp: 0.33.0
 
   '@types/shimmer@1.2.0': {}
 
