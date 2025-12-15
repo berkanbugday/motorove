@@ -9,6 +9,9 @@ services:
       tags:
         - motorove/images:landing
         - motorove/images:landing-latest
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
     container_name: motorove-landing
     ports:
       - "8080:8080" # Map container port 8080 to host port 8080

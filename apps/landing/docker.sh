@@ -195,6 +195,25 @@ push() {
             -f Dockerfile
         )
         
+        # Add NEXT_PUBLIC_* build args if set
+        if [ -n "$NEXT_PUBLIC_API_URL" ]; then
+            buildx_args+=(--build-arg "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL")
+            print_info "NEXT_PUBLIC_API_URL: $NEXT_PUBLIC_API_URL"
+        else
+            print_error "NEXT_PUBLIC_API_URL is not set!"
+            print_info "Set it with: export NEXT_PUBLIC_API_URL=<your-api-url>"
+            exit 1
+        fi
+        
+        if [ -n "$NEXT_PUBLIC_BASE_URL" ]; then
+            buildx_args+=(--build-arg "NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL")
+            print_info "NEXT_PUBLIC_BASE_URL: $NEXT_PUBLIC_BASE_URL"
+        else
+            print_error "NEXT_PUBLIC_BASE_URL is not set!"
+            print_info "Set it with: export NEXT_PUBLIC_BASE_URL=<your-base-url>"
+            exit 1
+        fi
+        
         # Add no-cache flag if requested
         if [ "$no_cache" = true ]; then
             buildx_args+=(--no-cache)

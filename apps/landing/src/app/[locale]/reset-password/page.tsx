@@ -55,16 +55,26 @@ export default function ResetPasswordPage({ params }: ResetPasswordPageProps) {
   });
 
   useEffect(() => {
-    // Supabase redirects with hash fragments for password reset
+    // Supabase PKCE flow sends token_hash and type=recovery in query params
+    // Also support hash fragments for backward compatibility
     const hash = window.location.hash;
     let token = "";
 
-    if (hash) {
+    // First, check for token_hash in query params (Supabase PKCE flow)
+    const tokenHash = searchParams.get("token_hash");
+    const type = searchParams.get("type");
+
+    if (tokenHash && type === "recovery") {
+      token = tokenHash;
+    }
+
+    // If no token_hash, check hash fragments (legacy flow)
+    if (!token && hash) {
       const hashParams = new URLSearchParams(hash.substring(1));
       token = hashParams.get("access_token") || "";
     }
 
-    // If no hash params, check query params
+    // If still no token, check for direct token param
     if (!token) {
       token = searchParams.get("token") || "";
     }

@@ -42,6 +42,15 @@ RUN pnpm build
 
 # Build landing page
 WORKDIR /app/apps/landing
+
+# Build-time environment variables for Next.js (NEXT_PUBLIC_* are baked into the bundle)
+# These MUST be provided via --build-arg or docker-compose args
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_BASE_URL
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+
 RUN pnpm build
 
 # Production stage
