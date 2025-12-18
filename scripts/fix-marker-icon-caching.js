@@ -46,14 +46,17 @@ function applyMarkerIconCachingFix() {
     private Bitmap iconBitmap;`
   );
 
-  // Update updateMarkerIcon method
+  // Update updateMarkerIcon method with null safety
   content = content.replace(
     /public void updateMarkerIcon\(\) \{[\s\S]*?if \(marker == null\) return;[\s\S]*?\}/,
     `public void updateMarkerIcon() {
         if (marker == null) return;
         if (markerIcon == null) {
-            markerIcon = getIcon();
-            marker.setIcon(markerIcon);
+            BitmapDescriptor icon = getIcon();
+            if (icon != null) {
+                markerIcon = icon;
+                marker.setIcon(markerIcon);
+            }
         }    
     }`
   );

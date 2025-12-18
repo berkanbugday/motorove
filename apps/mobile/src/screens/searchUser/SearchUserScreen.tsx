@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useEffect, useRef} from 'react';
+import React, {useState, useCallback, useEffect, useRef, memo} from 'react';
 import {View, StyleSheet, Keyboard, Animated} from 'react-native';
 import {
   TopHeaderBar,
@@ -21,7 +21,7 @@ import {useAuth} from '@contexts';
 /**
  * User Search Screen - Allows users to search for other users and follow/unfollow them
  */
-const CancelButton = ({onPress}: {onPress: () => void}) => {
+const CancelButton = memo(({onPress}: {onPress: () => void}) => {
   const translateX = useRef(new Animated.Value(50)).current;
   const {t} = useTranslation();
 
@@ -31,7 +31,7 @@ const CancelButton = ({onPress}: {onPress: () => void}) => {
       duration: 200,
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [translateX]);
 
   return (
     <Animated.View
@@ -49,7 +49,7 @@ const CancelButton = ({onPress}: {onPress: () => void}) => {
       />
     </Animated.View>
   );
-};
+});
 
 export const SearchUserScreen = () => {
   const navigation = useNavigation<MainScreenNavigationProp<'SearchUser'>>();

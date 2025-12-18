@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, memo, useCallback} from 'react';
 import {View, Image, TouchableOpacity} from 'react-native';
 import {colors} from '@theme';
 import {Caption, Typography} from '@components/Typography';
@@ -23,7 +23,7 @@ interface UserCardProps {
 /**
  * UserCard component - displays user information with follow/unfollow button
  */
-export const UserCard: React.FC<UserCardProps> = ({
+const UserCardComponent: React.FC<UserCardProps> = ({
   user,
   onPress,
   handleFollowPress,
@@ -45,9 +45,22 @@ export const UserCard: React.FC<UserCardProps> = ({
   // Check if this is the current user
   const isCurrentUser = user.id === currentUserId;
 
+  // Memoize press handlers
+  const onPressHandler = useCallback(() => {
+    onPress?.();
+  }, [onPress]);
+
+  const onFollowPressHandler = useCallback(() => {
+    handleFollowPress?.();
+  }, [handleFollowPress]);
+
+  const onUnfollowPressHandler = useCallback(() => {
+    handleUnfollowPress?.();
+  }, [handleUnfollowPress]);
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={onPressHandler}
       style={[styles.container, style]}
       activeOpacity={0.8}
       disabled={!onPress}>
@@ -90,7 +103,7 @@ export const UserCard: React.FC<UserCardProps> = ({
                   title={t('common.unfollow')}
                   variant="secondary"
                   size="small"
-                  onPress={handleUnfollowPress}
+                  onPress={onUnfollowPressHandler}
                   disabled={loading}
                   loading={loading}
                 />
@@ -105,7 +118,7 @@ export const UserCard: React.FC<UserCardProps> = ({
                   title={t('common.follow')}
                   variant="dark"
                   size="small"
-                  onPress={handleFollowPress}
+                  onPress={onFollowPressHandler}
                   disabled={loading}
                   loading={loading}
                 />
@@ -117,3 +130,18 @@ export const UserCard: React.FC<UserCardProps> = ({
     </TouchableOpacity>
   );
 };
+
+// Memoize UserCard to prevent unnecessary re-renders
+export const UserCard = memo(UserCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.user.id === nextProps.user.id &&
+    prevProps.user.followingStatus === nextProps.user.followingStatus &&
+    prevProps.user.firstName === nextProps.user.firstName &&
+    prevProps.user.lastName === nextProps.user.lastName &&
+    prevProps.user.avatar === nextProps.user.avatar &&
+    prevProps.user.city?.value === nextProps.user.city?.value &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.showFollowButton === nextProps.showFollowButton &&
+    prevProps.showUnfollowButton === nextProps.showUnfollowButton
+  );
+});

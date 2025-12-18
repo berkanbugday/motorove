@@ -57,7 +57,10 @@ const errorLink = onError(({graphQLErrors, networkError, operation}) => {
 
       // Track critical errors
       if (extensions?.code === 'INTERNAL_SERVER_ERROR') {
-        captureException(err, {
+        // Wrap GraphQL error in a proper Error object for Sentry
+        const error = new Error(`[GraphQL] ${message}`);
+        error.name = 'GraphQLError';
+        captureException(error, {
           tags: {
             graphql: true,
             operationName: operation.operationName,
@@ -67,6 +70,7 @@ const errorLink = onError(({graphQLErrors, networkError, operation}) => {
             operationName: operation.operationName,
             variables: operation.variables,
             path,
+            locations,
             extensions,
           },
         });

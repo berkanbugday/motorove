@@ -17,10 +17,9 @@ class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     // Install the splash screen before calling super.onCreate
-    // This ensures the splash screen is displayed until React loads
     installSplashScreen()
     
-    super.onCreate(savedInstanceState)
+    super.onCreate(null)
   }
 
   /**

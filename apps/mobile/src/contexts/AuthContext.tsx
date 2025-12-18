@@ -280,6 +280,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         // Set user properties for Analytics
         await firebaseService.setUserProperty('user_id', state.id);
         await firebaseService.setUserProperty('email', state.email || '');
+        // Set user context in Sentry for error tracking
+        loggingService.setUser({id: state.id, email: state.email});
         await firebaseService.logEvent('user_login', {
           method: 'auto', // Auto login from stored session
         });
@@ -357,6 +359,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         await firebaseService.setUserId(response.id);
         await firebaseService.setUserProperty('user_id', response.id);
         await firebaseService.setUserProperty('email', response.email || '');
+        // Set user context in Sentry for error tracking
+        loggingService.setUser({id: response.id, email: response.email});
         if (response.preferredLanguage) {
           await firebaseService.setUserProperty(
             'preferred_language',
@@ -433,6 +437,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
       // Reset Firebase Analytics user data
       await firebaseService.resetUserId();
+      // Clear Sentry user context
+      loggingService.clearUser();
 
       // Clear auth state last to stop any active queries
       setAuthUser(createEmptyAuthUser());

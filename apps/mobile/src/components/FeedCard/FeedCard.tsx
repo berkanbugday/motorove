@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, memo, useMemo, useCallback} from 'react';
 import {
   View,
   Image,
@@ -186,7 +186,7 @@ const {width: screenWidth} = Dimensions.get('window');
 /**
  * A reusable card component for feed items.
  */
-const FeedCard: React.FC<FeedCardProps> = props => {
+const FeedCardComponent: React.FC<FeedCardProps> = props => {
   const {t} = useTranslation();
   const {language} = useLanguage();
   const {
@@ -228,32 +228,41 @@ const FeedCard: React.FC<FeedCardProps> = props => {
   const likeAnimatedValue = useRef(new Animated.Value(1)).current;
   const saveAnimatedValue = useRef(new Animated.Value(1)).current;
 
-  // Calculate time ago based on language
-  const timeAgo = formatDistanceToNow(new Date(createdAt), {
-    addSuffix: true,
-    locale: language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
-  });
+  // Calculate time ago based on language - memoized
+  const timeAgo = useMemo(
+    () =>
+      formatDistanceToNow(new Date(createdAt), {
+        addSuffix: true,
+        locale:
+          language.toLowerCase() === Language.TR.toLowerCase() ? tr : enUS,
+      }),
+    [createdAt, language],
+  );
 
-  // For backward compatibility, convert single image to array
-  const imageArray = images ? (Array.isArray(images) ? images : [images]) : [];
-  const handlePress = () => {
+  // For backward compatibility, convert single image to array - memoized
+  const imageArray = useMemo(
+    () => (images ? (Array.isArray(images) ? images : [images]) : []),
+    [images],
+  );
+
+  const handlePress = useCallback(() => {
     if (onPress) {
       onPress();
     }
-  };
+  }, [onPress]);
 
-  const handleRoutePress = () => {
+  const handleRoutePress = useCallback(() => {
     if (onRoutePress) {
       onRoutePress();
     }
-  };
+  }, [onRoutePress]);
 
-  const handleLayout = (event: LayoutChangeEvent) => {
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
     const {width} = event.nativeEvent.layout;
     setCardWidth(width);
-  };
+  }, []);
 
-  const handleLikePress = () => {
+  const handleLikePress = useCallback(() => {
     if (actionBarDisabled) {
       return;
     }
@@ -276,15 +285,15 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     if (onLikePress) {
       onLikePress();
     }
-  };
+  }, [actionBarDisabled, likeAnimatedValue, onLikePress]);
 
-  const handleLikesPress = () => {
+  const handleLikesPress = useCallback(() => {
     if (onLikesPress) {
       onLikesPress();
     }
-  };
+  }, [onLikesPress]);
 
-  const handleSavePress = () => {
+  const handleSavePress = useCallback(() => {
     if (actionBarDisabled) {
       return;
     }
@@ -312,29 +321,32 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     if (onSavePress) {
       onSavePress();
     }
-  };
+  }, [actionBarDisabled, saveAnimatedValue, onSavePress]);
 
-  const handleDropdownSelect = (item: DropdownMenuItem) => {
-    if (onDropdownSelect) {
-      onDropdownSelect(item);
-    }
-  };
+  const handleDropdownSelect = useCallback(
+    (item: DropdownMenuItem) => {
+      if (onDropdownSelect) {
+        onDropdownSelect(item);
+      }
+    },
+    [onDropdownSelect],
+  );
 
-  const handleToggleCensoredImage = (index: number) => {
+  const handleToggleCensoredImage = useCallback((index: number) => {
     setRevealedCensoredImages(prev => ({
       ...prev,
       [index]: !prev[index],
     }));
-  };
+  }, []);
 
-  const handleImagePress = (index: number) => {
+  const handleImagePress = useCallback((index: number) => {
     setImagePreviewIndex(index);
     setImagePreviewVisible(true);
-  };
+  }, []);
 
-  const handleCloseImagePreview = () => {
+  const handleCloseImagePreview = useCallback(() => {
     setImagePreviewVisible(false);
-  };
+  }, []);
 
   const renderCarouselItem = ({item, index}: {item: any; index: number}) => {
     const isCensored = imageArray[index]?.isCensored;
@@ -690,5 +702,22 @@ const FeedCard: React.FC<FeedCardProps> = props => {
     </>
   );
 };
+
+// Memoize FeedCard to prevent unnecessary re-renders
+const FeedCard = memo(FeedCardComponent, (prevProps, nextProps) => {
+  // Custom comparison for performance - only re-render when these props change
+  return (
+    prevProps.isLiked === nextProps.isLiked &&
+    prevProps.isSaved === nextProps.isSaved &&
+    prevProps.likeCount === nextProps.likeCount &&
+    prevProps.commentCount === nextProps.commentCount &&
+    prevProps.content === nextProps.content &&
+    prevProps.fullName === nextProps.fullName &&
+    prevProps.createdAt === nextProps.createdAt &&
+    prevProps.avatarSource === nextProps.avatarSource &&
+    prevProps.images === nextProps.images &&
+    prevProps.actionBarDisabled === nextProps.actionBarDisabled
+  );
+});
 
 export default FeedCard;

@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express';
 import { ExceptionHelper } from '../../core/exceptions/exception-helper.service';
+import { SentryService } from '../../core/sentry/sentry.service';
 
 interface GqlContext {
   req: Request & { user?: any; accessToken?: string };
@@ -10,7 +11,10 @@ interface GqlContext {
 
 @Injectable()
 export class JwtGuard implements CanActivate {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private sentryService: SentryService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = GqlExecutionContext.create(context);
@@ -34,6 +38,13 @@ export class JwtGuard implements CanActivate {
       const user = await this.authService.validateUser(token);
       req.user = user;
       req.accessToken = token; // Store access token for Supabase operations
+
+      // Set user context in Sentry for error tracking
+      this.sentryService.setUser({
+        id: user.id,
+        email: user.email,
+      });
+
       return true;
     } catch {
       ExceptionHelper.unauthorized('errors.auth.invalid_token');

@@ -83,10 +83,10 @@ export const HomeScreen = ({navigation}: Props) => {
   } = useGetPosts();
 
   // Add hooks for post interactions
-  const {likePost, loading: likePostLoading} = useLikePost();
-  const {unlikePost, loading: unlikePostLoading} = useUnlikePost();
-  const {savePost, loading: savePostLoading} = useSavePost();
-  const {unsavePost, loading: unsavePostLoading} = useUnsavePost();
+  const {likePost} = useLikePost();
+  const {unlikePost} = useUnlikePost();
+  const {savePost} = useSavePost();
+  const {unsavePost} = useUnsavePost();
 
   // Add hook for post deletion
   const {removePost, loading: removePostLoading} = useRemovePost(() => {
@@ -495,6 +495,41 @@ export const HomeScreen = ({navigation}: Props) => {
     [formatAvatarSource, navigation, t],
   );
 
+  // Memoized handlers for FeedCard - prevents creating new functions on each render
+  const handlePostLikePress = useCallback(
+    (postId: string, isLiked: boolean) => {
+      handleLikePress(postId, isLiked);
+    },
+    [handleLikePress],
+  );
+
+  const handlePostSavePress = useCallback(
+    (postId: string, isSaved: boolean) => {
+      handleSavePress(postId, isSaved);
+    },
+    [handleSavePress],
+  );
+
+  const handlePostDropdownSelect = useCallback(
+    (menuItem: DropdownMenuItem, postId: string) => {
+      handleDropdownSelect(menuItem, postId);
+    },
+    [handleDropdownSelect],
+  );
+
+  const handlePostCommentPress = useCallback((postId: string) => {
+    handleCommentPress(postId);
+  }, []);
+
+  const handlePostProfilePress = useCallback(
+    (userId: string) => {
+      if (userId !== currentUserId) {
+        navigateToScreen(navigation, 'Profile', {userId});
+      }
+    },
+    [currentUserId, navigation],
+  );
+
   // Render feed post with comment navigation and dropdown menu
   const renderFeedPost = useCallback(
     ({item}: {item: IPost}) => {
@@ -517,36 +552,26 @@ export const HomeScreen = ({navigation}: Props) => {
           isLiked={feedCardProps.isLiked}
           isCommented={feedCardProps.isCommented}
           dropdownMenu={createPostDropdownItems(item.id, isOwnPost)}
-          onDropdownSelect={menuItem => handleDropdownSelect(menuItem, item.id)}
-          onLikePress={() => {
-            if (!likePostLoading && !unlikePostLoading) {
-              handleLikePress(item.id, item.isLiked);
-            }
-          }}
-          onCommentPress={() => handleCommentPress(item.id)}
-          onSavePress={() => {
-            if (!savePostLoading && !unsavePostLoading) {
-              handleSavePress(item.id, item.isSaved);
-            }
-          }}
+          onDropdownSelect={menuItem =>
+            handlePostDropdownSelect(menuItem, item.id)
+          }
+          onLikePress={() => handlePostLikePress(item.id, item.isLiked)}
+          onCommentPress={() => handlePostCommentPress(item.id)}
+          onSavePress={() => handlePostSavePress(item.id, item.isSaved)}
           onLikesPress={() => handleLikesPress(item.likedUsers)}
-          onProfilePress={() => {
-            if (item.createdBy.id !== currentUserId) {
-              navigateToScreen(navigation, 'Profile', {
-                userId: item.createdBy.id,
-              });
-            }
-          }}
+          onProfilePress={() => handlePostProfilePress(item.createdBy.id)}
           style={styles.feedCard}
         />
       );
     },
     [
       currentUserId,
-      handleLikePress,
-      handleSavePress,
+      handlePostLikePress,
+      handlePostSavePress,
+      handlePostDropdownSelect,
+      handlePostCommentPress,
+      handlePostProfilePress,
       createPostDropdownItems,
-      handleDropdownSelect,
       transformPostToFeedCard,
       handleLikesPress,
     ],
