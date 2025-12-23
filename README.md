@@ -174,6 +174,7 @@ pnpm mobile:test
 
 ## 📚 Documentation
 
+- **[Project Context](./docs/PROJECT_CONTEXT.md)** - Comprehensive architecture, stack, and workflow reference
 - **[Backend README](./apps/backend/README.md)** - API documentation, Docker setup, database
 - **[Mobile README](./apps/mobile/README.md)** - Mobile app setup, build configurations
 - **[Landing README](./apps/landing/README.md)** - Landing page setup, deployment
@@ -198,6 +199,8 @@ Using [pnpm](https://pnpm.io/) for:
 - **Strict Mode**: Prevents phantom dependencies
 
 ## 🤝 Contributing
+
+Please read our [Contributing Guidelines](./docs/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
 1. Create a feature branch from `main`
 2. Make your changes

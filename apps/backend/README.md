@@ -47,20 +47,19 @@ pnpm dev
 
 ### Docker Setup
 
-- **[README-DOCKER.md](./README-DOCKER.md)** - Complete Docker guide
-- **[DOCKER-SETUP-SUMMARY.md](./DOCKER-SETUP-SUMMARY.md)** - Quick reference
-- **[CHANGES.md](./CHANGES.md)** - Detailed changelog
+- **[README-DOCKER.md](./docs/README-DOCKER.md)** - Complete Docker guide
+- **[CHANGES.md](./docs/CHANGES.md)** - Detailed changelog
 - **[docker.sh](./docker.sh)** - Helper script (`./docker.sh help`)
 
 ### Supabase Integration
 
-- **[README-SUPABASE.md](./README-SUPABASE.md)** - Supabase-specific guide
-- **[SUPABASE-CHANGES.md](./SUPABASE-CHANGES.md)** - Supabase setup summary
+- **[README-SUPABASE.md](./docs/README-SUPABASE.md)** - Supabase-specific guide
+- **[SUPABASE-CHANGES.md](./docs/SUPABASE-CHANGES.md)** - Supabase setup summary
 
 ### Configuration
 
-- **[README-ENVIRONMENTS.md](./README-ENVIRONMENTS.md)** - Environment configuration
-- **[README-AUTH.md](./README-AUTH.md)** - Authentication setup
+- **[README-ENVIRONMENTS.md](./docs/README-ENVIRONMENTS.md)** - Environment configuration
+- **[README-AUTH.md](./docs/README-AUTH.md)** - Authentication setup
 
 ## 🗄️ Database
 
@@ -73,7 +72,7 @@ This project uses **Supabase** as the database provider:
 - ✅ Real-time subscriptions
 - ✅ 30-day authentication sessions
 
-See [README-SUPABASE.md](./README-SUPABASE.md) for detailed setup instructions.
+See [README-SUPABASE.md](./docs/README-SUPABASE.md) for detailed setup instructions.
 
 ### Get Your Supabase Credentials
 
@@ -196,7 +195,7 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 ```
 
-See [README-ENVIRONMENTS.md](./README-ENVIRONMENTS.md) for complete list.
+See [README-ENVIRONMENTS.md](./docs/README-ENVIRONMENTS.md) for complete list.
 
 ## ☁️ Google Cloud Weather API Setup
 
@@ -329,7 +328,7 @@ docker-compose run --rm api-prod pnpm prisma migrate deploy
 docker-compose up -d api-prod
 ```
 
-See [README-DOCKER.md](./README-DOCKER.md) for detailed deployment instructions.
+See [README-DOCKER.md](./docs/README-DOCKER.md) for detailed deployment instructions.
 
 ## 🔧 Tech Stack
 
@@ -428,7 +427,7 @@ UNLICENSED
 For issues and questions:
 
 1. Check the documentation in this directory
-2. Review [troubleshooting guides](./README-DOCKER.md#troubleshooting)
+2. Review [troubleshooting guides](./docs/README-DOCKER.md#troubleshooting)
 3. Check application logs: `./docker.sh logs dev`
 4. Review Supabase dashboard for database issues
 

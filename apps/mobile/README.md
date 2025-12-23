@@ -158,8 +158,9 @@ SENTRY_DSN=your-sentry-dsn
 
 - **[src/README.md](./src/README.md)** - Import aliases guide
 - **[src/services/README.md](./src/services/README.md)** - Services documentation
-- **[src/services/README-FIREBASE.md](./src/services/README-FIREBASE.md)** - Firebase setup
-- **[src/docs/README-ENVIRONMENTS.md](./src/docs/README-ENVIRONMENTS.md)** - Environment setup
+- **[src/services/README-FIREBASE.md](./docs/README-FIREBASE.md)** - Firebase setup
+- **[src/docs/README-ENVIRONMENTS.md](./docs/README-ENVIRONMENTS.md)** - Environment setup
+- **[src/docs/ANIMATED_MAP.md](./docs/ANIMATED_MAP.md)** - Animated Map Implementation details
 
 ## 🐛 Troubleshooting
 

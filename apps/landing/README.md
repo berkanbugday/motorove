@@ -136,7 +136,7 @@ docker login
 ./docker.sh push --tag v1.0.0
 ```
 
-See [README-DOCKER-HUB.md](./README-DOCKER-HUB.md) for detailed instructions.
+See [README-DOCKER-HUB.md](./docs/README-DOCKER-HUB.md) for detailed instructions.
 
 ## ☁️ Cloud Deployment
 
